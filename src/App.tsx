@@ -8,6 +8,7 @@ import Landing from "./components/Landing";
 import SecureReportTool from "./components/SecureReportTool";
 import ReportStatus from "./components/ReportStatus";
 import ReportSuccess from "./components/ReportSuccess";
+import Dashboard from "./components/Dashboard";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -23,6 +24,8 @@ const App = () => (
           <Route path="/secure/tool" element={<SecureReportTool />} />
           <Route path="/secure/tool/report-status" element={<ReportStatus />} />
           <Route path="/secure/tool/success" element={<ReportSuccess />} />
+          <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/dashboard/login" element={<Dashboard />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
