@@ -74,7 +74,7 @@ const SecureReportTool = () => {
 
       const { encryptedData, keyHash, accessKey } = encryptReport(reportData);
 
-      // Submit encrypted report
+      // Submit encrypted report - let the database trigger generate tracking_id
       const { data: report, error } = await supabase
         .from("reports")
         .insert({
@@ -83,7 +83,8 @@ const SecureReportTool = () => {
           title: formData.title, // Title remains unencrypted for basic search
           encrypted_content: encryptedData,
           encryption_key_hash: keyHash,
-          submitted_by_email: reportType === "confidential" ? formData.submitter_email : null,
+          submitted_by_email: reportType === "confidential" ? formData.submitter_email || null : null,
+          tracking_id: "", // Empty string will trigger the database function to generate it
         })
         .select()
         .single();
