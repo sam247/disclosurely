@@ -89,6 +89,7 @@ const LinkGenerator = () => {
 
     setLoading(true);
     try {
+      // Create the link data without link_token - the trigger will generate it
       const linkData = {
         organization_id: userOrg.id,
         name: formData.name,
