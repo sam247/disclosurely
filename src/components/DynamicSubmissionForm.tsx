@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -215,7 +216,13 @@ const DynamicSubmissionForm = () => {
 
       // Encrypt the report content
       const encryptionKey = crypto.getRandomValues(new Uint8Array(32));
-      const encryptedContent = await encryptData(JSON.stringify(reportData), encryptionKey);
+      
+      // Convert Uint8Array to hex string for the encryptData function
+      const encryptionKeyHex = Array.from(encryptionKey)
+        .map(b => b.toString(16).padStart(2, '0'))
+        .join('');
+      
+      const encryptedContent = encryptData(JSON.stringify(reportData), encryptionKeyHex);
       const keyHash = await crypto.subtle.digest('SHA-256', encryptionKey);
       
       // Convert Uint8Array to hex string
