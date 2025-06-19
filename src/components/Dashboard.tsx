@@ -1,4 +1,3 @@
-
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -7,6 +6,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
 import { LogOut, Users, FileText, AlertTriangle, CheckCircle, Link as LinkIcon, Shield } from 'lucide-react';
 import LinkGenerator from './LinkGenerator';
+import LinkTester from './LinkTester';
 
 const Dashboard = () => {
   const { user, signOut } = useAuth();
@@ -61,9 +61,10 @@ const Dashboard = () => {
       <main className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
         <div className="px-4 py-6 sm:px-0">
           <Tabs defaultValue="overview" className="space-y-6">
-            <TabsList className="grid w-full grid-cols-4">
+            <TabsList className="grid w-full grid-cols-5">
               <TabsTrigger value="overview">Overview</TabsTrigger>
               <TabsTrigger value="links">Submission Links</TabsTrigger>
+              <TabsTrigger value="test">Test Links</TabsTrigger>
               <TabsTrigger value="reports">Reports</TabsTrigger>
               <TabsTrigger value="settings">Settings</TabsTrigger>
             </TabsList>
@@ -190,6 +191,10 @@ const Dashboard = () => {
 
             <TabsContent value="links">
               <LinkGenerator />
+            </TabsContent>
+
+            <TabsContent value="test">
+              <LinkTester />
             </TabsContent>
 
             <TabsContent value="reports">

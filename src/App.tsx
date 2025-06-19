@@ -13,6 +13,7 @@ import ReportStatus from "./components/ReportStatus";
 import ReportSuccess from "./components/ReportSuccess";
 import Dashboard from "./components/Dashboard";
 import OrganizationOnboarding from "./components/OrganizationOnboarding";
+import DynamicSubmissionForm from "./components/DynamicSubmissionForm";
 import Login from "./pages/Login";
 import Signup from "./pages/Signup";
 import NotFound from "./pages/NotFound";
@@ -31,6 +32,9 @@ const App = () => (
             <Route path="/secure/tool" element={<SecureReportTool />} />
             <Route path="/secure/tool/report-status" element={<ReportStatus />} />
             <Route path="/secure/tool/success" element={<ReportSuccess />} />
+            
+            {/* Dynamic submission form routes */}
+            <Route path="/submit/:orgDomain/:linkToken" element={<DynamicSubmissionForm />} />
             
             {/* Authentication routes */}
             <Route path="/auth/login" element={<Login />} />
