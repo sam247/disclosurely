@@ -1,263 +1,177 @@
 
-import { useState } from "react";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Separator } from "@/components/ui/separator";
-import { Shield, Users, FileText, Bell, Settings, MessageSquare, Eye, LayoutDashboard } from "lucide-react";
-import { Link } from "react-router-dom";
+import { useNavigate } from 'react-router-dom';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { useAuth } from '@/hooks/useAuth';
+import { useToast } from '@/hooks/use-toast';
+import { LogOut, Users, FileText, AlertTriangle, CheckCircle } from 'lucide-react';
 
 const Dashboard = () => {
-  const [activeTab, setActiveTab] = useState("overview");
+  const { user, signOut } = useAuth();
+  const navigate = useNavigate();
+  const { toast } = useToast();
 
-  // Mock data
-  const stats = {
-    totalReports: 24,
-    pendingReports: 7,
-    inProgress: 11,
-    resolved: 6,
-    thisMonth: 8,
-    lastMonth: 16
-  };
-
-  const recentReports = [
-    { id: "RPT-001", title: "Financial irregularities in Q3", status: "pending", priority: "high", date: "2024-06-17" },
-    { id: "RPT-002", title: "Safety violation in warehouse", status: "in_progress", priority: "medium", date: "2024-06-16" },
-    { id: "RPT-003", title: "Harassment complaint", status: "pending", priority: "high", date: "2024-06-15" },
-    { id: "RPT-004", title: "Data privacy concern", status: "resolved", priority: "low", date: "2024-06-14" },
-    { id: "RPT-005", title: "Procurement fraud allegation", status: "in_progress", priority: "high", date: "2024-06-13" },
-  ];
-
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case "pending": return "bg-yellow-100 text-yellow-800";
-      case "in_progress": return "bg-blue-100 text-blue-800";
-      case "resolved": return "bg-green-100 text-green-800";
-      default: return "bg-gray-100 text-gray-800";
-    }
-  };
-
-  const getPriorityColor = (priority: string) => {
-    switch (priority) {
-      case "high": return "bg-red-100 text-red-800";
-      case "medium": return "bg-orange-100 text-orange-800";
-      case "low": return "bg-green-100 text-green-800";
-      default: return "bg-gray-100 text-gray-800";
+  const handleLogout = async () => {
+    try {
+      await signOut();
+      toast({
+        title: "Logged out",
+        description: "You have been successfully logged out.",
+      });
+      navigate('/auth/login');
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to log out. Please try again.",
+        variant: "destructive",
+      });
     }
   };
 
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
-      <header className="border-b border-gray-200 bg-white">
-        <div className="px-6 py-4">
-          <div className="flex justify-between items-center">
-            <div className="flex items-center space-x-4">
-              <div className="flex items-center space-x-3">
-                <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
-                  <Shield className="h-5 w-5 text-white" />
-                </div>
-                <span className="text-xl font-bold text-gray-900">SecureWhistle</span>
-              </div>
-              <Separator orientation="vertical" className="h-8" />
-              <h1 className="text-xl font-semibold text-gray-900">Organization Dashboard</h1>
+      <header className="bg-white shadow">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex justify-between items-center py-6">
+            <div>
+              <h1 className="text-2xl font-bold text-gray-900">SecureWhistle Dashboard</h1>
+              <p className="text-sm text-gray-600">Welcome back, {user?.email}</p>
             </div>
-            <div className="flex items-center space-x-4">
-              <Button variant="outline" size="sm">
-                <Bell className="h-4 w-4 mr-2" />
-                Notifications
-              </Button>
-              <Button variant="outline" size="sm">
-                <Settings className="h-4 w-4 mr-2" />
-                Settings
-              </Button>
-              <Button variant="outline" size="sm" asChild>
-                <Link to="/">Back to Site</Link>
-              </Button>
-            </div>
+            <Button 
+              onClick={handleLogout}
+              variant="outline"
+              className="flex items-center gap-2"
+            >
+              <LogOut className="h-4 w-4" />
+              Sign out
+            </Button>
           </div>
         </div>
       </header>
 
-      <div className="flex">
-        {/* Sidebar */}
-        <aside className="w-64 bg-white border-r border-gray-200 min-h-screen">
-          <nav className="p-4 space-y-2">
-            <Button
-              variant={activeTab === "overview" ? "default" : "ghost"}
-              className="w-full justify-start"
-              onClick={() => setActiveTab("overview")}
-            >
-              <LayoutDashboard className="h-4 w-4 mr-2" />
-              Overview
-            </Button>
-            <Button
-              variant={activeTab === "reports" ? "default" : "ghost"}
-              className="w-full justify-start"
-              onClick={() => setActiveTab("reports")}
-            >
-              <FileText className="h-4 w-4 mr-2" />
-              All Reports
-            </Button>
-            <Button
-              variant={activeTab === "analytics" ? "default" : "ghost"}
-              className="w-full justify-start"
-              onClick={() => setActiveTab("analytics")}
-            >
-              <Eye className="h-4 w-4 mr-2" />
-              Analytics
-            </Button>
-            <Button
-              variant={activeTab === "users" ? "default" : "ghost"}
-              className="w-full justify-start"
-              onClick={() => setActiveTab("users")}
-            >
-              <Users className="h-4 w-4 mr-2" />
-              Team Management
-            </Button>
-            <Button
-              variant={activeTab === "messages" ? "default" : "ghost"}
-              className="w-full justify-start"
-              onClick={() => setActiveTab("messages")}
-            >
-              <MessageSquare className="h-4 w-4 mr-2" />
-              Messages
-            </Button>
-          </nav>
-        </aside>
+      {/* Main Content */}
+      <main className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
+        <div className="px-4 py-6 sm:px-0">
+          {/* Stats Cards */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">New Reports</CardTitle>
+                <AlertTriangle className="h-4 w-4 text-red-500" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">12</div>
+                <p className="text-xs text-muted-foreground">+2 from yesterday</p>
+              </CardContent>
+            </Card>
 
-        {/* Main Content */}
-        <main className="flex-1 p-6">
-          {activeTab === "overview" && (
-            <div className="space-y-6">
-              {/* Stats Grid */}
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                <Card>
-                  <CardHeader className="pb-2">
-                    <CardTitle className="text-sm font-medium text-gray-600">Total Reports</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="text-2xl font-bold text-gray-900">{stats.totalReports}</div>
-                    <p className="text-xs text-gray-500 mt-1">All time</p>
-                  </CardContent>
-                </Card>
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">Active Cases</CardTitle>
+                <FileText className="h-4 w-4 text-blue-500" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">28</div>
+                <p className="text-xs text-muted-foreground">+5 from last week</p>
+              </CardContent>
+            </Card>
 
-                <Card>
-                  <CardHeader className="pb-2">
-                    <CardTitle className="text-sm font-medium text-gray-600">Pending Review</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="text-2xl font-bold text-yellow-600">{stats.pendingReports}</div>
-                    <p className="text-xs text-gray-500 mt-1">Requires attention</p>
-                  </CardContent>
-                </Card>
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">Resolved</CardTitle>
+                <CheckCircle className="h-4 w-4 text-green-500" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">156</div>
+                <p className="text-xs text-muted-foreground">+12 this month</p>
+              </CardContent>
+            </Card>
 
-                <Card>
-                  <CardHeader className="pb-2">
-                    <CardTitle className="text-sm font-medium text-gray-600">In Progress</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="text-2xl font-bold text-blue-600">{stats.inProgress}</div>
-                    <p className="text-xs text-gray-500 mt-1">Being investigated</p>
-                  </CardContent>
-                </Card>
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">Team Members</CardTitle>
+                <Users className="h-4 w-4 text-purple-500" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">8</div>
+                <p className="text-xs text-muted-foreground">Active users</p>
+              </CardContent>
+            </Card>
+          </div>
 
-                <Card>
-                  <CardHeader className="pb-2">
-                    <CardTitle className="text-sm font-medium text-gray-600">This Month</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="text-2xl font-bold text-green-600">{stats.thisMonth}</div>
-                    <p className="text-xs text-gray-500 mt-1">New reports</p>
-                  </CardContent>
-                </Card>
-              </div>
-
-              {/* Recent Reports */}
-              <Card>
-                <CardHeader>
-                  <CardTitle>Recent Reports</CardTitle>
-                  <CardDescription>Latest submissions requiring attention</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-4">
-                    {recentReports.map((report) => (
-                      <div key={report.id} className="flex items-center justify-between p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
-                        <div className="flex-1">
-                          <div className="flex items-center space-x-3">
-                            <span className="font-medium text-gray-900">{report.id}</span>
-                            <Badge variant="outline" className={getPriorityColor(report.priority)}>
-                              {report.priority}
-                            </Badge>
-                          </div>
-                          <p className="text-gray-600 mt-1">{report.title}</p>
-                          <p className="text-sm text-gray-500 mt-1">{report.date}</p>
-                        </div>
-                        <div className="flex items-center space-x-3">
-                          <Badge className={getStatusColor(report.status)}>
-                            {report.status.replace('_', ' ')}
-                          </Badge>
-                          <Button size="sm" variant="outline">View</Button>
-                        </div>
-                      </div>
-                    ))}
+          {/* Recent Activity */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <Card>
+              <CardHeader>
+                <CardTitle>Recent Reports</CardTitle>
+                <CardDescription>Latest submissions requiring attention</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between p-4 border rounded-lg">
+                    <div>
+                      <p className="font-medium">WB-A1B2C3D4</p>
+                      <p className="text-sm text-gray-600">Financial misconduct reported</p>
+                      <p className="text-xs text-gray-500">2 hours ago</p>
+                    </div>
+                    <span className="px-2 py-1 bg-red-100 text-red-800 text-xs rounded-full">
+                      New
+                    </span>
                   </div>
-                </CardContent>
-              </Card>
-            </div>
-          )}
-
-          {activeTab === "reports" && (
-            <div className="space-y-6">
-              <div className="flex justify-between items-center">
-                <h2 className="text-2xl font-bold text-gray-900">All Reports</h2>
-                <div className="flex space-x-2">
-                  <Button variant="outline">Filter</Button>
-                  <Button variant="outline">Export</Button>
+                  <div className="flex items-center justify-between p-4 border rounded-lg">
+                    <div>
+                      <p className="font-medium">WB-E5F6G7H8</p>
+                      <p className="text-sm text-gray-600">Safety violation incident</p>
+                      <p className="text-xs text-gray-500">5 hours ago</p>
+                    </div>
+                    <span className="px-2 py-1 bg-yellow-100 text-yellow-800 text-xs rounded-full">
+                      In Progress
+                    </span>
+                  </div>
+                  <div className="flex items-center justify-between p-4 border rounded-lg">
+                    <div>
+                      <p className="font-medium">WB-I9J0K1L2</p>
+                      <p className="text-sm text-gray-600">HR policy violation</p>
+                      <p className="text-xs text-gray-500">1 day ago</p>
+                    </div>
+                    <span className="px-2 py-1 bg-blue-100 text-blue-800 text-xs rounded-full">
+                      Under Review
+                    </span>
+                  </div>
                 </div>
-              </div>
-              <Card>
-                <CardContent className="p-6">
-                  <p className="text-gray-500 text-center py-8">Reports management interface would be implemented here</p>
-                </CardContent>
-              </Card>
-            </div>
-          )}
+              </CardContent>
+            </Card>
 
-          {activeTab === "analytics" && (
-            <div className="space-y-6">
-              <h2 className="text-2xl font-bold text-gray-900">Analytics & Insights</h2>
-              <Card>
-                <CardContent className="p-6">
-                  <p className="text-gray-500 text-center py-8">Analytics dashboard would be implemented here</p>
-                </CardContent>
-              </Card>
-            </div>
-          )}
-
-          {activeTab === "users" && (
-            <div className="space-y-6">
-              <h2 className="text-2xl font-bold text-gray-900">Team Management</h2>
-              <Card>
-                <CardContent className="p-6">
-                  <p className="text-gray-500 text-center py-8">User management interface would be implemented here</p>
-                </CardContent>
-              </Card>
-            </div>
-          )}
-
-          {activeTab === "messages" && (
-            <div className="space-y-6">
-              <h2 className="text-2xl font-bold text-gray-900">Secure Messages</h2>
-              <Card>
-                <CardContent className="p-6">
-                  <p className="text-gray-500 text-center py-8">Encrypted messaging interface would be implemented here</p>
-                </CardContent>
-              </Card>
-            </div>
-          )}
-        </main>
-      </div>
+            <Card>
+              <CardHeader>
+                <CardTitle>Quick Actions</CardTitle>
+                <CardDescription>Common tasks and navigation</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-2 gap-4">
+                  <Button className="h-20 flex flex-col items-center justify-center">
+                    <FileText className="h-6 w-6 mb-2" />
+                    View All Reports
+                  </Button>
+                  <Button variant="outline" className="h-20 flex flex-col items-center justify-center">
+                    <Users className="h-6 w-6 mb-2" />
+                    Manage Users
+                  </Button>
+                  <Button variant="outline" className="h-20 flex flex-col items-center justify-center">
+                    <AlertTriangle className="h-6 w-6 mb-2" />
+                    Urgent Cases
+                  </Button>
+                  <Button variant="outline" className="h-20 flex flex-col items-center justify-center">
+                    <CheckCircle className="h-6 w-6 mb-2" />
+                    Generate Report
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        </div>
+      </main>
     </div>
   );
 };
