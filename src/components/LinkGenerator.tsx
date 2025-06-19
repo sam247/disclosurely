@@ -89,9 +89,10 @@ const LinkGenerator = () => {
 
     setLoading(true);
     try {
-      // Create the link data without link_token - the trigger will generate it
+      // Create the link data with empty link_token - the trigger will generate it
       const linkData = {
         organization_id: userOrg.id,
+        link_token: '', // Empty string will trigger the database function to generate the token
         name: formData.name,
         description: formData.description,
         department: formData.department,
