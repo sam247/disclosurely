@@ -67,6 +67,116 @@ export type Database = {
           },
         ]
       }
+      link_analytics: {
+        Row: {
+          created_at: string
+          event_type: string
+          id: string
+          ip_address: unknown | null
+          link_id: string
+          metadata: Json | null
+          referrer: string | null
+          user_agent: string | null
+        }
+        Insert: {
+          created_at?: string
+          event_type: string
+          id?: string
+          ip_address?: unknown | null
+          link_id: string
+          metadata?: Json | null
+          referrer?: string | null
+          user_agent?: string | null
+        }
+        Update: {
+          created_at?: string
+          event_type?: string
+          id?: string
+          ip_address?: unknown | null
+          link_id?: string
+          metadata?: Json | null
+          referrer?: string | null
+          user_agent?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "link_analytics_link_id_fkey"
+            columns: ["link_id"]
+            isOneToOne: false
+            referencedRelation: "organization_links"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      organization_links: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          custom_fields: Json | null
+          department: string | null
+          description: string | null
+          expires_at: string | null
+          id: string
+          is_active: boolean | null
+          link_token: string
+          location: string | null
+          name: string
+          organization_id: string
+          updated_at: string
+          usage_count: number | null
+          usage_limit: number | null
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          custom_fields?: Json | null
+          department?: string | null
+          description?: string | null
+          expires_at?: string | null
+          id?: string
+          is_active?: boolean | null
+          link_token: string
+          location?: string | null
+          name: string
+          organization_id: string
+          updated_at?: string
+          usage_count?: number | null
+          usage_limit?: number | null
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          custom_fields?: Json | null
+          department?: string | null
+          description?: string | null
+          expires_at?: string | null
+          id?: string
+          is_active?: boolean | null
+          link_token?: string
+          location?: string | null
+          name?: string
+          organization_id?: string
+          updated_at?: string
+          usage_count?: number | null
+          usage_limit?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "organization_links_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "organization_links_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       organizations: {
         Row: {
           brand_color: string | null
@@ -301,6 +411,7 @@ export type Database = {
           resolved_at: string | null
           status: Database["public"]["Enums"]["report_status"] | null
           submitted_by_email: string | null
+          submitted_via_link_id: string | null
           tags: string[] | null
           title: string
           tracking_id: string
@@ -319,6 +430,7 @@ export type Database = {
           resolved_at?: string | null
           status?: Database["public"]["Enums"]["report_status"] | null
           submitted_by_email?: string | null
+          submitted_via_link_id?: string | null
           tags?: string[] | null
           title: string
           tracking_id: string
@@ -337,6 +449,7 @@ export type Database = {
           resolved_at?: string | null
           status?: Database["public"]["Enums"]["report_status"] | null
           submitted_by_email?: string | null
+          submitted_via_link_id?: string | null
           tags?: string[] | null
           title?: string
           tracking_id?: string
@@ -357,6 +470,13 @@ export type Database = {
             referencedRelation: "organizations"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "reports_submitted_via_link_id_fkey"
+            columns: ["submitted_via_link_id"]
+            isOneToOne: false
+            referencedRelation: "organization_links"
+            referencedColumns: ["id"]
+          },
         ]
       }
     }
@@ -374,6 +494,10 @@ export type Database = {
           p_ip_address?: unknown
           p_user_agent?: string
         }
+        Returns: string
+      }
+      generate_link_token: {
+        Args: Record<PropertyKey, never>
         Returns: string
       }
       generate_tracking_id: {

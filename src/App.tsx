@@ -6,11 +6,13 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "@/hooks/useAuth";
 import ProtectedRoute from "@/components/ProtectedRoute";
+import OrganizationRoute from "@/components/OrganizationRoute";
 import Landing from "./components/Landing";
 import SecureReportTool from "./components/SecureReportTool";
 import ReportStatus from "./components/ReportStatus";
 import ReportSuccess from "./components/ReportSuccess";
 import Dashboard from "./components/Dashboard";
+import OrganizationOnboarding from "./components/OrganizationOnboarding";
 import Login from "./pages/Login";
 import Signup from "./pages/Signup";
 import NotFound from "./pages/NotFound";
@@ -34,20 +36,24 @@ const App = () => (
             <Route path="/auth/login" element={<Login />} />
             <Route path="/auth/signup" element={<Signup />} />
             
+            {/* Organization onboarding */}
+            <Route 
+              path="/onboarding" 
+              element={
+                <ProtectedRoute>
+                  <OrganizationOnboarding />
+                </ProtectedRoute>
+              } 
+            />
+            
             {/* Protected dashboard routes */}
             <Route 
               path="/dashboard" 
               element={
                 <ProtectedRoute>
-                  <Dashboard />
-                </ProtectedRoute>
-              } 
-            />
-            <Route 
-              path="/dashboard/login" 
-              element={
-                <ProtectedRoute>
-                  <Dashboard />
+                  <OrganizationRoute>
+                    <Dashboard />
+                  </OrganizationRoute>
                 </ProtectedRoute>
               } 
             />
