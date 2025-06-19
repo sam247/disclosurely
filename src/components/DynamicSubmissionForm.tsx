@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -28,7 +27,7 @@ interface LinkData {
   description: string;
   department: string;
   location: string;
-  custom_fields: any[];
+  custom_fields: any;
   is_active: boolean;
   expires_at: string | null;
   usage_limit: number | null;
@@ -130,7 +129,21 @@ const DynamicSubmissionForm = () => {
         return;
       }
 
-      setLinkData(linkInfo);
+      // Convert the linkInfo to match our LinkData interface
+      const processedLinkData: LinkData = {
+        id: linkInfo.id,
+        name: linkInfo.name,
+        description: linkInfo.description || '',
+        department: linkInfo.department || '',
+        location: linkInfo.location || '',
+        custom_fields: Array.isArray(linkInfo.custom_fields) ? linkInfo.custom_fields : [],
+        is_active: linkInfo.is_active,
+        expires_at: linkInfo.expires_at,
+        usage_limit: linkInfo.usage_limit,
+        usage_count: linkInfo.usage_count
+      };
+
+      setLinkData(processedLinkData);
 
       // Track page view
       await supabase.from('link_analytics').insert({
@@ -204,6 +217,11 @@ const DynamicSubmissionForm = () => {
       const encryptionKey = crypto.getRandomValues(new Uint8Array(32));
       const encryptedContent = await encryptData(JSON.stringify(reportData), encryptionKey);
       const keyHash = await crypto.subtle.digest('SHA-256', encryptionKey);
+      
+      // Convert Uint8Array to hex string
+      const keyHashHex = Array.from(new Uint8Array(keyHash))
+        .map(b => b.toString(16).padStart(2, '0'))
+        .join('');
 
       // Insert the report
       const { data: report, error: reportError } = await supabase
@@ -213,7 +231,7 @@ const DynamicSubmissionForm = () => {
           tracking_id: trackingId,
           title: formData.title,
           encrypted_content: encryptedContent,
-          encryption_key_hash: Array.from(new Uint8Array(keyHash)).map(b => b.toString(16).padStart(2, '0')).join(''),
+          encryption_key_hash: keyHashHex,
           report_type: isAnonymous ? 'anonymous' : 'confidential',
           submitted_by_email: isAnonymous ? null : formData.submitter_email,
           submitted_via_link_id: linkData.id,
