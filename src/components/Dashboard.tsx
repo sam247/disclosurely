@@ -1,3 +1,4 @@
+
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -7,6 +8,7 @@ import { useToast } from '@/hooks/use-toast';
 import { LogOut, Users, FileText, AlertTriangle, CheckCircle, Link as LinkIcon, Shield } from 'lucide-react';
 import LinkGenerator from './LinkGenerator';
 import LinkTester from './LinkTester';
+import ReportsManagement from './ReportsManagement';
 
 const Dashboard = () => {
   const { user, signOut } = useAuth();
@@ -63,9 +65,9 @@ const Dashboard = () => {
           <Tabs defaultValue="overview" className="space-y-6">
             <TabsList className="grid w-full grid-cols-5">
               <TabsTrigger value="overview">Overview</TabsTrigger>
+              <TabsTrigger value="reports">Reports</TabsTrigger>
               <TabsTrigger value="links">Submission Links</TabsTrigger>
               <TabsTrigger value="test">Test Links</TabsTrigger>
-              <TabsTrigger value="reports">Reports</TabsTrigger>
               <TabsTrigger value="settings">Settings</TabsTrigger>
             </TabsList>
 
@@ -189,24 +191,16 @@ const Dashboard = () => {
               </div>
             </TabsContent>
 
+            <TabsContent value="reports">
+              <ReportsManagement />
+            </TabsContent>
+
             <TabsContent value="links">
               <LinkGenerator />
             </TabsContent>
 
             <TabsContent value="test">
               <LinkTester />
-            </TabsContent>
-
-            <TabsContent value="reports">
-              <Card>
-                <CardHeader>
-                  <CardTitle>Reports Management</CardTitle>
-                  <CardDescription>View and manage all submitted reports</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-gray-600">Reports management interface coming soon...</p>
-                </CardContent>
-              </Card>
             </TabsContent>
 
             <TabsContent value="settings">
