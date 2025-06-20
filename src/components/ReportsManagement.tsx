@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
@@ -26,11 +25,13 @@ import {
   User
 } from 'lucide-react';
 
+type ReportStatus = 'new' | 'in_review' | 'investigating' | 'resolved' | 'closed';
+
 interface Report {
   id: string;
   tracking_id: string;
   title: string;
-  status: string;
+  status: ReportStatus;
   priority: number;
   report_type: string;
   created_at: string;
@@ -145,7 +146,7 @@ const ReportsManagement = () => {
     }
   };
 
-  const updateReportStatus = async (reportId: string, newStatus: string) => {
+  const updateReportStatus = async (reportId: string, newStatus: ReportStatus) => {
     try {
       const { error } = await supabase
         .from('reports')
@@ -236,7 +237,7 @@ const ReportsManagement = () => {
     setIsDialogOpen(true);
   };
 
-  const getStatusColor = (status: string) => {
+  const getStatusColor = (status: ReportStatus) => {
     switch (status) {
       case "new": return "bg-blue-100 text-blue-800";
       case "in_review": return "bg-yellow-100 text-yellow-800";
@@ -247,7 +248,7 @@ const ReportsManagement = () => {
     }
   };
 
-  const getStatusIcon = (status: string) => {
+  const getStatusIcon = (status: ReportStatus) => {
     switch (status) {
       case "new": return <AlertTriangle className="h-4 w-4" />;
       case "in_review": return <Clock className="h-4 w-4" />;
@@ -445,7 +446,7 @@ const ReportsManagement = () => {
                   <div className="mt-1">
                     <Select 
                       value={selectedReport.status} 
-                      onValueChange={(value) => updateReportStatus(selectedReport.id, value)}
+                      onValueChange={(value: ReportStatus) => updateReportStatus(selectedReport.id, value)}
                     >
                       <SelectTrigger className="w-full">
                         <SelectValue />
