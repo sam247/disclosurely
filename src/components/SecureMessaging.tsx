@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -115,7 +114,14 @@ const SecureMessaging = () => {
         .order('created_at', { ascending: true });
 
       if (error) throw error;
-      setMessages(data || []);
+      
+      // Type assertion to ensure sender_type is properly typed
+      const typedMessages = (data || []).map(msg => ({
+        ...msg,
+        sender_type: msg.sender_type as 'whistleblower' | 'organization'
+      }));
+      
+      setMessages(typedMessages);
     } catch (error) {
       console.error('Error loading messages:', error);
       toast({

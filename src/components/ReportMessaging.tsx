@@ -80,7 +80,14 @@ const ReportMessaging = ({ reportId, trackingId, encryptionKey }: ReportMessagin
         .order('created_at', { ascending: true });
 
       if (error) throw error;
-      setMessages(data || []);
+      
+      // Type assertion to ensure sender_type is properly typed
+      const typedMessages = (data || []).map(msg => ({
+        ...msg,
+        sender_type: msg.sender_type as 'whistleblower' | 'organization'
+      }));
+      
+      setMessages(typedMessages);
     } catch (error) {
       console.error('Error loading messages:', error);
       toast({
