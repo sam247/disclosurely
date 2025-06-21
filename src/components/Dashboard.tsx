@@ -9,6 +9,7 @@ import { LogOut, Users, FileText, AlertTriangle, CheckCircle, Link as LinkIcon, 
 import LinkGenerator from './LinkGenerator';
 import LinkTester from './LinkTester';
 import ReportsManagement from './ReportsManagement';
+import UserManagement from './UserManagement';
 
 const Dashboard = () => {
   const { user, signOut } = useAuth();
@@ -63,9 +64,10 @@ const Dashboard = () => {
       <main className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
         <div className="px-4 py-6 sm:px-0">
           <Tabs defaultValue="overview" className="space-y-6">
-            <TabsList className="grid w-full grid-cols-5">
+            <TabsList className="grid w-full grid-cols-6">
               <TabsTrigger value="overview">Overview</TabsTrigger>
               <TabsTrigger value="reports">Reports</TabsTrigger>
+              <TabsTrigger value="users">Users</TabsTrigger>
               <TabsTrigger value="links">Submission Links</TabsTrigger>
               <TabsTrigger value="test">Test Links</TabsTrigger>
               <TabsTrigger value="settings">Settings</TabsTrigger>
@@ -193,6 +195,10 @@ const Dashboard = () => {
 
             <TabsContent value="reports">
               <ReportsManagement />
+            </TabsContent>
+
+            <TabsContent value="users">
+              <UserManagement />
             </TabsContent>
 
             <TabsContent value="links">
