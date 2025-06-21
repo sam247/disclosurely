@@ -9,7 +9,9 @@ import NotFound from '@/pages/NotFound';
 import Dashboard from '@/components/Dashboard';
 import OrganizationOnboarding from '@/components/OrganizationOnboarding';
 import DynamicSubmissionForm from '@/components/DynamicSubmissionForm';
+import SecureReportTool from '@/components/SecureReportTool';
 import ReportStatus from '@/components/ReportStatus';
+import ReportSuccess from '@/components/ReportSuccess';
 import SecureMessaging from '@/components/SecureMessaging';
 import ProtectedRoute from '@/components/ProtectedRoute';
 import OrganizationRoute from '@/components/OrganizationRoute';
@@ -30,7 +32,9 @@ function App() {
             
             {/* Secure routes for whistleblowers */}
             <Route path="/secure/messages" element={<SecureMessaging />} />
-            <Route path="/secure/tool/:linkToken" element={<DynamicSubmissionForm />} />
+            <Route path="/secure/tool" element={<SecureReportTool />} />
+            <Route path="/secure/tool/success" element={<ReportSuccess />} />
+            <Route path="/secure/tool/:orgDomain/:linkToken" element={<DynamicSubmissionForm />} />
             <Route path="/secure/status/:trackingId" element={<ReportStatus />} />
             
             {/* Protected routes for authenticated users */}
