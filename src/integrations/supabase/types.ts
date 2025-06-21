@@ -67,6 +67,64 @@ export type Database = {
           },
         ]
       }
+      email_notifications: {
+        Row: {
+          email_address: string
+          id: string
+          metadata: Json | null
+          notification_type: string
+          organization_id: string
+          report_id: string | null
+          sent_at: string
+          subject: string
+          user_id: string
+        }
+        Insert: {
+          email_address: string
+          id?: string
+          metadata?: Json | null
+          notification_type: string
+          organization_id: string
+          report_id?: string | null
+          sent_at?: string
+          subject: string
+          user_id: string
+        }
+        Update: {
+          email_address?: string
+          id?: string
+          metadata?: Json | null
+          notification_type?: string
+          organization_id?: string
+          report_id?: string | null
+          sent_at?: string
+          subject?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "email_notifications_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "email_notifications_report_id_fkey"
+            columns: ["report_id"]
+            isOneToOne: false
+            referencedRelation: "reports"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "email_notifications_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       link_analytics: {
         Row: {
           created_at: string
@@ -104,6 +162,67 @@ export type Database = {
             columns: ["link_id"]
             isOneToOne: false
             referencedRelation: "organization_links"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      notifications: {
+        Row: {
+          created_at: string
+          id: string
+          is_read: boolean | null
+          message: string
+          metadata: Json | null
+          organization_id: string
+          report_id: string | null
+          title: string
+          type: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          is_read?: boolean | null
+          message: string
+          metadata?: Json | null
+          organization_id: string
+          report_id?: string | null
+          title: string
+          type: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          is_read?: boolean | null
+          message?: string
+          metadata?: Json | null
+          organization_id?: string
+          report_id?: string | null
+          title?: string
+          type?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "notifications_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "notifications_report_id_fkey"
+            columns: ["report_id"]
+            isOneToOne: false
+            referencedRelation: "reports"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "notifications_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
         ]

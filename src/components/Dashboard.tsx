@@ -10,6 +10,7 @@ import LinkGenerator from './LinkGenerator';
 import LinkTester from './LinkTester';
 import ReportsManagement from './ReportsManagement';
 import UserManagement from './UserManagement';
+import NotificationSystem from './NotificationSystem';
 
 const Dashboard = () => {
   const { user, signOut } = useAuth();
@@ -48,14 +49,17 @@ const Dashboard = () => {
                 <p className="text-sm text-gray-600">Welcome back, {user?.email}</p>
               </div>
             </div>
-            <Button 
-              onClick={handleLogout}
-              variant="outline"
-              className="flex items-center gap-2"
-            >
-              <LogOut className="h-4 w-4" />
-              Sign out
-            </Button>
+            <div className="flex items-center space-x-4">
+              <NotificationSystem />
+              <Button 
+                onClick={handleLogout}
+                variant="outline"
+                className="flex items-center gap-2"
+              >
+                <LogOut className="h-4 w-4" />
+                Sign out
+              </Button>
+            </div>
           </div>
         </div>
       </header>

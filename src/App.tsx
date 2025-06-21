@@ -1,56 +1,39 @@
 
-import { Toaster } from "@/components/ui/toaster";
-import { Toaster as Sonner } from "@/components/ui/sonner";
-import { TooltipProvider } from "@/components/ui/tooltip";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
-import { AuthProvider } from "@/hooks/useAuth";
-import ProtectedRoute from "@/components/ProtectedRoute";
-import OrganizationRoute from "@/components/OrganizationRoute";
-import Landing from "./components/Landing";
-import SecureReportTool from "./components/SecureReportTool";
-import ReportStatus from "./components/ReportStatus";
-import ReportSuccess from "./components/ReportSuccess";
-import Dashboard from "./components/Dashboard";
-import OrganizationOnboarding from "./components/OrganizationOnboarding";
-import DynamicSubmissionForm from "./components/DynamicSubmissionForm";
-import Login from "./pages/Login";
-import Signup from "./pages/Signup";
-import NotFound from "./pages/NotFound";
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { Toaster } from '@/components/ui/toaster';
+import Index from '@/pages/Index';
+import Login from '@/pages/Login';
+import Signup from '@/pages/Signup';
+import NotFound from '@/pages/NotFound';
+import Dashboard from '@/components/Dashboard';
+import OrganizationOnboarding from '@/components/OrganizationOnboarding';
+import DynamicSubmissionForm from '@/components/DynamicSubmissionForm';
+import ReportStatus from '@/components/ReportStatus';
+import SecureMessaging from '@/components/SecureMessaging';
+import ProtectedRoute from '@/components/ProtectedRoute';
+import OrganizationRoute from '@/components/OrganizationRoute';
+import './App.css';
 
 const queryClient = new QueryClient();
 
-const App = () => (
-  <QueryClientProvider client={queryClient}>
-    <AuthProvider>
-      <TooltipProvider>
-        <Toaster />
-        <Sonner />
-        <BrowserRouter>
+function App() {
+  return (
+    <QueryClientProvider client={queryClient}>
+      <Router>
+        <div className="App">
           <Routes>
-            <Route path="/" element={<Landing />} />
-            <Route path="/secure/tool" element={<SecureReportTool />} />
-            <Route path="/secure/tool/report-status" element={<ReportStatus />} />
-            <Route path="/secure/tool/success" element={<ReportSuccess />} />
-            
-            {/* Dynamic submission form routes */}
-            <Route path="/submit/:orgDomain/:linkToken" element={<DynamicSubmissionForm />} />
-            
-            {/* Authentication routes */}
+            {/* Public routes */}
+            <Route path="/" element={<Index />} />
             <Route path="/auth/login" element={<Login />} />
             <Route path="/auth/signup" element={<Signup />} />
             
-            {/* Organization onboarding */}
-            <Route 
-              path="/onboarding" 
-              element={
-                <ProtectedRoute>
-                  <OrganizationOnboarding />
-                </ProtectedRoute>
-              } 
-            />
+            {/* Secure routes for whistleblowers */}
+            <Route path="/secure/messages" element={<SecureMessaging />} />
+            <Route path="/secure/tool/:linkToken" element={<DynamicSubmissionForm />} />
+            <Route path="/secure/status/:trackingId" element={<ReportStatus />} />
             
-            {/* Protected dashboard routes */}
+            {/* Protected routes for authenticated users */}
             <Route 
               path="/dashboard" 
               element={
@@ -61,14 +44,23 @@ const App = () => (
                 </ProtectedRoute>
               } 
             />
+            <Route 
+              path="/onboarding" 
+              element={
+                <ProtectedRoute>
+                  <OrganizationOnboarding />
+                </ProtectedRoute>
+              } 
+            />
             
-            {/* Catch-all route */}
+            {/* 404 route */}
             <Route path="*" element={<NotFound />} />
           </Routes>
-        </BrowserRouter>
-      </TooltipProvider>
-    </AuthProvider>
-  </QueryClientProvider>
-);
+          <Toaster />
+        </div>
+      </Router>
+    </QueryClientProvider>
+  );
+}
 
 export default App;
