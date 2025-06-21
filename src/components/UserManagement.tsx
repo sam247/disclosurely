@@ -17,11 +17,9 @@ import {
   UserPlus, 
   Mail, 
   Shield, 
-  Clock,
   CheckCircle,
   XCircle,
-  Trash2,
-  Edit
+  Trash2
 } from 'lucide-react';
 
 type UserRole = 'admin' | 'case_handler' | 'reviewer' | 'org_admin';
@@ -122,16 +120,18 @@ const UserManagement = () => {
   };
 
   const sendInvitation = async () => {
-    if (!inviteEmail.trim() || !organization) return;
+    if (!inviteEmail.trim() || !organization || !user?.id) return;
 
     try {
+      // Insert invitation without token - the trigger will generate it
       const { error } = await supabase
         .from('user_invitations')
         .insert({
           organization_id: organization.id,
           email: inviteEmail.toLowerCase().trim(),
           role: inviteRole,
-          invited_by: user?.id,
+          invited_by: user.id,
+          token: '', // This will be replaced by the trigger
         });
 
       if (error) throw error;
