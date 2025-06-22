@@ -33,7 +33,7 @@ const SignupForm = () => {
     setLoading(true);
 
     try {
-      const redirectUrl = `${window.location.origin}/dashboard`;
+      const redirectUrl = `https://disclosurely.com/dashboard`;
       
       const { error } = await supabase.auth.signUp({
         email,
@@ -78,7 +78,7 @@ const SignupForm = () => {
       const { error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
-          redirectTo: `${window.location.origin}/dashboard`,
+          redirectTo: `https://disclosurely.com/dashboard`,
         },
       });
 
