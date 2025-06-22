@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -103,13 +102,19 @@ const Dashboard = () => {
         return;
       }
 
+      // Generate a unique token
+      const generateToken = () => {
+        return Math.random().toString(36).substring(2, 14);
+      };
+
       const { data, error } = await supabase
         .from('organization_links')
         .insert({
           organization_id: profile.organization_id,
           name: 'Quick Report Link',
           description: 'Submit reports securely',
-          created_by: user.id
+          created_by: user.id,
+          link_token: generateToken()
         })
         .select()
         .single();

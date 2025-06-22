@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -151,13 +150,21 @@ const DynamicSubmissionForm = () => {
 
       console.log('Report created successfully:', report);
 
-      // Update link usage count
-      await supabase
+      // Update link usage count by fetching current count and incrementing
+      const { data: currentLink } = await supabase
         .from('organization_links')
-        .update({ 
-          usage_count: supabase.sql`usage_count + 1`
-        })
-        .eq('id', linkData.id);
+        .select('usage_count')
+        .eq('id', linkData.id)
+        .single();
+
+      if (currentLink) {
+        await supabase
+          .from('organization_links')
+          .update({ 
+            usage_count: (currentLink.usage_count || 0) + 1
+          })
+          .eq('id', linkData.id);
+      }
 
       toast({
         title: "Report submitted successfully!",
