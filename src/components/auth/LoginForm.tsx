@@ -56,7 +56,7 @@ const LoginForm = () => {
       const { error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
-          redirectTo: `https://disclosurely.com/dashboard`,
+          redirectTo: `https://app.disclosurely.com/dashboard`,
         },
       });
 
