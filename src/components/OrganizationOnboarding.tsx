@@ -25,11 +25,18 @@ const OrganizationOnboarding = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!user) return;
+    if (!user) {
+      console.error('No user found');
+      return;
+    }
+
+    console.log('Starting organization creation for user:', user.id);
+    console.log('Form data:', formData);
 
     setLoading(true);
     try {
-      // Create organization
+      // Create organization first
+      console.log('Creating organization...');
       const { data: orgData, error: orgError } = await supabase
         .from('organizations')
         .insert({
@@ -41,19 +48,31 @@ const OrganizationOnboarding = () => {
         .select()
         .single();
 
-      if (orgError) throw orgError;
+      if (orgError) {
+        console.error('Organization creation error:', orgError);
+        throw orgError;
+      }
+
+      console.log('Organization created successfully:', orgData);
 
       // Update user profile with organization
+      console.log('Updating user profile...');
       const { error: profileError } = await supabase
         .from('profiles')
         .upsert({
           id: user.id,
           email: user.email || '',
           organization_id: orgData.id,
-          role: 'org_admin'
+          role: 'org_admin',
+          is_active: true
         });
 
-      if (profileError) throw profileError;
+      if (profileError) {
+        console.error('Profile update error:', profileError);
+        throw profileError;
+      }
+
+      console.log('Profile updated successfully');
 
       toast({
         title: "Organization created successfully!",
@@ -62,9 +81,15 @@ const OrganizationOnboarding = () => {
 
       navigate('/dashboard');
     } catch (error: any) {
+      console.error('Full error object:', error);
+      console.error('Error code:', error.code);
+      console.error('Error details:', error.details);
+      console.error('Error hint:', error.hint);
+      console.error('Error message:', error.message);
+      
       toast({
         title: "Error creating organization",
-        description: error.message,
+        description: `${error.message} (Code: ${error.code || 'Unknown'})`,
         variant: "destructive",
       });
     } finally {
