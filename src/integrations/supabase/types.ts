@@ -678,14 +678,6 @@ export type Database = {
         Args: Record<PropertyKey, never>
         Returns: string
       }
-      get_user_organization_id: {
-        Args: { user_id: string }
-        Returns: string
-      }
-      is_org_admin: {
-        Args: { user_id: string }
-        Returns: boolean
-      }
       user_has_role: {
         Args: {
           p_user_id: string
