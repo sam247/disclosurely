@@ -28,21 +28,68 @@ interface Profile {
 export const useOrganization = () => {
   const [organization, setOrganization] = useState<Organization | null>(null);
   const [profile, setProfile] = useState<Profile | null>(null);
-  const [loading, setLoading] = useState(false); // Changed to false
-  const [needsOnboarding, setNeedsOnboarding] = useState(false); // Always false
+  const [loading, setLoading] = useState(true);
+  const [needsOnboarding, setNeedsOnboarding] = useState(false);
   const { user } = useAuth();
 
   useEffect(() => {
-    // Simplified: don't fetch anything, just set loading to false
-    setLoading(false);
+    if (user) {
+      fetchUserProfile();
+    } else {
+      setLoading(false);
+    }
   }, [user]);
 
-  const hasOrganization = () => {
-    return true; // Always return true to bypass checks
+  const fetchUserProfile = async () => {
+    if (!user) return;
+
+    try {
+      setLoading(true);
+      console.log('Fetching profile for user:', user.email);
+
+      // Get user's profile
+      const { data: profileData, error: profileError } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('id', user.id)
+        .single();
+
+      if (profileError) {
+        console.error('Error fetching profile:', profileError);
+        setNeedsOnboarding(true);
+        return;
+      }
+
+      console.log('Profile found:', profileData);
+      setProfile(profileData);
+
+      // If profile has organization, fetch organization details
+      if (profileData.organization_id) {
+        const { data: orgData, error: orgError } = await supabase
+          .from('organizations')
+          .select('*')
+          .eq('id', profileData.organization_id)
+          .single();
+
+        if (orgError) {
+          console.error('Error fetching organization:', orgError);
+        } else {
+          console.log('Organization found:', orgData);
+          setOrganization(orgData);
+        }
+      } else {
+        setNeedsOnboarding(true);
+      }
+    } catch (error) {
+      console.error('Error in fetchUserProfile:', error);
+      setNeedsOnboarding(true);
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const fetchUserProfile = async () => {
-    // Empty function to maintain compatibility
+  const hasOrganization = () => {
+    return organization !== null && profile?.organization_id !== null;
   };
 
   return {
