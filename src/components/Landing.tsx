@@ -1,10 +1,7 @@
-
 import { Shield, Users, Lock, FileText, Search, Bell } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-
 const Landing = () => {
-  return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
+  return <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
       {/* Navigation */}
       <nav className="bg-white shadow-sm border-b">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -16,16 +13,10 @@ const Landing = () => {
               <h1 className="text-2xl font-bold text-gray-900">Disclosurely</h1>
             </div>
             <div className="flex items-center space-x-4">
-              <a 
-                href="https://app.disclosurely.com/auth/login"
-                className="text-gray-600 hover:text-gray-900 px-3 py-2 rounded-md text-sm font-medium"
-              >
+              <a href="https://app.disclosurely.com/auth/login" className="text-gray-600 hover:text-gray-900 px-3 py-2 rounded-md text-sm font-medium">
                 Sign In
               </a>
-              <a 
-                href="https://app.disclosurely.com/auth/signup"
-                className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm font-medium"
-              >
+              <a href="https://app.disclosurely.com/auth/signup" className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm font-medium">
                 Get Started
               </a>
             </div>
@@ -34,7 +25,7 @@ const Landing = () => {
       </nav>
 
       {/* Hero Section */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-16 pb-20">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-16 pb-20 py-[155px]">
         <div className="text-center">
           <h1 className="text-4xl md:text-6xl font-bold text-gray-900 mb-6">
             Secure Whistleblowing
@@ -45,16 +36,10 @@ const Landing = () => {
             Built with enterprise-grade security and compliance in mind.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <a 
-              href="https://app.disclosurely.com/auth/signup"
-              className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-3 rounded-lg text-lg font-semibold"
-            >
+            <a href="https://app.disclosurely.com/auth/signup" className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-3 rounded-lg text-lg font-semibold">
               Start Free Trial
             </a>
-            <a 
-              href="https://app.disclosurely.com/secure/tool"
-              className="border border-gray-300 hover:border-gray-400 text-gray-700 px-8 py-3 rounded-lg text-lg font-semibold"
-            >
+            <a href="https://app.disclosurely.com/secure/tool" className="border border-gray-300 hover:border-gray-400 text-gray-700 px-8 py-3 rounded-lg text-lg font-semibold">
               Submit Report
             </a>
           </div>
@@ -163,10 +148,7 @@ const Landing = () => {
           <p className="text-xl text-blue-100 mb-8">
             Join organizations worldwide who trust Disclosurely for secure whistleblowing.
           </p>
-          <a 
-            href="https://app.disclosurely.com/auth/signup"
-            className="bg-white hover:bg-gray-100 text-blue-600 px-8 py-3 rounded-lg text-lg font-semibold inline-block"
-          >
+          <a href="https://app.disclosurely.com/auth/signup" className="bg-white hover:bg-gray-100 text-blue-600 px-8 py-3 rounded-lg text-lg font-semibold inline-block">
             Get Started Today
           </a>
         </div>
@@ -225,8 +207,6 @@ const Landing = () => {
           </div>
         </div>
       </footer>
-    </div>
-  );
+    </div>;
 };
-
 export default Landing;
