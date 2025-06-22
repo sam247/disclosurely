@@ -27,15 +27,16 @@ const AuthenticatedApp = () => {
         .from('profiles')
         .select('*, organizations(*)')
         .eq('id', user.id)
-        .single();
+        .maybeSingle();
 
-      if (profileError && profileError.code !== 'PGRST116') {
+      if (profileError) {
         console.error('Error checking profile:', profileError);
-        setProfileSetup('needs_setup');
-        return;
+        // Continue with setup anyway
       }
 
       if (!profile) {
+        console.log('No profile found, creating organization and profile...');
+        
         // Create organization first
         const { data: org, error: orgError } = await supabase
           .from('organizations')
@@ -58,6 +59,8 @@ const AuthenticatedApp = () => {
           return;
         }
 
+        console.log('Organization created:', org);
+
         // Create profile
         const { error: createProfileError } = await supabase
           .from('profiles')
@@ -71,7 +74,7 @@ const AuthenticatedApp = () => {
         if (createProfileError) {
           console.error('Error creating profile:', createProfileError);
           toast({
-            title: "Setup Error",
+            title: "Setup Error", 
             description: "Failed to create profile. Please try again.",
             variant: "destructive",
           });
@@ -79,7 +82,46 @@ const AuthenticatedApp = () => {
           return;
         }
 
-        console.log('Profile and organization created successfully');
+        console.log('Profile created successfully');
+        toast({
+          title: "Welcome!",
+          description: "Your organization has been set up successfully.",
+        });
+      } else if (!profile.organization_id) {
+        console.log('Profile exists but no organization, creating one...');
+        
+        // Create organization for existing profile
+        const { data: org, error: orgError } = await supabase
+          .from('organizations')
+          .insert({
+            name: `${user.email?.split('@')[0] || 'User'}'s Organization`,
+            domain: user.email?.split('@')[0] || 'default',
+            description: 'Default organization'
+          })
+          .select()
+          .single();
+
+        if (orgError) {
+          console.error('Error creating organization:', orgError);
+          setProfileSetup('needs_setup');
+          return;
+        }
+
+        // Update profile with organization
+        const { error: updateError } = await supabase
+          .from('profiles')
+          .update({ organization_id: org.id })
+          .eq('id', user.id);
+
+        if (updateError) {
+          console.error('Error updating profile:', updateError);
+          setProfileSetup('needs_setup');
+          return;
+        }
+
+        console.log('Profile updated with organization');
+      } else {
+        console.log('Profile and organization already exist');
       }
 
       setProfileSetup('complete');
@@ -107,8 +149,17 @@ const AuthenticatedApp = () => {
           <h2 className="text-2xl font-bold mb-4">Setup Required</h2>
           <p className="mb-4">There was an issue setting up your profile. Please try refreshing the page.</p>
           <button 
+            onClick={() => {
+              setProfileSetup('loading');
+              setupUserProfile();
+            }}
+            className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 mr-2"
+          >
+            Try Again
+          </button>
+          <button 
             onClick={() => window.location.reload()} 
-            className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
+            className="bg-gray-600 text-white px-4 py-2 rounded hover:bg-gray-700"
           >
             Refresh Page
           </button>
