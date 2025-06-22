@@ -1,35 +1,33 @@
-
-import { useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { ReactNode } from 'react';
+import { Navigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
+import AuthenticatedApp from './AuthenticatedApp';
 
 interface ProtectedRouteProps {
-  children: React.ReactNode;
+  children: ReactNode;
 }
 
 const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
   const { user, loading } = useAuth();
-  const navigate = useNavigate();
-
-  useEffect(() => {
-    if (!loading && !user) {
-      navigate('/auth/login');
-    }
-  }, [user, loading, navigate]);
 
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
-          <p className="mt-2 text-gray-600">Loading...</p>
-        </div>
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
       </div>
     );
   }
 
   if (!user) {
-    return null;
+    return <Navigate to="/auth/login" replace />;
+  }
+
+  // If the protected content is Dashboard, use AuthenticatedApp
+  // Otherwise render the children directly
+  if (children && typeof children === 'object' && 'type' in children && 
+      children.type && typeof children.type === 'function' && 
+      children.type.name === 'Dashboard') {
+    return <AuthenticatedApp />;
   }
 
   return <>{children}</>;

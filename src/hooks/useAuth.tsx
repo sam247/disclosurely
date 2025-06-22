@@ -36,14 +36,6 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
         console.log('Auth state changed:', event, session?.user?.email);
         setSession(session);
         setUser(session?.user ?? null);
-        
-        // If user just signed in, ensure they have a profile and organization
-        if (event === 'SIGNED_IN' && session?.user) {
-          setTimeout(() => {
-            ensureUserProfile(session.user);
-          }, 100);
-        }
-        
         setLoading(false);
       }
     );
@@ -53,74 +45,11 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
       console.log('Initial session:', session?.user?.email);
       setSession(session);
       setUser(session?.user ?? null);
-      
-      // Ensure profile exists for existing session
-      if (session?.user) {
-        setTimeout(() => {
-          ensureUserProfile(session.user);
-        }, 100);
-      }
-      
       setLoading(false);
     });
 
     return () => subscription.unsubscribe();
   }, []);
-
-  const ensureUserProfile = async (user: User) => {
-    try {
-      console.log('Ensuring profile for user:', user.email);
-      
-      // Check if profile exists
-      const { data: profile } = await supabase
-        .from('profiles')
-        .select('*')
-        .eq('id', user.id)
-        .single();
-
-      if (!profile) {
-        console.log('No profile found, creating one...');
-        
-        // Create organization first
-        const { data: org, error: orgError } = await supabase
-          .from('organizations')
-          .insert({
-            name: `${user.email}'s Organization`,
-            domain: user.email?.split('@')[0] || 'default',
-            description: 'Default organization'
-          })
-          .select()
-          .single();
-
-        if (orgError) {
-          console.error('Error creating organization:', orgError);
-          return;
-        }
-
-        console.log('Created organization:', org.name);
-
-        // Create profile
-        const { error: profileError } = await supabase
-          .from('profiles')
-          .insert({
-            id: user.id,
-            email: user.email || '',
-            organization_id: org.id,
-            role: 'org_admin'
-          });
-
-        if (profileError) {
-          console.error('Error creating profile:', profileError);
-        } else {
-          console.log('Profile created successfully');
-        }
-      } else {
-        console.log('Profile exists:', profile.email);
-      }
-    } catch (error) {
-      console.error('Error in ensureUserProfile:', error);
-    }
-  };
 
   const signOut = async () => {
     await supabase.auth.signOut();
