@@ -6,101 +6,63 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Switch } from '@/components/ui/switch';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
-import { Shield, Upload, AlertTriangle, Eye, EyeOff } from 'lucide-react';
-import { encryptData } from '@/utils/encryption';
-
-interface OrganizationData {
-  id: string;
-  name: string;
-  domain: string;
-  description: string | null;
-  brand_color: string | null;
-  logo_url: string | null;
-}
+import { Shield, AlertTriangle } from 'lucide-react';
 
 interface LinkData {
   id: string;
   name: string;
   description: string;
-  department: string;
-  location: string;
-  custom_fields: any;
-  is_active: boolean;
-  expires_at: string | null;
-  usage_limit: number | null;
-  usage_count: number;
+  organization_id: string;
+  organization_name: string;
 }
 
 const DynamicSubmissionForm = () => {
-  const { orgDomain, linkToken } = useParams();
+  const { linkToken } = useParams();
   const navigate = useNavigate();
   const { toast } = useToast();
 
-  const [organization, setOrganization] = useState<OrganizationData | null>(null);
   const [linkData, setLinkData] = useState<LinkData | null>(null);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [isAnonymous, setIsAnonymous] = useState(true);
-  const [showPassword, setShowPassword] = useState(false);
 
   const [formData, setFormData] = useState({
     title: '',
     description: '',
-    submitter_name: '',
-    submitter_email: '',
-    contact_preference: 'none',
-    incident_date: '',
-    location: '',
-    witnesses: '',
-    evidence_description: '',
-    follow_up_password: ''
+    submitter_email: ''
   });
 
   useEffect(() => {
     fetchLinkData();
-  }, [orgDomain, linkToken]);
+  }, [linkToken]);
 
   const fetchLinkData = async () => {
-    if (!orgDomain || !linkToken) {
+    if (!linkToken) {
       navigate('/404');
       return;
     }
 
     try {
-      // First, get organization by domain
-      const { data: orgData, error: orgError } = await supabase
-        .from('organizations')
-        .select('*')
-        .eq('domain', orgDomain)
-        .eq('is_active', true)
-        .single();
+      console.log('Fetching link data for token:', linkToken);
 
-      if (orgError || !orgData) {
-        toast({
-          title: "Organization not found",
-          description: "The organization link is invalid or inactive.",
-          variant: "destructive",
-        });
-        navigate('/404');
-        return;
-      }
-
-      setOrganization(orgData);
-
-      // Then get the link data
       const { data: linkInfo, error: linkError } = await supabase
         .from('organization_links')
-        .select('*')
+        .select(`
+          id,
+          name,
+          description,
+          organization_id,
+          organizations!inner(name)
+        `)
         .eq('link_token', linkToken)
-        .eq('organization_id', orgData.id)
         .eq('is_active', true)
         .single();
 
       if (linkError || !linkInfo) {
+        console.error('Link not found or error:', linkError);
         toast({
           title: "Link not found",
           description: "The submission link is invalid or has expired.",
@@ -110,47 +72,14 @@ const DynamicSubmissionForm = () => {
         return;
       }
 
-      // Check if link has expired
-      if (linkInfo.expires_at && new Date(linkInfo.expires_at) < new Date()) {
-        toast({
-          title: "Link expired",
-          description: "This submission link has expired.",
-          variant: "destructive",
-        });
-        return;
-      }
+      console.log('Link found:', linkInfo);
 
-      // Check usage limit
-      if (linkInfo.usage_limit && linkInfo.usage_count >= linkInfo.usage_limit) {
-        toast({
-          title: "Usage limit reached",
-          description: "This submission link has reached its usage limit.",
-          variant: "destructive",
-        });
-        return;
-      }
-
-      // Convert the linkInfo to match our LinkData interface
-      const processedLinkData: LinkData = {
+      setLinkData({
         id: linkInfo.id,
         name: linkInfo.name,
         description: linkInfo.description || '',
-        department: linkInfo.department || '',
-        location: linkInfo.location || '',
-        custom_fields: Array.isArray(linkInfo.custom_fields) ? linkInfo.custom_fields : [],
-        is_active: linkInfo.is_active,
-        expires_at: linkInfo.expires_at,
-        usage_limit: linkInfo.usage_limit,
-        usage_count: linkInfo.usage_count
-      };
-
-      setLinkData(processedLinkData);
-
-      // Track page view
-      await supabase.from('link_analytics').insert({
-        link_id: linkInfo.id,
-        event_type: 'view',
-        metadata: { user_agent: navigator.userAgent }
+        organization_id: linkInfo.organization_id,
+        organization_name: linkInfo.organizations.name
       });
 
     } catch (error) {
@@ -160,6 +89,7 @@ const DynamicSubmissionForm = () => {
         description: "There was a problem loading the submission form.",
         variant: "destructive",
       });
+      navigate('/404');
     } finally {
       setLoading(false);
     }
@@ -171,7 +101,7 @@ const DynamicSubmissionForm = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!organization || !linkData) return;
+    if (!linkData) return;
 
     if (!formData.title.trim() || !formData.description.trim()) {
       toast({
@@ -182,63 +112,29 @@ const DynamicSubmissionForm = () => {
       return;
     }
 
-    if (!isAnonymous && !formData.follow_up_password.trim()) {
-      toast({
-        title: "Password required",
-        description: "Please set a password for follow-up access.",
-        variant: "destructive",
-      });
-      return;
-    }
-
     setSubmitting(true);
 
     try {
       const trackingId = generateTrackingId();
-      const reportData = {
+      
+      console.log('Submitting report:', {
         title: formData.title,
-        description: formData.description,
-        submitter_name: isAnonymous ? null : formData.submitter_name,
-        submitter_email: isAnonymous ? null : formData.submitter_email,
-        contact_preference: formData.contact_preference,
-        incident_date: formData.incident_date || null,
-        location: formData.location || linkData.location,
-        witnesses: formData.witnesses,
-        evidence_description: formData.evidence_description,
-        department: linkData.department,
-        submission_method: 'web_form',
-        link_info: {
-          link_id: linkData.id,
-          link_name: linkData.name,
-          org_domain: orgDomain
-        }
-      };
+        organizationId: linkData.organization_id,
+        isAnonymous
+      });
 
-      // Encrypt the report content
-      const encryptionKey = crypto.getRandomValues(new Uint8Array(32));
-      
-      // Convert Uint8Array to hex string for the encryptData function
-      const encryptionKeyHex = Array.from(encryptionKey)
-        .map(b => b.toString(16).padStart(2, '0'))
-        .join('');
-      
-      const encryptedContent = encryptData(JSON.stringify(reportData), encryptionKeyHex);
-      const keyHash = await crypto.subtle.digest('SHA-256', encryptionKey);
-      
-      // Convert Uint8Array to hex string
-      const keyHashHex = Array.from(new Uint8Array(keyHash))
-        .map(b => b.toString(16).padStart(2, '0'))
-        .join('');
-
-      // Insert the report
+      // Create the report
       const { data: report, error: reportError } = await supabase
         .from('reports')
         .insert({
-          organization_id: organization.id,
+          organization_id: linkData.organization_id,
           tracking_id: trackingId,
           title: formData.title,
-          encrypted_content: encryptedContent,
-          encryption_key_hash: keyHashHex,
+          encrypted_content: JSON.stringify({
+            description: formData.description,
+            submission_method: 'web_form'
+          }),
+          encryption_key_hash: 'simple_hash_' + Date.now(),
           report_type: isAnonymous ? 'anonymous' : 'confidential',
           submitted_by_email: isAnonymous ? null : formData.submitter_email,
           submitted_via_link_id: linkData.id,
@@ -248,30 +144,31 @@ const DynamicSubmissionForm = () => {
         .select()
         .single();
 
-      if (reportError) throw reportError;
+      if (reportError) {
+        console.error('Report submission error:', reportError);
+        throw reportError;
+      }
+
+      console.log('Report created successfully:', report);
 
       // Update link usage count
       await supabase
         .from('organization_links')
-        .update({ usage_count: linkData.usage_count + 1 })
+        .update({ 
+          usage_count: supabase.sql`usage_count + 1`
+        })
         .eq('id', linkData.id);
 
-      // Track submission
-      await supabase.from('link_analytics').insert({
-        link_id: linkData.id,
-        event_type: 'submit',
-        metadata: { 
-          tracking_id: trackingId,
-          report_type: isAnonymous ? 'anonymous' : 'confidential'
-        }
+      toast({
+        title: "Report submitted successfully!",
+        description: `Your tracking ID is: ${trackingId}`,
       });
 
-      // Navigate to success page with tracking ID
+      // Navigate to success page
       navigate('/secure/tool/success', { 
         state: { 
           trackingId,
-          isAnonymous,
-          hasPassword: !isAnonymous && formData.follow_up_password.trim() !== ''
+          isAnonymous
         }
       });
 
@@ -279,7 +176,7 @@ const DynamicSubmissionForm = () => {
       console.error('Error submitting report:', error);
       toast({
         title: "Submission failed",
-        description: "There was an error submitting your report. Please try again.",
+        description: error.message || "There was an error submitting your report. Please try again.",
         variant: "destructive",
       });
     } finally {
@@ -298,7 +195,7 @@ const DynamicSubmissionForm = () => {
     );
   }
 
-  if (!organization || !linkData) {
+  if (!linkData) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <Card className="max-w-md">
@@ -312,30 +209,17 @@ const DynamicSubmissionForm = () => {
     );
   }
 
-  const brandColor = organization.brand_color || '#2563eb';
-
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Header with organization branding */}
-      <header className="bg-white shadow" style={{ borderTopColor: brandColor, borderTopWidth: '4px' }}>
+      {/* Header */}
+      <header className="bg-white shadow border-t-4 border-blue-600">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center py-6">
-            {organization.logo_url ? (
-              <img 
-                src={organization.logo_url} 
-                alt={organization.name}
-                className="h-10 w-auto mr-4"
-              />
-            ) : (
-              <div 
-                className="w-10 h-10 rounded-lg flex items-center justify-center mr-4"
-                style={{ backgroundColor: brandColor }}
-              >
-                <Shield className="h-6 w-6 text-white" />
-              </div>
-            )}
+            <div className="w-10 h-10 bg-blue-600 rounded-lg flex items-center justify-center mr-4">
+              <Shield className="h-6 w-6 text-white" />
+            </div>
             <div>
-              <h1 className="text-2xl font-bold text-gray-900">{organization.name}</h1>
+              <h1 className="text-2xl font-bold text-gray-900">{linkData.organization_name}</h1>
               <p className="text-sm text-gray-600">Secure Report Submission</p>
             </div>
           </div>
@@ -348,13 +232,11 @@ const DynamicSubmissionForm = () => {
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <Shield className="h-5 w-5" style={{ color: brandColor }} />
+                <Shield className="h-5 w-5 text-blue-600" />
                 {linkData.name}
               </CardTitle>
               <CardDescription>
                 {linkData.description || 'Submit your report securely and confidentially.'}
-                {linkData.department && <span className="block mt-1 text-sm">Department: {linkData.department}</span>}
-                {linkData.location && <span className="block text-sm">Location: {linkData.location}</span>}
               </CardDescription>
             </CardHeader>
           </Card>
@@ -377,7 +259,7 @@ const DynamicSubmissionForm = () => {
                 <Label htmlFor="anonymous" className="flex items-center gap-2">
                   {isAnonymous ? 'Anonymous Submission' : 'Confidential Submission'}
                   <span className="text-sm text-gray-500">
-                    ({isAnonymous ? 'No personal information required' : 'Provide contact details for follow-up'})
+                    ({isAnonymous ? 'No personal information required' : 'Provide email for follow-up'})
                   </span>
                 </Label>
               </div>
@@ -391,56 +273,17 @@ const DynamicSubmissionForm = () => {
                 <CardTitle className="text-lg">Contact Information</CardTitle>
                 <CardDescription>This information will be kept confidential</CardDescription>
               </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div>
-                    <Label htmlFor="submitter_name">Full Name</Label>
-                    <Input
-                      id="submitter_name"
-                      value={formData.submitter_name}
-                      onChange={(e) => setFormData({ ...formData, submitter_name: e.target.value })}
-                      placeholder="John Doe"
-                    />
-                  </div>
-                  <div>
-                    <Label htmlFor="submitter_email">Email Address</Label>
-                    <Input
-                      id="submitter_email"
-                      type="email"
-                      value={formData.submitter_email}
-                      onChange={(e) => setFormData({ ...formData, submitter_email: e.target.value })}
-                      placeholder="john@example.com"
-                    />
-                  </div>
-                </div>
-                
+              <CardContent>
                 <div>
-                  <Label htmlFor="follow_up_password">Follow-up Password *</Label>
-                  <div className="relative">
-                    <Input
-                      id="follow_up_password"
-                      type={showPassword ? "text" : "password"}
-                      required={!isAnonymous}
-                      value={formData.follow_up_password}
-                      onChange={(e) => setFormData({ ...formData, follow_up_password: e.target.value })}
-                      placeholder="Create a secure password"
-                      className="pr-10"
-                    />
-                    <button
-                      type="button"
-                      className="absolute inset-y-0 right-0 pr-3 flex items-center"
-                      onClick={() => setShowPassword(!showPassword)}
-                    >
-                      {showPassword ? (
-                        <EyeOff className="h-4 w-4 text-gray-400" />
-                      ) : (
-                        <Eye className="h-4 w-4 text-gray-400" />
-                      )}
-                    </button>
-                  </div>
-                  <p className="text-xs text-gray-500 mt-1">
-                    Use this password to check your report status and communicate securely
-                  </p>
+                  <Label htmlFor="submitter_email">Email Address</Label>
+                  <Input
+                    id="submitter_email"
+                    type="email"
+                    value={formData.submitter_email}
+                    onChange={(e) => setFormData({ ...formData, submitter_email: e.target.value })}
+                    placeholder="your@email.com"
+                    required={!isAnonymous}
+                  />
                 </div>
               </CardContent>
             </Card>
@@ -472,49 +315,7 @@ const DynamicSubmissionForm = () => {
                   value={formData.description}
                   onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                   placeholder="Please provide a detailed description of what happened..."
-                  rows={6}
-                />
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <Label htmlFor="incident_date">Incident Date</Label>
-                  <Input
-                    id="incident_date"
-                    type="date"
-                    value={formData.incident_date}
-                    onChange={(e) => setFormData({ ...formData, incident_date: e.target.value })}
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="location">Location</Label>
-                  <Input
-                    id="location"
-                    value={formData.location}
-                    onChange={(e) => setFormData({ ...formData, location: e.target.value })}
-                    placeholder={linkData.location || "Where did this occur?"}
-                  />
-                </div>
-              </div>
-
-              <div>
-                <Label htmlFor="witnesses">Witnesses (if any)</Label>
-                <Input
-                  id="witnesses"
-                  value={formData.witnesses}
-                  onChange={(e) => setFormData({ ...formData, witnesses: e.target.value })}
-                  placeholder="Names of any witnesses"
-                />
-              </div>
-
-              <div>
-                <Label htmlFor="evidence_description">Evidence Description</Label>
-                <Textarea
-                  id="evidence_description"
-                  value={formData.evidence_description}
-                  onChange={(e) => setFormData({ ...formData, evidence_description: e.target.value })}
-                  placeholder="Describe any evidence you have (documents, photos, etc.)"
-                  rows={3}
+                  rows={8}
                 />
               </div>
             </CardContent>
@@ -536,12 +337,11 @@ const DynamicSubmissionForm = () => {
           </Card>
 
           {/* Submit Button */}
-          <div className="flex justify-end space-x-3">
+          <div className="flex justify-end">
             <Button 
               type="submit" 
               disabled={submitting}
-              className="px-8"
-              style={{ backgroundColor: brandColor }}
+              className="px-8 bg-blue-600 hover:bg-blue-700"
             >
               {submitting ? 'Submitting...' : 'Submit Report'}
             </Button>

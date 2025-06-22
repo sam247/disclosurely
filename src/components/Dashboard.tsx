@@ -1,39 +1,165 @@
 
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
-import { LogOut, Users, FileText, AlertTriangle, CheckCircle, Link as LinkIcon, Shield } from 'lucide-react';
-import LinkGenerator from './LinkGenerator';
-import LinkTester from './LinkTester';
-import ReportsManagement from './ReportsManagement';
-import UserManagement from './UserManagement';
-import NotificationSystem from './NotificationSystem';
-import DashboardStats from './DashboardStats';
+import { LogOut, Plus, ExternalLink, FileText } from 'lucide-react';
+import { supabase } from '@/integrations/supabase/client';
+
+interface Report {
+  id: string;
+  title: string;
+  tracking_id: string;
+  status: string;
+  created_at: string;
+}
+
+interface SubmissionLink {
+  id: string;
+  name: string;
+  link_token: string;
+  usage_count: number;
+}
 
 const Dashboard = () => {
   const { user, signOut } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
+  const [reports, setReports] = useState<Report[]>([]);
+  const [links, setLinks] = useState<SubmissionLink[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  const handleLogout = async () => {
+  useEffect(() => {
+    if (user) {
+      fetchData();
+    }
+  }, [user]);
+
+  const fetchData = async () => {
+    if (!user) return;
+    
     try {
-      await signOut();
-      toast({
-        title: "Logged out",
-        description: "You have been successfully logged out.",
-      });
-      navigate('/auth/login');
+      console.log('Fetching dashboard data for user:', user.email);
+      
+      // Get user's profile and organization
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('organization_id')
+        .eq('id', user.id)
+        .single();
+
+      if (!profile?.organization_id) {
+        console.log('No organization found for user');
+        setLoading(false);
+        return;
+      }
+
+      // Fetch reports
+      const { data: reportsData } = await supabase
+        .from('reports')
+        .select('id, title, tracking_id, status, created_at')
+        .eq('organization_id', profile.organization_id)
+        .order('created_at', { ascending: false })
+        .limit(10);
+
+      // Fetch links
+      const { data: linksData } = await supabase
+        .from('organization_links')
+        .select('id, name, link_token, usage_count')
+        .eq('organization_id', profile.organization_id)
+        .eq('is_active', true)
+        .limit(5);
+
+      console.log('Fetched reports:', reportsData?.length || 0);
+      console.log('Fetched links:', linksData?.length || 0);
+
+      setReports(reportsData || []);
+      setLinks(linksData || []);
     } catch (error) {
+      console.error('Error fetching dashboard data:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const createQuickLink = async () => {
+    if (!user) return;
+
+    try {
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('organization_id')
+        .eq('id', user.id)
+        .single();
+
+      if (!profile?.organization_id) {
+        toast({
+          title: "Setup required",
+          description: "Please complete your profile setup first",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      const { data, error } = await supabase
+        .from('organization_links')
+        .insert({
+          organization_id: profile.organization_id,
+          name: 'Quick Report Link',
+          description: 'Submit reports securely',
+          created_by: user.id
+        })
+        .select()
+        .single();
+
+      if (error) throw error;
+
+      toast({
+        title: "Link created!",
+        description: "Your submission link is ready to use.",
+      });
+
+      fetchData(); // Refresh the data
+    } catch (error: any) {
+      console.error('Error creating link:', error);
       toast({
         title: "Error",
-        description: "Failed to log out. Please try again.",
+        description: error.message || "Failed to create link",
         variant: "destructive",
       });
     }
   };
+
+  const copyLink = (token: string) => {
+    const link = `${window.location.origin}/secure/tool/submit/${token}`;
+    navigator.clipboard.writeText(link);
+    toast({
+      title: "Link copied!",
+      description: "The submission link has been copied to your clipboard.",
+    });
+  };
+
+  const handleLogout = async () => {
+    try {
+      await signOut();
+      navigate('/auth/login');
+    } catch (error) {
+      console.error('Logout error:', error);
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-4"></div>
+          <p>Loading dashboard...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -41,155 +167,137 @@ const Dashboard = () => {
       <header className="bg-white shadow">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center py-6">
-            <div className="flex items-center space-x-4">
-              <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
-                <Shield className="h-5 w-5 text-white" />
-              </div>
-              <div>
-                <h1 className="text-2xl font-bold text-gray-900">Disclosurely Dashboard</h1>
-                <p className="text-sm text-gray-600">Welcome back, {user?.email}</p>
-              </div>
+            <div>
+              <h1 className="text-2xl font-bold text-gray-900">Dashboard</h1>
+              <p className="text-sm text-gray-600">Welcome back, {user?.email}</p>
             </div>
-            <div className="flex items-center space-x-4">
-              <NotificationSystem />
-              <Button 
-                onClick={handleLogout}
-                variant="outline"
-                className="flex items-center gap-2"
-              >
-                <LogOut className="h-4 w-4" />
-                Sign out
-              </Button>
-            </div>
+            <Button onClick={handleLogout} variant="outline">
+              <LogOut className="h-4 w-4 mr-2" />
+              Sign out
+            </Button>
           </div>
         </div>
       </header>
 
       {/* Main Content */}
       <main className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
-        <div className="px-4 py-6 sm:px-0">
-          <Tabs defaultValue="overview" className="space-y-6">
-            <TabsList className="grid w-full grid-cols-6">
-              <TabsTrigger value="overview">Overview</TabsTrigger>
-              <TabsTrigger value="reports">Reports</TabsTrigger>
-              <TabsTrigger value="users">Users</TabsTrigger>
-              <TabsTrigger value="links">Submission Links</TabsTrigger>
-              <TabsTrigger value="test">Test Links</TabsTrigger>
-              <TabsTrigger value="settings">Settings</TabsTrigger>
-            </TabsList>
+        <div className="px-4 py-6 sm:px-0 space-y-6">
+          
+          {/* Quick Stats */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <Card>
+              <CardContent className="p-6">
+                <div className="flex items-center">
+                  <FileText className="h-8 w-8 text-blue-600" />
+                  <div className="ml-4">
+                    <p className="text-sm font-medium text-gray-600">Total Reports</p>
+                    <p className="text-2xl font-bold text-gray-900">{reports.length}</p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+            
+            <Card>
+              <CardContent className="p-6">
+                <div className="flex items-center">
+                  <ExternalLink className="h-8 w-8 text-green-600" />
+                  <div className="ml-4">
+                    <p className="text-sm font-medium text-gray-600">Active Links</p>
+                    <p className="text-2xl font-bold text-gray-900">{links.length}</p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+            
+            <Card>
+              <CardContent className="p-6">
+                <div className="flex items-center">
+                  <Plus className="h-8 w-8 text-purple-600" />
+                  <div className="ml-4">
+                    <Button onClick={createQuickLink} className="w-full">
+                      Create New Link
+                    </Button>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
 
-            <TabsContent value="overview" className="space-y-6">
-              {/* Real Stats from DashboardStats component */}
-              <DashboardStats />
-
-              {/* Recent Activity and Quick Actions */}
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                <Card>
-                  <CardHeader>
-                    <CardTitle>Recent Reports</CardTitle>
-                    <CardDescription>Latest submissions requiring attention</CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="text-center py-8 text-gray-500">
-                      <FileText className="h-12 w-12 mx-auto mb-4 text-gray-300" />
-                      <p>No recent reports found</p>
-                      <p className="text-sm">Reports will appear here once submitted</p>
+          {/* Submission Links */}
+          <Card>
+            <CardHeader>
+              <CardTitle>Submission Links</CardTitle>
+              <CardDescription>Active links for report submissions</CardDescription>
+            </CardHeader>
+            <CardContent>
+              {links.length === 0 ? (
+                <div className="text-center py-8">
+                  <ExternalLink className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+                  <p className="text-gray-600">No submission links yet</p>
+                  <Button onClick={createQuickLink} className="mt-4">
+                    <Plus className="h-4 w-4 mr-2" />
+                    Create First Link
+                  </Button>
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  {links.map((link) => (
+                    <div key={link.id} className="flex items-center justify-between p-4 border rounded-lg">
+                      <div>
+                        <h3 className="font-medium">{link.name}</h3>
+                        <p className="text-sm text-gray-600">Used {link.usage_count} times</p>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <code className="text-xs bg-gray-100 px-2 py-1 rounded">
+                          /secure/tool/submit/{link.link_token}
+                        </code>
+                        <Button size="sm" onClick={() => copyLink(link.link_token)}>
+                          Copy Link
+                        </Button>
+                      </div>
                     </div>
-                  </CardContent>
-                </Card>
+                  ))}
+                </div>
+              )}
+            </CardContent>
+          </Card>
 
-                <Card>
-                  <CardHeader>
-                    <CardTitle>Quick Actions</CardTitle>
-                    <CardDescription>Common tasks and navigation</CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="grid grid-cols-2 gap-4">
-                      <Button 
-                        onClick={() => {
-                          const element = document.querySelector('[value="links"]');
-                          if (element) {
-                            (element as HTMLElement).click();
-                          }
-                        }}
-                        className="h-20 flex flex-col items-center justify-center"
-                      >
-                        <LinkIcon className="h-6 w-6 mb-2" />
-                        Create Link
-                      </Button>
-                      <Button 
-                        variant="outline" 
-                        onClick={() => {
-                          const element = document.querySelector('[value="reports"]');
-                          if (element) {
-                            (element as HTMLElement).click();
-                          }
-                        }}
-                        className="h-20 flex flex-col items-center justify-center"
-                      >
-                        <FileText className="h-6 w-6 mb-2" />
-                        View Reports
-                      </Button>
-                      <Button 
-                        variant="outline" 
-                        onClick={() => {
-                          const element = document.querySelector('[value="users"]');
-                          if (element) {
-                            (element as HTMLElement).click();
-                          }
-                        }}
-                        className="h-20 flex flex-col items-center justify-center"
-                      >
-                        <Users className="h-6 w-6 mb-2" />
-                        Manage Users
-                      </Button>
-                      <Button 
-                        variant="outline" 
-                        onClick={() => {
-                          const element = document.querySelector('[value="reports"]');
-                          if (element) {
-                            (element as HTMLElement).click();
-                          }
-                        }}
-                        className="h-20 flex flex-col items-center justify-center"
-                      >
-                        <AlertTriangle className="h-6 w-6 mb-2" />
-                        View All Cases
-                      </Button>
+          {/* Recent Reports */}
+          <Card>
+            <CardHeader>
+              <CardTitle>Recent Reports</CardTitle>
+              <CardDescription>Latest report submissions</CardDescription>
+            </CardHeader>
+            <CardContent>
+              {reports.length === 0 ? (
+                <div className="text-center py-8">
+                  <FileText className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+                  <p className="text-gray-600">No reports submitted yet</p>
+                  <p className="text-sm text-gray-500">Reports will appear here once submitted through your links</p>
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  {reports.map((report) => (
+                    <div key={report.id} className="flex items-center justify-between p-4 border rounded-lg">
+                      <div>
+                        <h3 className="font-medium">{report.title}</h3>
+                        <p className="text-sm text-gray-600">
+                          {report.tracking_id} • {new Date(report.created_at).toLocaleDateString()}
+                        </p>
+                      </div>
+                      <span className={`px-2 py-1 text-xs rounded-full ${
+                        report.status === 'new' ? 'bg-blue-100 text-blue-800' :
+                        report.status === 'in_progress' ? 'bg-yellow-100 text-yellow-800' :
+                        'bg-green-100 text-green-800'
+                      }`}>
+                        {report.status}
+                      </span>
                     </div>
-                  </CardContent>
-                </Card>
-              </div>
-            </TabsContent>
-
-            <TabsContent value="reports">
-              <ReportsManagement />
-            </TabsContent>
-
-            <TabsContent value="users">
-              <UserManagement />
-            </TabsContent>
-
-            <TabsContent value="links">
-              <LinkGenerator />
-            </TabsContent>
-
-            <TabsContent value="test">
-              <LinkTester />
-            </TabsContent>
-
-            <TabsContent value="settings">
-              <Card>
-                <CardHeader>
-                  <CardTitle>Organization Settings</CardTitle>
-                  <CardDescription>Manage your organization profile and preferences</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-gray-600">Settings interface coming soon...</p>
-                </CardContent>
-              </Card>
-            </TabsContent>
-          </Tabs>
+                  ))}
+                </div>
+              )}
+            </CardContent>
+          </Card>
         </div>
       </main>
     </div>
