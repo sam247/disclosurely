@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -65,6 +66,9 @@ const SecureReportTool = () => {
         return;
       }
 
+      // Generate a unique tracking ID first
+      const trackingId = generateTrackingId();
+
       // Encrypt the report data
       const reportData = {
         title: formData.title,
@@ -76,10 +80,7 @@ const SecureReportTool = () => {
         evidence_description: formData.evidence_description,
       };
 
-      const { encryptedData, keyHash, accessKey } = encryptReport(reportData);
-
-      // Generate a unique tracking ID
-      const trackingId = generateTrackingId();
+      const { encryptedData, keyHash, accessKey } = encryptReport(reportData, trackingId);
 
       // Submit encrypted report with the generated tracking_id
       const { data: report, error } = await supabase

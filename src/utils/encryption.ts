@@ -24,7 +24,7 @@ export const createKeyHash = (key: string): string => {
 
 // Generate access key for whistleblower
 export const generateAccessKey = (trackingId: string, encryptionKey: string): string => {
-  return CryptoJS.SHA256(trackingId + encryptionKey).toString().substring(0, 16);
+  return CryptoJS.SHA256(trackingId + encryptionKey).toString().substring(0, 16).toUpperCase();
 };
 
 // Verify access key
@@ -34,15 +34,11 @@ export const verifyAccessKey = (trackingId: string, accessKey: string, encryptio
 };
 
 // Complete encryption process for reports
-export const encryptReport = (reportData: any): { encryptedData: string; keyHash: string; accessKey: string } => {
+export const encryptReport = (reportData: any, trackingId: string): { encryptedData: string; keyHash: string; accessKey: string } => {
   const encryptionKey = generateEncryptionKey();
   const encryptedData = encryptData(JSON.stringify(reportData), encryptionKey);
   const keyHash = createKeyHash(encryptionKey);
-  
-  // For now, we'll use a placeholder tracking ID. In real implementation,
-  // this would be generated after the report is created
-  const tempTrackingId = 'temp-' + Date.now();
-  const accessKey = generateAccessKey(tempTrackingId, encryptionKey);
+  const accessKey = generateAccessKey(trackingId, encryptionKey);
   
   return { encryptedData, keyHash, accessKey };
 };

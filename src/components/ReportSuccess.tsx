@@ -8,8 +8,44 @@ import { useToast } from "@/hooks/use-toast";
 const ReportSuccess = () => {
   const [searchParams] = useSearchParams();
   const { toast } = useToast();
-  const trackingId = searchParams.get('trackingId') || 'Loading...';
-  const accessKey = searchParams.get('accessKey') || 'Loading...';
+  const trackingId = searchParams.get('trackingId');
+  const accessKey = searchParams.get('accessKey');
+
+  // Show fallback if no parameters are provided
+  if (!trackingId || !accessKey) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-green-50 to-blue-50">
+        <header className="border-b bg-white/80 backdrop-blur-sm">
+          <div className="container mx-auto px-4 py-4">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center space-x-2">
+                <Shield className="h-8 w-8 text-blue-600" />
+                <span className="text-xl font-bold text-gray-900">Disclosurely</span>
+              </div>
+              <Link to="/">
+                <Button variant="outline" size="sm">
+                  <Home className="h-4 w-4 mr-2" />
+                  Return Home
+                </Button>
+              </Link>
+            </div>
+          </div>
+        </header>
+        <div className="container mx-auto px-4 py-12">
+          <div className="max-w-2xl mx-auto text-center">
+            <Card>
+              <CardContent className="p-8">
+                <p className="text-gray-600">Report information not found. Please try submitting your report again.</p>
+                <Link to="/secure/tool" className="mt-4 inline-block">
+                  <Button>Submit New Report</Button>
+                </Link>
+              </CardContent>
+            </Card>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   const copyToClipboard = (text: string, label: string) => {
     navigator.clipboard.writeText(text);
@@ -76,7 +112,6 @@ const ReportSuccess = () => {
                       size="sm"
                       variant="ghost"
                       onClick={() => copyToClipboard(trackingId, 'Tracking ID')}
-                      disabled={trackingId === 'Loading...'}
                     >
                       <Copy className="h-3 w-3" />
                     </Button>
@@ -92,7 +127,6 @@ const ReportSuccess = () => {
                       size="sm"
                       variant="ghost"
                       onClick={() => copyToClipboard(accessKey, 'Access Key')}
-                      disabled={accessKey === 'Loading...'}
                     >
                       <Copy className="h-3 w-3" />
                     </Button>

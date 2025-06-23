@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -71,7 +72,7 @@ const Dashboard = () => {
         .from('reports')
         .select('id, title, tracking_id, status, created_at, encrypted_content, encryption_key_hash, priority, report_type')
         .eq('organization_id', profile.organization_id)
-        .neq('status', 'closed') // Only exclude archived (closed) reports, not deleted ones since 'deleted' isn't a valid status
+        .neq('status', 'closed') // Only exclude archived (closed) reports
         .order('created_at', { ascending: false })
         .limit(20);
 
@@ -127,19 +128,39 @@ const Dashboard = () => {
 
   const handleDeleteReport = async (reportId: string) => {
     try {
-      // Since 'deleted' is not a valid status, we'll actually delete the record
-      // In a production system, you'd want to implement soft deletes properly
+      console.log('Attempting to delete report:', reportId);
+      
+      // First delete any related messages
+      const { error: messagesError } = await supabase
+        .from('report_messages')
+        .delete()
+        .eq('report_id', reportId);
+
+      if (messagesError) {
+        console.error('Error deleting messages:', messagesError);
+      }
+
+      // Then delete the report
       const { error } = await supabase
         .from('reports')
         .delete()
         .eq('id', reportId);
 
-      if (error) throw error;
+      if (error) {
+        console.error('Error deleting report:', error);
+        throw error;
+      }
 
       toast({
         title: "Report deleted",
         description: "The report has been permanently deleted",
       });
+
+      // Close dialog if this report was being viewed
+      if (selectedReport?.id === reportId) {
+        setIsReportDialogOpen(false);
+        setSelectedReport(null);
+      }
 
       fetchData(); // Refresh the data
     } catch (error) {
@@ -447,7 +468,12 @@ const Dashboard = () => {
                 <ReportMessaging 
                   reportId={selectedReport.id}
                   trackingId={selectedReport.tracking_id}
-                  encryptionKey="placeholder-key"
+                  encryptedContent={selectedReport.encrypted_content}
+                  status={selectedReport.status}
+                  title={selectedReport.title}
+                  reportType={selectedReport.report_type}
+                  createdAt={selectedReport.created_at}
+                  priority={selectedReport.priority}
                 />
               </div>
             </div>
