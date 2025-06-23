@@ -1,11 +1,15 @@
+
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
-import { LogOut, Plus, ExternalLink, FileText } from 'lucide-react';
+import { LogOut, Plus, ExternalLink, FileText, Eye } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
+import { DecryptedReport } from '@/types/database';
+import { decryptReportContent } from '@/utils/encryption';
 
 interface Report {
   id: string;
@@ -13,6 +17,8 @@ interface Report {
   tracking_id: string;
   status: string;
   created_at: string;
+  encrypted_content: string;
+  encryption_key_hash: string;
 }
 
 interface SubmissionLink {
@@ -29,6 +35,10 @@ const Dashboard = () => {
   const [reports, setReports] = useState<Report[]>([]);
   const [links, setLinks] = useState<SubmissionLink[]>([]);
   const [loading, setLoading] = useState(true);
+  const [selectedReport, setSelectedReport] = useState<Report | null>(null);
+  const [decryptedContent, setDecryptedContent] = useState<DecryptedReport | null>(null);
+  const [isReportDialogOpen, setIsReportDialogOpen] = useState(false);
+  const [isDecrypting, setIsDecrypting] = useState(false);
 
   useEffect(() => {
     if (user) {
@@ -55,10 +65,10 @@ const Dashboard = () => {
         return;
       }
 
-      // Fetch reports
+      // Fetch reports with encrypted content
       const { data: reportsData } = await supabase
         .from('reports')
-        .select('id, title, tracking_id, status, created_at')
+        .select('id, title, tracking_id, status, created_at, encrypted_content, encryption_key_hash')
         .eq('organization_id', profile.organization_id)
         .order('created_at', { ascending: false })
         .limit(10);
@@ -80,6 +90,39 @@ const Dashboard = () => {
       console.error('Error fetching dashboard data:', error);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleViewReport = async (report: Report) => {
+    setSelectedReport(report);
+    setIsReportDialogOpen(true);
+    setIsDecrypting(true);
+    setDecryptedContent(null);
+
+    try {
+      // For now, we'll show a placeholder since we don't have the decryption key
+      // In a real implementation, you'd need to handle decryption properly
+      const mockDecryptedContent: DecryptedReport = {
+        id: report.id,
+        title: report.title,
+        content: "This report content is encrypted. In a production environment, this would show the decrypted content.",
+        category: "General",
+        incident_date: "",
+        location: "",
+        people_involved: "",
+        evidence_description: ""
+      };
+      
+      setDecryptedContent(mockDecryptedContent);
+    } catch (error) {
+      console.error('Error viewing report:', error);
+      toast({
+        title: "Error",
+        description: "Failed to decrypt report content",
+        variant: "destructive",
+      });
+    } finally {
+      setIsDecrypting(false);
     }
   };
 
@@ -283,20 +326,30 @@ const Dashboard = () => {
               ) : (
                 <div className="space-y-4">
                   {reports.map((report) => (
-                    <div key={report.id} className="flex items-center justify-between p-4 border rounded-lg">
-                      <div>
+                    <div key={report.id} className="flex items-center justify-between p-4 border rounded-lg hover:bg-gray-50 transition-colors">
+                      <div className="flex-1">
                         <h3 className="font-medium">{report.title}</h3>
                         <p className="text-sm text-gray-600">
                           {report.tracking_id} • {new Date(report.created_at).toLocaleDateString()}
                         </p>
                       </div>
-                      <span className={`px-2 py-1 text-xs rounded-full ${
-                        report.status === 'new' ? 'bg-blue-100 text-blue-800' :
-                        report.status === 'in_progress' ? 'bg-yellow-100 text-yellow-800' :
-                        'bg-green-100 text-green-800'
-                      }`}>
-                        {report.status}
-                      </span>
+                      <div className="flex items-center space-x-3">
+                        <span className={`px-2 py-1 text-xs rounded-full ${
+                          report.status === 'new' ? 'bg-blue-100 text-blue-800' :
+                          report.status === 'in_progress' ? 'bg-yellow-100 text-yellow-800' :
+                          'bg-green-100 text-green-800'
+                        }`}>
+                          {report.status}
+                        </span>
+                        <Button 
+                          size="sm" 
+                          variant="outline"
+                          onClick={() => handleViewReport(report)}
+                        >
+                          <Eye className="h-4 w-4 mr-1" />
+                          View
+                        </Button>
+                      </div>
                     </div>
                   ))}
                 </div>
@@ -305,6 +358,58 @@ const Dashboard = () => {
           </Card>
         </div>
       </main>
+
+      {/* Report Details Dialog */}
+      <Dialog open={isReportDialogOpen} onOpenChange={setIsReportDialogOpen}>
+        <DialogContent className="max-w-3xl max-h-[80vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Report Details: {selectedReport?.tracking_id}</DialogTitle>
+            <DialogDescription>
+              View submitted report information
+            </DialogDescription>
+          </DialogHeader>
+          
+          {selectedReport && (
+            <div className="space-y-6">
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="text-sm font-medium text-gray-700">Title</label>
+                  <p className="text-sm mt-1">{selectedReport.title}</p>
+                </div>
+                <div>
+                  <label className="text-sm font-medium text-gray-700">Status</label>
+                  <p className="text-sm mt-1 capitalize">{selectedReport.status}</p>
+                </div>
+                <div>
+                  <label className="text-sm font-medium text-gray-700">Tracking ID</label>
+                  <p className="text-sm mt-1 font-mono">{selectedReport.tracking_id}</p>
+                </div>
+                <div>
+                  <label className="text-sm font-medium text-gray-700">Submitted</label>
+                  <p className="text-sm mt-1">{new Date(selectedReport.created_at).toLocaleString()}</p>
+                </div>
+              </div>
+
+              <div>
+                <label className="text-sm font-medium text-gray-700">Report Content</label>
+                {isDecrypting ? (
+                  <div className="mt-2 p-4 border rounded-lg">
+                    <div className="animate-pulse">Decrypting report content...</div>
+                  </div>
+                ) : decryptedContent ? (
+                  <div className="mt-2 p-4 border rounded-lg bg-gray-50">
+                    <p className="text-sm">{decryptedContent.content}</p>
+                  </div>
+                ) : (
+                  <div className="mt-2 p-4 border rounded-lg">
+                    <p className="text-sm text-gray-600">Unable to decrypt content</p>
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
