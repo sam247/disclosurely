@@ -23,10 +23,10 @@ const AuthenticatedApp = () => {
     try {
       console.log('Checking profile for user:', user.email);
 
-      // Check if profile exists with organization
+      // First check if profile exists
       const { data: profile, error: profileError } = await supabase
         .from('profiles')
-        .select('*, organizations(*)')
+        .select('*')
         .eq('id', user.id)
         .maybeSingle();
 
@@ -36,14 +36,50 @@ const AuthenticatedApp = () => {
         return;
       }
 
+      console.log('Profile data:', profile);
+
+      // If no profile exists, create one and mark as needs setup
       if (!profile) {
-        console.log('No profile found, needs setup');
+        console.log('No profile found, creating basic profile');
+        const { error: createError } = await supabase
+          .from('profiles')
+          .insert({
+            id: user.id,
+            email: user.email || '',
+            role: 'org_admin',
+            is_active: true
+          });
+
+        if (createError) {
+          console.error('Error creating profile:', createError);
+        }
+        
         setProfileStatus('needs_setup');
         return;
       }
 
+      // If profile exists but no organization, needs setup
       if (!profile.organization_id) {
         console.log('Profile exists but no organization, needs setup');
+        setProfileStatus('needs_setup');
+        return;
+      }
+
+      // Check if organization exists
+      const { data: organization, error: orgError } = await supabase
+        .from('organizations')
+        .select('*')
+        .eq('id', profile.organization_id)
+        .maybeSingle();
+
+      if (orgError) {
+        console.error('Error checking organization:', orgError);
+        setProfileStatus('needs_setup');
+        return;
+      }
+
+      if (!organization) {
+        console.log('Organization not found, needs setup');
         setProfileStatus('needs_setup');
         return;
       }
