@@ -32,6 +32,11 @@ const AuthenticatedApp = () => {
 
       if (profileError) {
         console.error('Error checking profile:', profileError);
+        toast({
+          title: "Error checking profile",
+          description: "Please try refreshing the page",
+          variant: "destructive",
+        });
         setProfileStatus('needs_setup');
         return;
       }
@@ -40,7 +45,7 @@ const AuthenticatedApp = () => {
 
       // If no profile exists, create one and mark as needs setup
       if (!profile) {
-        console.log('No profile found, creating basic profile');
+        console.log('No profile found, creating basic profile and marking for setup');
         const { error: createError } = await supabase
           .from('profiles')
           .insert({
@@ -52,6 +57,11 @@ const AuthenticatedApp = () => {
 
         if (createError) {
           console.error('Error creating profile:', createError);
+          toast({
+            title: "Error creating profile",
+            description: createError.message,
+            variant: "destructive",
+          });
         }
         
         setProfileStatus('needs_setup');
@@ -60,12 +70,12 @@ const AuthenticatedApp = () => {
 
       // If profile exists but no organization, needs setup
       if (!profile.organization_id) {
-        console.log('Profile exists but no organization, needs setup');
+        console.log('Profile exists but no organization_id, needs setup');
         setProfileStatus('needs_setup');
         return;
       }
 
-      // Check if organization exists
+      // Check if organization actually exists
       const { data: organization, error: orgError } = await supabase
         .from('organizations')
         .select('*')
@@ -79,7 +89,13 @@ const AuthenticatedApp = () => {
       }
 
       if (!organization) {
-        console.log('Organization not found, needs setup');
+        console.log('Organization reference exists but organization not found, needs setup');
+        // Clear the invalid organization_id from profile
+        await supabase
+          .from('profiles')
+          .update({ organization_id: null })
+          .eq('id', user.id);
+        
         setProfileStatus('needs_setup');
         return;
       }
@@ -103,16 +119,18 @@ const AuthenticatedApp = () => {
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-4"></div>
-          <p>Loading...</p>
+          <p>Loading your account...</p>
         </div>
       </div>
     );
   }
 
   if (profileStatus === 'needs_setup') {
+    console.log('Rendering SimpleOrganizationSetup component');
     return <SimpleOrganizationSetup onComplete={handleSetupComplete} />;
   }
 
+  console.log('Rendering Dashboard component');
   return <Dashboard />;
 };
 

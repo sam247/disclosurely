@@ -1,3 +1,4 @@
+
 import { ReactNode } from 'react';
 import { Navigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
@@ -22,15 +23,8 @@ const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
     return <Navigate to="/auth/login" replace />;
   }
 
-  // If the protected content is Dashboard, use AuthenticatedApp
-  // Otherwise render the children directly
-  if (children && typeof children === 'object' && 'type' in children && 
-      children.type && typeof children.type === 'function' && 
-      children.type.name === 'Dashboard') {
-    return <AuthenticatedApp />;
-  }
-
-  return <>{children}</>;
+  // For dashboard route, always use AuthenticatedApp which handles setup flow
+  return <AuthenticatedApp />;
 };
 
 export default ProtectedRoute;
