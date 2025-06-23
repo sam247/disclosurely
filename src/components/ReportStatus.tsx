@@ -9,12 +9,38 @@ import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { Badge } from "@/components/ui/badge";
 import { Textarea } from "@/components/ui/textarea";
+import { decryptData } from "@/utils/encryption";
+
+interface Report {
+  id: string;
+  title: string;
+  tracking_id: string;
+  status: string;
+  created_at: string;
+  updated_at: string;
+  priority: number;
+  report_type: string;
+  encrypted_content: string;
+  encryption_key_hash: string;
+  organizations: {
+    name: string;
+    brand_color: string;
+  };
+}
+
+interface Message {
+  id: string;
+  sender_type: string;
+  encrypted_message: string;
+  created_at: string;
+  is_read: boolean;
+}
 
 const ReportStatus = () => {
   const [trackingId, setTrackingId] = useState("");
   const [accessKey, setAccessKey] = useState("");
-  const [report, setReport] = useState<any>(null);
-  const [messages, setMessages] = useState<any[]>([]);
+  const [report, setReport] = useState<Report | null>(null);
+  const [messages, setMessages] = useState<Message[]>([]);
   const [newMessage, setNewMessage] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [isSubmittingMessage, setIsSubmittingMessage] = useState(false);
@@ -22,41 +48,64 @@ const ReportStatus = () => {
   const handleLookup = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!trackingId.trim() || !accessKey.trim()) {
-      toast.error("Please enter both tracking ID and access key");
+    if (!trackingId.trim()) {
+      toast.error("Please enter a tracking ID");
       return;
     }
 
     setIsLoading(true);
 
     try {
+      console.log("Looking up report with tracking ID:", trackingId.trim());
+
       // Look up report by tracking ID
       const { data: reportData, error: reportError } = await supabase
         .from("reports")
         .select(`
           *,
-          organizations (name, brand_color)
+          organizations!inner (name, brand_color)
         `)
         .eq("tracking_id", trackingId.trim())
         .single();
 
       if (reportError || !reportData) {
+        console.error("Report lookup error:", reportError);
         toast.error("Report not found. Please check your tracking ID.");
         return;
       }
 
-      // For demo purposes, we'll show the report without full decryption validation
-      // In production, you'd validate the access key against the encryption
+      console.log("Report found:", reportData);
+
+      // Validate access key if provided (basic validation for now)
+      if (accessKey.trim()) {
+        try {
+          // Try to decrypt a small portion to validate the key
+          const testDecrypt = decryptData(reportData.encrypted_content.substring(0, 100), accessKey.trim());
+          console.log("Access key validation successful");
+        } catch (error) {
+          console.error("Access key validation failed:", error);
+          toast.error("Invalid access key. Please check your access key.");
+          setIsLoading(false);
+          return;
+        }
+      }
+
       setReport(reportData);
 
-      // Fetch messages
-      const { data: messagesData } = await supabase
+      // Fetch messages for this report
+      const { data: messagesData, error: messagesError } = await supabase
         .from("report_messages")
         .select("*")
         .eq("report_id", reportData.id)
         .order("created_at", { ascending: true });
 
-      setMessages(messagesData || []);
+      if (messagesError) {
+        console.error("Messages fetch error:", messagesError);
+      } else {
+        console.log("Messages fetched:", messagesData?.length || 0);
+        setMessages(messagesData || []);
+      }
+
       toast.success("Report found successfully!");
 
     } catch (error) {
@@ -75,18 +124,28 @@ const ReportStatus = () => {
       return;
     }
 
+    if (!report) {
+      toast.error("No report selected");
+      return;
+    }
+
     setIsSubmittingMessage(true);
 
     try {
+      console.log("Sending message for report:", report.id);
+
       const { error } = await supabase
         .from("report_messages")
         .insert({
           report_id: report.id,
-          sender_type: "whistleblower", // This must match the database constraint exactly
-          encrypted_message: newMessage, // In production, this would be encrypted
+          sender_type: "whistleblower",
+          encrypted_message: newMessage.trim(), // In production, this would be encrypted
         });
 
-      if (error) throw error;
+      if (error) {
+        console.error("Message send error:", error);
+        throw error;
+      }
 
       // Refresh messages
       const { data: messagesData } = await supabase
@@ -147,13 +206,13 @@ const ReportStatus = () => {
                 <span>Check Report Status</span>
               </CardTitle>
               <CardDescription>
-                Enter your tracking ID and access key to view your report status and communicate securely.
+                Enter your tracking ID to view your report status and communicate securely.
               </CardDescription>
             </CardHeader>
             <CardContent>
               <form onSubmit={handleLookup} className="space-y-4">
                 <div>
-                  <Label htmlFor="trackingId">Tracking ID</Label>
+                  <Label htmlFor="trackingId">Tracking ID *</Label>
                   <Input
                     id="trackingId"
                     value={trackingId}
@@ -163,13 +222,12 @@ const ReportStatus = () => {
                   />
                 </div>
                 <div>
-                  <Label htmlFor="accessKey">Access Key</Label>
+                  <Label htmlFor="accessKey">Access Key (optional for status check)</Label>
                   <Input
                     id="accessKey"
                     value={accessKey}
                     onChange={(e) => setAccessKey(e.target.value)}
-                    placeholder="Enter your access key"
-                    required
+                    placeholder="Enter your access key for secure messaging"
                   />
                 </div>
                 <Button type="submit" disabled={isLoading}>
@@ -219,66 +277,80 @@ const ReportStatus = () => {
                 </CardContent>
               </Card>
 
-              {/* Messages */}
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center space-x-2">
-                    <MessageSquare className="h-5 w-5 text-blue-600" />
-                    <span>Secure Communication</span>
-                  </CardTitle>
-                  <CardDescription>
-                    Communicate securely with the case handler assigned to your report.
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-4 mb-6">
-                    {messages.length === 0 ? (
-                      <div className="text-center py-8 text-gray-500">
-                        <Clock className="h-8 w-8 mx-auto mb-2 opacity-50" />
-                        <p>No messages yet. Your case handler will respond soon.</p>
-                      </div>
-                    ) : (
-                      messages.map((message) => (
-                        <div
-                          key={message.id}
-                          className={`p-4 rounded-lg ${
-                            message.sender_type === "whistleblower"
-                              ? "bg-blue-50 ml-8"
-                              : "bg-gray-50 mr-8"
-                          }`}
-                        >
-                          <div className="flex justify-between items-start mb-2">
-                            <span className="text-sm font-medium">
-                              {message.sender_type === "whistleblower" ? "You" : "Case Handler"}
-                            </span>
-                            <span className="text-xs text-gray-500">
-                              {new Date(message.created_at).toLocaleString()}
-                            </span>
-                          </div>
-                          <p className="text-sm">{message.encrypted_message}</p>
+              {/* Messages - Only show if access key is provided */}
+              {accessKey.trim() && (
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center space-x-2">
+                      <MessageSquare className="h-5 w-5 text-blue-600" />
+                      <span>Secure Communication</span>
+                    </CardTitle>
+                    <CardDescription>
+                      Communicate securely with the case handler assigned to your report.
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-4 mb-6">
+                      {messages.length === 0 ? (
+                        <div className="text-center py-8 text-gray-500">
+                          <Clock className="h-8 w-8 mx-auto mb-2 opacity-50" />
+                          <p>No messages yet. Your case handler will respond soon.</p>
                         </div>
-                      ))
-                    )}
-                  </div>
-
-                  {/* Send Message Form */}
-                  <form onSubmit={handleSendMessage} className="space-y-4">
-                    <div>
-                      <Label htmlFor="newMessage">Send a message</Label>
-                      <Textarea
-                        id="newMessage"
-                        value={newMessage}
-                        onChange={(e) => setNewMessage(e.target.value)}
-                        placeholder="Type your message here..."
-                        rows={3}
-                      />
+                      ) : (
+                        messages.map((message) => (
+                          <div
+                            key={message.id}
+                            className={`p-4 rounded-lg ${
+                              message.sender_type === "whistleblower"
+                                ? "bg-blue-50 ml-8"
+                                : "bg-gray-50 mr-8"
+                            }`}
+                          >
+                            <div className="flex justify-between items-start mb-2">
+                              <span className="text-sm font-medium">
+                                {message.sender_type === "whistleblower" ? "You" : "Case Handler"}
+                              </span>
+                              <span className="text-xs text-gray-500">
+                                {new Date(message.created_at).toLocaleString()}
+                              </span>
+                            </div>
+                            <p className="text-sm">{message.encrypted_message}</p>
+                          </div>
+                        ))
+                      )}
                     </div>
-                    <Button type="submit" disabled={isSubmittingMessage}>
-                      {isSubmittingMessage ? "Sending..." : "Send Message"}
-                    </Button>
-                  </form>
-                </CardContent>
-              </Card>
+
+                    {/* Send Message Form */}
+                    <form onSubmit={handleSendMessage} className="space-y-4">
+                      <div>
+                        <Label htmlFor="newMessage">Send a message</Label>
+                        <Textarea
+                          id="newMessage"
+                          value={newMessage}
+                          onChange={(e) => setNewMessage(e.target.value)}
+                          placeholder="Type your message here..."
+                          rows={3}
+                        />
+                      </div>
+                      <Button type="submit" disabled={isSubmittingMessage || !newMessage.trim()}>
+                        {isSubmittingMessage ? "Sending..." : "Send Message"}
+                      </Button>
+                    </form>
+                  </CardContent>
+                </Card>
+              )}
+
+              {/* Show message about access key if not provided */}
+              {!accessKey.trim() && (
+                <Card className="border-yellow-200 bg-yellow-50">
+                  <CardContent className="p-4">
+                    <p className="text-yellow-800 text-sm">
+                      <MessageSquare className="h-4 w-4 inline mr-2" />
+                      To access secure messaging, please enter your access key above.
+                    </p>
+                  </CardContent>
+                </Card>
+              )}
             </div>
           )}
         </div>

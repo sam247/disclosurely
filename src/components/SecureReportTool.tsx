@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -74,35 +73,32 @@ const SecureReportTool = () => {
 
       const { encryptedData, keyHash, accessKey } = encryptReport(reportData);
 
-      // Submit encrypted report - let the database trigger generate tracking_id
+      // Submit encrypted report - the database trigger will generate a unique tracking_id
       const { data: report, error } = await supabase
         .from("reports")
         .insert({
           organization_id: org.id,
           report_type: reportType,
-          title: formData.title, // Title remains unencrypted for basic search
+          title: formData.title,
           encrypted_content: encryptedData,
           encryption_key_hash: keyHash,
           submitted_by_email: reportType === "confidential" ? formData.submitter_email || null : null,
-          tracking_id: "", // Empty string will trigger the database function to generate it
         })
         .select()
         .single();
 
-      if (error) throw error;
+      if (error) {
+        console.error("Database error:", error);
+        throw error;
+      }
 
-      // Show success with tracking ID and access key
-      toast.success("Report submitted successfully!", {
-        description: "Your report has been securely submitted and encrypted.",
-      });
+      console.log("Report created successfully:", report);
 
-      // Navigate to success page with tracking info
-      navigate("/secure/tool/success", {
-        state: {
-          trackingId: report.tracking_id,
-          accessKey: accessKey,
-        }
-      });
+      // Navigate to success page with the actual tracking info
+      navigate("/secure/tool/success?" + new URLSearchParams({
+        trackingId: report.tracking_id,
+        accessKey: accessKey,
+      }));
 
     } catch (error) {
       console.error("Error submitting report:", error);

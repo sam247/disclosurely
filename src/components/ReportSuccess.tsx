@@ -1,16 +1,15 @@
 
-import { useState } from "react";
 import { useSearchParams, Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { CheckCircle, Shield, MessageSquare, Copy, ArrowRight, Home } from "lucide-react";
+import { CheckCircle, Shield, MessageSquare, Copy, Home } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
 const ReportSuccess = () => {
   const [searchParams] = useSearchParams();
   const { toast } = useToast();
-  const trackingId = searchParams.get('trackingId') || 'WB-XXXXXXXX';
-  const accessKey = searchParams.get('accessKey') || 'XXXX-XXXX-XXXX';
+  const trackingId = searchParams.get('trackingId') || 'Loading...';
+  const accessKey = searchParams.get('accessKey') || 'Loading...';
 
   const copyToClipboard = (text: string, label: string) => {
     navigator.clipboard.writeText(text);
@@ -77,6 +76,7 @@ const ReportSuccess = () => {
                       size="sm"
                       variant="ghost"
                       onClick={() => copyToClipboard(trackingId, 'Tracking ID')}
+                      disabled={trackingId === 'Loading...'}
                     >
                       <Copy className="h-3 w-3" />
                     </Button>
@@ -92,6 +92,7 @@ const ReportSuccess = () => {
                       size="sm"
                       variant="ghost"
                       onClick={() => copyToClipboard(accessKey, 'Access Key')}
+                      disabled={accessKey === 'Loading...'}
                     >
                       <Copy className="h-3 w-3" />
                     </Button>

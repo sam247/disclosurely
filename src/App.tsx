@@ -10,7 +10,8 @@ import NotFound from '@/pages/NotFound';
 import Dashboard from '@/components/Dashboard';
 import DynamicSubmissionForm from '@/components/DynamicSubmissionForm';
 import ReportSuccess from '@/components/ReportSuccess';
-import SecureMessaging from '@/components/SecureMessaging';
+import ReportStatus from '@/components/ReportStatus';
+import SecureReportTool from '@/components/SecureReportTool';
 import ProtectedRoute from '@/components/ProtectedRoute';
 import './App.css';
 
@@ -29,9 +30,10 @@ function App() {
               <Route path="/auth/signup" element={<Signup />} />
               
               {/* Public submission routes */}
+              <Route path="/secure/tool" element={<SecureReportTool />} />
               <Route path="/secure/tool/submit/:linkToken" element={<DynamicSubmissionForm />} />
               <Route path="/secure/tool/success" element={<ReportSuccess />} />
-              <Route path="/secure/tool/messages" element={<SecureMessaging />} />
+              <Route path="/secure/tool/messages" element={<ReportStatus />} />
               
               {/* Protected routes */}
               <Route 

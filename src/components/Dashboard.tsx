@@ -1,14 +1,17 @@
+
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
-import { LogOut, Plus, ExternalLink, FileText, Eye } from 'lucide-react';
+import { LogOut, Plus, ExternalLink, FileText, Eye, Archive, Trash2 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { DecryptedReport } from '@/types/database';
 import ReportMessaging from '@/components/ReportMessaging';
+import ReportContentDisplay from '@/components/ReportContentDisplay';
 
 interface Report {
   id: string;
@@ -18,6 +21,8 @@ interface Report {
   created_at: string;
   encrypted_content: string;
   encryption_key_hash: string;
+  priority: number;
+  report_type: string;
 }
 
 interface SubmissionLink {
@@ -35,9 +40,7 @@ const Dashboard = () => {
   const [links, setLinks] = useState<SubmissionLink[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedReport, setSelectedReport] = useState<Report | null>(null);
-  const [decryptedContent, setDecryptedContent] = useState<DecryptedReport | null>(null);
   const [isReportDialogOpen, setIsReportDialogOpen] = useState(false);
-  const [isDecrypting, setIsDecrypting] = useState(false);
 
   useEffect(() => {
     if (user) {
@@ -67,18 +70,19 @@ const Dashboard = () => {
       // Fetch reports with encrypted content
       const { data: reportsData } = await supabase
         .from('reports')
-        .select('id, title, tracking_id, status, created_at, encrypted_content, encryption_key_hash')
+        .select('id, title, tracking_id, status, created_at, encrypted_content, encryption_key_hash, priority, report_type')
         .eq('organization_id', profile.organization_id)
+        .neq('status', 'deleted') // Don't show deleted reports
         .order('created_at', { ascending: false })
-        .limit(10);
+        .limit(20);
 
-      // Fetch links
+      // Fetch the single organization link (simplified to one link per org)
       const { data: linksData } = await supabase
         .from('organization_links')
         .select('id, name, link_token, usage_count')
         .eq('organization_id', profile.organization_id)
         .eq('is_active', true)
-        .limit(5);
+        .limit(1);
 
       console.log('Fetched reports:', reportsData?.length || 0);
       console.log('Fetched links:', linksData?.length || 0);
@@ -95,37 +99,59 @@ const Dashboard = () => {
   const handleViewReport = async (report: Report) => {
     setSelectedReport(report);
     setIsReportDialogOpen(true);
-    setIsDecrypting(true);
-    setDecryptedContent(null);
+  };
 
+  const handleArchiveReport = async (reportId: string) => {
     try {
-      // For now, we'll show a placeholder since we don't have the decryption key
-      // In a real implementation, you'd need to handle decryption properly
-      const mockDecryptedContent: DecryptedReport = {
-        id: report.id,
-        title: report.title,
-        content: "This report content is encrypted. In a production environment, this would show the decrypted content.",
-        category: "General",
-        incident_date: "",
-        location: "",
-        people_involved: "",
-        evidence_description: ""
-      };
-      
-      setDecryptedContent(mockDecryptedContent);
+      const { error } = await supabase
+        .from('reports')
+        .update({ status: 'closed' })
+        .eq('id', reportId);
+
+      if (error) throw error;
+
+      toast({
+        title: "Report archived",
+        description: "The report has been moved to closed status",
+      });
+
+      fetchData(); // Refresh the data
     } catch (error) {
-      console.error('Error viewing report:', error);
+      console.error('Error archiving report:', error);
       toast({
         title: "Error",
-        description: "Failed to decrypt report content",
+        description: "Failed to archive report",
         variant: "destructive",
       });
-    } finally {
-      setIsDecrypting(false);
     }
   };
 
-  const createQuickLink = async () => {
+  const handleDeleteReport = async (reportId: string) => {
+    try {
+      const { error } = await supabase
+        .from('reports')
+        .update({ status: 'deleted' })
+        .eq('id', reportId);
+
+      if (error) throw error;
+
+      toast({
+        title: "Report deleted",
+        description: "The report has been marked as deleted",
+      });
+
+      fetchData(); // Refresh the data
+    } catch (error) {
+      console.error('Error deleting report:', error);
+      toast({
+        title: "Error",
+        description: "Failed to delete report",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const createOrGetSubmissionLink = async () => {
     if (!user) return;
 
     try {
@@ -144,6 +170,15 @@ const Dashboard = () => {
         return;
       }
 
+      // Check if a link already exists
+      if (links.length > 0) {
+        toast({
+          title: "Link already exists",
+          description: "Your organization already has a submission link",
+        });
+        return;
+      }
+
       // Generate a unique token
       const generateToken = () => {
         return Math.random().toString(36).substring(2, 14);
@@ -153,8 +188,8 @@ const Dashboard = () => {
         .from('organization_links')
         .insert({
           organization_id: profile.organization_id,
-          name: 'Quick Report Link',
-          description: 'Submit reports securely',
+          name: 'Report Submission Link',
+          description: 'Submit reports securely to our organization',
           created_by: user.id,
           link_token: generateToken()
         })
@@ -249,8 +284,8 @@ const Dashboard = () => {
                 <div className="flex items-center">
                   <ExternalLink className="h-8 w-8 text-green-600" />
                   <div className="ml-4">
-                    <p className="text-sm font-medium text-gray-600">Active Links</p>
-                    <p className="text-2xl font-bold text-gray-900">{links.length}</p>
+                    <p className="text-sm font-medium text-gray-600">Submission Link</p>
+                    <p className="text-2xl font-bold text-gray-900">{links.length > 0 ? 'Active' : 'None'}</p>
                   </div>
                 </div>
               </CardContent>
@@ -261,8 +296,8 @@ const Dashboard = () => {
                 <div className="flex items-center">
                   <Plus className="h-8 w-8 text-purple-600" />
                   <div className="ml-4">
-                    <Button onClick={createQuickLink} className="w-full">
-                      Create New Link
+                    <Button onClick={createOrGetSubmissionLink} className="w-full" disabled={links.length > 0}>
+                      {links.length > 0 ? 'Link Created' : 'Create Submission Link'}
                     </Button>
                   </div>
                 </div>
@@ -270,57 +305,46 @@ const Dashboard = () => {
             </Card>
           </div>
 
-          {/* Submission Links */}
-          <Card>
-            <CardHeader>
-              <CardTitle>Submission Links</CardTitle>
-              <CardDescription>Active links for report submissions</CardDescription>
-            </CardHeader>
-            <CardContent>
-              {links.length === 0 ? (
-                <div className="text-center py-8">
-                  <ExternalLink className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                  <p className="text-gray-600">No submission links yet</p>
-                  <Button onClick={createQuickLink} className="mt-4">
-                    <Plus className="h-4 w-4 mr-2" />
-                    Create First Link
-                  </Button>
-                </div>
-              ) : (
-                <div className="space-y-4">
-                  {links.map((link) => (
-                    <div key={link.id} className="flex items-center justify-between p-4 border rounded-lg">
-                      <div>
-                        <h3 className="font-medium">{link.name}</h3>
-                        <p className="text-sm text-gray-600">Used {link.usage_count} times</p>
-                      </div>
-                      <div className="flex items-center space-x-2">
-                        <code className="text-xs bg-gray-100 px-2 py-1 rounded">
-                          /secure/tool/submit/{link.link_token}
-                        </code>
-                        <Button size="sm" onClick={() => copyLink(link.link_token)}>
-                          Copy Link
-                        </Button>
-                      </div>
+          {/* Submission Link */}
+          {links.length > 0 && (
+            <Card>
+              <CardHeader>
+                <CardTitle>Submission Link</CardTitle>
+                <CardDescription>Your organization's secure report submission link</CardDescription>
+              </CardHeader>
+              <CardContent>
+                {links.map((link) => (
+                  <div key={link.id} className="flex items-center justify-between p-4 border rounded-lg">
+                    <div>
+                      <h3 className="font-medium">{link.name}</h3>
+                      <p className="text-sm text-gray-600">Used {link.usage_count} times</p>
                     </div>
-                  ))}
-                </div>
-              )}
-            </CardContent>
-          </Card>
+                    <div className="flex items-center space-x-2">
+                      <code className="text-xs bg-gray-100 px-2 py-1 rounded">
+                        /secure/tool/submit/{link.link_token}
+                      </code>
+                      <Button size="sm" onClick={() => copyLink(link.link_token)}>
+                        Copy Link
+                      </Button>
+                    </div>
+                  </div>
+                ))}
+              </CardContent>
+            </Card>
+          )}
 
           {/* Recent Reports */}
           <Card>
             <CardHeader>
-              <CardTitle>Recent Reports</CardTitle>
-              <CardDescription>Latest report submissions</CardDescription>
+              <CardTitle>Reports</CardTitle>
+              <CardDescription>All report submissions</CardDescription>
             </CardHeader>
             <CardContent>
               {reports.length === 0 ? (
                 <div className="text-center py-8">
                   <FileText className="h-12 w-12 text-gray-400 mx-auto mb-4" />
                   <p className="text-gray-600">No reports submitted yet</p>
-                  <p className="text-sm text-gray-500">Reports will appear here once submitted through your links</p>
+                  <p className="text-sm text-gray-500">Reports will appear here once submitted through your link</p>
                 </div>
               ) : (
                 <div className="space-y-4">
@@ -335,10 +359,12 @@ const Dashboard = () => {
                       <div className="flex items-center space-x-3">
                         <span className={`px-2 py-1 text-xs rounded-full ${
                           report.status === 'new' ? 'bg-blue-100 text-blue-800' :
-                          report.status === 'in_progress' ? 'bg-yellow-100 text-yellow-800' :
-                          'bg-green-100 text-green-800'
+                          report.status === 'in_review' ? 'bg-yellow-100 text-yellow-800' :
+                          report.status === 'investigating' ? 'bg-orange-100 text-orange-800' :
+                          report.status === 'resolved' ? 'bg-green-100 text-green-800' :
+                          'bg-gray-100 text-gray-800'
                         }`}>
-                          {report.status}
+                          {report.status.replace('_', ' ')}
                         </span>
                         <Button 
                           size="sm" 
@@ -348,6 +374,38 @@ const Dashboard = () => {
                           <Eye className="h-4 w-4 mr-1" />
                           View
                         </Button>
+                        {report.status !== 'closed' && (
+                          <Button 
+                            size="sm" 
+                            variant="outline"
+                            onClick={() => handleArchiveReport(report.id)}
+                          >
+                            <Archive className="h-4 w-4 mr-1" />
+                            Archive
+                          </Button>
+                        )}
+                        <AlertDialog>
+                          <AlertDialogTrigger asChild>
+                            <Button size="sm" variant="outline">
+                              <Trash2 className="h-4 w-4 mr-1" />
+                              Delete
+                            </Button>
+                          </AlertDialogTrigger>
+                          <AlertDialogContent>
+                            <AlertDialogHeader>
+                              <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+                              <AlertDialogDescription>
+                                This action will mark the report as deleted. This action cannot be undone.
+                              </AlertDialogDescription>
+                            </AlertDialogHeader>
+                            <AlertDialogFooter>
+                              <AlertDialogCancel>Cancel</AlertDialogCancel>
+                              <AlertDialogAction onClick={() => handleDeleteReport(report.id)}>
+                                Delete
+                              </AlertDialogAction>
+                            </AlertDialogFooter>
+                          </AlertDialogContent>
+                        </AlertDialog>
                       </div>
                     </div>
                   ))}
@@ -372,41 +430,15 @@ const Dashboard = () => {
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               {/* Report Information */}
               <div className="space-y-6">
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <label className="text-sm font-medium text-gray-700">Title</label>
-                    <p className="text-sm mt-1">{selectedReport.title}</p>
-                  </div>
-                  <div>
-                    <label className="text-sm font-medium text-gray-700">Status</label>
-                    <p className="text-sm mt-1 capitalize">{selectedReport.status}</p>
-                  </div>
-                  <div>
-                    <label className="text-sm font-medium text-gray-700">Tracking ID</label>
-                    <p className="text-sm mt-1 font-mono">{selectedReport.tracking_id}</p>
-                  </div>
-                  <div>
-                    <label className="text-sm font-medium text-gray-700">Submitted</label>
-                    <p className="text-sm mt-1">{new Date(selectedReport.created_at).toLocaleString()}</p>
-                  </div>
-                </div>
-
-                <div>
-                  <label className="text-sm font-medium text-gray-700">Report Content</label>
-                  {isDecrypting ? (
-                    <div className="mt-2 p-4 border rounded-lg">
-                      <div className="animate-pulse">Decrypting report content...</div>
-                    </div>
-                  ) : decryptedContent ? (
-                    <div className="mt-2 p-4 border rounded-lg bg-gray-50">
-                      <p className="text-sm">{decryptedContent.content}</p>
-                    </div>
-                  ) : (
-                    <div className="mt-2 p-4 border rounded-lg">
-                      <p className="text-sm text-gray-600">Unable to decrypt content</p>
-                    </div>
-                  )}
-                </div>
+                <ReportContentDisplay
+                  encryptedContent={selectedReport.encrypted_content}
+                  title={selectedReport.title}
+                  status={selectedReport.status}
+                  trackingId={selectedReport.tracking_id}
+                  reportType={selectedReport.report_type}
+                  createdAt={selectedReport.created_at}
+                  priority={selectedReport.priority}
+                />
               </div>
 
               {/* Secure Messaging */}
@@ -414,7 +446,7 @@ const Dashboard = () => {
                 <ReportMessaging 
                   reportId={selectedReport.id}
                   trackingId={selectedReport.tracking_id}
-                  encryptionKey="placeholder-key" // In production, this would be derived from the report's encryption
+                  encryptionKey="placeholder-key"
                 />
               </div>
             </div>
