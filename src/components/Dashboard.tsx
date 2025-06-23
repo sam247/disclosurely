@@ -8,6 +8,7 @@ import { useToast } from '@/hooks/use-toast';
 import { LogOut, Plus, ExternalLink, FileText, Eye } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { DecryptedReport } from '@/types/database';
+import ReportMessaging from '@/components/ReportMessaging';
 
 interface Report {
   id: string;
@@ -359,50 +360,62 @@ const Dashboard = () => {
 
       {/* Report Details Dialog */}
       <Dialog open={isReportDialogOpen} onOpenChange={setIsReportDialogOpen}>
-        <DialogContent className="max-w-3xl max-h-[80vh] overflow-y-auto">
+        <DialogContent className="max-w-6xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>Report Details: {selectedReport?.tracking_id}</DialogTitle>
             <DialogDescription>
-              View submitted report information
+              View submitted report information and secure messages
             </DialogDescription>
           </DialogHeader>
           
           {selectedReport && (
-            <div className="space-y-6">
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="text-sm font-medium text-gray-700">Title</label>
-                  <p className="text-sm mt-1">{selectedReport.title}</p>
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              {/* Report Information */}
+              <div className="space-y-6">
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="text-sm font-medium text-gray-700">Title</label>
+                    <p className="text-sm mt-1">{selectedReport.title}</p>
+                  </div>
+                  <div>
+                    <label className="text-sm font-medium text-gray-700">Status</label>
+                    <p className="text-sm mt-1 capitalize">{selectedReport.status}</p>
+                  </div>
+                  <div>
+                    <label className="text-sm font-medium text-gray-700">Tracking ID</label>
+                    <p className="text-sm mt-1 font-mono">{selectedReport.tracking_id}</p>
+                  </div>
+                  <div>
+                    <label className="text-sm font-medium text-gray-700">Submitted</label>
+                    <p className="text-sm mt-1">{new Date(selectedReport.created_at).toLocaleString()}</p>
+                  </div>
                 </div>
+
                 <div>
-                  <label className="text-sm font-medium text-gray-700">Status</label>
-                  <p className="text-sm mt-1 capitalize">{selectedReport.status}</p>
-                </div>
-                <div>
-                  <label className="text-sm font-medium text-gray-700">Tracking ID</label>
-                  <p className="text-sm mt-1 font-mono">{selectedReport.tracking_id}</p>
-                </div>
-                <div>
-                  <label className="text-sm font-medium text-gray-700">Submitted</label>
-                  <p className="text-sm mt-1">{new Date(selectedReport.created_at).toLocaleString()}</p>
+                  <label className="text-sm font-medium text-gray-700">Report Content</label>
+                  {isDecrypting ? (
+                    <div className="mt-2 p-4 border rounded-lg">
+                      <div className="animate-pulse">Decrypting report content...</div>
+                    </div>
+                  ) : decryptedContent ? (
+                    <div className="mt-2 p-4 border rounded-lg bg-gray-50">
+                      <p className="text-sm">{decryptedContent.content}</p>
+                    </div>
+                  ) : (
+                    <div className="mt-2 p-4 border rounded-lg">
+                      <p className="text-sm text-gray-600">Unable to decrypt content</p>
+                    </div>
+                  )}
                 </div>
               </div>
 
+              {/* Secure Messaging */}
               <div>
-                <label className="text-sm font-medium text-gray-700">Report Content</label>
-                {isDecrypting ? (
-                  <div className="mt-2 p-4 border rounded-lg">
-                    <div className="animate-pulse">Decrypting report content...</div>
-                  </div>
-                ) : decryptedContent ? (
-                  <div className="mt-2 p-4 border rounded-lg bg-gray-50">
-                    <p className="text-sm">{decryptedContent.content}</p>
-                  </div>
-                ) : (
-                  <div className="mt-2 p-4 border rounded-lg">
-                    <p className="text-sm text-gray-600">Unable to decrypt content</p>
-                  </div>
-                )}
+                <ReportMessaging 
+                  reportId={selectedReport.id}
+                  trackingId={selectedReport.tracking_id}
+                  encryptionKey="placeholder-key" // In production, this would be derived from the report's encryption
+                />
               </div>
             </div>
           )}
