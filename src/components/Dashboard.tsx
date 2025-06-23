@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -9,7 +8,6 @@ import { useToast } from '@/hooks/use-toast';
 import { LogOut, Plus, ExternalLink, FileText, Eye } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { DecryptedReport } from '@/types/database';
-import { decryptReportContent } from '@/utils/encryption';
 
 interface Report {
   id: string;
