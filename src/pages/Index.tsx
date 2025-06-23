@@ -1,8 +1,8 @@
 
-import Landing from '@/components/Landing';
+import ProtectedLanding from '@/components/ProtectedLanding';
 
 const Index = () => {
-  return <Landing />;
+  return <ProtectedLanding />;
 };
 
 export default Index;

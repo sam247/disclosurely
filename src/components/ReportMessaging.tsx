@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -78,7 +79,10 @@ const ReportMessaging = ({ reportId, trackingId, encryptionKey }: ReportMessagin
         .eq('report_id', reportId)
         .order('created_at', { ascending: true });
 
-      if (error) throw error;
+      if (error) {
+        console.error('Error loading messages:', error);
+        throw error;
+      }
       
       // Type assertion to ensure sender_type is properly typed
       const typedMessages = (data || []).map(msg => ({
@@ -100,43 +104,70 @@ const ReportMessaging = ({ reportId, trackingId, encryptionKey }: ReportMessagin
   };
 
   const sendMessage = async () => {
-    if (!newMessage.trim() || !user) return;
+    if (!newMessage.trim()) {
+      toast({
+        title: "Error",
+        description: "Please enter a message",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (!user) {
+      toast({
+        title: "Error",
+        description: "You must be logged in to send messages",
+        variant: "destructive",
+      });
+      return;
+    }
 
     setIsSending(true);
     try {
       // Encrypt the message using the report's encryption key
       const encryptedMessage = encryptData(newMessage, encryptionKey);
 
-      console.log('Sending message with data:', {
+      console.log('Attempting to send message with:', {
         report_id: reportId,
         sender_type: 'organization',
-        sender_id: user.id
+        sender_id: user.id,
+        message_length: newMessage.length
       });
 
-      const { error } = await supabase
+      const { data, error } = await supabase
         .from('report_messages')
         .insert({
           report_id: reportId,
           encrypted_message: encryptedMessage,
           sender_type: 'organization',
           sender_id: user.id
-        });
+        })
+        .select()
+        .single();
 
       if (error) {
-        console.error('Database error:', error);
+        console.error('Supabase error details:', {
+          message: error.message,
+          details: error.details,
+          hint: error.hint,
+          code: error.code
+        });
         throw error;
       }
 
+      console.log('Message sent successfully:', data);
       setNewMessage('');
+      await loadMessages();
+      
       toast({
         title: "Message Sent",
         description: "Your message has been sent securely",
       });
     } catch (error) {
-      console.error('Error sending message:', error);
+      console.error('Complete error object:', error);
       toast({
         title: "Error",
-        description: "Failed to send message. Please check console for details.",
+        description: `Failed to send message: ${error instanceof Error ? error.message : 'Unknown error'}`,
         variant: "destructive",
       });
     } finally {
