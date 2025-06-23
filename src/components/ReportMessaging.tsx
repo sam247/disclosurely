@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -108,16 +107,25 @@ const ReportMessaging = ({ reportId, trackingId, encryptionKey }: ReportMessagin
       // Encrypt the message using the report's encryption key
       const encryptedMessage = encryptData(newMessage, encryptionKey);
 
+      console.log('Sending message with data:', {
+        report_id: reportId,
+        sender_type: 'organization',
+        sender_id: user.id
+      });
+
       const { error } = await supabase
         .from('report_messages')
         .insert({
           report_id: reportId,
           encrypted_message: encryptedMessage,
-          sender_type: 'organization', // This must match the database constraint exactly
+          sender_type: 'organization',
           sender_id: user.id
         });
 
-      if (error) throw error;
+      if (error) {
+        console.error('Database error:', error);
+        throw error;
+      }
 
       setNewMessage('');
       toast({
@@ -128,7 +136,7 @@ const ReportMessaging = ({ reportId, trackingId, encryptionKey }: ReportMessagin
       console.error('Error sending message:', error);
       toast({
         title: "Error",
-        description: "Failed to send message",
+        description: "Failed to send message. Please check console for details.",
         variant: "destructive",
       });
     } finally {
