@@ -82,7 +82,7 @@ const ReportStatus = () => {
         .from("report_messages")
         .insert({
           report_id: report.id,
-          sender_type: "whistleblower",
+          sender_type: "whistleblower", // This must match the database constraint exactly
           encrypted_message: newMessage, // In production, this would be encrypted
         });
 
@@ -131,7 +131,7 @@ const ReportStatus = () => {
         <div className="container mx-auto px-4 py-4">
           <div className="flex items-center space-x-2">
             <Shield className="h-8 w-8 text-blue-600" />
-            <span className="text-xl font-bold text-gray-900">SecureReport</span>
+            <span className="text-xl font-bold text-gray-900">Disclosurely</span>
             <span className="text-sm text-gray-500 ml-4">Report Status Portal</span>
           </div>
         </div>

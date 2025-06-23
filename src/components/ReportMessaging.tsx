@@ -113,7 +113,7 @@ const ReportMessaging = ({ reportId, trackingId, encryptionKey }: ReportMessagin
         .insert({
           report_id: reportId,
           encrypted_message: encryptedMessage,
-          sender_type: 'organization',
+          sender_type: 'organization', // This must match the database constraint exactly
           sender_id: user.id
         });
 

@@ -1,131 +1,157 @@
 
-import { useLocation, useNavigate } from 'react-router-dom';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { CheckCircle, Shield, Copy } from 'lucide-react';
-import { useState } from 'react';
-import { toast } from 'sonner';
+import { useState } from "react";
+import { useSearchParams, Link } from "react-router-dom";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { CheckCircle, Shield, MessageSquare, Copy, ArrowRight, Home } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
 
 const ReportSuccess = () => {
-  const location = useLocation();
-  const navigate = useNavigate();
-  const [copied, setCopied] = useState(false);
-  
-  const { trackingId, isAnonymous, hasPassword } = location.state || {};
+  const [searchParams] = useSearchParams();
+  const { toast } = useToast();
+  const trackingId = searchParams.get('trackingId') || 'WB-XXXXXXXX';
+  const accessKey = searchParams.get('accessKey') || 'XXXX-XXXX-XXXX';
 
-  const copyTrackingId = async () => {
-    if (trackingId) {
-      await navigator.clipboard.writeText(trackingId);
-      setCopied(true);
-      toast.success('Tracking ID copied to clipboard');
-      setTimeout(() => setCopied(false), 2000);
-    }
+  const copyToClipboard = (text: string, label: string) => {
+    navigator.clipboard.writeText(text);
+    toast({
+      title: "Copied!",
+      description: `${label} copied to clipboard`,
+    });
   };
 
-  if (!trackingId) {
-    return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <Card className="max-w-md">
-          <CardContent className="text-center py-12">
-            <h3 className="text-lg font-semibold text-gray-900 mb-2">Invalid Access</h3>
-            <p className="text-gray-600 mb-4">This page can only be accessed after submitting a report.</p>
-            <Button onClick={() => navigate('/')}>Go Home</Button>
-          </CardContent>
-        </Card>
-      </div>
-    );
-  }
-
   return (
-    <div className="min-h-screen bg-gray-50 flex items-center justify-center px-4">
-      <Card className="max-w-2xl w-full">
-        <CardHeader className="text-center">
-          <div className="mx-auto mb-4 w-16 h-16 bg-green-100 rounded-full flex items-center justify-center">
-            <CheckCircle className="w-8 h-8 text-green-600" />
-          </div>
-          <CardTitle className="text-2xl text-green-800">Report Submitted Successfully</CardTitle>
-          <CardDescription className="text-gray-600">
-            Your report has been securely encrypted and submitted. Thank you for your courage in speaking up.
-          </CardDescription>
-        </CardHeader>
-        
-        <CardContent className="space-y-6">
-          {/* Tracking ID */}
-          <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <h3 className="font-medium text-blue-900">Your Tracking ID</h3>
-                <p className="text-sm text-blue-700 mt-1">Save this ID to check your report status</p>
-              </div>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={copyTrackingId}
-                className="ml-4"
-              >
-                {copied ? 'Copied!' : <Copy className="w-4 h-4" />}
+    <div className="min-h-screen bg-gradient-to-br from-green-50 to-blue-50">
+      {/* Header */}
+      <header className="border-b bg-white/80 backdrop-blur-sm">
+        <div className="container mx-auto px-4 py-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-2">
+              <Shield className="h-8 w-8 text-blue-600" />
+              <span className="text-xl font-bold text-gray-900">Disclosurely</span>
+            </div>
+            <Link to="/">
+              <Button variant="outline" size="sm">
+                <Home className="h-4 w-4 mr-2" />
+                Return Home
               </Button>
-            </div>
-            <div className="mt-3 p-3 bg-white rounded border font-mono text-lg text-center">
-              {trackingId}
-            </div>
+            </Link>
           </div>
+        </div>
+      </header>
 
-          {/* Security Notice */}
-          <div className="bg-green-50 border border-green-200 rounded-lg p-4">
-            <div className="flex items-start space-x-3">
-              <Shield className="w-5 h-5 text-green-600 mt-0.5" />
-              <div>
-                <h3 className="font-medium text-green-900">Your Information is Protected</h3>
-                <p className="text-sm text-green-700 mt-1">
-                  {isAnonymous 
-                    ? "Your report is completely anonymous and cannot be traced back to you."
-                    : "Your identity is kept confidential and will only be known to authorized personnel."
-                  }
-                </p>
+      <div className="container mx-auto px-4 py-12">
+        <div className="max-w-2xl mx-auto">
+          {/* Success Message */}
+          <Card className="mb-8 border-green-200 bg-green-50">
+            <CardContent className="p-8 text-center">
+              <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6">
+                <CheckCircle className="h-8 w-8 text-green-600" />
               </div>
-            </div>
-          </div>
+              <h1 className="text-2xl font-bold text-gray-900 mb-4">
+                Report Submitted Successfully
+              </h1>
+              <p className="text-gray-600 mb-6">
+                Your report has been securely encrypted and submitted. Thank you for your courage in speaking up.
+              </p>
+            </CardContent>
+          </Card>
 
-          {/* Next Steps */}
-          <div className="space-y-4">
-            <h3 className="font-medium text-gray-900">What happens next?</h3>
-            <div className="space-y-3 text-sm text-gray-600">
-              <div className="flex items-start space-x-3">
-                <div className="w-6 h-6 bg-blue-100 rounded-full flex items-center justify-center text-xs font-medium text-blue-600">1</div>
-                <p>Your report will be reviewed by the appropriate team within 2-3 business days.</p>
-              </div>
-              <div className="flex items-start space-x-3">
-                <div className="w-6 h-6 bg-blue-100 rounded-full flex items-center justify-center text-xs font-medium text-blue-600">2</div>
-                <p>You can check the status of your report anytime using your tracking ID.</p>
-              </div>
-              {!isAnonymous && hasPassword && (
-                <div className="flex items-start space-x-3">
-                  <div className="w-6 h-6 bg-blue-100 rounded-full flex items-center justify-center text-xs font-medium text-blue-600">3</div>
-                  <p>You may receive secure communications regarding your report through our messaging system.</p>
+          {/* Important Information */}
+          <Card className="mb-8">
+            <CardHeader>
+              <CardTitle className="flex items-center space-x-2">
+                <Shield className="h-5 w-5 text-blue-600" />
+                <span>Your Information is Protected</span>
+              </CardTitle>
+              <CardDescription>
+                Your report is completely anonymous and cannot be traced back to you.
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              <div className="grid md:grid-cols-2 gap-4">
+                <div className="p-4 bg-blue-50 rounded-lg">
+                  <div className="flex items-center justify-between mb-2">
+                    <label className="text-sm font-medium text-gray-700">Your Tracking ID</label>
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      onClick={() => copyToClipboard(trackingId, 'Tracking ID')}
+                    >
+                      <Copy className="h-3 w-3" />
+                    </Button>
+                  </div>
+                  <p className="font-mono text-lg font-bold text-blue-600">{trackingId}</p>
+                  <p className="text-xs text-gray-600 mt-1">Save this ID to check your report status</p>
                 </div>
-              )}
-            </div>
-          </div>
+                
+                <div className="p-4 bg-purple-50 rounded-lg">
+                  <div className="flex items-center justify-between mb-2">
+                    <label className="text-sm font-medium text-gray-700">Access Key</label>
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      onClick={() => copyToClipboard(accessKey, 'Access Key')}
+                    >
+                      <Copy className="h-3 w-3" />
+                    </Button>
+                  </div>
+                  <p className="font-mono text-lg font-bold text-purple-600">{accessKey}</p>
+                  <p className="text-xs text-gray-600 mt-1">Keep this key secure for accessing messages</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* What Happens Next */}
+          <Card className="mb-8">
+            <CardHeader>
+              <CardTitle>What happens next?</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                <div className="flex items-start space-x-3">
+                  <div className="w-6 h-6 bg-blue-600 text-white rounded-full flex items-center justify-center text-sm font-bold">1</div>
+                  <div>
+                    <p className="font-medium">Your report will be reviewed</p>
+                    <p className="text-sm text-gray-600">The appropriate team will review your report within 2-3 business days.</p>
+                  </div>
+                </div>
+                <div className="flex items-start space-x-3">
+                  <div className="w-6 h-6 bg-blue-600 text-white rounded-full flex items-center justify-center text-sm font-bold">2</div>
+                  <div>
+                    <p className="font-medium">You can check status anytime</p>
+                    <p className="text-sm text-gray-600">Use your tracking ID to check the status of your report.</p>
+                  </div>
+                </div>
+                <div className="flex items-start space-x-3">
+                  <div className="w-6 h-6 bg-blue-600 text-white rounded-full flex items-center justify-center text-sm font-bold">3</div>
+                  <div>
+                    <p className="font-medium">Secure communication</p>
+                    <p className="text-sm text-gray-600">The organization may reach out with questions through secure messaging.</p>
+                  </div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
 
           {/* Action Buttons */}
-          <div className="flex flex-col sm:flex-row gap-3 pt-4">
-            <Button 
-              onClick={() => navigate(`/secure/status/${trackingId}`)}
-              className="flex-1"
-            >
-              Check Report Status
-            </Button>
-            <Button 
-              variant="outline" 
-              onClick={() => navigate('/')}
-              className="flex-1"
-            >
-              Return Home
-            </Button>
+          <div className="flex flex-col sm:flex-row gap-4">
+            <Link to="/secure/tool/messages" className="flex-1">
+              <Button size="lg" className="w-full">
+                <MessageSquare className="mr-2 h-5 w-5" />
+                Check Messages & Status
+              </Button>
+            </Link>
+            <Link to="/" className="flex-1">
+              <Button size="lg" variant="outline" className="w-full">
+                <Home className="mr-2 h-5 w-5" />
+                Return Home
+              </Button>
+            </Link>
           </div>
-        </CardContent>
-      </Card>
+        </div>
+      </div>
     </div>
   );
 };
