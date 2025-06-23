@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -67,12 +66,12 @@ const Dashboard = () => {
         return;
       }
 
-      // Fetch reports with encrypted content
+      // Fetch reports with encrypted content, exclude archived reports
       const { data: reportsData } = await supabase
         .from('reports')
         .select('id, title, tracking_id, status, created_at, encrypted_content, encryption_key_hash, priority, report_type')
         .eq('organization_id', profile.organization_id)
-        .neq('status', 'deleted') // Don't show deleted reports
+        .neq('status', 'closed') // Only exclude archived (closed) reports, not deleted ones since 'deleted' isn't a valid status
         .order('created_at', { ascending: false })
         .limit(20);
 
@@ -128,16 +127,18 @@ const Dashboard = () => {
 
   const handleDeleteReport = async (reportId: string) => {
     try {
+      // Since 'deleted' is not a valid status, we'll actually delete the record
+      // In a production system, you'd want to implement soft deletes properly
       const { error } = await supabase
         .from('reports')
-        .update({ status: 'deleted' })
+        .delete()
         .eq('id', reportId);
 
       if (error) throw error;
 
       toast({
         title: "Report deleted",
-        description: "The report has been marked as deleted",
+        description: "The report has been permanently deleted",
       });
 
       fetchData(); // Refresh the data
@@ -395,7 +396,7 @@ const Dashboard = () => {
                             <AlertDialogHeader>
                               <AlertDialogTitle>Are you sure?</AlertDialogTitle>
                               <AlertDialogDescription>
-                                This action will mark the report as deleted. This action cannot be undone.
+                                This action will permanently delete the report. This action cannot be undone.
                               </AlertDialogDescription>
                             </AlertDialogHeader>
                             <AlertDialogFooter>

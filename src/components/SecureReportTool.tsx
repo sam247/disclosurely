@@ -32,6 +32,11 @@ const SecureReportTool = () => {
     setFormData(prev => ({ ...prev, [field]: value }));
   };
 
+  // Generate a unique tracking ID
+  const generateTrackingId = () => {
+    return 'WB-' + Math.random().toString(36).substring(2, 10).toUpperCase();
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
@@ -73,7 +78,10 @@ const SecureReportTool = () => {
 
       const { encryptedData, keyHash, accessKey } = encryptReport(reportData);
 
-      // Submit encrypted report - the database trigger will generate a unique tracking_id
+      // Generate a unique tracking ID
+      const trackingId = generateTrackingId();
+
+      // Submit encrypted report with the generated tracking_id
       const { data: report, error } = await supabase
         .from("reports")
         .insert({
@@ -82,6 +90,7 @@ const SecureReportTool = () => {
           title: formData.title,
           encrypted_content: encryptedData,
           encryption_key_hash: keyHash,
+          tracking_id: trackingId, // Provide the tracking_id explicitly
           submitted_by_email: reportType === "confidential" ? formData.submitter_email || null : null,
         })
         .select()
