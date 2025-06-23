@@ -179,8 +179,7 @@ const ReportContentDisplay = ({
               <h4 className="font-semibold mb-2">Report Details:</h4>
               {decryptedContent && (
                 <div className="space-y-2 text-sm">
-                  {Object.entries(dec
-                  ryptedContent).map(([key, value]) => (
+                  {Object.entries(decryptedContent).map(([key, value]) => (
                     <div key={key}>
                       <Label className="capitalize text-gray-600">{key.replace(/([A-Z])/g, ' $1').trim()}:</Label>
                       <p className="mt-1">{typeof value === 'string' ? value : JSON.stringify(value)}</p>
