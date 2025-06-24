@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -9,6 +10,7 @@ import { Switch } from '@/components/ui/switch';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { Shield, AlertTriangle } from 'lucide-react';
+import { encryptReport } from '@/utils/encryption';
 
 interface LinkData {
   id: string;
@@ -122,6 +124,15 @@ const DynamicSubmissionForm = () => {
         isAnonymous
       });
 
+      // Encrypt the report data
+      const reportData = {
+        title: formData.title,
+        description: formData.description,
+        submission_method: 'web_form'
+      };
+
+      const { encryptedData, keyHash, accessKey } = encryptReport(reportData, trackingId);
+
       // Create the report
       const { data: report, error: reportError } = await supabase
         .from('reports')
@@ -129,11 +140,8 @@ const DynamicSubmissionForm = () => {
           organization_id: linkData.organization_id,
           tracking_id: trackingId,
           title: formData.title,
-          encrypted_content: JSON.stringify({
-            description: formData.description,
-            submission_method: 'web_form'
-          }),
-          encryption_key_hash: 'simple_hash_' + Date.now(),
+          encrypted_content: encryptedData,
+          encryption_key_hash: keyHash,
           report_type: isAnonymous ? 'anonymous' : 'confidential',
           submitted_by_email: isAnonymous ? null : formData.submitter_email,
           submitted_via_link_id: linkData.id,
@@ -166,18 +174,8 @@ const DynamicSubmissionForm = () => {
           .eq('id', linkData.id);
       }
 
-      toast({
-        title: "Report submitted successfully!",
-        description: `Your tracking ID is: ${trackingId}`,
-      });
-
-      // Navigate to success page
-      navigate('/secure/tool/success', { 
-        state: { 
-          trackingId,
-          isAnonymous
-        }
-      });
+      // Navigate to success page with tracking info
+      navigate(`/secure/tool/success?trackingId=${encodeURIComponent(trackingId)}&accessKey=${encodeURIComponent(accessKey)}`);
 
     } catch (error: any) {
       console.error('Error submitting report:', error);

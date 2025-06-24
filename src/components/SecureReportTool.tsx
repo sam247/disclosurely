@@ -33,7 +33,6 @@ const SecureReportTool = () => {
     setFormData(prev => ({ ...prev, [field]: value }));
   };
 
-  // Generate a unique tracking ID
   const generateTrackingId = () => {
     return 'WB-' + Math.random().toString(36).substring(2, 10).toUpperCase();
   };
@@ -91,7 +90,7 @@ const SecureReportTool = () => {
           title: formData.title,
           encrypted_content: encryptedData,
           encryption_key_hash: keyHash,
-          tracking_id: trackingId, // Provide the tracking_id explicitly
+          tracking_id: trackingId,
           submitted_by_email: reportType === "confidential" ? formData.submitter_email || null : null,
         })
         .select()
@@ -105,10 +104,7 @@ const SecureReportTool = () => {
       console.log("Report created successfully:", report);
 
       // Navigate to success page with the actual tracking info
-      navigate("/secure/tool/success?" + new URLSearchParams({
-        trackingId: report.tracking_id,
-        accessKey: accessKey,
-      }));
+      navigate(`/secure/tool/success?trackingId=${encodeURIComponent(trackingId)}&accessKey=${encodeURIComponent(accessKey)}`);
 
     } catch (error) {
       console.error("Error submitting report:", error);
