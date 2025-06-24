@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -30,24 +31,23 @@ const ReportContentDisplay = ({
   const displayContent = () => {
     console.log('Raw content from database:', encryptedContent);
     
+    // Check if this looks like an encrypted string (base64 with Salt prefix)
+    if (typeof encryptedContent === 'string' && encryptedContent.includes('U2FsdGVk')) {
+      console.log('Content appears to be encrypted');
+      return {
+        message: "This content is encrypted and cannot be displayed without the proper decryption key.",
+        note: "In a production environment, authorized users would have access to decrypt this content.",
+        isEncrypted: true
+      };
+    }
+    
     try {
-      // Parse the JSON content
+      // Try to parse as JSON first
       const parsed = JSON.parse(encryptedContent);
       console.log('Successfully parsed report content:', parsed);
-      
-      // If the parsed content has a 'content' field that looks encrypted, 
-      // we need to show a message that it's encrypted
-      if (parsed.content && typeof parsed.content === 'string' && parsed.content.includes('U2FsdGVk')) {
-        return {
-          message: "This content is encrypted and cannot be displayed without the proper decryption key.",
-          note: "In a production environment, authorized users would have access to decrypt this content."
-        };
-      }
-      
-      // Otherwise return the parsed content
       return parsed;
     } catch (error) {
-      console.log('Content is not valid JSON, displaying as text');
+      console.log('Content is not valid JSON, treating as plain text');
       // If it's not JSON, return as plain content
       return { content: encryptedContent };
     }
@@ -138,6 +138,19 @@ const ReportContentDisplay = ({
               {(() => {
                 const content = displayContent();
                 console.log('Displaying content:', content);
+                
+                // Check if content is encrypted
+                if (content && typeof content === 'object' && content.isEncrypted) {
+                  return (
+                    <div className="space-y-2 text-sm">
+                      <div className="bg-yellow-50 border border-yellow-200 rounded p-3">
+                        <p className="font-medium text-yellow-800">{content.message}</p>
+                        <p className="text-yellow-700 text-xs mt-1">{content.note}</p>
+                      </div>
+                    </div>
+                  );
+                }
+                
                 return (
                   <div className="space-y-2 text-sm">
                     {typeof content === 'object' && content !== null ? (
