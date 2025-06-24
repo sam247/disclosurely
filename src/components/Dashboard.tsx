@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -23,6 +22,9 @@ interface Report {
   encryption_key_hash: string;
   priority: number;
   report_type: string;
+  organizations?: {
+    name: string;
+  };
 }
 
 interface SubmissionLink {
@@ -466,14 +468,17 @@ const Dashboard = () => {
               {/* Secure Messaging */}
               <div>
                 <ReportMessaging 
-                  reportId={selectedReport.id}
-                  trackingId={selectedReport.tracking_id}
-                  encryptedContent={selectedReport.encrypted_content}
-                  status={selectedReport.status}
-                  title={selectedReport.title}
-                  reportType={selectedReport.report_type}
-                  createdAt={selectedReport.created_at}
-                  priority={selectedReport.priority}
+                  report={{
+                    id: selectedReport.id,
+                    title: selectedReport.title,
+                    tracking_id: selectedReport.tracking_id,
+                    status: selectedReport.status,
+                    created_at: selectedReport.created_at,
+                    report_type: selectedReport.report_type,
+                    encrypted_content: selectedReport.encrypted_content,
+                    organizations: selectedReport.organizations || { name: 'Organization' }
+                  }}
+                  onClose={() => setIsReportDialogOpen(false)}
                 />
               </div>
             </div>
