@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -69,13 +70,17 @@ const Dashboard = () => {
       }
 
       // Fetch reports with encrypted content, exclude archived reports
-      const { data: reportsData } = await supabase
+      const { data: reportsData, error: reportsError } = await supabase
         .from('reports')
         .select('id, title, tracking_id, status, created_at, encrypted_content, encryption_key_hash, priority, report_type')
         .eq('organization_id', profile.organization_id)
         .neq('status', 'closed') // Only exclude archived (closed) reports
         .order('created_at', { ascending: false })
         .limit(20);
+
+      if (reportsError) {
+        console.error('Error fetching reports:', reportsError);
+      }
 
       // Fetch the single organization link (simplified to one link per org)
       const { data: linksData } = await supabase
@@ -86,6 +91,7 @@ const Dashboard = () => {
         .limit(1);
 
       console.log('Fetched reports:', reportsData?.length || 0);
+      console.log('Report IDs:', reportsData?.map(r => r.id) || []);
       console.log('Fetched links:', linksData?.length || 0);
 
       setReports(reportsData || []);
@@ -132,8 +138,10 @@ const Dashboard = () => {
       // Remove the archived report from local state immediately
       setReports(prevReports => prevReports.filter(report => report.id !== reportId));
       
-      // Also refresh the data to ensure consistency
-      await fetchData();
+      // Also refresh the data to ensure consistency after a short delay
+      setTimeout(() => {
+        fetchData();
+      }, 500);
     } catch (error) {
       console.error('Error archiving report:', error);
       toast({
@@ -193,10 +201,17 @@ const Dashboard = () => {
       }
 
       // Remove the deleted report from local state immediately
-      setReports(prevReports => prevReports.filter(report => report.id !== reportId));
+      setReports(prevReports => {
+        const filtered = prevReports.filter(report => report.id !== reportId);
+        console.log('Local state updated, new count:', filtered.length);
+        return filtered;
+      });
       
-      // Also refresh the data to ensure consistency
-      await fetchData();
+      // Also refresh the data to ensure consistency after a short delay
+      setTimeout(() => {
+        console.log('Refreshing data after delete...');
+        fetchData();
+      }, 500);
     } catch (error) {
       console.error('Error deleting report:', error);
       toast({
