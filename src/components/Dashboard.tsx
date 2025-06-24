@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -141,7 +140,7 @@ const Dashboard = () => {
       // Also refresh the data to ensure consistency after a short delay
       setTimeout(() => {
         fetchData();
-      }, 500);
+      }, 1000);
     } catch (error) {
       console.error('Error archiving report:', error);
       toast({
@@ -156,6 +155,19 @@ const Dashboard = () => {
     try {
       console.log('Attempting to delete report:', reportId);
       
+      // Remove from local state first to give immediate feedback
+      setReports(prevReports => {
+        const filtered = prevReports.filter(report => report.id !== reportId);
+        console.log('Local state updated, new count:', filtered.length);
+        return filtered;
+      });
+
+      // Close dialog if this report was being viewed
+      if (selectedReport?.id === reportId) {
+        setIsReportDialogOpen(false);
+        setSelectedReport(null);
+      }
+
       // First delete any related messages
       const { error: messagesError } = await supabase
         .from('report_messages')
@@ -194,26 +206,20 @@ const Dashboard = () => {
         description: "The report has been permanently deleted",
       });
 
-      // Close dialog if this report was being viewed
-      if (selectedReport?.id === reportId) {
-        setIsReportDialogOpen(false);
-        setSelectedReport(null);
-      }
-
-      // Remove the deleted report from local state immediately
-      setReports(prevReports => {
-        const filtered = prevReports.filter(report => report.id !== reportId);
-        console.log('Local state updated, new count:', filtered.length);
-        return filtered;
-      });
-      
-      // Also refresh the data to ensure consistency after a short delay
+      // Wait a bit longer before refreshing to ensure the delete is fully processed
       setTimeout(() => {
         console.log('Refreshing data after delete...');
         fetchData();
-      }, 500);
+      }, 1500);
+      
     } catch (error) {
       console.error('Error deleting report:', error);
+      
+      // If deletion failed, restore the report to the local state
+      setTimeout(() => {
+        fetchData();
+      }, 500);
+      
       toast({
         title: "Error",
         description: "Failed to delete report. Please try again.",
