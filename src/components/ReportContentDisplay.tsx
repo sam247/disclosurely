@@ -27,29 +27,20 @@ const ReportContentDisplay = ({
 }: ReportContentDisplayProps) => {
   const [showContent, setShowContent] = useState(false);
 
-  // For now, we'll show a message indicating the content is encrypted
-  // In a full implementation, this would decrypt the content for authorized users
+  // Parse and display the actual report content
   const displayContent = () => {
-    console.log('Raw encrypted content:', encryptedContent);
+    console.log('Raw content from database:', encryptedContent);
     
-    // Check if this looks like it might be JSON (starts with { or [)
-    if (encryptedContent && (encryptedContent.trim().startsWith('{') || encryptedContent.trim().startsWith('['))) {
-      try {
-        const parsed = JSON.parse(encryptedContent);
-        console.log('Successfully parsed as JSON:', parsed);
-        return parsed;
-      } catch (error) {
-        console.log('Failed to parse as JSON, showing as encrypted data');
-      }
+    // Try to parse the content as JSON first
+    try {
+      const parsed = JSON.parse(encryptedContent);
+      console.log('Successfully parsed report content:', parsed);
+      return parsed;
+    } catch (error) {
+      console.log('Content is not valid JSON, displaying as text');
+      // If it's not JSON, return as plain content
+      return { content: encryptedContent };
     }
-    
-    // For demonstration purposes, since we don't have the decryption key in the dashboard,
-    // we'll show that this is encrypted content
-    return {
-      note: "This content is encrypted and would require proper decryption keys to view in production",
-      encrypted_data: encryptedContent.substring(0, 100) + "...",
-      security_note: "Only authorized organization members with proper access would see the decrypted content here"
-    };
   };
 
   const getStatusColor = (status: string) => {
