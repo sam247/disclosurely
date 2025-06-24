@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -26,24 +27,15 @@ const ReportContentDisplay = ({
 }: ReportContentDisplayProps) => {
   const [showContent, setShowContent] = useState(false);
 
-  // For organization dashboard users, we'll display the content directly
-  // In a real implementation, this would be decrypted server-side for authorized users
+  // For organization dashboard users, parse and display the actual content
   const displayContent = () => {
     try {
       // Try to parse as JSON first to see if it's structured data
       const parsed = JSON.parse(encryptedContent);
       return parsed;
     } catch {
-      // If it's not JSON, it might be the encrypted string - show a placeholder
-      if (encryptedContent.length > 100 && !encryptedContent.includes(' ')) {
-        // This looks like encrypted data, show placeholder
-        return {
-          content: "Report content is encrypted and secure. The actual content would be decrypted for authorized organization members.",
-          note: "This is a placeholder - in production, authorized users would see the decrypted content here."
-        };
-      }
-      // Otherwise treat as plain text
-      return { content: encryptedContent };
+      // If it's not JSON, treat as plain text
+      return { description: encryptedContent };
     }
   };
 
@@ -137,7 +129,7 @@ const ReportContentDisplay = ({
                       Object.entries(content).map(([key, value]) => (
                         <div key={key}>
                           <Label className="capitalize text-gray-600">
-                            {key.replace(/([A-Z])/g, ' $1').trim()}:
+                            {key.replace(/([A-Z])/g, ' $1').trim().replace(/_/g, ' ')}:
                           </Label>
                           <p className="mt-1 whitespace-pre-wrap">{typeof value === 'string' ? value : JSON.stringify(value, null, 2)}</p>
                         </div>
