@@ -175,39 +175,63 @@ const Dashboard = () => {
         setSelectedReport(null);
       }
 
+      // Check if report exists before deletion
+      console.log('Checking if report exists before deletion...');
+      const { data: existingReport, error: checkError } = await supabase
+        .from('reports')
+        .select('id, title')
+        .eq('id', reportId)
+        .single();
+
+      if (checkError) {
+        console.error('Error checking report existence:', checkError);
+        if (checkError.code === 'PGRST116') {
+          console.log('Report does not exist - may have been already deleted');
+          toast({
+            title: "Report not found",
+            description: "The report may have been already deleted",
+          });
+          return;
+        }
+      } else {
+        console.log('Report exists before deletion:', existingReport);
+      }
+
       // First delete any related messages
       console.log('Deleting related messages...');
-      const { error: messagesError } = await supabase
+      const { error: messagesError, count: messagesDeleted } = await supabase
         .from('report_messages')
         .delete()
-        .eq('report_id', reportId);
+        .eq('report_id', reportId)
+        .select('*', { count: 'exact' });
 
       if (messagesError) {
         console.error('Error deleting messages:', messagesError);
       } else {
-        console.log('Messages deleted successfully');
+        console.log('Messages deleted successfully, count:', messagesDeleted);
       }
 
       // Delete any notifications related to this report
       console.log('Deleting related notifications...');
-      const { error: notificationsError } = await supabase
+      const { error: notificationsError, count: notificationsDeleted } = await supabase
         .from('notifications')
         .delete()
-        .eq('report_id', reportId);
+        .eq('report_id', reportId)
+        .select('*', { count: 'exact' });
 
       if (notificationsError) {
         console.error('Error deleting notifications:', notificationsError);
       } else {
-        console.log('Notifications deleted successfully');
+        console.log('Notifications deleted successfully, count:', notificationsDeleted);
       }
 
       // Then delete the report itself
       console.log('Deleting the main report...');
-      const { error: reportError, data: deletedData } = await supabase
+      const { error: reportError, data: deletedData, count: deletedCount } = await supabase
         .from('reports')
         .delete()
         .eq('id', reportId)
-        .select(); // Add select to see what was deleted
+        .select('*', { count: 'exact' }); // Add select to see what was deleted
 
       if (reportError) {
         console.error('Error deleting report:', reportError);
@@ -215,10 +239,32 @@ const Dashboard = () => {
       }
 
       console.log('Report delete operation result:', deletedData);
-      console.log('Number of reports deleted:', deletedData?.length || 0);
+      console.log('Number of reports deleted:', deletedCount);
+      console.log('Deleted data details:', deletedData);
 
       if (!deletedData || deletedData.length === 0) {
-        console.warn('No reports were deleted - this might indicate the report was not found');
+        console.warn('No reports were deleted - this might indicate the report was not found or RLS prevented deletion');
+        
+        // Check if report still exists after deletion attempt
+        const { data: stillExists } = await supabase
+          .from('reports')
+          .select('id, title')
+          .eq('id', reportId)
+          .single();
+        
+        if (stillExists) {
+          console.error('CRITICAL: Report still exists after deletion attempt!', stillExists);
+          toast({
+            title: "Delete failed",
+            description: "Report could not be deleted. Please check permissions.",
+            variant: "destructive",
+          });
+          // Restore to local state since deletion failed
+          setTimeout(() => {
+            fetchData();
+          }, 500);
+          return;
+        }
       }
 
       console.log('Report deleted successfully from database');
