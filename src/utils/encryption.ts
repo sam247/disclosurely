@@ -22,14 +22,11 @@ export const createKeyHash = (key: string): string => {
   return CryptoJS.SHA256(key).toString();
 };
 
-// Complete encryption process for reports - simplified to just use tracking ID
-export const encryptReport = (reportData: any, trackingId: string): { encryptedData: string; keyHash: string; accessKey: string } => {
+// Complete encryption process for reports - now only returns tracking ID
+export const encryptReport = (reportData: any, trackingId: string): { encryptedData: string; keyHash: string } => {
   const encryptionKey = generateEncryptionKey();
   const encryptedData = encryptData(JSON.stringify(reportData), encryptionKey);
   const keyHash = createKeyHash(encryptionKey);
   
-  // Simplified: use tracking ID as the access key for easier user experience
-  const accessKey = trackingId;
-  
-  return { encryptedData, keyHash, accessKey };
+  return { encryptedData, keyHash };
 };

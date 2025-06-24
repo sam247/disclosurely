@@ -79,7 +79,7 @@ const SecureReportTool = () => {
         evidence_description: formData.evidence_description,
       };
 
-      const { encryptedData, keyHash, accessKey } = encryptReport(reportData, trackingId);
+      const { encryptedData, keyHash } = encryptReport(reportData, trackingId);
 
       // Submit encrypted report with the generated tracking_id
       const { data: report, error } = await supabase
@@ -103,8 +103,8 @@ const SecureReportTool = () => {
 
       console.log("Report created successfully:", report);
 
-      // Navigate to success page with the actual tracking info
-      navigate(`/secure/tool/success?trackingId=${encodeURIComponent(trackingId)}&accessKey=${encodeURIComponent(accessKey)}`);
+      // Navigate to success page with only the tracking ID
+      navigate(`/secure/tool/success?trackingId=${encodeURIComponent(trackingId)}`);
 
     } catch (error) {
       console.error("Error submitting report:", error);

@@ -1,138 +1,97 @@
 
-import { useSearchParams, Link } from "react-router-dom";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { CheckCircle, Shield, MessageSquare, Copy, Home } from "lucide-react";
-import { useToast } from "@/hooks/use-toast";
+import { useEffect, useState } from 'react';
+import { useSearchParams, Link } from 'react-router-dom';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { CheckCircle, Copy, Shield, Clock, MessageSquare, Home } from 'lucide-react';
+import { toast } from 'sonner';
 
 const ReportSuccess = () => {
   const [searchParams] = useSearchParams();
-  const { toast } = useToast();
-  const trackingId = searchParams.get('trackingId');
-  const accessKey = searchParams.get('accessKey');
+  const [trackingId, setTrackingId] = useState<string>('');
 
-  // Show fallback if no parameters are provided
-  if (!trackingId || !accessKey) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-green-50 to-blue-50">
-        <header className="border-b bg-white/80 backdrop-blur-sm">
-          <div className="container mx-auto px-4 py-4">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center space-x-2">
-                <Shield className="h-8 w-8 text-blue-600" />
-                <span className="text-xl font-bold text-gray-900">Disclosurely</span>
-              </div>
-              <Link to="/">
-                <Button variant="outline" size="sm">
-                  <Home className="h-4 w-4 mr-2" />
-                  Return Home
-                </Button>
-              </Link>
-            </div>
-          </div>
-        </header>
-        <div className="container mx-auto px-4 py-12">
-          <div className="max-w-2xl mx-auto text-center">
-            <Card>
-              <CardContent className="p-8">
-                <p className="text-gray-600">Report information not found. Please try submitting your report again.</p>
-                <Link to="/secure/tool" className="mt-4 inline-block">
-                  <Button>Submit New Report</Button>
-                </Link>
-              </CardContent>
-            </Card>
-          </div>
-        </div>
-      </div>
-    );
-  }
+  useEffect(() => {
+    const id = searchParams.get('trackingId');
+    if (id) {
+      setTrackingId(id);
+    }
+  }, [searchParams]);
 
-  const copyToClipboard = (text: string, label: string) => {
-    navigator.clipboard.writeText(text);
-    toast({
-      title: "Copied!",
-      description: `${label} copied to clipboard`,
-    });
+  const copyTrackingId = () => {
+    navigator.clipboard.writeText(trackingId);
+    toast.success('Tracking ID copied to clipboard!');
   };
 
-  return (
-    <div className="min-h-screen bg-gradient-to-br from-green-50 to-blue-50">
-      {/* Header */}
-      <header className="border-b bg-white/80 backdrop-blur-sm">
-        <div className="container mx-auto px-4 py-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-2">
-              <Shield className="h-8 w-8 text-blue-600" />
-              <span className="text-xl font-bold text-gray-900">Disclosurely</span>
-            </div>
+  if (!trackingId) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 flex items-center justify-center">
+        <Card className="w-full max-w-md">
+          <CardContent className="p-6 text-center">
+            <p className="text-gray-600">No tracking information found.</p>
             <Link to="/">
-              <Button variant="outline" size="sm">
+              <Button className="mt-4">
                 <Home className="h-4 w-4 mr-2" />
                 Return Home
               </Button>
             </Link>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100">
+      {/* Header */}
+      <header className="border-b bg-white/80 backdrop-blur-sm">
+        <div className="container mx-auto px-4 py-4">
+          <div className="flex items-center space-x-2">
+            <Shield className="h-8 w-8 text-blue-600" />
+            <span className="text-xl font-bold text-gray-900">Disclosurely</span>
           </div>
         </div>
       </header>
 
-      <div className="container mx-auto px-4 py-12">
+      <div className="container mx-auto px-4 py-8">
         <div className="max-w-2xl mx-auto">
           {/* Success Message */}
           <Card className="mb-8 border-green-200 bg-green-50">
-            <CardContent className="p-8 text-center">
-              <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6">
-                <CheckCircle className="h-8 w-8 text-green-600" />
+            <CardHeader className="text-center">
+              <div className="flex justify-center mb-4">
+                <CheckCircle className="h-16 w-16 text-green-600" />
               </div>
-              <h1 className="text-2xl font-bold text-gray-900 mb-4">
-                Report Submitted Successfully
-              </h1>
-              <p className="text-gray-600 mb-6">
+              <CardTitle className="text-2xl text-green-800">Report Submitted Successfully</CardTitle>
+              <CardDescription className="text-green-700">
                 Your report has been securely encrypted and submitted. Thank you for your courage in speaking up.
-              </p>
-            </CardContent>
+              </CardDescription>
+            </CardHeader>
           </Card>
 
-          {/* Important Information */}
+          {/* Security Information */}
           <Card className="mb-8">
             <CardHeader>
               <CardTitle className="flex items-center space-x-2">
                 <Shield className="h-5 w-5 text-blue-600" />
                 <span>Your Information is Protected</span>
               </CardTitle>
-              <CardDescription>
-                Your report is completely anonymous and cannot be traced back to you.
-              </CardDescription>
             </CardHeader>
-            <CardContent className="space-y-6">
-              <div className="grid md:grid-cols-2 gap-4">
-                <div className="p-4 bg-blue-50 rounded-lg">
-                  <div className="flex items-center justify-between mb-2">
-                    <label className="text-sm font-medium text-gray-700">Your Tracking ID</label>
-                    <Button
-                      size="sm"
-                      variant="ghost"
-                      onClick={() => copyToClipboard(trackingId, 'Tracking ID')}
-                    >
-                      <Copy className="h-3 w-3" />
-                    </Button>
+            <CardContent>
+              <p className="text-gray-600 mb-6">
+                Your report is completely anonymous and cannot be traced back to you.
+              </p>
+
+              {/* Tracking ID */}
+              <div className="bg-blue-50 p-4 rounded-lg border border-blue-200">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm font-medium text-blue-800 mb-1">Your Tracking ID</p>
+                    <p className="text-2xl font-mono font-bold text-blue-900">{trackingId}</p>
+                    <p className="text-sm text-blue-600 mt-1">Save this ID to check your report status</p>
                   </div>
-                  <p className="font-mono text-lg font-bold text-blue-600">{trackingId}</p>
-                  <p className="text-xs text-gray-600 mt-1">Save this ID to check your report status</p>
-                </div>
-                
-                <div className="p-4 bg-purple-50 rounded-lg">
-                  <div className="flex items-center justify-between mb-2">
-                    <label className="text-sm font-medium text-gray-700">Access Key</label>
-                    <Button
-                      size="sm"
-                      variant="ghost"
-                      onClick={() => copyToClipboard(accessKey, 'Access Key')}
-                    >
-                      <Copy className="h-3 w-3" />
-                    </Button>
-                  </div>
-                  <p className="font-mono text-lg font-bold text-purple-600">{accessKey}</p>
-                  <p className="text-xs text-gray-600 mt-1">Keep this key secure for accessing messages</p>
+                  <Button onClick={copyTrackingId} variant="outline" size="sm">
+                    <Copy className="h-4 w-4 mr-2" />
+                    Copy
+                  </Button>
                 </div>
               </div>
             </CardContent>
@@ -143,28 +102,34 @@ const ReportSuccess = () => {
             <CardHeader>
               <CardTitle>What happens next?</CardTitle>
             </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                <div className="flex items-start space-x-3">
-                  <div className="w-6 h-6 bg-blue-600 text-white rounded-full flex items-center justify-center text-sm font-bold">1</div>
-                  <div>
-                    <p className="font-medium">Your report will be reviewed</p>
-                    <p className="text-sm text-gray-600">The appropriate team will review your report within 2-3 business days.</p>
-                  </div>
+            <CardContent className="space-y-4">
+              <div className="flex items-start space-x-3">
+                <div className="flex-shrink-0 w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
+                  <span className="text-sm font-bold text-blue-600">1</span>
                 </div>
-                <div className="flex items-start space-x-3">
-                  <div className="w-6 h-6 bg-blue-600 text-white rounded-full flex items-center justify-center text-sm font-bold">2</div>
-                  <div>
-                    <p className="font-medium">You can check status anytime</p>
-                    <p className="text-sm text-gray-600">Use your tracking ID to check the status of your report.</p>
-                  </div>
+                <div>
+                  <h4 className="font-medium text-gray-900">Your report will be reviewed</h4>
+                  <p className="text-sm text-gray-600">The appropriate team will review your report within 2-3 business days.</p>
                 </div>
-                <div className="flex items-start space-x-3">
-                  <div className="w-6 h-6 bg-blue-600 text-white rounded-full flex items-center justify-center text-sm font-bold">3</div>
-                  <div>
-                    <p className="font-medium">Secure communication</p>
-                    <p className="text-sm text-gray-600">The organization may reach out with questions through secure messaging.</p>
-                  </div>
+              </div>
+
+              <div className="flex items-start space-x-3">
+                <div className="flex-shrink-0 w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
+                  <span className="text-sm font-bold text-blue-600">2</span>
+                </div>
+                <div>
+                  <h4 className="font-medium text-gray-900">You can check status anytime</h4>
+                  <p className="text-sm text-gray-600">Use your tracking ID to check the status of your report.</p>
+                </div>
+              </div>
+
+              <div className="flex items-start space-x-3">
+                <div className="flex-shrink-0 w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
+                  <span className="text-sm font-bold text-blue-600">3</span>
+                </div>
+                <div>
+                  <h4 className="font-medium text-gray-900">Secure communication</h4>
+                  <p className="text-sm text-gray-600">The organization may reach out with questions through secure messaging.</p>
                 </div>
               </div>
             </CardContent>
@@ -173,14 +138,14 @@ const ReportSuccess = () => {
           {/* Action Buttons */}
           <div className="flex flex-col sm:flex-row gap-4">
             <Link to="/secure/tool/messages" className="flex-1">
-              <Button size="lg" className="w-full">
-                <MessageSquare className="mr-2 h-5 w-5" />
+              <Button className="w-full" size="lg">
+                <MessageSquare className="h-5 w-5 mr-2" />
                 Check Messages & Status
               </Button>
             </Link>
             <Link to="/" className="flex-1">
-              <Button size="lg" variant="outline" className="w-full">
-                <Home className="mr-2 h-5 w-5" />
+              <Button variant="outline" className="w-full" size="lg">
+                <Home className="h-5 w-5 mr-2" />
                 Return Home
               </Button>
             </Link>
