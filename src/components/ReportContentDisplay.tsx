@@ -4,7 +4,10 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Label } from '@/components/ui/label';
-import { Eye, EyeOff, FileText, Lock, AlertTriangle } from 'lucide-react';
+import { Eye, EyeOff, FileText, Lock, Unlock } from 'lucide-react';
+import { decryptReport } from '@/utils/encryption';
+import { useAuth } from '@/hooks/useAuth';
+import { supabase } from '@/integrations/supabase/client';
 
 interface ReportContentDisplayProps {
   encryptedContent: string;
@@ -25,37 +28,35 @@ const ReportContentDisplay = ({
   createdAt, 
   priority 
 }: ReportContentDisplayProps) => {
+  const { user } = useAuth();
   const [showContent, setShowContent] = useState(false);
+  const [decryptedContent, setDecryptedContent] = useState<any>(null);
+  const [isDecrypting, setIsDecrypting] = useState(false);
 
-  // Check if content is encrypted (this is the expected state for secure reports)
-  const isEncrypted = (content: string): boolean => {
-    // Check for CryptoJS encrypted format markers
-    return content.includes('U2FsdGVk') || 
-           (content.length > 50 && /^[A-Za-z0-9+/]+=*$/.test(content));
-  };
-
-  const displayContent = () => {
-    console.log('Raw content from database:', encryptedContent);
-    
-    if (isEncrypted(encryptedContent)) {
-      console.log('Content is encrypted (as expected for secure reports)');
-      return {
-        isEncrypted: true,
-        message: "Report content is end-to-end encrypted",
-        details: "This report was submitted with client-side encryption. Only authorized personnel with the proper decryption key can view the full content.",
-        technicalNote: "To decrypt this content, use the decryption key provided to authorized reviewers.",
-        encryptedSize: `${Math.round(encryptedContent.length * 0.75)} bytes (estimated original size)`
-      };
+  const handleDecryptContent = async () => {
+    if (!user || decryptedContent) {
+      setShowContent(!showContent);
+      return;
     }
-    
-    // If somehow we have unencrypted content, try to parse it
+
+    setIsDecrypting(true);
     try {
-      const parsed = JSON.parse(encryptedContent);
-      console.log('Content appears to be unencrypted JSON:', parsed);
-      return parsed;
+      // Get user's organization ID
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('organization_id')
+        .eq('id', user.id)
+        .single();
+
+      if (profile?.organization_id) {
+        const decrypted = decryptReport(encryptedContent, profile.organization_id);
+        setDecryptedContent(decrypted);
+        setShowContent(true);
+      }
     } catch (error) {
-      console.log('Content is neither encrypted nor valid JSON, treating as plain text');
-      return { content: encryptedContent };
+      console.error('Error decrypting content:', error);
+    } finally {
+      setIsDecrypting(false);
     }
   };
 
@@ -121,22 +122,29 @@ const ReportContentDisplay = ({
           <div className="flex items-center justify-between">
             <h4 className="font-semibold flex items-center space-x-2">
               <span>Report Content:</span>
-              <Lock className="h-4 w-4 text-green-600" />
+              {decryptedContent ? (
+                <Unlock className="h-4 w-4 text-green-600" />
+              ) : (
+                <Lock className="h-4 w-4 text-blue-600" />
+              )}
             </h4>
             <Button
               variant="outline"
               size="sm"
-              onClick={() => setShowContent(!showContent)}
+              onClick={handleDecryptContent}
+              disabled={isDecrypting}
             >
-              {showContent ? (
+              {isDecrypting ? (
+                'Decrypting...'
+              ) : showContent ? (
                 <>
                   <EyeOff className="mr-2 h-4 w-4" />
-                  Hide Details
+                  Hide Content
                 </>
               ) : (
                 <>
                   <Eye className="mr-2 h-4 w-4" />
-                  Show Details
+                  View Content
                 </>
               )}
             </Button>
@@ -144,64 +152,26 @@ const ReportContentDisplay = ({
           
           {showContent && (
             <div className="bg-gray-50 p-4 rounded-lg">
-              {(() => {
-                const content = displayContent();
-                console.log('Displaying content:', content);
-                
-                // Handle encrypted content (expected case)
-                if (content && typeof content === 'object' && content.isEncrypted) {
-                  return (
-                    <div className="space-y-4">
-                      <div className="bg-green-50 border border-green-200 rounded-lg p-4">
-                        <div className="flex items-start space-x-3">
-                          <Lock className="h-5 w-5 text-green-600 mt-0.5" />
-                          <div className="flex-1">
-                            <h5 className="font-medium text-green-800 mb-2">{content.message}</h5>
-                            <p className="text-green-700 text-sm mb-3">{content.details}</p>
-                            
-                            <div className="bg-green-100 rounded p-3 text-sm">
-                              <div className="flex items-center space-x-2 mb-2">
-                                <AlertTriangle className="h-4 w-4 text-green-600" />
-                                <span className="font-medium text-green-800">For Authorized Personnel:</span>
-                              </div>
-                              <p className="text-green-700">{content.technicalNote}</p>
-                              <p className="text-green-600 text-xs mt-2">Content size: {content.encryptedSize}</p>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                      
-                      <div className="text-xs text-gray-500 italic">
-                        Note: This security measure protects the confidentiality of sensitive reports. 
-                        Contact your system administrator for decryption procedures.
-                      </div>
+              {decryptedContent ? (
+                <div className="space-y-3">
+                  {Object.entries(decryptedContent).map(([key, value]) => (
+                    <div key={key}>
+                      <Label className="capitalize text-gray-600 font-medium">
+                        {key.replace(/([A-Z])/g, ' $1').trim().replace(/_/g, ' ')}:
+                      </Label>
+                      <p className="mt-1 whitespace-pre-wrap text-sm">
+                        {typeof value === 'string' ? value : JSON.stringify(value, null, 2)}
+                      </p>
                     </div>
-                  );
-                }
-                
-                // Handle unencrypted content (should be rare)
-                return (
-                  <div className="space-y-2 text-sm">
-                    {typeof content === 'object' && content !== null ? (
-                      Object.entries(content).map(([key, value]) => (
-                        <div key={key}>
-                          <Label className="capitalize text-gray-600">
-                            {key.replace(/([A-Z])/g, ' $1').trim().replace(/_/g, ' ')}:
-                          </Label>
-                          <p className="mt-1 whitespace-pre-wrap">
-                            {typeof value === 'string' ? value : JSON.stringify(value, null, 2)}
-                          </p>
-                        </div>
-                      ))
-                    ) : (
-                      <div>
-                        <Label className="text-gray-600">Content:</Label>
-                        <p className="mt-1 whitespace-pre-wrap">{String(content)}</p>
-                      </div>
-                    )}
-                  </div>
-                );
-              })()}
+                  ))}
+                </div>
+              ) : (
+                <div className="text-center py-4">
+                  <Lock className="h-8 w-8 text-gray-400 mx-auto mb-2" />
+                  <p className="text-gray-600">Unable to decrypt content</p>
+                  <p className="text-sm text-gray-500">Please ensure you have proper access permissions</p>
+                </div>
+              )}
             </div>
           )}
         </div>

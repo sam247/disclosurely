@@ -22,11 +22,24 @@ export const createKeyHash = (key: string): string => {
   return CryptoJS.SHA256(key).toString();
 };
 
-// Complete encryption process for reports - now only returns tracking ID
-export const encryptReport = (reportData: any, trackingId: string): { encryptedData: string; keyHash: string } => {
-  const encryptionKey = generateEncryptionKey();
-  const encryptedData = encryptData(JSON.stringify(reportData), encryptionKey);
-  const keyHash = createKeyHash(encryptionKey);
+// Organization-based encryption for reports
+export const encryptReport = (reportData: any, organizationId: string): { encryptedData: string; keyHash: string } => {
+  // Use organization ID to generate a consistent key
+  const organizationKey = CryptoJS.SHA256(organizationId + process.env.ENCRYPTION_SALT || 'default-salt').toString();
+  const encryptedData = encryptData(JSON.stringify(reportData), organizationKey);
+  const keyHash = createKeyHash(organizationKey);
   
   return { encryptedData, keyHash };
+};
+
+// Decrypt report for authorized dashboard users
+export const decryptReport = (encryptedData: string, organizationId: string): any => {
+  try {
+    const organizationKey = CryptoJS.SHA256(organizationId + process.env.ENCRYPTION_SALT || 'default-salt').toString();
+    const decryptedData = decryptData(encryptedData, organizationKey);
+    return JSON.parse(decryptedData);
+  } catch (error) {
+    console.error('Failed to decrypt report:', error);
+    return null;
+  }
 };
