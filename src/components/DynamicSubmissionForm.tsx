@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -131,7 +130,7 @@ const DynamicSubmissionForm = () => {
         submission_method: 'web_form'
       };
 
-      const { encryptedData, keyHash, accessKey } = encryptReport(reportData, trackingId);
+      const { encryptedData, keyHash } = encryptReport(reportData, trackingId);
 
       // Create the report
       const { data: report, error: reportError } = await supabase
@@ -174,8 +173,8 @@ const DynamicSubmissionForm = () => {
           .eq('id', linkData.id);
       }
 
-      // Navigate to success page with tracking info
-      navigate(`/secure/tool/success?trackingId=${encodeURIComponent(trackingId)}&accessKey=${encodeURIComponent(accessKey)}`);
+      // Navigate to success page with only tracking ID
+      navigate(`/secure/tool/success?trackingId=${encodeURIComponent(trackingId)}`);
 
     } catch (error: any) {
       console.error('Error submitting report:', error);
