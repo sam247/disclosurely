@@ -129,7 +129,10 @@ const Dashboard = () => {
         setSelectedReport(null);
       }
 
-      // Refresh the data to update the UI
+      // Remove the archived report from local state immediately
+      setReports(prevReports => prevReports.filter(report => report.id !== reportId));
+      
+      // Also refresh the data to ensure consistency
       await fetchData();
     } catch (error) {
       console.error('Error archiving report:', error);
@@ -189,7 +192,10 @@ const Dashboard = () => {
         setSelectedReport(null);
       }
 
-      // Refresh the data to update the UI
+      // Remove the deleted report from local state immediately
+      setReports(prevReports => prevReports.filter(report => report.id !== reportId));
+      
+      // Also refresh the data to ensure consistency
       await fetchData();
     } catch (error) {
       console.error('Error deleting report:', error);
