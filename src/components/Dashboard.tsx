@@ -104,24 +104,38 @@ const Dashboard = () => {
 
   const handleArchiveReport = async (reportId: string) => {
     try {
+      console.log('Archiving report:', reportId);
+      
       const { error } = await supabase
         .from('reports')
         .update({ status: 'closed' })
         .eq('id', reportId);
 
-      if (error) throw error;
+      if (error) {
+        console.error('Error archiving report:', error);
+        throw error;
+      }
+
+      console.log('Report archived successfully');
 
       toast({
         title: "Report archived",
         description: "The report has been moved to closed status",
       });
 
-      fetchData(); // Refresh the data
+      // Close dialog if this report was being viewed
+      if (selectedReport?.id === reportId) {
+        setIsReportDialogOpen(false);
+        setSelectedReport(null);
+      }
+
+      // Refresh the data to update the UI
+      await fetchData();
     } catch (error) {
       console.error('Error archiving report:', error);
       toast({
         title: "Error",
-        description: "Failed to archive report",
+        description: "Failed to archive report. Please try again.",
         variant: "destructive",
       });
     }
@@ -175,7 +189,8 @@ const Dashboard = () => {
         setSelectedReport(null);
       }
 
-      fetchData(); // Refresh the data
+      // Refresh the data to update the UI
+      await fetchData();
     } catch (error) {
       console.error('Error deleting report:', error);
       toast({
