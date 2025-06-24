@@ -53,9 +53,6 @@ const Dashboard = () => {
     if (!user) return;
     
     try {
-      console.log('=== STARTING FETCHDATA ===');
-      console.log('Fetching dashboard data for user:', user.email);
-      
       // Get user's profile and organization
       const { data: profile } = await supabase
         .from('profiles')
@@ -64,12 +61,9 @@ const Dashboard = () => {
         .single();
 
       if (!profile?.organization_id) {
-        console.log('No organization found for user');
         setLoading(false);
         return;
       }
-
-      console.log('User organization_id:', profile.organization_id);
 
       // Fetch reports with encrypted content, exclude archived reports
       const { data: reportsData, error: reportsError } = await supabase
@@ -82,10 +76,6 @@ const Dashboard = () => {
 
       if (reportsError) {
         console.error('Error fetching reports:', reportsError);
-      } else {
-        console.log('Raw query result:', reportsData);
-        console.log('Fetched reports count:', reportsData?.length || 0);
-        console.log('Report IDs from database:', reportsData?.map(r => `${r.id} (${r.title})`) || []);
       }
 
       // Fetch the single organization link (simplified to one link per org)
@@ -96,11 +86,8 @@ const Dashboard = () => {
         .eq('is_active', true)
         .limit(1);
 
-      console.log('Fetched links:', linksData?.length || 0);
-
       setReports(reportsData || []);
       setLinks(linksData || []);
-      console.log('=== FETCHDATA COMPLETE ===');
     } catch (error) {
       console.error('Error fetching dashboard data:', error);
     } finally {
@@ -115,19 +102,12 @@ const Dashboard = () => {
 
   const handleArchiveReport = async (reportId: string) => {
     try {
-      console.log('Archiving report:', reportId);
-      
       const { error } = await supabase
         .from('reports')
         .update({ status: 'closed' })
         .eq('id', reportId);
 
-      if (error) {
-        console.error('Error archiving report:', error);
-        throw error;
-      }
-
-      console.log('Report archived successfully');
+      if (error) throw error;
 
       toast({
         title: "Report archived",
@@ -159,15 +139,8 @@ const Dashboard = () => {
 
   const handleDeleteReport = async (reportId: string) => {
     try {
-      console.log('=== STARTING DELETE OPERATION ===');
-      console.log('Attempting to delete report:', reportId);
-      
       // Remove from local state first to give immediate feedback
-      setReports(prevReports => {
-        const filtered = prevReports.filter(report => report.id !== reportId);
-        console.log('Local state updated, new count:', filtered.length);
-        return filtered;
-      });
+      setReports(prevReports => prevReports.filter(report => report.id !== reportId));
 
       // Close dialog if this report was being viewed
       if (selectedReport?.id === reportId) {
@@ -175,58 +148,27 @@ const Dashboard = () => {
         setSelectedReport(null);
       }
 
-      // Check if report exists before deletion
-      console.log('Checking if report exists before deletion...');
-      const { data: existingReport, error: checkError } = await supabase
-        .from('reports')
-        .select('id, title')
-        .eq('id', reportId)
-        .single();
-
-      if (checkError) {
-        console.error('Error checking report existence:', checkError);
-        if (checkError.code === 'PGRST116') {
-          console.log('Report does not exist - may have been already deleted');
-          toast({
-            title: "Report not found",
-            description: "The report may have been already deleted",
-          });
-          return;
-        }
-      } else {
-        console.log('Report exists before deletion:', existingReport);
-      }
-
-      // First delete any related messages
-      console.log('Deleting related messages...');
-      const { error: messagesError, data: deletedMessages } = await supabase
+      // Delete related messages
+      const { error: messagesError } = await supabase
         .from('report_messages')
         .delete()
-        .eq('report_id', reportId)
-        .select();
+        .eq('report_id', reportId);
 
       if (messagesError) {
         console.error('Error deleting messages:', messagesError);
-      } else {
-        console.log('Messages deleted successfully, count:', deletedMessages?.length || 0);
       }
 
-      // Delete any notifications related to this report
-      console.log('Deleting related notifications...');
-      const { error: notificationsError, data: deletedNotifications } = await supabase
+      // Delete related notifications
+      const { error: notificationsError } = await supabase
         .from('notifications')
         .delete()
-        .eq('report_id', reportId)
-        .select();
+        .eq('report_id', reportId);
 
       if (notificationsError) {
         console.error('Error deleting notifications:', notificationsError);
-      } else {
-        console.log('Notifications deleted successfully, count:', deletedNotifications?.length || 0);
       }
 
-      // Then delete the report itself
-      console.log('Deleting the main report...');
+      // Delete the report itself
       const { error: reportError, data: deletedData } = await supabase
         .from('reports')
         .delete()
@@ -235,62 +177,31 @@ const Dashboard = () => {
 
       if (reportError) {
         console.error('Error deleting report:', reportError);
-        console.error('Delete error details:', {
-          code: reportError.code,
-          message: reportError.message,
-          details: reportError.details,
-          hint: reportError.hint
-        });
         throw reportError;
       }
 
-      console.log('Report delete operation result:', deletedData);
-      console.log('Number of reports deleted:', deletedData?.length || 0);
-      console.log('Deleted data details:', deletedData);
-
       if (!deletedData || deletedData.length === 0) {
-        console.warn('No reports were deleted - this might indicate RLS prevented deletion');
-        
-        // Check if report still exists after deletion attempt
-        const { data: stillExists, error: checkStillExistsError } = await supabase
-          .from('reports')
-          .select('id, title')
-          .eq('id', reportId)
-          .maybeSingle(); // Use maybeSingle to avoid errors if not found
-
-        if (checkStillExistsError) {
-          console.error('Error checking if report still exists:', checkStillExistsError);
-        }
-        
-        if (stillExists) {
-          console.error('CRITICAL: Report still exists after deletion attempt!', stillExists);
-          toast({
-            title: "Delete failed",
-            description: "Report could not be deleted. This might be a permissions issue.",
-            variant: "destructive",
-          });
-          // Restore to local state since deletion failed
-          setTimeout(() => {
-            fetchData();
-          }, 500);
-          return;
-        } else {
-          console.log('Report confirmed deleted from database');
-        }
+        toast({
+          title: "Delete failed",
+          description: "Report could not be deleted. Please try again.",
+          variant: "destructive",
+        });
+        // Restore to local state since deletion failed
+        setTimeout(() => {
+          fetchData();
+        }, 500);
+        return;
       }
-
-      console.log('Report deleted successfully from database');
 
       toast({
         title: "Report deleted",
         description: "The report has been permanently deleted",
       });
 
-      // Wait longer before refreshing to ensure the delete is fully processed
+      // Refresh data after successful deletion
       setTimeout(() => {
-        console.log('Triggering fetchData after delete...');
         fetchData();
-      }, 2000); // Increased to 2 seconds
+      }, 1000);
       
     } catch (error) {
       console.error('Error deleting report:', error);
@@ -303,7 +214,6 @@ const Dashboard = () => {
       });
       
       setTimeout(() => {
-        console.log('Restoring data due to delete error...');
         fetchData();
       }, 500);
     }
