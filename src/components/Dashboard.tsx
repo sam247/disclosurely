@@ -53,6 +53,7 @@ const Dashboard = () => {
     if (!user) return;
     
     try {
+      console.log('=== STARTING FETCHDATA ===');
       console.log('Fetching dashboard data for user:', user.email);
       
       // Get user's profile and organization
@@ -68,6 +69,8 @@ const Dashboard = () => {
         return;
       }
 
+      console.log('User organization_id:', profile.organization_id);
+
       // Fetch reports with encrypted content, exclude archived reports
       const { data: reportsData, error: reportsError } = await supabase
         .from('reports')
@@ -79,6 +82,10 @@ const Dashboard = () => {
 
       if (reportsError) {
         console.error('Error fetching reports:', reportsError);
+      } else {
+        console.log('Raw query result:', reportsData);
+        console.log('Fetched reports count:', reportsData?.length || 0);
+        console.log('Report IDs from database:', reportsData?.map(r => `${r.id} (${r.title})`) || []);
       }
 
       // Fetch the single organization link (simplified to one link per org)
@@ -89,12 +96,11 @@ const Dashboard = () => {
         .eq('is_active', true)
         .limit(1);
 
-      console.log('Fetched reports:', reportsData?.length || 0);
-      console.log('Report IDs:', reportsData?.map(r => r.id) || []);
       console.log('Fetched links:', linksData?.length || 0);
 
       setReports(reportsData || []);
       setLinks(linksData || []);
+      console.log('=== FETCHDATA COMPLETE ===');
     } catch (error) {
       console.error('Error fetching dashboard data:', error);
     } finally {
@@ -153,6 +159,7 @@ const Dashboard = () => {
 
   const handleDeleteReport = async (reportId: string) => {
     try {
+      console.log('=== STARTING DELETE OPERATION ===');
       console.log('Attempting to delete report:', reportId);
       
       // Remove from local state first to give immediate feedback
@@ -169,6 +176,7 @@ const Dashboard = () => {
       }
 
       // First delete any related messages
+      console.log('Deleting related messages...');
       const { error: messagesError } = await supabase
         .from('report_messages')
         .delete()
@@ -176,9 +184,12 @@ const Dashboard = () => {
 
       if (messagesError) {
         console.error('Error deleting messages:', messagesError);
+      } else {
+        console.log('Messages deleted successfully');
       }
 
       // Delete any notifications related to this report
+      console.log('Deleting related notifications...');
       const { error: notificationsError } = await supabase
         .from('notifications')
         .delete()
@@ -186,45 +197,57 @@ const Dashboard = () => {
 
       if (notificationsError) {
         console.error('Error deleting notifications:', notificationsError);
+      } else {
+        console.log('Notifications deleted successfully');
       }
 
-      // Then delete the report
-      const { error: reportError } = await supabase
+      // Then delete the report itself
+      console.log('Deleting the main report...');
+      const { error: reportError, data: deletedData } = await supabase
         .from('reports')
         .delete()
-        .eq('id', reportId);
+        .eq('id', reportId)
+        .select(); // Add select to see what was deleted
 
       if (reportError) {
         console.error('Error deleting report:', reportError);
         throw reportError;
       }
 
-      console.log('Report deleted successfully');
+      console.log('Report delete operation result:', deletedData);
+      console.log('Number of reports deleted:', deletedData?.length || 0);
+
+      if (!deletedData || deletedData.length === 0) {
+        console.warn('No reports were deleted - this might indicate the report was not found');
+      }
+
+      console.log('Report deleted successfully from database');
 
       toast({
         title: "Report deleted",
         description: "The report has been permanently deleted",
       });
 
-      // Wait a bit longer before refreshing to ensure the delete is fully processed
+      // Wait longer before refreshing to ensure the delete is fully processed
       setTimeout(() => {
-        console.log('Refreshing data after delete...');
+        console.log('Triggering fetchData after delete...');
         fetchData();
-      }, 1500);
+      }, 2000); // Increased to 2 seconds
       
     } catch (error) {
       console.error('Error deleting report:', error);
       
       // If deletion failed, restore the report to the local state
-      setTimeout(() => {
-        fetchData();
-      }, 500);
-      
       toast({
         title: "Error",
         description: "Failed to delete report. Please try again.",
         variant: "destructive",
       });
+      
+      setTimeout(() => {
+        console.log('Restoring data due to delete error...');
+        fetchData();
+      }, 500);
     }
   };
 
