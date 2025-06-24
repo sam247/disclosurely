@@ -199,64 +199,74 @@ const Dashboard = () => {
 
       // First delete any related messages
       console.log('Deleting related messages...');
-      const { error: messagesError, count: messagesDeleted } = await supabase
+      const { error: messagesError, data: deletedMessages } = await supabase
         .from('report_messages')
         .delete()
         .eq('report_id', reportId)
-        .select('*', { count: 'exact' });
+        .select();
 
       if (messagesError) {
         console.error('Error deleting messages:', messagesError);
       } else {
-        console.log('Messages deleted successfully, count:', messagesDeleted);
+        console.log('Messages deleted successfully, count:', deletedMessages?.length || 0);
       }
 
       // Delete any notifications related to this report
       console.log('Deleting related notifications...');
-      const { error: notificationsError, count: notificationsDeleted } = await supabase
+      const { error: notificationsError, data: deletedNotifications } = await supabase
         .from('notifications')
         .delete()
         .eq('report_id', reportId)
-        .select('*', { count: 'exact' });
+        .select();
 
       if (notificationsError) {
         console.error('Error deleting notifications:', notificationsError);
       } else {
-        console.log('Notifications deleted successfully, count:', notificationsDeleted);
+        console.log('Notifications deleted successfully, count:', deletedNotifications?.length || 0);
       }
 
       // Then delete the report itself
       console.log('Deleting the main report...');
-      const { error: reportError, data: deletedData, count: deletedCount } = await supabase
+      const { error: reportError, data: deletedData } = await supabase
         .from('reports')
         .delete()
         .eq('id', reportId)
-        .select('*', { count: 'exact' }); // Add select to see what was deleted
+        .select();
 
       if (reportError) {
         console.error('Error deleting report:', reportError);
+        console.error('Delete error details:', {
+          code: reportError.code,
+          message: reportError.message,
+          details: reportError.details,
+          hint: reportError.hint
+        });
         throw reportError;
       }
 
       console.log('Report delete operation result:', deletedData);
-      console.log('Number of reports deleted:', deletedCount);
+      console.log('Number of reports deleted:', deletedData?.length || 0);
       console.log('Deleted data details:', deletedData);
 
       if (!deletedData || deletedData.length === 0) {
-        console.warn('No reports were deleted - this might indicate the report was not found or RLS prevented deletion');
+        console.warn('No reports were deleted - this might indicate RLS prevented deletion');
         
         // Check if report still exists after deletion attempt
-        const { data: stillExists } = await supabase
+        const { data: stillExists, error: checkStillExistsError } = await supabase
           .from('reports')
           .select('id, title')
           .eq('id', reportId)
-          .single();
+          .maybeSingle(); // Use maybeSingle to avoid errors if not found
+
+        if (checkStillExistsError) {
+          console.error('Error checking if report still exists:', checkStillExistsError);
+        }
         
         if (stillExists) {
           console.error('CRITICAL: Report still exists after deletion attempt!', stillExists);
           toast({
             title: "Delete failed",
-            description: "Report could not be deleted. Please check permissions.",
+            description: "Report could not be deleted. This might be a permissions issue.",
             variant: "destructive",
           });
           // Restore to local state since deletion failed
@@ -264,6 +274,8 @@ const Dashboard = () => {
             fetchData();
           }, 500);
           return;
+        } else {
+          console.log('Report confirmed deleted from database');
         }
       }
 
