@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -27,14 +26,25 @@ const ReportContentDisplay = ({
 }: ReportContentDisplayProps) => {
   const [showContent, setShowContent] = useState(false);
 
-  // Parse and display the actual report content
+  // Parse and display the actual submitted form data
   const displayContent = () => {
     console.log('Raw content from database:', encryptedContent);
     
-    // Try to parse the content as JSON first
     try {
+      // Parse the JSON content
       const parsed = JSON.parse(encryptedContent);
       console.log('Successfully parsed report content:', parsed);
+      
+      // If the parsed content has a 'content' field that looks encrypted, 
+      // we need to show a message that it's encrypted
+      if (parsed.content && typeof parsed.content === 'string' && parsed.content.includes('U2FsdGVk')) {
+        return {
+          message: "This content is encrypted and cannot be displayed without the proper decryption key.",
+          note: "In a production environment, authorized users would have access to decrypt this content."
+        };
+      }
+      
+      // Otherwise return the parsed content
       return parsed;
     } catch (error) {
       console.log('Content is not valid JSON, displaying as text');
