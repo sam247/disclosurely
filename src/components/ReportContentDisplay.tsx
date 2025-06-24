@@ -27,15 +27,19 @@ const ReportContentDisplay = ({
 }: ReportContentDisplayProps) => {
   const [showContent, setShowContent] = useState(false);
 
-  // For organization dashboard users, parse and display the actual content
+  // For organization dashboard users, display the stored content
+  // The content is stored as encrypted but we show what's available
   const displayContent = () => {
+    // The encryptedContent from the database might be a JSON string or plain text
+    // Let's try to parse it and display the actual report data
     try {
-      // Try to parse as JSON first to see if it's structured data
       const parsed = JSON.parse(encryptedContent);
+      console.log('Parsed report content:', parsed);
       return parsed;
-    } catch {
+    } catch (error) {
+      console.log('Content is not JSON, treating as plain text:', encryptedContent);
       // If it's not JSON, treat as plain text
-      return { description: encryptedContent };
+      return { content: encryptedContent };
     }
   };
 
@@ -123,6 +127,7 @@ const ReportContentDisplay = ({
             <div className="bg-gray-50 p-4 rounded-lg">
               {(() => {
                 const content = displayContent();
+                console.log('Displaying content:', content);
                 return (
                   <div className="space-y-2 text-sm">
                     {typeof content === 'object' && content !== null ? (
@@ -131,7 +136,9 @@ const ReportContentDisplay = ({
                           <Label className="capitalize text-gray-600">
                             {key.replace(/([A-Z])/g, ' $1').trim().replace(/_/g, ' ')}:
                           </Label>
-                          <p className="mt-1 whitespace-pre-wrap">{typeof value === 'string' ? value : JSON.stringify(value, null, 2)}</p>
+                          <p className="mt-1 whitespace-pre-wrap">
+                            {typeof value === 'string' ? value : JSON.stringify(value, null, 2)}
+                          </p>
                         </div>
                       ))
                     ) : (

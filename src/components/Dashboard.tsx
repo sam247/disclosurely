@@ -139,18 +139,27 @@ const Dashboard = () => {
 
       if (messagesError) {
         console.error('Error deleting messages:', messagesError);
-        throw messagesError;
+      }
+
+      // Delete any notifications related to this report
+      const { error: notificationsError } = await supabase
+        .from('notifications')
+        .delete()
+        .eq('report_id', reportId);
+
+      if (notificationsError) {
+        console.error('Error deleting notifications:', notificationsError);
       }
 
       // Then delete the report
-      const { error } = await supabase
+      const { error: reportError } = await supabase
         .from('reports')
         .delete()
         .eq('id', reportId);
 
-      if (error) {
-        console.error('Error deleting report:', error);
-        throw error;
+      if (reportError) {
+        console.error('Error deleting report:', reportError);
+        throw reportError;
       }
 
       console.log('Report deleted successfully');
@@ -412,22 +421,26 @@ const Dashboard = () => {
                         )}
                         <AlertDialog>
                           <AlertDialogTrigger asChild>
-                            <Button size="sm" variant="outline">
+                            <Button size="sm" variant="destructive">
                               <Trash2 className="h-4 w-4 mr-1" />
                               Delete
                             </Button>
                           </AlertDialogTrigger>
                           <AlertDialogContent>
                             <AlertDialogHeader>
-                              <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+                              <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
                               <AlertDialogDescription>
-                                This action will permanently delete the report. This action cannot be undone.
+                                This action cannot be undone. This will permanently delete the report 
+                                and all associated messages.
                               </AlertDialogDescription>
                             </AlertDialogHeader>
                             <AlertDialogFooter>
                               <AlertDialogCancel>Cancel</AlertDialogCancel>
-                              <AlertDialogAction onClick={() => handleDeleteReport(report.id)}>
-                                Delete
+                              <AlertDialogAction 
+                                onClick={() => handleDeleteReport(report.id)}
+                                className="bg-red-600 hover:bg-red-700"
+                              >
+                                Delete Report
                               </AlertDialogAction>
                             </AlertDialogFooter>
                           </AlertDialogContent>
