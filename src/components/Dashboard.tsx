@@ -8,7 +8,6 @@ import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
 import { LogOut, Plus, ExternalLink, FileText, Eye, Archive, Trash2 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
-import { DecryptedReport } from '@/types/database';
 import ReportMessaging from '@/components/ReportMessaging';
 import ReportContentDisplay from '@/components/ReportContentDisplay';
 
@@ -140,6 +139,7 @@ const Dashboard = () => {
 
       if (messagesError) {
         console.error('Error deleting messages:', messagesError);
+        throw messagesError;
       }
 
       // Then delete the report
@@ -152,6 +152,8 @@ const Dashboard = () => {
         console.error('Error deleting report:', error);
         throw error;
       }
+
+      console.log('Report deleted successfully');
 
       toast({
         title: "Report deleted",
@@ -169,7 +171,7 @@ const Dashboard = () => {
       console.error('Error deleting report:', error);
       toast({
         title: "Error",
-        description: "Failed to delete report",
+        description: "Failed to delete report. Please try again.",
         variant: "destructive",
       });
     }

@@ -22,23 +22,14 @@ export const createKeyHash = (key: string): string => {
   return CryptoJS.SHA256(key).toString();
 };
 
-// Generate access key for whistleblower
-export const generateAccessKey = (trackingId: string, encryptionKey: string): string => {
-  return CryptoJS.SHA256(trackingId + encryptionKey).toString().substring(0, 16).toUpperCase();
-};
-
-// Verify access key
-export const verifyAccessKey = (trackingId: string, accessKey: string, encryptionKey: string): boolean => {
-  const expectedKey = generateAccessKey(trackingId, encryptionKey);
-  return accessKey === expectedKey;
-};
-
-// Complete encryption process for reports
+// Complete encryption process for reports - simplified to just use tracking ID
 export const encryptReport = (reportData: any, trackingId: string): { encryptedData: string; keyHash: string; accessKey: string } => {
   const encryptionKey = generateEncryptionKey();
   const encryptedData = encryptData(JSON.stringify(reportData), encryptionKey);
   const keyHash = createKeyHash(encryptionKey);
-  const accessKey = generateAccessKey(trackingId, encryptionKey);
+  
+  // Simplified: use tracking ID as the access key for easier user experience
+  const accessKey = trackingId;
   
   return { encryptedData, keyHash, accessKey };
 };

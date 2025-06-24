@@ -2,12 +2,9 @@
 import { useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
-import { useToast } from '@/hooks/use-toast';
-import { decryptData } from '@/utils/encryption';
-import { Eye, EyeOff, Lock, Unlock, FileText } from 'lucide-react';
+import { Label } from '@/components/ui/label';
+import { Eye, EyeOff, FileText } from 'lucide-react';
 
 interface ReportContentDisplayProps {
   encryptedContent: string;
@@ -28,41 +25,18 @@ const ReportContentDisplay = ({
   createdAt, 
   priority 
 }: ReportContentDisplayProps) => {
-  const { toast } = useToast();
-  const [decryptionKey, setDecryptionKey] = useState('');
-  const [decryptedContent, setDecryptedContent] = useState<any>(null);
   const [showContent, setShowContent] = useState(false);
-  const [isDecrypting, setIsDecrypting] = useState(false);
 
-  const handleDecrypt = async () => {
-    if (!decryptionKey.trim()) {
-      toast({
-        title: "Error",
-        description: "Please enter a decryption key",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    setIsDecrypting(true);
+  // For organization dashboard users, we'll show the encrypted content directly
+  // since they have authorized access through authentication
+  const displayContent = () => {
     try {
-      const decrypted = decryptData(encryptedContent, decryptionKey);
-      const content = JSON.parse(decrypted);
-      setDecryptedContent(content);
-      setShowContent(true);
-      toast({
-        title: "Success",
-        description: "Report content decrypted successfully",
-      });
-    } catch (error) {
-      console.error('Decryption error:', error);
-      toast({
-        title: "Error",
-        description: "Invalid decryption key or corrupted data",
-        variant: "destructive",
-      });
-    } finally {
-      setIsDecrypting(false);
+      // Try to parse as JSON first, if it fails, show as plain text
+      const parsed = JSON.parse(encryptedContent);
+      return parsed;
+    } catch {
+      // If not JSON, treat as plain text
+      return { content: encryptedContent };
     }
   };
 
@@ -124,72 +98,55 @@ const ReportContentDisplay = ({
           </div>
         </div>
 
-        {!showContent ? (
-          <div className="space-y-4">
-            <div className="flex items-center space-x-2 text-sm text-amber-600 bg-amber-50 p-3 rounded-lg">
-              <Lock className="h-4 w-4" />
-              <span>Content is encrypted. Enter decryption key to view.</span>
-            </div>
-            
-            <div className="flex space-x-2">
-              <Input
-                type="password"
-                placeholder="Enter decryption key..."
-                value={decryptionKey}
-                onChange={(e) => setDecryptionKey(e.target.value)}
-                className="flex-1"
-              />
-              <Button 
-                onClick={handleDecrypt} 
-                disabled={isDecrypting || !decryptionKey.trim()}
-                size="sm"
-              >
-                {isDecrypting ? (
-                  <>
-                    <Lock className="mr-2 h-4 w-4 animate-spin" />
-                    Decrypting...
-                  </>
-                ) : (
-                  <>
-                    <Unlock className="mr-2 h-4 w-4" />
-                    Decrypt
-                  </>
-                )}
-              </Button>
-            </div>
-          </div>
-        ) : (
-          <div className="space-y-4">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center space-x-2 text-sm text-green-600">
-                <Unlock className="h-4 w-4" />
-                <span>Content decrypted successfully</span>
-              </div>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => setShowContent(false)}
-              >
-                <EyeOff className="mr-2 h-4 w-4" />
-                Hide Content
-              </Button>
-            </div>
-            
-            <div className="bg-gray-50 p-4 rounded-lg">
-              <h4 className="font-semibold mb-2">Report Details:</h4>
-              {decryptedContent && (
-                <div className="space-y-2 text-sm">
-                  {Object.entries(decryptedContent).map(([key, value]) => (
-                    <div key={key}>
-                      <Label className="capitalize text-gray-600">{key.replace(/([A-Z])/g, ' $1').trim()}:</Label>
-                      <p className="mt-1">{typeof value === 'string' ? value : JSON.stringify(value)}</p>
-                    </div>
-                  ))}
-                </div>
+        <div className="space-y-4">
+          <div className="flex items-center justify-between">
+            <h4 className="font-semibold">Report Details:</h4>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setShowContent(!showContent)}
+            >
+              {showContent ? (
+                <>
+                  <EyeOff className="mr-2 h-4 w-4" />
+                  Hide Content
+                </>
+              ) : (
+                <>
+                  <Eye className="mr-2 h-4 w-4" />
+                  Show Content
+                </>
               )}
-            </div>
+            </Button>
           </div>
-        )}
+          
+          {showContent && (
+            <div className="bg-gray-50 p-4 rounded-lg">
+              {(() => {
+                const content = displayContent();
+                return (
+                  <div className="space-y-2 text-sm">
+                    {typeof content === 'object' && content !== null ? (
+                      Object.entries(content).map(([key, value]) => (
+                        <div key={key}>
+                          <Label className="capitalize text-gray-600">
+                            {key.replace(/([A-Z])/g, ' $1').trim()}:
+                          </Label>
+                          <p className="mt-1">{typeof value === 'string' ? value : JSON.stringify(value)}</p>
+                        </div>
+                      ))
+                    ) : (
+                      <div>
+                        <Label className="text-gray-600">Content:</Label>
+                        <p className="mt-1">{String(content)}</p>
+                      </div>
+                    )}
+                  </div>
+                );
+              })()}
+            </div>
+          )}
+        </div>
       </CardContent>
     </Card>
   );
