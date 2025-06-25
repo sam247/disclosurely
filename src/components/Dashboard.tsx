@@ -53,6 +53,32 @@ const Dashboard = () => {
     }
   }, [user]);
 
+  const createAuditLog = async (reportId: string, organizationId: string, action: string, details: any) => {
+    try {
+      console.log('Creating audit log:', { reportId, organizationId, action, details });
+      
+      const { error } = await supabase
+        .from('audit_logs')
+        .insert({
+          organization_id: organizationId,
+          user_id: user?.id,
+          report_id: reportId,
+          action: action,
+          details: details,
+          ip_address: null,
+          user_agent: navigator.userAgent
+        });
+
+      if (error) {
+        console.error('Error creating audit log:', error);
+      } else {
+        console.log('Audit log created successfully');
+      }
+    } catch (error) {
+      console.error('Error in createAuditLog:', error);
+    }
+  };
+
   const fetchData = async () => {
     if (!user) return;
     
@@ -65,9 +91,12 @@ const Dashboard = () => {
         .single();
 
       if (!profile?.organization_id) {
+        console.log('No organization found for user');
         setLoading(false);
         return;
       }
+
+      console.log('Fetching data for organization:', profile.organization_id);
 
       // Fetch reports with encrypted content, exclude archived reports
       const { data: reportsData, error: reportsError } = await supabase
@@ -80,6 +109,8 @@ const Dashboard = () => {
 
       if (reportsError) {
         console.error('Error fetching reports:', reportsError);
+      } else {
+        console.log('Fetched reports:', reportsData?.length || 0);
       }
 
       // Fetch the single organization link (simplified to one link per org)
@@ -100,18 +131,65 @@ const Dashboard = () => {
   };
 
   const handleViewReport = async (report: Report) => {
+    console.log('Viewing report:', report.id);
+    
+    // Get user's organization for audit log
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('organization_id')
+      .eq('id', user?.id)
+      .single();
+
+    if (profile?.organization_id) {
+      // Create audit log for viewing report
+      await createAuditLog(
+        report.id,
+        profile.organization_id,
+        'viewed',
+        {
+          report_title: report.title,
+          tracking_id: report.tracking_id,
+          viewed_by: user?.email
+        }
+      );
+    }
+
     setSelectedReport(report);
     setIsReportDialogOpen(true);
   };
 
   const handleArchiveReport = async (reportId: string) => {
     try {
+      // Get user's organization for audit log
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('organization_id')
+        .eq('id', user?.id)
+        .single();
+
       const { error } = await supabase
         .from('reports')
         .update({ status: 'closed' })
         .eq('id', reportId);
 
       if (error) throw error;
+
+      // Create audit log for status change
+      if (profile?.organization_id) {
+        const reportToArchive = reports.find(r => r.id === reportId);
+        await createAuditLog(
+          reportId,
+          profile.organization_id,
+          'status_changed',
+          {
+            report_title: reportToArchive?.title,
+            tracking_id: reportToArchive?.tracking_id,
+            old_status: reportToArchive?.status,
+            new_status: 'closed',
+            changed_by: user?.email
+          }
+        );
+      }
 
       toast({
         title: "Report archived",
@@ -464,7 +542,7 @@ const Dashboard = () => {
               <Card>
                 <CardHeader>
                   <CardTitle>Reports</CardTitle>
-                  <CardDescription>All report submissions</CardDescription>
+                  <CardDescription>All report submissions ({reports.length} total)</CardDescription>
                 </CardHeader>
                 <CardContent>
                   {reports.length === 0 ? (

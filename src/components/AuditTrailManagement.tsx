@@ -65,9 +65,12 @@ const AuditTrailManagement = () => {
         .single();
 
       if (!profile?.organization_id) {
+        console.log('No organization found for user');
         setLoading(false);
         return;
       }
+
+      console.log('Fetching audit logs for organization:', profile.organization_id);
 
       // Calculate date filter
       const dateFilter = new Date();
@@ -99,7 +102,12 @@ const AuditTrailManagement = () => {
 
       const { data, error } = await query.limit(500);
 
-      if (error) throw error;
+      if (error) {
+        console.error('Error fetching audit logs:', error);
+        throw error;
+      }
+
+      console.log('Fetched audit logs:', data?.length || 0, 'records');
 
       // Apply search filter locally
       let filteredData = data || [];
@@ -230,7 +238,7 @@ const AuditTrailManagement = () => {
             Audit Trail & Activity Reports
           </CardTitle>
           <CardDescription>
-            Complete audit trail of all activities within your organization
+            Complete audit trail of all activities within your organization ({auditLogs.length} total records)
           </CardDescription>
         </CardHeader>
         <CardContent>

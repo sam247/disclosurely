@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -100,6 +99,32 @@ const DynamicSubmissionForm = () => {
     return 'WB-' + Math.random().toString(36).substr(2, 8).toUpperCase();
   };
 
+  const createAuditLog = async (reportId: string, organizationId: string, action: string, details: any) => {
+    try {
+      console.log('Creating audit log:', { reportId, organizationId, action, details });
+      
+      const { error } = await supabase
+        .from('audit_logs')
+        .insert({
+          organization_id: organizationId,
+          user_id: null, // Anonymous submission
+          report_id: reportId,
+          action: action,
+          details: details,
+          ip_address: null, // Could be added later if needed
+          user_agent: navigator.userAgent
+        });
+
+      if (error) {
+        console.error('Error creating audit log:', error);
+      } else {
+        console.log('Audit log created successfully');
+      }
+    } catch (error) {
+      console.error('Error in createAuditLog:', error);
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!linkData) return;
@@ -157,6 +182,19 @@ const DynamicSubmissionForm = () => {
       }
 
       console.log('Report created successfully:', report);
+
+      // Create audit log for report creation
+      await createAuditLog(
+        report.id,
+        linkData.organization_id,
+        'created',
+        {
+          report_title: formData.title,
+          report_type: isAnonymous ? 'anonymous' : 'confidential',
+          submission_method: 'web_form',
+          tracking_id: trackingId
+        }
+      );
 
       // Update link usage count
       const { data: currentLink } = await supabase
