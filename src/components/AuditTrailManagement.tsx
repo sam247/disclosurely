@@ -301,7 +301,7 @@ const AuditTrailManagement = () => {
               <TableBody>
                 {currentLogs.length === 0 ? (
                   <TableRow>
-                    <TableCell colSpan={6} name="text-center py-8">
+                    <TableCell colSpan={6} className="text-center py-8">
                       No audit logs found for the selected criteria
                     </TableCell>
                   </TableRow>
