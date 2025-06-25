@@ -172,7 +172,7 @@ const AuditTrailManagement = () => {
     }
     
     try {
-      const detailsString = typeof details === 'string' ? details : JSON.stringify(details, null, 2);
+      const detailsString: string = typeof details === 'string' ? details : JSON.stringify(details, null, 2);
       return (
         <div className="text-xs bg-gray-50 p-2 rounded font-mono">
           {detailsString}
