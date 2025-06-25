@@ -173,7 +173,7 @@ const AuditTrailManagement = () => {
   };
 
   // Helper function to safely render details with proper React typing
-  const renderDetails = (details: unknown): React.ReactElement => {
+  const renderDetails = (details: unknown): JSX.Element => {
     if (!details || (typeof details === 'object' && details !== null && Object.keys(details as object).length === 0)) {
       return <span className="text-gray-400">-</span>;
     }
@@ -185,7 +185,7 @@ const AuditTrailManagement = () => {
           {detailsString}
         </div>
       );
-    } catch {
+    } catch (error) {
       return <span className="text-gray-400">Invalid data</span>;
     }
   };
