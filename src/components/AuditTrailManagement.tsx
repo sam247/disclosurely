@@ -178,7 +178,7 @@ const AuditTrailManagement = () => {
           {detailsString}
         </div>
       );
-    } catch {
+    } catch (error) {
       return <span className="text-gray-400">Invalid data</span>;
     }
   };
