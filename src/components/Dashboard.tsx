@@ -1,15 +1,18 @@
+
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
-import { LogOut, Plus, ExternalLink, FileText, Eye, Archive, Trash2 } from 'lucide-react';
+import { LogOut, Plus, ExternalLink, FileText, Eye, Archive, Trash2, CreditCard, Settings } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import ReportMessaging from '@/components/ReportMessaging';
 import ReportContentDisplay from '@/components/ReportContentDisplay';
+import SubscriptionManagement from '@/components/SubscriptionManagement';
 
 interface Report {
   id: string;
@@ -34,7 +37,7 @@ interface SubmissionLink {
 }
 
 const Dashboard = () => {
-  const { user, signOut } = useAuth();
+  const { user, signOut, subscriptionData } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
   const [reports, setReports] = useState<Report[]>([]);
@@ -319,7 +322,14 @@ const Dashboard = () => {
           <div className="flex justify-between items-center py-6">
             <div>
               <h1 className="text-2xl font-bold text-gray-900">Dashboard</h1>
-              <p className="text-sm text-gray-600">Welcome back, {user?.email}</p>
+              <div className="flex items-center gap-4">
+                <p className="text-sm text-gray-600">Welcome back, {user?.email}</p>
+                {subscriptionData.subscribed && (
+                  <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                    {subscriptionData.subscription_tier}
+                  </span>
+                )}
+              </div>
             </div>
             <Button onClick={handleLogout} variant="outline">
               <LogOut className="h-4 w-4 mr-2" />
@@ -331,160 +341,213 @@ const Dashboard = () => {
 
       {/* Main Content */}
       <main className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
-        <div className="px-4 py-6 sm:px-0 space-y-6">
-          
-          {/* Quick Stats */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <Card>
-              <CardContent className="p-6">
-                <div className="flex items-center">
-                  <FileText className="h-8 w-8 text-blue-600" />
-                  <div className="ml-4">
-                    <p className="text-sm font-medium text-gray-600">Total Reports</p>
-                    <p className="text-2xl font-bold text-gray-900">{reports.length}</p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-            
-            <Card>
-              <CardContent className="p-6">
-                <div className="flex items-center">
-                  <ExternalLink className="h-8 w-8 text-green-600" />
-                  <div className="ml-4">
-                    <p className="text-sm font-medium text-gray-600">Submission Link</p>
-                    <p className="text-2xl font-bold text-gray-900">{links.length > 0 ? 'Active' : 'None'}</p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-            
-            <Card>
-              <CardContent className="p-6">
-                <div className="flex items-center">
-                  <Plus className="h-8 w-8 text-purple-600" />
-                  <div className="ml-4">
-                    <Button onClick={createOrGetSubmissionLink} className="w-full" disabled={links.length > 0}>
-                      {links.length > 0 ? 'Link Created' : 'Create Submission Link'}
-                    </Button>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
+        <div className="px-4 py-6 sm:px-0">
+          <Tabs defaultValue="reports" className="space-y-6">
+            <TabsList>
+              <TabsTrigger value="reports">Reports</TabsTrigger>
+              <TabsTrigger value="subscription">Subscription</TabsTrigger>
+            </TabsList>
 
-          {/* Submission Link */}
-          {links.length > 0 && (
-            <Card>
-              <CardHeader>
-                <CardTitle>Submission Link</CardTitle>
-                <CardDescription>Your organization's secure report submission link</CardDescription>
-              </CardHeader>
-              <CardContent>
-                {links.map((link) => (
-                  <div key={link.id} className="flex items-center justify-between p-4 border rounded-lg">
-                    <div>
-                      <h3 className="font-medium">{link.name}</h3>
-                      <p className="text-sm text-gray-600">Used {link.usage_count} times</p>
+            <TabsContent value="reports" className="space-y-6">
+              {/* Quick Stats */}
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <Card>
+                  <CardContent className="p-6">
+                    <div className="flex items-center">
+                      <FileText className="h-8 w-8 text-blue-600" />
+                      <div className="ml-4">
+                        <p className="text-sm font-medium text-gray-600">Total Reports</p>
+                        <p className="text-2xl font-bold text-gray-900">{reports.length}</p>
+                      </div>
                     </div>
-                    <div className="flex items-center space-x-2">
-                      <code className="text-xs bg-gray-100 px-2 py-1 rounded">
-                        /secure/tool/submit/{link.link_token}
-                      </code>
-                      <Button size="sm" onClick={() => copyLink(link.link_token)}>
-                        Copy Link
-                      </Button>
+                  </CardContent>
+                </Card>
+                
+                <Card>
+                  <CardContent className="p-6">
+                    <div className="flex items-center">
+                      <ExternalLink className="h-8 w-8 text-green-600" />
+                      <div className="ml-4">
+                        <p className="text-sm font-medium text-gray-600">Submission Link</p>
+                        <p className="text-2xl font-bold text-gray-900">{links.length > 0 ? 'Active' : 'None'}</p>
+                      </div>
                     </div>
-                  </div>
-                ))}
-              </CardContent>
-            </Card>
-          )}
-
-          {/* Recent Reports */}
-          <Card>
-            <CardHeader>
-              <CardTitle>Reports</CardTitle>
-              <CardDescription>All report submissions</CardDescription>
-            </CardHeader>
-            <CardContent>
-              {reports.length === 0 ? (
-                <div className="text-center py-8">
-                  <FileText className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                  <p className="text-gray-600">No reports submitted yet</p>
-                  <p className="text-sm text-gray-500">Reports will appear here once submitted through your link</p>
-                </div>
-              ) : (
-                <div className="space-y-4">
-                  {reports.map((report) => (
-                    <div key={report.id} className="flex items-center justify-between p-4 border rounded-lg hover:bg-gray-50 transition-colors">
-                      <div className="flex-1">
-                        <h3 className="font-medium">{report.title}</h3>
-                        <p className="text-sm text-gray-600">
-                          {report.tracking_id} • {new Date(report.created_at).toLocaleDateString()}
+                  </CardContent>
+                </Card>
+                
+                <Card>
+                  <CardContent className="p-6">
+                    <div className="flex items-center">
+                      <CreditCard className="h-8 w-8 text-purple-600" />
+                      <div className="ml-4">
+                        <p className="text-sm font-medium text-gray-600">Subscription</p>
+                        <p className="text-2xl font-bold text-gray-900">
+                          {subscriptionData.subscribed ? 'Active' : 'Inactive'}
                         </p>
                       </div>
-                      <div className="flex items-center space-x-3">
-                        <span className={`px-2 py-1 text-xs rounded-full ${
-                          report.status === 'new' ? 'bg-blue-100 text-blue-800' :
-                          report.status === 'in_review' ? 'bg-yellow-100 text-yellow-800' :
-                          report.status === 'investigating' ? 'bg-orange-100 text-orange-800' :
-                          report.status === 'resolved' ? 'bg-green-100 text-green-800' :
-                          'bg-gray-100 text-gray-800'
-                        }`}>
-                          {report.status.replace('_', ' ')}
-                        </span>
-                        <Button 
-                          size="sm" 
-                          variant="outline"
-                          onClick={() => handleViewReport(report)}
-                        >
-                          <Eye className="h-4 w-4 mr-1" />
-                          View
-                        </Button>
-                        {report.status !== 'closed' && (
-                          <Button 
-                            size="sm" 
-                            variant="outline"
-                            onClick={() => handleArchiveReport(report.id)}
-                          >
-                            <Archive className="h-4 w-4 mr-1" />
-                            Archive
-                          </Button>
-                        )}
-                        <AlertDialog>
-                          <AlertDialogTrigger asChild>
-                            <Button size="sm" variant="destructive">
-                              <Trash2 className="h-4 w-4 mr-1" />
-                              Delete
-                            </Button>
-                          </AlertDialogTrigger>
-                          <AlertDialogContent>
-                            <AlertDialogHeader>
-                              <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
-                              <AlertDialogDescription>
-                                This action cannot be undone. This will permanently delete the report 
-                                and all associated messages.
-                              </AlertDialogDescription>
-                            </AlertDialogHeader>
-                            <AlertDialogFooter>
-                              <AlertDialogCancel>Cancel</AlertDialogCancel>
-                              <AlertDialogAction 
-                                onClick={() => handleDeleteReport(report.id)}
-                                className="bg-red-600 hover:bg-red-700"
-                              >
-                                Delete Report
-                              </AlertDialogAction>
-                            </AlertDialogFooter>
-                          </AlertDialogContent>
-                        </AlertDialog>
-                      </div>
                     </div>
-                  ))}
-                </div>
+                  </CardContent>
+                </Card>
+              </div>
+
+              {/* Subscription Alert */}
+              {!subscriptionData.subscribed && (
+                <Card className="border-orange-200 bg-orange-50">
+                  <CardContent className="p-6">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <h3 className="font-medium text-orange-800">Subscription Required</h3>
+                        <p className="text-sm text-orange-700">
+                          A subscription is required to create submission links and manage reports.
+                        </p>
+                      </div>
+                      <Button onClick={() => navigate('#subscription')} className="bg-orange-600 hover:bg-orange-700">
+                        View Plans
+                      </Button>
+                    </div>
+                  </CardContent>
+                </Card>
               )}
-            </CardContent>
-          </Card>
+
+              {/* Create Link Button */}
+              <Card>
+                <CardContent className="p-6">
+                  <div className="flex items-center">
+                    <Plus className="h-8 w-8 text-purple-600" />
+                    <div className="ml-4">
+                      <Button 
+                        onClick={createOrGetSubmissionLink} 
+                        className="w-full" 
+                        disabled={links.length > 0 || !subscriptionData.subscribed}
+                      >
+                        {links.length > 0 ? 'Link Created' : 'Create Submission Link'}
+                      </Button>
+                      {!subscriptionData.subscribed && (
+                        <p className="text-xs text-gray-500 mt-2">Subscription required</p>
+                      )}
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Submission Link */}
+              {links.length > 0 && (
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Submission Link</CardTitle>
+                    <CardDescription>Your organization's secure report submission link</CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    {links.map((link) => (
+                      <div key={link.id} className="flex items-center justify-between p-4 border rounded-lg">
+                        <div>
+                          <h3 className="font-medium">{link.name}</h3>
+                          <p className="text-sm text-gray-600">Used {link.usage_count} times</p>
+                        </div>
+                        <div className="flex items-center space-x-2">
+                          <code className="text-xs bg-gray-100 px-2 py-1 rounded">
+                            /secure/tool/submit/{link.link_token}
+                          </code>
+                          <Button size="sm" onClick={() => copyLink(link.link_token)}>
+                            Copy Link
+                          </Button>
+                        </div>
+                      </div>
+                    ))}
+                  </CardContent>
+                </Card>
+              )}
+
+              {/* Reports List */}
+              <Card>
+                <CardHeader>
+                  <CardTitle>Reports</CardTitle>
+                  <CardDescription>All report submissions</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  {reports.length === 0 ? (
+                    <div className="text-center py-8">
+                      <FileText className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+                      <p className="text-gray-600">No reports submitted yet</p>
+                      <p className="text-sm text-gray-500">Reports will appear here once submitted through your link</p>
+                    </div>
+                  ) : (
+                    <div className="space-y-4">
+                      {reports.map((report) => (
+                        <div key={report.id} className="flex items-center justify-between p-4 border rounded-lg hover:bg-gray-50 transition-colors">
+                          <div className="flex-1">
+                            <h3 className="font-medium">{report.title}</h3>
+                            <p className="text-sm text-gray-600">
+                              {report.tracking_id} • {new Date(report.created_at).toLocaleDateString()}
+                            </p>
+                          </div>
+                          <div className="flex items-center space-x-3">
+                            <span className={`px-2 py-1 text-xs rounded-full ${
+                              report.status === 'new' ? 'bg-blue-100 text-blue-800' :
+                              report.status === 'in_review' ? 'bg-yellow-100 text-yellow-800' :
+                              report.status === 'investigating' ? 'bg-orange-100 text-orange-800' :
+                              report.status === 'resolved' ? 'bg-green-100 text-green-800' :
+                              'bg-gray-100 text-gray-800'
+                            }`}>
+                              {report.status.replace('_', ' ')}
+                            </span>
+                            <Button 
+                              size="sm" 
+                              variant="outline"
+                              onClick={() => handleViewReport(report)}
+                            >
+                              <Eye className="h-4 w-4 mr-1" />
+                              View
+                            </Button>
+                            {report.status !== 'closed' && (
+                              <Button 
+                                size="sm" 
+                                variant="outline"
+                                onClick={() => handleArchiveReport(report.id)}
+                              >
+                                <Archive className="h-4 w-4 mr-1" />
+                                Archive
+                              </Button>
+                            )}
+                            <AlertDialog>
+                              <AlertDialogTrigger asChild>
+                                <Button size="sm" variant="destructive">
+                                  <Trash2 className="h-4 w-4 mr-1" />
+                                  Delete
+                                </Button>
+                              </AlertDialogTrigger>
+                              <AlertDialogContent>
+                                <AlertDialogHeader>
+                                  <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+                                  <AlertDialogDescription>
+                                    This action cannot be undone. This will permanently delete the report 
+                                    and all associated messages.
+                                  </AlertDialogDescription>
+                                </AlertDialogHeader>
+                                <AlertDialogFooter>
+                                  <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                  <AlertDialogAction 
+                                    onClick={() => handleDeleteReport(report.id)}
+                                    className="bg-red-600 hover:bg-red-700"
+                                  >
+                                    Delete Report
+                                  </AlertDialogAction>
+                                </AlertDialogFooter>
+                              </AlertDialogContent>
+                            </AlertDialog>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            </TabsContent>
+
+            <TabsContent value="subscription">
+              <SubscriptionManagement />
+            </TabsContent>
+          </Tabs>
         </div>
       </main>
 
@@ -500,7 +563,6 @@ const Dashboard = () => {
           
           {selectedReport && (
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              {/* Report Information */}
               <div className="space-y-6">
                 <ReportContentDisplay
                   encryptedContent={selectedReport.encrypted_content}
@@ -512,8 +574,6 @@ const Dashboard = () => {
                   priority={selectedReport.priority}
                 />
               </div>
-
-              {/* Secure Messaging */}
               <div>
                 <ReportMessaging 
                   report={{
