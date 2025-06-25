@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
@@ -165,6 +164,24 @@ const AuditTrailManagement = () => {
     });
   };
 
+  // Helper function to safely render details
+  const renderDetails = (details: unknown) => {
+    if (!details || (typeof details === 'object' && Object.keys(details as object).length === 0)) {
+      return <span className="text-gray-400">-</span>;
+    }
+    
+    try {
+      const detailsString = JSON.stringify(details, null, 2);
+      return (
+        <div className="text-xs bg-gray-50 p-2 rounded font-mono">
+          {detailsString}
+        </div>
+      );
+    } catch {
+      return <span className="text-gray-400">Invalid data</span>;
+    }
+  };
+
   const getActionIcon = (action: AuditAction) => {
     switch (action) {
       case 'created': return <FileText className="h-4 w-4" />;
@@ -326,13 +343,7 @@ const AuditTrailManagement = () => {
                       </TableCell>
                       <TableCell>
                         <div className="text-sm text-gray-600 max-w-48">
-                          {log.details && typeof log.details === 'object' && Object.keys(log.details).length > 0 ? (
-                            <div className="text-xs bg-gray-50 p-2 rounded font-mono">
-                              {JSON.stringify(log.details, null, 2)}
-                            </div>
-                          ) : (
-                            <span className="text-gray-400">-</span>
-                          )}
+                          {renderDetails(log.details)}
                         </div>
                       </TableCell>
                       <TableCell>
