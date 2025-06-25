@@ -31,7 +31,7 @@ const AuditTrailManagement = () => {
   const [auditLogs, setAuditLogs] = useState<AuditLogWithDetails[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
-  const [actionFilter, setActionFilter] = useState<string>('all');
+  const [actionFilter, setActionFilter] = useState<AuditAction | 'all'>('all');
   const [dateRange, setDateRange] = useState<string>('7');
   const [currentPage, setCurrentPage] = useState(1);
   const logsPerPage = 25;
@@ -93,9 +93,9 @@ const AuditTrailManagement = () => {
         .gte('created_at', dateFilter.toISOString())
         .order('created_at', { ascending: false });
 
-      // Apply action filter
+      // Apply action filter - fix type issue
       if (actionFilter !== 'all') {
-        query = query.eq('action', actionFilter);
+        query = query.eq('action', actionFilter as AuditAction);
       }
 
       const { data, error } = await query.limit(500);
@@ -228,7 +228,7 @@ const AuditTrailManagement = () => {
                 />
               </div>
             </div>
-            <Select value={actionFilter} onValueChange={setActionFilter}>
+            <Select value={actionFilter} onValueChange={(value) => setActionFilter(value as AuditAction | 'all')}>
               <SelectTrigger className="w-48">
                 <Filter className="h-4 w-4 mr-2" />
                 <SelectValue />
@@ -327,11 +327,11 @@ const AuditTrailManagement = () => {
                       <TableCell>
                         <div className="text-sm text-gray-600 max-w-48">
                           {log.details && typeof log.details === 'object' && Object.keys(log.details).length > 0 ? (
-                            <pre className="text-xs whitespace-pre-wrap">
-                              {JSON.stringify(log.details, null, 1)}
-                            </pre>
+                            <div className="text-xs bg-gray-50 p-2 rounded font-mono">
+                              {JSON.stringify(log.details, null, 2)}
+                            </div>
                           ) : (
-                            '-'
+                            <span className="text-gray-400">-</span>
                           )}
                         </div>
                       </TableCell>
