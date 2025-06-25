@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
@@ -11,7 +12,6 @@ import { useToast } from '@/hooks/use-toast';
 import { Download, Search, Filter, Calendar, User, FileText, Activity } from 'lucide-react';
 import { format } from 'date-fns';
 import type { AuditLog, AuditAction } from '@/types/database';
-import { ReactNode } from 'react';
 
 interface AuditLogWithDetails extends AuditLog {
   profiles?: {
@@ -166,21 +166,21 @@ const AuditTrailManagement = () => {
   };
 
   // Helper function to safely render details
-  const renderDetails = (details: unknown): ReactNode => {
+  const renderDetails = (details: unknown): JSX.Element => {
     if (!details || (typeof details === 'object' && details !== null && Object.keys(details as object).length === 0)) {
       return <span className="text-gray-400">-</span>;
     }
     
     try {
-      const detailsString: string = typeof details === 'string' ? details : JSON.stringify(details, null, 2);
+      const detailsString = typeof details === 'string' ? details : JSON.stringify(details, null, 2);
       return (
         <div className="text-xs bg-gray-50 p-2 rounded font-mono">
           {detailsString}
         </div>
-      ) as ReactNode;
+      );
     } catch (error) {
       console.error('Error rendering details:', error);
-      return <span className="text-gray-400">Invalid data</span> as ReactNode;
+      return <span className="text-gray-400">Invalid data</span>;
     }
   };
 
