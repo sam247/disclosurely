@@ -11,6 +11,7 @@ import { useToast } from '@/hooks/use-toast';
 import { Download, Search, Filter, Calendar, User, FileText, Activity } from 'lucide-react';
 import { format } from 'date-fns';
 import type { AuditLog, AuditAction } from '@/types/database';
+import React from 'react';
 
 interface AuditLogWithDetails extends AuditLog {
   profiles?: {
@@ -173,7 +174,7 @@ const AuditTrailManagement = () => {
   };
 
   // Helper function to safely render details with proper React typing
-  const renderDetails = (details: unknown): JSX.Element => {
+  const renderDetails = (details: unknown): React.ReactNode => {
     if (!details || (typeof details === 'object' && details !== null && Object.keys(details as object).length === 0)) {
       return <span className="text-gray-400">-</span>;
     }
