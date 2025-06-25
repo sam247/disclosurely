@@ -167,7 +167,7 @@ const AuditTrailManagement = () => {
 
   // Helper function to safely render details
   const renderDetails = (details: unknown): ReactNode => {
-    if (!details || (typeof details === 'object' && details !== null && Object.keys(details).length === 0)) {
+    if (!details || (typeof details === 'object' && details !== null && Object.keys(details as object).length === 0)) {
       return <span className="text-gray-400">-</span>;
     }
     
@@ -179,6 +179,7 @@ const AuditTrailManagement = () => {
         </div>
       );
     } catch (error) {
+      console.error('Error rendering details:', error);
       return <span className="text-gray-400">Invalid data</span>;
     }
   };
