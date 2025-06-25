@@ -172,7 +172,7 @@ const AuditTrailManagement = () => {
     });
   };
 
-  // Helper function to safely render details
+  // Helper function to safely render details with proper typing
   const renderDetails = (details: unknown): JSX.Element => {
     if (!details || (typeof details === 'object' && details !== null && Object.keys(details as object).length === 0)) {
       return <span className="text-gray-400">-</span>;
