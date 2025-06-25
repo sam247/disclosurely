@@ -11,6 +11,7 @@ import { useToast } from '@/hooks/use-toast';
 import { Download, Search, Filter, Calendar, User, FileText, Activity } from 'lucide-react';
 import { format } from 'date-fns';
 import type { AuditLog, AuditAction } from '@/types/database';
+import { ReactNode } from 'react';
 
 interface AuditLogWithDetails extends AuditLog {
   profiles?: {
@@ -92,9 +93,9 @@ const AuditTrailManagement = () => {
         .gte('created_at', dateFilter.toISOString())
         .order('created_at', { ascending: false });
 
-      // Apply action filter - fix type issue
+      // Apply action filter
       if (actionFilter !== 'all') {
-        query = query.eq('action', actionFilter as AuditAction);
+        query = query.eq('action', actionFilter);
       }
 
       const { data, error } = await query.limit(500);
@@ -165,7 +166,7 @@ const AuditTrailManagement = () => {
   };
 
   // Helper function to safely render details
-  const renderDetails = (details: unknown) => {
+  const renderDetails = (details: unknown): ReactNode => {
     if (!details || (typeof details === 'object' && Object.keys(details as object).length === 0)) {
       return <span className="text-gray-400">-</span>;
     }
