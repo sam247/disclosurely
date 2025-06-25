@@ -53,7 +53,7 @@ const Dashboard = () => {
     }
   }, [user]);
 
-  const createAuditLog = async (reportId: string, organizationId: string, action: string, details: any) => {
+  const createAuditLog = async (reportId: string, organizationId: string, action: 'viewed' | 'status_changed', details: any) => {
     try {
       console.log('Creating audit log:', { reportId, organizationId, action, details });
       

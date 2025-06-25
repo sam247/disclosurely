@@ -99,7 +99,7 @@ const DynamicSubmissionForm = () => {
     return 'WB-' + Math.random().toString(36).substr(2, 8).toUpperCase();
   };
 
-  const createAuditLog = async (reportId: string, organizationId: string, action: string, details: any) => {
+  const createAuditLog = async (reportId: string, organizationId: string, action: 'created', details: any) => {
     try {
       console.log('Creating audit log:', { reportId, organizationId, action, details });
       
