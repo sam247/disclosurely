@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -13,6 +12,8 @@ import { supabase } from '@/integrations/supabase/client';
 import ReportMessaging from '@/components/ReportMessaging';
 import ReportContentDisplay from '@/components/ReportContentDisplay';
 import SubscriptionManagement from '@/components/SubscriptionManagement';
+import AuditTrailManagement from '@/components/AuditTrailManagement';
+import AuditStatistics from '@/components/AuditStatistics';
 
 interface Report {
   id: string;
@@ -345,6 +346,7 @@ const Dashboard = () => {
           <Tabs defaultValue="reports" className="space-y-6">
             <TabsList>
               <TabsTrigger value="reports">Reports</TabsTrigger>
+              <TabsTrigger value="audit">Audit Trail</TabsTrigger>
               <TabsTrigger value="subscription">Subscription</TabsTrigger>
             </TabsList>
 
@@ -542,6 +544,11 @@ const Dashboard = () => {
                   )}
                 </CardContent>
               </Card>
+            </TabsContent>
+
+            <TabsContent value="audit" className="space-y-6">
+              <AuditStatistics />
+              <AuditTrailManagement />
             </TabsContent>
 
             <TabsContent value="subscription">
