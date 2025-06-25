@@ -177,10 +177,10 @@ const AuditTrailManagement = () => {
         <div className="text-xs bg-gray-50 p-2 rounded font-mono">
           {detailsString}
         </div>
-      );
+      ) as ReactNode;
     } catch (error) {
       console.error('Error rendering details:', error);
-      return <span className="text-gray-400">Invalid data</span>;
+      return <span className="text-gray-400">Invalid data</span> as ReactNode;
     }
   };
 
