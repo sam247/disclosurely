@@ -10,9 +10,10 @@ import { useAuth } from '@/hooks/useAuth';
 import { useAuditLog } from '@/hooks/useAuditLog';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
-import { Eye, UserPlus, Clock, CheckCircle, XCircle, Search, Filter, FileText } from 'lucide-react';
+import { Eye, Search, Filter, FileText, LogOut } from 'lucide-react';
 import { format } from 'date-fns';
 import type { Report, ReportStatus } from '@/types/database';
+import ReportViewModal from './ReportViewModal';
 
 interface ReportWithAssignee extends Report {
   assignee_profile: {
@@ -23,7 +24,7 @@ interface ReportWithAssignee extends Report {
 }
 
 const ReportsManagement = () => {
-  const { user } = useAuth();
+  const { user, signOut } = useAuth();
   const { createAuditLog } = useAuditLog();
   const { toast } = useToast();
   const [reports, setReports] = useState<ReportWithAssignee[]>([]);
@@ -31,6 +32,7 @@ const ReportsManagement = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState<ReportStatus | 'all'>('all');
   const [selectedReport, setSelectedReport] = useState<ReportWithAssignee | null>(null);
+  const [modalOpen, setModalOpen] = useState(false);
   const [users, setUsers] = useState<{ id: string; email: string; first_name: string | null; last_name: string | null; }[]>([]);
 
   const reportStatuses: { value: ReportStatus | 'all'; label: string }[] = [
@@ -159,66 +161,6 @@ const ReportsManagement = () => {
     }
   };
 
-  const updateReportStatus = async (reportId: string, newStatus: ReportStatus) => {
-    try {
-      const { error } = await supabase
-        .from('reports')
-        .update({ status: newStatus })
-        .eq('id', reportId);
-
-      if (error) throw error;
-
-      // Create audit log
-      await createAuditLog('status_changed', reportId, { 
-        old_status: reports.find(r => r.id === reportId)?.status,
-        new_status: newStatus 
-      });
-
-      fetchReports();
-      toast({
-        title: "Success",
-        description: "Report status updated successfully",
-      });
-    } catch (error) {
-      console.error('Error updating report status:', error);
-      toast({
-        title: "Error",
-        description: "Failed to update report status",
-        variant: "destructive",
-      });
-    }
-  };
-
-  const assignReport = async (reportId: string, userId: string) => {
-    try {
-      const { error } = await supabase
-        .from('reports')
-        .update({ assigned_to: userId })
-        .eq('id', reportId);
-
-      if (error) throw error;
-
-      // Create audit log
-      await createAuditLog('assigned', reportId, { 
-        assigned_to: userId,
-        assigned_by: user?.id 
-      });
-
-      fetchReports();
-      toast({
-        title: "Success",
-        description: "Report assigned successfully",
-      });
-    } catch (error) {
-      console.error('Error assigning report:', error);
-      toast({
-        title: "Error",
-        description: "Failed to assign report",
-        variant: "destructive",
-      });
-    }
-  };
-
   const viewReport = async (reportId: string) => {
     // Create audit log for viewing
     await createAuditLog('viewed', reportId, { 
@@ -226,7 +168,45 @@ const ReportsManagement = () => {
       viewed_at: new Date().toISOString()
     });
     
-    setSelectedReport(reports.find(r => r.id === reportId) || null);
+    const report = reports.find(r => r.id === reportId);
+    if (report) {
+      setSelectedReport(report);
+      setModalOpen(true);
+    }
+  };
+
+  const handleSignOut = async () => {
+    try {
+      await signOut();
+      toast({
+        title: "Success",
+        description: "Signed out successfully",
+      });
+    } catch (error) {
+      console.error('Error signing out:', error);
+      toast({
+        title: "Error",
+        description: "Failed to sign out",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const getStatusBadgeClass = (status: string) => {
+    switch (status) {
+      case 'new':
+        return 'bg-blue-100 text-blue-800 hover:bg-blue-200';
+      case 'in_review':
+        return 'bg-blue-100 text-blue-800 hover:bg-blue-200';
+      case 'investigating':
+        return 'bg-blue-100 text-blue-800 hover:bg-blue-200';
+      case 'resolved':
+        return 'bg-blue-100 text-blue-800 hover:bg-blue-200';
+      case 'closed':
+        return 'bg-blue-100 text-blue-800 hover:bg-blue-200';
+      default:
+        return 'bg-blue-100 text-blue-800 hover:bg-blue-200';
+    }
   };
 
   if (loading) {
@@ -241,13 +221,21 @@ const ReportsManagement = () => {
     <div className="space-y-6">
       <Card>
         <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <FileText className="h-5 w-5" />
-            Reports Management
-          </CardTitle>
-          <CardDescription>
-            Manage and monitor all reports submitted to your organization ({reports.length} total reports)
-          </CardDescription>
+          <div className="flex items-center justify-between">
+            <div>
+              <CardTitle className="flex items-center gap-2">
+                <FileText className="h-5 w-5" />
+                Reports Management
+              </CardTitle>
+              <CardDescription>
+                Manage and monitor all reports submitted to your organization ({reports.length} total reports)
+              </CardDescription>
+            </div>
+            <Button variant="outline" onClick={handleSignOut} className="flex items-center gap-2">
+              <LogOut className="h-4 w-4" />
+              Sign Out
+            </Button>
+          </div>
         </CardHeader>
         <CardContent>
           <div className="flex flex-col sm:flex-row gap-4 mb-6">
@@ -285,13 +273,14 @@ const ReportsManagement = () => {
                   <TableHead>Title</TableHead>
                   <TableHead>Status</TableHead>
                   <TableHead>Assigned To</TableHead>
+                  <TableHead>Created</TableHead>
                   <TableHead className="text-right">Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {reports.length === 0 ? (
                   <TableRow>
-                    <TableCell colSpan={5} className="text-center py-8">
+                    <TableCell colSpan={6} className="text-center py-8">
                       No reports found for the selected criteria
                     </TableCell>
                   </TableRow>
@@ -305,16 +294,7 @@ const ReportsManagement = () => {
                         <div className="text-sm truncate max-w-96">{report.title}</div>
                       </TableCell>
                       <TableCell>
-                        <Badge
-                          className={`
-                            ${report.status === 'new' ? 'bg-blue-100 text-blue-800' : ''}
-                            ${report.status === 'in_review' ? 'bg-yellow-100 text-yellow-800' : ''}
-                            ${report.status === 'investigating' ? 'bg-orange-100 text-orange-800' : ''}
-                            ${report.status === 'resolved' ? 'bg-green-100 text-green-800' : ''}
-                            ${report.status === 'closed' ? 'bg-gray-100 text-gray-800' : ''}
-                            `
-                          }
-                        >
+                        <Badge className={getStatusBadgeClass(report.status)}>
                           {report.status.replace('_', ' ')}
                         </Badge>
                       </TableCell>
@@ -332,6 +312,11 @@ const ReportsManagement = () => {
                           <Badge variant="secondary">Unassigned</Badge>
                         )}
                       </TableCell>
+                      <TableCell>
+                        <div className="text-sm text-gray-500">
+                          {format(new Date(report.created_at), 'MMM dd, yyyy')}
+                        </div>
+                      </TableCell>
                       <TableCell className="text-right">
                         <Button variant="ghost" size="sm" onClick={() => viewReport(report.id)}>
                           <Eye className="h-4 w-4 mr-2" />
@@ -347,69 +332,16 @@ const ReportsManagement = () => {
         </CardContent>
       </Card>
 
-      {selectedReport && (
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <FileText className="h-5 w-5" />
-              Report Details
-            </CardTitle>
-            <CardDescription>
-              Details for report: {selectedReport.tracking_id}
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="grid gap-4">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <div className="text-sm font-bold mb-2">Title</div>
-                <div className="text-gray-700">{selectedReport.title}</div>
-              </div>
-              <div>
-                <div className="text-sm font-bold mb-2">Tracking ID</div>
-                <div className="text-gray-700">{selectedReport.tracking_id}</div>
-              </div>
-              <div>
-                <div className="text-sm font-bold mb-2">Status</div>
-                <Select
-                  value={selectedReport.status}
-                  onValueChange={(value) => updateReportStatus(selectedReport.id, value as ReportStatus)}
-                >
-                  <SelectTrigger className="w-48">
-                    <Clock className="h-4 w-4 mr-2" />
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {reportStatuses.filter(s => s.value !== 'all').map(status => (
-                      <SelectItem key={status.value} value={status.value}>
-                        {status.label}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-              <div>
-                <div className="text-sm font-bold mb-2">Assign To</div>
-                <Select
-                  value={selectedReport.assigned_to || ''}
-                  onValueChange={(value) => assignReport(selectedReport.id, value)}
-                >
-                  <SelectTrigger className="w-48">
-                    <UserPlus className="h-4 w-4 mr-2" />
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {users.map(user => (
-                      <SelectItem key={user.id} value={user.id}>
-                        {user.email}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-      )}
+      <ReportViewModal
+        report={selectedReport}
+        isOpen={modalOpen}
+        onClose={() => {
+          setModalOpen(false);
+          setSelectedReport(null);
+        }}
+        onReportUpdated={fetchReports}
+        users={users}
+      />
     </div>
   );
 };
