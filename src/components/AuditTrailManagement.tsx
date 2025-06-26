@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
@@ -178,7 +177,7 @@ const AuditTrailManagement = () => {
   // Helper function to safely render details with proper React typing
   const renderDetails = (details: Json | null): React.ReactNode => {
     if (!details || (typeof details === 'object' && details !== null && Object.keys(details as object).length === 0)) {
-      return <span className="text-gray-400">-</span>;
+      return <span className="text-gray-400">-</span> as React.ReactNode;
     }
     
     try {
@@ -187,9 +186,9 @@ const AuditTrailManagement = () => {
         <div className="text-xs bg-gray-50 p-2 rounded font-mono">
           {detailsString}
         </div>
-      );
+      ) as React.ReactNode;
     } catch (error) {
-      return <span className="text-gray-400">Invalid data</span>;
+      return <span className="text-gray-400">Invalid data</span> as React.ReactNode;
     }
   };
 
