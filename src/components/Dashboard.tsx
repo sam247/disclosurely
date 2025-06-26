@@ -122,36 +122,87 @@ const Dashboard = () => {
         setReports(reportsData || []);
       }
 
-      // Fetch organization links - but only active ones and remove duplicates
-      const { data: linksData, error: linksError } = await supabase
+      // Fetch organization links - get ALL links first, then deduplicate
+      const { data: allLinksData, error: linksError } = await supabase
         .from('organization_links')
-        .select('id, name, link_token, usage_count, is_active')
+        .select('id, name, link_token, usage_count, is_active, created_at')
         .eq('organization_id', profile.organization_id)
-        .eq('is_active', true)
         .order('created_at', { ascending: false });
 
       if (linksError) {
         console.error('Error fetching links:', linksError);
       } else {
-        console.log('Fetched raw links:', linksData?.length || 0, 'records');
+        console.log('Fetched all links:', allLinksData?.length || 0, 'records');
         
-        // Remove duplicates by link_token to prevent duplicate display
-        const uniqueLinks = linksData?.reduce((acc: SubmissionLink[], current) => {
-          const existingLink = acc.find(link => link.link_token === current.link_token);
-          if (!existingLink) {
-            acc.push(current);
+        if (allLinksData && allLinksData.length > 0) {
+          // Remove duplicates by link_token, keeping the most recent one
+          const uniqueLinks = allLinksData.reduce((acc: SubmissionLink[], current) => {
+            const existingLink = acc.find(link => link.link_token === current.link_token);
+            if (!existingLink) {
+              acc.push(current);
+            }
+            return acc;
+          }, []);
+          
+          console.log('After deduplication:', uniqueLinks.length, 'unique links');
+          
+          // If we have duplicates, clean them up in the background
+          if (allLinksData.length > uniqueLinks.length) {
+            console.log('Found duplicates, cleaning up...');
+            cleanupDuplicateLinks(profile.organization_id, uniqueLinks);
           }
-          return acc;
-        }, []) || [];
-        
-        console.log('After deduplication:', uniqueLinks.length, 'unique links');
-        setLinks(uniqueLinks);
+          
+          setLinks(uniqueLinks);
+        } else {
+          setLinks([]);
+        }
       }
 
     } catch (error) {
       console.error('Error fetching dashboard data:', error);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const cleanupDuplicateLinks = async (organizationId: string, uniqueLinks: SubmissionLink[]) => {
+    try {
+      // Get all links for this organization
+      const { data: allLinks } = await supabase
+        .from('organization_links')
+        .select('*')
+        .eq('organization_id', organizationId)
+        .order('created_at', { ascending: false });
+
+      if (!allLinks || allLinks.length <= 1) return;
+
+      // Find duplicates to delete (keep the first occurrence of each link_token)
+      const linksToDelete: string[] = [];
+      const seenTokens = new Set<string>();
+
+      allLinks.forEach((link) => {
+        if (seenTokens.has(link.link_token)) {
+          linksToDelete.push(link.id);
+        } else {
+          seenTokens.add(link.link_token);
+        }
+      });
+
+      // Delete duplicates
+      if (linksToDelete.length > 0) {
+        const { error } = await supabase
+          .from('organization_links')
+          .delete()
+          .in('id', linksToDelete);
+
+        if (error) {
+          console.error('Error cleaning up duplicates:', error);
+        } else {
+          console.log(`Cleaned up ${linksToDelete.length} duplicate links`);
+        }
+      }
+    } catch (error) {
+      console.error('Error in cleanupDuplicateLinks:', error);
     }
   };
 
