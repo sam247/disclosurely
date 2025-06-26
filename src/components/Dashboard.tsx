@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -35,6 +36,7 @@ interface SubmissionLink {
   name: string;
   link_token: string;
   usage_count: number;
+  is_active: boolean;
 }
 
 const Dashboard = () => {
@@ -106,7 +108,7 @@ const Dashboard = () => {
 
       console.log('Fetching data for organization:', profile.organization_id);
 
-      // Fetch ALL reports for the organization (not filtering by status)
+      // Fetch ALL reports for the organization
       const { data: reportsData, error: reportsError } = await supabase
         .from('reports')
         .select('id, title, tracking_id, status, created_at, encrypted_content, encryption_key_hash, priority, report_type')
@@ -117,24 +119,36 @@ const Dashboard = () => {
         console.error('Error fetching reports:', reportsError);
       } else {
         console.log('Fetched reports:', reportsData?.length || 0, 'records');
-        console.log('Report data sample:', reportsData?.[0]);
+        console.log('Report statuses:', reportsData?.map(r => r.status));
+        setReports(reportsData || []);
       }
 
-      // Fetch the single organization link (simplified to one link per org)
+      // Fetch organization links - but only active ones and remove duplicates
       const { data: linksData, error: linksError } = await supabase
         .from('organization_links')
-        .select('id, name, link_token, usage_count')
+        .select('id, name, link_token, usage_count, is_active')
         .eq('organization_id', profile.organization_id)
-        .eq('is_active', true);
+        .eq('is_active', true)
+        .order('created_at', { ascending: false });
 
       if (linksError) {
         console.error('Error fetching links:', linksError);
       } else {
-        console.log('Fetched links:', linksData?.length || 0, 'records');
+        console.log('Fetched raw links:', linksData?.length || 0, 'records');
+        
+        // Remove duplicates by link_token to prevent duplicate display
+        const uniqueLinks = linksData?.reduce((acc: SubmissionLink[], current) => {
+          const existingLink = acc.find(link => link.link_token === current.link_token);
+          if (!existingLink) {
+            acc.push(current);
+          }
+          return acc;
+        }, []) || [];
+        
+        console.log('After deduplication:', uniqueLinks.length, 'unique links');
+        setLinks(uniqueLinks);
       }
 
-      setReports(reportsData || []);
-      setLinks(linksData || []);
     } catch (error) {
       console.error('Error fetching dashboard data:', error);
     } finally {
@@ -214,13 +228,8 @@ const Dashboard = () => {
         setSelectedReport(null);
       }
 
-      // Remove the archived report from local state immediately
-      setReports(prevReports => prevReports.filter(report => report.id !== reportId));
-      
-      // Also refresh the data to ensure consistency after a short delay
-      setTimeout(() => {
-        fetchData();
-      }, 1000);
+      // Refresh data to update the reports list
+      fetchData();
     } catch (error) {
       console.error('Error archiving report:', error);
       toast({
@@ -233,9 +242,6 @@ const Dashboard = () => {
 
   const handleDeleteReport = async (reportId: string) => {
     try {
-      // Remove from local state first to give immediate feedback
-      setReports(prevReports => prevReports.filter(report => report.id !== reportId));
-
       // Close dialog if this report was being viewed
       if (selectedReport?.id === reportId) {
         setIsReportDialogOpen(false);
@@ -280,10 +286,6 @@ const Dashboard = () => {
           description: "Report could not be deleted. Please try again.",
           variant: "destructive",
         });
-        // Restore to local state since deletion failed
-        setTimeout(() => {
-          fetchData();
-        }, 500);
         return;
       }
 
@@ -293,23 +295,16 @@ const Dashboard = () => {
       });
 
       // Refresh data after successful deletion
-      setTimeout(() => {
-        fetchData();
-      }, 1000);
+      fetchData();
       
     } catch (error) {
       console.error('Error deleting report:', error);
       
-      // If deletion failed, restore the report to the local state
       toast({
         title: "Error",
         description: "Failed to delete report. Please try again.",
         variant: "destructive",
       });
-      
-      setTimeout(() => {
-        fetchData();
-      }, 500);
     }
   };
 
@@ -332,7 +327,7 @@ const Dashboard = () => {
         return;
       }
 
-      // Check if a link already exists
+      // Check if a link already exists (prevent duplicates)
       if (links.length > 0) {
         toast({
           title: "Link already exists",
@@ -341,10 +336,21 @@ const Dashboard = () => {
         return;
       }
 
-      // Generate a unique token
-      const generateToken = () => {
-        return Math.random().toString(36).substring(2, 14);
-      };
+      // Double-check in database to ensure no duplicates
+      const { data: existingLinks } = await supabase
+        .from('organization_links')
+        .select('id')
+        .eq('organization_id', profile.organization_id)
+        .eq('is_active', true);
+
+      if (existingLinks && existingLinks.length > 0) {
+        toast({
+          title: "Link already exists",
+          description: "Your organization already has a submission link",
+        });
+        fetchData(); // Refresh to show the existing link
+        return;
+      }
 
       const { data, error } = await supabase
         .from('organization_links')
@@ -352,8 +358,7 @@ const Dashboard = () => {
           organization_id: profile.organization_id,
           name: 'Report Submission Link',
           description: 'Submit reports securely to our organization',
-          created_by: user.id,
-          link_token: generateToken()
+          created_by: user.id
         })
         .select()
         .single();
@@ -405,8 +410,9 @@ const Dashboard = () => {
     );
   }
 
-  // Filter reports to show only non-closed ones in the main view
+  // Show ALL reports (including closed ones) but separate them
   const activeReports = reports.filter(report => report.status !== 'closed');
+  const closedReports = reports.filter(report => report.status === 'closed');
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -452,7 +458,10 @@ const Dashboard = () => {
                       <FileText className="h-8 w-8 text-blue-600" />
                       <div className="ml-4">
                         <p className="text-sm font-medium text-gray-600">Total Reports</p>
-                        <p className="text-2xl font-bold text-gray-900">{activeReports.length}</p>
+                        <p className="text-2xl font-bold text-gray-900">{reports.length}</p>
+                        <p className="text-xs text-gray-500">
+                          {activeReports.length} active, {closedReports.length} closed
+                        </p>
                       </div>
                     </div>
                   </CardContent>
@@ -557,23 +566,18 @@ const Dashboard = () => {
               <Card>
                 <CardHeader>
                   <CardTitle>Reports</CardTitle>
-                  <CardDescription>All active report submissions ({activeReports.length} total)</CardDescription>
+                  <CardDescription>All report submissions ({reports.length} total)</CardDescription>
                 </CardHeader>
                 <CardContent>
-                  {activeReports.length === 0 ? (
+                  {reports.length === 0 ? (
                     <div className="text-center py-8">
                       <FileText className="h-12 w-12 text-gray-400 mx-auto mb-4" />
                       <p className="text-gray-600">No reports submitted yet</p>
                       <p className="text-sm text-gray-500">Reports will appear here once submitted through your link</p>
-                      {reports.length > 0 && (
-                        <p className="text-sm text-gray-500 mt-2">
-                          You have {reports.length} total reports (including closed ones)
-                        </p>
-                      )}
                     </div>
                   ) : (
                     <div className="space-y-4">
-                      {activeReports.map((report) => (
+                      {reports.map((report) => (
                         <div key={report.id} className="flex items-center justify-between p-4 border rounded-lg hover:bg-gray-50 transition-colors">
                           <div className="flex-1">
                             <h3 className="font-medium">{report.title}</h3>
@@ -587,6 +591,7 @@ const Dashboard = () => {
                               report.status === 'in_review' ? 'bg-yellow-100 text-yellow-800' :
                               report.status === 'investigating' ? 'bg-orange-100 text-orange-800' :
                               report.status === 'resolved' ? 'bg-green-100 text-green-800' :
+                              report.status === 'closed' ? 'bg-gray-100 text-gray-800' :
                               'bg-gray-100 text-gray-800'
                             }`}>
                               {report.status.replace('_', ' ')}
