@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
@@ -358,7 +359,9 @@ const AuditTrailManagement = () => {
                       </TableCell>
                       <TableCell>
                         <span className="text-sm text-gray-500">
-                          {log.ip_address || '-'}
+                          {typeof log.ip_address === 'string' && log.ip_address.trim() !== '' 
+                            ? log.ip_address 
+                            : '-'}
                         </span>
                       </TableCell>
                     </TableRow>
