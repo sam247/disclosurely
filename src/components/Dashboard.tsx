@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -12,10 +13,8 @@ import {
   Users, 
   Clock, 
   CheckCircle, 
-  Plus, 
-  ExternalLink, 
   Copy,
-  Trash2,
+  ExternalLink,
   Activity
 } from 'lucide-react';
 import { format } from 'date-fns';
@@ -43,9 +42,9 @@ const Dashboard = () => {
   const [newReportCount, setNewReportCount] = useState(0);
   const [overdueReportCount, setOverdueReportCount] = useState(0);
   const [activeTab, setActiveTab] = useState<'reports' | 'audit' | 'users' | 'subscription'>('reports');
-  const [submissionLinks, setSubmissionLinks] = useState<any[]>([]);
-  const [creatingLink, setCreatingLink] = useState(false);
+  const [submissionLink, setSubmissionLink] = useState<any>(null);
   const [copySuccess, setCopySuccess] = useState(false);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     fetchData();
@@ -55,6 +54,8 @@ const Dashboard = () => {
     if (!organization) return;
 
     try {
+      setLoading(true);
+      
       // Fetch report counts
       const { data: reports, error: reportsError } = await supabase
         .from('reports')
@@ -93,14 +94,20 @@ const Dashboard = () => {
       if (overdueReportsError) throw overdueReportsError;
       setOverdueReportCount(overdueReports.length);
 
-       // Fetch submission links
-       const { data: links, error: linksError } = await supabase
-       .from('organization_links')
-       .select('*')
-       .eq('organization_id', organization.id);
+      // Fetch the single submission link
+      const { data: links, error: linksError } = await supabase
+        .from('organization_links')
+        .select('*')
+        .eq('organization_id', organization.id)
+        .eq('is_active', true)
+        .order('created_at', { ascending: false })
+        .limit(1);
 
-     if (linksError) throw linksError;
-     setSubmissionLinks(links || []);
+      if (linksError) {
+        console.error('Error fetching links:', linksError);
+      } else {
+        setSubmissionLink(links && links.length > 0 ? links[0] : null);
+      }
 
     } catch (error) {
       console.error('Error fetching data:', error);
@@ -109,6 +116,8 @@ const Dashboard = () => {
         description: "Failed to fetch dashboard data",
         variant: "destructive",
       });
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -116,23 +125,30 @@ const Dashboard = () => {
     if (!organization || !user) return;
 
     try {
-      setCreatingLink(true);
-
-      // Create audit log for link creation
-      await createAuditLog('created', undefined, { 
-        action: 'submission_link_created',
-        created_by: user.id 
-      });
+      console.log('Creating submission link for organization:', organization.id);
 
       const { data, error } = await supabase
         .from('organization_links')
         .insert({
-          name: 'Quick Report Link',
-          description: 'General purpose submission link',
+          organization_id: organization.id,
+          name: 'Secure Report Submission',
+          description: 'Submit reports securely and anonymously',
           created_by: user.id,
-        } as any);
+          is_active: true
+        })
+        .select()
+        .single();
 
-      if (error) throw error;
+      if (error) {
+        console.error('Error creating submission link:', error);
+        throw error;
+      }
+
+      console.log('Created submission link:', data);
+      await createAuditLog('created', undefined, { 
+        action: 'submission_link_created',
+        link_id: data.id 
+      });
 
       await fetchData();
       toast({
@@ -146,42 +162,23 @@ const Dashboard = () => {
         description: "Failed to create submission link",
         variant: "destructive",
       });
-    } finally {
-      setCreatingLink(false);
     }
   };
 
-  const copyLink = (linkId: string) => {
-    const link = `${window.location.origin}/secure/tool/submit/${linkId}`;
+  const copyLink = () => {
+    if (!submissionLink) return;
+    
+    const link = `${window.location.origin}/secure/tool/submit/${submissionLink.link_token}`;
     navigator.clipboard.writeText(link);
     setCopySuccess(true);
     setTimeout(() => {
       setCopySuccess(false);
     }, 2000);
-  };
-
-  const deleteLink = async (linkId: string) => {
-    try {
-      const { error } = await supabase
-        .from('organization_links')
-        .delete()
-        .eq('id', linkId);
-
-      if (error) throw error;
-
-      await fetchData();
-      toast({
-        title: "Success",
-        description: "Submission link deleted successfully",
-      });
-    } catch (error) {
-      console.error('Error deleting submission link:', error);
-      toast({
-        title: "Error",
-        description: "Failed to delete submission link",
-        variant: "destructive",
-      });
-    }
+    
+    toast({
+      title: "Success",
+      description: "Submission link copied to clipboard",
+    });
   };
 
   const dashboardCards: DashboardCardProps[] = [
@@ -257,55 +254,76 @@ const Dashboard = () => {
           </div>
 
           <div className="mb-6">
-            <div className="flex items-center justify-between">
-              <h2 className="text-xl font-semibold">Submission Links</h2>
-              <Button onClick={createSubmissionLink} disabled={creatingLink}>
-                <Plus className="h-4 w-4 mr-2" />
-                Create New Link
-              </Button>
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-xl font-semibold">Submission Link</h2>
             </div>
-            <p className="text-gray-500 text-sm mt-1">
-              Share these links to allow users to submit reports anonymously.
+            <p className="text-gray-500 text-sm mb-4">
+              Share this link to allow users to submit reports anonymously.
             </p>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mt-4">
-              {submissionLinks.map(link => (
-                <Card key={link.id} className="bg-white shadow-md rounded-md overflow-hidden">
-                  <CardContent className="flex flex-col">
-                    <div className="font-medium">{link.name}</div>
-                    <div className="text-gray-500 text-sm">{link.description}</div>
-                    <div className="flex items-center justify-between mt-2">
-                      <Button 
-                        variant="outline" 
-                        size="sm" 
-                        onClick={() => copyLink(link.id)}
-                        disabled={copySuccess}
+            {loading ? (
+              <div className="flex items-center justify-center py-8">
+                <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600"></div>
+              </div>
+            ) : submissionLink ? (
+              <Card className="bg-white shadow-md rounded-md overflow-hidden">
+                <CardContent className="p-4">
+                  <div className="flex items-center justify-between mb-3">
+                    <div className="font-medium">{submissionLink.name}</div>
+                    <Badge variant="secondary" className="text-green-800 bg-green-100">
+                      Active
+                    </Badge>
+                  </div>
+                  <div className="text-gray-500 text-sm mb-3">{submissionLink.description}</div>
+                  
+                  <div className="bg-gray-50 p-3 rounded-lg mb-3">
+                    <div className="text-sm font-medium text-gray-700 mb-1">Submission URL:</div>
+                    <div className="flex items-center space-x-2">
+                      <code className="flex-1 text-sm bg-white p-2 rounded border text-gray-800">
+                        {window.location.origin}/secure/tool/submit/{submissionLink.link_token}
+                      </code>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={copyLink}
+                        className="flex items-center gap-2"
                       >
-                        {copySuccess ? <CheckCircle className="h-4 w-4 mr-2" /> : <Copy className="h-4 w-4 mr-2" />}
-                        {copySuccess ? 'Copied!' : 'Copy Link'}
-                      </Button>
-                      <Button 
-                        variant="destructive" 
-                        size="sm" 
-                        onClick={() => deleteLink(link.id)}
-                      >
-                        <Trash2 className="h-4 w-4 mr-2" />
-                        Delete
+                        <Copy className="h-4 w-4" />
+                        {copySuccess ? 'Copied!' : 'Copy'}
                       </Button>
                     </div>
+                  </div>
+
+                  <div className="flex items-center justify-between">
+                    <div className="text-sm text-gray-500">
+                      Created: {format(new Date(submissionLink.created_at), 'MMM dd, yyyy')}
+                    </div>
                     <a 
-                      href={`/secure/tool/submit/${link.id}`} 
+                      href={`/secure/tool/submit/${submissionLink.link_token}`} 
                       target="_blank" 
                       rel="noopener noreferrer"
-                      className="text-blue-500 text-sm mt-2 hover:underline"
+                      className="text-blue-500 text-sm hover:underline flex items-center gap-1"
                     >
-                      <ExternalLink className="h-4 w-4 mr-1 inline-block" />
-                      Preview Link
+                      <ExternalLink className="h-4 w-4" />
+                      Test Link
                     </a>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
+                  </div>
+                </CardContent>
+              </Card>
+            ) : (
+              <Card className="bg-white shadow-md rounded-md overflow-hidden">
+                <CardContent className="text-center py-8">
+                  <ExternalLink className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+                  <h3 className="text-lg font-medium text-gray-900 mb-2">No submission link yet</h3>
+                  <p className="text-gray-600 mb-4">
+                    Create a submission link to start collecting reports.
+                  </p>
+                  <Button onClick={createSubmissionLink}>
+                    Create Submission Link
+                  </Button>
+                </CardContent>
+              </Card>
+            )}
           </div>
 
           <div className="border rounded-md bg-gray-50">
