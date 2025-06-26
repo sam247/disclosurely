@@ -83,12 +83,20 @@ const Dashboard = () => {
     if (!user) return;
     
     try {
+      console.log('Starting fetchData for user:', user.id);
+      
       // Get user's profile and organization
-      const { data: profile } = await supabase
+      const { data: profile, error: profileError } = await supabase
         .from('profiles')
         .select('organization_id')
         .eq('id', user.id)
         .single();
+
+      if (profileError) {
+        console.error('Error fetching profile:', profileError);
+        setLoading(false);
+        return;
+      }
 
       if (!profile?.organization_id) {
         console.log('No organization found for user');
@@ -98,28 +106,32 @@ const Dashboard = () => {
 
       console.log('Fetching data for organization:', profile.organization_id);
 
-      // Fetch reports with encrypted content, exclude archived reports
+      // Fetch ALL reports for the organization (not filtering by status)
       const { data: reportsData, error: reportsError } = await supabase
         .from('reports')
         .select('id, title, tracking_id, status, created_at, encrypted_content, encryption_key_hash, priority, report_type')
         .eq('organization_id', profile.organization_id)
-        .neq('status', 'closed') // Only exclude archived (closed) reports
-        .order('created_at', { ascending: false })
-        .limit(20);
+        .order('created_at', { ascending: false });
 
       if (reportsError) {
         console.error('Error fetching reports:', reportsError);
       } else {
-        console.log('Fetched reports:', reportsData?.length || 0);
+        console.log('Fetched reports:', reportsData?.length || 0, 'records');
+        console.log('Report data sample:', reportsData?.[0]);
       }
 
       // Fetch the single organization link (simplified to one link per org)
-      const { data: linksData } = await supabase
+      const { data: linksData, error: linksError } = await supabase
         .from('organization_links')
         .select('id, name, link_token, usage_count')
         .eq('organization_id', profile.organization_id)
-        .eq('is_active', true)
-        .limit(1);
+        .eq('is_active', true);
+
+      if (linksError) {
+        console.error('Error fetching links:', linksError);
+      } else {
+        console.log('Fetched links:', linksData?.length || 0, 'records');
+      }
 
       setReports(reportsData || []);
       setLinks(linksData || []);
@@ -393,6 +405,9 @@ const Dashboard = () => {
     );
   }
 
+  // Filter reports to show only non-closed ones in the main view
+  const activeReports = reports.filter(report => report.status !== 'closed');
+
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
@@ -437,7 +452,7 @@ const Dashboard = () => {
                       <FileText className="h-8 w-8 text-blue-600" />
                       <div className="ml-4">
                         <p className="text-sm font-medium text-gray-600">Total Reports</p>
-                        <p className="text-2xl font-bold text-gray-900">{reports.length}</p>
+                        <p className="text-2xl font-bold text-gray-900">{activeReports.length}</p>
                       </div>
                     </div>
                   </CardContent>
@@ -542,18 +557,23 @@ const Dashboard = () => {
               <Card>
                 <CardHeader>
                   <CardTitle>Reports</CardTitle>
-                  <CardDescription>All report submissions ({reports.length} total)</CardDescription>
+                  <CardDescription>All active report submissions ({activeReports.length} total)</CardDescription>
                 </CardHeader>
                 <CardContent>
-                  {reports.length === 0 ? (
+                  {activeReports.length === 0 ? (
                     <div className="text-center py-8">
                       <FileText className="h-12 w-12 text-gray-400 mx-auto mb-4" />
                       <p className="text-gray-600">No reports submitted yet</p>
                       <p className="text-sm text-gray-500">Reports will appear here once submitted through your link</p>
+                      {reports.length > 0 && (
+                        <p className="text-sm text-gray-500 mt-2">
+                          You have {reports.length} total reports (including closed ones)
+                        </p>
+                      )}
                     </div>
                   ) : (
                     <div className="space-y-4">
-                      {reports.map((report) => (
+                      {activeReports.map((report) => (
                         <div key={report.id} className="flex items-center justify-between p-4 border rounded-lg hover:bg-gray-50 transition-colors">
                           <div className="flex-1">
                             <h3 className="font-medium">{report.title}</h3>
