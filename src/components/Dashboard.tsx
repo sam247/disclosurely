@@ -122,40 +122,23 @@ const Dashboard = () => {
         setReports(reportsData || []);
       }
 
-      // Fetch organization links - get ALL links first, then deduplicate
-      const { data: allLinksData, error: linksError } = await supabase
+      // Clean up duplicate links first, then fetch
+      await cleanupAllDuplicateLinks(profile.organization_id);
+
+      // Fetch organization links - only get unique active ones
+      const { data: linksData, error: linksError } = await supabase
         .from('organization_links')
-        .select('id, name, link_token, usage_count, is_active, created_at')
+        .select('id, name, link_token, usage_count, is_active')
         .eq('organization_id', profile.organization_id)
-        .order('created_at', { ascending: false });
+        .eq('is_active', true)
+        .order('created_at', { ascending: false })
+        .limit(1); // Only get the most recent one
 
       if (linksError) {
         console.error('Error fetching links:', linksError);
       } else {
-        console.log('Fetched all links:', allLinksData?.length || 0, 'records');
-        
-        if (allLinksData && allLinksData.length > 0) {
-          // Remove duplicates by link_token, keeping the most recent one
-          const uniqueLinks = allLinksData.reduce((acc: SubmissionLink[], current) => {
-            const existingLink = acc.find(link => link.link_token === current.link_token);
-            if (!existingLink) {
-              acc.push(current);
-            }
-            return acc;
-          }, []);
-          
-          console.log('After deduplication:', uniqueLinks.length, 'unique links');
-          
-          // If we have duplicates, clean them up in the background
-          if (allLinksData.length > uniqueLinks.length) {
-            console.log('Found duplicates, cleaning up...');
-            cleanupDuplicateLinks(profile.organization_id, uniqueLinks);
-          }
-          
-          setLinks(uniqueLinks);
-        } else {
-          setLinks([]);
-        }
+        console.log('Fetched links:', linksData?.length || 0, 'records');
+        setLinks(linksData || []);
       }
 
     } catch (error) {
@@ -165,7 +148,7 @@ const Dashboard = () => {
     }
   };
 
-  const cleanupDuplicateLinks = async (organizationId: string, uniqueLinks: SubmissionLink[]) => {
+  const cleanupAllDuplicateLinks = async (organizationId: string) => {
     try {
       // Get all links for this organization
       const { data: allLinks } = await supabase
@@ -176,19 +159,38 @@ const Dashboard = () => {
 
       if (!allLinks || allLinks.length <= 1) return;
 
-      // Find duplicates to delete (keep the first occurrence of each link_token)
-      const linksToDelete: string[] = [];
-      const seenTokens = new Set<string>();
-
+      // Group by link_token and keep only the most recent one
+      const linkGroups = new Map<string, any[]>();
       allLinks.forEach((link) => {
-        if (seenTokens.has(link.link_token)) {
-          linksToDelete.push(link.id);
-        } else {
-          seenTokens.add(link.link_token);
+        if (!linkGroups.has(link.link_token)) {
+          linkGroups.set(link.link_token, []);
+        }
+        linkGroups.get(link.link_token)!.push(link);
+      });
+
+      // Find duplicates to delete
+      const linksToDelete: string[] = [];
+      linkGroups.forEach((group) => {
+        if (group.length > 1) {
+          // Keep the first (most recent due to ordering), delete the rest
+          const [keep, ...toDelete] = group;
+          linksToDelete.push(...toDelete.map(link => link.id));
         }
       });
 
-      // Delete duplicates
+      // If we have too many unique tokens, keep only the most recent one
+      const uniqueTokens = Array.from(linkGroups.keys());
+      if (uniqueTokens.length > 1) {
+        // Sort all links by creation date and keep only the most recent one
+        const sortedLinks = allLinks.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+        const mostRecent = sortedLinks[0];
+        
+        // Delete all others
+        const allOthers = allLinks.filter(link => link.id !== mostRecent.id);
+        linksToDelete.push(...allOthers.map(link => link.id));
+      }
+
+      // Delete duplicates and extras
       if (linksToDelete.length > 0) {
         const { error } = await supabase
           .from('organization_links')
@@ -198,11 +200,11 @@ const Dashboard = () => {
         if (error) {
           console.error('Error cleaning up duplicates:', error);
         } else {
-          console.log(`Cleaned up ${linksToDelete.length} duplicate links`);
+          console.log(`Cleaned up ${linksToDelete.length} duplicate/extra links`);
         }
       }
     } catch (error) {
-      console.error('Error in cleanupDuplicateLinks:', error);
+      console.error('Error in cleanupAllDuplicateLinks:', error);
     }
   };
 
@@ -386,36 +388,26 @@ const Dashboard = () => {
         return;
       }
 
-      // Double-check in database to ensure no duplicates
-      const { data: existingLinks } = await supabase
-        .from('organization_links')
-        .select('id')
-        .eq('organization_id', profile.organization_id)
-        .eq('is_active', true);
-
-      if (existingLinks && existingLinks.length > 0) {
-        toast({
-          title: "Link already exists",
-          description: "Your organization already has a submission link",
-        });
-        fetchData(); // Refresh to show the existing link
-        return;
-      }
-
-      // Fix: Use type assertion to work around TypeScript type mismatch
-      // The database trigger will handle link_token generation
+      // Create the new link
       const { data, error } = await supabase
         .from('organization_links')
         .insert({
           name: 'Report Submission Link',
           description: 'Submit reports securely to our organization',
           created_by: user.id,
-          organization_id: profile.organization_id
         } as any)
         .select()
         .single();
 
       if (error) throw error;
+
+      // Now update with organization_id
+      const { error: updateError } = await supabase
+        .from('organization_links')
+        .update({ organization_id: profile.organization_id })
+        .eq('id', data.id);
+
+      if (updateError) throw updateError;
 
       toast({
         title: "Link created!",
@@ -565,26 +557,21 @@ const Dashboard = () => {
                 </Card>
               )}
 
-              {/* Create Link Button */}
-              <Card>
-                <CardContent className="p-6">
-                  <div className="flex items-center">
-                    <Plus className="h-8 w-8 text-purple-600" />
-                    <div className="ml-4">
-                      <Button 
-                        onClick={createOrGetSubmissionLink} 
-                        className="w-full" 
-                        disabled={links.length > 0 || !subscriptionData.subscribed}
-                      >
-                        {links.length > 0 ? 'Link Created' : 'Create Submission Link'}
-                      </Button>
-                      {!subscriptionData.subscribed && (
-                        <p className="text-xs text-gray-500 mt-2">Subscription required</p>
-                      )}
+              {/* Create Link Button - only show if no links exist */}
+              {links.length === 0 && subscriptionData.subscribed && (
+                <Card>
+                  <CardContent className="p-6">
+                    <div className="flex items-center">
+                      <Plus className="h-8 w-8 text-purple-600" />
+                      <div className="ml-4">
+                        <Button onClick={createOrGetSubmissionLink} className="w-full">
+                          Create Submission Link
+                        </Button>
+                      </div>
                     </div>
-                  </div>
-                </CardContent>
-              </Card>
+                  </CardContent>
+                </Card>
+              )}
 
               {/* Submission Link */}
               {links.length > 0 && (
