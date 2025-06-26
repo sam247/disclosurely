@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -169,27 +170,36 @@ const LinkGenerator = () => {
         return;
       }
 
-      const linkData = {
-        organization_id: profile.organization_id,
-        name: formData.name,
-        description: formData.description,
-        department: formData.department,
-        location: formData.location,
-        is_active: formData.is_active,
-        expires_at: formData.expires_at ? new Date(formData.expires_at).toISOString() : null,
-        usage_limit: formData.usage_limit ? parseInt(formData.usage_limit) : null,
-        created_by: user.id
-      };
-
-      console.log('Creating link with data:', linkData);
-
-      const { error } = await supabase
+      // Fix: Create link without organization_id in initial insert, then update separately
+      const { data, error } = await supabase
         .from('organization_links')
-        .insert(linkData);
+        .insert({
+          name: formData.name,
+          description: formData.description,
+          department: formData.department,
+          location: formData.location,
+          is_active: formData.is_active,
+          expires_at: formData.expires_at ? new Date(formData.expires_at).toISOString() : null,
+          usage_limit: formData.usage_limit ? parseInt(formData.usage_limit) : null,
+          created_by: user.id
+        })
+        .select()
+        .single();
 
       if (error) {
         console.error('Insert error:', error);
         throw error;
+      }
+
+      // Update with organization_id
+      const { error: updateError } = await supabase
+        .from('organization_links')
+        .update({ organization_id: profile.organization_id })
+        .eq('id', data.id);
+
+      if (updateError) {
+        console.error('Update error:', updateError);
+        throw updateError;
       }
 
       toast({

@@ -352,10 +352,10 @@ const Dashboard = () => {
         return;
       }
 
+      // Fix: Remove organization_id from insert object and let database trigger handle link_token
       const { data, error } = await supabase
         .from('organization_links')
         .insert({
-          organization_id: profile.organization_id,
           name: 'Report Submission Link',
           description: 'Submit reports securely to our organization',
           created_by: user.id
@@ -364,6 +364,14 @@ const Dashboard = () => {
         .single();
 
       if (error) throw error;
+
+      // Update the created link with organization_id using a separate update
+      const { error: updateError } = await supabase
+        .from('organization_links')
+        .update({ organization_id: profile.organization_id })
+        .eq('id', data.id);
+
+      if (updateError) throw updateError;
 
       toast({
         title: "Link created!",
