@@ -1,94 +1,113 @@
 import { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
+import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { Textarea } from '@/components/ui/textarea';
-import { Label } from '@/components/ui/label';
-import { useToast } from '@/hooks/use-toast';
-import { supabase } from '@/integrations/supabase/client';
+import { Input } from '@/components/ui/input';
 import { useAuth } from '@/hooks/useAuth';
-import { 
-  Eye, 
-  UserCheck, 
-  MessageSquare, 
-  FileText, 
-  Filter,
-  Search,
-  Clock,
-  AlertTriangle,
-  CheckCircle,
-  XCircle,
-  User
-} from 'lucide-react';
+import { useAuditLog } from '@/hooks/useAuditLog';
+import { supabase } from '@/integrations/supabase/client';
+import { useToast } from '@/hooks/use-toast';
+import { Eye, UserPlus, Clock, CheckCircle, XCircle, Search, Filter } from 'lucide-react';
+import { format } from 'date-fns';
+import type { Report, ReportStatus } from '@/types/database';
 
-type ReportStatus = 'new' | 'in_review' | 'investigating' | 'resolved' | 'closed';
-
-interface Report {
-  id: string;
-  tracking_id: string;
-  title: string;
-  status: ReportStatus;
-  priority: number;
-  report_type: string;
-  created_at: string;
-  updated_at: string;
-  assigned_to: string | null;
-  submitted_by_email: string | null;
-  profiles?: {
+interface ReportWithAssignee extends Report {
+  assignee_profile: {
+    email: string;
     first_name: string | null;
     last_name: string | null;
-    email: string;
-  };
+  } | null;
 }
 
 const ReportsManagement = () => {
   const { user } = useAuth();
+  const { createAuditLog } = useAuditLog();
   const { toast } = useToast();
-  const [reports, setReports] = useState<Report[]>([]);
-  const [selectedReport, setSelectedReport] = useState<Report | null>(null);
-  const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [isLoading, setIsLoading] = useState(true);
+  const [reports, setReports] = useState<ReportWithAssignee[]>([]);
+  const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
-  const [statusFilter, setStatusFilter] = useState('all');
-  const [priorityFilter, setPriorityFilter] = useState('all');
-  const [teamMembers, setTeamMembers] = useState<any[]>([]);
-  const [newNote, setNewNote] = useState('');
-  const [reportNotes, setReportNotes] = useState<any[]>([]);
+  const [statusFilter, setStatusFilter] = useState<ReportStatus | 'all'>('all');
+  const [selectedReport, setSelectedReport] = useState<ReportWithAssignee | null>(null);
+  const [users, setUsers] = useState<{ id: string; email: string; first_name: string | null; last_name: string | null; }[]>([]);
+
+  const reportStatuses: { value: ReportStatus | 'all'; label: string }[] = [
+    { value: 'all', label: 'All Statuses' },
+    { value: 'new', label: 'New' },
+    { value: 'in_review', label: 'In Review' },
+    { value: 'investigating', label: 'Investigating' },
+    { value: 'resolved', label: 'Resolved' },
+    { value: 'closed', label: 'Closed' },
+  ];
 
   useEffect(() => {
-    fetchReports();
-    fetchTeamMembers();
-  }, []);
+    if (user) {
+      fetchReports();
+      fetchUsers();
+    }
+  }, [user, searchTerm, statusFilter]);
 
   const fetchReports = async () => {
+    if (!user) return;
+
     try {
+      setLoading(true);
+
+      // Get user's organization
       const { data: profile } = await supabase
         .from('profiles')
         .select('organization_id')
-        .eq('id', user?.id)
+        .eq('id', user.id)
         .single();
 
-      if (!profile?.organization_id) return;
+      if (!profile?.organization_id) {
+        console.log('No organization found for user');
+        setLoading(false);
+        return;
+      }
 
-      const { data, error } = await supabase
+      console.log('Fetching reports for organization:', profile.organization_id);
+
+      // Build query
+      let query = supabase
         .from('reports')
         .select(`
           *,
-          profiles:assigned_to (
+          assignee_profile:assigned_to (
+            email,
             first_name,
-            last_name,
-            email
+            last_name
           )
         `)
         .eq('organization_id', profile.organization_id)
         .order('created_at', { ascending: false });
 
-      if (error) throw error;
-      setReports(data || []);
+      // Apply status filter
+      if (statusFilter !== 'all') {
+        query = query.eq('status', statusFilter);
+      }
+
+      const { data, error } = await query;
+
+      if (error) {
+        console.error('Error fetching reports:', error);
+        throw error;
+      }
+
+      console.log('Fetched reports:', data?.length || 0, 'records');
+
+      // Apply search filter locally
+      let filteredData = data || [];
+      if (searchTerm) {
+        const lowerSearchTerm = searchTerm.toLowerCase();
+        filteredData = filteredData.filter(report =>
+          report.title.toLowerCase().includes(lowerSearchTerm) ||
+          report.tracking_id.toLowerCase().includes(lowerSearchTerm)
+        );
+      }
+
+      setReports(filteredData as ReportWithAssignee[]);
     } catch (error) {
       console.error('Error fetching reports:', error);
       toast({
@@ -97,52 +116,45 @@ const ReportsManagement = () => {
         variant: "destructive",
       });
     } finally {
-      setIsLoading(false);
+      setLoading(false);
     }
   };
 
-  const fetchTeamMembers = async () => {
+  const fetchUsers = async () => {
+    if (!user) return;
+
     try {
+      // Get user's organization
       const { data: profile } = await supabase
         .from('profiles')
         .select('organization_id')
-        .eq('id', user?.id)
+        .eq('id', user.id)
         .single();
 
-      if (!profile?.organization_id) return;
+      if (!profile?.organization_id) {
+        console.log('No organization found for user');
+        return;
+      }
 
-      const { data, error } = await supabase
+      // Fetch users in the same organization
+      const { data: usersData, error: usersError } = await supabase
         .from('profiles')
-        .select('id, first_name, last_name, email, role')
-        .eq('organization_id', profile.organization_id)
-        .eq('is_active', true);
+        .select('id, email, first_name, last_name')
+        .eq('organization_id', profile.organization_id);
 
-      if (error) throw error;
-      setTeamMembers(data || []);
+      if (usersError) {
+        console.error('Error fetching users:', usersError);
+        throw usersError;
+      }
+
+      setUsers(usersData || []);
     } catch (error) {
-      console.error('Error fetching team members:', error);
-    }
-  };
-
-  const fetchReportNotes = async (reportId: string) => {
-    try {
-      const { data, error } = await supabase
-        .from('report_notes')
-        .select(`
-          *,
-          profiles:author_id (
-            first_name,
-            last_name,
-            email
-          )
-        `)
-        .eq('report_id', reportId)
-        .order('created_at', { ascending: false });
-
-      if (error) throw error;
-      setReportNotes(data || []);
-    } catch (error) {
-      console.error('Error fetching report notes:', error);
+      console.error('Error fetching users:', error);
+      toast({
+        title: "Error",
+        description: "Failed to fetch users",
+        variant: "destructive",
+      });
     }
   };
 
@@ -150,16 +162,18 @@ const ReportsManagement = () => {
     try {
       const { error } = await supabase
         .from('reports')
-        .update({ 
-          status: newStatus,
-          updated_at: new Date().toISOString(),
-          resolved_at: newStatus === 'resolved' ? new Date().toISOString() : null
-        })
+        .update({ status: newStatus })
         .eq('id', reportId);
 
       if (error) throw error;
-      
-      await fetchReports();
+
+      // Create audit log
+      await createAuditLog('status_changed', reportId, { 
+        old_status: reports.find(r => r.id === reportId)?.status,
+        new_status: newStatus 
+      });
+
+      fetchReports();
       toast({
         title: "Success",
         description: "Report status updated successfully",
@@ -174,19 +188,22 @@ const ReportsManagement = () => {
     }
   };
 
-  const assignReport = async (reportId: string, assigneeId: string) => {
+  const assignReport = async (reportId: string, userId: string) => {
     try {
       const { error } = await supabase
         .from('reports')
-        .update({ 
-          assigned_to: assigneeId,
-          updated_at: new Date().toISOString()
-        })
+        .update({ assigned_to: userId })
         .eq('id', reportId);
 
       if (error) throw error;
-      
-      await fetchReports();
+
+      // Create audit log
+      await createAuditLog('assigned', reportId, { 
+        assigned_to: userId,
+        assigned_by: user?.id 
+      });
+
+      fetchReports();
       toast({
         title: "Success",
         description: "Report assigned successfully",
@@ -201,97 +218,21 @@ const ReportsManagement = () => {
     }
   };
 
-  const addNote = async () => {
-    if (!selectedReport || !newNote.trim()) return;
-
-    try {
-      const { error } = await supabase
-        .from('report_notes')
-        .insert({
-          report_id: selectedReport.id,
-          author_id: user?.id,
-          content: newNote,
-        });
-
-      if (error) throw error;
-      
-      setNewNote('');
-      await fetchReportNotes(selectedReport.id);
-      toast({
-        title: "Success",
-        description: "Note added successfully",
-      });
-    } catch (error) {
-      console.error('Error adding note:', error);
-      toast({
-        title: "Error",
-        description: "Failed to add note",
-        variant: "destructive",
-      });
-    }
-  };
-
-  const openReportDetails = async (report: Report) => {
-    setSelectedReport(report);
-    await fetchReportNotes(report.id);
-    setIsDialogOpen(true);
-  };
-
-  const getStatusColor = (status: ReportStatus) => {
-    switch (status) {
-      case "new": return "bg-blue-100 text-blue-800";
-      case "in_review": return "bg-yellow-100 text-yellow-800";
-      case "investigating": return "bg-orange-100 text-orange-800";
-      case "resolved": return "bg-green-100 text-green-800";
-      case "closed": return "bg-gray-100 text-gray-800";
-      default: return "bg-gray-100 text-gray-800";
-    }
-  };
-
-  const getStatusIcon = (status: ReportStatus) => {
-    switch (status) {
-      case "new": return <AlertTriangle className="h-4 w-4" />;
-      case "in_review": return <Clock className="h-4 w-4" />;
-      case "investigating": return <Eye className="h-4 w-4" />;
-      case "resolved": return <CheckCircle className="h-4 w-4" />;
-      case "closed": return <XCircle className="h-4 w-4" />;
-      default: return <FileText className="h-4 w-4" />;
-    }
-  };
-
-  const formatStatus = (status: string) => {
-    return status.split('_').map(word => 
-      word.charAt(0).toUpperCase() + word.slice(1)
-    ).join(' ');
-  };
-
-  const getPriorityColor = (priority: number) => {
-    switch (priority) {
-      case 1: return "text-red-600 font-bold";
-      case 2: return "text-orange-600 font-semibold";
-      case 3: return "text-yellow-600";
-      case 4: return "text-green-600";
-      case 5: return "text-gray-600";
-      default: return "text-gray-600";
-    }
-  };
-
-  const filteredReports = reports.filter(report => {
-    const matchesSearch = report.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         report.tracking_id.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesStatus = statusFilter === 'all' || report.status === statusFilter;
-    const matchesPriority = priorityFilter === 'all' || report.priority.toString() === priorityFilter;
+  const viewReport = async (reportId: string) => {
+    // Create audit log for viewing
+    await createAuditLog('viewed', reportId, { 
+      viewed_by: user?.id,
+      viewed_at: new Date().toISOString()
+    });
     
-    return matchesSearch && matchesStatus && matchesPriority;
-  });
+    setSelectedReport(reports.find(r => r.id === reportId) || null);
+  };
 
-  if (isLoading) {
+  if (loading) {
     return (
-      <Card>
-        <CardContent className="p-6">
-          <div className="text-center">Loading reports...</div>
-        </CardContent>
-      </Card>
+      <div className="flex items-center justify-center py-8">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+      </div>
     );
   }
 
@@ -299,20 +240,19 @@ const ReportsManagement = () => {
     <div className="space-y-6">
       <Card>
         <CardHeader>
-          <CardTitle className="flex items-center space-x-2">
-            <FileText className="h-5 w-5 text-blue-600" />
-            <span>Report Management</span>
+          <CardTitle className="flex items-center gap-2">
+            <FileText className="h-5 w-5" />
+            Reports Management
           </CardTitle>
           <CardDescription>
-            View, manage, and track all submitted reports
+            Manage and monitor all reports submitted to your organization ({reports.length} total reports)
           </CardDescription>
         </CardHeader>
         <CardContent>
-          {/* Filters */}
           <div className="flex flex-col sm:flex-row gap-4 mb-6">
             <div className="flex-1">
               <div className="relative">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+                <Search className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
                 <Input
                   placeholder="Search by title or tracking ID..."
                   value={searchTerm}
@@ -321,35 +261,21 @@ const ReportsManagement = () => {
                 />
               </div>
             </div>
-            <Select value={statusFilter} onValueChange={setStatusFilter}>
-              <SelectTrigger className="w-full sm:w-48">
-                <SelectValue placeholder="Filter by status" />
+            <Select value={statusFilter} onValueChange={(value) => setStatusFilter(value as ReportStatus | 'all')}>
+              <SelectTrigger className="w-48">
+                <Filter className="h-4 w-4 mr-2" />
+                <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">All Statuses</SelectItem>
-                <SelectItem value="new">New</SelectItem>
-                <SelectItem value="in_review">In Review</SelectItem>
-                <SelectItem value="investigating">Investigating</SelectItem>
-                <SelectItem value="resolved">Resolved</SelectItem>
-                <SelectItem value="closed">Closed</SelectItem>
-              </SelectContent>
-            </Select>
-            <Select value={priorityFilter} onValueChange={setPriorityFilter}>
-              <SelectTrigger className="w-full sm:w-48">
-                <SelectValue placeholder="Filter by priority" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Priorities</SelectItem>
-                <SelectItem value="1">Priority 1 (High)</SelectItem>
-                <SelectItem value="2">Priority 2</SelectItem>
-                <SelectItem value="3">Priority 3 (Medium)</SelectItem>
-                <SelectItem value="4">Priority 4</SelectItem>
-                <SelectItem value="5">Priority 5 (Low)</SelectItem>
+                {reportStatuses.map(status => (
+                  <SelectItem key={status.value} value={status.value}>
+                    {status.label}
+                  </SelectItem>
+                ))}
               </SelectContent>
             </Select>
           </div>
 
-          {/* Reports Table */}
           <div className="rounded-md border">
             <Table>
               <TableHeader>
@@ -357,62 +283,59 @@ const ReportsManagement = () => {
                   <TableHead>Tracking ID</TableHead>
                   <TableHead>Title</TableHead>
                   <TableHead>Status</TableHead>
-                  <TableHead>Priority</TableHead>
                   <TableHead>Assigned To</TableHead>
-                  <TableHead>Submitted</TableHead>
-                  <TableHead>Actions</TableHead>
+                  <TableHead className="text-right">Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {filteredReports.length === 0 ? (
+                {reports.length === 0 ? (
                   <TableRow>
-                    <TableCell colSpan={7} className="text-center py-8 text-gray-500">
-                      No reports found
+                    <TableCell colSpan={5} className="text-center py-8">
+                      No reports found for the selected criteria
                     </TableCell>
                   </TableRow>
                 ) : (
-                  filteredReports.map((report) => (
+                  reports.map((report) => (
                     <TableRow key={report.id}>
-                      <TableCell className="font-mono">{report.tracking_id}</TableCell>
-                      <TableCell className="max-w-xs truncate">{report.title}</TableCell>
                       <TableCell>
-                        <Badge className={getStatusColor(report.status)}>
-                          <span className="flex items-center space-x-1">
-                            {getStatusIcon(report.status)}
-                            <span>{formatStatus(report.status)}</span>
-                          </span>
+                        <div className="font-medium">{report.tracking_id}</div>
+                      </TableCell>
+                      <TableCell>
+                        <div className="text-sm truncate max-w-96">{report.title}</div>
+                      </TableCell>
+                      <TableCell>
+                        <Badge
+                          className={`
+                            ${report.status === 'new' ? 'bg-blue-100 text-blue-800' : ''}
+                            ${report.status === 'in_review' ? 'bg-yellow-100 text-yellow-800' : ''}
+                            ${report.status === 'investigating' ? 'bg-orange-100 text-orange-800' : ''}
+                            ${report.status === 'resolved' ? 'bg-green-100 text-green-800' : ''}
+                            ${report.status === 'closed' ? 'bg-gray-100 text-gray-800' : ''}
+                            `
+                          }
+                        >
+                          {report.status.replace('_', ' ')}
                         </Badge>
                       </TableCell>
                       <TableCell>
-                        <span className={getPriorityColor(report.priority)}>
-                          Level {report.priority}
-                        </span>
-                      </TableCell>
-                      <TableCell>
-                        {report.profiles ? (
-                          <div className="flex items-center space-x-1">
-                            <User className="h-4 w-4 text-gray-400" />
-                            <span className="text-sm">
-                              {report.profiles.first_name} {report.profiles.last_name}
-                            </span>
+                        {report.assignee_profile ? (
+                          <div className="text-sm">
+                            <div className="font-medium">{report.assignee_profile.email}</div>
+                            {(report.assignee_profile.first_name || report.assignee_profile.last_name) && (
+                              <div className="text-gray-500">
+                                {report.assignee_profile.first_name} {report.assignee_profile.last_name}
+                              </div>
+                            )}
                           </div>
                         ) : (
-                          <span className="text-gray-400 text-sm">Unassigned</span>
+                          <Badge variant="secondary">Unassigned</Badge>
                         )}
                       </TableCell>
-                      <TableCell className="text-sm text-gray-500">
-                        {new Date(report.created_at).toLocaleDateString()}
-                      </TableCell>
-                      <TableCell>
-                        <div className="flex space-x-2">
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            onClick={() => openReportDetails(report)}
-                          >
-                            <Eye className="h-4 w-4" />
-                          </Button>
-                        </div>
+                      <TableCell className="text-right">
+                        <Button variant="ghost" size="sm" onClick={() => viewReport(report.id)}>
+                          <Eye className="h-4 w-4 mr-2" />
+                          View
+                        </Button>
                       </TableCell>
                     </TableRow>
                   ))
@@ -423,106 +346,69 @@ const ReportsManagement = () => {
         </CardContent>
       </Card>
 
-      {/* Report Details Dialog */}
-      <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-        <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle>Report Details: {selectedReport?.tracking_id}</DialogTitle>
-            <DialogDescription>
-              View and manage report information
-            </DialogDescription>
-          </DialogHeader>
-          
-          {selectedReport && (
-            <div className="space-y-6">
-              {/* Report Info */}
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <Label>Title</Label>
-                  <p className="text-sm">{selectedReport.title}</p>
-                </div>
-                <div>
-                  <Label>Status</Label>
-                  <div className="mt-1">
-                    <Select 
-                      value={selectedReport.status} 
-                      onValueChange={(value: ReportStatus) => updateReportStatus(selectedReport.id, value)}
-                    >
-                      <SelectTrigger className="w-full">
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="new">New</SelectItem>
-                        <SelectItem value="in_review">In Review</SelectItem>
-                        <SelectItem value="investigating">Investigating</SelectItem>
-                        <SelectItem value="resolved">Resolved</SelectItem>
-                        <SelectItem value="closed">Closed</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                </div>
-                <div>
-                  <Label>Priority</Label>
-                  <p className="text-sm">Level {selectedReport.priority}</p>
-                </div>
-                <div>
-                  <Label>Assigned To</Label>
-                  <div className="mt-1">
-                    <Select 
-                      value={selectedReport.assigned_to || "unassigned"} 
-                      onValueChange={(value) => assignReport(selectedReport.id, value)}
-                    >
-                      <SelectTrigger className="w-full">
-                        <SelectValue placeholder="Select assignee" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="unassigned">Unassigned</SelectItem>
-                        {teamMembers.map((member) => (
-                          <SelectItem key={member.id} value={member.id}>
-                            {member.first_name} {member.last_name} ({member.role})
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-                </div>
-              </div>
-
-              {/* Internal Notes */}
+      {selectedReport && (
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <FileText className="h-5 w-5" />
+              Report Details
+            </CardTitle>
+            <CardDescription>
+              Details for report: {selectedReport.tracking_id}
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="grid gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <Label>Internal Notes</Label>
-                <div className="mt-2 space-y-4">
-                  {reportNotes.map((note) => (
-                    <div key={note.id} className="p-4 border rounded-lg">
-                      <div className="flex justify-between items-start mb-2">
-                        <span className="text-sm font-medium">
-                          {note.profiles?.first_name} {note.profiles?.last_name}
-                        </span>
-                        <span className="text-xs text-gray-500">
-                          {new Date(note.created_at).toLocaleString()}
-                        </span>
-                      </div>
-                      <p className="text-sm">{note.content}</p>
-                    </div>
-                  ))}
-                  
-                  <div className="space-y-2">
-                    <Textarea
-                      placeholder="Add an internal note..."
-                      value={newNote}
-                      onChange={(e) => setNewNote(e.target.value)}
-                      rows={3}
-                    />
-                    <Button onClick={addNote} disabled={!newNote.trim()}>
-                      Add Note
-                    </Button>
-                  </div>
-                </div>
+                <div className="text-sm font-bold mb-2">Title</div>
+                <div className="text-gray-700">{selectedReport.title}</div>
+              </div>
+              <div>
+                <div className="text-sm font-bold mb-2">Tracking ID</div>
+                <div className="text-gray-700">{selectedReport.tracking_id}</div>
+              </div>
+              <div>
+                <div className="text-sm font-bold mb-2">Status</div>
+                <Select
+                  value={selectedReport.status}
+                  onValueChange={(value) => updateReportStatus(selectedReport.id, value as ReportStatus)}
+                >
+                  <SelectTrigger className="w-48">
+                    <Clock className="h-4 w-4 mr-2" />
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {reportStatuses.filter(s => s.value !== 'all').map(status => (
+                      <SelectItem key={status.value} value={status.value}>
+                        {status.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <div className="text-sm font-bold mb-2">Assign To</div>
+                <Select
+                  value={selectedReport.assigned_to || ''}
+                  onValueChange={(value) => assignReport(selectedReport.id, value)}
+                >
+                  <SelectTrigger className="w-48">
+                    <UserPlus className="h-4 w-4 mr-2" />
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {users.map(user => (
+                      <SelectItem key={user.id} value={user.id}>
+                        {user.email}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
             </div>
-          )}
-        </DialogContent>
-      </Dialog>
+          </CardContent>
+        </Card>
+      )}
     </div>
   );
 };

@@ -1,747 +1,352 @@
 import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
 import { useAuth } from '@/hooks/useAuth';
-import { useToast } from '@/hooks/use-toast';
-import { LogOut, Plus, ExternalLink, FileText, Eye, Archive, Trash2, CreditCard, Settings } from 'lucide-react';
+import { useOrganization } from '@/hooks/useOrganization';
+import { useAuditLog } from '@/hooks/useAuditLog';
 import { supabase } from '@/integrations/supabase/client';
-import ReportMessaging from '@/components/ReportMessaging';
-import ReportContentDisplay from '@/components/ReportContentDisplay';
-import SubscriptionManagement from '@/components/SubscriptionManagement';
-import AuditTrailManagement from '@/components/AuditTrailManagement';
-import AuditStatistics from '@/components/AuditStatistics';
+import { useToast } from '@/hooks/use-toast';
+import { 
+  FileText, 
+  Users, 
+  Clock, 
+  CheckCircle, 
+  Plus, 
+  ExternalLink, 
+  Copy,
+  Trash2,
+  Activity
+} from 'lucide-react';
+import { format } from 'date-fns';
+import ReportsManagement from './ReportsManagement';
+import AuditTrailManagement from './AuditTrailManagement';
+import UserManagement from './UserManagement';
+import SubscriptionManagement from './SubscriptionManagement';
 
-interface Report {
-  id: string;
+interface DashboardCardProps {
   title: string;
-  tracking_id: string;
-  status: string;
-  created_at: string;
-  encrypted_content: string;
-  encryption_key_hash: string;
-  priority: number;
-  report_type: string;
-  organizations?: {
-    name: string;
-  };
-}
-
-interface SubmissionLink {
-  id: string;
-  name: string;
-  link_token: string;
-  usage_count: number;
-  is_active: boolean;
+  value: number;
+  icon: React.ReactNode;
+  color: string;
+  description?: string;
 }
 
 const Dashboard = () => {
-  const { user, signOut, subscriptionData } = useAuth();
-  const navigate = useNavigate();
+  const { user } = useAuth();
+  const { organization, profile } = useOrganization();
+  const { createAuditLog } = useAuditLog();
   const { toast } = useToast();
-  const [reports, setReports] = useState<Report[]>([]);
-  const [links, setLinks] = useState<SubmissionLink[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [selectedReport, setSelectedReport] = useState<Report | null>(null);
-  const [isReportDialogOpen, setIsReportDialogOpen] = useState(false);
+
+  const [reportCount, setReportCount] = useState(0);
+  const [userCount, setUserCount] = useState(0);
+  const [newReportCount, setNewReportCount] = useState(0);
+  const [overdueReportCount, setOverdueReportCount] = useState(0);
+  const [activeTab, setActiveTab] = useState<'reports' | 'audit' | 'users' | 'subscription'>('reports');
+  const [submissionLinks, setSubmissionLinks] = useState<any[]>([]);
+  const [creatingLink, setCreatingLink] = useState(false);
+  const [copySuccess, setCopySuccess] = useState(false);
 
   useEffect(() => {
-    if (user) {
-      fetchData();
-    }
-  }, [user]);
-
-  const createAuditLog = async (reportId: string, organizationId: string, action: 'viewed' | 'status_changed', details: any) => {
-    try {
-      console.log('Creating audit log:', { reportId, organizationId, action, details });
-      
-      const { error } = await supabase
-        .from('audit_logs')
-        .insert({
-          organization_id: organizationId,
-          user_id: user?.id,
-          report_id: reportId,
-          action: action,
-          details: details,
-          ip_address: null,
-          user_agent: navigator.userAgent
-        });
-
-      if (error) {
-        console.error('Error creating audit log:', error);
-      } else {
-        console.log('Audit log created successfully');
-      }
-    } catch (error) {
-      console.error('Error in createAuditLog:', error);
-    }
-  };
+    fetchData();
+  }, [organization]);
 
   const fetchData = async () => {
-    if (!user) return;
-    
+    if (!organization) return;
+
     try {
-      console.log('Starting fetchData for user:', user.id);
-      
-      // Get user's profile and organization
-      const { data: profile, error: profileError } = await supabase
-        .from('profiles')
-        .select('organization_id')
-        .eq('id', user.id)
-        .single();
-
-      if (profileError) {
-        console.error('Error fetching profile:', profileError);
-        setLoading(false);
-        return;
-      }
-
-      if (!profile?.organization_id) {
-        console.log('No organization found for user');
-        setLoading(false);
-        return;
-      }
-
-      console.log('Fetching data for organization:', profile.organization_id);
-
-      // Fetch ALL reports for the organization
-      const { data: reportsData, error: reportsError } = await supabase
+      // Fetch report counts
+      const { data: reports, error: reportsError } = await supabase
         .from('reports')
-        .select('id, title, tracking_id, status, created_at, encrypted_content, encryption_key_hash, priority, report_type')
-        .eq('organization_id', profile.organization_id)
-        .order('created_at', { ascending: false });
+        .select('*', { count: 'exact' })
+        .eq('organization_id', organization.id);
 
-      if (reportsError) {
-        console.error('Error fetching reports:', reportsError);
-      } else {
-        console.log('Fetched reports:', reportsData?.length || 0, 'records');
-        console.log('Report statuses:', reportsData?.map(r => r.status));
-        setReports(reportsData || []);
-      }
+      if (reportsError) throw reportsError;
+      setReportCount(reports.length);
 
-      // Clean up duplicate links first, then fetch
-      await cleanupAllDuplicateLinks(profile.organization_id);
-
-      // Fetch organization links - only get unique active ones
-      const { data: linksData, error: linksError } = await supabase
-        .from('organization_links')
-        .select('id, name, link_token, usage_count, is_active')
-        .eq('organization_id', profile.organization_id)
-        .eq('is_active', true)
-        .order('created_at', { ascending: false })
-        .limit(1); // Only get the most recent one
-
-      if (linksError) {
-        console.error('Error fetching links:', linksError);
-      } else {
-        console.log('Fetched links:', linksData?.length || 0, 'records');
-        setLinks(linksData || []);
-      }
-
-    } catch (error) {
-      console.error('Error fetching dashboard data:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const cleanupAllDuplicateLinks = async (organizationId: string) => {
-    try {
-      // Get all links for this organization
-      const { data: allLinks } = await supabase
-        .from('organization_links')
-        .select('*')
-        .eq('organization_id', organizationId)
-        .order('created_at', { ascending: false });
-
-      if (!allLinks || allLinks.length <= 1) return;
-
-      // Group by link_token and keep only the most recent one
-      const linkGroups = new Map<string, any[]>();
-      allLinks.forEach((link) => {
-        if (!linkGroups.has(link.link_token)) {
-          linkGroups.set(link.link_token, []);
-        }
-        linkGroups.get(link.link_token)!.push(link);
-      });
-
-      // Find duplicates to delete
-      const linksToDelete: string[] = [];
-      linkGroups.forEach((group) => {
-        if (group.length > 1) {
-          // Keep the first (most recent due to ordering), delete the rest
-          const [keep, ...toDelete] = group;
-          linksToDelete.push(...toDelete.map(link => link.id));
-        }
-      });
-
-      // If we have too many unique tokens, keep only the most recent one
-      const uniqueTokens = Array.from(linkGroups.keys());
-      if (uniqueTokens.length > 1) {
-        // Sort all links by creation date and keep only the most recent one
-        const sortedLinks = allLinks.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
-        const mostRecent = sortedLinks[0];
-        
-        // Delete all others
-        const allOthers = allLinks.filter(link => link.id !== mostRecent.id);
-        linksToDelete.push(...allOthers.map(link => link.id));
-      }
-
-      // Delete duplicates and extras
-      if (linksToDelete.length > 0) {
-        const { error } = await supabase
-          .from('organization_links')
-          .delete()
-          .in('id', linksToDelete);
-
-        if (error) {
-          console.error('Error cleaning up duplicates:', error);
-        } else {
-          console.log(`Cleaned up ${linksToDelete.length} duplicate/extra links`);
-        }
-      }
-    } catch (error) {
-      console.error('Error in cleanupAllDuplicateLinks:', error);
-    }
-  };
-
-  const handleViewReport = async (report: Report) => {
-    console.log('Viewing report:', report.id);
-    
-    // Get user's organization for audit log
-    const { data: profile } = await supabase
-      .from('profiles')
-      .select('organization_id')
-      .eq('id', user?.id)
-      .single();
-
-    if (profile?.organization_id) {
-      // Create audit log for viewing report
-      await createAuditLog(
-        report.id,
-        profile.organization_id,
-        'viewed',
-        {
-          report_title: report.title,
-          tracking_id: report.tracking_id,
-          viewed_by: user?.email
-        }
-      );
-    }
-
-    setSelectedReport(report);
-    setIsReportDialogOpen(true);
-  };
-
-  const handleArchiveReport = async (reportId: string) => {
-    try {
-      // Get user's organization for audit log
-      const { data: profile } = await supabase
+      // Fetch user counts
+      const { data: users, error: usersError } = await supabase
         .from('profiles')
-        .select('organization_id')
-        .eq('id', user?.id)
-        .single();
+        .select('*', { count: 'exact' })
+        .eq('organization_id', organization.id);
 
-      const { error } = await supabase
+      if (usersError) throw usersError;
+      setUserCount(users.length);
+
+      // Fetch new report counts
+      const { data: newReports, error: newReportsError } = await supabase
         .from('reports')
-        .update({ status: 'closed' })
-        .eq('id', reportId);
+        .select('*', { count: 'exact' })
+        .eq('organization_id', organization.id)
+        .eq('status', 'new');
 
-      if (error) throw error;
+      if (newReportsError) throw newReportsError;
+      setNewReportCount(newReports.length);
 
-      // Create audit log for status change
-      if (profile?.organization_id) {
-        const reportToArchive = reports.find(r => r.id === reportId);
-        await createAuditLog(
-          reportId,
-          profile.organization_id,
-          'status_changed',
-          {
-            report_title: reportToArchive?.title,
-            tracking_id: reportToArchive?.tracking_id,
-            old_status: reportToArchive?.status,
-            new_status: 'closed',
-            changed_by: user?.email
-          }
-        );
-      }
+      // Fetch overdue report counts
+      const { data: overdueReports, error: overdueReportsError } = await supabase
+        .from('reports')
+        .select('*', { count: 'exact' })
+        .eq('organization_id', organization.id)
+        .lt('due_date', new Date().toISOString());
 
-      toast({
-        title: "Report archived",
-        description: "The report has been moved to closed status",
-      });
+      if (overdueReportsError) throw overdueReportsError;
+      setOverdueReportCount(overdueReports.length);
 
-      // Close dialog if this report was being viewed
-      if (selectedReport?.id === reportId) {
-        setIsReportDialogOpen(false);
-        setSelectedReport(null);
-      }
+       // Fetch submission links
+       const { data: links, error: linksError } = await supabase
+       .from('organization_links')
+       .select('*')
+       .eq('organization_id', organization.id);
 
-      // Refresh data to update the reports list
-      fetchData();
+     if (linksError) throw linksError;
+     setSubmissionLinks(links || []);
+
     } catch (error) {
-      console.error('Error archiving report:', error);
+      console.error('Error fetching data:', error);
       toast({
         title: "Error",
-        description: "Failed to archive report. Please try again.",
+        description: "Failed to fetch dashboard data",
         variant: "destructive",
       });
     }
   };
 
-  const handleDeleteReport = async (reportId: string) => {
-    try {
-      // Close dialog if this report was being viewed
-      if (selectedReport?.id === reportId) {
-        setIsReportDialogOpen(false);
-        setSelectedReport(null);
-      }
-
-      // Delete related messages
-      const { error: messagesError } = await supabase
-        .from('report_messages')
-        .delete()
-        .eq('report_id', reportId);
-
-      if (messagesError) {
-        console.error('Error deleting messages:', messagesError);
-      }
-
-      // Delete related notifications
-      const { error: notificationsError } = await supabase
-        .from('notifications')
-        .delete()
-        .eq('report_id', reportId);
-
-      if (notificationsError) {
-        console.error('Error deleting notifications:', notificationsError);
-      }
-
-      // Delete the report itself
-      const { error: reportError, data: deletedData } = await supabase
-        .from('reports')
-        .delete()
-        .eq('id', reportId)
-        .select();
-
-      if (reportError) {
-        console.error('Error deleting report:', reportError);
-        throw reportError;
-      }
-
-      if (!deletedData || deletedData.length === 0) {
-        toast({
-          title: "Delete failed",
-          description: "Report could not be deleted. Please try again.",
-          variant: "destructive",
-        });
-        return;
-      }
-
-      toast({
-        title: "Report deleted",
-        description: "The report has been permanently deleted",
-      });
-
-      // Refresh data after successful deletion
-      fetchData();
-      
-    } catch (error) {
-      console.error('Error deleting report:', error);
-      
-      toast({
-        title: "Error",
-        description: "Failed to delete report. Please try again.",
-        variant: "destructive",
-      });
-    }
-  };
-
-  const createOrGetSubmissionLink = async () => {
-    if (!user) return;
+  const createSubmissionLink = async () => {
+    if (!organization || !user) return;
 
     try {
-      const { data: profile } = await supabase
-        .from('profiles')
-        .select('organization_id')
-        .eq('id', user.id)
-        .single();
+      setCreatingLink(true);
 
-      if (!profile?.organization_id) {
-        toast({
-          title: "Setup required",
-          description: "Please complete your profile setup first",
-          variant: "destructive",
-        });
-        return;
-      }
+      // Create audit log for link creation
+      await createAuditLog('created', undefined, { 
+        action: 'submission_link_created',
+        created_by: user.id 
+      });
 
-      // Check if a link already exists (prevent duplicates)
-      if (links.length > 0) {
-        toast({
-          title: "Link already exists",
-          description: "Your organization already has a submission link",
-        });
-        return;
-      }
-
-      // Create the new link
       const { data, error } = await supabase
         .from('organization_links')
         .insert({
-          name: 'Report Submission Link',
-          description: 'Submit reports securely to our organization',
+          name: 'Quick Report Link',
+          description: 'General purpose submission link',
           created_by: user.id,
-        } as any)
-        .select()
-        .single();
+        } as any);
 
       if (error) throw error;
 
-      // Now update with organization_id
-      const { error: updateError } = await supabase
-        .from('organization_links')
-        .update({ organization_id: profile.organization_id })
-        .eq('id', data.id);
-
-      if (updateError) throw updateError;
-
+      await fetchData();
       toast({
-        title: "Link created!",
-        description: "Your submission link is ready to use.",
+        title: "Success",
+        description: "Submission link created successfully",
       });
-
-      fetchData(); // Refresh the data
-    } catch (error: any) {
-      console.error('Error creating link:', error);
+    } catch (error) {
+      console.error('Error creating submission link:', error);
       toast({
         title: "Error",
-        description: error.message || "Failed to create link",
+        description: "Failed to create submission link",
+        variant: "destructive",
+      });
+    } finally {
+      setCreatingLink(false);
+    }
+  };
+
+  const copyLink = (linkId: string) => {
+    const link = `${window.location.origin}/secure/tool/submit/${linkId}`;
+    navigator.clipboard.writeText(link);
+    setCopySuccess(true);
+    setTimeout(() => {
+      setCopySuccess(false);
+    }, 2000);
+  };
+
+  const deleteLink = async (linkId: string) => {
+    try {
+      const { error } = await supabase
+        .from('organization_links')
+        .delete()
+        .eq('id', linkId);
+
+      if (error) throw error;
+
+      await fetchData();
+      toast({
+        title: "Success",
+        description: "Submission link deleted successfully",
+      });
+    } catch (error) {
+      console.error('Error deleting submission link:', error);
+      toast({
+        title: "Error",
+        description: "Failed to delete submission link",
         variant: "destructive",
       });
     }
   };
 
-  const copyLink = (token: string) => {
-    const link = `${window.location.origin}/secure/tool/submit/${token}`;
-    navigator.clipboard.writeText(link);
-    toast({
-      title: "Link copied!",
-      description: "The submission link has been copied to your clipboard.",
-    });
-  };
+  const dashboardCards: DashboardCardProps[] = [
+    {
+      title: 'Total Reports',
+      value: reportCount,
+      icon: <FileText className="h-5 w-5 text-white" />,
+      color: 'bg-blue-500',
+      description: 'Total number of reports submitted'
+    },
+    {
+      title: 'Total Users',
+      value: userCount,
+      icon: <Users className="h-5 w-5 text-white" />,
+      color: 'bg-green-500',
+      description: 'Total number of users in your organization'
+    },
+    {
+      title: 'New Reports',
+      value: newReportCount,
+      icon: <Clock className="h-5 w-5 text-white" />,
+      color: 'bg-yellow-500',
+      description: 'Number of new reports awaiting review'
+    },
+    {
+      title: 'Overdue Reports',
+      value: overdueReportCount,
+      icon: <CheckCircle className="h-5 w-5 text-white" />,
+      color: 'bg-red-500',
+      description: 'Number of reports past their due date'
+    },
+  ];
 
-  const handleLogout = async () => {
-    try {
-      await signOut();
-      navigate('/auth/login');
-    } catch (error) {
-      console.error('Logout error:', error);
-    }
-  };
-
-  if (loading) {
+  if (!organization || !profile) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-4"></div>
-          <p>Loading dashboard...</p>
-        </div>
+      <div className="flex items-center justify-center py-8">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
       </div>
     );
   }
 
-  // Show ALL reports (including closed ones) but separate them
-  const activeReports = reports.filter(report => report.status !== 'closed');
-  const closedReports = reports.filter(report => report.status === 'closed');
-
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Header */}
-      <header className="bg-white shadow">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center py-6">
-            <div>
-              <h1 className="text-2xl font-bold text-gray-900">Dashboard</h1>
-              <div className="flex items-center gap-4">
-                <p className="text-sm text-gray-600">Welcome back, {user?.email}</p>
-                {subscriptionData.subscribed && (
-                  <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                    {subscriptionData.subscription_tier}
-                  </span>
+    <div className="container mx-auto p-6">
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-2xl font-semibold">
+            Welcome to your Dashboard, {user?.email}
+          </CardTitle>
+          <CardDescription>
+            Here's an overview of your organization's whistleblower platform.
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+            {dashboardCards.map((card, index) => (
+              <Card key={index} className="bg-white shadow-md rounded-md overflow-hidden">
+                <div className={`p-4 flex items-center ${card.color}`}>
+                  <div className="w-12 h-12 rounded-full flex items-center justify-center mr-4">
+                    {card.icon}
+                  </div>
+                  <div>
+                    <div className="text-white text-lg font-bold">{card.value}</div>
+                    <div className="text-white text-sm">{card.title}</div>
+                  </div>
+                </div>
+                {card.description && (
+                  <div className="p-4 text-gray-600 text-sm">
+                    {card.description}
+                  </div>
                 )}
-              </div>
-            </div>
-            <Button onClick={handleLogout} variant="outline">
-              <LogOut className="h-4 w-4 mr-2" />
-              Sign out
-            </Button>
+              </Card>
+            ))}
           </div>
-        </div>
-      </header>
 
-      {/* Main Content */}
-      <main className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
-        <div className="px-4 py-6 sm:px-0">
-          <Tabs defaultValue="reports" className="space-y-6">
-            <TabsList>
-              <TabsTrigger value="reports">Reports</TabsTrigger>
-              <TabsTrigger value="audit">Audit Trail</TabsTrigger>
-              <TabsTrigger value="subscription">Subscription</TabsTrigger>
-            </TabsList>
+          <div className="mb-6">
+            <div className="flex items-center justify-between">
+              <h2 className="text-xl font-semibold">Submission Links</h2>
+              <Button onClick={createSubmissionLink} disabled={creatingLink}>
+                <Plus className="h-4 w-4 mr-2" />
+                Create New Link
+              </Button>
+            </div>
+            <p className="text-gray-500 text-sm mt-1">
+              Share these links to allow users to submit reports anonymously.
+            </p>
 
-            <TabsContent value="reports" className="space-y-6">
-              {/* Quick Stats */}
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <Card>
-                  <CardContent className="p-6">
-                    <div className="flex items-center">
-                      <FileText className="h-8 w-8 text-blue-600" />
-                      <div className="ml-4">
-                        <p className="text-sm font-medium text-gray-600">Total Reports</p>
-                        <p className="text-2xl font-bold text-gray-900">{reports.length}</p>
-                        <p className="text-xs text-gray-500">
-                          {activeReports.length} active, {closedReports.length} closed
-                        </p>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-                
-                <Card>
-                  <CardContent className="p-6">
-                    <div className="flex items-center">
-                      <ExternalLink className="h-8 w-8 text-green-600" />
-                      <div className="ml-4">
-                        <p className="text-sm font-medium text-gray-600">Submission Link</p>
-                        <p className="text-2xl font-bold text-gray-900">{links.length > 0 ? 'Active' : 'None'}</p>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-                
-                <Card>
-                  <CardContent className="p-6">
-                    <div className="flex items-center">
-                      <CreditCard className="h-8 w-8 text-purple-600" />
-                      <div className="ml-4">
-                        <p className="text-sm font-medium text-gray-600">Subscription</p>
-                        <p className="text-2xl font-bold text-gray-900">
-                          {subscriptionData.subscribed ? 'Active' : 'Inactive'}
-                        </p>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              </div>
-
-              {/* Subscription Alert */}
-              {!subscriptionData.subscribed && (
-                <Card className="border-orange-200 bg-orange-50">
-                  <CardContent className="p-6">
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <h3 className="font-medium text-orange-800">Subscription Required</h3>
-                        <p className="text-sm text-orange-700">
-                          A subscription is required to create submission links and manage reports.
-                        </p>
-                      </div>
-                      <Button onClick={() => navigate('#subscription')} className="bg-orange-600 hover:bg-orange-700">
-                        View Plans
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mt-4">
+              {submissionLinks.map(link => (
+                <Card key={link.id} className="bg-white shadow-md rounded-md overflow-hidden">
+                  <CardContent className="flex flex-col">
+                    <div className="font-medium">{link.name}</div>
+                    <div className="text-gray-500 text-sm">{link.description}</div>
+                    <div className="flex items-center justify-between mt-2">
+                      <Button 
+                        variant="outline" 
+                        size="sm" 
+                        onClick={() => copyLink(link.id)}
+                        disabled={copySuccess}
+                      >
+                        {copySuccess ? <CheckCircle className="h-4 w-4 mr-2" /> : <Copy className="h-4 w-4 mr-2" />}
+                        {copySuccess ? 'Copied!' : 'Copy Link'}
+                      </Button>
+                      <Button 
+                        variant="destructive" 
+                        size="sm" 
+                        onClick={() => deleteLink(link.id)}
+                      >
+                        <Trash2 className="h-4 w-4 mr-2" />
+                        Delete
                       </Button>
                     </div>
+                    <a 
+                      href={`/secure/tool/submit/${link.id}`} 
+                      target="_blank" 
+                      rel="noopener noreferrer"
+                      className="text-blue-500 text-sm mt-2 hover:underline"
+                    >
+                      <ExternalLink className="h-4 w-4 mr-1 inline-block" />
+                      Preview Link
+                    </a>
                   </CardContent>
                 </Card>
-              )}
-
-              {/* Create Link Button - only show if no links exist */}
-              {links.length === 0 && subscriptionData.subscribed && (
-                <Card>
-                  <CardContent className="p-6">
-                    <div className="flex items-center">
-                      <Plus className="h-8 w-8 text-purple-600" />
-                      <div className="ml-4">
-                        <Button onClick={createOrGetSubmissionLink} className="w-full">
-                          Create Submission Link
-                        </Button>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              )}
-
-              {/* Submission Link */}
-              {links.length > 0 && (
-                <Card>
-                  <CardHeader>
-                    <CardTitle>Submission Link</CardTitle>
-                    <CardDescription>Your organization's secure report submission link</CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    {links.map((link) => (
-                      <div key={link.id} className="flex items-center justify-between p-4 border rounded-lg">
-                        <div>
-                          <h3 className="font-medium">{link.name}</h3>
-                          <p className="text-sm text-gray-600">Used {link.usage_count} times</p>
-                        </div>
-                        <div className="flex items-center space-x-2">
-                          <code className="text-xs bg-gray-100 px-2 py-1 rounded">
-                            /secure/tool/submit/{link.link_token}
-                          </code>
-                          <Button size="sm" onClick={() => copyLink(link.link_token)}>
-                            Copy Link
-                          </Button>
-                        </div>
-                      </div>
-                    ))}
-                  </CardContent>
-                </Card>
-              )}
-
-              {/* Reports List */}
-              <Card>
-                <CardHeader>
-                  <CardTitle>Reports</CardTitle>
-                  <CardDescription>All report submissions ({reports.length} total)</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  {reports.length === 0 ? (
-                    <div className="text-center py-8">
-                      <FileText className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                      <p className="text-gray-600">No reports submitted yet</p>
-                      <p className="text-sm text-gray-500">Reports will appear here once submitted through your link</p>
-                    </div>
-                  ) : (
-                    <div className="space-y-4">
-                      {reports.map((report) => (
-                        <div key={report.id} className="flex items-center justify-between p-4 border rounded-lg hover:bg-gray-50 transition-colors">
-                          <div className="flex-1">
-                            <h3 className="font-medium">{report.title}</h3>
-                            <p className="text-sm text-gray-600">
-                              {report.tracking_id} • {new Date(report.created_at).toLocaleDateString()}
-                            </p>
-                          </div>
-                          <div className="flex items-center space-x-3">
-                            <span className={`px-2 py-1 text-xs rounded-full ${
-                              report.status === 'new' ? 'bg-blue-100 text-blue-800' :
-                              report.status === 'in_review' ? 'bg-yellow-100 text-yellow-800' :
-                              report.status === 'investigating' ? 'bg-orange-100 text-orange-800' :
-                              report.status === 'resolved' ? 'bg-green-100 text-green-800' :
-                              report.status === 'closed' ? 'bg-gray-100 text-gray-800' :
-                              'bg-gray-100 text-gray-800'
-                            }`}>
-                              {report.status.replace('_', ' ')}
-                            </span>
-                            <Button 
-                              size="sm" 
-                              variant="outline"
-                              onClick={() => handleViewReport(report)}
-                            >
-                              <Eye className="h-4 w-4 mr-1" />
-                              View
-                            </Button>
-                            {report.status !== 'closed' && (
-                              <Button 
-                                size="sm" 
-                                variant="outline"
-                                onClick={() => handleArchiveReport(report.id)}
-                              >
-                                <Archive className="h-4 w-4 mr-1" />
-                                Archive
-                              </Button>
-                            )}
-                            <AlertDialog>
-                              <AlertDialogTrigger asChild>
-                                <Button size="sm" variant="destructive">
-                                  <Trash2 className="h-4 w-4 mr-1" />
-                                  Delete
-                                </Button>
-                              </AlertDialogTrigger>
-                              <AlertDialogContent>
-                                <AlertDialogHeader>
-                                  <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
-                                  <AlertDialogDescription>
-                                    This action cannot be undone. This will permanently delete the report 
-                                    and all associated messages.
-                                  </AlertDialogDescription>
-                                </AlertDialogHeader>
-                                <AlertDialogFooter>
-                                  <AlertDialogCancel>Cancel</AlertDialogCancel>
-                                  <AlertDialogAction 
-                                    onClick={() => handleDeleteReport(report.id)}
-                                    className="bg-red-600 hover:bg-red-700"
-                                  >
-                                    Delete Report
-                                  </AlertDialogAction>
-                                </AlertDialogFooter>
-                              </AlertDialogContent>
-                            </AlertDialog>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                </CardContent>
-              </Card>
-            </TabsContent>
-
-            <TabsContent value="audit" className="space-y-6">
-              <AuditStatistics />
-              <AuditTrailManagement />
-            </TabsContent>
-
-            <TabsContent value="subscription">
-              <SubscriptionManagement />
-            </TabsContent>
-          </Tabs>
-        </div>
-      </main>
-
-      {/* Report Details Dialog */}
-      <Dialog open={isReportDialogOpen} onOpenChange={setIsReportDialogOpen}>
-        <DialogContent className="max-w-6xl max-h-[90vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle>Report Details: {selectedReport?.tracking_id}</DialogTitle>
-            <DialogDescription>
-              View submitted report information and secure messages
-            </DialogDescription>
-          </DialogHeader>
-          
-          {selectedReport && (
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              <div className="space-y-6">
-                <ReportContentDisplay
-                  encryptedContent={selectedReport.encrypted_content}
-                  title={selectedReport.title}
-                  status={selectedReport.status}
-                  trackingId={selectedReport.tracking_id}
-                  reportType={selectedReport.report_type}
-                  createdAt={selectedReport.created_at}
-                  priority={selectedReport.priority}
-                />
-              </div>
-              <div>
-                <ReportMessaging 
-                  report={{
-                    id: selectedReport.id,
-                    title: selectedReport.title,
-                    tracking_id: selectedReport.tracking_id,
-                    status: selectedReport.status,
-                    created_at: selectedReport.created_at,
-                    report_type: selectedReport.report_type,
-                    encrypted_content: selectedReport.encrypted_content,
-                    organizations: selectedReport.organizations || { name: 'Organization' }
-                  }}
-                  onClose={() => setIsReportDialogOpen(false)}
-                />
-              </div>
+              ))}
             </div>
-          )}
-        </DialogContent>
-      </Dialog>
+          </div>
+
+          <div className="border rounded-md bg-gray-50">
+            <nav className="flex space-x-2 p-4">
+              <Button 
+                variant={activeTab === 'reports' ? 'default' : 'outline'}
+                onClick={() => setActiveTab('reports')}
+              >
+                Reports
+              </Button>
+              <Button 
+                variant={activeTab === 'audit' ? 'default' : 'outline'}
+                onClick={() => setActiveTab('audit')}
+              >
+                Audit Trail
+              </Button>
+              <Button 
+                variant={activeTab === 'users' ? 'default' : 'outline'}
+                onClick={() => setActiveTab('users')}
+              >
+                User Management
+              </Button>
+              {profile?.role === 'org_admin' && (
+                <Button 
+                  variant={activeTab === 'subscription' ? 'default' : 'outline'}
+                  onClick={() => setActiveTab('subscription')}
+                >
+                  Subscription
+                </Button>
+              )}
+            </nav>
+
+            <div className="p-4">
+              {activeTab === 'reports' && <ReportsManagement />}
+              {activeTab === 'audit' && <AuditTrailManagement />}
+              {activeTab === 'users' && <UserManagement />}
+              {activeTab === 'subscription' && <SubscriptionManagement />}
+            </div>
+          </div>
+        </CardContent>
+      </Card>
     </div>
   );
 };
