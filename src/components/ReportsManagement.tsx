@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
@@ -9,7 +10,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { useAuditLog } from '@/hooks/useAuditLog';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
-import { Eye, UserPlus, Clock, CheckCircle, XCircle, Search, Filter } from 'lucide-react';
+import { Eye, UserPlus, Clock, CheckCircle, XCircle, Search, Filter, FileText } from 'lucide-react';
 import { format } from 'date-fns';
 import type { Report, ReportStatus } from '@/types/database';
 

@@ -43,3 +43,22 @@ export const decryptReport = (encryptedData: string, organizationId: string): an
     return null;
   }
 };
+
+// Message encryption functions
+export const encryptMessage = async (message: string, key?: string): Promise<{ encryptedData: string; keyHash: string }> => {
+  const messageKey = key || generateEncryptionKey();
+  const encryptedData = encryptData(message, messageKey);
+  const keyHash = createKeyHash(messageKey);
+  
+  return { encryptedData, keyHash };
+};
+
+// Decrypt message
+export const decryptMessage = async (encryptedData: string, key: string): Promise<string> => {
+  try {
+    return decryptData(encryptedData, key);
+  } catch (error) {
+    console.error('Failed to decrypt message:', error);
+    return '[Unable to decrypt message]';
+  }
+};
