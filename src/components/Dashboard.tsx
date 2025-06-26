@@ -127,15 +127,16 @@ const Dashboard = () => {
     try {
       console.log('Creating submission link for organization:', organization.id);
 
+      // Fix: Use proper type casting and let the database trigger handle link_token generation
       const { data, error } = await supabase
         .from('organization_links')
         .insert({
-          organization_id: organization.id,
           name: 'Secure Report Submission',
           description: 'Submit reports securely and anonymously',
           created_by: user.id,
-          is_active: true
-        })
+          is_active: true,
+          organization_id: organization.id
+        } as any) // Type assertion to bypass TypeScript issues with auto-generated fields
         .select()
         .single();
 
