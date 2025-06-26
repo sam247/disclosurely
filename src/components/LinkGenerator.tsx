@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -170,7 +169,8 @@ const LinkGenerator = () => {
         return;
       }
 
-      // Fix: Create link without organization_id in initial insert, then update separately
+      // Fix: Use type assertion to work around TypeScript type mismatch
+      // The database trigger will handle link_token generation
       const { data, error } = await supabase
         .from('organization_links')
         .insert({
@@ -181,25 +181,15 @@ const LinkGenerator = () => {
           is_active: formData.is_active,
           expires_at: formData.expires_at ? new Date(formData.expires_at).toISOString() : null,
           usage_limit: formData.usage_limit ? parseInt(formData.usage_limit) : null,
-          created_by: user.id
-        })
+          created_by: user.id,
+          organization_id: profile.organization_id
+        } as any)
         .select()
         .single();
 
       if (error) {
         console.error('Insert error:', error);
         throw error;
-      }
-
-      // Update with organization_id
-      const { error: updateError } = await supabase
-        .from('organization_links')
-        .update({ organization_id: profile.organization_id })
-        .eq('id', data.id);
-
-      if (updateError) {
-        console.error('Update error:', updateError);
-        throw updateError;
       }
 
       toast({

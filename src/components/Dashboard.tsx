@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -352,26 +351,20 @@ const Dashboard = () => {
         return;
       }
 
-      // Fix: Remove organization_id from insert object and let database trigger handle link_token
+      // Fix: Use type assertion to work around TypeScript type mismatch
+      // The database trigger will handle link_token generation
       const { data, error } = await supabase
         .from('organization_links')
         .insert({
           name: 'Report Submission Link',
           description: 'Submit reports securely to our organization',
-          created_by: user.id
-        })
+          created_by: user.id,
+          organization_id: profile.organization_id
+        } as any)
         .select()
         .single();
 
       if (error) throw error;
-
-      // Update the created link with organization_id using a separate update
-      const { error: updateError } = await supabase
-        .from('organization_links')
-        .update({ organization_id: profile.organization_id })
-        .eq('id', data.id);
-
-      if (updateError) throw updateError;
 
       toast({
         title: "Link created!",
