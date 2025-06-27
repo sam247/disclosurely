@@ -6,32 +6,35 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
-import { Checkbox } from '@/components/ui/checkbox';
-import { Shield, Lock, AlertTriangle, Upload } from 'lucide-react';
-import { toast } from 'sonner';
+import { Switch } from '@/components/ui/switch';
+import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
+import { Shield, AlertTriangle } from 'lucide-react';
 import { encryptReport } from '@/utils/encryption';
+
+interface LinkData {
+  id: string;
+  name: string;
+  description: string;
+  organization_id: string;
+  organization_name: string;
+}
 
 const DynamicSubmissionForm = () => {
   const { linkToken } = useParams();
   const navigate = useNavigate();
-  
-  const [linkData, setLinkData] = useState<any>(null);
+  const { toast } = useToast();
+
+  const [linkData, setLinkData] = useState<LinkData | null>(null);
   const [loading, setLoading] = useState(true);
-  const [reportType, setReportType] = useState<"anonymous" | "confidential">("anonymous");
+  const [submitting, setSubmitting] = useState(false);
+  const [isAnonymous, setIsAnonymous] = useState(true);
+
   const [formData, setFormData] = useState({
-    title: "",
-    category: "",
-    content: "",
-    incident_date: "",
-    location: "",
-    people_involved: "",
-    evidence_description: "",
-    submitter_email: "",
+    title: '',
+    description: '',
+    submitter_email: ''
   });
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [agreedToTerms, setAgreedToTerms] = useState(false);
 
   useEffect(() => {
     fetchLinkData();
@@ -39,358 +42,317 @@ const DynamicSubmissionForm = () => {
 
   const fetchLinkData = async () => {
     if (!linkToken) {
-      toast.error("Invalid submission link");
+      navigate('/404');
       return;
     }
 
     try {
-      // Fetch link data without authentication since this is a public form
-      const { data: linkInfo, error } = await supabase
+      console.log('Fetching link data for token:', linkToken);
+
+      const { data: linkInfo, error: linkError } = await supabase
         .from('organization_links')
         .select(`
-          *,
-          organizations (
-            id,
-            name,
-            brand_color,
-            logo_url
-          )
+          id,
+          name,
+          description,
+          organization_id,
+          organizations!inner(name)
         `)
         .eq('link_token', linkToken)
         .eq('is_active', true)
         .single();
 
-      if (error) {
-        console.error('Error fetching link data:', error);
-        toast.error("Invalid or expired submission link");
+      if (linkError || !linkInfo) {
+        console.error('Link not found or error:', linkError);
+        toast({
+          title: "Link not found",
+          description: "The submission link is invalid or has expired.",
+          variant: "destructive",
+        });
+        navigate('/404');
         return;
       }
 
-      if (!linkInfo) {
-        toast.error("Submission link not found");
-        return;
-      }
+      console.log('Link found:', linkInfo);
 
-      // Check if link has expired
-      if (linkInfo.expires_at && new Date(linkInfo.expires_at) < new Date()) {
-        toast.error("This submission link has expired");
-        return;
-      }
+      setLinkData({
+        id: linkInfo.id,
+        name: linkInfo.name,
+        description: linkInfo.description || '',
+        organization_id: linkInfo.organization_id,
+        organization_name: linkInfo.organizations.name
+      });
 
-      // Check usage limit
-      if (linkInfo.usage_limit && linkInfo.usage_count >= linkInfo.usage_limit) {
-        toast.error("This submission link has reached its usage limit");
-        return;
-      }
-
-      setLinkData(linkInfo);
     } catch (error) {
       console.error('Error fetching link data:', error);
-      toast.error("Failed to load submission form");
+      toast({
+        title: "Error loading form",
+        description: "There was a problem loading the submission form.",
+        variant: "destructive",
+      });
+      navigate('/404');
     } finally {
       setLoading(false);
     }
   };
 
-  const handleInputChange = (field: string, value: string) => {
-    setFormData(prev => ({ ...prev, [field]: value }));
-  };
-
   const generateTrackingId = () => {
-    return 'WB-' + Math.random().toString(36).substring(2, 10).toUpperCase();
+    return 'WB-' + Math.random().toString(36).substr(2, 8).toUpperCase();
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
-    if (!agreedToTerms) {
-      toast.error("Please agree to the terms and conditions");
+    if (!linkData) return;
+
+    if (!formData.title.trim() || !formData.description.trim()) {
+      toast({
+        title: "Required fields missing",
+        description: "Please fill in the title and description.",
+        variant: "destructive",
+      });
       return;
     }
 
-    if (!formData.title.trim() || !formData.content.trim()) {
-      toast.error("Please fill in all required fields");
-      return;
-    }
-
-    if (!linkData) {
-      toast.error("Invalid submission link");
-      return;
-    }
-
-    setIsSubmitting(true);
+    setSubmitting(true);
 
     try {
       const trackingId = generateTrackingId();
+      
+      console.log('Submitting report:', {
+        title: formData.title,
+        organizationId: linkData.organization_id,
+        isAnonymous
+      });
 
-      // Encrypt the report data
+      // Encrypt the report data using organization-based encryption
       const reportData = {
         title: formData.title,
-        content: formData.content,
-        category: formData.category,
-        incident_date: formData.incident_date,
-        location: formData.location,
-        people_involved: formData.people_involved,
-        evidence_description: formData.evidence_description,
+        description: formData.description,
+        submission_method: 'web_form'
       };
 
-      const { encryptedData, keyHash } = encryptReport(reportData, trackingId);
+      const { encryptedData, keyHash } = encryptReport(reportData, linkData.organization_id);
 
-      // Submit encrypted report
-      const { data: report, error } = await supabase
+      // Create the report
+      const { data: report, error: reportError } = await supabase
         .from('reports')
         .insert({
           organization_id: linkData.organization_id,
-          report_type: reportType,
+          tracking_id: trackingId,
           title: formData.title,
           encrypted_content: encryptedData,
           encryption_key_hash: keyHash,
-          tracking_id: trackingId,
-          submitted_by_email: reportType === "confidential" ? formData.submitter_email || null : null,
+          report_type: isAnonymous ? 'anonymous' : 'confidential',
+          submitted_by_email: isAnonymous ? null : formData.submitter_email,
           submitted_via_link_id: linkData.id,
+          status: 'new',
+          priority: 3
         })
         .select()
         .single();
 
-      if (error) {
-        console.error("Database error:", error);
-        throw error;
+      if (reportError) {
+        console.error('Report submission error:', reportError);
+        throw reportError;
       }
 
-      // Update link usage count
-      await supabase
-        .from('organization_links')
-        .update({ usage_count: linkData.usage_count + 1 })
-        .eq('id', linkData.id);
+      console.log('Report created successfully:', report);
 
-      console.log("Report created successfully:", report);
+      // Update link usage count
+      const { data: currentLink } = await supabase
+        .from('organization_links')
+        .select('usage_count')
+        .eq('id', linkData.id)
+        .single();
+
+      if (currentLink) {
+        await supabase
+          .from('organization_links')
+          .update({ 
+            usage_count: (currentLink.usage_count || 0) + 1
+          })
+          .eq('id', linkData.id);
+      }
+
+      // Navigate to success page with tracking ID
       navigate(`/secure/tool/success?trackingId=${encodeURIComponent(trackingId)}`);
 
-    } catch (error) {
-      console.error("Error submitting report:", error);
-      toast.error("Failed to submit report. Please try again.");
+    } catch (error: any) {
+      console.error('Error submitting report:', error);
+      toast({
+        title: "Submission failed",
+        description: error.message || "There was an error submitting your report. Please try again.",
+        variant: "destructive",
+      });
     } finally {
-      setIsSubmitting(false);
+      setSubmitting(false);
     }
   };
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 flex items-center justify-center">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+          <p className="text-gray-600">Loading submission form...</p>
+        </div>
       </div>
     );
   }
 
   if (!linkData) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 flex items-center justify-center">
-        <Card className="max-w-md mx-auto">
-          <CardContent className="text-center py-8">
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <Card className="max-w-md">
+          <CardContent className="text-center py-12">
             <AlertTriangle className="h-12 w-12 text-red-500 mx-auto mb-4" />
-            <h3 className="text-lg font-medium text-gray-900 mb-2">Link Not Found</h3>
-            <p className="text-gray-600">
-              This submission link is invalid or has expired.
-            </p>
+            <h3 className="text-lg font-semibold text-gray-900 mb-2">Form Not Available</h3>
+            <p className="text-gray-600">This submission form is no longer available.</p>
           </CardContent>
         </Card>
       </div>
     );
   }
 
-  const organization = linkData.organizations;
-
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100">
+    <div className="min-h-screen bg-gray-50">
       {/* Header */}
-      <header className="border-b bg-white/80 backdrop-blur-sm">
-        <div className="container mx-auto px-4 py-4">
-          <div className="flex items-center space-x-2">
-            <Shield className="h-8 w-8 text-blue-600" />
-            <span className="text-xl font-bold text-gray-900">{organization?.name || 'SecureReport'}</span>
-            <span className="text-sm text-gray-500 ml-4">Secure Submission Portal</span>
+      <header className="bg-white shadow border-t-4 border-blue-600">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex items-center py-6">
+            <div className="w-10 h-10 bg-blue-600 rounded-lg flex items-center justify-center mr-4">
+              <Shield className="h-6 w-6 text-white" />
+            </div>
+            <div>
+              <h1 className="text-2xl font-bold text-gray-900">{linkData.organization_name}</h1>
+              <p className="text-sm text-gray-600">Secure Report Submission</p>
+            </div>
           </div>
         </div>
       </header>
 
-      <div className="container mx-auto px-4 py-8">
-        <div className="max-w-4xl mx-auto">
-          {/* Security Notice */}
-          <Card className="mb-8 border-green-200 bg-green-50">
-            <CardHeader>
-              <div className="flex items-center space-x-2">
-                <Lock className="h-5 w-5 text-green-600" />
-                <CardTitle className="text-green-800">Secure & Anonymous</CardTitle>
-              </div>
-            </CardHeader>
-            <CardContent>
-              <p className="text-green-700 text-sm">
-                Your report will be encrypted before submission using AES-256 encryption. 
-                No personal information is required for anonymous reports, and all data is protected with enterprise-grade security.
-              </p>
-            </CardContent>
-          </Card>
-
-          {/* Report Form */}
+      {/* Main Form */}
+      <main className="max-w-4xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
+        <div className="mb-8">
           <Card>
             <CardHeader>
-              <CardTitle className="flex items-center space-x-2">
-                <AlertTriangle className="h-5 w-5 text-amber-600" />
-                <span>{linkData.name}</span>
+              <CardTitle className="flex items-center gap-2">
+                <Shield className="h-5 w-5 text-blue-600" />
+                {linkData.name}
               </CardTitle>
               <CardDescription>
-                {linkData.description}
+                {linkData.description || 'Submit your report securely and confidentially.'}
               </CardDescription>
             </CardHeader>
-            <CardContent>
-              <form onSubmit={handleSubmit} className="space-y-6">
-                {/* Report Type */}
-                <div>
-                  <Label className="text-base font-medium">Report Type</Label>
-                  <RadioGroup
-                    value={reportType}
-                    onValueChange={(value: "anonymous" | "confidential") => setReportType(value)}
-                    className="mt-2"
-                  >
-                    <div className="flex items-center space-x-2">
-                      <RadioGroupItem value="anonymous" id="anonymous" />
-                      <Label htmlFor="anonymous" className="font-normal">
-                        Anonymous Report (Recommended)
-                      </Label>
-                    </div>
-                    <div className="flex items-center space-x-2">
-                      <RadioGroupItem value="confidential" id="confidential" />
-                      <Label htmlFor="confidential" className="font-normal">
-                        Confidential Report (Your email will be stored)
-                      </Label>
-                    </div>
-                  </RadioGroup>
-                </div>
-
-                {/* Email for confidential reports */}
-                {reportType === "confidential" && (
-                  <div>
-                    <Label htmlFor="submitter_email">Your Email Address</Label>
-                    <Input
-                      id="submitter_email"
-                      type="email"
-                      value={formData.submitter_email}
-                      onChange={(e) => handleInputChange("submitter_email", e.target.value)}
-                      placeholder="Enter your email address"
-                      required
-                    />
-                  </div>
-                )}
-
-                {/* Title */}
-                <div>
-                  <Label htmlFor="title">Report Title *</Label>
-                  <Input
-                    id="title"
-                    value={formData.title}
-                    onChange={(e) => handleInputChange("title", e.target.value)}
-                    placeholder="Brief title describing the issue"
-                    required
-                  />
-                </div>
-
-                {/* Category */}
-                <div>
-                  <Label htmlFor="category">Category</Label>
-                  <Input
-                    id="category"
-                    value={formData.category}
-                    onChange={(e) => handleInputChange("category", e.target.value)}
-                    placeholder="e.g., Financial misconduct, Safety violation, Harassment"
-                  />
-                </div>
-
-                {/* Content */}
-                <div>
-                  <Label htmlFor="content">Detailed Description *</Label>
-                  <Textarea
-                    id="content"
-                    value={formData.content}
-                    onChange={(e) => handleInputChange("content", e.target.value)}
-                    placeholder="Provide detailed information about the incident or concern..."
-                    rows={6}
-                    required
-                  />
-                </div>
-
-                {/* Incident Date */}
-                <div>
-                  <Label htmlFor="incident_date">Incident Date</Label>
-                  <Input
-                    id="incident_date"
-                    type="date"
-                    value={formData.incident_date}
-                    onChange={(e) => handleInputChange("incident_date", e.target.value)}
-                  />
-                </div>
-
-                {/* Location */}
-                <div>
-                  <Label htmlFor="location">Location</Label>
-                  <Input
-                    id="location"
-                    value={formData.location}
-                    onChange={(e) => handleInputChange("location", e.target.value)}
-                    placeholder="Where did this occur? (optional)"
-                  />
-                </div>
-
-                {/* People Involved */}
-                <div>
-                  <Label htmlFor="people_involved">People Involved</Label>
-                  <Textarea
-                    id="people_involved"
-                    value={formData.people_involved}
-                    onChange={(e) => handleInputChange("people_involved", e.target.value)}
-                    placeholder="Names, roles, or descriptions of people involved (optional)"
-                    rows={3}
-                  />
-                </div>
-
-                {/* Evidence */}
-                <div>
-                  <Label htmlFor="evidence_description">Evidence Description</Label>
-                  <Textarea
-                    id="evidence_description"
-                    value={formData.evidence_description}
-                    onChange={(e) => handleInputChange("evidence_description", e.target.value)}
-                    placeholder="Describe any evidence you have (documents, emails, recordings, etc.)"
-                    rows={3}
-                  />
-                </div>
-
-                {/* Terms Agreement */}
-                <div className="flex items-start space-x-2">
-                  <Checkbox
-                    id="terms"
-                    checked={agreedToTerms}
-                    onCheckedChange={(checked) => setAgreedToTerms(checked as boolean)}
-                  />
-                  <Label htmlFor="terms" className="text-sm leading-relaxed">
-                    I understand that this report will be encrypted and submitted securely. 
-                    I agree to the terms of service and privacy policy. I confirm that the information provided is accurate to the best of my knowledge.
-                  </Label>
-                </div>
-
-                {/* Submit Button */}
-                <Button 
-                  type="submit" 
-                  className="w-full" 
-                  size="lg"
-                  disabled={isSubmitting || !agreedToTerms}
-                >
-                  {isSubmitting ? "Encrypting & Submitting..." : "Submit Secure Report"}
-                </Button>
-              </form>
-            </CardContent>
           </Card>
         </div>
-      </div>
+
+        <form onSubmit={handleSubmit} className="space-y-6">
+          {/* Report Type Selection */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-lg">Report Type</CardTitle>
+              <CardDescription>Choose how you'd like to submit this report</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="flex items-center space-x-3">
+                <Switch
+                  id="anonymous"
+                  checked={isAnonymous}
+                  onCheckedChange={setIsAnonymous}
+                />
+                <Label htmlFor="anonymous" className="flex items-center gap-2">
+                  {isAnonymous ? 'Anonymous Submission' : 'Confidential Submission'}
+                  <span className="text-sm text-gray-500">
+                    ({isAnonymous ? 'No personal information required' : 'Provide email for follow-up'})
+                  </span>
+                </Label>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Contact Information (if not anonymous) */}
+          {!isAnonymous && (
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-lg">Contact Information</CardTitle>
+                <CardDescription>This information will be kept confidential</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div>
+                  <Label htmlFor="submitter_email">Email Address</Label>
+                  <Input
+                    id="submitter_email"
+                    type="email"
+                    value={formData.submitter_email}
+                    onChange={(e) => setFormData({ ...formData, submitter_email: e.target.value })}
+                    placeholder="your@email.com"
+                    required={!isAnonymous}
+                  />
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
+          {/* Report Details */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-lg">Report Details</CardTitle>
+              <CardDescription>Provide information about the incident or concern</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div>
+                <Label htmlFor="title">Report Title *</Label>
+                <Input
+                  id="title"
+                  required
+                  value={formData.title}
+                  onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+                  placeholder="Brief summary of the issue"
+                />
+              </div>
+
+              <div>
+                <Label htmlFor="description">Detailed Description *</Label>
+                <Textarea
+                  id="description"
+                  required
+                  value={formData.description}
+                  onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                  placeholder="Please provide a detailed description of what happened..."
+                  rows={8}
+                />
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Security Notice */}
+          <Card className="border-blue-200 bg-blue-50">
+            <CardContent className="pt-6">
+              <div className="flex items-start gap-3">
+                <Shield className="h-5 w-5 text-blue-600 mt-0.5" />
+                <div className="text-sm">
+                  <p className="font-medium text-blue-900 mb-1">Your Privacy is Protected</p>
+                  <p className="text-blue-800">
+                    All information is encrypted and stored securely. {isAnonymous ? 'This anonymous report cannot be traced back to you.' : 'Your identity will be kept confidential.'}
+                  </p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Submit Button */}
+          <div className="flex justify-end">
+            <Button 
+              type="submit" 
+              disabled={submitting}
+              className="px-8 bg-blue-600 hover:bg-blue-700"
+            >
+              {submitting ? 'Submitting...' : 'Submit Report'}
+            </Button>
+          </div>
+        </form>
+      </main>
     </div>
   );
 };
