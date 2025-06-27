@@ -77,7 +77,7 @@ const ReportViewModal = ({ report, isOpen, onClose, onReportUpdated, users }: Re
   const [loading, setLoading] = useState(false);
   const [sending, setSending] = useState(false);
   const [decryptedContent, setDecryptedContent] = useState<any>(null);
-  const [showContent, setShowContent] = useState(false);
+  const [deleting, setDeleting] = useState(false);
 
   const reportStatuses: { value: ReportStatus; label: string }[] = [
     { value: 'new', label: 'New' },
@@ -241,23 +241,78 @@ const ReportViewModal = ({ report, isOpen, onClose, onReportUpdated, users }: Re
     if (!report) return;
 
     try {
-      // First delete related records to avoid constraint violations
-      await supabase.from('report_messages').delete().eq('report_id', report.id);
-      await supabase.from('report_notes').delete().eq('report_id', report.id);
-      await supabase.from('report_attachments').delete().eq('report_id', report.id);
-      await supabase.from('notifications').delete().eq('report_id', report.id);
+      setDeleting(true);
       
-      // Delete audit logs last, but before the report
-      await supabase.from('audit_logs').delete().eq('report_id', report.id);
+      // Delete all related records in the correct order to avoid foreign key violations
+      console.log('Starting delete process for report:', report.id);
       
-      // Finally delete the report
-      const { error } = await supabase
+      // 1. Delete notifications first
+      const { error: notificationsError } = await supabase
+        .from('notifications')
+        .delete()
+        .eq('report_id', report.id);
+      
+      if (notificationsError) {
+        console.error('Error deleting notifications:', notificationsError);
+        throw notificationsError;
+      }
+
+      // 2. Delete report messages
+      const { error: messagesError } = await supabase
+        .from('report_messages')
+        .delete()
+        .eq('report_id', report.id);
+      
+      if (messagesError) {
+        console.error('Error deleting messages:', messagesError);
+        throw messagesError;
+      }
+
+      // 3. Delete report notes
+      const { error: notesError } = await supabase
+        .from('report_notes')
+        .delete()
+        .eq('report_id', report.id);
+      
+      if (notesError) {
+        console.error('Error deleting notes:', notesError);
+        throw notesError;
+      }
+
+      // 4. Delete report attachments
+      const { error: attachmentsError } = await supabase
+        .from('report_attachments')
+        .delete()
+        .eq('report_id', report.id);
+      
+      if (attachmentsError) {
+        console.error('Error deleting attachments:', attachmentsError);
+        throw attachmentsError;
+      }
+
+      // 5. Delete audit logs (must be done before deleting the report)
+      const { error: auditError } = await supabase
+        .from('audit_logs')
+        .delete()
+        .eq('report_id', report.id);
+      
+      if (auditError) {
+        console.error('Error deleting audit logs:', auditError);
+        throw auditError;
+      }
+      
+      // 6. Finally delete the report itself
+      const { error: reportError } = await supabase
         .from('reports')
         .delete()
         .eq('id', report.id);
 
-      if (error) throw error;
+      if (reportError) {
+        console.error('Error deleting report:', reportError);
+        throw reportError;
+      }
 
+      console.log('Report deleted successfully');
       onReportUpdated();
       onClose();
       toast({
@@ -268,9 +323,11 @@ const ReportViewModal = ({ report, isOpen, onClose, onReportUpdated, users }: Re
       console.error('Error deleting report:', error);
       toast({
         title: "Error",
-        description: "Failed to delete report",
+        description: "Failed to delete report. Please try again.",
         variant: "destructive",
       });
+    } finally {
+      setDeleting(false);
     }
   };
 
@@ -341,21 +398,23 @@ const ReportViewModal = ({ report, isOpen, onClose, onReportUpdated, users }: Re
 
               <AlertDialog>
                 <AlertDialogTrigger asChild>
-                  <Button variant="destructive" size="sm">
+                  <Button variant="destructive" size="sm" disabled={deleting}>
                     <Trash2 className="h-4 w-4 mr-2" />
-                    Delete
+                    {deleting ? 'Deleting...' : 'Delete'}
                   </Button>
                 </AlertDialogTrigger>
                 <AlertDialogContent>
                   <AlertDialogHeader>
                     <AlertDialogTitle>Delete Report</AlertDialogTitle>
                     <AlertDialogDescription>
-                      Are you sure you want to delete this report? This action cannot be undone.
+                      Are you sure you want to delete this report? This action cannot be undone and will remove all associated data including messages, notes, and audit logs.
                     </AlertDialogDescription>
                   </AlertDialogHeader>
                   <AlertDialogFooter>
                     <AlertDialogCancel>Cancel</AlertDialogCancel>
-                    <AlertDialogAction onClick={deleteReport}>Delete</AlertDialogAction>
+                    <AlertDialogAction onClick={deleteReport} disabled={deleting}>
+                      {deleting ? 'Deleting...' : 'Delete'}
+                    </AlertDialogAction>
                   </AlertDialogFooter>
                 </AlertDialogContent>
               </AlertDialog>
@@ -414,44 +473,33 @@ const ReportViewModal = ({ report, isOpen, onClose, onReportUpdated, users }: Re
             </div>
           </div>
 
-          {/* Report Content */}
+          {/* Report Content - Always Visible */}
           <Card>
             <CardHeader>
-              <CardTitle className="flex items-center justify-between">
-                <span>Report Content</span>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setShowContent(!showContent)}
-                >
-                  {showContent ? 'Hide Content' : 'Show Content'}
-                </Button>
-              </CardTitle>
+              <CardTitle>Report Content</CardTitle>
             </CardHeader>
-            {showContent && (
-              <CardContent>
-                {decryptedContent ? (
-                  <div className="space-y-3">
-                    {Object.entries(decryptedContent).map(([key, value]) => (
-                      <div key={key}>
-                        <Label className="capitalize text-gray-600 font-medium">
-                          {key.replace(/([A-Z])/g, ' $1').trim().replace(/_/g, ' ')}:
-                        </Label>
-                        <p className="mt-1 whitespace-pre-wrap text-sm">
-                          {typeof value === 'string' ? value : JSON.stringify(value, null, 2)}
-                        </p>
-                      </div>
-                    ))}
-                  </div>
-                ) : (
-                  <div className="text-center py-4">
-                    <Lock className="h-8 w-8 text-gray-400 mx-auto mb-2" />
-                    <p className="text-gray-600">Unable to decrypt content</p>
-                    <p className="text-sm text-gray-500">Please ensure you have proper access permissions</p>
-                  </div>
-                )}
-              </CardContent>
-            )}
+            <CardContent>
+              {decryptedContent ? (
+                <div className="space-y-3">
+                  {Object.entries(decryptedContent).map(([key, value]) => (
+                    <div key={key}>
+                      <Label className="capitalize text-gray-600 font-medium">
+                        {key.replace(/([A-Z])/g, ' $1').trim().replace(/_/g, ' ')}:
+                      </Label>
+                      <p className="mt-1 whitespace-pre-wrap text-sm">
+                        {typeof value === 'string' ? value : JSON.stringify(value, null, 2)}
+                      </p>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="text-center py-4">
+                  <Lock className="h-8 w-8 text-gray-400 mx-auto mb-2" />
+                  <p className="text-gray-600">Unable to decrypt content</p>
+                  <p className="text-sm text-gray-500">Please ensure you have proper access permissions</p>
+                </div>
+              )}
+            </CardContent>
           </Card>
 
           {/* Messages Section */}
