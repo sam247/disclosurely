@@ -256,14 +256,14 @@ const ReportViewModal = ({ report, isOpen, onClose, onReportUpdated, users }: Re
       setDeleting(true);
       console.log('Starting delete process for report:', report.id);
       
-      // Use raw SQL to call the delete function
+      // Delete the report - the database function will handle cascading deletes
       const { error } = await supabase
         .from('reports')
         .delete()
         .eq('id', report.id);
 
       if (error) {
-        console.error('Error from delete:', error);
+        console.error('Error deleting report:', error);
         throw error;
       }
 
