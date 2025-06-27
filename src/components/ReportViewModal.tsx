@@ -225,7 +225,8 @@ const ReportViewModal = ({ report, isOpen, onClose, onReportUpdated, users }: Re
 
       if (error) throw error;
 
-      await createAuditLog('deleted', report.id, { 
+      await createAuditLog('updated', report.id, { 
+        action: 'deleted',
         deleted_by: user?.id 
       });
 
@@ -256,7 +257,8 @@ const ReportViewModal = ({ report, isOpen, onClose, onReportUpdated, users }: Re
 
       if (error) throw error;
 
-      await createAuditLog('archived', report.id, { 
+      await createAuditLog('updated', report.id, { 
+        action: 'archived',
         archived_by: user?.id 
       });
 
