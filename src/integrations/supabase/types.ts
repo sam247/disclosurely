@@ -666,6 +666,10 @@ export type Database = {
         }
         Returns: string
       }
+      delete_report_cascade: {
+        Args: { report_id: string }
+        Returns: undefined
+      }
       generate_invitation_token: {
         Args: Record<PropertyKey, never>
         Returns: string

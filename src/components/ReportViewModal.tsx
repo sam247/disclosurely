@@ -256,34 +256,15 @@ const ReportViewModal = ({ report, isOpen, onClose, onReportUpdated, users }: Re
       setDeleting(true);
       console.log('Starting delete process for report:', report.id);
       
-      // Use a database function to handle the deletion with proper ordering
-      const { error } = await supabase.rpc('delete_report_cascade', {
-        report_id: report.id
-      });
+      // Use raw SQL to call the delete function
+      const { error } = await supabase
+        .from('reports')
+        .delete()
+        .eq('id', report.id);
 
       if (error) {
-        console.error('Error from delete function:', error);
-        
-        // Fallback to manual deletion if function doesn't exist
-        console.log('Attempting manual deletion...');
-        
-        // Delete in the correct order to avoid foreign key violations
-        const deleteOperations = [
-          () => supabase.from('notifications').delete().eq('report_id', report.id),
-          () => supabase.from('report_messages').delete().eq('report_id', report.id),
-          () => supabase.from('report_notes').delete().eq('report_id', report.id),
-          () => supabase.from('report_attachments').delete().eq('report_id', report.id),
-          () => supabase.from('audit_logs').delete().eq('report_id', report.id),
-          () => supabase.from('reports').delete().eq('id', report.id)
-        ];
-
-        for (const operation of deleteOperations) {
-          const { error: opError } = await operation();
-          if (opError) {
-            console.error('Delete operation failed:', opError);
-            throw opError;
-          }
-        }
+        console.error('Error from delete:', error);
+        throw error;
       }
 
       console.log('Report deleted successfully');
@@ -447,7 +428,7 @@ const ReportViewModal = ({ report, isOpen, onClose, onReportUpdated, users }: Re
             </div>
           </div>
 
-          {/* Report Content */}
+          {/* Report Content - Auto Display */}
           <Card>
             <CardHeader>
               <CardTitle>Report Content</CardTitle>
