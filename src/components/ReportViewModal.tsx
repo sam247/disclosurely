@@ -36,10 +36,10 @@ import {
   MessageSquare, 
   Lock, 
   Trash2,
-  Archive,
-  X
+  Archive
 } from 'lucide-react';
 import { format } from 'date-fns';
+import { decryptReport } from '@/utils/encryption';
 import type { Report, ReportStatus } from '@/types/database';
 
 interface ReportWithAssignee extends Report {
@@ -76,6 +76,8 @@ const ReportViewModal = ({ report, isOpen, onClose, onReportUpdated, users }: Re
   const [newMessage, setNewMessage] = useState('');
   const [loading, setLoading] = useState(false);
   const [sending, setSending] = useState(false);
+  const [decryptedContent, setDecryptedContent] = useState<any>(null);
+  const [showContent, setShowContent] = useState(false);
 
   const reportStatuses: { value: ReportStatus; label: string }[] = [
     { value: 'new', label: 'New' },
@@ -88,8 +90,29 @@ const ReportViewModal = ({ report, isOpen, onClose, onReportUpdated, users }: Re
   useEffect(() => {
     if (report && isOpen) {
       fetchMessages();
+      decryptReportContent();
     }
   }, [report, isOpen]);
+
+  const decryptReportContent = async () => {
+    if (!report || !user) return;
+    
+    try {
+      // Get user's organization ID for decryption
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('organization_id')
+        .eq('id', user.id)
+        .single();
+
+      if (profile?.organization_id) {
+        const decrypted = decryptReport(report.encrypted_content, profile.organization_id);
+        setDecryptedContent(decrypted);
+      }
+    } catch (error) {
+      console.error('Error decrypting content:', error);
+    }
+  };
 
   const fetchMessages = async () => {
     if (!report) return;
@@ -218,17 +241,22 @@ const ReportViewModal = ({ report, isOpen, onClose, onReportUpdated, users }: Re
     if (!report) return;
 
     try {
+      // First delete related records to avoid constraint violations
+      await supabase.from('report_messages').delete().eq('report_id', report.id);
+      await supabase.from('report_notes').delete().eq('report_id', report.id);
+      await supabase.from('report_attachments').delete().eq('report_id', report.id);
+      await supabase.from('notifications').delete().eq('report_id', report.id);
+      
+      // Delete audit logs last, but before the report
+      await supabase.from('audit_logs').delete().eq('report_id', report.id);
+      
+      // Finally delete the report
       const { error } = await supabase
         .from('reports')
         .delete()
         .eq('id', report.id);
 
       if (error) throw error;
-
-      await createAuditLog('updated', report.id, { 
-        action: 'deleted',
-        deleted_by: user?.id 
-      });
 
       onReportUpdated();
       onClose();
@@ -284,11 +312,11 @@ const ReportViewModal = ({ report, isOpen, onClose, onReportUpdated, users }: Re
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <div className="flex items-center justify-between">
-            <DialogTitle className="flex items-center gap-2">
+          <DialogTitle className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
               <FileText className="h-5 w-5" />
               Report Details - {report.tracking_id}
-            </DialogTitle>
+            </div>
             <div className="flex items-center gap-2">
               <AlertDialog>
                 <AlertDialogTrigger asChild>
@@ -331,12 +359,8 @@ const ReportViewModal = ({ report, isOpen, onClose, onReportUpdated, users }: Re
                   </AlertDialogFooter>
                 </AlertDialogContent>
               </AlertDialog>
-
-              <Button variant="outline" size="sm" onClick={onClose}>
-                <X className="h-4 w-4" />
-              </Button>
             </div>
-          </div>
+          </DialogTitle>
         </DialogHeader>
         
         <div className="grid gap-6">
@@ -389,6 +413,46 @@ const ReportViewModal = ({ report, isOpen, onClose, onReportUpdated, users }: Re
               </Select>
             </div>
           </div>
+
+          {/* Report Content */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center justify-between">
+                <span>Report Content</span>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setShowContent(!showContent)}
+                >
+                  {showContent ? 'Hide Content' : 'Show Content'}
+                </Button>
+              </CardTitle>
+            </CardHeader>
+            {showContent && (
+              <CardContent>
+                {decryptedContent ? (
+                  <div className="space-y-3">
+                    {Object.entries(decryptedContent).map(([key, value]) => (
+                      <div key={key}>
+                        <Label className="capitalize text-gray-600 font-medium">
+                          {key.replace(/([A-Z])/g, ' $1').trim().replace(/_/g, ' ')}:
+                        </Label>
+                        <p className="mt-1 whitespace-pre-wrap text-sm">
+                          {typeof value === 'string' ? value : JSON.stringify(value, null, 2)}
+                        </p>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="text-center py-4">
+                    <Lock className="h-8 w-8 text-gray-400 mx-auto mb-2" />
+                    <p className="text-gray-600">Unable to decrypt content</p>
+                    <p className="text-sm text-gray-500">Please ensure you have proper access permissions</p>
+                  </div>
+                )}
+              </CardContent>
+            )}
+          </Card>
 
           {/* Messages Section */}
           <Card>

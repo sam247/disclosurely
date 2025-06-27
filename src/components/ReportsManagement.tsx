@@ -193,20 +193,8 @@ const ReportsManagement = () => {
   };
 
   const getStatusBadgeClass = (status: string) => {
-    switch (status) {
-      case 'new':
-        return 'bg-blue-100 text-blue-800 hover:bg-blue-200';
-      case 'in_review':
-        return 'bg-blue-100 text-blue-800 hover:bg-blue-200';
-      case 'investigating':
-        return 'bg-blue-100 text-blue-800 hover:bg-blue-200';
-      case 'resolved':
-        return 'bg-blue-100 text-blue-800 hover:bg-blue-200';
-      case 'closed':
-        return 'bg-blue-100 text-blue-800 hover:bg-blue-200';
-      default:
-        return 'bg-blue-100 text-blue-800 hover:bg-blue-200';
-    }
+    // All status badges are now blue
+    return 'bg-blue-100 text-blue-800 hover:bg-blue-200';
   };
 
   if (loading) {
