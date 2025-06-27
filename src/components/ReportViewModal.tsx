@@ -89,15 +89,20 @@ const ReportViewModal = ({ report, isOpen, onClose, onReportUpdated, users }: Re
 
   useEffect(() => {
     if (report && isOpen) {
+      console.log('Modal opened with report:', report);
       fetchMessages();
       decryptReportContent();
     }
   }, [report, isOpen]);
 
   const decryptReportContent = async () => {
-    if (!report || !user) return;
+    if (!report || !user) {
+      console.log('Missing report or user for decryption');
+      return;
+    }
     
     try {
+      console.log('Attempting to decrypt report content...');
       // Get user's organization ID for decryption
       const { data: profile } = await supabase
         .from('profiles')
@@ -105,12 +110,19 @@ const ReportViewModal = ({ report, isOpen, onClose, onReportUpdated, users }: Re
         .eq('id', user.id)
         .single();
 
+      console.log('User profile:', profile);
+
       if (profile?.organization_id) {
+        console.log('Decrypting with organization ID:', profile.organization_id);
         const decrypted = decryptReport(report.encrypted_content, profile.organization_id);
+        console.log('Decrypted content:', decrypted);
         setDecryptedContent(decrypted);
+      } else {
+        console.error('No organization ID found for user');
       }
     } catch (error) {
       console.error('Error decrypting content:', error);
+      setDecryptedContent({ error: 'Unable to decrypt content. Please check your permissions.' });
     }
   };
 
@@ -242,74 +254,36 @@ const ReportViewModal = ({ report, isOpen, onClose, onReportUpdated, users }: Re
 
     try {
       setDeleting(true);
-      
-      // Delete all related records in the correct order to avoid foreign key violations
       console.log('Starting delete process for report:', report.id);
       
-      // 1. Delete notifications first
-      const { error: notificationsError } = await supabase
-        .from('notifications')
-        .delete()
-        .eq('report_id', report.id);
-      
-      if (notificationsError) {
-        console.error('Error deleting notifications:', notificationsError);
-        throw notificationsError;
-      }
+      // Use a database function to handle the deletion with proper ordering
+      const { error } = await supabase.rpc('delete_report_cascade', {
+        report_id: report.id
+      });
 
-      // 2. Delete report messages
-      const { error: messagesError } = await supabase
-        .from('report_messages')
-        .delete()
-        .eq('report_id', report.id);
-      
-      if (messagesError) {
-        console.error('Error deleting messages:', messagesError);
-        throw messagesError;
-      }
+      if (error) {
+        console.error('Error from delete function:', error);
+        
+        // Fallback to manual deletion if function doesn't exist
+        console.log('Attempting manual deletion...');
+        
+        // Delete in the correct order to avoid foreign key violations
+        const deleteOperations = [
+          () => supabase.from('notifications').delete().eq('report_id', report.id),
+          () => supabase.from('report_messages').delete().eq('report_id', report.id),
+          () => supabase.from('report_notes').delete().eq('report_id', report.id),
+          () => supabase.from('report_attachments').delete().eq('report_id', report.id),
+          () => supabase.from('audit_logs').delete().eq('report_id', report.id),
+          () => supabase.from('reports').delete().eq('id', report.id)
+        ];
 
-      // 3. Delete report notes
-      const { error: notesError } = await supabase
-        .from('report_notes')
-        .delete()
-        .eq('report_id', report.id);
-      
-      if (notesError) {
-        console.error('Error deleting notes:', notesError);
-        throw notesError;
-      }
-
-      // 4. Delete report attachments
-      const { error: attachmentsError } = await supabase
-        .from('report_attachments')
-        .delete()
-        .eq('report_id', report.id);
-      
-      if (attachmentsError) {
-        console.error('Error deleting attachments:', attachmentsError);
-        throw attachmentsError;
-      }
-
-      // 5. Delete audit logs (must be done before deleting the report)
-      const { error: auditError } = await supabase
-        .from('audit_logs')
-        .delete()
-        .eq('report_id', report.id);
-      
-      if (auditError) {
-        console.error('Error deleting audit logs:', auditError);
-        throw auditError;
-      }
-      
-      // 6. Finally delete the report itself
-      const { error: reportError } = await supabase
-        .from('reports')
-        .delete()
-        .eq('id', report.id);
-
-      if (reportError) {
-        console.error('Error deleting report:', reportError);
-        throw reportError;
+        for (const operation of deleteOperations) {
+          const { error: opError } = await operation();
+          if (opError) {
+            console.error('Delete operation failed:', opError);
+            throw opError;
+          }
+        }
       }
 
       console.log('Report deleted successfully');
@@ -473,7 +447,7 @@ const ReportViewModal = ({ report, isOpen, onClose, onReportUpdated, users }: Re
             </div>
           </div>
 
-          {/* Report Content - Always Visible */}
+          {/* Report Content */}
           <Card>
             <CardHeader>
               <CardTitle>Report Content</CardTitle>
@@ -481,22 +455,32 @@ const ReportViewModal = ({ report, isOpen, onClose, onReportUpdated, users }: Re
             <CardContent>
               {decryptedContent ? (
                 <div className="space-y-3">
-                  {Object.entries(decryptedContent).map(([key, value]) => (
-                    <div key={key}>
-                      <Label className="capitalize text-gray-600 font-medium">
-                        {key.replace(/([A-Z])/g, ' $1').trim().replace(/_/g, ' ')}:
-                      </Label>
-                      <p className="mt-1 whitespace-pre-wrap text-sm">
-                        {typeof value === 'string' ? value : JSON.stringify(value, null, 2)}
-                      </p>
+                  {decryptedContent.error ? (
+                    <div className="text-red-600 p-4 bg-red-50 rounded-lg">
+                      <p>{decryptedContent.error}</p>
                     </div>
-                  ))}
+                  ) : typeof decryptedContent === 'object' ? (
+                    Object.entries(decryptedContent).map(([key, value]) => (
+                      <div key={key}>
+                        <Label className="capitalize text-gray-600 font-medium">
+                          {key.replace(/([A-Z])/g, ' $1').trim().replace(/_/g, ' ')}:
+                        </Label>
+                        <p className="mt-1 whitespace-pre-wrap text-sm">
+                          {typeof value === 'string' ? value : JSON.stringify(value, null, 2)}
+                        </p>
+                      </div>
+                    ))
+                  ) : (
+                    <div>
+                      <Label className="text-gray-600 font-medium">Content:</Label>
+                      <p className="mt-1 whitespace-pre-wrap text-sm">{String(decryptedContent)}</p>
+                    </div>
+                  )}
                 </div>
               ) : (
                 <div className="text-center py-4">
                   <Lock className="h-8 w-8 text-gray-400 mx-auto mb-2" />
-                  <p className="text-gray-600">Unable to decrypt content</p>
-                  <p className="text-sm text-gray-500">Please ensure you have proper access permissions</p>
+                  <p className="text-gray-600">Loading content...</p>
                 </div>
               )}
             </CardContent>
