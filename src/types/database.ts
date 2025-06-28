@@ -1,9 +1,8 @@
 
+
 import { Database } from "@/integrations/supabase/types";
 
-export type Organization = Database['public']['Tables']['organizations']['Row'] & {
-  custom_logo_url?: string | null;
-};
+export type Organization = Database['public']['Tables']['organizations']['Row'];
 export type Profile = Database['public']['Tables']['profiles']['Row'];
 export type Report = Database['public']['Tables']['reports']['Row'];
 export type ReportMessage = Database['public']['Tables']['report_messages']['Row'];
@@ -29,3 +28,4 @@ export interface EncryptionResult {
   keyHash: string;
   accessKey: string;
 }
+
