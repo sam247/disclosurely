@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -24,9 +23,7 @@ const OrganizationBranding = () => {
 
   useEffect(() => {
     if (organization) {
-      // Cast to access custom_logo_url since it's added in the database but not in the base type
-      const orgWithBranding = organization as any;
-      setLogoUrl(orgWithBranding.custom_logo_url || '');
+      setLogoUrl(organization.custom_logo_url || '');
     }
   }, [organization]);
 
