@@ -33,28 +33,46 @@ const ReportContentDisplay = ({
 
   useEffect(() => {
     const attemptDecryption = async () => {
-      if (!encryptedContent || !user) return;
+      if (!encryptedContent || !user) {
+        console.log('Missing encrypted content or user for decryption');
+        return;
+      }
       
       setIsDecrypting(true);
       setDecryptionError(null);
       
       try {
+        console.log('Starting decryption process for user:', user.email);
+        
         // Get user's organization ID
-        const { data: profile } = await supabase
+        const { data: profile, error: profileError } = await supabase
           .from('profiles')
           .select('organization_id')
           .eq('id', user.id)
           .single();
 
+        if (profileError) {
+          console.error('Error fetching user profile:', profileError);
+          throw new Error('Failed to fetch user profile');
+        }
+
         if (!profile?.organization_id) {
+          console.error('No organization found for user');
           throw new Error('No organization found');
         }
 
-        const decrypted = await decryptReport(encryptedContent, profile.organization_id);
+        console.log('Decrypting for organization:', profile.organization_id);
+        const decrypted = decryptReport(encryptedContent, profile.organization_id);
+        
+        if (!decrypted) {
+          throw new Error('Decryption returned null - check encryption key or data format');
+        }
+
+        console.log('Successfully decrypted report content');
         setDecryptedContent(decrypted);
       } catch (error) {
         console.error('Decryption failed:', error);
-        setDecryptionError('Unable to decrypt report content');
+        setDecryptionError(error instanceof Error ? error.message : 'Unable to decrypt report content');
       } finally {
         setIsDecrypting(false);
       }
@@ -90,6 +108,18 @@ const ReportContentDisplay = ({
       word.charAt(0).toUpperCase() + word.slice(1)
     ).join(' ');
   };
+
+  // Debug information in development
+  if (process.env.NODE_ENV === 'development') {
+    console.log('ReportContentDisplay Debug:', {
+      hasEncryptedContent: !!encryptedContent,
+      encryptedContentLength: encryptedContent?.length,
+      hasUser: !!user,
+      isDecrypting,
+      hasDecryptedContent: !!decryptedContent,
+      decryptionError
+    });
+  }
 
   return (
     <div className="space-y-4">
@@ -150,21 +180,28 @@ const ReportContentDisplay = ({
           ) : decryptionError ? (
             <div className="text-center py-8">
               <AlertCircle className="h-8 w-8 text-red-500 mx-auto mb-2" />
-              <p className="text-red-600">{decryptionError}</p>
+              <p className="text-red-600 mb-2">{decryptionError}</p>
+              <p className="text-sm text-gray-500">
+                Contact your administrator if this problem persists.
+              </p>
             </div>
           ) : decryptedContent ? (
             <div className="space-y-4">
-              <div>
-                <h4 className="font-medium text-gray-900 mb-2">Title:</h4>
-                <p className="text-gray-700">{decryptedContent.title}</p>
-              </div>
-              
-              <div>
-                <h4 className="font-medium text-gray-900 mb-2">Description:</h4>
-                <div className="text-gray-700 whitespace-pre-wrap">
-                  {decryptedContent.content}
+              {decryptedContent.title && (
+                <div>
+                  <h4 className="font-medium text-gray-900 mb-2">Title:</h4>
+                  <p className="text-gray-700">{decryptedContent.title}</p>
                 </div>
-              </div>
+              )}
+              
+              {decryptedContent.content && (
+                <div>
+                  <h4 className="font-medium text-gray-900 mb-2">Description:</h4>
+                  <div className="text-gray-700 whitespace-pre-wrap">
+                    {decryptedContent.content}
+                  </div>
+                </div>
+              )}
 
               {decryptedContent.category && (
                 <div>
@@ -203,13 +240,16 @@ const ReportContentDisplay = ({
 
               <div>
                 <h4 className="font-medium text-gray-900 mb-2">Submission Method:</h4>
-                <p className="text-gray-700">web_form</p>
+                <p className="text-gray-700">Web Form</p>
               </div>
             </div>
           ) : (
             <div className="text-center py-8">
               <FileText className="h-8 w-8 text-gray-400 mx-auto mb-2" />
-              <p className="text-gray-500">No content available</p>
+              <p className="text-gray-500">No content available or failed to load</p>
+              <p className="text-xs text-gray-400 mt-1">
+                Check browser console for detailed error information
+              </p>
             </div>
           )}
         </CardContent>

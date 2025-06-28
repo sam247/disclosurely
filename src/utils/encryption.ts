@@ -25,7 +25,7 @@ export const createKeyHash = (key: string): string => {
 // Organization-based encryption for reports
 export const encryptReport = (reportData: any, organizationId: string): { encryptedData: string; keyHash: string } => {
   // Use organization ID to generate a consistent key
-  const organizationKey = CryptoJS.SHA256(organizationId + process.env.ENCRYPTION_SALT || 'default-salt').toString();
+  const organizationKey = CryptoJS.SHA256(organizationId + (process.env.ENCRYPTION_SALT || 'default-salt')).toString();
   const encryptedData = encryptData(JSON.stringify(reportData), organizationKey);
   const keyHash = createKeyHash(organizationKey);
   
@@ -35,11 +35,30 @@ export const encryptReport = (reportData: any, organizationId: string): { encryp
 // Decrypt report for authorized dashboard users
 export const decryptReport = (encryptedData: string, organizationId: string): any => {
   try {
-    const organizationKey = CryptoJS.SHA256(organizationId + process.env.ENCRYPTION_SALT || 'default-salt').toString();
+    console.log('Attempting to decrypt report for organization:', organizationId);
+    
+    if (!encryptedData || !organizationId) {
+      console.error('Missing required parameters for decryption');
+      return null;
+    }
+
+    const organizationKey = CryptoJS.SHA256(organizationId + (process.env.ENCRYPTION_SALT || 'default-salt')).toString();
+    console.log('Generated decryption key hash:', organizationKey.substring(0, 8) + '...');
+    
     const decryptedData = decryptData(encryptedData, organizationKey);
-    return JSON.parse(decryptedData);
+    console.log('Decrypted data length:', decryptedData.length);
+    
+    if (!decryptedData) {
+      console.error('Decryption returned empty result');
+      return null;
+    }
+
+    const parsedData = JSON.parse(decryptedData);
+    console.log('Successfully parsed decrypted data');
+    return parsedData;
   } catch (error) {
     console.error('Failed to decrypt report:', error);
+    console.error('Encrypted data preview:', encryptedData.substring(0, 50) + '...');
     return null;
   }
 };
