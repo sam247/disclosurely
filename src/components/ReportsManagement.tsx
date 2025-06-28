@@ -48,6 +48,7 @@ interface Report {
 const ReportsManagement = () => {
   const { user } = useAuth();
   const { toast } = useToast();
+  
   const [reports, setReports] = useState<Report[]>([]);
   const [selectedReport, setSelectedReport] = useState<Report | null>(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);

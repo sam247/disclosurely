@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -8,7 +7,7 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
-import { LogOut, Plus, ExternalLink, FileText, Eye, Archive, Trash2, CreditCard, Settings } from 'lucide-react';
+import { LogOut, Plus, ExternalLink, FileText, Eye, Archive, Trash2, CreditCard } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import ReportMessaging from '@/components/ReportMessaging';
 import ReportContentDisplay from '@/components/ReportContentDisplay';
@@ -126,7 +125,7 @@ const Dashboard = () => {
       // Remove the archived report from local state immediately
       setReports(prevReports => prevReports.filter(report => report.id !== reportId));
       
-      // Also refresh the data to ensure consistency after a short delay
+      // Refresh the data to ensure consistency
       setTimeout(() => {
         fetchData();
       }, 1000);
@@ -142,7 +141,7 @@ const Dashboard = () => {
 
   const handleDeleteReport = async (reportId: string) => {
     try {
-      // Remove from local state first to give immediate feedback
+      // Remove from local state first for immediate feedback
       setReports(prevReports => prevReports.filter(report => report.id !== reportId));
 
       // Close dialog if this report was being viewed
@@ -151,49 +150,20 @@ const Dashboard = () => {
         setSelectedReport(null);
       }
 
-      // Delete related messages
-      const { error: messagesError } = await supabase
-        .from('report_messages')
-        .delete()
-        .eq('report_id', reportId);
-
-      if (messagesError) {
-        console.error('Error deleting messages:', messagesError);
-      }
-
-      // Delete related notifications
-      const { error: notificationsError } = await supabase
-        .from('notifications')
-        .delete()
-        .eq('report_id', reportId);
-
-      if (notificationsError) {
-        console.error('Error deleting notifications:', notificationsError);
-      }
+      // Delete related data first (cascading delete)
+      await supabase.from('report_messages').delete().eq('report_id', reportId);
+      await supabase.from('report_notes').delete().eq('report_id', reportId);
+      await supabase.from('notifications').delete().eq('report_id', reportId);
 
       // Delete the report itself
-      const { error: reportError, data: deletedData } = await supabase
+      const { error: reportError } = await supabase
         .from('reports')
         .delete()
-        .eq('id', reportId)
-        .select();
+        .eq('id', reportId);
 
       if (reportError) {
         console.error('Error deleting report:', reportError);
         throw reportError;
-      }
-
-      if (!deletedData || deletedData.length === 0) {
-        toast({
-          title: "Delete failed",
-          description: "Report could not be deleted. Please try again.",
-          variant: "destructive",
-        });
-        // Restore to local state since deletion failed
-        setTimeout(() => {
-          fetchData();
-        }, 500);
-        return;
       }
 
       toast({
@@ -209,13 +179,13 @@ const Dashboard = () => {
     } catch (error) {
       console.error('Error deleting report:', error);
       
-      // If deletion failed, restore the report to the local state
       toast({
         title: "Error",
         description: "Failed to delete report. Please try again.",
         variant: "destructive",
       });
       
+      // Restore the report to local state if deletion failed
       setTimeout(() => {
         fetchData();
       }, 500);

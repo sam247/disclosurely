@@ -9,64 +9,6 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
-      audit_logs: {
-        Row: {
-          action: Database["public"]["Enums"]["audit_action"]
-          created_at: string
-          details: Json | null
-          id: string
-          ip_address: unknown | null
-          organization_id: string
-          report_id: string | null
-          user_agent: string | null
-          user_id: string | null
-        }
-        Insert: {
-          action: Database["public"]["Enums"]["audit_action"]
-          created_at?: string
-          details?: Json | null
-          id?: string
-          ip_address?: unknown | null
-          organization_id: string
-          report_id?: string | null
-          user_agent?: string | null
-          user_id?: string | null
-        }
-        Update: {
-          action?: Database["public"]["Enums"]["audit_action"]
-          created_at?: string
-          details?: Json | null
-          id?: string
-          ip_address?: unknown | null
-          organization_id?: string
-          report_id?: string | null
-          user_agent?: string | null
-          user_id?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "audit_logs_organization_id_fkey"
-            columns: ["organization_id"]
-            isOneToOne: false
-            referencedRelation: "organizations"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "audit_logs_report_id_fkey"
-            columns: ["report_id"]
-            isOneToOne: false
-            referencedRelation: "reports"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "audit_logs_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       email_notifications: {
         Row: {
           email_address: string
@@ -654,18 +596,6 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      create_audit_log: {
-        Args: {
-          p_organization_id: string
-          p_user_id: string
-          p_report_id: string
-          p_action: Database["public"]["Enums"]["audit_action"]
-          p_details?: Json
-          p_ip_address?: unknown
-          p_user_agent?: string
-        }
-        Returns: string
-      }
       generate_invitation_token: {
         Args: Record<PropertyKey, never>
         Returns: string
@@ -687,13 +617,6 @@ export type Database = {
       }
     }
     Enums: {
-      audit_action:
-        | "created"
-        | "updated"
-        | "viewed"
-        | "assigned"
-        | "status_changed"
-        | "message_sent"
       report_status:
         | "new"
         | "in_review"
@@ -817,14 +740,6 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
-      audit_action: [
-        "created",
-        "updated",
-        "viewed",
-        "assigned",
-        "status_changed",
-        "message_sent",
-      ],
       report_status: [
         "new",
         "in_review",
