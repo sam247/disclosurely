@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -30,7 +31,7 @@ const ReportContentDisplay = ({
 }: ReportContentDisplayProps) => {
   const { user } = useAuth();
   const { toast } = useToast();
-  const [decryptedContent, setDecryptedContent] = useState<DecryptedReport | null>(null);
+  const [decryptedContent, setDecryptedContent] = useState<any | null>(null);
   const [isDecrypting, setIsDecrypting] = useState(false);
   const [decryptionError, setDecryptionError] = useState<string | null>(null);
   const [organizationId, setOrganizationId] = useState<string | null>(null);
@@ -75,6 +76,7 @@ const ReportContentDisplay = ({
       const decrypted = decryptReport(encryptedContent, profile.organization_id);
       
       console.log('Successfully decrypted report content');
+      console.log('Decrypted data:', decrypted);
       setDecryptedContent(decrypted);
       setRetryCount(0);
       
@@ -226,16 +228,28 @@ const ReportContentDisplay = ({
             </div>
           ) : decryptedContent ? (
             <div className="space-y-4">
+              {/* Display the actual decrypted title */}
               {decryptedContent.title && (
                 <div>
-                  <h4 className="font-medium text-gray-900 mb-2">Title:</h4>
+                  <h4 className="font-medium text-gray-900 mb-2">Report Title:</h4>
                   <p className="text-gray-700">{decryptedContent.title}</p>
                 </div>
               )}
               
-              {decryptedContent.content && (
+              {/* Map 'description' field to content display */}
+              {decryptedContent.description && (
                 <div>
                   <h4 className="font-medium text-gray-900 mb-2">Description:</h4>
+                  <div className="text-gray-700 whitespace-pre-wrap">
+                    {decryptedContent.description}
+                  </div>
+                </div>
+              )}
+
+              {/* Handle content field as fallback */}
+              {decryptedContent.content && (
+                <div>
+                  <h4 className="font-medium text-gray-900 mb-2">Content:</h4>
                   <div className="text-gray-700 whitespace-pre-wrap">
                     {decryptedContent.content}
                   </div>
@@ -277,9 +291,20 @@ const ReportContentDisplay = ({
                 </div>
               )}
 
+              {/* Display submission method from decrypted data */}
               <div>
                 <h4 className="font-medium text-gray-900 mb-2">Submission Method:</h4>
-                <p className="text-gray-700">Web Form</p>
+                <p className="text-gray-700">
+                  {decryptedContent.submission_method || 'Web Form'}
+                </p>
+              </div>
+
+              {/* Debug: Show all available fields */}
+              <div className="border-t pt-4 mt-4">
+                <h4 className="font-medium text-gray-900 mb-2">Available Data Fields:</h4>
+                <div className="text-xs text-gray-500 font-mono">
+                  {Object.keys(decryptedContent).join(', ')}
+                </div>
               </div>
             </div>
           ) : (
