@@ -1,7 +1,9 @@
+
 import { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Lock, FileText, Calendar, User, AlertCircle } from 'lucide-react';
+import { Lock, FileText, Calendar, User, AlertCircle, RefreshCw } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 import { DecryptedReport } from '@/types/database';
 import { decryptReport } from '@/utils/encryption';
 import { useAuth } from '@/hooks/useAuth';
@@ -30,54 +32,56 @@ const ReportContentDisplay = ({
   const [decryptedContent, setDecryptedContent] = useState<DecryptedReport | null>(null);
   const [isDecrypting, setIsDecrypting] = useState(false);
   const [decryptionError, setDecryptionError] = useState<string | null>(null);
+  const [organizationId, setOrganizationId] = useState<string | null>(null);
+
+  const attemptDecryption = async () => {
+    if (!encryptedContent || !user) {
+      console.log('Missing encrypted content or user for decryption');
+      return;
+    }
+    
+    setIsDecrypting(true);
+    setDecryptionError(null);
+    
+    try {
+      console.log('Starting decryption process for user:', user.email);
+      console.log('Encrypted content available:', !!encryptedContent);
+      console.log('Encrypted content length:', encryptedContent?.length);
+      
+      // Get user's organization ID
+      const { data: profile, error: profileError } = await supabase
+        .from('profiles')
+        .select('organization_id')
+        .eq('id', user.id)
+        .single();
+
+      if (profileError) {
+        console.error('Error fetching user profile:', profileError);
+        throw new Error('Failed to fetch user profile');
+      }
+
+      if (!profile?.organization_id) {
+        console.error('No organization found for user');
+        throw new Error('No organization found for user');
+      }
+
+      console.log('User organization ID:', profile.organization_id);
+      setOrganizationId(profile.organization_id);
+
+      const decrypted = decryptReport(encryptedContent, profile.organization_id);
+      
+      console.log('Successfully decrypted report content:', Object.keys(decrypted || {}));
+      setDecryptedContent(decrypted);
+    } catch (error) {
+      console.error('Decryption failed:', error);
+      const errorMessage = error instanceof Error ? error.message : 'Unknown decryption error';
+      setDecryptionError(errorMessage);
+    } finally {
+      setIsDecrypting(false);
+    }
+  };
 
   useEffect(() => {
-    const attemptDecryption = async () => {
-      if (!encryptedContent || !user) {
-        console.log('Missing encrypted content or user for decryption');
-        return;
-      }
-      
-      setIsDecrypting(true);
-      setDecryptionError(null);
-      
-      try {
-        console.log('Starting decryption process for user:', user.email);
-        
-        // Get user's organization ID
-        const { data: profile, error: profileError } = await supabase
-          .from('profiles')
-          .select('organization_id')
-          .eq('id', user.id)
-          .single();
-
-        if (profileError) {
-          console.error('Error fetching user profile:', profileError);
-          throw new Error('Failed to fetch user profile');
-        }
-
-        if (!profile?.organization_id) {
-          console.error('No organization found for user');
-          throw new Error('No organization found');
-        }
-
-        console.log('Decrypting for organization:', profile.organization_id);
-        const decrypted = decryptReport(encryptedContent, profile.organization_id);
-        
-        if (!decrypted) {
-          throw new Error('Decryption returned null - check encryption key or data format');
-        }
-
-        console.log('Successfully decrypted report content');
-        setDecryptedContent(decrypted);
-      } catch (error) {
-        console.error('Decryption failed:', error);
-        setDecryptionError(error instanceof Error ? error.message : 'Unable to decrypt report content');
-      } finally {
-        setIsDecrypting(false);
-      }
-    };
-
     attemptDecryption();
   }, [encryptedContent, user]);
 
@@ -108,18 +112,6 @@ const ReportContentDisplay = ({
       word.charAt(0).toUpperCase() + word.slice(1)
     ).join(' ');
   };
-
-  // Debug information in development
-  if (process.env.NODE_ENV === 'development') {
-    console.log('ReportContentDisplay Debug:', {
-      hasEncryptedContent: !!encryptedContent,
-      encryptedContentLength: encryptedContent?.length,
-      hasUser: !!user,
-      isDecrypting,
-      hasDecryptedContent: !!decryptedContent,
-      decryptionError
-    });
-  }
 
   return (
     <div className="space-y-4">
@@ -163,12 +155,25 @@ const ReportContentDisplay = ({
         </div>
       </div>
 
-      {/* Report Content - Always Visible */}
+      {/* Report Content */}
       <Card>
         <CardHeader>
-          <CardTitle className="flex items-center space-x-2">
-            <Lock className="h-4 w-4 text-green-600" />
-            <span>Report Content</span>
+          <CardTitle className="flex items-center justify-between">
+            <div className="flex items-center space-x-2">
+              <Lock className="h-4 w-4 text-green-600" />
+              <span>Report Content</span>
+            </div>
+            {decryptionError && (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={attemptDecryption}
+                disabled={isDecrypting}
+              >
+                <RefreshCw className={`h-4 w-4 mr-2 ${isDecrypting ? 'animate-spin' : ''}`} />
+                Retry
+              </Button>
+            )}
           </CardTitle>
         </CardHeader>
         <CardContent>
@@ -179,11 +184,21 @@ const ReportContentDisplay = ({
             </div>
           ) : decryptionError ? (
             <div className="text-center py-8">
-              <AlertCircle className="h-8 w-8 text-red-500 mx-auto mb-2" />
-              <p className="text-red-600 mb-2">{decryptionError}</p>
-              <p className="text-sm text-gray-500">
-                Contact your administrator if this problem persists.
-              </p>
+              <AlertCircle className="h-8 w-8 text-red-500 mx-auto mb-4" />
+              <h4 className="text-lg font-medium text-red-600 mb-2">Content Unavailable</h4>
+              <p className="text-red-600 mb-4">{decryptionError}</p>
+              <div className="text-sm text-gray-500 space-y-2">
+                <p>Debug Information:</p>
+                <div className="bg-gray-100 p-3 rounded text-left">
+                  <p>• User ID: {user?.id?.substring(0, 8)}...</p>
+                  <p>• Organization ID: {organizationId?.substring(0, 8) || 'Not found'}...</p>
+                  <p>• Encrypted Data: {encryptedContent ? 'Present' : 'Missing'}</p>
+                  <p>• Data Length: {encryptedContent?.length || 0} characters</p>
+                </div>
+                <p className="mt-4">
+                  If this error persists, please contact your administrator.
+                </p>
+              </div>
             </div>
           ) : decryptedContent ? (
             <div className="space-y-4">
@@ -246,10 +261,7 @@ const ReportContentDisplay = ({
           ) : (
             <div className="text-center py-8">
               <FileText className="h-8 w-8 text-gray-400 mx-auto mb-2" />
-              <p className="text-gray-500">No content available or failed to load</p>
-              <p className="text-xs text-gray-400 mt-1">
-                Check browser console for detailed error information
-              </p>
+              <p className="text-gray-500">No content available</p>
             </div>
           )}
         </CardContent>
