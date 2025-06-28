@@ -1,13 +1,10 @@
 
-import { useState } from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
+import { useState, useEffect } from 'react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Label } from '@/components/ui/label';
-import { Eye, EyeOff, FileText, Lock, Unlock } from 'lucide-react';
+import { Lock, FileText, Calendar, User, AlertCircle } from 'lucide-react';
+import { DecryptedReport } from '@/types/database';
 import { decryptReport } from '@/utils/encryption';
-import { useAuth } from '@/hooks/useAuth';
-import { supabase } from '@/integrations/supabase/client';
 
 interface ReportContentDisplayProps {
   encryptedContent: string;
@@ -19,49 +16,42 @@ interface ReportContentDisplayProps {
   priority: number;
 }
 
-const ReportContentDisplay = ({ 
-  encryptedContent, 
-  title, 
-  status, 
-  trackingId, 
-  reportType, 
-  createdAt, 
-  priority 
+const ReportContentDisplay = ({
+  encryptedContent,
+  title,
+  status,
+  trackingId,
+  reportType,
+  createdAt,
+  priority
 }: ReportContentDisplayProps) => {
-  const { user } = useAuth();
-  const [showContent, setShowContent] = useState(false);
-  const [decryptedContent, setDecryptedContent] = useState<any>(null);
+  const [decryptedContent, setDecryptedContent] = useState<DecryptedReport | null>(null);
   const [isDecrypting, setIsDecrypting] = useState(false);
+  const [decryptionError, setDecryptionError] = useState<string | null>(null);
 
-  const handleDecryptContent = async () => {
-    if (!user || decryptedContent) {
-      setShowContent(!showContent);
-      return;
-    }
-
-    setIsDecrypting(true);
-    try {
-      // Get user's organization ID
-      const { data: profile } = await supabase
-        .from('profiles')
-        .select('organization_id')
-        .eq('id', user.id)
-        .single();
-
-      if (profile?.organization_id) {
-        const decrypted = decryptReport(encryptedContent, profile.organization_id);
+  useEffect(() => {
+    const attemptDecryption = async () => {
+      if (!encryptedContent) return;
+      
+      setIsDecrypting(true);
+      setDecryptionError(null);
+      
+      try {
+        const decrypted = await decryptReport(encryptedContent, trackingId);
         setDecryptedContent(decrypted);
-        setShowContent(true);
+      } catch (error) {
+        console.error('Decryption failed:', error);
+        setDecryptionError('Unable to decrypt report content');
+      } finally {
+        setIsDecrypting(false);
       }
-    } catch (error) {
-      console.error('Error decrypting content:', error);
-    } finally {
-      setIsDecrypting(false);
-    }
-  };
+    };
+
+    attemptDecryption();
+  }, [encryptedContent, trackingId]);
 
   const getStatusColor = (status: string) => {
-    switch (status) {
+    switch (status.toLowerCase()) {
       case 'new': return 'bg-blue-100 text-blue-800';
       case 'in_review': return 'bg-yellow-100 text-yellow-800';
       case 'investigating': return 'bg-orange-100 text-orange-800';
@@ -73,110 +63,145 @@ const ReportContentDisplay = ({
 
   const getPriorityColor = (priority: number) => {
     switch (priority) {
-      case 1: return 'bg-red-100 text-red-800';
-      case 2: return 'bg-orange-100 text-orange-800';
-      case 3: return 'bg-yellow-100 text-yellow-800';
-      case 4: return 'bg-green-100 text-green-800';
-      case 5: return 'bg-blue-100 text-blue-800';
-      default: return 'bg-gray-100 text-gray-800';
+      case 1: return 'text-red-600 font-bold';
+      case 2: return 'text-orange-600 font-semibold';
+      case 3: return 'text-yellow-600';
+      case 4: return 'text-green-600';
+      case 5: return 'text-gray-600';
+      default: return 'text-gray-600';
     }
   };
 
-  return (
-    <Card className="w-full">
-      <CardHeader>
-        <div className="flex justify-between items-start">
-          <div>
-            <CardTitle className="flex items-center space-x-2">
-              <FileText className="h-5 w-5" />
-              <span>{title}</span>
-            </CardTitle>
-            <CardDescription>
-              Report ID: {trackingId} • Submitted: {new Date(createdAt).toLocaleDateString()}
-            </CardDescription>
-          </div>
-          <div className="flex space-x-2">
-            <Badge className={getStatusColor(status)}>
-              {status.replace('_', ' ').toUpperCase()}
-            </Badge>
-            <Badge className={getPriorityColor(priority)}>
-              Priority {priority}
-            </Badge>
-          </div>
-        </div>
-      </CardHeader>
-      
-      <CardContent className="space-y-4">
-        <div className="grid grid-cols-2 gap-4 text-sm">
-          <div>
-            <Label className="text-gray-600">Report Type</Label>
-            <p className="capitalize">{reportType}</p>
-          </div>
-          <div>
-            <Label className="text-gray-600">Status</Label>
-            <p className="capitalize">{status.replace('_', ' ')}</p>
-          </div>
-        </div>
+  const formatStatus = (status: string) => {
+    return status.split('_').map(word => 
+      word.charAt(0).toUpperCase() + word.slice(1)
+    ).join(' ');
+  };
 
-        <div className="space-y-4">
-          <div className="flex items-center justify-between">
-            <h4 className="font-semibold flex items-center space-x-2">
-              <span>Report Content:</span>
-              {decryptedContent ? (
-                <Unlock className="h-4 w-4 text-green-600" />
-              ) : (
-                <Lock className="h-4 w-4 text-blue-600" />
-              )}
-            </h4>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={handleDecryptContent}
-              disabled={isDecrypting}
-            >
-              {isDecrypting ? (
-                'Decrypting...'
-              ) : showContent ? (
-                <>
-                  <EyeOff className="mr-2 h-4 w-4" />
-                  Hide Content
-                </>
-              ) : (
-                <>
-                  <Eye className="mr-2 h-4 w-4" />
-                  View Content
-                </>
-              )}
-            </Button>
-          </div>
-          
-          {showContent && (
-            <div className="bg-gray-50 p-4 rounded-lg">
-              {decryptedContent ? (
-                <div className="space-y-3">
-                  {Object.entries(decryptedContent).map(([key, value]) => (
-                    <div key={key}>
-                      <Label className="capitalize text-gray-600 font-medium">
-                        {key.replace(/([A-Z])/g, ' $1').trim().replace(/_/g, ' ')}:
-                      </Label>
-                      <p className="mt-1 whitespace-pre-wrap text-sm">
-                        {typeof value === 'string' ? value : JSON.stringify(value, null, 2)}
-                      </p>
-                    </div>
-                  ))}
+  return (
+    <div className="space-y-4">
+      {/* Header with basic info */}
+      <div className="flex items-center justify-between">
+        <div className="flex items-center space-x-3">
+          <FileText className="h-5 w-5 text-blue-600" />
+          <h3 className="text-lg font-semibold">{title}</h3>
+        </div>
+        <div className="flex items-center space-x-2">
+          <Badge className="bg-blue-100 text-blue-800">
+            {formatStatus(reportType)}
+          </Badge>
+          <Badge className={getPriorityColor(priority)}>
+            Priority {priority}
+          </Badge>
+        </div>
+      </div>
+
+      {/* Meta information */}
+      <div className="grid grid-cols-2 gap-4 text-sm">
+        <div className="flex items-center space-x-2">
+          <User className="h-4 w-4 text-gray-400" />
+          <span className="text-gray-600">Report ID: {trackingId}</span>
+        </div>
+        <div className="flex items-center space-x-2">
+          <Calendar className="h-4 w-4 text-gray-400" />
+          <span className="text-gray-600">
+            Submitted: {new Date(createdAt).toLocaleDateString()}
+          </span>
+        </div>
+        <div className="flex items-center space-x-2">
+          <AlertCircle className="h-4 w-4 text-gray-400" />
+          <Badge className={getStatusColor(status)}>
+            {formatStatus(status)}
+          </Badge>
+        </div>
+        <div className="flex items-center space-x-2">
+          <FileText className="h-4 w-4 text-gray-400" />
+          <span className="text-gray-600">Type: {formatStatus(reportType)}</span>
+        </div>
+      </div>
+
+      {/* Report Content - Always Visible */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center space-x-2">
+            <Lock className="h-4 w-4 text-green-600" />
+            <span>Report Content</span>
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          {isDecrypting ? (
+            <div className="flex items-center justify-center py-8">
+              <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600"></div>
+              <span className="ml-3 text-gray-600">Decrypting content...</span>
+            </div>
+          ) : decryptionError ? (
+            <div className="text-center py-8">
+              <AlertCircle className="h-8 w-8 text-red-500 mx-auto mb-2" />
+              <p className="text-red-600">{decryptionError}</p>
+            </div>
+          ) : decryptedContent ? (
+            <div className="space-y-4">
+              <div>
+                <h4 className="font-medium text-gray-900 mb-2">Title:</h4>
+                <p className="text-gray-700">{decryptedContent.title}</p>
+              </div>
+              
+              <div>
+                <h4 className="font-medium text-gray-900 mb-2">Description:</h4>
+                <div className="text-gray-700 whitespace-pre-wrap">
+                  {decryptedContent.content}
                 </div>
-              ) : (
-                <div className="text-center py-4">
-                  <Lock className="h-8 w-8 text-gray-400 mx-auto mb-2" />
-                  <p className="text-gray-600">Unable to decrypt content</p>
-                  <p className="text-sm text-gray-500">Please ensure you have proper access permissions</p>
+              </div>
+
+              {decryptedContent.category && (
+                <div>
+                  <h4 className="font-medium text-gray-900 mb-2">Category:</h4>
+                  <p className="text-gray-700">{decryptedContent.category}</p>
                 </div>
               )}
+
+              {decryptedContent.incident_date && (
+                <div>
+                  <h4 className="font-medium text-gray-900 mb-2">Incident Date:</h4>
+                  <p className="text-gray-700">{decryptedContent.incident_date}</p>
+                </div>
+              )}
+
+              {decryptedContent.location && (
+                <div>
+                  <h4 className="font-medium text-gray-900 mb-2">Location:</h4>
+                  <p className="text-gray-700">{decryptedContent.location}</p>
+                </div>
+              )}
+
+              {decryptedContent.people_involved && (
+                <div>
+                  <h4 className="font-medium text-gray-900 mb-2">People Involved:</h4>
+                  <p className="text-gray-700">{decryptedContent.people_involved}</p>
+                </div>
+              )}
+
+              {decryptedContent.evidence_description && (
+                <div>
+                  <h4 className="font-medium text-gray-900 mb-2">Evidence Description:</h4>
+                  <p className="text-gray-700">{decryptedContent.evidence_description}</p>
+                </div>
+              )}
+
+              <div>
+                <h4 className="font-medium text-gray-900 mb-2">Submission Method:</h4>
+                <p className="text-gray-700">web_form</p>
+              </div>
+            </div>
+          ) : (
+            <div className="text-center py-8">
+              <FileText className="h-8 w-8 text-gray-400 mx-auto mb-2" />
+              <p className="text-gray-500">No content available</p>
             </div>
           )}
-        </div>
-      </CardContent>
-    </Card>
+        </CardContent>
+      </Card>
+    </div>
   );
 };
 
