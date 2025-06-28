@@ -19,8 +19,6 @@ interface LinkData {
   description: string;
   organization_id: string;
   organization_name: string;
-  custom_logo_url?: string;
-  subscription_tier?: string;
 }
 
 const DynamicSubmissionForm = () => {
@@ -60,10 +58,7 @@ const DynamicSubmissionForm = () => {
           name,
           description,
           organization_id,
-          organizations!inner(
-            name,
-            custom_logo_url
-          )
+          organizations!inner(name)
         `)
         .eq('link_token', linkToken)
         .eq('is_active', true)
@@ -82,19 +77,12 @@ const DynamicSubmissionForm = () => {
 
       console.log('Link found:', linkInfo);
 
-      // Check subscription tier for logo display
-      const { data: subscriptionData } = await supabase.functions.invoke('check-subscription-by-org', {
-        body: { organization_id: linkInfo.organization_id }
-      });
-
       setLinkData({
         id: linkInfo.id,
         name: linkInfo.name,
         description: linkInfo.description || '',
         organization_id: linkInfo.organization_id,
-        organization_name: linkInfo.organizations.name,
-        custom_logo_url: linkInfo.organizations.custom_logo_url,
-        subscription_tier: subscriptionData?.subscription_tier
+        organization_name: linkInfo.organizations.name
       });
 
     } catch (error) {
@@ -229,46 +217,19 @@ const DynamicSubmissionForm = () => {
     );
   }
 
-  const showCustomLogo = linkData.subscription_tier === 'tier2' && linkData.custom_logo_url;
-
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
       <header className="bg-white shadow border-t-4 border-blue-600">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center py-6">
-            {showCustomLogo ? (
-              <div className="flex items-center">
-                <img
-                  src={linkData.custom_logo_url!}
-                  alt={`${linkData.organization_name} Logo`}
-                  className="h-10 max-w-48 object-contain mr-4"
-                  onError={(e) => {
-                    // Fallback to default display if logo fails to load
-                    const container = e.target.parentElement;
-                    container.innerHTML = `
-                      <div class="w-10 h-10 bg-blue-600 rounded-lg flex items-center justify-center mr-4">
-                        <span class="h-6 w-6 text-white font-bold">${linkData.organization_name.charAt(0)}</span>
-                      </div>
-                    `;
-                  }}
-                />
-                <div>
-                  <h1 className="text-2xl font-bold text-gray-900">{linkData.organization_name}</h1>
-                  <p className="text-sm text-gray-600">Secure Report Submission</p>
-                </div>
-              </div>
-            ) : (
-              <>
-                <div className="w-10 h-10 bg-blue-600 rounded-lg flex items-center justify-center mr-4">
-                  <Shield className="h-6 w-6 text-white" />
-                </div>
-                <div>
-                  <h1 className="text-2xl font-bold text-gray-900">{linkData.organization_name}</h1>
-                  <p className="text-sm text-gray-600">Secure Report Submission</p>
-                </div>
-              </>
-            )}
+            <div className="w-10 h-10 bg-blue-600 rounded-lg flex items-center justify-center mr-4">
+              <Shield className="h-6 w-6 text-white" />
+            </div>
+            <div>
+              <h1 className="text-2xl font-bold text-gray-900">{linkData.organization_name}</h1>
+              <p className="text-sm text-gray-600">Secure Report Submission</p>
+            </div>
           </div>
         </div>
       </header>
