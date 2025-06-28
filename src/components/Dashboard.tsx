@@ -379,29 +379,28 @@ const Dashboard = () => {
                 </Card>
               )}
 
-              {/* Create Link Button */}
-              <Card>
-                <CardContent className="p-6">
-                  <div className="flex items-center">
-                    <Plus className="h-8 w-8 text-purple-600" />
-                    <div className="ml-4">
-                      <Button 
-                        onClick={createOrGetSubmissionLink} 
-                        className="w-full" 
-                        disabled={links.length > 0 || !subscriptionData.subscribed}
-                      >
-                        {links.length > 0 ? 'Link Created' : 'Create Submission Link'}
-                      </Button>
-                      {!subscriptionData.subscribed && (
-                        <p className="text-xs text-gray-500 mt-2">Subscription required</p>
-                      )}
+              {/* Create/Manage Link Section */}
+              {links.length === 0 ? (
+                <Card>
+                  <CardContent className="p-6">
+                    <div className="flex items-center">
+                      <Plus className="h-8 w-8 text-purple-600" />
+                      <div className="ml-4">
+                        <Button 
+                          onClick={createOrGetSubmissionLink} 
+                          className="w-full" 
+                          disabled={!subscriptionData.subscribed}
+                        >
+                          Create Submission Link
+                        </Button>
+                        {!subscriptionData.subscribed && (
+                          <p className="text-xs text-gray-500 mt-2">Subscription required</p>
+                        )}
+                      </div>
                     </div>
-                  </div>
-                </CardContent>
-              </Card>
-
-              {/* Submission Link */}
-              {links.length > 0 && (
+                  </CardContent>
+                </Card>
+              ) : (
                 <Card>
                   <CardHeader>
                     <CardTitle>Submission Link</CardTitle>

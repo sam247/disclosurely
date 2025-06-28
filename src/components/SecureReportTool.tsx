@@ -7,6 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Checkbox } from "@/components/ui/checkbox";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Shield, Lock, AlertTriangle, Upload } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
@@ -25,11 +26,12 @@ const SecureReportTool = () => {
     people_involved: "",
     evidence_description: "",
     submitter_email: "",
+    priority: 3,
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [agreedToTerms, setAgreedToTerms] = useState(false);
 
-  const handleInputChange = (field: string, value: string) => {
+  const handleInputChange = (field: string, value: string | number) => {
     setFormData(prev => ({ ...prev, [field]: value }));
   };
 
@@ -81,7 +83,7 @@ const SecureReportTool = () => {
 
       const { encryptedData, keyHash } = encryptReport(reportData, trackingId);
 
-      // Submit encrypted report with the generated tracking_id
+      // Submit encrypted report with the generated tracking_id and priority
       const { data: report, error } = await supabase
         .from("reports")
         .insert({
@@ -92,6 +94,7 @@ const SecureReportTool = () => {
           encryption_key_hash: keyHash,
           tracking_id: trackingId,
           submitted_by_email: reportType === "confidential" ? formData.submitter_email || null : null,
+          priority: formData.priority,
         })
         .select()
         .single();
@@ -217,6 +220,26 @@ const SecureReportTool = () => {
                     onChange={(e) => handleInputChange("category", e.target.value)}
                     placeholder="e.g., Financial misconduct, Safety violation, Harassment"
                   />
+                </div>
+
+                {/* Priority */}
+                <div>
+                  <Label htmlFor="priority">Priority Level</Label>
+                  <Select
+                    value={formData.priority.toString()}
+                    onValueChange={(value) => handleInputChange("priority", parseInt(value))}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select priority level" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="1">1 - Critical (Immediate danger/serious violation)</SelectItem>
+                      <SelectItem value="2">2 - High (Significant impact)</SelectItem>
+                      <SelectItem value="3">3 - Medium (Standard concern)</SelectItem>
+                      <SelectItem value="4">4 - Low (Minor issue)</SelectItem>
+                      <SelectItem value="5">5 - Informational (General feedback)</SelectItem>
+                    </SelectContent>
+                  </Select>
                 </div>
 
                 {/* Content */}

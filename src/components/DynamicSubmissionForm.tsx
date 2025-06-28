@@ -7,6 +7,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Switch } from '@/components/ui/switch';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { Shield, AlertTriangle } from 'lucide-react';
@@ -33,7 +34,8 @@ const DynamicSubmissionForm = () => {
   const [formData, setFormData] = useState({
     title: '',
     description: '',
-    submitter_email: ''
+    submitter_email: '',
+    priority: 3
   });
 
   useEffect(() => {
@@ -121,7 +123,8 @@ const DynamicSubmissionForm = () => {
       console.log('Submitting report:', {
         title: formData.title,
         organizationId: linkData.organization_id,
-        isAnonymous
+        isAnonymous,
+        priority: formData.priority
       });
 
       // Encrypt the report data using organization-based encryption
@@ -146,7 +149,7 @@ const DynamicSubmissionForm = () => {
           submitted_by_email: isAnonymous ? null : formData.submitter_email,
           submitted_via_link_id: linkData.id,
           status: 'new',
-          priority: 3
+          priority: formData.priority
         })
         .select()
         .single();
@@ -322,6 +325,25 @@ const DynamicSubmissionForm = () => {
                   placeholder="Please provide a detailed description of what happened..."
                   rows={8}
                 />
+              </div>
+
+              <div>
+                <Label htmlFor="priority">Priority Level</Label>
+                <Select
+                  value={formData.priority.toString()}
+                  onValueChange={(value) => setFormData({ ...formData, priority: parseInt(value) })}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select priority level" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="1">1 - Critical (Immediate danger/serious violation)</SelectItem>
+                    <SelectItem value="2">2 - High (Significant impact)</SelectItem>
+                    <SelectItem value="3">3 - Medium (Standard concern)</SelectItem>
+                    <SelectItem value="4">4 - Low (Minor issue)</SelectItem>
+                    <SelectItem value="5">5 - Informational (General feedback)</SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
             </CardContent>
           </Card>
