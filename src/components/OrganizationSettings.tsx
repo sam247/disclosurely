@@ -9,6 +9,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { useOrganization } from '@/hooks/useOrganization';
+import { Upload, X } from 'lucide-react';
 
 interface OrganizationSettingsProps {
   isOpen: boolean;
@@ -19,6 +20,7 @@ const OrganizationSettings = ({ isOpen, onClose }: OrganizationSettingsProps) =>
   const { organization, refetch } = useOrganization();
   const { toast } = useToast();
   const [loading, setLoading] = useState(false);
+  const [uploadingLogo, setUploadingLogo] = useState(false);
   const [formData, setFormData] = useState({
     name: organization?.name || '',
     description: organization?.description || '',
@@ -60,6 +62,111 @@ const OrganizationSettings = ({ isOpen, onClose }: OrganizationSettingsProps) =>
       });
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleLogoUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file || !organization) return;
+
+    // Validate file type
+    const allowedTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
+    if (!allowedTypes.includes(file.type)) {
+      toast({
+        title: "Invalid file type",
+        description: "Please upload a JPEG, PNG, GIF, or WebP image.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    // Validate file size (5MB max)
+    if (file.size > 5 * 1024 * 1024) {
+      toast({
+        title: "File too large",
+        description: "Please upload an image smaller than 5MB.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setUploadingLogo(true);
+    try {
+      // Create a unique filename
+      const fileExt = file.name.split('.').pop();
+      const fileName = `${organization.id}-logo-${Date.now()}.${fileExt}`;
+
+      // Upload file to Supabase Storage
+      const { data: uploadData, error: uploadError } = await supabase.storage
+        .from('organization-logos')
+        .upload(fileName, file, {
+          cacheControl: '3600',
+          upsert: true
+        });
+
+      if (uploadError) throw uploadError;
+
+      // Get public URL
+      const { data: { publicUrl } } = supabase.storage
+        .from('organization-logos')
+        .getPublicUrl(fileName);
+
+      // Update organization with logo URL
+      const { error: updateError } = await supabase
+        .from('organizations')
+        .update({
+          logo_url: publicUrl,
+          updated_at: new Date().toISOString(),
+        })
+        .eq('id', organization.id);
+
+      if (updateError) throw updateError;
+
+      toast({
+        title: "Logo uploaded",
+        description: "Your organization logo has been uploaded successfully.",
+      });
+
+      refetch();
+    } catch (error: any) {
+      console.error('Error uploading logo:', error);
+      toast({
+        title: "Upload failed",
+        description: error.message || "Failed to upload logo. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setUploadingLogo(false);
+    }
+  };
+
+  const handleRemoveLogo = async () => {
+    if (!organization?.logo_url) return;
+
+    try {
+      const { error } = await supabase
+        .from('organizations')
+        .update({
+          logo_url: null,
+          updated_at: new Date().toISOString(),
+        })
+        .eq('id', organization.id);
+
+      if (error) throw error;
+
+      toast({
+        title: "Logo removed",
+        description: "Your organization logo has been removed.",
+      });
+
+      refetch();
+    } catch (error: any) {
+      console.error('Error removing logo:', error);
+      toast({
+        title: "Error",
+        description: error.message || "Failed to remove logo. Please try again.",
+        variant: "destructive",
+      });
     }
   };
 
@@ -132,8 +239,64 @@ const OrganizationSettings = ({ isOpen, onClose }: OrganizationSettingsProps) =>
                   />
                 </div>
               </div>
+
+              {/* Logo Upload Section */}
               <div>
-                <Label htmlFor="logo-url">Custom Logo URL</Label>
+                <Label>Organization Logo</Label>
+                <div className="mt-2 space-y-4">
+                  {/* Current Logo Display */}
+                  {organization?.logo_url && (
+                    <div className="flex items-center space-x-4">
+                      <img 
+                        src={organization.logo_url} 
+                        alt="Current logo" 
+                        className="w-16 h-16 object-contain border rounded"
+                      />
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        onClick={handleRemoveLogo}
+                      >
+                        <X className="h-4 w-4 mr-2" />
+                        Remove Logo
+                      </Button>
+                    </div>
+                  )}
+
+                  {/* File Upload */}
+                  <div>
+                    <Label htmlFor="logo-upload" className="block text-sm font-medium mb-2">
+                      Upload New Logo
+                    </Label>
+                    <div className="flex items-center space-x-4">
+                      <Input
+                        id="logo-upload"
+                        type="file"
+                        accept="image/*"
+                        onChange={handleLogoUpload}
+                        disabled={uploadingLogo}
+                        className="flex-1"
+                      />
+                      <Button
+                        type="button"
+                        disabled={uploadingLogo}
+                        onClick={() => document.getElementById('logo-upload')?.click()}
+                      >
+                        <Upload className="h-4 w-4 mr-2" />
+                        {uploadingLogo ? 'Uploading...' : 'Choose File'}
+                      </Button>
+                    </div>
+                    <p className="text-xs text-gray-500 mt-1">
+                      Supports JPEG, PNG, GIF, WebP. Max size: 5MB
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Custom Logo URL - Alternative Option */}
+              <div>
+                <Label htmlFor="logo-url">Or use Custom Logo URL</Label>
                 <Input
                   id="logo-url"
                   value={formData.custom_logo_url}
