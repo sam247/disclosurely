@@ -1,10 +1,11 @@
-
 import { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Lock, FileText, Calendar, User, AlertCircle } from 'lucide-react';
 import { DecryptedReport } from '@/types/database';
 import { decryptReport } from '@/utils/encryption';
+import { useAuth } from '@/hooks/useAuth';
+import { supabase } from '@/integrations/supabase/client';
 
 interface ReportContentDisplayProps {
   encryptedContent: string;
@@ -25,19 +26,31 @@ const ReportContentDisplay = ({
   createdAt,
   priority
 }: ReportContentDisplayProps) => {
+  const { user } = useAuth();
   const [decryptedContent, setDecryptedContent] = useState<DecryptedReport | null>(null);
   const [isDecrypting, setIsDecrypting] = useState(false);
   const [decryptionError, setDecryptionError] = useState<string | null>(null);
 
   useEffect(() => {
     const attemptDecryption = async () => {
-      if (!encryptedContent) return;
+      if (!encryptedContent || !user) return;
       
       setIsDecrypting(true);
       setDecryptionError(null);
       
       try {
-        const decrypted = await decryptReport(encryptedContent, trackingId);
+        // Get user's organization ID
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('organization_id')
+          .eq('id', user.id)
+          .single();
+
+        if (!profile?.organization_id) {
+          throw new Error('No organization found');
+        }
+
+        const decrypted = await decryptReport(encryptedContent, profile.organization_id);
         setDecryptedContent(decrypted);
       } catch (error) {
         console.error('Decryption failed:', error);
@@ -48,7 +61,7 @@ const ReportContentDisplay = ({
     };
 
     attemptDecryption();
-  }, [encryptedContent, trackingId]);
+  }, [encryptedContent, user]);
 
   const getStatusColor = (status: string) => {
     switch (status.toLowerCase()) {
