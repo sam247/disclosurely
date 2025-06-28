@@ -2,7 +2,18 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from './useAuth';
-import { Organization } from '@/types/database';
+
+interface Organization {
+  id: string;
+  name: string;
+  domain: string;
+  description: string | null;
+  brand_color: string | null;
+  logo_url: string | null;
+  is_active: boolean;
+  created_at: string;
+  updated_at: string;
+}
 
 interface Profile {
   id: string;
