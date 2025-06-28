@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -245,12 +244,15 @@ const DynamicSubmissionForm = () => {
                   className="h-10 max-w-48 object-contain mr-4"
                   onError={(e) => {
                     // Fallback to default display if logo fails to load
-                    const container = e.target.parentElement;
-                    container.innerHTML = `
-                      <div class="w-10 h-10 bg-blue-600 rounded-lg flex items-center justify-center mr-4">
-                        <span class="h-6 w-6 text-white font-bold">${linkData.organization_name.charAt(0)}</span>
-                      </div>
-                    `;
+                    const imgElement = e.target as HTMLImageElement;
+                    const container = imgElement.parentElement;
+                    if (container) {
+                      container.innerHTML = `
+                        <div class="w-10 h-10 bg-blue-600 rounded-lg flex items-center justify-center mr-4">
+                          <span class="h-6 w-6 text-white font-bold">${linkData.organization_name.charAt(0)}</span>
+                        </div>
+                      `;
+                    }
                   }}
                 />
                 <div>

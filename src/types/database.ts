@@ -27,3 +27,8 @@ export interface EncryptionResult {
   keyHash: string;
   accessKey: string;
 }
+
+// Extended Organization type with custom logo URL
+export interface OrganizationWithBranding extends Organization {
+  custom_logo_url?: string | null;
+}

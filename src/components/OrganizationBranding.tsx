@@ -24,7 +24,9 @@ const OrganizationBranding = () => {
 
   useEffect(() => {
     if (organization) {
-      setLogoUrl(organization.custom_logo_url || '');
+      // Cast to access custom_logo_url since it's added in the database but not in the base type
+      const orgWithBranding = organization as any;
+      setLogoUrl(orgWithBranding.custom_logo_url || '');
     }
   }, [organization]);
 
