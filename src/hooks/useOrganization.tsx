@@ -2,17 +2,10 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from './useAuth';
+import { Organization as DbOrganization } from '@/types/database';
 
-interface Organization {
-  id: string;
-  name: string;
-  domain: string;
-  description: string | null;
-  brand_color: string | null;
-  logo_url: string | null;
-  is_active: boolean;
-  created_at: string;
-  updated_at: string;
+interface Organization extends DbOrganization {
+  custom_logo_url?: string | null;
 }
 
 interface Profile {
@@ -75,7 +68,7 @@ export const useOrganization = () => {
           console.error('Error fetching organization:', orgError);
         } else {
           console.log('Organization found:', orgData);
-          setOrganization(orgData);
+          setOrganization(orgData as Organization);
         }
       } else {
         setNeedsOnboarding(true);
