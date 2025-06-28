@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -8,6 +7,7 @@ import { DecryptedReport } from '@/types/database';
 import { decryptReport } from '@/utils/encryption';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
+import { useToast } from '@/hooks/use-toast';
 
 interface ReportContentDisplayProps {
   encryptedContent: string;
@@ -29,10 +29,12 @@ const ReportContentDisplay = ({
   priority
 }: ReportContentDisplayProps) => {
   const { user } = useAuth();
+  const { toast } = useToast();
   const [decryptedContent, setDecryptedContent] = useState<DecryptedReport | null>(null);
   const [isDecrypting, setIsDecrypting] = useState(false);
   const [decryptionError, setDecryptionError] = useState<string | null>(null);
   const [organizationId, setOrganizationId] = useState<string | null>(null);
+  const [retryCount, setRetryCount] = useState(0);
 
   const attemptDecryption = async () => {
     if (!encryptedContent || !user) {
@@ -44,7 +46,8 @@ const ReportContentDisplay = ({
     setDecryptionError(null);
     
     try {
-      console.log('Starting decryption process for user:', user.email);
+      console.log('=== STARTING DECRYPTION PROCESS ===');
+      console.log('User:', user.email);
       console.log('Encrypted content available:', !!encryptedContent);
       console.log('Encrypted content length:', encryptedContent?.length);
       
@@ -57,28 +60,47 @@ const ReportContentDisplay = ({
 
       if (profileError) {
         console.error('Error fetching user profile:', profileError);
-        throw new Error('Failed to fetch user profile');
+        throw new Error('Failed to fetch user profile: ' + profileError.message);
       }
 
       if (!profile?.organization_id) {
         console.error('No organization found for user');
-        throw new Error('No organization found for user');
+        throw new Error('User is not associated with any organization');
       }
 
       console.log('User organization ID:', profile.organization_id);
       setOrganizationId(profile.organization_id);
 
+      // Attempt to decrypt the report
       const decrypted = decryptReport(encryptedContent, profile.organization_id);
       
-      console.log('Successfully decrypted report content:', Object.keys(decrypted || {}));
+      console.log('Successfully decrypted report content');
       setDecryptedContent(decrypted);
+      setRetryCount(0);
+      
+      toast({
+        title: "Content Loaded",
+        description: "Report content has been successfully decrypted and loaded.",
+      });
+      
     } catch (error) {
-      console.error('Decryption failed:', error);
+      console.error('Decryption process failed:', error);
       const errorMessage = error instanceof Error ? error.message : 'Unknown decryption error';
       setDecryptionError(errorMessage);
+      
+      toast({
+        title: "Decryption Failed",
+        description: errorMessage,
+        variant: "destructive",
+      });
     } finally {
       setIsDecrypting(false);
     }
+  };
+
+  const handleRetry = () => {
+    setRetryCount(prev => prev + 1);
+    attemptDecryption();
   };
 
   useEffect(() => {
@@ -167,11 +189,11 @@ const ReportContentDisplay = ({
               <Button
                 variant="outline"
                 size="sm"
-                onClick={attemptDecryption}
+                onClick={handleRetry}
                 disabled={isDecrypting}
               >
                 <RefreshCw className={`h-4 w-4 mr-2 ${isDecrypting ? 'animate-spin' : ''}`} />
-                Retry
+                Retry ({retryCount})
               </Button>
             )}
           </CardTitle>
@@ -188,15 +210,17 @@ const ReportContentDisplay = ({
               <h4 className="text-lg font-medium text-red-600 mb-2">Content Unavailable</h4>
               <p className="text-red-600 mb-4">{decryptionError}</p>
               <div className="text-sm text-gray-500 space-y-2">
-                <p>Debug Information:</p>
-                <div className="bg-gray-100 p-3 rounded text-left">
+                <p><strong>Debug Information:</strong></p>
+                <div className="bg-gray-100 p-3 rounded text-left font-mono text-xs">
                   <p>• User ID: {user?.id?.substring(0, 8)}...</p>
                   <p>• Organization ID: {organizationId?.substring(0, 8) || 'Not found'}...</p>
                   <p>• Encrypted Data: {encryptedContent ? 'Present' : 'Missing'}</p>
                   <p>• Data Length: {encryptedContent?.length || 0} characters</p>
+                  <p>• Retry Count: {retryCount}</p>
                 </div>
-                <p className="mt-4">
-                  If this error persists, please contact your administrator.
+                <p className="mt-4 text-gray-600">
+                  If this error persists after retrying, please contact your administrator.
+                  The report data may have been encrypted with a different key or may be corrupted.
                 </p>
               </div>
             </div>

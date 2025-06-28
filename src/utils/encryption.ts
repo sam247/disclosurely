@@ -6,30 +6,65 @@ export const generateEncryptionKey = (): string => {
   return CryptoJS.lib.WordArray.random(256/8).toString();
 };
 
-// Encrypt data with AES-256
+// Improved encryption with better error handling
 export const encryptData = (data: string, key: string): string => {
   try {
-    return CryptoJS.AES.encrypt(data, key).toString();
+    if (!data || !key) {
+      throw new Error('Data and key are required for encryption');
+    }
+    
+    console.log('Encrypting data length:', data.length, 'with key length:', key.length);
+    
+    // Use AES encryption with explicit configuration
+    const encrypted = CryptoJS.AES.encrypt(data, key, {
+      mode: CryptoJS.mode.CBC,
+      padding: CryptoJS.pad.Pkcs7
+    });
+    
+    const result = encrypted.toString();
+    console.log('Encryption successful, result length:', result.length);
+    
+    return result;
   } catch (error) {
     console.error('Encryption failed:', error);
-    throw new Error('Failed to encrypt data');
+    throw new Error('Failed to encrypt data: ' + (error instanceof Error ? error.message : 'Unknown error'));
   }
 };
 
-// Decrypt data with AES-256
+// Improved decryption with better error handling
 export const decryptData = (encryptedData: string, key: string): string => {
   try {
-    const bytes = CryptoJS.AES.decrypt(encryptedData, key);
-    const decrypted = bytes.toString(CryptoJS.enc.Utf8);
-    
-    if (!decrypted) {
-      throw new Error('Decryption returned empty string');
+    if (!encryptedData || !key) {
+      throw new Error('Encrypted data and key are required for decryption');
     }
     
-    return decrypted;
+    console.log('Attempting decryption...');
+    console.log('Encrypted data length:', encryptedData.length);
+    console.log('Key length:', key.length);
+    console.log('Encrypted data sample:', encryptedData.substring(0, 100));
+    
+    // Attempt decryption with explicit configuration
+    const decrypted = CryptoJS.AES.decrypt(encryptedData, key, {
+      mode: CryptoJS.mode.CBC,
+      padding: CryptoJS.pad.Pkcs7
+    });
+    
+    console.log('Decryption object created:', !!decrypted);
+    
+    // Convert to UTF8 string
+    const decryptedString = decrypted.toString(CryptoJS.enc.Utf8);
+    console.log('Decrypted string length:', decryptedString.length);
+    
+    if (!decryptedString || decryptedString.length === 0) {
+      console.error('Decryption resulted in empty string - likely wrong key or corrupted data');
+      throw new Error('Decryption resulted in empty string - please verify the encryption key');
+    }
+    
+    console.log('Decryption successful');
+    return decryptedString;
   } catch (error) {
-    console.error('Decryption failed:', error);
-    throw new Error('Failed to decrypt data');
+    console.error('Decryption failed with error:', error);
+    throw new Error('Failed to decrypt data: ' + (error instanceof Error ? error.message : 'Unknown error'));
   }
 };
 
@@ -38,86 +73,80 @@ export const createKeyHash = (key: string): string => {
   return CryptoJS.SHA256(key).toString();
 };
 
-// Organization-based encryption for reports
+// Simplified organization-based encryption for reports
 export const encryptReport = (reportData: any, organizationId: string): { encryptedData: string; keyHash: string } => {
   try {
-    console.log('Encrypting report for organization:', organizationId);
+    console.log('=== ENCRYPTING REPORT ===');
+    console.log('Organization ID:', organizationId);
     
-    // Use organization ID to generate a consistent key with salt
-    const salt = process.env.ENCRYPTION_SALT || 'default-salt-key-2024';
-    const organizationKey = CryptoJS.SHA256(organizationId + salt).toString();
+    if (!organizationId) {
+      throw new Error('Organization ID is required for encryption');
+    }
     
-    console.log('Generated encryption key hash:', organizationKey.substring(0, 8) + '...');
+    // Create a deterministic key based on organization ID
+    const salt = process.env.ENCRYPTION_SALT || 'disclosurely-salt-2024';
+    const keyMaterial = organizationId + salt;
+    const organizationKey = CryptoJS.SHA256(keyMaterial).toString();
     
+    console.log('Generated key hash:', organizationKey.substring(0, 8) + '...');
+    
+    // Stringify the data
     const dataString = JSON.stringify(reportData);
-    console.log('Data to encrypt length:', dataString.length);
+    console.log('Data to encrypt (length):', dataString.length);
+    console.log('Data sample:', dataString.substring(0, 100));
     
+    // Encrypt the data
     const encryptedData = encryptData(dataString, organizationKey);
     const keyHash = createKeyHash(organizationKey);
     
-    console.log('Encryption successful, encrypted data length:', encryptedData.length);
+    console.log('Encryption completed successfully');
+    console.log('Encrypted data length:', encryptedData.length);
+    console.log('Key hash:', keyHash.substring(0, 16) + '...');
     
     return { encryptedData, keyHash };
   } catch (error) {
     console.error('Report encryption failed:', error);
-    throw new Error('Failed to encrypt report data');
+    throw new Error('Failed to encrypt report data: ' + (error instanceof Error ? error.message : 'Unknown error'));
   }
 };
 
-// Decrypt report for authorized dashboard users
+// Improved decrypt report for authorized dashboard users
 export const decryptReport = (encryptedData: string, organizationId: string): any => {
   try {
-    console.log('Attempting to decrypt report for organization:', organizationId);
+    console.log('=== DECRYPTING REPORT ===');
+    console.log('Organization ID:', organizationId);
+    console.log('Encrypted data length:', encryptedData.length);
     
     if (!encryptedData || !organizationId) {
-      console.error('Missing required parameters for decryption');
-      throw new Error('Missing encrypted data or organization ID');
+      throw new Error('Both encrypted data and organization ID are required');
     }
 
-    // Use the same salt as encryption
-    const salt = process.env.ENCRYPTION_SALT || 'default-salt-key-2024';
-    const organizationKey = CryptoJS.SHA256(organizationId + salt).toString();
+    // Recreate the same key used for encryption
+    const salt = process.env.ENCRYPTION_SALT || 'disclosurely-salt-2024';
+    const keyMaterial = organizationId + salt;
+    const organizationKey = CryptoJS.SHA256(keyMaterial).toString();
     
-    console.log('Generated decryption key hash:', organizationKey.substring(0, 8) + '...');
-    console.log('Encrypted data length:', encryptedData.length);
-    console.log('Encrypted data preview:', encryptedData.substring(0, 50) + '...');
+    console.log('Recreated key hash:', organizationKey.substring(0, 8) + '...');
     
-    // Validate encrypted data format
-    if (!encryptedData.includes('=') && !encryptedData.includes('+') && !encryptedData.includes('/')) {
-      console.error('Invalid encrypted data format - not base64');
-      throw new Error('Invalid encrypted data format');
-    }
+    // Decrypt the data
+    const decryptedString = decryptData(encryptedData, organizationKey);
     
-    const decryptedData = decryptData(encryptedData, organizationKey);
-    console.log('Decrypted data length:', decryptedData.length);
-    
-    if (!decryptedData) {
-      console.error('Decryption returned empty result');
-      throw new Error('Decryption returned empty result');
-    }
-
-    // Validate JSON format
+    // Parse the JSON
     let parsedData;
     try {
-      parsedData = JSON.parse(decryptedData);
+      parsedData = JSON.parse(decryptedString);
     } catch (parseError) {
       console.error('Failed to parse decrypted JSON:', parseError);
-      console.error('Decrypted content (first 200 chars):', decryptedData.substring(0, 200));
-      throw new Error('Invalid JSON format in decrypted data');
+      console.error('Decrypted string (first 200 chars):', decryptedString.substring(0, 200));
+      throw new Error('Decrypted data is not valid JSON');
     }
     
-    console.log('Successfully parsed decrypted data:', Object.keys(parsedData));
+    console.log('Report decryption successful');
+    console.log('Parsed data keys:', Object.keys(parsedData));
+    
     return parsedData;
   } catch (error) {
-    console.error('Failed to decrypt report:', error);
-    
-    // More specific error messages
-    if (error.message.includes('Malformed')) {
-      throw new Error('Data corruption detected - unable to decrypt report content');
-    } else if (error.message.includes('Invalid')) {
-      throw new Error('Invalid data format - report may be corrupted');
-    } else {
-      throw new Error('Decryption failed - please contact support if this persists');
-    }
+    console.error('Report decryption failed:', error);
+    throw new Error('Failed to decrypt report: ' + (error instanceof Error ? error.message : 'Unknown error'));
   }
 };
