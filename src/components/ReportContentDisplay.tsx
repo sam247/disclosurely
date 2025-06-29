@@ -1,7 +1,7 @@
-
 import { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { ScrollArea } from '@/components/ui/scroll-area';
 import { Lock, FileText, Calendar, User, AlertCircle, RefreshCw } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { DecryptedReport } from '@/types/database';
@@ -179,7 +179,7 @@ const ReportContentDisplay = ({
         </div>
       </div>
 
-      {/* Report Content */}
+      {/* Report Content with Scroll Area */}
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center justify-between">
@@ -227,86 +227,80 @@ const ReportContentDisplay = ({
               </div>
             </div>
           ) : decryptedContent ? (
-            <div className="space-y-4">
-              {/* Display the actual decrypted title */}
-              {decryptedContent.title && (
-                <div>
-                  <h4 className="font-medium text-gray-900 mb-2">Report Title:</h4>
-                  <p className="text-gray-700">{decryptedContent.title}</p>
-                </div>
-              )}
-              
-              {/* Map 'description' field to content display */}
-              {decryptedContent.description && (
-                <div>
-                  <h4 className="font-medium text-gray-900 mb-2">Description:</h4>
-                  <div className="text-gray-700 whitespace-pre-wrap">
-                    {decryptedContent.description}
+            <ScrollArea className="h-96 w-full pr-4">
+              <div className="space-y-4">
+                {/* Display the actual decrypted title */}
+                {decryptedContent.title && (
+                  <div>
+                    <h4 className="font-medium text-gray-900 mb-2">Report Title:</h4>
+                    <p className="text-gray-700">{decryptedContent.title}</p>
                   </div>
-                </div>
-              )}
-
-              {/* Handle content field as fallback */}
-              {decryptedContent.content && (
-                <div>
-                  <h4 className="font-medium text-gray-900 mb-2">Content:</h4>
-                  <div className="text-gray-700 whitespace-pre-wrap">
-                    {decryptedContent.content}
+                )}
+                
+                {/* Map 'description' field to content display */}
+                {decryptedContent.description && (
+                  <div>
+                    <h4 className="font-medium text-gray-900 mb-2">Description:</h4>
+                    <div className="text-gray-700 whitespace-pre-wrap">
+                      {decryptedContent.description}
+                    </div>
                   </div>
-                </div>
-              )}
+                )}
 
-              {decryptedContent.category && (
+                {/* Handle content field as fallback */}
+                {decryptedContent.content && (
+                  <div>
+                    <h4 className="font-medium text-gray-900 mb-2">Content:</h4>
+                    <div className="text-gray-700 whitespace-pre-wrap">
+                      {decryptedContent.content}
+                    </div>
+                  </div>
+                )}
+
+                {decryptedContent.category && (
+                  <div>
+                    <h4 className="font-medium text-gray-900 mb-2">Category:</h4>
+                    <p className="text-gray-700">{decryptedContent.category}</p>
+                  </div>
+                )}
+
+                {decryptedContent.incident_date && (
+                  <div>
+                    <h4 className="font-medium text-gray-900 mb-2">Incident Date:</h4>
+                    <p className="text-gray-700">{decryptedContent.incident_date}</p>
+                  </div>
+                )}
+
+                {decryptedContent.location && (
+                  <div>
+                    <h4 className="font-medium text-gray-900 mb-2">Location:</h4>
+                    <p className="text-gray-700">{decryptedContent.location}</p>
+                  </div>
+                )}
+
+                {decryptedContent.people_involved && (
+                  <div>
+                    <h4 className="font-medium text-gray-900 mb-2">People Involved:</h4>
+                    <p className="text-gray-700">{decryptedContent.people_involved}</p>
+                  </div>
+                )}
+
+                {decryptedContent.evidence_description && (
+                  <div>
+                    <h4 className="font-medium text-gray-900 mb-2">Evidence Description:</h4>
+                    <p className="text-gray-700">{decryptedContent.evidence_description}</p>
+                  </div>
+                )}
+
+                {/* Display submission method from decrypted data */}
                 <div>
-                  <h4 className="font-medium text-gray-900 mb-2">Category:</h4>
-                  <p className="text-gray-700">{decryptedContent.category}</p>
-                </div>
-              )}
-
-              {decryptedContent.incident_date && (
-                <div>
-                  <h4 className="font-medium text-gray-900 mb-2">Incident Date:</h4>
-                  <p className="text-gray-700">{decryptedContent.incident_date}</p>
-                </div>
-              )}
-
-              {decryptedContent.location && (
-                <div>
-                  <h4 className="font-medium text-gray-900 mb-2">Location:</h4>
-                  <p className="text-gray-700">{decryptedContent.location}</p>
-                </div>
-              )}
-
-              {decryptedContent.people_involved && (
-                <div>
-                  <h4 className="font-medium text-gray-900 mb-2">People Involved:</h4>
-                  <p className="text-gray-700">{decryptedContent.people_involved}</p>
-                </div>
-              )}
-
-              {decryptedContent.evidence_description && (
-                <div>
-                  <h4 className="font-medium text-gray-900 mb-2">Evidence Description:</h4>
-                  <p className="text-gray-700">{decryptedContent.evidence_description}</p>
-                </div>
-              )}
-
-              {/* Display submission method from decrypted data */}
-              <div>
-                <h4 className="font-medium text-gray-900 mb-2">Submission Method:</h4>
-                <p className="text-gray-700">
-                  {decryptedContent.submission_method || 'Web Form'}
-                </p>
-              </div>
-
-              {/* Debug: Show all available fields */}
-              <div className="border-t pt-4 mt-4">
-                <h4 className="font-medium text-gray-900 mb-2">Available Data Fields:</h4>
-                <div className="text-xs text-gray-500 font-mono">
-                  {Object.keys(decryptedContent).join(', ')}
+                  <h4 className="font-medium text-gray-900 mb-2">Submission Method:</h4>
+                  <p className="text-gray-700">
+                    {decryptedContent.submission_method || 'Web Form'}
+                  </p>
                 </div>
               </div>
-            </div>
+            </ScrollArea>
           ) : (
             <div className="text-center py-8">
               <FileText className="h-8 w-8 text-gray-400 mx-auto mb-2" />
