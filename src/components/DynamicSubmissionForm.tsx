@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -19,6 +18,9 @@ interface LinkData {
   description: string;
   organization_id: string;
   organization_name: string;
+  organization_logo_url?: string;
+  organization_custom_logo_url?: string;
+  organization_brand_color?: string;
 }
 
 const DynamicSubmissionForm = () => {
@@ -58,7 +60,12 @@ const DynamicSubmissionForm = () => {
           name,
           description,
           organization_id,
-          organizations!inner(name)
+          organizations!inner(
+            name,
+            logo_url,
+            custom_logo_url,
+            brand_color
+          )
         `)
         .eq('link_token', linkToken)
         .eq('is_active', true)
@@ -82,7 +89,10 @@ const DynamicSubmissionForm = () => {
         name: linkInfo.name,
         description: linkInfo.description || '',
         organization_id: linkInfo.organization_id,
-        organization_name: linkInfo.organizations.name
+        organization_name: linkInfo.organizations.name,
+        organization_logo_url: linkInfo.organizations.logo_url,
+        organization_custom_logo_url: linkInfo.organizations.custom_logo_url,
+        organization_brand_color: linkInfo.organizations.brand_color
       });
 
     } catch (error) {
@@ -96,6 +106,16 @@ const DynamicSubmissionForm = () => {
     } finally {
       setLoading(false);
     }
+  };
+
+  // Helper function to get the logo URL (prioritize custom_logo_url over logo_url)
+  const getLogoUrl = () => {
+    return linkData?.organization_custom_logo_url || linkData?.organization_logo_url;
+  };
+
+  // Helper function to get brand color
+  const getBrandColor = () => {
+    return linkData?.organization_brand_color || '#2563eb';
   };
 
   const generateTrackingId = () => {
@@ -217,14 +237,35 @@ const DynamicSubmissionForm = () => {
     );
   }
 
+  const logoUrl = getLogoUrl();
+  const brandColor = getBrandColor();
+
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
-      <header className="bg-white shadow border-t-4 border-blue-600">
+      <header className="bg-white shadow border-t-4" style={{ borderTopColor: brandColor }}>
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center py-6">
-            <div className="w-10 h-10 bg-blue-600 rounded-lg flex items-center justify-center mr-4">
-              <Shield className="h-6 w-6 text-white" />
+            <div className="flex items-center justify-center mr-4">
+              {logoUrl ? (
+                <img 
+                  src={logoUrl} 
+                  alt={`${linkData.organization_name} logo`}
+                  className="w-10 h-10 object-contain"
+                  onError={(e) => {
+                    // Fallback to Shield icon if logo fails to load
+                    const target = e.target as HTMLImageElement;
+                    target.style.display = 'none';
+                    target.nextElementSibling?.classList.remove('hidden');
+                  }}
+                />
+              ) : null}
+              <div 
+                className={`w-10 h-10 rounded-lg flex items-center justify-center ${logoUrl ? 'hidden' : ''}`}
+                style={{ backgroundColor: brandColor }}
+              >
+                <Shield className="h-6 w-6 text-white" />
+              </div>
             </div>
             <div>
               <h1 className="text-2xl font-bold text-gray-900">{linkData.organization_name}</h1>
@@ -240,7 +281,7 @@ const DynamicSubmissionForm = () => {
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <Shield className="h-5 w-5 text-blue-600" />
+                <Shield className="h-5 w-5" style={{ color: brandColor }} />
                 {linkData.name}
               </CardTitle>
               <CardDescription>
@@ -368,7 +409,8 @@ const DynamicSubmissionForm = () => {
             <Button 
               type="submit" 
               disabled={submitting}
-              className="px-8 bg-blue-600 hover:bg-blue-700"
+              className="px-8 hover:opacity-90"
+              style={{ backgroundColor: brandColor }}
             >
               {submitting ? 'Submitting...' : 'Submit Report'}
             </Button>
