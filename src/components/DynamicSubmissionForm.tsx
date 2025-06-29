@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
@@ -11,6 +11,7 @@ import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { Shield, AlertTriangle } from 'lucide-react';
 import { encryptReport } from '@/utils/encryption';
+import BrandedFormLayout from './BrandedFormLayout';
 
 interface LinkData {
   id: string;
@@ -108,12 +109,10 @@ const DynamicSubmissionForm = () => {
     }
   };
 
-  // Helper function to get the logo URL (prioritize custom_logo_url over logo_url)
   const getLogoUrl = () => {
     return linkData?.organization_custom_logo_url || linkData?.organization_logo_url;
   };
 
-  // Helper function to get brand color
   const getBrandColor = () => {
     return linkData?.organization_brand_color || '#2563eb';
   };
@@ -241,183 +240,118 @@ const DynamicSubmissionForm = () => {
   const brandColor = getBrandColor();
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Header */}
-      <header className="bg-white shadow border-t-4" style={{ borderTopColor: brandColor }}>
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center py-6">
-            <div className="flex items-center justify-center mr-4">
-              {logoUrl ? (
-                <img 
-                  src={logoUrl} 
-                  alt={`${linkData.organization_name} logo`}
-                  className="w-10 h-10 object-contain"
-                  onError={(e) => {
-                    // Fallback to Shield icon if logo fails to load
-                    const target = e.target as HTMLImageElement;
-                    target.style.display = 'none';
-                    target.nextElementSibling?.classList.remove('hidden');
-                  }}
-                />
-              ) : null}
-              <div 
-                className={`w-10 h-10 rounded-lg flex items-center justify-center ${logoUrl ? 'hidden' : ''}`}
-                style={{ backgroundColor: brandColor }}
-              >
-                <Shield className="h-6 w-6 text-white" />
-              </div>
-            </div>
-            <div>
-              <h1 className="text-2xl font-bold text-gray-900">{linkData.organization_name}</h1>
-              <p className="text-sm text-gray-600">Secure Report Submission</p>
-            </div>
+    <BrandedFormLayout
+      title={linkData.name}
+      description={linkData.description || 'Submit your report securely and confidentially.'}
+      organizationName={linkData.organization_name}
+      logoUrl={logoUrl}
+      brandColor={brandColor}
+    >
+      <form onSubmit={handleSubmit} className="space-y-4">
+        {/* Report Type Selection */}
+        <div className="space-y-3">
+          <Label className="text-base font-medium">Report Type</Label>
+          <div className="flex items-center space-x-3">
+            <Switch
+              id="anonymous"
+              checked={isAnonymous}
+              onCheckedChange={setIsAnonymous}
+            />
+            <Label htmlFor="anonymous" className="flex items-center gap-2 text-sm">
+              {isAnonymous ? 'Anonymous Submission' : 'Confidential Submission'}
+              <span className="text-xs text-gray-500">
+                ({isAnonymous ? 'No personal information required' : 'Provide email for follow-up'})
+              </span>
+            </Label>
           </div>
         </div>
-      </header>
 
-      {/* Main Form */}
-      <main className="max-w-4xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
-        <div className="mb-8">
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Shield className="h-5 w-5" style={{ color: brandColor }} />
-                {linkData.name}
-              </CardTitle>
-              <CardDescription>
-                {linkData.description || 'Submit your report securely and confidentially.'}
-              </CardDescription>
-            </CardHeader>
-          </Card>
-        </div>
+        {/* Contact Information (if not anonymous) */}
+        {!isAnonymous && (
+          <div className="space-y-2">
+            <Label htmlFor="submitter_email">Email Address</Label>
+            <Input
+              id="submitter_email"
+              type="email"
+              value={formData.submitter_email}
+              onChange={(e) => setFormData({ ...formData, submitter_email: e.target.value })}
+              placeholder="your@email.com"
+              required={!isAnonymous}
+            />
+          </div>
+        )}
 
-        <form onSubmit={handleSubmit} className="space-y-6">
-          {/* Report Type Selection */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-lg">Report Type</CardTitle>
-              <CardDescription>Choose how you'd like to submit this report</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="flex items-center space-x-3">
-                <Switch
-                  id="anonymous"
-                  checked={isAnonymous}
-                  onCheckedChange={setIsAnonymous}
-                />
-                <Label htmlFor="anonymous" className="flex items-center gap-2">
-                  {isAnonymous ? 'Anonymous Submission' : 'Confidential Submission'}
-                  <span className="text-sm text-gray-500">
-                    ({isAnonymous ? 'No personal information required' : 'Provide email for follow-up'})
-                  </span>
-                </Label>
-              </div>
-            </CardContent>
-          </Card>
+        {/* Report Details */}
+        <div className="space-y-4">
+          <div className="space-y-2">
+            <Label htmlFor="title">Report Title *</Label>
+            <Input
+              id="title"
+              required
+              value={formData.title}
+              onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+              placeholder="Brief summary of the issue"
+            />
+          </div>
 
-          {/* Contact Information (if not anonymous) */}
-          {!isAnonymous && (
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-lg">Contact Information</CardTitle>
-                <CardDescription>This information will be kept confidential</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div>
-                  <Label htmlFor="submitter_email">Email Address</Label>
-                  <Input
-                    id="submitter_email"
-                    type="email"
-                    value={formData.submitter_email}
-                    onChange={(e) => setFormData({ ...formData, submitter_email: e.target.value })}
-                    placeholder="your@email.com"
-                    required={!isAnonymous}
-                  />
-                </div>
-              </CardContent>
-            </Card>
-          )}
+          <div className="space-y-2">
+            <Label htmlFor="description">Detailed Description *</Label>
+            <Textarea
+              id="description"
+              required
+              value={formData.description}
+              onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+              placeholder="Please provide a detailed description of what happened..."
+              rows={4}
+            />
+          </div>
 
-          {/* Report Details */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-lg">Report Details</CardTitle>
-              <CardDescription>Provide information about the incident or concern</CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div>
-                <Label htmlFor="title">Report Title *</Label>
-                <Input
-                  id="title"
-                  required
-                  value={formData.title}
-                  onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                  placeholder="Brief summary of the issue"
-                />
-              </div>
-
-              <div>
-                <Label htmlFor="description">Detailed Description *</Label>
-                <Textarea
-                  id="description"
-                  required
-                  value={formData.description}
-                  onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                  placeholder="Please provide a detailed description of what happened..."
-                  rows={8}
-                />
-              </div>
-
-              <div>
-                <Label htmlFor="priority">Priority Level</Label>
-                <Select
-                  value={formData.priority.toString()}
-                  onValueChange={(value) => setFormData({ ...formData, priority: parseInt(value) })}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select priority level" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="1">1 - Critical (Immediate danger/serious violation)</SelectItem>
-                    <SelectItem value="2">2 - High (Significant impact)</SelectItem>
-                    <SelectItem value="3">3 - Medium (Standard concern)</SelectItem>
-                    <SelectItem value="4">4 - Low (Minor issue)</SelectItem>
-                    <SelectItem value="5">5 - Informational (General feedback)</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Security Notice */}
-          <Card className="border-blue-200 bg-blue-50">
-            <CardContent className="pt-6">
-              <div className="flex items-start gap-3">
-                <Shield className="h-5 w-5 text-blue-600 mt-0.5" />
-                <div className="text-sm">
-                  <p className="font-medium text-blue-900 mb-1">Your Privacy is Protected</p>
-                  <p className="text-blue-800">
-                    All information is encrypted and stored securely. {isAnonymous ? 'This anonymous report cannot be traced back to you.' : 'Your identity will be kept confidential.'}
-                  </p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Submit Button */}
-          <div className="flex justify-end">
-            <Button 
-              type="submit" 
-              disabled={submitting}
-              className="px-8 hover:opacity-90"
-              style={{ backgroundColor: brandColor }}
+          <div className="space-y-2">
+            <Label htmlFor="priority">Priority Level</Label>
+            <Select
+              value={formData.priority.toString()}
+              onValueChange={(value) => setFormData({ ...formData, priority: parseInt(value) })}
             >
-              {submitting ? 'Submitting...' : 'Submit Report'}
-            </Button>
+              <SelectTrigger>
+                <SelectValue placeholder="Select priority level" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="1">1 - Critical (Immediate danger/serious violation)</SelectItem>
+                <SelectItem value="2">2 - High (Significant impact)</SelectItem>
+                <SelectItem value="3">3 - Medium (Standard concern)</SelectItem>
+                <SelectItem value="4">4 - Low (Minor issue)</SelectItem>
+                <SelectItem value="5">5 - Informational (General feedback)</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
-        </form>
-      </main>
-    </div>
+        </div>
+
+        {/* Security Notice */}
+        <Card className="border-blue-200 bg-blue-50">
+          <CardContent className="pt-4">
+            <div className="flex items-start gap-3">
+              <Shield className="h-4 w-4 text-blue-600 mt-0.5" />
+              <div className="text-sm">
+                <p className="font-medium text-blue-900 mb-1">Your Privacy is Protected</p>
+                <p className="text-blue-800">
+                  All information is encrypted and stored securely. {isAnonymous ? 'This anonymous report cannot be traced back to you.' : 'Your identity will be kept confidential.'}
+                </p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Submit Button */}
+        <Button 
+          type="submit" 
+          disabled={submitting}
+          className="w-full hover:opacity-90"
+          style={{ backgroundColor: brandColor }}
+        >
+          {submitting ? 'Submitting...' : 'Submit Report'}
+        </Button>
+      </form>
+    </BrandedFormLayout>
   );
 };
 

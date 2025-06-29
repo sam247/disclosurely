@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -8,11 +7,12 @@ import { Textarea } from "@/components/ui/textarea";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Shield, Lock, AlertTriangle, Upload } from "lucide-react";
+import { Shield, Lock, Upload } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { encryptReport } from "@/utils/encryption";
 import { useNavigate } from "react-router-dom";
+import BrandedFormLayout from "./BrandedFormLayout";
 
 const SecureReportTool = () => {
   const navigate = useNavigate();
@@ -118,224 +118,199 @@ const SecureReportTool = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100">
-      {/* Header */}
-      <header className="border-b bg-white/80 backdrop-blur-sm">
-        <div className="container mx-auto px-4 py-4">
-          <div className="flex items-center space-x-2">
-            <Shield className="h-8 w-8 text-blue-600" />
-            <span className="text-xl font-bold text-gray-900">SecureReport</span>
-            <span className="text-sm text-gray-500 ml-4">Secure Submission Portal</span>
-          </div>
-        </div>
-      </header>
-
-      <div className="container mx-auto px-4 py-8">
-        <div className="max-w-4xl mx-auto">
-          {/* Security Notice */}
-          <Card className="mb-8 border-green-200 bg-green-50">
-            <CardHeader>
-              <div className="flex items-center space-x-2">
-                <Lock className="h-5 w-5 text-green-600" />
-                <CardTitle className="text-green-800">Secure & Anonymous</CardTitle>
+    <BrandedFormLayout
+      title="Submit Secure Report"
+      description="All information will be encrypted and securely transmitted to the organization."
+    >
+      <div className="space-y-6">
+        {/* Security Notice */}
+        <Card className="border-green-200 bg-green-50">
+          <CardContent className="pt-4">
+            <div className="flex items-start gap-3">
+              <Lock className="h-4 w-4 text-green-600 mt-0.5" />
+              <div className="text-sm">
+                <p className="font-medium text-green-800 mb-1">Secure & Anonymous</p>
+                <p className="text-green-700">
+                  Your report will be encrypted before submission using AES-256 encryption. 
+                  No personal information is required for anonymous reports.
+                </p>
               </div>
-            </CardHeader>
-            <CardContent>
-              <p className="text-green-700 text-sm">
-                Your report will be encrypted before submission using AES-256 encryption. 
-                No personal information is required for anonymous reports, and all data is protected with enterprise-grade security.
-              </p>
-            </CardContent>
-          </Card>
+            </div>
+          </CardContent>
+        </Card>
 
-          {/* Report Form */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center space-x-2">
-                <AlertTriangle className="h-5 w-5 text-amber-600" />
-                <span>Submit Secure Report</span>
-              </CardTitle>
-              <CardDescription>
-                All information will be encrypted and securely transmitted to the organization.
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <form onSubmit={handleSubmit} className="space-y-6">
-                {/* Report Type */}
-                <div>
-                  <Label className="text-base font-medium">Report Type</Label>
-                  <RadioGroup
-                    value={reportType}
-                    onValueChange={(value: "anonymous" | "confidential") => setReportType(value)}
-                    className="mt-2"
-                  >
-                    <div className="flex items-center space-x-2">
-                      <RadioGroupItem value="anonymous" id="anonymous" />
-                      <Label htmlFor="anonymous" className="font-normal">
-                        Anonymous Report (Recommended)
-                      </Label>
-                    </div>
-                    <div className="flex items-center space-x-2">
-                      <RadioGroupItem value="confidential" id="confidential" />
-                      <Label htmlFor="confidential" className="font-normal">
-                        Confidential Report (Your email will be stored)
-                      </Label>
-                    </div>
-                  </RadioGroup>
-                </div>
+        <form onSubmit={handleSubmit} className="space-y-4">
+          {/* Report Type */}
+          <div className="space-y-3">
+            <Label className="text-base font-medium">Report Type</Label>
+            <RadioGroup
+              value={reportType}
+              onValueChange={(value: "anonymous" | "confidential") => setReportType(value)}
+            >
+              <div className="flex items-center space-x-2">
+                <RadioGroupItem value="anonymous" id="anonymous" />
+                <Label htmlFor="anonymous" className="font-normal text-sm">
+                  Anonymous Report (Recommended)
+                </Label>
+              </div>
+              <div className="flex items-center space-x-2">
+                <RadioGroupItem value="confidential" id="confidential" />
+                <Label htmlFor="confidential" className="font-normal text-sm">
+                  Confidential Report (Your email will be stored)
+                </Label>
+              </div>
+            </RadioGroup>
+          </div>
 
-                {/* Email for confidential reports */}
-                {reportType === "confidential" && (
-                  <div>
-                    <Label htmlFor="submitter_email">Your Email Address</Label>
-                    <Input
-                      id="submitter_email"
-                      type="email"
-                      value={formData.submitter_email}
-                      onChange={(e) => handleInputChange("submitter_email", e.target.value)}
-                      placeholder="Enter your email address"
-                      required
-                    />
-                  </div>
-                )}
+          {/* Email for confidential reports */}
+          {reportType === "confidential" && (
+            <div className="space-y-2">
+              <Label htmlFor="submitter_email">Your Email Address</Label>
+              <Input
+                id="submitter_email"
+                type="email"
+                value={formData.submitter_email}
+                onChange={(e) => handleInputChange("submitter_email", e.target.value)}
+                placeholder="Enter your email address"
+                required
+              />
+            </div>
+          )}
 
-                {/* Title */}
-                <div>
-                  <Label htmlFor="title">Report Title *</Label>
-                  <Input
-                    id="title"
-                    value={formData.title}
-                    onChange={(e) => handleInputChange("title", e.target.value)}
-                    placeholder="Brief title describing the issue"
-                    required
-                  />
-                </div>
+          {/* Title */}
+          <div className="space-y-2">
+            <Label htmlFor="title">Report Title *</Label>
+            <Input
+              id="title"
+              value={formData.title}
+              onChange={(e) => handleInputChange("title", e.target.value)}
+              placeholder="Brief title describing the issue"
+              required
+            />
+          </div>
 
-                {/* Category */}
-                <div>
-                  <Label htmlFor="category">Category</Label>
-                  <Input
-                    id="category"
-                    value={formData.category}
-                    onChange={(e) => handleInputChange("category", e.target.value)}
-                    placeholder="e.g., Financial misconduct, Safety violation, Harassment"
-                  />
-                </div>
+          {/* Category */}
+          <div className="space-y-2">
+            <Label htmlFor="category">Category</Label>
+            <Input
+              id="category"
+              value={formData.category}
+              onChange={(e) => handleInputChange("category", e.target.value)}
+              placeholder="e.g., Financial misconduct, Safety violation, Harassment"
+            />
+          </div>
 
-                {/* Priority */}
-                <div>
-                  <Label htmlFor="priority">Priority Level</Label>
-                  <Select
-                    value={formData.priority.toString()}
-                    onValueChange={(value) => handleInputChange("priority", parseInt(value))}
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select priority level" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="1">1 - Critical (Immediate danger/serious violation)</SelectItem>
-                      <SelectItem value="2">2 - High (Significant impact)</SelectItem>
-                      <SelectItem value="3">3 - Medium (Standard concern)</SelectItem>
-                      <SelectItem value="4">4 - Low (Minor issue)</SelectItem>
-                      <SelectItem value="5">5 - Informational (General feedback)</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
+          {/* Priority */}
+          <div className="space-y-2">
+            <Label htmlFor="priority">Priority Level</Label>
+            <Select
+              value={formData.priority.toString()}
+              onValueChange={(value) => handleInputChange("priority", parseInt(value))}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Select priority level" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="1">1 - Critical (Immediate danger/serious violation)</SelectItem>
+                <SelectItem value="2">2 - High (Significant impact)</SelectItem>
+                <SelectItem value="3">3 - Medium (Standard concern)</SelectItem>
+                <SelectItem value="4">4 - Low (Minor issue)</SelectItem>
+                <SelectItem value="5">5 - Informational (General feedback)</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
 
-                {/* Content */}
-                <div>
-                  <Label htmlFor="content">Detailed Description *</Label>
-                  <Textarea
-                    id="content"
-                    value={formData.content}
-                    onChange={(e) => handleInputChange("content", e.target.value)}
-                    placeholder="Provide detailed information about the incident or concern..."
-                    rows={6}
-                    required
-                  />
-                </div>
+          {/* Content */}
+          <div className="space-y-2">
+            <Label htmlFor="content">Detailed Description *</Label>
+            <Textarea
+              id="content"
+              value={formData.content}
+              onChange={(e) => handleInputChange("content", e.target.value)}
+              placeholder="Provide detailed information about the incident or concern..."
+              rows={4}
+              required
+            />
+          </div>
 
-                {/* Incident Date */}
-                <div>
-                  <Label htmlFor="incident_date">Incident Date</Label>
-                  <Input
-                    id="incident_date"
-                    type="date"
-                    value={formData.incident_date}
-                    onChange={(e) => handleInputChange("incident_date", e.target.value)}
-                  />
-                </div>
+          {/* Incident Date */}
+          <div className="space-y-2">
+            <Label htmlFor="incident_date">Incident Date</Label>
+            <Input
+              id="incident_date"
+              type="date"
+              value={formData.incident_date}
+              onChange={(e) => handleInputChange("incident_date", e.target.value)}
+            />
+          </div>
 
-                {/* Location */}
-                <div>
-                  <Label htmlFor="location">Location</Label>
-                  <Input
-                    id="location"
-                    value={formData.location}
-                    onChange={(e) => handleInputChange("location", e.target.value)}
-                    placeholder="Where did this occur? (optional)"
-                  />
-                </div>
+          {/* Location */}
+          <div className="space-y-2">
+            <Label htmlFor="location">Location</Label>
+            <Input
+              id="location"
+              value={formData.location}
+              onChange={(e) => handleInputChange("location", e.target.value)}
+              placeholder="Where did this occur? (optional)"
+            />
+          </div>
 
-                {/* People Involved */}
-                <div>
-                  <Label htmlFor="people_involved">People Involved</Label>
-                  <Textarea
-                    id="people_involved"
-                    value={formData.people_involved}
-                    onChange={(e) => handleInputChange("people_involved", e.target.value)}
-                    placeholder="Names, roles, or descriptions of people involved (optional)"
-                    rows={3}
-                  />
-                </div>
+          {/* People Involved */}
+          <div className="space-y-2">
+            <Label htmlFor="people_involved">People Involved</Label>
+            <Textarea
+              id="people_involved"
+              value={formData.people_involved}
+              onChange={(e) => handleInputChange("people_involved", e.target.value)}
+              placeholder="Names, roles, or descriptions of people involved (optional)"
+              rows={2}
+            />
+          </div>
 
-                {/* Evidence */}
-                <div>
-                  <Label htmlFor="evidence_description">Evidence Description</Label>
-                  <Textarea
-                    id="evidence_description"
-                    value={formData.evidence_description}
-                    onChange={(e) => handleInputChange("evidence_description", e.target.value)}
-                    placeholder="Describe any evidence you have (documents, emails, recordings, etc.)"
-                    rows={3}
-                  />
-                </div>
+          {/* Evidence */}
+          <div className="space-y-2">
+            <Label htmlFor="evidence_description">Evidence Description</Label>
+            <Textarea
+              id="evidence_description"
+              value={formData.evidence_description}
+              onChange={(e) => handleInputChange("evidence_description", e.target.value)}
+              placeholder="Describe any evidence you have (documents, emails, recordings, etc.)"
+              rows={2}
+            />
+          </div>
 
-                {/* File Upload Placeholder */}
-                <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center">
-                  <Upload className="h-8 w-8 text-gray-400 mx-auto mb-2" />
-                  <p className="text-sm text-gray-600">File upload feature coming soon</p>
-                  <p className="text-xs text-gray-400">Encrypted file attachments will be supported</p>
-                </div>
+          {/* File Upload Placeholder */}
+          <div className="border-2 border-dashed border-gray-300 rounded-lg p-4 text-center">
+            <Upload className="h-6 w-6 text-gray-400 mx-auto mb-2" />
+            <p className="text-sm text-gray-600">File upload feature coming soon</p>
+            <p className="text-xs text-gray-400">Encrypted file attachments will be supported</p>
+          </div>
 
-                {/* Terms Agreement */}
-                <div className="flex items-start space-x-2">
-                  <Checkbox
-                    id="terms"
-                    checked={agreedToTerms}
-                    onCheckedChange={(checked) => setAgreedToTerms(checked as boolean)}
-                  />
-                  <Label htmlFor="terms" className="text-sm leading-relaxed">
-                    I understand that this report will be encrypted and submitted securely. 
-                    I agree to the terms of service and privacy policy. I confirm that the information provided is accurate to the best of my knowledge.
-                  </Label>
-                </div>
+          {/* Terms Agreement */}
+          <div className="flex items-start space-x-2">
+            <Checkbox
+              id="terms"
+              checked={agreedToTerms}
+              onCheckedChange={(checked) => setAgreedToTerms(checked as boolean)}
+            />
+            <Label htmlFor="terms" className="text-sm leading-relaxed">
+              I understand that this report will be encrypted and submitted securely. 
+              I agree to the terms of service and privacy policy. I confirm that the information provided is accurate to the best of my knowledge.
+            </Label>
+          </div>
 
-                {/* Submit Button */}
-                <Button 
-                  type="submit" 
-                  className="w-full" 
-                  size="lg"
-                  disabled={isSubmitting || !agreedToTerms}
-                >
-                  {isSubmitting ? "Encrypting & Submitting..." : "Submit Secure Report"}
-                </Button>
-              </form>
-            </CardContent>
-          </Card>
-        </div>
+          {/* Submit Button */}
+          <Button 
+            type="submit" 
+            className="w-full" 
+            size="lg"
+            disabled={isSubmitting || !agreedToTerms}
+          >
+            {isSubmitting ? "Encrypting & Submitting..." : "Submit Secure Report"}
+          </Button>
+        </form>
       </div>
-    </div>
+    </BrandedFormLayout>
   );
 };
 
