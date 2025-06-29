@@ -7,6 +7,7 @@ import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { CreditCard, Users, CheckCircle, ExternalLink, RefreshCw } from 'lucide-react';
+import CustomDomainSettings from './CustomDomainSettings';
 
 interface SubscriptionData {
   subscribed: boolean;
@@ -122,6 +123,10 @@ const SubscriptionManagement = () => {
     }
   };
 
+  // Check if user has active Tier 2 subscription
+  const hasActiveTier2Subscription = subscriptionData.subscribed && 
+    subscriptionData.subscription_tier === 'tier2';
+
   if (loading && !refreshing) {
     return (
       <div className="space-y-6">
@@ -191,6 +196,9 @@ const SubscriptionManagement = () => {
         </CardContent>
       </Card>
 
+      {/* Custom Domain Settings - Only show for Tier 2 subscribers */}
+      <CustomDomainSettings hasActiveTier2Subscription={hasActiveTier2Subscription} />
+
       {/* Subscription Plans */}
       {!subscriptionData.subscribed && (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -237,7 +245,10 @@ const SubscriptionManagement = () => {
           </Card>
 
           {/* Tier 2 */}
-          <Card className="border-2 hover:border-blue-300 transition-colors">
+          <Card className="border-2 hover:border-blue-300 transition-colors relative">
+            <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
+              <Badge className="bg-blue-600 text-white">Most Popular</Badge>
+            </div>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Users className="h-5 w-5" />
@@ -266,6 +277,10 @@ const SubscriptionManagement = () => {
                 <div className="flex items-center gap-2">
                   <CheckCircle className="h-4 w-4 text-green-600" />
                   <span className="text-sm">Dashboard & analytics</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <CheckCircle className="h-4 w-4 text-blue-600 font-semibold" />
+                  <span className="text-sm font-semibold text-blue-600">Custom domain branding</span>
                 </div>
               </div>
               <Button 

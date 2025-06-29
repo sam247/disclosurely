@@ -9,6 +9,47 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      domain_verifications: {
+        Row: {
+          created_at: string
+          domain: string
+          id: string
+          organization_id: string
+          updated_at: string
+          verification_token: string
+          verification_type: string
+          verified_at: string | null
+        }
+        Insert: {
+          created_at?: string
+          domain: string
+          id?: string
+          organization_id: string
+          updated_at?: string
+          verification_token: string
+          verification_type?: string
+          verified_at?: string | null
+        }
+        Update: {
+          created_at?: string
+          domain?: string
+          id?: string
+          organization_id?: string
+          updated_at?: string
+          verification_token?: string
+          verification_type?: string
+          verified_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "domain_verifications_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       email_notifications: {
         Row: {
           email_address: string
@@ -242,9 +283,13 @@ export type Database = {
         Row: {
           brand_color: string | null
           created_at: string
+          custom_domain: string | null
+          custom_domain_enabled: boolean | null
           custom_logo_url: string | null
           description: string | null
           domain: string
+          domain_verification_token: string | null
+          domain_verified: boolean | null
           id: string
           is_active: boolean | null
           logo_url: string | null
@@ -255,9 +300,13 @@ export type Database = {
         Insert: {
           brand_color?: string | null
           created_at?: string
+          custom_domain?: string | null
+          custom_domain_enabled?: boolean | null
           custom_logo_url?: string | null
           description?: string | null
           domain: string
+          domain_verification_token?: string | null
+          domain_verified?: boolean | null
           id?: string
           is_active?: boolean | null
           logo_url?: string | null
@@ -268,9 +317,13 @@ export type Database = {
         Update: {
           brand_color?: string | null
           created_at?: string
+          custom_domain?: string | null
+          custom_domain_enabled?: boolean | null
           custom_logo_url?: string | null
           description?: string | null
           domain?: string
+          domain_verification_token?: string | null
+          domain_verified?: boolean | null
           id?: string
           is_active?: boolean | null
           logo_url?: string | null
@@ -599,6 +652,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      generate_domain_verification_token: {
+        Args: Record<PropertyKey, never>
+        Returns: string
+      }
       generate_invitation_token: {
         Args: Record<PropertyKey, never>
         Returns: string

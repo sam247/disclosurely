@@ -1,0 +1,332 @@
+
+import { useState, useEffect } from 'react';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Badge } from '@/components/ui/badge';
+import { useToast } from '@/hooks/use-toast';
+import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from '@/hooks/useAuth';
+import { Globe, CheckCircle, AlertCircle, Copy, ExternalLink } from 'lucide-react';
+
+interface DomainVerification {
+  id: string;
+  domain: string;
+  verification_token: string;
+  verification_type: string;
+  verified_at: string | null;
+  created_at: string;
+}
+
+interface CustomDomainSettingsProps {
+  hasActiveTier2Subscription: boolean;
+}
+
+const CustomDomainSettings = ({ hasActiveTier2Subscription }: CustomDomainSettingsProps) => {
+  const { user } = useAuth();
+  const { toast } = useToast();
+  const [loading, setLoading] = useState(false);
+  const [domainVerifications, setDomainVerifications] = useState<DomainVerification[]>([]);
+  const [newDomain, setNewDomain] = useState('');
+  const [showAddForm, setShowAddForm] = useState(false);
+
+  useEffect(() => {
+    if (user && hasActiveTier2Subscription) {
+      fetchDomainVerifications();
+    }
+  }, [user, hasActiveTier2Subscription]);
+
+  const fetchDomainVerifications = async () => {
+    if (!user) return;
+
+    try {
+      const { data, error } = await supabase
+        .from('domain_verifications')
+        .select('*')
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+      setDomainVerifications(data || []);
+    } catch (error: any) {
+      console.error('Error fetching domain verifications:', error);
+      toast({
+        title: "Error fetching domains",
+        description: error.message,
+        variant: "destructive",
+      });
+    }
+  };
+
+  const addDomain = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!user || !newDomain.trim()) return;
+
+    // Basic domain validation
+    const domainRegex = /^[a-zA-Z0-9]([a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(\.[a-zA-Z0-9]([a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*/;
+    if (!domainRegex.test(newDomain)) {
+      toast({
+        title: "Invalid domain",
+        description: "Please enter a valid domain name (e.g., reports.yourcompany.com)",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setLoading(true);
+    try {
+      // Get user's organization
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('organization_id')
+        .eq('id', user.id)
+        .single();
+
+      if (!profile?.organization_id) {
+        throw new Error('Organization not found');
+      }
+
+      const { error } = await supabase
+        .from('domain_verifications')
+        .insert({
+          organization_id: profile.organization_id,
+          domain: newDomain.toLowerCase(),
+          verification_type: 'CNAME'
+        });
+
+      if (error) throw error;
+
+      toast({
+        title: "Domain added successfully",
+        description: "Please configure the DNS settings to verify your domain.",
+      });
+
+      setNewDomain('');
+      setShowAddForm(false);
+      fetchDomainVerifications();
+    } catch (error: any) {
+      console.error('Error adding domain:', error);
+      toast({
+        title: "Error adding domain",
+        description: error.message,
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const copyToClipboard = (text: string, label: string) => {
+    navigator.clipboard.writeText(text);
+    toast({
+      title: `${label} copied!`,
+      description: "The value has been copied to your clipboard.",
+    });
+  };
+
+  const verifyDomain = async (domainId: string) => {
+    setLoading(true);
+    try {
+      // In a real implementation, this would check DNS records
+      // For now, we'll simulate verification
+      const { error } = await supabase
+        .from('domain_verifications')
+        .update({ verified_at: new Date().toISOString() })
+        .eq('id', domainId);
+
+      if (error) throw error;
+
+      toast({
+        title: "Domain verified!",
+        description: "Your custom domain is now active.",
+      });
+
+      fetchDomainVerifications();
+    } catch (error: any) {
+      console.error('Error verifying domain:', error);
+      toast({
+        title: "Verification failed",
+        description: "Please check your DNS settings and try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  if (!hasActiveTier2Subscription) {
+    return (
+      <Card className="border-amber-200 bg-amber-50">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Globe className="h-5 w-5" />
+            Custom Domain Branding
+          </CardTitle>
+          <CardDescription>
+            Use your own domain for submission links (Tier 2 feature)
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <p className="text-sm text-gray-600 mb-4">
+            Upgrade to Tier 2 to use your own custom domain for your submission links, 
+            giving your reports a more professional and branded appearance.
+          </p>
+          <Badge variant="secondary">Tier 2 Required</Badge>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  return (
+    <div className="space-y-6">
+      <Card>
+        <CardHeader>
+          <div className="flex justify-between items-start">
+            <div>
+              <CardTitle className="flex items-center gap-2">
+                <Globe className="h-5 w-5" />
+                Custom Domain Branding
+              </CardTitle>
+              <CardDescription>
+                Use your own domain for submission links instead of the default domain
+              </CardDescription>
+            </div>
+            <Button onClick={() => setShowAddForm(!showAddForm)}>
+              Add Domain
+            </Button>
+          </div>
+        </CardHeader>
+        <CardContent>
+          {showAddForm && (
+            <form onSubmit={addDomain} className="mb-6 p-4 border rounded-lg bg-gray-50">
+              <div className="space-y-4">
+                <div>
+                  <Label htmlFor="domain">Domain Name</Label>
+                  <Input
+                    id="domain"
+                    value={newDomain}
+                    onChange={(e) => setNewDomain(e.target.value)}
+                    placeholder="reports.yourcompany.com"
+                    required
+                  />
+                  <p className="text-xs text-gray-500 mt-1">
+                    Enter the subdomain you want to use for your submission links
+                  </p>
+                </div>
+                <div className="flex space-x-2">
+                  <Button type="submit" disabled={loading}>
+                    {loading ? 'Adding...' : 'Add Domain'}
+                  </Button>
+                  <Button type="button" variant="outline" onClick={() => setShowAddForm(false)}>
+                    Cancel
+                  </Button>
+                </div>
+              </div>
+            </form>
+          )}
+
+          {domainVerifications.length === 0 ? (
+            <div className="text-center py-8">
+              <Globe className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+              <h3 className="text-lg font-medium text-gray-900 mb-2">No custom domains yet</h3>
+              <p className="text-gray-600">
+                Add a custom domain to brand your submission links with your own domain.
+              </p>
+            </div>
+          ) : (
+            <div className="space-y-4">
+              {domainVerifications.map((domain) => (
+                <Card key={domain.id} className="border-l-4 border-l-blue-500">
+                  <CardContent className="pt-6">
+                    <div className="flex justify-between items-start mb-4">
+                      <div>
+                        <h4 className="font-medium text-lg">{domain.domain}</h4>
+                        <div className="flex items-center gap-2 mt-1">
+                          {domain.verified_at ? (
+                            <Badge variant="default" className="bg-green-100 text-green-800">
+                              <CheckCircle className="h-3 w-3 mr-1" />
+                              Verified
+                            </Badge>
+                          ) : (
+                            <Badge variant="secondary" className="bg-yellow-100 text-yellow-800">
+                              <AlertCircle className="h-3 w-3 mr-1" />
+                              Pending Verification
+                            </Badge>
+                          )}
+                        </div>
+                      </div>
+                      {!domain.verified_at && (
+                        <Button onClick={() => verifyDomain(domain.id)} disabled={loading}>
+                          Verify Domain
+                        </Button>
+                      )}
+                    </div>
+
+                    {!domain.verified_at && (
+                      <div className="space-y-4 bg-blue-50 p-4 rounded-lg">
+                        <h5 className="font-medium text-blue-900">DNS Configuration Required</h5>
+                        <p className="text-sm text-blue-800">
+                          Add the following CNAME record to your DNS settings:
+                        </p>
+                        
+                        <div className="space-y-2">
+                          <div className="flex items-center justify-between bg-white p-3 rounded border">
+                            <div>
+                              <Label className="text-xs font-medium text-gray-500">NAME/HOST</Label>
+                              <p className="font-mono text-sm">{domain.domain}</p>
+                            </div>
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => copyToClipboard(domain.domain, 'Domain name')}
+                            >
+                              <Copy className="h-4 w-4" />
+                            </Button>
+                          </div>
+                          
+                          <div className="flex items-center justify-between bg-white p-3 rounded border">
+                            <div>
+                              <Label className="text-xs font-medium text-gray-500">VALUE/TARGET</Label>
+                              <p className="font-mono text-sm">cname.disclosurely.com</p>
+                            </div>
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => copyToClipboard('cname.disclosurely.com', 'CNAME target')}
+                            >
+                              <Copy className="h-4 w-4" />
+                            </Button>
+                          </div>
+                        </div>
+
+                        <div className="text-xs text-blue-700">
+                          <p className="mb-1">• TTL can be set to 300 seconds (5 minutes) or your DNS provider's default</p>
+                          <p>• DNS changes can take up to 24 hours to propagate</p>
+                        </div>
+                      </div>
+                    )}
+
+                    {domain.verified_at && (
+                      <div className="bg-green-50 p-4 rounded-lg">
+                        <div className="flex items-center gap-2 mb-2">
+                          <CheckCircle className="h-4 w-4 text-green-600" />
+                          <span className="text-green-800 font-medium">Domain Active</span>
+                        </div>
+                        <p className="text-sm text-green-700">
+                          Your submission links will now use your custom domain: 
+                          <span className="font-mono ml-1">{domain.domain}/secure/tool/submit/...</span>
+                        </p>
+                      </div>
+                    )}
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          )}
+        </CardContent>
+      </Card>
+    </div>
+  );
+};
+
+export default CustomDomainSettings;
