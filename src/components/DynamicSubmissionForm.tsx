@@ -1,6 +1,5 @@
-
 import { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -10,7 +9,7 @@ import { Switch } from '@/components/ui/switch';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
-import { Shield, AlertTriangle } from 'lucide-react';
+import { Shield, AlertTriangle, Search } from 'lucide-react';
 import { encryptReport } from '@/utils/encryption';
 import BrandedFormLayout from './BrandedFormLayout';
 
@@ -297,140 +296,169 @@ const DynamicSubmissionForm = () => {
       logoUrl={logoUrl}
       brandColor={brandColor}
     >
-      <form onSubmit={handleSubmit} className="space-y-4">
-        {/* Report Type Selection */}
-        <div className="space-y-3">
-          <Label className="text-base font-medium">Report Type</Label>
-          <div className="flex items-center space-x-3">
-            <Switch
-              id="anonymous"
-              checked={isAnonymous}
-              onCheckedChange={setIsAnonymous}
-            />
-            <Label htmlFor="anonymous" className="flex items-center gap-2 text-sm">
-              {isAnonymous ? 'Anonymous Submission' : 'Confidential Submission'}
-              <span className="text-xs text-gray-500">
-                ({isAnonymous ? 'No personal information required' : 'Provide email for follow-up'})
-              </span>
-            </Label>
-          </div>
-        </div>
-
-        {/* Contact Information (if not anonymous) */}
-        {!isAnonymous && (
-          <div className="space-y-2">
-            <Label htmlFor="submitter_email">Email Address</Label>
-            <Input
-              id="submitter_email"
-              type="email"
-              value={formData.submitter_email}
-              onChange={(e) => setFormData({ ...formData, submitter_email: e.target.value })}
-              placeholder="your@email.com"
-              required={!isAnonymous}
-            />
-          </div>
-        )}
-
-        {/* Report Details */}
-        <div className="space-y-4">
-          <div className="space-y-2">
-            <Label htmlFor="title">Report Title *</Label>
-            <Input
-              id="title"
-              required
-              value={formData.title}
-              onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-              placeholder="Brief summary of the issue"
-            />
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="category">Category *</Label>
-            <Select value={formData.category} onValueChange={handleCategoryChange} required>
-              <SelectTrigger>
-                <SelectValue placeholder="Select a category" />
-              </SelectTrigger>
-              <SelectContent>
-                {PREDEFINED_CATEGORIES.map((category) => (
-                  <SelectItem key={category} value={category}>
-                    {category}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-
-          {/* Custom Category Input */}
-          {formData.category === "Other (Please Specify)" && (
-            <div className="space-y-2">
-              <Label htmlFor="customCategory">Please Specify Category *</Label>
-              <Input
-                id="customCategory"
-                value={formData.customCategory}
-                onChange={(e) => setFormData({ ...formData, customCategory: e.target.value })}
-                placeholder="Enter the specific category"
-                required
-              />
-            </div>
-          )}
-
-          <div className="space-y-2">
-            <Label htmlFor="description">Detailed Description *</Label>
-            <Textarea
-              id="description"
-              required
-              value={formData.description}
-              onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-              placeholder="Please provide a detailed description of what happened..."
-              rows={4}
-            />
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="priority">Priority Level</Label>
-            <Select
-              value={formData.priority.toString()}
-              onValueChange={(value) => setFormData({ ...formData, priority: parseInt(value) })}
-            >
-              <SelectTrigger>
-                <SelectValue placeholder="Select priority level" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="1">1 - Critical (Immediate danger/serious violation)</SelectItem>
-                <SelectItem value="2">2 - High (Significant impact)</SelectItem>
-                <SelectItem value="3">3 - Medium (Standard concern)</SelectItem>
-                <SelectItem value="4">4 - Low (Minor issue)</SelectItem>
-                <SelectItem value="5">5 - Informational (General feedback)</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-        </div>
-
-        {/* Security Notice */}
+      <div className="space-y-6">
+        {/* Check Status Button */}
         <Card className="border-blue-200 bg-blue-50">
           <CardContent className="pt-4">
-            <div className="flex items-start gap-3">
-              <Shield className="h-4 w-4 text-blue-600 mt-0.5" />
-              <div className="text-sm">
-                <p className="font-medium text-blue-900 mb-1">Your Privacy is Protected</p>
-                <p className="text-blue-800">
-                  All information is encrypted and stored securely. {isAnonymous ? 'This anonymous report cannot be traced back to you.' : 'Your identity will be kept confidential.'}
-                </p>
+            <div className="flex items-center justify-between">
+              <div className="flex items-start gap-3">
+                <Search className="h-4 w-4 text-blue-600 mt-0.5" />
+                <div className="text-sm">
+                  <p className="font-medium text-blue-900 mb-1">Already submitted a report?</p>
+                  <p className="text-blue-800">
+                    Check the status of your existing report using your tracking ID.
+                  </p>
+                </div>
               </div>
+              <Link to={`/secure/tool/submit/${linkToken}/status`}>
+                <Button 
+                  variant="outline" 
+                  size="sm"
+                  className="border-blue-300 text-blue-700 hover:bg-blue-100"
+                >
+                  <Search className="h-4 w-4 mr-2" />
+                  Check Status
+                </Button>
+              </Link>
             </div>
           </CardContent>
         </Card>
 
-        {/* Submit Button */}
-        <Button 
-          type="submit" 
-          disabled={submitting}
-          className="w-full hover:opacity-90"
-          style={{ backgroundColor: brandColor }}
-        >
-          {submitting ? 'Submitting...' : 'Submit Report'}
-        </Button>
-      </form>
+        <form onSubmit={handleSubmit} className="space-y-4">
+          {/* Report Type Selection */}
+          <div className="space-y-3">
+            <Label className="text-base font-medium">Report Type</Label>
+            <div className="flex items-center space-x-3">
+              <Switch
+                id="anonymous"
+                checked={isAnonymous}
+                onCheckedChange={setIsAnonymous}
+              />
+              <Label htmlFor="anonymous" className="flex items-center gap-2 text-sm">
+                {isAnonymous ? 'Anonymous Submission' : 'Confidential Submission'}
+                <span className="text-xs text-gray-500">
+                  ({isAnonymous ? 'No personal information required' : 'Provide email for follow-up'})
+                </span>
+              </Label>
+            </div>
+          </div>
+
+          {/* Contact Information (if not anonymous) */}
+          {!isAnonymous && (
+            <div className="space-y-2">
+              <Label htmlFor="submitter_email">Email Address</Label>
+              <Input
+                id="submitter_email"
+                type="email"
+                value={formData.submitter_email}
+                onChange={(e) => setFormData({ ...formData, submitter_email: e.target.value })}
+                placeholder="your@email.com"
+                required={!isAnonymous}
+              />
+            </div>
+          )}
+
+          {/* Report Details */}
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="title">Report Title *</Label>
+              <Input
+                id="title"
+                required
+                value={formData.title}
+                onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+                placeholder="Brief summary of the issue"
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="category">Category *</Label>
+              <Select value={formData.category} onValueChange={handleCategoryChange} required>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select a category" />
+                </SelectTrigger>
+                <SelectContent>
+                  {PREDEFINED_CATEGORIES.map((category) => (
+                    <SelectItem key={category} value={category}>
+                      {category}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            {/* Custom Category Input */}
+            {formData.category === "Other (Please Specify)" && (
+              <div className="space-y-2">
+                <Label htmlFor="customCategory">Please Specify Category *</Label>
+                <Input
+                  id="customCategory"
+                  value={formData.customCategory}
+                  onChange={(e) => setFormData({ ...formData, customCategory: e.target.value })}
+                  placeholder="Enter the specific category"
+                  required
+                />
+              </div>
+            )}
+
+            <div className="space-y-2">
+              <Label htmlFor="description">Detailed Description *</Label>
+              <Textarea
+                id="description"
+                required
+                value={formData.description}
+                onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                placeholder="Please provide a detailed description of what happened..."
+                rows={4}
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="priority">Priority Level</Label>
+              <Select
+                value={formData.priority.toString()}
+                onValueChange={(value) => setFormData({ ...formData, priority: parseInt(value) })}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select priority level" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="1">1 - Critical (Immediate danger/serious violation)</SelectItem>
+                  <SelectItem value="2">2 - High (Significant impact)</SelectItem>
+                  <SelectItem value="3">3 - Medium (Standard concern)</SelectItem>
+                  <SelectItem value="4">4 - Low (Minor issue)</SelectItem>
+                  <SelectItem value="5">5 - Informational (General feedback)</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+
+          {/* Security Notice */}
+          <Card className="border-blue-200 bg-blue-50">
+            <CardContent className="pt-4">
+              <div className="flex items-start gap-3">
+                <Shield className="h-4 w-4 text-blue-600 mt-0.5" />
+                <div className="text-sm">
+                  <p className="font-medium text-blue-900 mb-1">Your Privacy is Protected</p>
+                  <p className="text-blue-800">
+                    All information is encrypted and stored securely. {isAnonymous ? 'This anonymous report cannot be traced back to you.' : 'Your identity will be kept confidential.'}
+                  </p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Submit Button */}
+          <Button 
+            type="submit" 
+            disabled={submitting}
+            className="w-full hover:opacity-90"
+            style={{ backgroundColor: brandColor }}
+          >
+            {submitting ? 'Submitting...' : 'Submit Report'}
+          </Button>
+        </form>
+      </div>
     </BrandedFormLayout>
   );
 };

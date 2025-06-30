@@ -13,6 +13,7 @@ import ReportSuccess from '@/components/ReportSuccess';
 import ReportStatus from '@/components/ReportStatus';
 import SecureReportTool from '@/components/SecureReportTool';
 import ProtectedRoute from '@/components/ProtectedRoute';
+import CompanyStatusPage from '@/components/CompanyStatusPage';
 import './App.css';
 
 const queryClient = new QueryClient();
@@ -32,6 +33,7 @@ function App() {
               {/* Public submission routes */}
               <Route path="/secure/tool" element={<SecureReportTool />} />
               <Route path="/secure/tool/submit/:linkToken" element={<DynamicSubmissionForm />} />
+              <Route path="/secure/tool/submit/:linkToken/status" element={<CompanyStatusPage />} />
               <Route path="/secure/tool/success" element={<ReportSuccess />} />
               <Route path="/secure/tool/messages" element={<ReportStatus />} />
               
