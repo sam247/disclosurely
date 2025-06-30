@@ -24,6 +24,7 @@ import {
   XCircle,
   User
 } from 'lucide-react';
+import ReportsStatistics from '@/components/ReportsStatistics';
 
 type ReportStatus = 'new' | 'in_review' | 'investigating' | 'resolved' | 'closed';
 
@@ -298,6 +299,9 @@ const ReportsManagement = () => {
 
   return (
     <div className="space-y-6">
+      {/* Statistics Section */}
+      <ReportsStatistics />
+      
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center space-x-2">

@@ -14,6 +14,7 @@ import ReportMessaging from '@/components/ReportMessaging';
 import ReportContentDisplay from '@/components/ReportContentDisplay';
 import SubscriptionManagement from '@/components/SubscriptionManagement';
 import OrganizationSettings from '@/components/OrganizationSettings';
+import ReportsManagement from '@/components/ReportsManagement';
 
 interface Report {
   id: string;
@@ -330,13 +331,14 @@ const Dashboard = () => {
       {/* Main Content */}
       <main className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
         <div className="px-4 py-6 sm:px-0">
-          <Tabs defaultValue="reports" className="space-y-6">
+          <Tabs defaultValue="cases" className="space-y-6">
             <TabsList>
+              <TabsTrigger value="cases">Cases</TabsTrigger>
               <TabsTrigger value="reports">Reports</TabsTrigger>
               <TabsTrigger value="subscription">Subscription</TabsTrigger>
             </TabsList>
 
-            <TabsContent value="reports" className="space-y-6">
+            <TabsContent value="cases" className="space-y-6">
               {/* Quick Stats */}
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <Card>
@@ -529,6 +531,10 @@ const Dashboard = () => {
                   )}
                 </CardContent>
               </Card>
+            </TabsContent>
+
+            <TabsContent value="reports">
+              <ReportsManagement />
             </TabsContent>
 
             <TabsContent value="subscription">
