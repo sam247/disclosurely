@@ -1,9 +1,7 @@
 import { Shield, Users, Lock, FileText, Search, Bell } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-
 const Landing = () => {
-  return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
+  return <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
       {/* Navigation */}
       <nav className="bg-white shadow-sm border-b">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -27,7 +25,7 @@ const Landing = () => {
       </nav>
 
       {/* Hero Section */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-16 pb-20">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-16 pb-20 py-[125px]">
         <div className="text-center">
           <h1 className="text-4xl md:text-6xl font-bold text-gray-900 mb-6 pt-8">
             Secure Whistleblowing
@@ -206,8 +204,6 @@ const Landing = () => {
           </div>
         </div>
       </footer>
-    </div>
-  );
+    </div>;
 };
-
 export default Landing;
