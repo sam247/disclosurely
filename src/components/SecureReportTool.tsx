@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -14,12 +15,23 @@ import { encryptReport } from "@/utils/encryption";
 import { useNavigate } from "react-router-dom";
 import BrandedFormLayout from "./BrandedFormLayout";
 
+const PREDEFINED_CATEGORIES = [
+  "Bribery",
+  "Fraud", 
+  "GDPR",
+  "Corruption",
+  "Failure to comply with laws and regulation",
+  "Endangering the health & safety of individuals",
+  "Other (Please Specify)"
+];
+
 const SecureReportTool = () => {
   const navigate = useNavigate();
   const [reportType, setReportType] = useState<"anonymous" | "confidential">("anonymous");
   const [formData, setFormData] = useState({
     title: "",
     category: "",
+    customCategory: "",
     content: "",
     incident_date: "",
     location: "",
@@ -35,8 +47,23 @@ const SecureReportTool = () => {
     setFormData(prev => ({ ...prev, [field]: value }));
   };
 
+  const handleCategoryChange = (value: string) => {
+    setFormData(prev => ({ 
+      ...prev, 
+      category: value,
+      customCategory: value === "Other (Please Specify)" ? prev.customCategory : ""
+    }));
+  };
+
   const generateTrackingId = () => {
     return 'WB-' + Math.random().toString(36).substring(2, 10).toUpperCase();
+  };
+
+  const getFinalCategory = () => {
+    if (formData.category === "Other (Please Specify)" && formData.customCategory.trim()) {
+      return formData.customCategory.trim();
+    }
+    return formData.category;
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -49,6 +76,16 @@ const SecureReportTool = () => {
 
     if (!formData.title.trim() || !formData.content.trim()) {
       toast.error("Please fill in all required fields");
+      return;
+    }
+
+    if (!formData.category) {
+      toast.error("Please select a category");
+      return;
+    }
+
+    if (formData.category === "Other (Please Specify)" && !formData.customCategory.trim()) {
+      toast.error("Please specify the category");
       return;
     }
 
@@ -69,12 +106,13 @@ const SecureReportTool = () => {
 
       // Generate a unique tracking ID first
       const trackingId = generateTrackingId();
+      const finalCategory = getFinalCategory();
 
       // Encrypt the report data
       const reportData = {
         title: formData.title,
         content: formData.content,
-        category: formData.category,
+        category: finalCategory,
         incident_date: formData.incident_date,
         location: formData.location,
         people_involved: formData.people_involved,
@@ -95,6 +133,7 @@ const SecureReportTool = () => {
           tracking_id: trackingId,
           submitted_by_email: reportType === "confidential" ? formData.submitter_email || null : null,
           priority: formData.priority,
+          tags: [finalCategory] // Store category as a tag for statistics
         })
         .select()
         .single();
@@ -191,14 +230,34 @@ const SecureReportTool = () => {
 
           {/* Category */}
           <div className="space-y-2">
-            <Label htmlFor="category">Category</Label>
-            <Input
-              id="category"
-              value={formData.category}
-              onChange={(e) => handleInputChange("category", e.target.value)}
-              placeholder="e.g., Financial misconduct, Safety violation, Harassment"
-            />
+            <Label htmlFor="category">Category *</Label>
+            <Select value={formData.category} onValueChange={handleCategoryChange} required>
+              <SelectTrigger>
+                <SelectValue placeholder="Select a category" />
+              </SelectTrigger>
+              <SelectContent>
+                {PREDEFINED_CATEGORIES.map((category) => (
+                  <SelectItem key={category} value={category}>
+                    {category}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
+
+          {/* Custom Category Input */}
+          {formData.category === "Other (Please Specify)" && (
+            <div className="space-y-2">
+              <Label htmlFor="customCategory">Please Specify Category *</Label>
+              <Input
+                id="customCategory"
+                value={formData.customCategory}
+                onChange={(e) => handleInputChange("customCategory", e.target.value)}
+                placeholder="Enter the specific category"
+                required
+              />
+            </div>
+          )}
 
           {/* Priority */}
           <div className="space-y-2">
@@ -244,7 +303,6 @@ const SecureReportTool = () => {
             />
           </div>
 
-          {/* Location */}
           <div className="space-y-2">
             <Label htmlFor="location">Location</Label>
             <Input
@@ -255,7 +313,6 @@ const SecureReportTool = () => {
             />
           </div>
 
-          {/* People Involved */}
           <div className="space-y-2">
             <Label htmlFor="people_involved">People Involved</Label>
             <Textarea
@@ -267,7 +324,6 @@ const SecureReportTool = () => {
             />
           </div>
 
-          {/* Evidence */}
           <div className="space-y-2">
             <Label htmlFor="evidence_description">Evidence Description</Label>
             <Textarea
@@ -279,14 +335,12 @@ const SecureReportTool = () => {
             />
           </div>
 
-          {/* File Upload Placeholder */}
           <div className="border-2 border-dashed border-gray-300 rounded-lg p-4 text-center">
             <Upload className="h-6 w-6 text-gray-400 mx-auto mb-2" />
             <p className="text-sm text-gray-600">File upload feature coming soon</p>
             <p className="text-xs text-gray-400">Encrypted file attachments will be supported</p>
           </div>
 
-          {/* Terms Agreement */}
           <div className="flex items-start space-x-2">
             <Checkbox
               id="terms"
@@ -299,7 +353,6 @@ const SecureReportTool = () => {
             </Label>
           </div>
 
-          {/* Submit Button */}
           <Button 
             type="submit" 
             className="w-full" 

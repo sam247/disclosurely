@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -12,6 +13,16 @@ import { supabase } from '@/integrations/supabase/client';
 import { Shield, AlertTriangle } from 'lucide-react';
 import { encryptReport } from '@/utils/encryption';
 import BrandedFormLayout from './BrandedFormLayout';
+
+const PREDEFINED_CATEGORIES = [
+  "Bribery",
+  "Fraud", 
+  "GDPR",
+  "Corruption",
+  "Failure to comply with laws and regulation",
+  "Endangering the health & safety of individuals",
+  "Other (Please Specify)"
+];
 
 interface LinkData {
   id: string;
@@ -37,6 +48,8 @@ const DynamicSubmissionForm = () => {
   const [formData, setFormData] = useState({
     title: '',
     description: '',
+    category: '',
+    customCategory: '',
     submitter_email: '',
     priority: 3
   });
@@ -121,6 +134,21 @@ const DynamicSubmissionForm = () => {
     return 'WB-' + Math.random().toString(36).substr(2, 8).toUpperCase();
   };
 
+  const handleCategoryChange = (value: string) => {
+    setFormData(prev => ({ 
+      ...prev, 
+      category: value,
+      customCategory: value === "Other (Please Specify)" ? prev.customCategory : ""
+    }));
+  };
+
+  const getFinalCategory = () => {
+    if (formData.category === "Other (Please Specify)" && formData.customCategory.trim()) {
+      return formData.customCategory.trim();
+    }
+    return formData.category;
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!linkData) return;
@@ -134,22 +162,43 @@ const DynamicSubmissionForm = () => {
       return;
     }
 
+    if (!formData.category) {
+      toast({
+        title: "Category required",
+        description: "Please select a category.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (formData.category === "Other (Please Specify)" && !formData.customCategory.trim()) {
+      toast({
+        title: "Category specification required",
+        description: "Please specify the category.",
+        variant: "destructive",
+      });
+      return;
+    }
+
     setSubmitting(true);
 
     try {
       const trackingId = generateTrackingId();
+      const finalCategory = getFinalCategory();
       
       console.log('Submitting report:', {
         title: formData.title,
         organizationId: linkData.organization_id,
         isAnonymous,
-        priority: formData.priority
+        priority: formData.priority,
+        category: finalCategory
       });
 
       // Encrypt the report data using organization-based encryption
       const reportData = {
         title: formData.title,
         description: formData.description,
+        category: finalCategory,
         submission_method: 'web_form'
       };
 
@@ -168,7 +217,8 @@ const DynamicSubmissionForm = () => {
           submitted_by_email: isAnonymous ? null : formData.submitter_email,
           submitted_via_link_id: linkData.id,
           status: 'new',
-          priority: formData.priority
+          priority: formData.priority,
+          tags: [finalCategory] // Store category as a tag for statistics
         })
         .select()
         .single();
@@ -293,6 +343,36 @@ const DynamicSubmissionForm = () => {
               placeholder="Brief summary of the issue"
             />
           </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="category">Category *</Label>
+            <Select value={formData.category} onValueChange={handleCategoryChange} required>
+              <SelectTrigger>
+                <SelectValue placeholder="Select a category" />
+              </SelectTrigger>
+              <SelectContent>
+                {PREDEFINED_CATEGORIES.map((category) => (
+                  <SelectItem key={category} value={category}>
+                    {category}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+
+          {/* Custom Category Input */}
+          {formData.category === "Other (Please Specify)" && (
+            <div className="space-y-2">
+              <Label htmlFor="customCategory">Please Specify Category *</Label>
+              <Input
+                id="customCategory"
+                value={formData.customCategory}
+                onChange={(e) => setFormData({ ...formData, customCategory: e.target.value })}
+                placeholder="Enter the specific category"
+                required
+              />
+            </div>
+          )}
 
           <div className="space-y-2">
             <Label htmlFor="description">Detailed Description *</Label>
