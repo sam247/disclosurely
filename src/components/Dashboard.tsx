@@ -8,7 +8,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
-import { LogOut, Plus, ExternalLink, FileText, Eye, Archive, Trash2, CreditCard, Settings } from 'lucide-react';
+import { LogOut, Plus, ExternalLink, FileText, Eye, Archive, Trash2, CreditCard, Settings, RotateCcw } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import ReportMessaging from '@/components/ReportMessaging';
 import ReportContentDisplay from '@/components/ReportContentDisplay';
@@ -43,11 +43,13 @@ const Dashboard = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const [reports, setReports] = useState<Report[]>([]);
+  const [archivedReports, setArchivedReports] = useState<Report[]>([]);
   const [links, setLinks] = useState<SubmissionLink[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedReport, setSelectedReport] = useState<Report | null>(null);
   const [isReportDialogOpen, setIsReportDialogOpen] = useState(false);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+  const [showArchived, setShowArchived] = useState(false);
 
   useEffect(() => {
     if (user) {
@@ -71,17 +73,30 @@ const Dashboard = () => {
         return;
       }
 
-      // Fetch reports with encrypted content, exclude archived reports
+      // Fetch active reports
       const { data: reportsData, error: reportsError } = await supabase
         .from('reports')
         .select('id, title, tracking_id, status, created_at, encrypted_content, encryption_key_hash, priority, report_type')
         .eq('organization_id', profile.organization_id)
-        .neq('status', 'closed') // Only exclude archived (closed) reports
+        .neq('status', 'closed')
         .order('created_at', { ascending: false })
         .limit(20);
 
       if (reportsError) {
         console.error('Error fetching reports:', reportsError);
+      }
+
+      // Fetch archived reports
+      const { data: archivedData, error: archivedError } = await supabase
+        .from('reports')
+        .select('id, title, tracking_id, status, created_at, encrypted_content, encryption_key_hash, priority, report_type')
+        .eq('organization_id', profile.organization_id)
+        .eq('status', 'closed')
+        .order('created_at', { ascending: false })
+        .limit(20);
+
+      if (archivedError) {
+        console.error('Error fetching archived reports:', archivedError);
       }
 
       // Fetch the single organization link (simplified to one link per org)
@@ -93,6 +108,7 @@ const Dashboard = () => {
         .limit(1);
 
       setReports(reportsData || []);
+      setArchivedReports(archivedData || []);
       setLinks(linksData || []);
     } catch (error) {
       console.error('Error fetching dashboard data:', error);
@@ -120,16 +136,13 @@ const Dashboard = () => {
         description: "The report has been moved to closed status",
       });
 
-      // Close dialog if this report was being viewed
       if (selectedReport?.id === reportId) {
         setIsReportDialogOpen(false);
         setSelectedReport(null);
       }
 
-      // Remove the archived report from local state immediately
       setReports(prevReports => prevReports.filter(report => report.id !== reportId));
       
-      // Refresh the data to ensure consistency
       setTimeout(() => {
         fetchData();
       }, 1000);
@@ -143,23 +156,54 @@ const Dashboard = () => {
     }
   };
 
-  const handleDeleteReport = async (reportId: string) => {
+  const handleUnarchiveReport = async (reportId: string) => {
     try {
-      // Remove from local state first for immediate feedback
-      setReports(prevReports => prevReports.filter(report => report.id !== reportId));
+      const { error } = await supabase
+        .from('reports')
+        .update({ status: 'new' })
+        .eq('id', reportId);
 
-      // Close dialog if this report was being viewed
+      if (error) throw error;
+
+      toast({
+        title: "Report unarchived",
+        description: "The report has been moved back to active status",
+      });
+
       if (selectedReport?.id === reportId) {
         setIsReportDialogOpen(false);
         setSelectedReport(null);
       }
 
-      // Delete related data first (cascading delete)
+      setArchivedReports(prevReports => prevReports.filter(report => report.id !== reportId));
+      
+      setTimeout(() => {
+        fetchData();
+      }, 1000);
+    } catch (error) {
+      console.error('Error unarchiving report:', error);
+      toast({
+        title: "Error",
+        description: "Failed to unarchive report. Please try again.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleDeleteReport = async (reportId: string) => {
+    try {
+      setReports(prevReports => prevReports.filter(report => report.id !== reportId));
+      setArchivedReports(prevReports => prevReports.filter(report => report.id !== reportId));
+
+      if (selectedReport?.id === reportId) {
+        setIsReportDialogOpen(false);
+        setSelectedReport(null);
+      }
+
       await supabase.from('report_messages').delete().eq('report_id', reportId);
       await supabase.from('report_notes').delete().eq('report_id', reportId);
       await supabase.from('notifications').delete().eq('report_id', reportId);
 
-      // Delete the report itself
       const { error: reportError } = await supabase
         .from('reports')
         .delete()
@@ -175,7 +219,6 @@ const Dashboard = () => {
         description: "The report has been permanently deleted",
       });
 
-      // Refresh data after successful deletion
       setTimeout(() => {
         fetchData();
       }, 1000);
@@ -189,7 +232,6 @@ const Dashboard = () => {
         variant: "destructive",
       });
       
-      // Restore the report to local state if deletion failed
       setTimeout(() => {
         fetchData();
       }, 500);
@@ -215,7 +257,6 @@ const Dashboard = () => {
         return;
       }
 
-      // Check if a link already exists
       if (links.length > 0) {
         toast({
           title: "Link already exists",
@@ -224,7 +265,6 @@ const Dashboard = () => {
         return;
       }
 
-      // Generate a unique token
       const generateToken = () => {
         return Math.random().toString(36).substring(2, 14);
       };
@@ -248,7 +288,7 @@ const Dashboard = () => {
         description: "Your submission link is ready to use.",
       });
 
-      fetchData(); // Refresh the data
+      fetchData();
     } catch (error: any) {
       console.error('Error creating link:', error);
       toast({
@@ -287,6 +327,96 @@ const Dashboard = () => {
       </div>
     );
   }
+
+  const renderReportsList = (reportsList: Report[], isArchived = false) => (
+    reportsList.length === 0 ? (
+      <div className="text-center py-8">
+        <FileText className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+        <p className="text-gray-600">No {isArchived ? 'archived ' : ''}reports found</p>
+        <p className="text-sm text-gray-500">
+          {isArchived ? 'Archived reports will appear here' : 'Reports will appear here once submitted through your link'}
+        </p>
+      </div>
+    ) : (
+      <div className="space-y-4">
+        {reportsList.map((report) => (
+          <div key={report.id} className="flex items-center justify-between p-4 border rounded-lg hover:bg-gray-50 transition-colors">
+            <div className="flex-1">
+              <h3 className="font-medium">{report.title}</h3>
+              <p className="text-sm text-gray-600">
+                {report.tracking_id} • {new Date(report.created_at).toLocaleDateString()}
+              </p>
+            </div>
+            <div className="flex items-center space-x-3">
+              <span className={`px-2 py-1 text-xs rounded-full ${
+                report.status === 'new' ? 'bg-blue-100 text-blue-800' :
+                report.status === 'in_review' ? 'bg-yellow-100 text-yellow-800' :
+                report.status === 'investigating' ? 'bg-orange-100 text-orange-800' :
+                report.status === 'resolved' ? 'bg-green-100 text-green-800' :
+                report.status === 'closed' ? 'bg-gray-100 text-gray-800' :
+                'bg-gray-100 text-gray-800'
+              }`}>
+                {report.status.replace('_', ' ')}
+              </span>
+              <Button 
+                size="sm" 
+                variant="outline"
+                onClick={() => handleViewReport(report)}
+              >
+                <Eye className="h-4 w-4 mr-1" />
+                View
+              </Button>
+              {isArchived ? (
+                <Button 
+                  size="sm" 
+                  variant="outline"
+                  onClick={() => handleUnarchiveReport(report.id)}
+                >
+                  <RotateCcw className="h-4 w-4 mr-1" />
+                  Unarchive
+                </Button>
+              ) : (
+                <Button 
+                  size="sm" 
+                  variant="outline"
+                  onClick={() => handleArchiveReport(report.id)}
+                >
+                  <Archive className="h-4 w-4 mr-1" />
+                  Archive
+                </Button>
+              )}
+              <AlertDialog>
+                <AlertDialogTrigger asChild>
+                  <Button size="sm" variant="destructive">
+                    <Trash2 className="h-4 w-4 mr-1" />
+                    Delete
+                  </Button>
+                </AlertDialogTrigger>
+                <AlertDialogContent>
+                  <AlertDialogHeader>
+                    <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+                    <AlertDialogDescription>
+                      This action cannot be undone. This will permanently delete the report 
+                      and all associated messages.
+                    </AlertDialogDescription>
+                  </AlertDialogHeader>
+                  <AlertDialogFooter>
+                    <AlertDialogCancel>Cancel</AlertDialogCancel>
+                    <AlertDialogAction 
+                      onClick={() => handleDeleteReport(report.id)}
+                      className="bg-red-600 hover:bg-red-700"
+                    >
+                      Delete Report
+                    </AlertDialogAction>
+                  </AlertDialogFooter>
+                </AlertDialogContent>
+              </AlertDialog>
+            </div>
+          </div>
+        ))}
+      </div>
+    )
+  );
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -346,8 +476,20 @@ const Dashboard = () => {
                     <div className="flex items-center">
                       <FileText className="h-8 w-8 text-blue-600" />
                       <div className="ml-4">
-                        <p className="text-sm font-medium text-gray-600">Total Reports</p>
+                        <p className="text-sm font-medium text-gray-600">Active Reports</p>
                         <p className="text-2xl font-bold text-gray-900">{reports.length}</p>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+                
+                <Card>
+                  <CardContent className="p-6">
+                    <div className="flex items-center">
+                      <Archive className="h-8 w-8 text-gray-600" />
+                      <div className="ml-4">
+                        <p className="text-sm font-medium text-gray-600">Archived Reports</p>
+                        <p className="text-2xl font-bold text-gray-900">{archivedReports.length}</p>
                       </div>
                     </div>
                   </CardContent>
@@ -360,20 +502,6 @@ const Dashboard = () => {
                       <div className="ml-4">
                         <p className="text-sm font-medium text-gray-600">Submission Link</p>
                         <p className="text-2xl font-bold text-gray-900">{links.length > 0 ? 'Active' : 'None'}</p>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-                
-                <Card>
-                  <CardContent className="p-6">
-                    <div className="flex items-center">
-                      <CreditCard className="h-8 w-8 text-purple-600" />
-                      <div className="ml-4">
-                        <p className="text-sm font-medium text-gray-600">Subscription</p>
-                        <p className="text-2xl font-bold text-gray-900">
-                          {subscriptionData.subscribed ? 'Active' : 'Inactive'}
-                        </p>
                       </div>
                     </div>
                   </CardContent>
@@ -447,88 +575,26 @@ const Dashboard = () => {
                 </Card>
               )}
 
-              {/* Reports List */}
+              {/* Reports List with Toggle */}
               <Card>
                 <CardHeader>
-                  <CardTitle>Reports</CardTitle>
-                  <CardDescription>All report submissions</CardDescription>
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <CardTitle>{showArchived ? 'Archived Reports' : 'Active Reports'}</CardTitle>
+                      <CardDescription>
+                        {showArchived ? 'Previously archived report submissions' : 'Current active report submissions'}
+                      </CardDescription>
+                    </div>
+                    <Button 
+                      variant="outline" 
+                      onClick={() => setShowArchived(!showArchived)}
+                    >
+                      {showArchived ? 'Show Active' : 'Show Archived'}
+                    </Button>
+                  </div>
                 </CardHeader>
                 <CardContent>
-                  {reports.length === 0 ? (
-                    <div className="text-center py-8">
-                      <FileText className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                      <p className="text-gray-600">No reports submitted yet</p>
-                      <p className="text-sm text-gray-500">Reports will appear here once submitted through your link</p>
-                    </div>
-                  ) : (
-                    <div className="space-y-4">
-                      {reports.map((report) => (
-                        <div key={report.id} className="flex items-center justify-between p-4 border rounded-lg hover:bg-gray-50 transition-colors">
-                          <div className="flex-1">
-                            <h3 className="font-medium">{report.title}</h3>
-                            <p className="text-sm text-gray-600">
-                              {report.tracking_id} • {new Date(report.created_at).toLocaleDateString()}
-                            </p>
-                          </div>
-                          <div className="flex items-center space-x-3">
-                            <span className={`px-2 py-1 text-xs rounded-full ${
-                              report.status === 'new' ? 'bg-blue-100 text-blue-800' :
-                              report.status === 'in_review' ? 'bg-yellow-100 text-yellow-800' :
-                              report.status === 'investigating' ? 'bg-orange-100 text-orange-800' :
-                              report.status === 'resolved' ? 'bg-green-100 text-green-800' :
-                              'bg-gray-100 text-gray-800'
-                            }`}>
-                              {report.status.replace('_', ' ')}
-                            </span>
-                            <Button 
-                              size="sm" 
-                              variant="outline"
-                              onClick={() => handleViewReport(report)}
-                            >
-                              <Eye className="h-4 w-4 mr-1" />
-                              View
-                            </Button>
-                            {report.status !== 'closed' && (
-                              <Button 
-                                size="sm" 
-                                variant="outline"
-                                onClick={() => handleArchiveReport(report.id)}
-                              >
-                                <Archive className="h-4 w-4 mr-1" />
-                                Archive
-                              </Button>
-                            )}
-                            <AlertDialog>
-                              <AlertDialogTrigger asChild>
-                                <Button size="sm" variant="destructive">
-                                  <Trash2 className="h-4 w-4 mr-1" />
-                                  Delete
-                                </Button>
-                              </AlertDialogTrigger>
-                              <AlertDialogContent>
-                                <AlertDialogHeader>
-                                  <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
-                                  <AlertDialogDescription>
-                                    This action cannot be undone. This will permanently delete the report 
-                                    and all associated messages.
-                                  </AlertDialogDescription>
-                                </AlertDialogHeader>
-                                <AlertDialogFooter>
-                                  <AlertDialogCancel>Cancel</AlertDialogCancel>
-                                  <AlertDialogAction 
-                                    onClick={() => handleDeleteReport(report.id)}
-                                    className="bg-red-600 hover:bg-red-700"
-                                  >
-                                    Delete Report
-                                  </AlertDialogAction>
-                                </AlertDialogFooter>
-                              </AlertDialogContent>
-                            </AlertDialog>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  )}
+                  {renderReportsList(showArchived ? archivedReports : reports, showArchived)}
                 </CardContent>
               </Card>
             </TabsContent>
@@ -587,7 +653,6 @@ const Dashboard = () => {
         </DialogContent>
       </Dialog>
 
-      {/* Organization Settings Dialog */}
       <OrganizationSettings 
         isOpen={isSettingsOpen} 
         onClose={() => setIsSettingsOpen(false)} 
