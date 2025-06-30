@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -12,6 +13,7 @@ import { LogOut, Plus, ExternalLink, FileText, Eye, Archive, Trash2, CreditCard,
 import { supabase } from '@/integrations/supabase/client';
 import ReportMessaging from '@/components/ReportMessaging';
 import ReportContentDisplay from '@/components/ReportContentDisplay';
+import ReportAttachments from '@/components/ReportAttachments';
 import SubscriptionManagement from '@/components/SubscriptionManagement';
 import OrganizationSettings from '@/components/OrganizationSettings';
 import ReportsManagement from '@/components/ReportsManagement';
@@ -617,7 +619,7 @@ const Dashboard = () => {
           <DialogHeader>
             <DialogTitle>Report Details: {selectedReport?.tracking_id}</DialogTitle>
             <DialogDescription>
-              View submitted report information and secure messages
+              View submitted report information, attachments, and secure messages
             </DialogDescription>
           </DialogHeader>
           
@@ -634,6 +636,7 @@ const Dashboard = () => {
                   priority={selectedReport.priority}
                   submittedByEmail={selectedReport.submitted_by_email}
                 />
+                <ReportAttachments reportId={selectedReport.id} />
               </div>
               <div>
                 <ReportMessaging 
