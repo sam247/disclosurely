@@ -9,7 +9,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { useOrganization } from '@/hooks/useOrganization';
-import { Upload, X } from 'lucide-react';
+import { Upload, X, Info } from 'lucide-react';
 
 interface OrganizationSettingsProps {
   isOpen: boolean;
@@ -25,7 +25,6 @@ const OrganizationSettings = ({ isOpen, onClose }: OrganizationSettingsProps) =>
     name: organization?.name || '',
     description: organization?.description || '',
     brand_color: organization?.brand_color || '#2563eb',
-    custom_logo_url: organization?.custom_logo_url || '',
   });
 
   const handleSave = async () => {
@@ -39,7 +38,6 @@ const OrganizationSettings = ({ isOpen, onClose }: OrganizationSettingsProps) =>
           name: formData.name,
           description: formData.description,
           brand_color: formData.brand_color,
-          custom_logo_url: formData.custom_logo_url,
           updated_at: new Date().toISOString(),
         })
         .eq('id', organization.id);
@@ -243,7 +241,25 @@ const OrganizationSettings = ({ isOpen, onClose }: OrganizationSettingsProps) =>
               {/* Logo Upload Section */}
               <div>
                 <Label>Organization Logo</Label>
-                <div className="mt-2 space-y-4">
+                
+                {/* Image Requirements Notice */}
+                <div className="mt-2 mb-4 p-3 bg-blue-50 rounded-lg border border-blue-200">
+                  <div className="flex items-start gap-2">
+                    <Info className="h-4 w-4 text-blue-600 mt-0.5 flex-shrink-0" />
+                    <div className="text-sm text-blue-800">
+                      <p className="font-medium mb-1">Image Requirements:</p>
+                      <ul className="list-disc list-inside space-y-1 text-xs">
+                        <li>Use a square image (1:1 aspect ratio) for best results</li>
+                        <li>Minimum size: 256×256 pixels</li>
+                        <li>Recommended size: 512×512 pixels or larger</li>
+                        <li>Supports JPEG, PNG, GIF, WebP formats</li>
+                        <li>Maximum file size: 5MB</li>
+                      </ul>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="space-y-4">
                   {/* Current Logo Display */}
                   {organization?.logo_url && (
                     <div className="flex items-center space-x-4">
@@ -267,7 +283,7 @@ const OrganizationSettings = ({ isOpen, onClose }: OrganizationSettingsProps) =>
                   {/* File Upload */}
                   <div>
                     <Label htmlFor="logo-upload" className="block text-sm font-medium mb-2">
-                      Upload New Logo
+                      Upload Logo
                     </Label>
                     <div className="flex items-center space-x-4">
                       <Input
@@ -287,34 +303,8 @@ const OrganizationSettings = ({ isOpen, onClose }: OrganizationSettingsProps) =>
                         {uploadingLogo ? 'Uploading...' : 'Choose File'}
                       </Button>
                     </div>
-                    <p className="text-xs text-gray-500 mt-1">
-                      Supports JPEG, PNG, GIF, WebP. Max size: 5MB
-                    </p>
                   </div>
                 </div>
-              </div>
-
-              {/* Custom Logo URL - Alternative Option */}
-              <div>
-                <Label htmlFor="logo-url">Or use Custom Logo URL</Label>
-                <Input
-                  id="logo-url"
-                  value={formData.custom_logo_url}
-                  onChange={(e) => handleInputChange('custom_logo_url', e.target.value)}
-                  placeholder="https://example.com/logo.png"
-                />
-                {formData.custom_logo_url && (
-                  <div className="mt-2">
-                    <img 
-                      src={formData.custom_logo_url} 
-                      alt="Logo preview" 
-                      className="max-w-32 max-h-16 object-contain border rounded"
-                      onError={(e) => {
-                        e.currentTarget.style.display = 'none';
-                      }}
-                    />
-                  </div>
-                )}
               </div>
             </CardContent>
           </Card>
