@@ -1,9 +1,7 @@
 import { Shield, Users, Lock, FileText, Bell } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-
 const Landing = () => {
-  return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
+  return <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
       {/* Navigation */}
       <nav className="bg-white shadow-sm border-b">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -27,7 +25,7 @@ const Landing = () => {
       </nav>
 
       {/* Hero Section */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-16 pb-20">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-16 pb-20 py-[135px]">
         <div className="text-center">
           <h1 className="text-4xl md:text-6xl font-bold text-gray-900 mb-6">
             Secure Whistleblowing
@@ -41,9 +39,7 @@ const Landing = () => {
             <a href="https://app.disclosurely.com/auth/signup" className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-3 rounded-lg text-lg font-semibold">
               Start Free Trial
             </a>
-            <a href="https://app.disclosurely.com/secure/tool" className="border border-gray-300 hover:border-gray-400 text-gray-700 px-8 py-3 rounded-lg text-lg font-semibold">
-              Submit Report
-            </a>
+            
           </div>
         </div>
       </div>
@@ -209,8 +205,6 @@ const Landing = () => {
           </div>
         </div>
       </footer>
-    </div>
-  );
+    </div>;
 };
-
 export default Landing;
