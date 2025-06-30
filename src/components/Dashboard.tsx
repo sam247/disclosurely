@@ -29,6 +29,7 @@ interface Report {
   organizations?: {
     name: string;
   };
+  submitted_by_email?: string;
 }
 
 interface SubmissionLink {
@@ -73,10 +74,10 @@ const Dashboard = () => {
         return;
       }
 
-      // Fetch active reports
+      // Fetch active reports - now including submitted_by_email
       const { data: reportsData, error: reportsError } = await supabase
         .from('reports')
-        .select('id, title, tracking_id, status, created_at, encrypted_content, encryption_key_hash, priority, report_type')
+        .select('id, title, tracking_id, status, created_at, encrypted_content, encryption_key_hash, priority, report_type, submitted_by_email')
         .eq('organization_id', profile.organization_id)
         .neq('status', 'closed')
         .order('created_at', { ascending: false })
@@ -86,10 +87,10 @@ const Dashboard = () => {
         console.error('Error fetching reports:', reportsError);
       }
 
-      // Fetch archived reports
+      // Fetch archived reports - now including submitted_by_email
       const { data: archivedData, error: archivedError } = await supabase
         .from('reports')
-        .select('id, title, tracking_id, status, created_at, encrypted_content, encryption_key_hash, priority, report_type')
+        .select('id, title, tracking_id, status, created_at, encrypted_content, encryption_key_hash, priority, report_type, submitted_by_email')
         .eq('organization_id', profile.organization_id)
         .eq('status', 'closed')
         .order('created_at', { ascending: false })
@@ -631,6 +632,7 @@ const Dashboard = () => {
                   reportType={selectedReport.report_type}
                   createdAt={selectedReport.created_at}
                   priority={selectedReport.priority}
+                  submittedByEmail={selectedReport.submitted_by_email}
                 />
               </div>
               <div>
