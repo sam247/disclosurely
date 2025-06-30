@@ -36,7 +36,7 @@ export const uploadReportFile = async (
       .from('report-attachments')
       .getPublicUrl(fileName);
 
-    // Create attachment record in database
+    // Create attachment record in database with simplified approach
     const { error: dbError } = await supabase
       .from('report_attachments')
       .insert({
