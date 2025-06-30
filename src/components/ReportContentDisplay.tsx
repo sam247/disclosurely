@@ -18,6 +18,7 @@ interface ReportContentDisplayProps {
   reportType: string;
   createdAt: string;
   priority: number;
+  submittedByEmail?: string;
 }
 
 const ReportContentDisplay = ({
@@ -27,7 +28,8 @@ const ReportContentDisplay = ({
   trackingId,
   reportType,
   createdAt,
-  priority
+  priority,
+  submittedByEmail
 }: ReportContentDisplayProps) => {
   const { user } = useAuth();
   const { toast } = useToast();
@@ -177,6 +179,12 @@ const ReportContentDisplay = ({
           <FileText className="h-4 w-4 text-gray-400" />
           <span className="text-gray-600">Type: {formatStatus(reportType)}</span>
         </div>
+        {submittedByEmail && (
+          <div className="flex items-center space-x-2 col-span-2">
+            <User className="h-4 w-4 text-gray-400" />
+            <span className="text-gray-600">Submitted by: {submittedByEmail}</span>
+          </div>
+        )}
       </div>
 
       {/* Report Content with Scroll Area */}
