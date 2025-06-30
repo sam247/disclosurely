@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -14,6 +13,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { encryptReport } from "@/utils/encryption";
 import { useNavigate } from "react-router-dom";
 import BrandedFormLayout from "./BrandedFormLayout";
+import FileUpload from "./FileUpload";
+import { uploadReportFile } from "@/utils/fileUpload";
 
 const PREDEFINED_CATEGORIES = [
   "Bribery",
@@ -42,6 +43,7 @@ const SecureReportTool = () => {
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [agreedToTerms, setAgreedToTerms] = useState(false);
+  const [attachedFiles, setAttachedFiles] = useState<File[]>([]);
 
   const handleInputChange = (field: string, value: string | number) => {
     setFormData(prev => ({ ...prev, [field]: value }));
@@ -144,6 +146,23 @@ const SecureReportTool = () => {
       }
 
       console.log("Report created successfully:", report);
+
+      // Upload attached files if any
+      if (attachedFiles.length > 0) {
+        const uploadPromises = attachedFiles.map(file => 
+          uploadReportFile(file, trackingId, report.id)
+        );
+
+        const uploadResults = await Promise.all(uploadPromises);
+        const failedUploads = uploadResults.filter(result => !result.success);
+
+        if (failedUploads.length > 0) {
+          console.error('Some file uploads failed:', failedUploads);
+          toast.error(`Report submitted successfully, but ${failedUploads.length} file(s) failed to upload.`);
+        } else {
+          console.log('All files uploaded successfully');
+        }
+      }
 
       // Navigate to success page with only the tracking ID
       navigate(`/secure/tool/success?trackingId=${encodeURIComponent(trackingId)}`);
@@ -303,6 +322,7 @@ const SecureReportTool = () => {
             />
           </div>
 
+          {/* Location */}
           <div className="space-y-2">
             <Label htmlFor="location">Location</Label>
             <Input
@@ -313,6 +333,7 @@ const SecureReportTool = () => {
             />
           </div>
 
+          {/* People Involved */}
           <div className="space-y-2">
             <Label htmlFor="people_involved">People Involved</Label>
             <Textarea
@@ -324,6 +345,7 @@ const SecureReportTool = () => {
             />
           </div>
 
+          {/* Evidence Description */}
           <div className="space-y-2">
             <Label htmlFor="evidence_description">Evidence Description</Label>
             <Textarea
@@ -335,10 +357,15 @@ const SecureReportTool = () => {
             />
           </div>
 
-          <div className="border-2 border-dashed border-gray-300 rounded-lg p-4 text-center">
-            <Upload className="h-6 w-6 text-gray-400 mx-auto mb-2" />
-            <p className="text-sm text-gray-600">File upload feature coming soon</p>
-            <p className="text-xs text-gray-400">Encrypted file attachments will be supported</p>
+          {/* File Upload Section */}
+          <div className="space-y-2">
+            <Label>Supporting Evidence</Label>
+            <FileUpload
+              onFilesChange={setAttachedFiles}
+              maxFiles={5}
+              maxSize={10}
+              disabled={isSubmitting}
+            />
           </div>
 
           <div className="flex items-start space-x-2">

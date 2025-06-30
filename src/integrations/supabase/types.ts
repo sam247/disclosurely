@@ -392,7 +392,9 @@ export type Database = {
           file_size: number
           filename: string
           id: string
+          original_filename: string | null
           report_id: string
+          uploaded_by_whistleblower: boolean | null
         }
         Insert: {
           content_type: string
@@ -402,7 +404,9 @@ export type Database = {
           file_size: number
           filename: string
           id?: string
+          original_filename?: string | null
           report_id: string
+          uploaded_by_whistleblower?: boolean | null
         }
         Update: {
           content_type?: string
@@ -412,7 +416,9 @@ export type Database = {
           file_size?: number
           filename?: string
           id?: string
+          original_filename?: string | null
           report_id?: string
+          uploaded_by_whistleblower?: boolean | null
         }
         Relationships: [
           {

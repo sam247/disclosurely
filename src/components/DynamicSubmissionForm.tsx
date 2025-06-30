@@ -12,6 +12,8 @@ import { supabase } from '@/integrations/supabase/client';
 import { Shield, AlertTriangle, Search } from 'lucide-react';
 import { encryptReport } from '@/utils/encryption';
 import BrandedFormLayout from './BrandedFormLayout';
+import FileUpload from './FileUpload';
+import { uploadReportFile } from '@/utils/fileUpload';
 
 const PREDEFINED_CATEGORIES = [
   "Bribery",
@@ -43,6 +45,7 @@ const DynamicSubmissionForm = () => {
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [isAnonymous, setIsAnonymous] = useState(true);
+  const [attachedFiles, setAttachedFiles] = useState<File[]>([]);
 
   const [formData, setFormData] = useState({
     title: '',
@@ -228,6 +231,27 @@ const DynamicSubmissionForm = () => {
       }
 
       console.log('Report created successfully:', report);
+
+      // Upload attached files if any
+      if (attachedFiles.length > 0) {
+        const uploadPromises = attachedFiles.map(file => 
+          uploadReportFile(file, trackingId, report.id)
+        );
+
+        const uploadResults = await Promise.all(uploadPromises);
+        const failedUploads = uploadResults.filter(result => !result.success);
+
+        if (failedUploads.length > 0) {
+          console.error('Some file uploads failed:', failedUploads);
+          toast({
+            title: "Report submitted",
+            description: `Report submitted successfully, but ${failedUploads.length} file(s) failed to upload.`,
+            variant: "destructive",
+          });
+        } else {
+          console.log('All files uploaded successfully');
+        }
+      }
 
       // Update link usage count
       const { data: currentLink } = await supabase
@@ -431,6 +455,17 @@ const DynamicSubmissionForm = () => {
                 </SelectContent>
               </Select>
             </div>
+          </div>
+
+          {/* File Upload Section */}
+          <div className="space-y-2">
+            <Label>Supporting Evidence</Label>
+            <FileUpload
+              onFilesChange={setAttachedFiles}
+              maxFiles={5}
+              maxSize={10}
+              disabled={submitting}
+            />
           </div>
 
           {/* Security Notice */}
