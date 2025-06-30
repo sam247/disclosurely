@@ -26,6 +26,7 @@ interface Report {
   encryption_key_hash: string;
   priority: number;
   report_type: string;
+  submitted_by_email?: string | null;
   organizations?: {
     name: string;
   };
@@ -76,7 +77,7 @@ const Dashboard = () => {
       // Fetch active reports
       const { data: reportsData, error: reportsError } = await supabase
         .from('reports')
-        .select('id, title, tracking_id, status, created_at, encrypted_content, encryption_key_hash, priority, report_type')
+        .select('id, title, tracking_id, status, created_at, encrypted_content, encryption_key_hash, priority, report_type, submitted_by_email')
         .eq('organization_id', profile.organization_id)
         .neq('status', 'closed')
         .order('created_at', { ascending: false })
@@ -89,7 +90,7 @@ const Dashboard = () => {
       // Fetch archived reports
       const { data: archivedData, error: archivedError } = await supabase
         .from('reports')
-        .select('id, title, tracking_id, status, created_at, encrypted_content, encryption_key_hash, priority, report_type')
+        .select('id, title, tracking_id, status, created_at, encrypted_content, encryption_key_hash, priority, report_type, submitted_by_email')
         .eq('organization_id', profile.organization_id)
         .eq('status', 'closed')
         .order('created_at', { ascending: false })
@@ -631,6 +632,7 @@ const Dashboard = () => {
                   reportType={selectedReport.report_type}
                   createdAt={selectedReport.created_at}
                   priority={selectedReport.priority}
+                  submittedByEmail={selectedReport.submitted_by_email}
                 />
               </div>
               <div>

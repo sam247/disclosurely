@@ -1,8 +1,9 @@
+
 import { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { Lock, FileText, Calendar, User, AlertCircle, RefreshCw } from 'lucide-react';
+import { Lock, FileText, Calendar, User, AlertCircle, RefreshCw, Mail } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { DecryptedReport } from '@/types/database';
 import { decryptReport } from '@/utils/encryption';
@@ -18,6 +19,7 @@ interface ReportContentDisplayProps {
   reportType: string;
   createdAt: string;
   priority: number;
+  submittedByEmail?: string | null;
 }
 
 const ReportContentDisplay = ({
@@ -27,7 +29,8 @@ const ReportContentDisplay = ({
   trackingId,
   reportType,
   createdAt,
-  priority
+  priority,
+  submittedByEmail
 }: ReportContentDisplayProps) => {
   const { user } = useAuth();
   const { toast } = useToast();
@@ -178,6 +181,19 @@ const ReportContentDisplay = ({
           <span className="text-gray-600">Type: {formatStatus(reportType)}</span>
         </div>
       </div>
+
+      {/* Submitter Email (for confidential reports) */}
+      {submittedByEmail && reportType === 'confidential' && (
+        <Card className="border-blue-200 bg-blue-50">
+          <CardContent className="pt-4">
+            <div className="flex items-center space-x-2">
+              <Mail className="h-4 w-4 text-blue-600" />
+              <span className="font-medium text-blue-900">Submitter Contact:</span>
+              <span className="text-blue-800">{submittedByEmail}</span>
+            </div>
+          </CardContent>
+        </Card>
+      )}
 
       {/* Report Content with Scroll Area */}
       <Card>
