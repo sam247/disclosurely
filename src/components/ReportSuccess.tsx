@@ -12,12 +12,14 @@ interface OrganizationBranding {
   logo_url?: string;
   custom_logo_url?: string;
   brand_color?: string;
+  domain?: string;
 }
 
 const ReportSuccess = () => {
   const [searchParams] = useSearchParams();
   const [trackingId, setTrackingId] = useState<string>('');
   const [organizationBranding, setOrganizationBranding] = useState<OrganizationBranding | null>(null);
+  const [organizationLinkToken, setOrganizationLinkToken] = useState<string>('');
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -41,7 +43,8 @@ const ReportSuccess = () => {
             name,
             logo_url,
             custom_logo_url,
-            brand_color
+            brand_color,
+            domain
           )
         `)
         .eq('tracking_id', trackingId)
@@ -53,12 +56,29 @@ const ReportSuccess = () => {
         return;
       }
 
+      // Get the organization's link token for status checking
+      const { data: linkData, error: linkError } = await supabase
+        .from('organization_links')
+        .select('link_token')
+        .eq('organization_id', report.organization_id)
+        .eq('is_active', true)
+        .single();
+
+      if (linkError) {
+        console.error('Organization link not found:', linkError);
+      }
+
       setOrganizationBranding({
         name: report.organizations.name,
         logo_url: report.organizations.logo_url,
         custom_logo_url: report.organizations.custom_logo_url,
-        brand_color: report.organizations.brand_color
+        brand_color: report.organizations.brand_color,
+        domain: report.organizations.domain
       });
+
+      if (linkData?.link_token) {
+        setOrganizationLinkToken(linkData.link_token);
+      }
     } catch (error) {
       console.error('Error fetching organization branding:', error);
     } finally {
@@ -237,16 +257,29 @@ const ReportSuccess = () => {
 
           {/* Action Buttons */}
           <div className="flex flex-col sm:flex-row gap-4">
-            <Link to="/secure/tool/messages" className="flex-1">
-              <Button 
-                className="w-full hover:opacity-90" 
-                size="lg"
-                style={{ backgroundColor: brandColor }}
-              >
-                <MessageSquare className="h-5 w-5 mr-2" />
-                Check Messages & Status
-              </Button>
-            </Link>
+            {organizationLinkToken ? (
+              <Link to={`/secure/tool/submit/${organizationLinkToken}/status`} className="flex-1">
+                <Button 
+                  className="w-full hover:opacity-90" 
+                  size="lg"
+                  style={{ backgroundColor: brandColor }}
+                >
+                  <MessageSquare className="h-5 w-5 mr-2" />
+                  Check Messages & Status
+                </Button>
+              </Link>
+            ) : (
+              <Link to="/secure/tool/messages" className="flex-1">
+                <Button 
+                  className="w-full hover:opacity-90" 
+                  size="lg"
+                  style={{ backgroundColor: brandColor }}
+                >
+                  <MessageSquare className="h-5 w-5 mr-2" />
+                  Check Messages & Status
+                </Button>
+              </Link>
+            )}
             <Link to="/" className="flex-1">
               <Button variant="outline" className="w-full" size="lg">
                 <Home className="h-5 w-5 mr-2" />
