@@ -46,7 +46,8 @@ export const useGDPRCompliance = () => {
         .order('created_at', { ascending: false });
 
       if (error) throw error;
-      setExportRequests(data || []);
+      // Type assertion to ensure proper typing
+      setExportRequests((data || []) as DataExportRequest[]);
     } catch (error) {
       console.error('Error fetching export requests:', error);
     }
@@ -64,7 +65,8 @@ export const useGDPRCompliance = () => {
         .order('created_at', { ascending: false });
 
       if (error) throw error;
-      setErasureRequests(data || []);
+      // Type assertion to ensure proper typing
+      setErasureRequests((data || []) as DataErasureRequest[]);
     } catch (error) {
       console.error('Error fetching erasure requests:', error);
     }
