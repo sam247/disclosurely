@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -41,10 +40,11 @@ const LoginForm = () => {
       // Sign out immediately after password verification
       await supabase.auth.signOut();
 
-      // Send OTP for second factor
+      // Send OTP for second factor - specify email type for verification code
       const { error: otpError } = await supabase.auth.signInWithOtp({
         email,
         options: {
+          emailRedirectTo: undefined, // Don't send magic link
           shouldCreateUser: false
         }
       });
@@ -58,7 +58,7 @@ const LoginForm = () => {
       } else {
         toast({
           title: "Code Sent",
-          description: "Please check your email for the verification code",
+          description: "Please check your email for the 6-digit verification code",
         });
         setShowOTP(true);
       }
