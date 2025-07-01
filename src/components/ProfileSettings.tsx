@@ -60,6 +60,7 @@ const ProfileSettings = () => {
         .from('profiles')
         .upsert({
           id: user.id,
+          email: user.email, // Include required email field
           first_name: profile.first_name,
           last_name: profile.last_name,
           updated_at: new Date().toISOString(),
