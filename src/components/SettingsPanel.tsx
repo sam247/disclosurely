@@ -47,9 +47,7 @@ const SettingsPanel = ({ isOpen, onClose }: SettingsPanelProps) => {
           </TabsContent>
 
           <TabsContent value="organization">
-            <div className="space-y-6">
-              <OrganizationSettings isOpen={true} onClose={() => {}} />
-            </div>
+            <OrganizationSettings />
           </TabsContent>
 
           <TabsContent value="gdpr">
