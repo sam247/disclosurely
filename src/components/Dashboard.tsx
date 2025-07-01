@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -17,6 +16,7 @@ import ReportAttachments from '@/components/ReportAttachments';
 import SubscriptionManagement from '@/components/SubscriptionManagement';
 import OrganizationSettings from '@/components/OrganizationSettings';
 import ReportsManagement from '@/components/ReportsManagement';
+import SettingsPanel from '@/components/SettingsPanel';
 
 interface Report {
   id: string;
@@ -439,19 +439,10 @@ const Dashboard = () => {
               </div>
             </div>
             <div className="flex items-center space-x-2">
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button variant="outline" size="sm">
-                    <Settings className="h-4 w-4 mr-2" />
-                    Settings
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end">
-                  <DropdownMenuItem onClick={() => setIsSettingsOpen(true)}>
-                    Organization Settings
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
+              <Button variant="outline" size="sm" onClick={() => setIsSettingsOpen(true)}>
+                <Settings className="h-4 w-4 mr-2" />
+                Settings
+              </Button>
               <Button onClick={handleLogout} variant="outline">
                 <LogOut className="h-4 w-4 mr-2" />
                 Sign out
@@ -658,7 +649,7 @@ const Dashboard = () => {
         </DialogContent>
       </Dialog>
 
-      <OrganizationSettings 
+      <SettingsPanel 
         isOpen={isSettingsOpen} 
         onClose={() => setIsSettingsOpen(false)} 
       />
