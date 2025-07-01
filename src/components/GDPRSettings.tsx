@@ -14,6 +14,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { Shield, Download, Trash2, Clock, CheckCircle, XCircle, AlertCircle, UserX } from 'lucide-react';
+import AutomatedGDPRStatus from './AutomatedGDPRStatus';
 
 const GDPRSettings = () => {
   const {
@@ -38,6 +39,10 @@ const GDPRSettings = () => {
     if (!exportEmail) return;
     await createExportRequest(exportEmail, exportType);
     setExportEmail('');
+    toast({
+      title: "Export request created successfully",
+      description: "Your data export will be processed automatically and you'll receive a notification when ready.",
+    });
   };
 
   const handleErasureRequest = async () => {
@@ -45,13 +50,17 @@ const GDPRSettings = () => {
     await createErasureRequest(erasureEmail, erasureType, erasureReason);
     setErasureEmail('');
     setErasureReason('');
+    toast({
+      title: "Erasure request created successfully", 
+      description: "Your data erasure request will be automatically processed after a 24-hour safety period.",
+    });
   };
 
   const handleDeleteAccount = async () => {
     if (!user) return;
 
     try {
-      // First create an erasure request for full data deletion
+      // Create an erasure request for full data deletion
       await createErasureRequest(user.email || '', 'full_erasure', 'Account deletion requested by user');
       
       // Sign out the user
@@ -59,7 +68,7 @@ const GDPRSettings = () => {
       
       toast({
         title: "Account deletion initiated",
-        description: "Your account deletion request has been submitted. You will be contacted via email regarding the process.",
+        description: "Your account deletion request has been submitted and will be processed automatically within 24 hours.",
       });
     } catch (error: any) {
       toast({
@@ -96,15 +105,18 @@ const GDPRSettings = () => {
     <div className="space-y-6">
       <div className="flex items-center space-x-2">
         <Shield className="h-6 w-6 text-blue-600" />
-        <h2 className="text-2xl font-bold">Privacy & GDPR</h2>
+        <h2 className="text-2xl font-bold">Privacy & Data Management</h2>
       </div>
+
+      {/* Automated GDPR Status */}
+      <AutomatedGDPRStatus />
 
       {/* Data Export Section */}
       <Card>
         <CardHeader>
           <CardTitle>Request Data Export</CardTitle>
           <CardDescription>
-            Users can request to export their personal data in compliance with GDPR Article 20.
+            Request to export your personal data. Exports are processed automatically and you'll receive a download link.
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
@@ -144,7 +156,7 @@ const GDPRSettings = () => {
       <Card>
         <CardHeader>
           <CardTitle>Export Requests</CardTitle>
-          <CardDescription>Recent data export requests and their status.</CardDescription>
+          <CardDescription>Recent data export requests and their automated processing status.</CardDescription>
         </CardHeader>
         <CardContent>
           <div className="space-y-3">
@@ -182,7 +194,7 @@ const GDPRSettings = () => {
         <CardHeader>
           <CardTitle>Request Data Erasure</CardTitle>
           <CardDescription>
-            Users can request deletion of their personal data under GDPR Article 17 (Right to be Forgotten).
+            Request deletion of your personal data. Requests are automatically approved after 24 hours for safety.
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
@@ -231,7 +243,7 @@ const GDPRSettings = () => {
       <Card>
         <CardHeader>
           <CardTitle>Erasure Requests</CardTitle>
-          <CardDescription>Manage data erasure requests requiring review.</CardDescription>
+          <CardDescription>Data erasure requests with automated 24-hour approval process.</CardDescription>
         </CardHeader>
         <CardContent>
           <div className="space-y-3">
@@ -250,24 +262,6 @@ const GDPRSettings = () => {
                         {request.erasure_type.replace('_', ' ')} • {new Date(request.created_at).toLocaleDateString()}
                       </p>
                     </div>
-                    {request.status === 'pending' && (
-                      <div className="flex space-x-2">
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => reviewErasureRequest(request.id, 'approved')}
-                        >
-                          Approve
-                        </Button>
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => reviewErasureRequest(request.id, 'rejected')}
-                        >
-                          Reject
-                        </Button>
-                      </div>
-                    )}
                   </div>
                   {request.reason && (
                     <>
@@ -299,7 +293,7 @@ const GDPRSettings = () => {
         <CardHeader>
           <CardTitle className="text-red-600">Delete Account</CardTitle>
           <CardDescription>
-            Permanently delete your account and all associated data. This action cannot be undone.
+            Permanently delete your account and all associated data. This process is automated and irreversible.
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -314,14 +308,14 @@ const GDPRSettings = () => {
               <AlertDialogHeader>
                 <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
                 <AlertDialogDescription>
-                  This action will permanently delete your account and all associated data including:
+                  This action will automatically delete your account and all associated data within 24 hours including:
                   <ul className="list-disc list-inside mt-2 space-y-1">
                     <li>Your profile information</li>
                     <li>All reports and messages</li>
                     <li>File attachments</li>
                     <li>Account history</li>
                   </ul>
-                  This action cannot be undone. You will receive an email confirmation once the deletion is complete.
+                  This process is fully automated and cannot be undone. You will be signed out immediately.
                 </AlertDialogDescription>
               </AlertDialogHeader>
               <AlertDialogFooter>
