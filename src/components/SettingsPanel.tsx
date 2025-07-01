@@ -1,6 +1,7 @@
 
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { ScrollArea } from '@/components/ui/scroll-area';
 import { User, Building2, Shield, FileText } from 'lucide-react';
 import ProfileSettings from './ProfileSettings';
 import OrganizationSettings from './OrganizationSettings';
@@ -14,16 +15,16 @@ interface SettingsPanelProps {
 const SettingsPanel = ({ isOpen, onClose }: SettingsPanelProps) => {
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
-        <DialogHeader>
+      <DialogContent className="max-w-4xl h-[80vh] flex flex-col">
+        <DialogHeader className="flex-shrink-0">
           <DialogTitle>Settings</DialogTitle>
           <DialogDescription>
             Manage your profile, organization, and compliance settings
           </DialogDescription>
         </DialogHeader>
         
-        <Tabs defaultValue="profile" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-4">
+        <Tabs defaultValue="profile" className="flex-1 flex flex-col min-h-0">
+          <TabsList className="grid w-full grid-cols-4 flex-shrink-0">
             <TabsTrigger value="profile" className="flex items-center gap-2">
               <User className="h-4 w-4" />
               Profile
@@ -42,29 +43,31 @@ const SettingsPanel = ({ isOpen, onClose }: SettingsPanelProps) => {
             </TabsTrigger>
           </TabsList>
 
-          <TabsContent value="profile">
-            <ProfileSettings />
-          </TabsContent>
+          <ScrollArea className="flex-1 mt-6">
+            <TabsContent value="profile" className="mt-0">
+              <ProfileSettings />
+            </TabsContent>
 
-          <TabsContent value="organization">
-            <OrganizationSettings />
-          </TabsContent>
+            <TabsContent value="organization" className="mt-0">
+              <OrganizationSettings />
+            </TabsContent>
 
-          <TabsContent value="gdpr">
-            <GDPRSettings />
-          </TabsContent>
+            <TabsContent value="gdpr" className="mt-0">
+              <GDPRSettings />
+            </TabsContent>
 
-          <TabsContent value="compliance">
-            <div className="space-y-6">
-              <div className="text-center py-8">
-                <FileText className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                <h3 className="text-lg font-semibold mb-2">Compliance Tools</h3>
-                <p className="text-gray-600">
-                  Additional compliance features and reporting tools will be available here.
-                </p>
+            <TabsContent value="compliance" className="mt-0">
+              <div className="space-y-6">
+                <div className="text-center py-8">
+                  <FileText className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+                  <h3 className="text-lg font-semibold mb-2">Compliance Tools</h3>
+                  <p className="text-gray-600">
+                    Additional compliance features and reporting tools will be available here.
+                  </p>
+                </div>
               </div>
-            </div>
-          </TabsContent>
+            </TabsContent>
+          </ScrollArea>
         </Tabs>
       </DialogContent>
     </Dialog>
