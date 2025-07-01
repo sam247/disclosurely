@@ -19,6 +19,7 @@ const MFASetup = () => {
   const [verificationCode, setVerificationCode] = useState('');
   const [isEnabling, setIsEnabling] = useState(false);
   const [isVerifying, setIsVerifying] = useState(false);
+  const [factorId, setFactorId] = useState('');
 
   useEffect(() => {
     checkMFAStatus();
@@ -28,7 +29,7 @@ const MFASetup = () => {
     if (!user) return;
 
     try {
-      const { data, error } = supabase.auth.mfa.listFactors();
+      const { data, error } = await supabase.auth.mfa.listFactors();
       if (error) throw error;
 
       const hasActiveFactor = data?.totp?.some(factor => factor.status === 'verified');
@@ -50,8 +51,11 @@ const MFASetup = () => {
 
       if (error) throw error;
 
-      setQrCode(data.qr_code);
-      setSecret(data.secret);
+      // Access the QR code and secret from the totp property
+      setQrCode(data.totp.qr_code);
+      setSecret(data.totp.secret);
+      setFactorId(data.id);
+      
       toast({
         title: "MFA Setup Started",
         description: "Scan the QR code with your authenticator app",
@@ -69,28 +73,29 @@ const MFASetup = () => {
   };
 
   const verifyAndEnableMFA = async () => {
-    if (!user || !verificationCode) return;
+    if (!user || !verificationCode || !factorId) return;
 
     setIsVerifying(true);
     try {
-      const factors = await supabase.auth.mfa.listFactors();
-      if (factors.error) throw factors.error;
+      const { data: challengeData, error: challengeError } = await supabase.auth.mfa.challenge({
+        factorId: factorId
+      });
 
-      const factor = factors.data?.totp?.[0];
-      if (!factor) throw new Error('No TOTP factor found');
+      if (challengeError) throw challengeError;
 
-      const { error } = await supabase.auth.mfa.verify({
-        factorId: factor.id,
-        challengeId: factor.id,
+      const { error: verifyError } = await supabase.auth.mfa.verify({
+        factorId: factorId,
+        challengeId: challengeData.id,
         code: verificationCode
       });
 
-      if (error) throw error;
+      if (verifyError) throw verifyError;
 
       setMfaEnabled(true);
       setQrCode('');
       setSecret('');
       setVerificationCode('');
+      setFactorId('');
       
       toast({
         title: "MFA Enabled",
@@ -112,10 +117,10 @@ const MFASetup = () => {
     if (!user) return;
 
     try {
-      const factors = await supabase.auth.mfa.listFactors();
-      if (factors.error) throw factors.error;
+      const { data, error: listError } = await supabase.auth.mfa.listFactors();
+      if (listError) throw listError;
 
-      const factor = factors.data?.totp?.[0];
+      const factor = data?.totp?.[0];
       if (!factor) return;
 
       const { error } = await supabase.auth.mfa.unenroll({
