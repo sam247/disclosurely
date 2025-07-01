@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -40,12 +41,16 @@ const LoginForm = () => {
       // Sign out immediately after password verification
       await supabase.auth.signOut();
 
-      // Send OTP for second factor - specify email type for verification code
+      // Send OTP for second factor - use the correct method for verification code only
       const { error: otpError } = await supabase.auth.signInWithOtp({
         email,
         options: {
-          emailRedirectTo: undefined, // Don't send magic link
-          shouldCreateUser: false
+          emailRedirectTo: undefined, // Prevent magic link
+          shouldCreateUser: false,
+          data: {
+            // This helps ensure it's treated as a verification code
+            verification: true
+          }
         }
       });
 
