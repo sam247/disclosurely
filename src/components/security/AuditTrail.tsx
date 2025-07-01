@@ -16,7 +16,7 @@ interface AuditEvent {
   event_type: string;
   user_id?: string;
   user_email?: string;
-  ip_address?: string;
+  ip_address?: unknown; // Changed from string to unknown to match database type
   user_agent?: string;
   resource_type?: string;
   resource_id?: string;
@@ -81,7 +81,7 @@ const AuditTrail = () => {
         throw error;
       }
       
-      // Ensure data matches our interface
+      // Convert the database results to our interface format
       const typedData: AuditEvent[] = (data || []).map(item => ({
         id: item.id,
         event_type: item.event_type,
@@ -124,7 +124,7 @@ const AuditTrail = () => {
           event.action,
           event.result,
           event.risk_level,
-          event.ip_address || 'N/A',
+          event.ip_address ? String(event.ip_address) : 'N/A', // Convert to string safely
           JSON.stringify(event.details).replace(/,/g, ';')
         ].join(','))
       ].join('\n');
@@ -280,7 +280,7 @@ const AuditTrail = () => {
                       
                       <div className="text-sm text-gray-600 space-y-1">
                         <div>User: {event.user_email || 'System'}</div>
-                        {event.ip_address && <div>IP: {event.ip_address}</div>}
+                        {event.ip_address && <div>IP: {String(event.ip_address)}</div>}
                         {event.resource_type && (
                           <div>Resource: {event.resource_type} {event.resource_id && `(${event.resource_id})`}</div>
                         )}
