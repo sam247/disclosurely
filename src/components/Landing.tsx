@@ -1,5 +1,4 @@
-
-import { Shield, Users, Lock, FileText, Bell, Star, Check, DollarSign, Globe, Eye, Award } from 'lucide-react';
+import { Shield, Users, Lock, FileText, Bell, Star, Check, DollarSign, Globe, Eye, Award, Building2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 

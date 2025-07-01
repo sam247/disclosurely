@@ -34,35 +34,21 @@ const CookieConsentBanner = () => {
   }, [user]);
 
   const checkConsentStatus = async () => {
-    // Check localStorage first for non-authenticated users
+    // Check localStorage first for immediate response
     const localConsent = localStorage.getItem('cookie-consent');
     if (localConsent) {
-      const consent = JSON.parse(localConsent);
-      if (consent.timestamp && Date.now() - consent.timestamp < 365 * 24 * 60 * 60 * 1000) {
-        setPreferences(consent.preferences);
-        return;
-      }
-    }
-
-    // For authenticated users, check database
-    if (user) {
       try {
-        const { data } = await supabase
-          .from('user_preferences')
-          .select('cookie_preferences')
-          .eq('user_id', user.id)
-          .single();
-
-        if (data?.cookie_preferences) {
-          setPreferences(data.cookie_preferences);
+        const consent = JSON.parse(localConsent);
+        if (consent.timestamp && Date.now() - consent.timestamp < 365 * 24 * 60 * 60 * 1000) {
+          setPreferences(consent.preferences);
           return;
         }
       } catch (error) {
-        console.log('No existing cookie preferences found');
+        console.error('Error parsing local consent:', error);
       }
     }
 
-    // Show banner if no consent found
+    // Show banner if no valid consent found
     setShowBanner(true);
   };
 
@@ -74,21 +60,6 @@ const CookieConsentBanner = () => {
         preferences: newPreferences,
         timestamp: Date.now()
       }));
-
-      // Save to database if user is authenticated
-      if (user) {
-        const { error } = await supabase
-          .from('user_preferences')
-          .upsert({
-            user_id: user.id,
-            cookie_preferences: newPreferences,
-            updated_at: new Date().toISOString()
-          });
-
-        if (error && error.code !== '23505') { // Ignore unique constraint errors
-          console.error('Error saving cookie preferences:', error);
-        }
-      }
 
       setPreferences(newPreferences);
       setShowBanner(false);
