@@ -47,8 +47,9 @@ const AuditTrail = () => {
 
     setLoading(true);
     try {
+      // Use direct query since TypeScript types haven't updated yet
       let query = supabase
-        .from('audit_logs')
+        .from('audit_logs' as any)
         .select('*')
         .order('created_at', { ascending: false })
         .limit(100);
@@ -72,7 +73,16 @@ const AuditTrail = () => {
 
       const { data, error } = await query;
 
-      if (error) throw error;
+      if (error) {
+        console.error('Error fetching audit events:', error);
+        // If table doesn't exist yet, show empty state
+        if (error.code === 'PGRST116' || error.message?.includes('does not exist')) {
+          setAuditEvents([]);
+          return;
+        }
+        throw error;
+      }
+      
       setAuditEvents(data || []);
     } catch (error: any) {
       console.error('Error fetching audit events:', error);
@@ -234,6 +244,7 @@ const AuditTrail = () => {
             <div className="text-center p-8 text-gray-500">
               <Activity className="h-12 w-12 mx-auto mb-4 opacity-50" />
               <p>No audit events found</p>
+              <p className="text-sm">Security events will appear here once they start being logged</p>
             </div>
           ) : (
             <div className="space-y-2">
