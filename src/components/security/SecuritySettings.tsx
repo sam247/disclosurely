@@ -1,10 +1,13 @@
 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Shield, Key, Clock, UserX } from 'lucide-react';
+import { Shield, Key, Clock, UserX, Activity, Eye, Lock } from 'lucide-react';
 import MFASetup from './MFASetup';
 import PasswordSecurity from './PasswordSecurity';
 import SessionManagement from './SessionManagement';
 import AccountLockout from './AccountLockout';
+import SecurityMonitoring from './SecurityMonitoring';
+import AuditTrail from './AuditTrail';
+import SecurityHeaders from './SecurityHeaders';
 
 const SecuritySettings = () => {
   return (
@@ -12,12 +15,24 @@ const SecuritySettings = () => {
       <div>
         <h2 className="text-2xl font-bold mb-2">Security Settings</h2>
         <p className="text-gray-600">
-          Manage your account security and authentication settings
+          Comprehensive security management and monitoring for your organization
         </p>
       </div>
 
-      <Tabs defaultValue="mfa" className="space-y-6">
-        <TabsList className="grid w-full grid-cols-4">
+      <Tabs defaultValue="monitoring" className="space-y-6">
+        <TabsList className="grid w-full grid-cols-7">
+          <TabsTrigger value="monitoring" className="flex items-center gap-2">
+            <Activity className="h-4 w-4" />
+            Monitor
+          </TabsTrigger>
+          <TabsTrigger value="audit" className="flex items-center gap-2">
+            <Eye className="h-4 w-4" />
+            Audit
+          </TabsTrigger>
+          <TabsTrigger value="headers" className="flex items-center gap-2">
+            <Lock className="h-4 w-4" />
+            Headers
+          </TabsTrigger>
           <TabsTrigger value="mfa" className="flex items-center gap-2">
             <Shield className="h-4 w-4" />
             MFA
@@ -35,6 +50,18 @@ const SecuritySettings = () => {
             Lockout
           </TabsTrigger>
         </TabsList>
+
+        <TabsContent value="monitoring">
+          <SecurityMonitoring />
+        </TabsContent>
+
+        <TabsContent value="audit">
+          <AuditTrail />
+        </TabsContent>
+
+        <TabsContent value="headers">
+          <SecurityHeaders />
+        </TabsContent>
 
         <TabsContent value="mfa">
           <MFASetup />
