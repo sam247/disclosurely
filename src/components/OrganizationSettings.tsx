@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -9,17 +8,43 @@ import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { useOrganization } from '@/hooks/useOrganization';
 import { Upload, X, Info } from 'lucide-react';
+import CustomDomainSettings from './CustomDomainSettings';
 
 const OrganizationSettings = () => {
   const { organization, refetch } = useOrganization();
   const { toast } = useToast();
   const [loading, setLoading] = useState(false);
   const [uploadingLogo, setUploadingLogo] = useState(false);
+  const [subscriptionData, setSubscriptionData] = useState<any>({ subscribed: false });
   const [formData, setFormData] = useState({
     name: organization?.name || '',
     description: organization?.description || '',
     brand_color: organization?.brand_color || '#2563eb',
   });
+
+  // Check subscription status when component mounts
+  React.useEffect(() => {
+    checkSubscription();
+  }, []);
+
+  const checkSubscription = async () => {
+    try {
+      const { data, error } = await supabase.functions.invoke('check-subscription', {
+        headers: {
+          Authorization: `Bearer ${(await supabase.auth.getSession()).data.session?.access_token}`,
+        },
+      });
+
+      if (error) throw error;
+      setSubscriptionData(data);
+    } catch (error: any) {
+      console.error('Error checking subscription:', error);
+    }
+  };
+
+  // Check if user has active Tier 2 subscription
+  const hasActiveTier2Subscription = subscriptionData.subscribed && 
+    subscriptionData.subscription_tier === 'tier2';
 
   const handleSave = async () => {
     if (!organization) return;
@@ -292,6 +317,9 @@ const OrganizationSettings = () => {
           </div>
         </CardContent>
       </Card>
+
+      {/* Custom Domain Settings */}
+      <CustomDomainSettings hasActiveTier2Subscription={hasActiveTier2Subscription} />
 
       {/* Save Button */}
       <div className="flex justify-end">
