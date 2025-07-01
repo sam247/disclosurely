@@ -6,6 +6,7 @@ import { User, Building2, Shield, FileText } from 'lucide-react';
 import ProfileSettings from './ProfileSettings';
 import OrganizationSettings from './OrganizationSettings';
 import GDPRSettings from './GDPRSettings';
+import SecuritySettings from './security/SecuritySettings';
 
 interface SettingsPanelProps {
   isOpen: boolean;
@@ -19,12 +20,12 @@ const SettingsPanel = ({ isOpen, onClose }: SettingsPanelProps) => {
         <DialogHeader className="flex-shrink-0">
           <DialogTitle>Settings</DialogTitle>
           <DialogDescription>
-            Manage your profile, organization, and compliance settings
+            Manage your profile, organization, security and compliance settings
           </DialogDescription>
         </DialogHeader>
         
         <Tabs defaultValue="profile" className="flex-1 flex flex-col min-h-0">
-          <TabsList className="grid w-full grid-cols-4 flex-shrink-0">
+          <TabsList className="grid w-full grid-cols-5 flex-shrink-0">
             <TabsTrigger value="profile" className="flex items-center gap-2">
               <User className="h-4 w-4" />
               Profile
@@ -32,6 +33,10 @@ const SettingsPanel = ({ isOpen, onClose }: SettingsPanelProps) => {
             <TabsTrigger value="organization" className="flex items-center gap-2">
               <Building2 className="h-4 w-4" />
               Organization
+            </TabsTrigger>
+            <TabsTrigger value="security" className="flex items-center gap-2">
+              <Shield className="h-4 w-4" />
+              Security
             </TabsTrigger>
             <TabsTrigger value="gdpr" className="flex items-center gap-2">
               <Shield className="h-4 w-4" />
@@ -43,13 +48,17 @@ const SettingsPanel = ({ isOpen, onClose }: SettingsPanelProps) => {
             </TabsTrigger>
           </TabsList>
 
-          <ScrollArea className="flex-1 mt-6">
+          <ScrollArea className="flex-1 mt-6" style={{ height: 'calc(80vh - 140px)' }}>
             <TabsContent value="profile" className="mt-0">
               <ProfileSettings />
             </TabsContent>
 
             <TabsContent value="organization" className="mt-0">
               <OrganizationSettings />
+            </TabsContent>
+
+            <TabsContent value="security" className="mt-0">
+              <SecuritySettings />
             </TabsContent>
 
             <TabsContent value="gdpr" className="mt-0">
