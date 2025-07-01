@@ -1,150 +1,119 @@
 
 import { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Progress } from '@/components/ui/progress';
 import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { ScrollArea } from '@/components/ui/scroll-area';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
-import { 
-  AlertTriangle, 
-  Shield, 
-  Activity, 
-  Eye, 
-  Lock, 
-  TrendingUp,
-  Users,
-  Clock,
-  Globe
-} from 'lucide-react';
-
-interface SecurityMetrics {
-  totalEvents: number;
-  criticalEvents: number;
-  failedLogins: number;
-  activeUsers: number;
-  suspiciousActivities: number;
-  riskScore: number;
-}
+import { Shield, AlertTriangle, CheckCircle, XCircle, Clock, Users, Database, Activity } from 'lucide-react';
+import { format } from 'date-fns';
 
 interface SecurityAlert {
   id: string;
   type: string;
   severity: 'low' | 'medium' | 'high' | 'critical';
   message: string;
-  created_at: string;
+  details: any;
   resolved: boolean;
+  resolved_at?: string;
+  resolved_by?: string;
+  created_at: string;
+}
+
+interface SecurityMetrics {
+  totalEvents: number;
+  failedLogins: number;
+  suspiciousActivity: number;
+  activeAlerts: number;
 }
 
 const SecurityMonitoring = () => {
   const { user } = useAuth();
   const { toast } = useToast();
+  const [alerts, setAlerts] = useState<SecurityAlert[]>([]);
   const [metrics, setMetrics] = useState<SecurityMetrics>({
     totalEvents: 0,
-    criticalEvents: 0,
     failedLogins: 0,
-    activeUsers: 0,
-    suspiciousActivities: 0,
-    riskScore: 0
+    suspiciousActivity: 0,
+    activeAlerts: 0
   });
-  const [alerts, setAlerts] = useState<SecurityAlert[]>([]);
   const [loading, setLoading] = useState(true);
-  const [realTimeEnabled, setRealTimeEnabled] = useState(false);
 
   useEffect(() => {
-    fetchSecurityMetrics();
-    fetchSecurityAlerts();
-    
-    // Set up real-time monitoring
-    const interval = setInterval(() => {
-      if (realTimeEnabled) {
-        fetchSecurityMetrics();
-        fetchSecurityAlerts();
-      }
-    }, 30000); // Refresh every 30 seconds
+    fetchSecurityData();
+  }, []);
 
-    return () => clearInterval(interval);
-  }, [realTimeEnabled]);
-
-  const fetchSecurityMetrics = async () => {
+  const fetchSecurityData = async () => {
     if (!user) return;
 
+    setLoading(true);
     try {
-      // Get metrics from the last 24 hours
-      const yesterday = new Date();
-      yesterday.setDate(yesterday.getDate() - 1);
-
-      const { data: auditLogs, error } = await supabase
-        .from('audit_logs' as any)
+      // Fetch security alerts
+      const { data: alertsData, error: alertsError } = await supabase
+        .from('security_alerts')
         .select('*')
-        .gte('created_at', yesterday.toISOString());
-
-      if (error && error.code !== 'PGRST116') {
-        throw error;
-      }
-
-      const totalEvents = auditLogs?.length || 0;
-      const criticalEvents = auditLogs?.filter((log: any) => log.risk_level === 'critical').length || 0;
-      const failedLogins = auditLogs?.filter((log: any) => 
-        log.event_type === 'authentication' && log.result === 'failure'
-      ).length || 0;
-      
-      // Calculate suspicious activities (multiple failed logins, unusual IP patterns, etc.)
-      const suspiciousActivities = auditLogs?.filter((log: any) => 
-        log.risk_level === 'high' || log.risk_level === 'critical'
-      ).length || 0;
-
-      // Calculate risk score (0-100)
-      const riskScore = Math.min(100, (criticalEvents * 10) + (suspiciousActivities * 5) + failedLogins);
-
-      // Get active users count
-      const { data: profiles } = await supabase
-        .from('profiles')
-        .select('id')
-        .eq('is_active', true);
-
-      setMetrics({
-        totalEvents,
-        criticalEvents,
-        failedLogins,
-        activeUsers: profiles?.length || 0,
-        suspiciousActivities,
-        riskScore
-      });
-    } catch (error: any) {
-      console.error('Error fetching security metrics:', error);
-      // Set default values if there's an error
-      setMetrics({
-        totalEvents: 0,
-        criticalEvents: 0,
-        failedLogins: 0,
-        activeUsers: 0,
-        suspiciousActivities: 0,
-        riskScore: 0
-      });
-    }
-  };
-
-  const fetchSecurityAlerts = async () => {
-    if (!user) return;
-
-    try {
-      const { data, error } = await supabase
-        .from('security_alerts' as any)
-        .select('*')
-        .eq('resolved', false)
         .order('created_at', { ascending: false })
-        .limit(10);
+        .limit(50);
 
-      if (error && error.code !== 'PGRST116') {
-        throw error;
+      if (alertsError) {
+        console.error('Error fetching security alerts:', alertsError);
+        // If table doesn't exist yet, show empty state
+        if (alertsError.code === 'PGRST116' || alertsError.message?.includes('does not exist')) {
+          setAlerts([]);
+        } else {
+          throw alertsError;
+        }
+      } else {
+        // Ensure data matches our interface
+        const typedAlerts: SecurityAlert[] = (alertsData || []).map(item => ({
+          id: item.id,
+          type: item.type,
+          severity: item.severity as 'low' | 'medium' | 'high' | 'critical',
+          message: item.message,
+          details: item.details,
+          resolved: item.resolved,
+          resolved_at: item.resolved_at,
+          resolved_by: item.resolved_by,
+          created_at: item.created_at,
+        }));
+        setAlerts(typedAlerts);
       }
 
-      setAlerts(data || []);
+      // Fetch audit logs for metrics
+      const { data: auditData, error: auditError } = await supabase
+        .from('audit_logs')
+        .select('event_type, result, risk_level')
+        .gte('created_at', new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString());
+
+      if (auditError) {
+        console.error('Error fetching audit data:', auditError);
+        // Continue with empty metrics if audit_logs doesn't exist
+      } else if (auditData) {
+        const totalEvents = auditData.length;
+        const failedLogins = auditData.filter(event => 
+          event.event_type === 'authentication' && event.result === 'failure'
+        ).length;
+        const suspiciousActivity = auditData.filter(event => 
+          event.risk_level === 'high' || event.risk_level === 'critical'
+        ).length;
+        const activeAlerts = (alertsData || []).filter(alert => !alert.resolved).length;
+
+        setMetrics({
+          totalEvents,
+          failedLogins,
+          suspiciousActivity,
+          activeAlerts
+        });
+      }
     } catch (error: any) {
-      console.error('Error fetching security alerts:', error);
-      setAlerts([]);
+      console.error('Error fetching security data:', error);
+      toast({
+        title: "Error",
+        description: "Failed to fetch security monitoring data",
+        variant: "destructive",
+      });
     } finally {
       setLoading(false);
     }
@@ -153,222 +122,182 @@ const SecurityMonitoring = () => {
   const resolveAlert = async (alertId: string) => {
     try {
       const { error } = await supabase
-        .from('security_alerts' as any)
-        .update({ resolved: true, resolved_at: new Date().toISOString() })
+        .from('security_alerts')
+        .update({
+          resolved: true,
+          resolved_at: new Date().toISOString(),
+          resolved_by: user?.id,
+        })
         .eq('id', alertId);
 
       if (error) throw error;
 
-      setAlerts(alerts.filter(alert => alert.id !== alertId));
-      
       toast({
         title: "Alert Resolved",
         description: "Security alert has been marked as resolved",
       });
+
+      // Refresh data
+      fetchSecurityData();
     } catch (error: any) {
-      console.error('Error resolving alert:', error);
       toast({
         title: "Error",
-        description: "Failed to resolve security alert",
+        description: "Failed to resolve alert",
         variant: "destructive",
       });
     }
   };
 
-  const getRiskLevel = (score: number) => {
-    if (score >= 80) return { level: 'Critical', color: 'text-red-600 bg-red-50' };
-    if (score >= 60) return { level: 'High', color: 'text-orange-600 bg-orange-50' };
-    if (score >= 40) return { level: 'Medium', color: 'text-yellow-600 bg-yellow-50' };
-    return { level: 'Low', color: 'text-green-600 bg-green-50' };
-  };
-
-  const getAlertColor = (severity: string) => {
+  const getSeverityBadgeColor = (severity: string) => {
     switch (severity) {
-      case 'critical': return 'bg-red-100 border-red-300 text-red-800';
-      case 'high': return 'bg-orange-100 border-orange-300 text-orange-800';
-      case 'medium': return 'bg-yellow-100 border-yellow-300 text-yellow-800';
-      case 'low': return 'bg-blue-100 border-blue-300 text-blue-800';
-      default: return 'bg-gray-100 border-gray-300 text-gray-800';
+      case 'critical': return 'bg-red-600 text-white';
+      case 'high': return 'bg-orange-600 text-white';
+      case 'medium': return 'bg-yellow-600 text-white';
+      case 'low': return 'bg-green-600 text-white';
+      default: return 'bg-gray-600 text-white';
     }
   };
 
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center p-8">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-      </div>
-    );
-  }
-
-  const riskData = getRiskLevel(metrics.riskScore);
+  const getSeverityIcon = (severity: string) => {
+    switch (severity) {
+      case 'critical': return <XCircle className="h-4 w-4 text-red-600" />;
+      case 'high': return <AlertTriangle className="h-4 w-4 text-orange-600" />;
+      case 'medium': return <Clock className="h-4 w-4 text-yellow-600" />;
+      case 'low': return <CheckCircle className="h-4 w-4 text-green-600" />;
+      default: return <AlertTriangle className="h-4 w-4 text-gray-600" />;
+    }
+  };
 
   return (
     <div className="space-y-6">
-      {/* Security Overview */}
-      <Card>
-        <CardHeader>
-          <div className="flex items-center justify-between">
-            <div>
-              <CardTitle className="flex items-center gap-2">
-                <Shield className="h-5 w-5" />
-                Security Overview
-              </CardTitle>
-              <CardDescription>
-                Real-time security monitoring and threat detection
-              </CardDescription>
-            </div>
-            <Button 
-              variant={realTimeEnabled ? "default" : "outline"}
-              onClick={() => setRealTimeEnabled(!realTimeEnabled)}
-            >
-              <Activity className="h-4 w-4 mr-2" />
-              {realTimeEnabled ? 'Live' : 'Enable Live'}
-            </Button>
-          </div>
-        </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-            <div className="text-center">
-              <div className="text-2xl font-bold text-blue-600">{metrics.totalEvents}</div>
-              <div className="text-sm text-gray-600 flex items-center justify-center gap-1">
-                <Activity className="h-3 w-3" />
-                Total Events (24h)
-              </div>
-            </div>
-            <div className="text-center">
-              <div className="text-2xl font-bold text-red-600">{metrics.criticalEvents}</div>
-              <div className="text-sm text-gray-600 flex items-center justify-center gap-1">
-                <AlertTriangle className="h-3 w-3" />
-                Critical Events
-              </div>
-            </div>
-            <div className="text-center">
-              <div className="text-2xl font-bold text-orange-600">{metrics.failedLogins}</div>
-              <div className="text-sm text-gray-600 flex items-center justify-center gap-1">
-                <Lock className="h-3 w-3" />
-                Failed Logins
-              </div>
-            </div>
-            <div className="text-center">
-              <div className="text-2xl font-bold text-green-600">{metrics.activeUsers}</div>
-              <div className="text-sm text-gray-600 flex items-center justify-center gap-1">
-                <Users className="h-3 w-3" />
-                Active Users
-              </div>
-            </div>
-          </div>
-
-          {/* Risk Score */}
-          <div className="space-y-2">
-            <div className="flex items-center justify-between">
-              <span className="text-sm font-medium">Organization Risk Score</span>
-              <Badge className={riskData.color}>
-                {riskData.level}
-              </Badge>
-            </div>
-            <Progress value={metrics.riskScore} className="h-3" />
-            <div className="text-xs text-gray-500">
-              Score: {metrics.riskScore}/100 - Based on recent security events and anomalies
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Security Alerts */}
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
-            <AlertTriangle className="h-5 w-5" />
-            Active Security Alerts
+            <Shield className="h-5 w-5" />
+            Security Overview
           </CardTitle>
           <CardDescription>
-            Unresolved security incidents requiring attention
+            Real-time security monitoring and threat detection
           </CardDescription>
         </CardHeader>
         <CardContent>
-          {alerts.length === 0 ? (
-            <div className="text-center py-8 text-gray-500">
-              <Shield className="h-12 w-12 mx-auto mb-4 opacity-50" />
-              <p>No active security alerts</p>
-              <p className="text-sm">Your system is currently secure</p>
-            </div>
-          ) : (
-            <div className="space-y-3">
-              {alerts.map((alert) => (
-                <div 
-                  key={alert.id} 
-                  className={`p-4 rounded-lg border ${getAlertColor(alert.severity)}`}
-                >
-                  <div className="flex items-start justify-between">
-                    <div className="flex-1">
-                      <div className="flex items-center gap-2 mb-1">
-                        <Badge variant="outline" className="text-xs">
-                          {alert.type}
-                        </Badge>
-                        <Badge className={`text-xs ${
-                          alert.severity === 'critical' ? 'bg-red-600' :
-                          alert.severity === 'high' ? 'bg-orange-600' :
-                          alert.severity === 'medium' ? 'bg-yellow-600' : 'bg-blue-600'
-                        } text-white`}>
-                          {alert.severity.toUpperCase()}
-                        </Badge>
-                      </div>
-                      <p className="text-sm font-medium mb-1">{alert.message}</p>
-                      <div className="flex items-center gap-1 text-xs opacity-75">
-                        <Clock className="h-3 w-3" />
-                        {new Date(alert.created_at).toLocaleString()}
-                      </div>
-                    </div>
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      onClick={() => resolveAlert(alert.id)}
-                    >
-                      Resolve
-                    </Button>
-                  </div>
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+            <div className="bg-blue-50 p-4 rounded-lg">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium text-blue-600">Total Events (24h)</p>
+                  <p className="text-2xl font-bold text-blue-900">{metrics.totalEvents}</p>
                 </div>
-              ))}
+                <Activity className="h-8 w-8 text-blue-600" />
+              </div>
             </div>
-          )}
+            
+            <div className="bg-red-50 p-4 rounded-lg">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium text-red-600">Failed Logins</p>
+                  <p className="text-2xl font-bold text-red-900">{metrics.failedLogins}</p>
+                </div>
+                <XCircle className="h-8 w-8 text-red-600" />
+              </div>
+            </div>
+            
+            <div className="bg-orange-50 p-4 rounded-lg">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium text-orange-600">Suspicious Activity</p>
+                  <p className="text-2xl font-bold text-orange-900">{metrics.suspiciousActivity}</p>
+                </div>
+                <AlertTriangle className="h-8 w-8 text-orange-600" />
+              </div>
+            </div>
+            
+            <div className="bg-yellow-50 p-4 rounded-lg">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium text-yellow-600">Active Alerts</p>
+                  <p className="text-2xl font-bold text-yellow-900">{metrics.activeAlerts}</p>
+                </div>
+                <Shield className="h-8 w-8 text-yellow-600" />
+              </div>
+            </div>
+          </div>
         </CardContent>
       </Card>
 
-      {/* Quick Actions */}
       <Card>
         <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <TrendingUp className="h-5 w-5" />
-            Security Actions
-          </CardTitle>
+          <CardTitle>Security Alerts</CardTitle>
           <CardDescription>
-            Quick security management actions
+            Active security incidents requiring attention
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <Button variant="outline" className="h-auto p-4 flex flex-col items-center gap-2">
-              <Eye className="h-6 w-6" />
-              <div className="text-center">
-                <div className="font-medium">View Logs</div>
-                <div className="text-xs text-gray-500">Review audit trail</div>
+          <ScrollArea className="h-[400px] w-full">
+            {loading ? (
+              <div className="flex items-center justify-center p-8">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
               </div>
-            </Button>
-            <Button variant="outline" className="h-auto p-4 flex flex-col items-center gap-2">
-              <Lock className="h-6 w-6" />
-              <div className="text-center">
-                <div className="font-medium">Lock Accounts</div>
-                <div className="text-xs text-gray-500">Suspend suspicious users</div>
+            ) : alerts.length === 0 ? (
+              <div className="text-center p-8 text-gray-500">
+                <Shield className="h-12 w-12 mx-auto mb-4 opacity-50" />
+                <p>No security alerts</p>
+                <p className="text-sm">Your system is secure</p>
               </div>
-            </Button>
-            <Button variant="outline" className="h-auto p-4 flex flex-col items-center gap-2">
-              <Globe className="h-6 w-6" />
-              <div className="text-center">
-                <div className="font-medium">IP Analysis</div>
-                <div className="text-xs text-gray-500">Review access patterns</div>
+            ) : (
+              <div className="space-y-3">
+                {alerts.map((alert) => (
+                  <div key={alert.id} className="border rounded-lg p-4 hover:bg-gray-50">
+                    <div className="flex items-start justify-between">
+                      <div className="flex-1">
+                        <div className="flex items-center gap-2 mb-2">
+                          {getSeverityIcon(alert.severity)}
+                          <span className="font-medium">{alert.message}</span>
+                          <Badge className={`text-xs ${getSeverityBadgeColor(alert.severity)}`}>
+                            {alert.severity.toUpperCase()}
+                          </Badge>
+                          {alert.resolved && (
+                            <Badge variant="outline" className="text-xs">
+                              RESOLVED
+                            </Badge>
+                          )}
+                        </div>
+                        
+                        <div className="text-sm text-gray-600 space-y-1">
+                          <div>Type: {alert.type}</div>
+                          <div>Created: {format(new Date(alert.created_at), 'MMM dd, HH:mm:ss')}</div>
+                          {alert.resolved_at && (
+                            <div>Resolved: {format(new Date(alert.resolved_at), 'MMM dd, HH:mm:ss')}</div>
+                          )}
+                          
+                          {alert.details && Object.keys(alert.details).length > 0 && (
+                            <details className="mt-2">
+                              <summary className="cursor-pointer text-blue-600 hover:text-blue-800">
+                                View Details
+                              </summary>
+                              <pre className="mt-1 text-xs bg-gray-100 p-2 rounded overflow-x-auto">
+                                {JSON.stringify(alert.details, null, 2)}
+                              </pre>
+                            </details>
+                          )}
+                        </div>
+                      </div>
+                      
+                      {!alert.resolved && (
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => resolveAlert(alert.id)}
+                        >
+                          Resolve
+                        </Button>
+                      )}
+                    </div>
+                  </div>
+                ))}
               </div>
-            </Button>
-          </div>
+            )}
+          </ScrollArea>
         </CardContent>
       </Card>
     </div>

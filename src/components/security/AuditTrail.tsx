@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -47,9 +46,8 @@ const AuditTrail = () => {
 
     setLoading(true);
     try {
-      // Use direct query since TypeScript types haven't updated yet
       let query = supabase
-        .from('audit_logs' as any)
+        .from('audit_logs')
         .select('*')
         .order('created_at', { ascending: false })
         .limit(100);
@@ -83,7 +81,24 @@ const AuditTrail = () => {
         throw error;
       }
       
-      setAuditEvents(data || []);
+      // Ensure data matches our interface
+      const typedData: AuditEvent[] = (data || []).map(item => ({
+        id: item.id,
+        event_type: item.event_type,
+        user_id: item.user_id,
+        user_email: item.user_email,
+        ip_address: item.ip_address,
+        user_agent: item.user_agent,
+        resource_type: item.resource_type,
+        resource_id: item.resource_id,
+        action: item.action,
+        result: item.result as 'success' | 'failure',
+        details: item.details,
+        risk_level: item.risk_level as 'low' | 'medium' | 'high' | 'critical',
+        created_at: item.created_at,
+      }));
+      
+      setAuditEvents(typedData);
     } catch (error: any) {
       console.error('Error fetching audit events:', error);
       toast({

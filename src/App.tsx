@@ -12,6 +12,7 @@ import DynamicSubmissionForm from '@/components/DynamicSubmissionForm';
 import ReportSuccess from '@/components/ReportSuccess';
 import ReportStatus from '@/components/ReportStatus';
 import SecureReportTool from '@/components/SecureReportTool';
+import AdminPanel from '@/components/AdminPanel';
 import ProtectedRoute from '@/components/ProtectedRoute';
 import CompanyStatusPage from '@/components/CompanyStatusPage';
 import './App.css';
@@ -43,6 +44,16 @@ function App() {
                 element={
                   <ProtectedRoute>
                     <Dashboard />
+                  </ProtectedRoute>
+                } 
+              />
+              
+              {/* Admin routes */}
+              <Route 
+                path="/admin" 
+                element={
+                  <ProtectedRoute>
+                    <AdminPanel />
                   </ProtectedRoute>
                 } 
               />
