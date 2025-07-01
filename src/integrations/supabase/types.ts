@@ -9,6 +9,212 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      cookie_consents: {
+        Row: {
+          analytics_cookies: boolean
+          consent_given: boolean
+          consent_timestamp: string
+          expires_at: string
+          id: string
+          ip_address: unknown | null
+          marketing_cookies: boolean
+          necessary_cookies: boolean
+          organization_id: string
+          user_agent: string | null
+        }
+        Insert: {
+          analytics_cookies?: boolean
+          consent_given?: boolean
+          consent_timestamp?: string
+          expires_at?: string
+          id?: string
+          ip_address?: unknown | null
+          marketing_cookies?: boolean
+          necessary_cookies?: boolean
+          organization_id: string
+          user_agent?: string | null
+        }
+        Update: {
+          analytics_cookies?: boolean
+          consent_given?: boolean
+          consent_timestamp?: string
+          expires_at?: string
+          id?: string
+          ip_address?: unknown | null
+          marketing_cookies?: boolean
+          necessary_cookies?: boolean
+          organization_id?: string
+          user_agent?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "cookie_consents_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      data_erasure_requests: {
+        Row: {
+          completed_at: string | null
+          created_at: string
+          email_address: string
+          erasure_type: string
+          id: string
+          organization_id: string
+          reason: string | null
+          requested_by: string | null
+          review_notes: string | null
+          reviewed_at: string | null
+          reviewed_by: string | null
+          status: string
+        }
+        Insert: {
+          completed_at?: string | null
+          created_at?: string
+          email_address: string
+          erasure_type: string
+          id?: string
+          organization_id: string
+          reason?: string | null
+          requested_by?: string | null
+          review_notes?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: string
+        }
+        Update: {
+          completed_at?: string | null
+          created_at?: string
+          email_address?: string
+          erasure_type?: string
+          id?: string
+          organization_id?: string
+          reason?: string | null
+          requested_by?: string | null
+          review_notes?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "data_erasure_requests_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "data_erasure_requests_requested_by_fkey"
+            columns: ["requested_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "data_erasure_requests_reviewed_by_fkey"
+            columns: ["reviewed_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      data_export_requests: {
+        Row: {
+          completed_at: string | null
+          created_at: string
+          email_address: string
+          expires_at: string | null
+          export_file_url: string | null
+          id: string
+          organization_id: string
+          request_type: string
+          requested_by: string | null
+          status: string
+        }
+        Insert: {
+          completed_at?: string | null
+          created_at?: string
+          email_address: string
+          expires_at?: string | null
+          export_file_url?: string | null
+          id?: string
+          organization_id: string
+          request_type: string
+          requested_by?: string | null
+          status?: string
+        }
+        Update: {
+          completed_at?: string | null
+          created_at?: string
+          email_address?: string
+          expires_at?: string | null
+          export_file_url?: string | null
+          id?: string
+          organization_id?: string
+          request_type?: string
+          requested_by?: string | null
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "data_export_requests_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "data_export_requests_requested_by_fkey"
+            columns: ["requested_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      data_retention_policies: {
+        Row: {
+          auto_purge_enabled: boolean
+          created_at: string
+          data_type: string
+          id: string
+          organization_id: string
+          retention_period_months: number
+          updated_at: string
+        }
+        Insert: {
+          auto_purge_enabled?: boolean
+          created_at?: string
+          data_type: string
+          id?: string
+          organization_id: string
+          retention_period_months?: number
+          updated_at?: string
+        }
+        Update: {
+          auto_purge_enabled?: boolean
+          created_at?: string
+          data_type?: string
+          id?: string
+          organization_id?: string
+          retention_period_months?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "data_retention_policies_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       domain_verifications: {
         Row: {
           created_at: string
