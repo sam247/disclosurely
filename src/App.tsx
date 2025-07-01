@@ -15,6 +15,7 @@ import SecureReportTool from '@/components/SecureReportTool';
 import AdminPanel from '@/components/AdminPanel';
 import ProtectedRoute from '@/components/ProtectedRoute';
 import CompanyStatusPage from '@/components/CompanyStatusPage';
+import CookieConsentBanner from '@/components/CookieConsentBanner';
 import './App.css';
 
 const queryClient = new QueryClient();
@@ -62,6 +63,7 @@ function App() {
               <Route path="*" element={<NotFound />} />
             </Routes>
             <Toaster />
+            <CookieConsentBanner />
           </div>
         </Router>
       </AuthProvider>

@@ -16,50 +16,56 @@ interface SettingsPanelProps {
 const SettingsPanel = ({ isOpen, onClose }: SettingsPanelProps) => {
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-4xl h-[80vh] flex flex-col">
-        <DialogHeader className="flex-shrink-0">
-          <DialogTitle>Settings</DialogTitle>
-          <DialogDescription>
+      <DialogContent className="max-w-4xl h-[85vh] sm:h-[80vh] max-h-[90vh] w-[95vw] sm:w-full flex flex-col mx-4">
+        <DialogHeader className="flex-shrink-0 pb-4">
+          <DialogTitle className="text-lg sm:text-xl">Settings</DialogTitle>
+          <DialogDescription className="text-sm sm:text-base">
             Manage your profile, organization, subscription, and privacy settings
           </DialogDescription>
         </DialogHeader>
         
         <Tabs defaultValue="profile" className="flex-1 flex flex-col min-h-0">
-          <TabsList className="grid w-full grid-cols-4 flex-shrink-0">
-            <TabsTrigger value="profile" className="flex items-center gap-2">
-              <User className="h-4 w-4" />
-              Profile
+          <TabsList className="grid w-full grid-cols-4 flex-shrink-0 h-auto">
+            <TabsTrigger value="profile" className="flex flex-col sm:flex-row items-center gap-1 sm:gap-2 p-2 sm:p-3 text-xs sm:text-sm">
+              <User className="h-3 w-3 sm:h-4 sm:w-4" />
+              <span className="hidden sm:inline">Profile</span>
+              <span className="sm:hidden">Prof.</span>
             </TabsTrigger>
-            <TabsTrigger value="organization" className="flex items-center gap-2">
-              <Building2 className="h-4 w-4" />
-              Organization
+            <TabsTrigger value="organization" className="flex flex-col sm:flex-row items-center gap-1 sm:gap-2 p-2 sm:p-3 text-xs sm:text-sm">
+              <Building2 className="h-3 w-3 sm:h-4 sm:w-4" />
+              <span className="hidden sm:inline">Organization</span>
+              <span className="sm:hidden">Org.</span>
             </TabsTrigger>
-            <TabsTrigger value="subscription" className="flex items-center gap-2">
-              <CreditCard className="h-4 w-4" />
-              Subscription
+            <TabsTrigger value="subscription" className="flex flex-col sm:flex-row items-center gap-1 sm:gap-2 p-2 sm:p-3 text-xs sm:text-sm">
+              <CreditCard className="h-3 w-3 sm:h-4 sm:w-4" />
+              <span className="hidden sm:inline">Subscription</span>
+              <span className="sm:hidden">Sub.</span>
             </TabsTrigger>
-            <TabsTrigger value="privacy" className="flex items-center gap-2">
-              <Shield className="h-4 w-4" />
-              Privacy & Data
+            <TabsTrigger value="privacy" className="flex flex-col sm:flex-row items-center gap-1 sm:gap-2 p-2 sm:p-3 text-xs sm:text-sm">
+              <Shield className="h-3 w-3 sm:h-4 sm:w-4" />
+              <span className="hidden sm:inline">Privacy & Data</span>
+              <span className="sm:hidden">Privacy</span>
             </TabsTrigger>
           </TabsList>
 
-          <ScrollArea className="flex-1 mt-6" style={{ height: 'calc(80vh - 140px)' }}>
-            <TabsContent value="profile" className="mt-0">
-              <ProfileSettings />
-            </TabsContent>
+          <ScrollArea className="flex-1 mt-4 sm:mt-6" style={{ height: 'calc(85vh - 180px)' }}>
+            <div className="px-1 sm:px-0">
+              <TabsContent value="profile" className="mt-0">
+                <ProfileSettings />
+              </TabsContent>
 
-            <TabsContent value="organization" className="mt-0">
-              <OrganizationSettings />
-            </TabsContent>
+              <TabsContent value="organization" className="mt-0">
+                <OrganizationSettings />
+              </TabsContent>
 
-            <TabsContent value="subscription" className="mt-0">
-              <SubscriptionManagement />
-            </TabsContent>
+              <TabsContent value="subscription" className="mt-0">
+                <SubscriptionManagement />
+              </TabsContent>
 
-            <TabsContent value="privacy" className="mt-0">
-              <SimpleGDPRSettings />
-            </TabsContent>
+              <TabsContent value="privacy" className="mt-0">
+                <SimpleGDPRSettings />
+              </TabsContent>
+            </div>
           </ScrollArea>
         </Tabs>
       </DialogContent>
