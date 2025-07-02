@@ -1,31 +1,31 @@
-
 import { Shield, Check, Star } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Link } from 'react-router-dom';
 
 const Pricing = () => {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
+    <div className="min-h-screen bg-white">
       {/* Navigation */}
-      <nav className="bg-white shadow-sm border-b">
+      <nav className="bg-white shadow-sm sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-16">
-            <div className="flex items-center space-x-2">
-              <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
-                <Shield className="h-5 w-5 text-white" />
-              </div>
-              <a href="/" className="text-xl sm:text-2xl font-bold text-gray-900">Disclosurely</a>
+          <div className="flex justify-between items-center py-4">
+            <div className="flex items-center">
+              <Link to="/" className="flex items-center space-x-3">
+                <img 
+                  src="/lovable-uploads/c46ace0e-df58-4119-b5e3-8dcfa075ea2f.png" 
+                  alt="Disclosurely" 
+                  className="h-8 w-auto"
+                />
+              </Link>
             </div>
-            <div className="flex items-center space-x-2 sm:space-x-4">
-              <a href="/pricing" className="text-blue-600 hover:text-blue-700 px-2 sm:px-3 py-2 rounded-md text-sm font-medium">
-                Pricing
-              </a>
-              <a href="https://app.disclosurely.com/auth/login" className="text-gray-600 hover:text-gray-900 px-2 sm:px-3 py-2 rounded-md text-sm font-medium">
-                Sign In
-              </a>
-              <a href="https://app.disclosurely.com/auth/signup" className="bg-blue-600 hover:bg-blue-700 text-white px-3 sm:px-4 py-2 rounded-md text-sm font-medium">
+            <div className="hidden md:flex items-center space-x-8">
+              <Link to="/pricing" className="text-blue-600 font-medium">Pricing</Link>
+              <Link to="/compliance-software" className="text-gray-600 hover:text-gray-900">Compliance</Link>
+              <Link to="/auth/login" className="text-gray-600 hover:text-gray-900">Sign in</Link>
+              <Link to="/auth/signup" className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors">
                 Get Started
-              </a>
+              </Link>
             </div>
           </div>
         </div>
@@ -209,55 +209,44 @@ const Pricing = () => {
       </div>
 
       {/* Footer */}
-      <footer className="bg-gray-900 text-white py-8 sm:py-12">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-6 sm:gap-8">
-            <div className="col-span-2 md:col-span-1">
-              <div className="flex items-center space-x-2 mb-4">
-                <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
-                  <Shield className="h-5 w-5 text-white" />
-                </div>
-                <h3 className="text-lg sm:text-xl font-bold">Disclosurely</h3>
+      <footer className="bg-gray-900 text-white">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
+            <div className="col-span-1 md:col-span-2">
+              <div className="flex items-center space-x-3 mb-4">
+                <img 
+                  src="/lovable-uploads/416d39db-53ff-402e-a2cf-26d1a3618601.png" 
+                  alt="Disclosurely" 
+                  className="h-8 w-auto"
+                />
               </div>
-              <p className="text-gray-400 text-sm sm:text-base">
-                Secure whistleblowing platform for modern organizations.
+              <p className="text-gray-400 mb-4">
+                Secure whistleblowing platform for organizations. Anonymous reporting, 
+                end-to-end encryption, and compliance features.
               </p>
             </div>
             
             <div>
-              <h4 className="text-base sm:text-lg font-semibold mb-4">Product</h4>
+              <h3 className="font-semibold mb-4">Product</h3>
               <ul className="space-y-2">
-                <li><a href="/pricing" className="text-gray-400 hover:text-white text-sm sm:text-base">Pricing</a></li>
-                <li><a href="/compliance-software" className="text-gray-400 hover:text-white text-sm sm:text-base">Compliance Software</a></li>
-                <li><a href="/vs-whistleblower-software" className="text-gray-400 hover:text-white text-sm sm:text-base">Disclosurely vs Whistleblower Software</a></li>
-                <li><a href="/vs-speak-up" className="text-gray-400 hover:text-white text-sm sm:text-base">Disclosurely vs Speak Up</a></li>
+                <li><Link to="/pricing" className="text-gray-400 hover:text-white">Pricing</Link></li>
+                <li><Link to="/compliance-software" className="text-gray-400 hover:text-white">Compliance Software</Link></li>
+                <li><Link to="/vs-whistleblower-software" className="text-gray-400 hover:text-white">Disclosurely vs Whistleblower Software</Link></li>
+                <li><Link to="/vs-speak-up" className="text-gray-400 hover:text-white">Disclosurely vs Speak Up</Link></li>
               </ul>
             </div>
             
             <div>
-              <h4 className="text-base sm:text-lg font-semibold mb-4">Company</h4>
+              <h3 className="font-semibold mb-4">Company</h3>
               <ul className="space-y-2">
-                <li><a href="#" className="text-gray-400 hover:text-white text-sm sm:text-base">About</a></li>
-                <li><a href="#" className="text-gray-400 hover:text-white text-sm sm:text-base">Blog</a></li>
-                <li><a href="#" className="text-gray-400 hover:text-white text-sm sm:text-base">Careers</a></li>
-                <li><a href="#" className="text-gray-400 hover:text-white text-sm sm:text-base">Contact</a></li>
-              </ul>
-            </div>
-            
-            <div>
-              <h4 className="text-base sm:text-lg font-semibold mb-4">Legal</h4>
-              <ul className="space-y-2">
-                <li><a href="#" className="text-gray-400 hover:text-white text-sm sm:text-base">Privacy Policy</a></li>
-                <li><a href="#" className="text-gray-400 hover:text-white text-sm sm:text-base">Terms of Service</a></li>
-                <li><a href="#" className="text-gray-400 hover:text-white text-sm sm:text-base">Cookie Policy</a></li>
+                <li><Link to="/auth/login" className="text-gray-400 hover:text-white">Sign In</Link></li>
+                <li><Link to="/auth/signup" className="text-gray-400 hover:text-white">Get Started</Link></li>
               </ul>
             </div>
           </div>
           
-          <div className="border-t border-gray-800 mt-6 sm:mt-8 pt-6 sm:pt-8 text-center">
-            <p className="text-gray-400 text-sm sm:text-base">
-              © 2025 Disclosurely. All rights reserved. <a href="/compliance-software" className="text-blue-400 hover:text-blue-300">Compliance Software</a>. Powered by <a href="https://betterranking.co.uk/?utm_source=footer&utm_medium=internal&utm_campaign=disclosurely&utm_id=links" className="text-blue-400 hover:text-blue-300" target="_blank" rel="noopener noreferrer">Better Ranking</a>.
-            </p>
+          <div className="border-t border-gray-800 mt-8 pt-8 text-center text-gray-400">
+            <p>© 2025 Disclosurely. All rights reserved. <Link to="/compliance-software" className="hover:text-white">Compliance Software</Link>. Powered by <a href="https://betterranking.co.uk/?utm_source=footer&utm_medium=internal&utm_campaign=disclosurely&utm_id=links" target="_blank" rel="noopener noreferrer" className="hover:text-white">Better Ranking</a>.</p>
           </div>
         </div>
       </footer>

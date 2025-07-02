@@ -1,6 +1,5 @@
 
 import { ReactNode } from 'react';
-import { Shield } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 
 interface BrandedFormLayoutProps {
@@ -42,12 +41,11 @@ const BrandedFormLayout = ({
                     }}
                   />
                 ) : null}
-                <div 
-                  className={`w-10 h-10 rounded-lg flex items-center justify-center ${logoUrl ? 'hidden' : ''}`}
-                  style={{ backgroundColor: brandColor }}
-                >
-                  <Shield className="h-6 w-6 text-white" />
-                </div>
+                <img 
+                  src="/lovable-uploads/c46ace0e-df58-4119-b5e3-8dcfa075ea2f.png" 
+                  alt="Disclosurely"
+                  className={`h-10 w-auto object-contain ${logoUrl ? 'hidden' : ''}`}
+                />
               </div>
               <div>
                 <h1 className="text-xl font-bold text-gray-900">
@@ -65,7 +63,12 @@ const BrandedFormLayout = ({
         <Card className="shadow-lg">
           <CardHeader className="pb-6">
             <CardTitle className="flex items-center gap-3 text-xl">
-              <Shield className="h-6 w-6" style={{ color: brandColor }} />
+              <img 
+                src="/lovable-uploads/c46ace0e-df58-4119-b5e3-8dcfa075ea2f.png" 
+                alt="Disclosurely"
+                className="h-6 w-auto"
+                style={{ filter: `hue-rotate(${brandColor === '#2563eb' ? '0deg' : '180deg'})` }}
+              />
               {title}
             </CardTitle>
             <CardDescription className="text-base mt-2">

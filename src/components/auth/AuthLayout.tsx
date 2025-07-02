@@ -1,6 +1,6 @@
 
 import { ReactNode } from 'react';
-import { Shield, Home } from 'lucide-react';
+import { Home } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
 interface AuthLayoutProps {
@@ -9,11 +9,11 @@ interface AuthLayoutProps {
 
 const AuthLayout = ({ children }: AuthLayoutProps) => {
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-gray-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8 relative">
       {/* Home icon in top left of the page */}
       <Link 
         to="/" 
-        className="fixed top-6 left-6 p-2 text-gray-400 hover:text-gray-600 transition-colors bg-white rounded-lg shadow-sm z-10"
+        className="absolute top-6 left-6 p-2 text-gray-400 hover:text-gray-600 transition-colors bg-white rounded-lg shadow-sm z-10"
         title="Back to Home"
       >
         <Home className="h-6 w-6" />
@@ -21,11 +21,12 @@ const AuthLayout = ({ children }: AuthLayoutProps) => {
 
       <div className="sm:mx-auto sm:w-full sm:max-w-md">
         <div className="text-center">
-          <div className="flex items-center justify-center space-x-2 mb-4">
-            <div className="w-10 h-10 bg-blue-600 rounded-lg flex items-center justify-center">
-              <Shield className="h-6 w-6 text-white" />
-            </div>
-            <h1 className="text-3xl font-bold text-gray-900">Disclosurely</h1>
+          <div className="flex items-center justify-center mb-6">
+            <img 
+              src="/lovable-uploads/c46ace0e-df58-4119-b5e3-8dcfa075ea2f.png" 
+              alt="Disclosurely" 
+              className="h-12 w-auto"
+            />
           </div>
           <p className="mt-2 text-sm text-gray-600">Secure Whistleblowing Platform</p>
         </div>

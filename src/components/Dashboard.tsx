@@ -427,15 +427,22 @@ const Dashboard = () => {
       <header className="bg-white shadow">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center py-6">
-            <div>
-              <h1 className="text-2xl font-bold text-gray-900">Dashboard</h1>
-              <div className="flex items-center gap-4">
-                <p className="text-sm text-gray-600">Welcome back, {user?.email}</p>
-                {subscriptionData.subscribed && (
-                  <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                    {subscriptionData.subscription_tier}
-                  </span>
-                )}
+            <div className="flex items-center space-x-4">
+              <img 
+                src="/lovable-uploads/c46ace0e-df58-4119-b5e3-8dcfa075ea2f.png" 
+                alt="Disclosurely" 
+                className="h-8 w-auto"
+              />
+              <div>
+                <h1 className="text-2xl font-bold text-gray-900">Dashboard</h1>
+                <div className="flex items-center gap-4">
+                  <p className="text-sm text-gray-600">Welcome back, {user?.email}</p>
+                  {subscriptionData.subscribed && (
+                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                      {subscriptionData.subscription_tier}
+                    </span>
+                  )}
+                </div>
               </div>
             </div>
             <div className="flex items-center space-x-2">
