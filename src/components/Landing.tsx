@@ -1,4 +1,3 @@
-
 import { Shield, Users, Lock, FileText, Bell, Star, Check, DollarSign, Globe, Eye, Award, Building2, MessageSquare, Database, UserCheck, Infinity } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -74,6 +73,57 @@ const Landing = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
+      {/* Head meta tags for SEO */}
+      <head>
+        <title>Disclosurely | Whistleblowing Software Small Businesses | Speak Up Now With Disclosurely</title>
+        <meta name="description" content="Secure whistleblowing platform for organizations. Anonymous reporting, end-to-end encryption, and compliance features. Trusted by businesses worldwide." />
+        <meta name="keywords" content="whistleblowing software, anonymous reporting, compliance, secure reporting, speak up, whistleblower protection" />
+        <meta name="author" content="Disclosurely" />
+        <meta name="robots" content="index, follow" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        
+        {/* Open Graph / Facebook */}
+        <meta property="og:type" content="website" />
+        <meta property="og:url" content="https://disclosurely.com/" />
+        <meta property="og:title" content="Disclosurely | Whistleblowing Software Small Businesses | Speak Up Now With Disclosurely" />
+        <meta property="og:description" content="Secure whistleblowing platform for organizations. Anonymous reporting, end-to-end encryption, and compliance features." />
+        <meta property="og:image" content="https://disclosurely.com/og-image.png" />
+
+        {/* Twitter */}
+        <meta property="twitter:card" content="summary_large_image" />
+        <meta property="twitter:url" content="https://disclosurely.com/" />
+        <meta property="twitter:title" content="Disclosurely | Whistleblowing Software Small Businesses | Speak Up Now With Disclosurely" />
+        <meta property="twitter:description" content="Secure whistleblowing platform for organizations. Anonymous reporting, end-to-end encryption, and compliance features." />
+        <meta property="twitter:image" content="https://disclosurely.com/og-image.png" />
+
+        {/* Canonical URL */}
+        <link rel="canonical" href="https://disclosurely.com/" />
+        
+        {/* JSON-LD Schema */}
+        <script type="application/ld+json">
+          {JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "SoftwareApplication",
+            "name": "Disclosurely",
+            "description": "Secure whistleblowing platform for organizations with anonymous reporting and end-to-end encryption",
+            "url": "https://disclosurely.com",
+            "applicationCategory": "BusinessApplication",
+            "operatingSystem": "Web",
+            "offers": {
+              "@type": "Offer",
+              "price": "0",
+              "priceCurrency": "USD",
+              "description": "Free trial available"
+            },
+            "provider": {
+              "@type": "Organization",
+              "name": "Disclosurely",
+              "url": "https://disclosurely.com"
+            }
+          })}
+        </script>
+      </head>
+
       {/* Navigation */}
       <nav className="bg-white shadow-sm border-b">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -381,63 +431,6 @@ const Landing = () => {
                   </div>
                 </div>
               </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Bank-Level Security Section */}
-      <div className="bg-gray-50 py-16 sm:py-20">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-12 sm:mb-16">
-            <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-4">
-              Bank-Level Security
-            </h2>
-            <p className="text-base sm:text-lg text-gray-600 max-w-2xl mx-auto px-4">
-              Your data is protected with the same security standards used by financial institutions
-            </p>
-          </div>
-
-          <div className="grid md:grid-cols-2 gap-8 sm:gap-12 items-center">
-            <div className="space-y-6">
-              <div className="flex items-start space-x-4">
-                <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center flex-shrink-0">
-                  <Shield className="h-5 w-5 text-blue-600" />
-                </div>
-                <div>
-                  <h3 className="text-lg font-semibold text-gray-900 mb-2">ISO 27001 Certified</h3>
-                  <p className="text-gray-600 text-sm sm:text-base">International standard for information security management</p>
-                </div>
-              </div>
-
-              <div className="flex items-start space-x-4">
-                <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center flex-shrink-0">
-                  <Lock className="h-5 w-5 text-blue-600" />
-                </div>
-                <div>
-                  <h3 className="text-lg font-semibold text-gray-900 mb-2">Zero-Trust Architecture</h3>
-                  <p className="text-gray-600 text-sm sm:text-base">Every request is verified and authenticated</p>
-                </div>
-              </div>
-
-              <div className="flex items-start space-x-4">
-                <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center flex-shrink-0">
-                  <Eye className="h-5 w-5 text-blue-600" />
-                </div>
-                <div>
-                  <h3 className="text-lg font-semibold text-gray-900 mb-2">Regular Penetration Testing</h3>
-                  <p className="text-gray-600 text-sm sm:text-base">Quarterly security audits by the experts at cyber-trust.co.uk</p>
-                </div>
-              </div>
-            </div>
-
-            <div className="relative rounded-lg overflow-hidden shadow-lg">
-              <img 
-                src="https://images.unsplash.com/photo-1563013544-824ae1b704d3?w=600&h=400&fit=crop" 
-                alt="Bank-level security"
-                className="w-full h-96 object-cover"
-              />
-              <div className="absolute inset-0 bg-blue-600 bg-opacity-20"></div>
             </div>
           </div>
         </div>
