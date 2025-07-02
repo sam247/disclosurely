@@ -1,5 +1,5 @@
 
-import { Shield, Users, Lock, FileText, Bell, Star, Check, DollarSign, Globe, Eye, Award, Building2 } from 'lucide-react';
+import { Shield, Users, Lock, FileText, Bell, Star, Check, DollarSign, Globe, Eye, Award, Building2, MessageSquare, Database, UserCheck, Infinity } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Carousel, CarouselContent, CarouselItem, CarouselPrevious, CarouselNext } from '@/components/ui/carousel';
@@ -85,6 +85,9 @@ const Landing = () => {
               <h1 className="text-xl sm:text-2xl font-bold text-gray-900">Disclosurely</h1>
             </div>
             <div className="flex items-center space-x-2 sm:space-x-4">
+              <a href="/pricing" className="text-gray-600 hover:text-gray-900 px-2 sm:px-3 py-2 rounded-md text-sm font-medium">
+                Pricing
+              </a>
               <a href="https://app.disclosurely.com/auth/login" className="text-gray-600 hover:text-gray-900 px-2 sm:px-3 py-2 rounded-md text-sm font-medium">
                 Sign In
               </a>
@@ -135,19 +138,19 @@ const Landing = () => {
             </div>
 
             <div className="text-center p-6 bg-gray-50 rounded-lg shadow-sm">
-              <Building2 className="h-12 w-12 text-green-600 mx-auto mb-4" />
+              <Building2 className="h-12 w-12 text-blue-600 mx-auto mb-4" />
               <h3 className="font-semibold text-gray-900 mb-2">Healthcare</h3>
               <p className="text-sm text-gray-600">Hospitals and healthcare organizations</p>
             </div>
 
             <div className="text-center p-6 bg-gray-50 rounded-lg shadow-sm">
-              <Award className="h-12 w-12 text-purple-600 mx-auto mb-4" />
+              <Award className="h-12 w-12 text-blue-600 mx-auto mb-4" />
               <h3 className="font-semibold text-gray-900 mb-2">Government</h3>
               <p className="text-sm text-gray-600">Public sector and government agencies</p>
             </div>
 
             <div className="text-center p-6 bg-gray-50 rounded-lg shadow-sm">
-              <Eye className="h-12 w-12 text-orange-600 mx-auto mb-4" />
+              <Eye className="h-12 w-12 text-blue-600 mx-auto mb-4" />
               <h3 className="font-semibold text-gray-900 mb-2">Non-Profit</h3>
               <p className="text-sm text-gray-600">NGOs and charitable organizations</p>
             </div>
@@ -155,55 +158,288 @@ const Landing = () => {
         </div>
       </div>
 
-      {/* Features Section */}
+      {/* Anonymous Reporting Section */}
       <div className="bg-gray-50 py-16 sm:py-20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-12 sm:mb-16">
-            <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-4">
-              Enterprise-Grade Security
-            </h2>
-            <p className="text-base sm:text-lg text-gray-600 max-w-2xl mx-auto px-4">
-              Our platform provides the highest level of security and anonymity for whistleblowers
-              while giving organizations the tools they need to manage reports effectively.
-            </p>
-          </div>
-
-          <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-6 sm:gap-8">
-            <div className="text-center p-6">
-              <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                <Lock className="h-8 w-8 text-blue-600" />
-              </div>
-              <h3 className="text-lg sm:text-xl font-semibold text-gray-900 mb-2">End-to-End Encryption</h3>
-              <p className="text-gray-600 text-sm sm:text-base">
-                All reports are encrypted with AES-256 encryption before transmission and storage.
+          <div className="grid md:grid-cols-2 gap-8 sm:gap-12 items-center">
+            <div className="space-y-6">
+              <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-4">
+                Anonymous Reporting
+              </h2>
+              <p className="text-base sm:text-lg text-gray-600 max-w-2xl px-4">
+                Complete anonymity for whistleblowers with secure identity protection
               </p>
+              
+              <div className="space-y-4">
+                <div className="flex items-start space-x-4">
+                  <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center flex-shrink-0">
+                    <Shield className="h-5 w-5 text-blue-600" />
+                  </div>
+                  <div>
+                    <h3 className="text-lg font-semibold text-gray-900 mb-2">Complete Anonymity</h3>
+                    <p className="text-gray-600 text-sm sm:text-base">No personal information collected or stored during anonymous submissions</p>
+                  </div>
+                </div>
+
+                <div className="flex items-start space-x-4">
+                  <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center flex-shrink-0">
+                    <Eye className="h-5 w-5 text-blue-600" />
+                  </div>
+                  <div>
+                    <h3 className="text-lg font-semibold text-gray-900 mb-2">Identity Protection</h3>
+                    <p className="text-gray-600 text-sm sm:text-base">Advanced techniques to prevent identity discovery</p>
+                  </div>
+                </div>
+
+                <div className="flex items-start space-x-4">
+                  <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center flex-shrink-0">
+                    <UserCheck className="h-5 w-5 text-blue-600" />
+                  </div>
+                  <div>
+                    <h3 className="text-lg font-semibold text-gray-900 mb-2">Safe Environment</h3>
+                    <p className="text-gray-600 text-sm sm:text-base">Create a culture where employees feel safe to speak up</p>
+                  </div>
+                </div>
+              </div>
             </div>
 
-            <div className="text-center p-6">
-              <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                <Users className="h-8 w-8 text-green-600" />
+            <div className="bg-gradient-to-br from-blue-50 to-indigo-100 p-6 sm:p-8 rounded-lg">
+              <h3 className="text-xl font-semibold text-gray-900 mb-4">Anonymous Features</h3>
+              <div className="space-y-3">
+                <div className="flex items-center space-x-3">
+                  <Check className="h-5 w-5 text-blue-600" />
+                  <span className="text-gray-700 text-sm sm:text-base">Zero personal data collection</span>
+                </div>
+                <div className="flex items-center space-x-3">
+                  <Check className="h-5 w-5 text-blue-600" />
+                  <span className="text-gray-700 text-sm sm:text-base">IP address anonymization</span>
+                </div>
+                <div className="flex items-center space-x-3">
+                  <Check className="h-5 w-5 text-blue-600" />
+                  <span className="text-gray-700 text-sm sm:text-base">Metadata removal from files</span>
+                </div>
+                <div className="flex items-center space-x-3">
+                  <Check className="h-5 w-5 text-blue-600" />
+                  <span className="text-gray-700 text-sm sm:text-base">Secure anonymous communication</span>
+                </div>
               </div>
-              <h3 className="text-lg sm:text-xl font-semibold text-gray-900 mb-2">Anonymous Reporting</h3>
-              <p className="text-gray-600 text-sm sm:text-base">
-                Whistleblowers can submit reports completely anonymously with secure follow-up communication.
-              </p>
-            </div>
-
-            <div className="text-center p-6">
-              <div className="w-16 h-16 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                <FileText className="h-8 w-8 text-purple-600" />
-              </div>
-              <h3 className="text-lg sm:text-xl font-semibold text-gray-900 mb-2">Compliance Ready</h3>
-              <p className="text-gray-600 text-sm sm:text-base">
-                Built to meet GDPR, SOX, and other regulatory requirements with full audit trails.
-              </p>
             </div>
           </div>
         </div>
       </div>
 
-      {/* Security Section */}
+      {/* End-to-End Encrypted Communication Section */}
       <div className="bg-white py-16 sm:py-20">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="grid md:grid-cols-2 gap-8 sm:gap-12 items-center">
+            <div className="bg-gradient-to-br from-blue-50 to-indigo-100 p-6 sm:p-8 rounded-lg">
+              <h3 className="text-xl font-semibold text-gray-900 mb-4">Encryption Standards</h3>
+              <div className="space-y-3">
+                <div className="flex items-center space-x-3">
+                  <Check className="h-5 w-5 text-blue-600" />
+                  <span className="text-gray-700 text-sm sm:text-base">AES-256 encryption</span>
+                </div>
+                <div className="flex items-center space-x-3">
+                  <Check className="h-5 w-5 text-blue-600" />
+                  <span className="text-gray-700 text-sm sm:text-base">TLS 1.3 in transit</span>
+                </div>
+                <div className="flex items-center space-x-3">
+                  <Check className="h-5 w-5 text-blue-600" />
+                  <span className="text-gray-700 text-sm sm:text-base">Zero-knowledge architecture</span>
+                </div>
+                <div className="flex items-center space-x-3">
+                  <Check className="h-5 w-5 text-blue-600" />
+                  <span className="text-gray-700 text-sm sm:text-base">Client-side encryption</span>
+                </div>
+              </div>
+            </div>
+
+            <div className="space-y-6">
+              <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-4">
+                End-to-End Encrypted Communication
+              </h2>
+              <p className="text-base sm:text-lg text-gray-600 max-w-2xl px-4">
+                Military-grade encryption protects all communications and data
+              </p>
+              
+              <div className="space-y-4">
+                <div className="flex items-start space-x-4">
+                  <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center flex-shrink-0">
+                    <Lock className="h-5 w-5 text-blue-600" />
+                  </div>
+                  <div>
+                    <h3 className="text-lg font-semibold text-gray-900 mb-2">Military-Grade Security</h3>
+                    <p className="text-gray-600 text-sm sm:text-base">AES-256 encryption ensures data cannot be intercepted or read</p>
+                  </div>
+                </div>
+
+                <div className="flex items-start space-x-4">
+                  <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center flex-shrink-0">
+                    <Shield className="h-5 w-5 text-blue-600" />
+                  </div>
+                  <div>
+                    <h3 className="text-lg font-semibold text-gray-900 mb-2">Zero-Knowledge Architecture</h3>
+                    <p className="text-gray-600 text-sm sm:text-base">Even we cannot access your encrypted data without proper authorization</p>
+                  </div>
+                </div>
+
+                <div className="flex items-start space-x-4">
+                  <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center flex-shrink-0">
+                    <FileText className="h-5 w-5 text-blue-600" />
+                  </div>
+                  <div>
+                    <h3 className="text-lg font-semibold text-gray-900 mb-2">Secure File Transfers</h3>
+                    <p className="text-gray-600 text-sm sm:text-base">All attachments and documents are encrypted before transmission</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Secure Two-Way Communication Section */}
+      <div className="bg-gray-50 py-16 sm:py-20">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="grid md:grid-cols-2 gap-8 sm:gap-12 items-center">
+            <div className="space-y-6">
+              <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-4">
+                Secure Two-Way Communication
+              </h2>
+              <p className="text-base sm:text-lg text-gray-600 max-w-2xl px-4">
+                Enable ongoing dialogue while maintaining anonymity and security
+              </p>
+              
+              <div className="space-y-4">
+                <div className="flex items-start space-x-4">
+                  <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center flex-shrink-0">
+                    <MessageSquare className="h-5 w-5 text-blue-600" />
+                  </div>
+                  <div>
+                    <h3 className="text-lg font-semibold text-gray-900 mb-2">Anonymous Messaging</h3>
+                    <p className="text-gray-600 text-sm sm:text-base">Secure chat system preserves whistleblower anonymity</p>
+                  </div>
+                </div>
+
+                <div className="flex items-start space-x-4">
+                  <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center flex-shrink-0">
+                    <Bell className="h-5 w-5 text-blue-600" />
+                  </div>
+                  <div>
+                    <h3 className="text-lg font-semibold text-gray-900 mb-2">Real-Time Updates</h3>
+                    <p className="text-gray-600 text-sm sm:text-base">Instant notifications for new messages and case updates</p>
+                  </div>
+                </div>
+
+                <div className="flex items-start space-x-4">
+                  <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center flex-shrink-0">
+                    <Users className="h-5 w-5 text-blue-600" />
+                  </div>
+                  <div>
+                    <h3 className="text-lg font-semibold text-gray-900 mb-2">Case Management</h3>
+                    <p className="text-gray-600 text-sm sm:text-base">Track case progress and maintain communication history</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div className="bg-gradient-to-br from-blue-50 to-indigo-100 p-6 sm:p-8 rounded-lg">
+              <h3 className="text-xl font-semibold text-gray-900 mb-4">Communication Features</h3>
+              <div className="space-y-3">
+                <div className="flex items-center space-x-3">
+                  <Check className="h-5 w-5 text-blue-600" />
+                  <span className="text-gray-700 text-sm sm:text-base">Encrypted messaging</span>
+                </div>
+                <div className="flex items-center space-x-3">
+                  <Check className="h-5 w-5 text-blue-600" />
+                  <span className="text-gray-700 text-sm sm:text-base">File sharing capabilities</span>
+                </div>
+                <div className="flex items-center space-x-3">
+                  <Check className="h-5 w-5 text-blue-600" />
+                  <span className="text-gray-700 text-sm sm:text-base">Message read receipts</span>
+                </div>
+                <div className="flex items-center space-x-3">
+                  <Check className="h-5 w-5 text-blue-600" />
+                  <span className="text-gray-700 text-sm sm:text-base">Automated case updates</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Unlimited Scale Section */}
+      <div className="bg-white py-16 sm:py-20">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="grid md:grid-cols-2 gap-8 sm:gap-12 items-center">
+            <div className="bg-gradient-to-br from-blue-50 to-indigo-100 p-6 sm:p-8 rounded-lg">
+              <h3 className="text-xl font-semibold text-gray-900 mb-4">Unlimited Everything</h3>
+              <div className="space-y-3">
+                <div className="flex items-center space-x-3">
+                  <Infinity className="h-5 w-5 text-blue-600" />
+                  <span className="text-gray-700 text-sm sm:text-base">Unlimited cases</span>
+                </div>
+                <div className="flex items-center space-x-3">
+                  <Infinity className="h-5 w-5 text-blue-600" />
+                  <span className="text-gray-700 text-sm sm:text-base">Unlimited file uploads</span>
+                </div>
+                <div className="flex items-center space-x-3">
+                  <Infinity className="h-5 w-5 text-blue-600" />
+                  <span className="text-gray-700 text-sm sm:text-base">Unlimited categories</span>
+                </div>
+                <div className="flex items-center space-x-3">
+                  <Infinity className="h-5 w-5 text-blue-600" />
+                  <span className="text-gray-700 text-sm sm:text-base">Unlimited users</span>
+                </div>
+              </div>
+            </div>
+
+            <div className="space-y-6">
+              <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-4">
+                Unlimited Scale
+              </h2>
+              <p className="text-base sm:text-lg text-gray-600 max-w-2xl px-4">
+                No artificial limits on cases, files, categories, or users
+              </p>
+              
+              <div className="space-y-4">
+                <div className="flex items-start space-x-4">
+                  <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center flex-shrink-0">
+                    <Database className="h-5 w-5 text-blue-600" />
+                  </div>
+                  <div>
+                    <h3 className="text-lg font-semibold text-gray-900 mb-2">Scalable Infrastructure</h3>
+                    <p className="text-gray-600 text-sm sm:text-base">Handle thousands of cases without performance degradation</p>
+                  </div>
+                </div>
+
+                <div className="flex items-start space-x-4">
+                  <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center flex-shrink-0">
+                    <Users className="h-5 w-5 text-blue-600" />
+                  </div>
+                  <div>
+                    <h3 className="text-lg font-semibold text-gray-900 mb-2">Enterprise Ready</h3>
+                    <p className="text-gray-600 text-sm sm:text-base">Support for large organizations with thousands of employees</p>
+                  </div>
+                </div>
+
+                <div className="flex items-start space-x-4">
+                  <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center flex-shrink-0">
+                    <Globe className="h-5 w-5 text-blue-600" />
+                  </div>
+                  <div>
+                    <h3 className="text-lg font-semibold text-gray-900 mb-2">Global Deployment</h3>
+                    <p className="text-gray-600 text-sm sm:text-base">Worldwide infrastructure ensures fast, reliable access</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Bank-Level Security Section */}
+      <div className="bg-gray-50 py-16 sm:py-20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12 sm:mb-16">
             <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-4">
@@ -227,8 +463,8 @@ const Landing = () => {
               </div>
 
               <div className="flex items-start space-x-4">
-                <div className="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center flex-shrink-0">
-                  <Lock className="h-5 w-5 text-green-600" />
+                <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center flex-shrink-0">
+                  <Lock className="h-5 w-5 text-blue-600" />
                 </div>
                 <div>
                   <h3 className="text-lg font-semibold text-gray-900 mb-2">Zero-Trust Architecture</h3>
@@ -237,8 +473,8 @@ const Landing = () => {
               </div>
 
               <div className="flex items-start space-x-4">
-                <div className="w-8 h-8 bg-purple-100 rounded-full flex items-center justify-center flex-shrink-0">
-                  <Eye className="h-5 w-5 text-purple-600" />
+                <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center flex-shrink-0">
+                  <Eye className="h-5 w-5 text-blue-600" />
                 </div>
                 <div>
                   <h3 className="text-lg font-semibold text-gray-900 mb-2">Regular Penetration Testing</h3>
@@ -251,19 +487,19 @@ const Landing = () => {
               <h3 className="text-xl font-semibold text-gray-900 mb-4">Security Certifications</h3>
               <div className="space-y-3">
                 <div className="flex items-center space-x-3">
-                  <Check className="h-5 w-5 text-green-600" />
+                  <Check className="h-5 w-5 text-blue-600" />
                   <span className="text-gray-700 text-sm sm:text-base">SOC 2 Type II</span>
                 </div>
                 <div className="flex items-center space-x-3">
-                  <Check className="h-5 w-5 text-green-600" />
+                  <Check className="h-5 w-5 text-blue-600" />
                   <span className="text-gray-700 text-sm sm:text-base">GDPR Compliant</span>
                 </div>
                 <div className="flex items-center space-x-3">
-                  <Check className="h-5 w-5 text-green-600" />
+                  <Check className="h-5 w-5 text-blue-600" />
                   <span className="text-gray-700 text-sm sm:text-base">HIPAA Ready</span>
                 </div>
                 <div className="flex items-center space-x-3">
-                  <Check className="h-5 w-5 text-green-600" />
+                  <Check className="h-5 w-5 text-blue-600" />
                   <span className="text-gray-700 text-sm sm:text-base">ISO 27001</span>
                 </div>
               </div>
@@ -273,7 +509,7 @@ const Landing = () => {
       </div>
 
       {/* Reviews Section with Carousel */}
-      <div className="bg-gray-50 py-16 sm:py-20">
+      <div className="bg-white py-16 sm:py-20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12 sm:mb-16">
             <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-4">
@@ -331,185 +567,6 @@ const Landing = () => {
         </div>
       </div>
 
-      {/* Pricing Section */}
-      <div className="bg-white py-16 sm:py-20">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-12 sm:mb-16">
-            <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-4">
-              Simple, Transparent Pricing
-            </h2>
-            <p className="text-base sm:text-lg text-gray-600 px-4">
-              Choose the plan that's right for your organization
-            </p>
-          </div>
-
-          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8 max-w-5xl mx-auto">
-            {/* Starter Plan */}
-            <Card className="relative">
-              <CardHeader className="text-center pb-6">
-                <CardTitle className="text-xl sm:text-2xl font-bold">Starter</CardTitle>
-                <div className="mt-4">
-                  <span className="text-3xl sm:text-4xl font-bold">$29</span>
-                  <span className="text-gray-600 text-sm sm:text-base">/month</span>
-                </div>
-                <CardDescription className="text-sm sm:text-base">Perfect for small organizations</CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="space-y-3">
-                  <div className="flex items-center space-x-3">
-                    <Check className="h-5 w-5 text-green-600" />
-                    <span className="text-gray-700 text-sm sm:text-base">Up to 50 reports/month</span>
-                  </div>
-                  <div className="flex items-center space-x-3">
-                    <Check className="h-5 w-5 text-green-600" />
-                    <span className="text-gray-700 text-sm sm:text-base">Basic encryption</span>
-                  </div>
-                  <div className="flex items-center space-x-3">
-                    <Check className="h-5 w-5 text-green-600" />
-                    <span className="text-gray-700 text-sm sm:text-base">Email support</span>
-                  </div>
-                  <div className="flex items-center space-x-3">
-                    <Check className="h-5 w-5 text-green-600" />
-                    <span className="text-gray-700 text-sm sm:text-base">Standard branding</span>
-                  </div>
-                </div>
-                <Button className="w-full mt-6" variant="outline">
-                  Get Started
-                </Button>
-              </CardContent>
-            </Card>
-
-            {/* Professional Plan */}
-            <Card className="relative border-blue-200 shadow-lg">
-              <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
-                <span className="bg-blue-600 text-white px-4 py-1 rounded-full text-xs sm:text-sm font-medium">
-                  Most Popular
-                </span>
-              </div>
-              <CardHeader className="text-center pb-6">
-                <CardTitle className="text-xl sm:text-2xl font-bold">Professional</CardTitle>
-                <div className="mt-4">
-                  <span className="text-3xl sm:text-4xl font-bold">$99</span>
-                  <span className="text-gray-600 text-sm sm:text-base">/month</span>
-                </div>
-                <CardDescription className="text-sm sm:text-base">For growing organizations</CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="space-y-3">
-                  <div className="flex items-center space-x-3">
-                    <Check className="h-5 w-5 text-green-600" />
-                    <span className="text-gray-700 text-sm sm:text-base">Unlimited reports</span>
-                  </div>
-                  <div className="flex items-center space-x-3">
-                    <Check className="h-5 w-5 text-green-600" />
-                    <span className="text-gray-700 text-sm sm:text-base">Advanced encryption</span>
-                  </div>
-                  <div className="flex items-center space-x-3">
-                    <Check className="h-5 w-5 text-green-600" />
-                    <span className="text-gray-700 text-sm sm:text-base">Priority support</span>
-                  </div>
-                  <div className="flex items-center space-x-3">
-                    <Check className="h-5 w-5 text-green-600" />
-                    <span className="text-gray-700 text-sm sm:text-base">Custom branding</span>
-                  </div>
-                  <div className="flex items-center space-x-3">
-                    <Check className="h-5 w-5 text-green-600" />
-                    <span className="text-gray-700 text-sm sm:text-base">Analytics dashboard</span>
-                  </div>
-                </div>
-                <Button className="w-full mt-6">
-                  Get Started
-                </Button>
-              </CardContent>
-            </Card>
-
-            {/* Enterprise Plan */}
-            <Card className="relative sm:col-span-2 lg:col-span-1">
-              <CardHeader className="text-center pb-6">
-                <CardTitle className="text-xl sm:text-2xl font-bold">Enterprise</CardTitle>
-                <div className="mt-4">
-                  <span className="text-3xl sm:text-4xl font-bold">Custom</span>
-                </div>
-                <CardDescription className="text-sm sm:text-base">For large organizations</CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="space-y-3">
-                  <div className="flex items-center space-x-3">
-                    <Check className="h-5 w-5 text-green-600" />
-                    <span className="text-gray-700 text-sm sm:text-base">Everything in Professional</span>
-                  </div>
-                  <div className="flex items-center space-x-3">
-                    <Check className="h-5 w-5 text-green-600" />
-                    <span className="text-gray-700 text-sm sm:text-base">Custom domain</span>
-                  </div>
-                  <div className="flex items-center space-x-3">
-                    <Check className="h-5 w-5 text-green-600" />
-                    <span className="text-gray-700 text-sm sm:text-base">Dedicated support</span>
-                  </div>
-                  <div className="flex items-center space-x-3">
-                    <Check className="h-5 w-5 text-green-600" />
-                    <span className="text-gray-700 text-sm sm:text-base">SLA guarantee</span>
-                  </div>
-                  <div className="flex items-center space-x-3">
-                    <Check className="h-5 w-5 text-green-600" />
-                    <span className="text-gray-700 text-sm sm:text-base">Custom integrations</span>
-                  </div>
-                </div>
-                <Button className="w-full mt-6" variant="outline">
-                  Contact Sales
-                </Button>
-              </CardContent>
-            </Card>
-          </div>
-        </div>
-      </div>
-
-      {/* How It Works Section */}
-      <div className="bg-gray-50 py-16 sm:py-20">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-12 sm:mb-16">
-            <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-4">
-              How It Works
-            </h2>
-            <p className="text-base sm:text-lg text-gray-600 px-4">
-              Simple, secure, and anonymous reporting in three easy steps
-            </p>
-          </div>
-
-          <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-6 sm:gap-8">
-            <div className="text-center">
-              <div className="w-12 h-12 bg-blue-600 rounded-full flex items-center justify-center mx-auto mb-4 text-white font-bold text-xl">
-                1
-              </div>
-              <h3 className="text-lg sm:text-xl font-semibold text-gray-900 mb-2">Submit Report</h3>
-              <p className="text-gray-600 text-sm sm:text-base px-2">
-                Whistleblowers submit reports through a secure, encrypted form with optional anonymity.
-              </p>
-            </div>
-
-            <div className="text-center">
-              <div className="w-12 h-12 bg-blue-600 rounded-full flex items-center justify-center mx-auto mb-4 text-white font-bold text-xl">
-                2
-              </div>
-              <h3 className="text-lg sm:text-xl font-semibold text-gray-900 mb-2">Secure Processing</h3>
-              <p className="text-gray-600 text-sm sm:text-base px-2">
-                Reports are processed securely and assigned to authorized personnel for investigation.
-              </p>
-            </div>
-
-            <div className="text-center sm:col-span-2 md:col-span-1">
-              <div className="w-12 h-12 bg-blue-600 rounded-full flex items-center justify-center mx-auto mb-4 text-white font-bold text-xl">
-                3
-              </div>
-              <h3 className="text-lg sm:text-xl font-semibold text-gray-900 mb-2">Follow-up</h3>
-              <p className="text-gray-600 text-sm sm:text-base px-2">
-                Secure, anonymous communication allows for follow-up questions and updates.
-              </p>
-            </div>
-          </div>
-        </div>
-      </div>
-
       {/* CTA Section */}
       <div className="bg-blue-600 py-12 sm:py-16">
         <div className="max-w-4xl mx-auto text-center px-4 sm:px-6 lg:px-8">
@@ -546,8 +603,8 @@ const Landing = () => {
               <ul className="space-y-2">
                 <li><a href="#" className="text-gray-400 hover:text-white text-sm sm:text-base">Features</a></li>
                 <li><a href="#" className="text-gray-400 hover:text-white text-sm sm:text-base">Security</a></li>
-                <li><a href="#" className="text-gray-400 hover:text-white text-sm sm:text-base">Compliance</a></li>
-                <li><a href="#" className="text-gray-400 hover:text-white text-sm sm:text-base">Pricing</a></li>
+                <li><a href="/compliance-software" className="text-gray-400 hover:text-white text-sm sm:text-base">Compliance</a></li>
+                <li><a href="/pricing" className="text-gray-400 hover:text-white text-sm sm:text-base">Pricing</a></li>
               </ul>
             </div>
             
@@ -573,7 +630,7 @@ const Landing = () => {
           
           <div className="border-t border-gray-800 mt-6 sm:mt-8 pt-6 sm:pt-8 text-center">
             <p className="text-gray-400 text-sm sm:text-base">
-              © 2024 Disclosurely. All rights reserved.
+              © 2025 Disclosurely. All rights reserved. <a href="/compliance-software" className="text-blue-400 hover:text-blue-300">Compliance Software</a>. Powered by <a href="https://betterranking.co.uk/?utm_source=footer&utm_medium=internal&utm_campaign=disclosurely&utm_id=links" className="text-blue-400 hover:text-blue-300" target="_blank" rel="noopener noreferrer">Better Ranking</a>.
             </p>
           </div>
         </div>
