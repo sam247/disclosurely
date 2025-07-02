@@ -113,6 +113,8 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
   const signOut = async () => {
     await supabase.auth.signOut();
     setSubscriptionData({ subscribed: false });
+    // Redirect to main domain instead of app subdomain
+    window.location.href = 'https://disclosurely.com';
   };
 
   const value = {

@@ -1,8 +1,77 @@
+
 import { Shield, Users, Lock, FileText, Bell, Star, Check, DollarSign, Globe, Eye, Award, Building2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Carousel, CarouselContent, CarouselItem, CarouselPrevious, CarouselNext } from '@/components/ui/carousel';
 
 const Landing = () => {
+  const reviews = [
+    {
+      id: 1,
+      name: "Sarah Johnson",
+      role: "Compliance Director, TechCorp",
+      avatar: "https://images.unsplash.com/photo-1494790108755-2616b332c133?w=150&h=150&fit=crop&crop=face",
+      rating: 5,
+      text: "Disclosurely has transformed how we handle sensitive reports. The platform is intuitive and our employees feel safe using it."
+    },
+    {
+      id: 2,
+      name: "Michael Rodriguez",
+      role: "CISO, Global Healthcare Inc",
+      avatar: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150&h=150&fit=crop&crop=face",
+      rating: 5,
+      text: "The security features are outstanding. We can confidently assure our stakeholders that reports are handled with utmost care."
+    },
+    {
+      id: 3,
+      name: "Lisa Chen",
+      role: "HR Director, Financial Services LLC",
+      avatar: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=150&h=150&fit=crop&crop=face",
+      rating: 5,
+      text: "Implementation was seamless and the support team is exceptional. Best investment we've made in compliance technology."
+    },
+    {
+      id: 4,
+      name: "David Thompson",
+      role: "Chief Ethics Officer, Manufacturing Corp",
+      avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&h=150&fit=crop&crop=face",
+      rating: 5,
+      text: "The anonymous reporting feature has significantly increased our reporting rates. Employees trust the system completely."
+    },
+    {
+      id: 5,
+      name: "Emma Williams",
+      role: "Risk Manager, Retail Solutions",
+      avatar: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&h=150&fit=crop&crop=face",
+      rating: 5,
+      text: "Disclosurely's compliance features saved us months of work. The automated reporting is a game-changer."
+    },
+    {
+      id: 6,
+      name: "James Martinez",
+      role: "Operations Director, Energy Corp",
+      avatar: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=150&h=150&fit=crop&crop=face",
+      rating: 5,
+      text: "The multi-language support and customization options make this perfect for our global operations."
+    },
+    {
+      id: 7,
+      name: "Rachel Green",
+      role: "Compliance Manager, Pharmaceutical Inc",
+      avatar: "https://images.unsplash.com/photo-1487412720507-e7ab37603c6f?w=150&h=150&fit=crop&crop=face",
+      rating: 5,
+      text: "Outstanding platform with top-tier security. Our regulatory audits have never been smoother."
+    },
+    {
+      id: 8,
+      name: "Robert Taylor",
+      role: "General Counsel, Tech Startup",
+      avatar: "https://images.unsplash.com/photo-1560250097-0b93528c311a?w=150&h=150&fit=crop&crop=face",
+      rating: 5,
+      text: "As a growing company, Disclosurely scales perfectly with our needs. Highly recommended for any organization."
+    }
+  ];
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
       {/* Navigation */}
@@ -27,7 +96,7 @@ const Landing = () => {
         </div>
       </nav>
 
-      {/* Hero Section - Updated padding from py-[135px] to py-[125px] */}
+      {/* Hero Section */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-16 pb-20 py-[125px]">
         <div className="text-center">
           <h1 className="text-3xl sm:text-4xl md:text-6xl font-bold text-gray-900 mb-6">
@@ -46,8 +115,48 @@ const Landing = () => {
         </div>
       </div>
 
-      {/* Features Section */}
+      {/* Trusted by Organizations Section - Moved up */}
       <div className="bg-white py-16 sm:py-20">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-12 sm:mb-16">
+            <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-4">
+              Trusted by Organizations Worldwide
+            </h2>
+            <p className="text-base sm:text-lg text-gray-600 px-4">
+              From startups to Fortune 500 companies, organizations trust Disclosurely
+            </p>
+          </div>
+
+          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-8">
+            <div className="text-center p-6 bg-gray-50 rounded-lg shadow-sm">
+              <Globe className="h-12 w-12 text-blue-600 mx-auto mb-4" />
+              <h3 className="font-semibold text-gray-900 mb-2">Corporate</h3>
+              <p className="text-sm text-gray-600">Large enterprises and multinational corporations</p>
+            </div>
+
+            <div className="text-center p-6 bg-gray-50 rounded-lg shadow-sm">
+              <Building2 className="h-12 w-12 text-green-600 mx-auto mb-4" />
+              <h3 className="font-semibold text-gray-900 mb-2">Healthcare</h3>
+              <p className="text-sm text-gray-600">Hospitals and healthcare organizations</p>
+            </div>
+
+            <div className="text-center p-6 bg-gray-50 rounded-lg shadow-sm">
+              <Award className="h-12 w-12 text-purple-600 mx-auto mb-4" />
+              <h3 className="font-semibold text-gray-900 mb-2">Government</h3>
+              <p className="text-sm text-gray-600">Public sector and government agencies</p>
+            </div>
+
+            <div className="text-center p-6 bg-gray-50 rounded-lg shadow-sm">
+              <Eye className="h-12 w-12 text-orange-600 mx-auto mb-4" />
+              <h3 className="font-semibold text-gray-900 mb-2">Non-Profit</h3>
+              <p className="text-sm text-gray-600">NGOs and charitable organizations</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Features Section */}
+      <div className="bg-gray-50 py-16 sm:py-20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12 sm:mb-16">
             <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-4">
@@ -93,46 +202,6 @@ const Landing = () => {
         </div>
       </div>
 
-      {/* Applications Section */}
-      <div className="bg-gray-50 py-16 sm:py-20">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-12 sm:mb-16">
-            <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-4">
-              Trusted by Organizations Worldwide
-            </h2>
-            <p className="text-base sm:text-lg text-gray-600 px-4">
-              From startups to Fortune 500 companies, organizations trust Disclosurely
-            </p>
-          </div>
-
-          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-8">
-            <div className="text-center p-6 bg-white rounded-lg shadow-sm">
-              <Globe className="h-12 w-12 text-blue-600 mx-auto mb-4" />
-              <h3 className="font-semibold text-gray-900 mb-2">Corporate</h3>
-              <p className="text-sm text-gray-600">Large enterprises and multinational corporations</p>
-            </div>
-
-            <div className="text-center p-6 bg-white rounded-lg shadow-sm">
-              <Building2 className="h-12 w-12 text-green-600 mx-auto mb-4" />
-              <h3 className="font-semibold text-gray-900 mb-2">Healthcare</h3>
-              <p className="text-sm text-gray-600">Hospitals and healthcare organizations</p>
-            </div>
-
-            <div className="text-center p-6 bg-white rounded-lg shadow-sm">
-              <Award className="h-12 w-12 text-purple-600 mx-auto mb-4" />
-              <h3 className="font-semibold text-gray-900 mb-2">Government</h3>
-              <p className="text-sm text-gray-600">Public sector and government agencies</p>
-            </div>
-
-            <div className="text-center p-6 bg-white rounded-lg shadow-sm">
-              <Eye className="h-12 w-12 text-orange-600 mx-auto mb-4" />
-              <h3 className="font-semibold text-gray-900 mb-2">Non-Profit</h3>
-              <p className="text-sm text-gray-600">NGOs and charitable organizations</p>
-            </div>
-          </div>
-        </div>
-      </div>
-
       {/* Security Section */}
       <div className="bg-white py-16 sm:py-20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -173,7 +242,7 @@ const Landing = () => {
                 </div>
                 <div>
                   <h3 className="text-lg font-semibold text-gray-900 mb-2">Regular Penetration Testing</h3>
-                  <p className="text-gray-600 text-sm sm:text-base">Quarterly security audits by third-party experts</p>
+                  <p className="text-gray-600 text-sm sm:text-base">Quarterly security audits by the experts at cyber-trust.co.uk</p>
                 </div>
               </div>
             </div>
@@ -203,7 +272,7 @@ const Landing = () => {
         </div>
       </div>
 
-      {/* Reviews Section */}
+      {/* Reviews Section with Carousel */}
       <div className="bg-gray-50 py-16 sm:py-20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12 sm:mb-16">
@@ -218,72 +287,46 @@ const Landing = () => {
             </div>
           </div>
 
-          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
-            <Card className="bg-white">
-              <CardContent className="p-6">
-                <div className="flex items-center space-x-1 mb-4">
-                  {[...Array(5)].map((_, i) => (
-                    <Star key={i} className="h-4 w-4 text-yellow-400 fill-current" />
-                  ))}
-                </div>
-                <p className="text-gray-600 mb-4 text-sm sm:text-base">
-                  "Disclosurely has transformed how we handle sensitive reports. The platform is intuitive and our employees feel safe using it."
-                </p>
-                <div className="flex items-center space-x-3">
-                  <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
-                    <span className="text-blue-600 font-semibold text-sm">SJ</span>
-                  </div>
-                  <div>
-                    <p className="font-semibold text-gray-900 text-sm">Sarah Johnson</p>
-                    <p className="text-gray-500 text-xs">Compliance Director, TechCorp</p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card className="bg-white">
-              <CardContent className="p-6">
-                <div className="flex items-center space-x-1 mb-4">
-                  {[...Array(5)].map((_, i) => (
-                    <Star key={i} className="h-4 w-4 text-yellow-400 fill-current" />
-                  ))}
-                </div>
-                <p className="text-gray-600 mb-4 text-sm sm:text-base">
-                  "The security features are outstanding. We can confidently assure our stakeholders that reports are handled with utmost care."
-                </p>
-                <div className="flex items-center space-x-3">
-                  <div className="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center">
-                    <span className="text-green-600 font-semibold text-sm">MR</span>
-                  </div>
-                  <div>
-                    <p className="font-semibold text-gray-900 text-sm">Michael Rodriguez</p>
-                    <p className="text-gray-500 text-xs">CISO, Global Healthcare Inc</p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card className="bg-white sm:col-span-2 lg:col-span-1">
-              <CardContent className="p-6">
-                <div className="flex items-center space-x-1 mb-4">
-                  {[...Array(5)].map((_, i) => (
-                    <Star key={i} className="h-4 w-4 text-yellow-400 fill-current" />
-                  ))}
-                </div>
-                <p className="text-gray-600 mb-4 text-sm sm:text-base">
-                  "Implementation was seamless and the support team is exceptional. Best investment we've made in compliance technology."
-                </p>
-                <div className="flex items-center space-x-3">
-                  <div className="w-10 h-10 bg-purple-100 rounded-full flex items-center justify-center">
-                    <span className="text-purple-600 font-semibold text-sm">LC</span>
-                  </div>
-                  <div>
-                    <p className="font-semibold text-gray-900 text-sm">Lisa Chen</p>
-                    <p className="text-gray-500 text-xs">HR Director, Financial Services LLC</p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
+          <div className="relative">
+            <Carousel
+              opts={{
+                align: "start",
+                loop: true,
+              }}
+              className="w-full max-w-6xl mx-auto"
+            >
+              <CarouselContent>
+                {reviews.map((review) => (
+                  <CarouselItem key={review.id} className="md:basis-1/2 lg:basis-1/3">
+                    <Card className="bg-white h-full">
+                      <CardContent className="p-6">
+                        <div className="flex items-center space-x-1 mb-4">
+                          {[...Array(review.rating)].map((_, i) => (
+                            <Star key={i} className="h-4 w-4 text-yellow-400 fill-current" />
+                          ))}
+                        </div>
+                        <p className="text-gray-600 mb-4 text-sm sm:text-base">
+                          "{review.text}"
+                        </p>
+                        <div className="flex items-center space-x-3">
+                          <img 
+                            src={review.avatar} 
+                            alt={review.name}
+                            className="w-12 h-12 rounded-full object-cover"
+                          />
+                          <div>
+                            <p className="font-semibold text-gray-900 text-sm">{review.name}</p>
+                            <p className="text-gray-500 text-xs">{review.role}</p>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </CarouselItem>
+                ))}
+              </CarouselContent>
+              <CarouselPrevious />
+              <CarouselNext />
+            </Carousel>
           </div>
         </div>
       </div>
