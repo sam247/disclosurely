@@ -3,88 +3,72 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Carousel, CarouselContent, CarouselItem, CarouselPrevious, CarouselNext } from '@/components/ui/carousel';
 import { Link } from 'react-router-dom';
-
 const Landing = () => {
-  const reviews = [
-    {
-      id: 1,
-      name: "Sarah Johnson",
-      role: "Compliance Director, TechCorp",
-      avatar: "https://images.unsplash.com/photo-1494790108755-2616b332c133?w=150&h=150&fit=crop&crop=face",
-      rating: 5,
-      text: "Disclosurely has transformed how we handle sensitive reports. The platform is intuitive and our employees feel safe using it."
-    },
-    {
-      id: 2,
-      name: "Michael Rodriguez",
-      role: "CISO, Global Healthcare Inc",
-      avatar: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150&h=150&fit=crop&crop=face",
-      rating: 5,
-      text: "The security features are outstanding. We can confidently assure our stakeholders that reports are handled with utmost care."
-    },
-    {
-      id: 3,
-      name: "Lisa Chen",
-      role: "HR Director, Financial Services LLC",
-      avatar: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=150&h=150&fit=crop&crop=face",
-      rating: 5,
-      text: "Implementation was seamless and the support team is exceptional. Best investment we've made in compliance technology."
-    },
-    {
-      id: 4,
-      name: "David Thompson",
-      role: "Chief Ethics Officer, Manufacturing Corp",
-      avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&h=150&fit=crop&crop=face",
-      rating: 5,
-      text: "The anonymous reporting feature has significantly increased our reporting rates. Employees trust the system completely."
-    },
-    {
-      id: 5,
-      name: "Emma Williams",
-      role: "Risk Manager, Retail Solutions",
-      avatar: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&h=150&fit=crop&crop=face",
-      rating: 5,
-      text: "Disclosurely's compliance features saved us months of work. The automated reporting is a game-changer."
-    },
-    {
-      id: 6,
-      name: "James Martinez",
-      role: "Operations Director, Energy Corp",
-      avatar: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=150&h=150&fit=crop&crop=face",
-      rating: 5,
-      text: "The multi-language support and customization options make this perfect for our global operations."
-    },
-    {
-      id: 7,
-      name: "Rachel Green",
-      role: "Compliance Manager, Pharmaceutical Inc",
-      avatar: "https://images.unsplash.com/photo-1487412720507-e7ab37603c6f?w=150&h=150&fit=crop&crop=face",
-      rating: 5,
-      text: "Outstanding platform with top-tier security. Our regulatory audits have never been smoother."
-    },
-    {
-      id: 8,
-      name: "Robert Taylor",
-      role: "General Counsel, Tech Startup",
-      avatar: "https://images.unsplash.com/photo-1560250097-0b93528c311a?w=150&h=150&fit=crop&crop=face",
-      rating: 5,
-      text: "As a growing company, Disclosurely scales perfectly with our needs. Highly recommended for any organization."
-    }
-  ];
-
-  return (
-    <div className="min-h-screen bg-white">
+  const reviews = [{
+    id: 1,
+    name: "Sarah Johnson",
+    role: "Compliance Director, TechCorp",
+    avatar: "https://images.unsplash.com/photo-1494790108755-2616b332c133?w=150&h=150&fit=crop&crop=face",
+    rating: 5,
+    text: "Disclosurely has transformed how we handle sensitive reports. The platform is intuitive and our employees feel safe using it."
+  }, {
+    id: 2,
+    name: "Michael Rodriguez",
+    role: "CISO, Global Healthcare Inc",
+    avatar: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150&h=150&fit=crop&crop=face",
+    rating: 5,
+    text: "The security features are outstanding. We can confidently assure our stakeholders that reports are handled with utmost care."
+  }, {
+    id: 3,
+    name: "Lisa Chen",
+    role: "HR Director, Financial Services LLC",
+    avatar: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=150&h=150&fit=crop&crop=face",
+    rating: 5,
+    text: "Implementation was seamless and the support team is exceptional. Best investment we've made in compliance technology."
+  }, {
+    id: 4,
+    name: "David Thompson",
+    role: "Chief Ethics Officer, Manufacturing Corp",
+    avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&h=150&fit=crop&crop=face",
+    rating: 5,
+    text: "The anonymous reporting feature has significantly increased our reporting rates. Employees trust the system completely."
+  }, {
+    id: 5,
+    name: "Emma Williams",
+    role: "Risk Manager, Retail Solutions",
+    avatar: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&h=150&fit=crop&crop=face",
+    rating: 5,
+    text: "Disclosurely's compliance features saved us months of work. The automated reporting is a game-changer."
+  }, {
+    id: 6,
+    name: "James Martinez",
+    role: "Operations Director, Energy Corp",
+    avatar: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=150&h=150&fit=crop&crop=face",
+    rating: 5,
+    text: "The multi-language support and customization options make this perfect for our global operations."
+  }, {
+    id: 7,
+    name: "Rachel Green",
+    role: "Compliance Manager, Pharmaceutical Inc",
+    avatar: "https://images.unsplash.com/photo-1487412720507-e7ab37603c6f?w=150&h=150&fit=crop&crop=face",
+    rating: 5,
+    text: "Outstanding platform with top-tier security. Our regulatory audits have never been smoother."
+  }, {
+    id: 8,
+    name: "Robert Taylor",
+    role: "General Counsel, Tech Startup",
+    avatar: "https://images.unsplash.com/photo-1560250097-0b93528c311a?w=150&h=150&fit=crop&crop=face",
+    rating: 5,
+    text: "As a growing company, Disclosurely scales perfectly with our needs. Highly recommended for any organization."
+  }];
+  return <div className="min-h-screen bg-white">
       {/* Navigation */}
       <nav className="bg-white shadow-sm sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center py-4">
             <div className="flex items-center">
               <Link to="/" className="flex items-center space-x-3">
-                <img 
-                  src="/lovable-uploads/c46ace0e-df58-4119-b5e3-8dcfa075ea2f.png" 
-                  alt="Disclosurely" 
-                  className="h-8 w-auto"
-                />
+                <img src="/lovable-uploads/c46ace0e-df58-4119-b5e3-8dcfa075ea2f.png" alt="Disclosurely" className="h-8 w-auto" />
               </Link>
             </div>
             <div className="hidden md:flex items-center space-x-8">
@@ -100,14 +84,10 @@ const Landing = () => {
       </nav>
 
       {/* Hero Section */}
-      <section className="pt-16 pb-32 bg-gradient-to-br from-blue-50 to-white">
+      <section className="pt-16 pb-32 bg-gradient-to-br from-blue-50 to-white py-[150px]">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center">
-            <img 
-              src="/lovable-uploads/c46ace0e-df58-4119-b5e3-8dcfa075ea2f.png" 
-              alt="Disclosurely" 
-              className="h-16 w-auto mx-auto mb-8"
-            />
+            
             <h1 className="text-4xl md:text-6xl font-bold text-gray-900 mb-6">
               Secure Whistleblowing<br />
               <span className="text-blue-600">Made Simple</span>
@@ -117,16 +97,10 @@ const Landing = () => {
               Protect whistleblowers while maintaining compliance and building trust.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Link 
-                to="/auth/signup" 
-                className="bg-blue-600 text-white px-8 py-3 rounded-lg text-lg font-semibold hover:bg-blue-700 transition-colors"
-              >
+              <Link to="/auth/signup" className="bg-blue-600 text-white px-8 py-3 rounded-lg text-lg font-semibold hover:bg-blue-700 transition-colors">
                 Start Free Trial
               </Link>
-              <Link 
-                to="/pricing" 
-                className="border border-gray-300 text-gray-700 px-8 py-3 rounded-lg text-lg font-semibold hover:bg-gray-50 transition-colors"
-              >
+              <Link to="/pricing" className="border border-gray-300 text-gray-700 px-8 py-3 rounded-lg text-lg font-semibold hover:bg-gray-50 transition-colors">
                 View Pricing
               </Link>
             </div>
@@ -220,11 +194,7 @@ const Landing = () => {
             </div>
 
             <div className="relative rounded-lg overflow-hidden shadow-lg">
-              <img 
-                src="https://images.unsplash.com/photo-1556741533-f6acd643072a?w=600&h=400&fit=crop" 
-                alt="Anonymous reporting illustration"
-                className="w-full h-96 object-cover"
-              />
+              <img src="https://images.unsplash.com/photo-1556741533-f6acd643072a?w=600&h=400&fit=crop" alt="Anonymous reporting illustration" className="w-full h-96 object-cover" />
               <div className="absolute inset-0 bg-blue-600 bg-opacity-20"></div>
             </div>
           </div>
@@ -236,11 +206,7 @@ const Landing = () => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid md:grid-cols-2 gap-8 sm:gap-12 items-center">
             <div className="relative rounded-lg overflow-hidden shadow-lg">
-              <img 
-                src="https://images.unsplash.com/photo-1563013544-824ae1b704d3?w=600&h=400&fit=crop" 
-                alt="Encryption and security"
-                className="w-full h-96 object-cover"
-              />
+              <img src="https://images.unsplash.com/photo-1563013544-824ae1b704d3?w=600&h=400&fit=crop" alt="Encryption and security" className="w-full h-96 object-cover" />
               <div className="absolute inset-0 bg-blue-600 bg-opacity-20"></div>
             </div>
 
@@ -334,11 +300,7 @@ const Landing = () => {
             </div>
 
             <div className="relative rounded-lg overflow-hidden shadow-lg">
-              <img 
-                src="https://images.unsplash.com/photo-1553484771-047a44eee27a?w=600&h=400&fit=crop" 
-                alt="Secure communication"
-                className="w-full h-96 object-cover"
-              />
+              <img src="https://images.unsplash.com/photo-1553484771-047a44eee27a?w=600&h=400&fit=crop" alt="Secure communication" className="w-full h-96 object-cover" />
               <div className="absolute inset-0 bg-blue-600 bg-opacity-20"></div>
             </div>
           </div>
@@ -350,11 +312,7 @@ const Landing = () => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid md:grid-cols-2 gap-8 sm:gap-12 items-center">
             <div className="relative rounded-lg overflow-hidden shadow-lg">
-              <img 
-                src="https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=600&h=400&fit=crop" 
-                alt="Scalable platform"
-                className="w-full h-96 object-cover"
-              />
+              <img src="https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=600&h=400&fit=crop" alt="Scalable platform" className="w-full h-96 object-cover" />
               <div className="absolute inset-0 bg-blue-600 bg-opacity-20"></div>
             </div>
 
@@ -410,40 +368,28 @@ const Landing = () => {
               What Our Customers Say
             </h2>
             <div className="flex justify-center items-center space-x-1 mb-4">
-              {[...Array(5)].map((_, i) => (
-                <Star key={i} className="h-6 w-6 text-yellow-400 fill-current" />
-              ))}
+              {[...Array(5)].map((_, i) => <Star key={i} className="h-6 w-6 text-yellow-400 fill-current" />)}
               <span className="ml-2 text-gray-600 text-sm sm:text-base">4.9/5 from 2,400+ reviews</span>
             </div>
           </div>
 
           <div className="relative">
-            <Carousel
-              opts={{
-                align: "start",
-                loop: true,
-              }}
-              className="w-full max-w-6xl mx-auto"
-            >
+            <Carousel opts={{
+            align: "start",
+            loop: true
+          }} className="w-full max-w-6xl mx-auto">
               <CarouselContent>
-                {reviews.map((review) => (
-                  <CarouselItem key={review.id} className="md:basis-1/2 lg:basis-1/3">
+                {reviews.map(review => <CarouselItem key={review.id} className="md:basis-1/2 lg:basis-1/3">
                     <Card className="bg-white h-full">
                       <CardContent className="p-6">
                         <div className="flex items-center space-x-1 mb-4">
-                          {[...Array(review.rating)].map((_, i) => (
-                            <Star key={i} className="h-4 w-4 text-yellow-400 fill-current" />
-                          ))}
+                          {[...Array(review.rating)].map((_, i) => <Star key={i} className="h-4 w-4 text-yellow-400 fill-current" />)}
                         </div>
                         <p className="text-gray-600 mb-4 text-sm sm:text-base">
                           "{review.text}"
                         </p>
                         <div className="flex items-center space-x-3">
-                          <img 
-                            src={review.avatar} 
-                            alt={review.name}
-                            className="w-12 h-12 rounded-full object-cover"
-                          />
+                          <img src={review.avatar} alt={review.name} className="w-12 h-12 rounded-full object-cover" />
                           <div>
                             <p className="font-semibold text-gray-900 text-sm">{review.name}</p>
                             <p className="text-gray-500 text-xs">{review.role}</p>
@@ -451,8 +397,7 @@ const Landing = () => {
                         </div>
                       </CardContent>
                     </Card>
-                  </CarouselItem>
-                ))}
+                  </CarouselItem>)}
               </CarouselContent>
               <CarouselPrevious />
               <CarouselNext />
@@ -482,11 +427,7 @@ const Landing = () => {
           <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
             <div className="col-span-1 md:col-span-2">
               <div className="flex items-center space-x-3 mb-4">
-                <img 
-                  src="/lovable-uploads/416d39db-53ff-402e-a2cf-26d1a3618601.png" 
-                  alt="Disclosurely" 
-                  className="h-8 w-auto"
-                />
+                <img src="/lovable-uploads/416d39db-53ff-402e-a2cf-26d1a3618601.png" alt="Disclosurely" className="h-8 w-auto" />
               </div>
               <p className="text-gray-400 mb-4">
                 Secure whistleblowing platform for organizations. Anonymous reporting, 
@@ -518,8 +459,6 @@ const Landing = () => {
           </div>
         </div>
       </footer>
-    </div>
-  );
+    </div>;
 };
-
 export default Landing;
