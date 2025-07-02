@@ -6,6 +6,8 @@ import { AuthProvider } from '@/hooks/useAuth';
 import Index from '@/pages/Index';
 import Pricing from '@/pages/Pricing';
 import ComplianceSoftware from '@/pages/ComplianceSoftware';
+import VsWhistleblowerSoftware from '@/pages/VsWhistleblowerSoftware';
+import VsSpeakUp from '@/pages/VsSpeakUp';
 import Login from '@/pages/Login';
 import Signup from '@/pages/Signup';
 import NotFound from '@/pages/NotFound';
@@ -33,6 +35,8 @@ function App() {
               <Route path="/" element={<Index />} />
               <Route path="/pricing" element={<Pricing />} />
               <Route path="/compliance-software" element={<ComplianceSoftware />} />
+              <Route path="/vs-whistleblower-software" element={<VsWhistleblowerSoftware />} />
+              <Route path="/vs-speak-up" element={<VsSpeakUp />} />
               <Route path="/auth/login" element={<Login />} />
               <Route path="/auth/signup" element={<Signup />} />
               

@@ -10,6 +10,15 @@ interface AuthLayoutProps {
 const AuthLayout = ({ children }: AuthLayoutProps) => {
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
+      {/* Home icon in top left of the page */}
+      <Link 
+        to="/" 
+        className="fixed top-6 left-6 p-2 text-gray-400 hover:text-gray-600 transition-colors bg-white rounded-lg shadow-sm z-10"
+        title="Back to Home"
+      >
+        <Home className="h-6 w-6" />
+      </Link>
+
       <div className="sm:mx-auto sm:w-full sm:max-w-md">
         <div className="text-center">
           <div className="flex items-center justify-center space-x-2 mb-4">
@@ -23,16 +32,7 @@ const AuthLayout = ({ children }: AuthLayoutProps) => {
       </div>
 
       <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
-        <div className="bg-white py-8 px-4 shadow-lg sm:rounded-lg sm:px-10 border border-gray-100 relative">
-          {/* Home icon in top right */}
-          <Link 
-            to="/" 
-            className="absolute top-4 right-4 p-2 text-gray-400 hover:text-gray-600 transition-colors"
-            title="Back to Home"
-          >
-            <Home className="h-5 w-5" />
-          </Link>
-          
+        <div className="bg-white py-8 px-4 shadow-lg sm:rounded-lg sm:px-10 border border-gray-100">
           {children}
         </div>
       </div>

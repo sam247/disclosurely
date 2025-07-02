@@ -227,10 +227,10 @@ const Pricing = () => {
             <div>
               <h4 className="text-base sm:text-lg font-semibold mb-4">Product</h4>
               <ul className="space-y-2">
-                <li><a href="/#features" className="text-gray-400 hover:text-white text-sm sm:text-base">Features</a></li>
-                <li><a href="/#security" className="text-gray-400 hover:text-white text-sm sm:text-base">Security</a></li>
-                <li><a href="/compliance-software" className="text-gray-400 hover:text-white text-sm sm:text-base">Compliance</a></li>
                 <li><a href="/pricing" className="text-gray-400 hover:text-white text-sm sm:text-base">Pricing</a></li>
+                <li><a href="/compliance-software" className="text-gray-400 hover:text-white text-sm sm:text-base">Compliance Software</a></li>
+                <li><a href="/vs-whistleblower-software" className="text-gray-400 hover:text-white text-sm sm:text-base">Disclosurely vs Whistleblower Software</a></li>
+                <li><a href="/vs-speak-up" className="text-gray-400 hover:text-white text-sm sm:text-base">Disclosurely vs Speak Up</a></li>
               </ul>
             </div>
             

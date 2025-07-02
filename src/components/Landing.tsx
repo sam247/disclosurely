@@ -203,26 +203,13 @@ const Landing = () => {
               </div>
             </div>
 
-            <div className="bg-gradient-to-br from-blue-50 to-indigo-100 p-6 sm:p-8 rounded-lg">
-              <h3 className="text-xl font-semibold text-gray-900 mb-4">Anonymous Features</h3>
-              <div className="space-y-3">
-                <div className="flex items-center space-x-3">
-                  <Check className="h-5 w-5 text-blue-600" />
-                  <span className="text-gray-700 text-sm sm:text-base">Zero personal data collection</span>
-                </div>
-                <div className="flex items-center space-x-3">
-                  <Check className="h-5 w-5 text-blue-600" />
-                  <span className="text-gray-700 text-sm sm:text-base">IP address anonymization</span>
-                </div>
-                <div className="flex items-center space-x-3">
-                  <Check className="h-5 w-5 text-blue-600" />
-                  <span className="text-gray-700 text-sm sm:text-base">Metadata removal from files</span>
-                </div>
-                <div className="flex items-center space-x-3">
-                  <Check className="h-5 w-5 text-blue-600" />
-                  <span className="text-gray-700 text-sm sm:text-base">Secure anonymous communication</span>
-                </div>
-              </div>
+            <div className="relative rounded-lg overflow-hidden shadow-lg">
+              <img 
+                src="https://images.unsplash.com/photo-1556741533-f6acd643072a?w=600&h=400&fit=crop" 
+                alt="Anonymous reporting illustration"
+                className="w-full h-96 object-cover"
+              />
+              <div className="absolute inset-0 bg-blue-600 bg-opacity-20"></div>
             </div>
           </div>
         </div>
@@ -232,26 +219,13 @@ const Landing = () => {
       <div className="bg-white py-16 sm:py-20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid md:grid-cols-2 gap-8 sm:gap-12 items-center">
-            <div className="bg-gradient-to-br from-blue-50 to-indigo-100 p-6 sm:p-8 rounded-lg">
-              <h3 className="text-xl font-semibold text-gray-900 mb-4">Encryption Standards</h3>
-              <div className="space-y-3">
-                <div className="flex items-center space-x-3">
-                  <Check className="h-5 w-5 text-blue-600" />
-                  <span className="text-gray-700 text-sm sm:text-base">AES-256 encryption</span>
-                </div>
-                <div className="flex items-center space-x-3">
-                  <Check className="h-5 w-5 text-blue-600" />
-                  <span className="text-gray-700 text-sm sm:text-base">TLS 1.3 in transit</span>
-                </div>
-                <div className="flex items-center space-x-3">
-                  <Check className="h-5 w-5 text-blue-600" />
-                  <span className="text-gray-700 text-sm sm:text-base">Zero-knowledge architecture</span>
-                </div>
-                <div className="flex items-center space-x-3">
-                  <Check className="h-5 w-5 text-blue-600" />
-                  <span className="text-gray-700 text-sm sm:text-base">Client-side encryption</span>
-                </div>
-              </div>
+            <div className="relative rounded-lg overflow-hidden shadow-lg">
+              <img 
+                src="https://images.unsplash.com/photo-1563013544-824ae1b704d3?w=600&h=400&fit=crop" 
+                alt="Encryption and security"
+                className="w-full h-96 object-cover"
+              />
+              <div className="absolute inset-0 bg-blue-600 bg-opacity-20"></div>
             </div>
 
             <div className="space-y-6">
@@ -343,26 +317,13 @@ const Landing = () => {
               </div>
             </div>
 
-            <div className="bg-gradient-to-br from-blue-50 to-indigo-100 p-6 sm:p-8 rounded-lg">
-              <h3 className="text-xl font-semibold text-gray-900 mb-4">Communication Features</h3>
-              <div className="space-y-3">
-                <div className="flex items-center space-x-3">
-                  <Check className="h-5 w-5 text-blue-600" />
-                  <span className="text-gray-700 text-sm sm:text-base">Encrypted messaging</span>
-                </div>
-                <div className="flex items-center space-x-3">
-                  <Check className="h-5 w-5 text-blue-600" />
-                  <span className="text-gray-700 text-sm sm:text-base">File sharing capabilities</span>
-                </div>
-                <div className="flex items-center space-x-3">
-                  <Check className="h-5 w-5 text-blue-600" />
-                  <span className="text-gray-700 text-sm sm:text-base">Message read receipts</span>
-                </div>
-                <div className="flex items-center space-x-3">
-                  <Check className="h-5 w-5 text-blue-600" />
-                  <span className="text-gray-700 text-sm sm:text-base">Automated case updates</span>
-                </div>
-              </div>
+            <div className="relative rounded-lg overflow-hidden shadow-lg">
+              <img 
+                src="https://images.unsplash.com/photo-1553484771-047a44eee27a?w=600&h=400&fit=crop" 
+                alt="Secure communication"
+                className="w-full h-96 object-cover"
+              />
+              <div className="absolute inset-0 bg-blue-600 bg-opacity-20"></div>
             </div>
           </div>
         </div>
@@ -372,26 +333,13 @@ const Landing = () => {
       <div className="bg-white py-16 sm:py-20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid md:grid-cols-2 gap-8 sm:gap-12 items-center">
-            <div className="bg-gradient-to-br from-blue-50 to-indigo-100 p-6 sm:p-8 rounded-lg">
-              <h3 className="text-xl font-semibold text-gray-900 mb-4">Unlimited Everything</h3>
-              <div className="space-y-3">
-                <div className="flex items-center space-x-3">
-                  <Infinity className="h-5 w-5 text-blue-600" />
-                  <span className="text-gray-700 text-sm sm:text-base">Unlimited cases</span>
-                </div>
-                <div className="flex items-center space-x-3">
-                  <Infinity className="h-5 w-5 text-blue-600" />
-                  <span className="text-gray-700 text-sm sm:text-base">Unlimited file uploads</span>
-                </div>
-                <div className="flex items-center space-x-3">
-                  <Infinity className="h-5 w-5 text-blue-600" />
-                  <span className="text-gray-700 text-sm sm:text-base">Unlimited categories</span>
-                </div>
-                <div className="flex items-center space-x-3">
-                  <Infinity className="h-5 w-5 text-blue-600" />
-                  <span className="text-gray-700 text-sm sm:text-base">Unlimited users</span>
-                </div>
-              </div>
+            <div className="relative rounded-lg overflow-hidden shadow-lg">
+              <img 
+                src="https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=600&h=400&fit=crop" 
+                alt="Scalable platform"
+                className="w-full h-96 object-cover"
+              />
+              <div className="absolute inset-0 bg-blue-600 bg-opacity-20"></div>
             </div>
 
             <div className="space-y-6">
@@ -483,26 +431,13 @@ const Landing = () => {
               </div>
             </div>
 
-            <div className="bg-gradient-to-br from-blue-50 to-indigo-100 p-6 sm:p-8 rounded-lg">
-              <h3 className="text-xl font-semibold text-gray-900 mb-4">Security Certifications</h3>
-              <div className="space-y-3">
-                <div className="flex items-center space-x-3">
-                  <Check className="h-5 w-5 text-blue-600" />
-                  <span className="text-gray-700 text-sm sm:text-base">SOC 2 Type II</span>
-                </div>
-                <div className="flex items-center space-x-3">
-                  <Check className="h-5 w-5 text-blue-600" />
-                  <span className="text-gray-700 text-sm sm:text-base">GDPR Compliant</span>
-                </div>
-                <div className="flex items-center space-x-3">
-                  <Check className="h-5 w-5 text-blue-600" />
-                  <span className="text-gray-700 text-sm sm:text-base">HIPAA Ready</span>
-                </div>
-                <div className="flex items-center space-x-3">
-                  <Check className="h-5 w-5 text-blue-600" />
-                  <span className="text-gray-700 text-sm sm:text-base">ISO 27001</span>
-                </div>
-              </div>
+            <div className="relative rounded-lg overflow-hidden shadow-lg">
+              <img 
+                src="https://images.unsplash.com/photo-1563013544-824ae1b704d3?w=600&h=400&fit=crop" 
+                alt="Bank-level security"
+                className="w-full h-96 object-cover"
+              />
+              <div className="absolute inset-0 bg-blue-600 bg-opacity-20"></div>
             </div>
           </div>
         </div>
@@ -601,10 +536,10 @@ const Landing = () => {
             <div>
               <h4 className="text-base sm:text-lg font-semibold mb-4">Product</h4>
               <ul className="space-y-2">
-                <li><a href="#" className="text-gray-400 hover:text-white text-sm sm:text-base">Features</a></li>
-                <li><a href="#" className="text-gray-400 hover:text-white text-sm sm:text-base">Security</a></li>
-                <li><a href="/compliance-software" className="text-gray-400 hover:text-white text-sm sm:text-base">Compliance</a></li>
                 <li><a href="/pricing" className="text-gray-400 hover:text-white text-sm sm:text-base">Pricing</a></li>
+                <li><a href="/compliance-software" className="text-gray-400 hover:text-white text-sm sm:text-base">Compliance Software</a></li>
+                <li><a href="/vs-whistleblower-software" className="text-gray-400 hover:text-white text-sm sm:text-base">Disclosurely vs Whistleblower Software</a></li>
+                <li><a href="/vs-speak-up" className="text-gray-400 hover:text-white text-sm sm:text-base">Disclosurely vs Speak Up</a></li>
               </ul>
             </div>
             
