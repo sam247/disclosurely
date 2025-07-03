@@ -3,6 +3,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Carousel, CarouselContent, CarouselItem, CarouselPrevious, CarouselNext } from '@/components/ui/carousel';
 import { Link } from 'react-router-dom';
+
 const Landing = () => {
   const reviews = [{
     id: 1,
@@ -61,14 +62,15 @@ const Landing = () => {
     rating: 5,
     text: "As a growing company, Disclosurely scales perfectly with our needs. Highly recommended for any organization."
   }];
-  return <div className="min-h-screen bg-white">
+  return (
+    <div className="min-h-screen bg-white">
       {/* Navigation */}
       <nav className="bg-white shadow-sm sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center py-4">
             <div className="flex items-center">
               <Link to="/" className="flex items-center space-x-3">
-                <img src="/lovable-uploads/c46ace0e-df58-4119-b5e3-8dcfa075ea2f.png" alt="Disclosurely" className="h-8 w-auto" />
+                <img src="/lovable-uploads/c46ace0e-df58-4119-b5e3-8dcfa075ea2f.png" alt="Disclosurely" className="h-6 sm:h-8 w-auto" />
               </Link>
             </div>
             <div className="hidden md:flex items-center space-x-8">
@@ -427,7 +429,7 @@ const Landing = () => {
           <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
             <div className="col-span-1 md:col-span-2">
               <div className="flex items-center space-x-3 mb-4">
-                <img src="/lovable-uploads/416d39db-53ff-402e-a2cf-26d1a3618601.png" alt="Disclosurely" className="h-8 w-auto" />
+                <img src="/lovable-uploads/416d39db-53ff-402e-a2cf-26d1a3618601.png" alt="Disclosurely" className="h-6 sm:h-8 w-auto" />
               </div>
               <p className="text-gray-400 mb-4">
                 Secure whistleblowing platform for organizations. Anonymous reporting, 
@@ -459,6 +461,8 @@ const Landing = () => {
           </div>
         </div>
       </footer>
-    </div>;
+    </div>
+  );
 };
+
 export default Landing;
