@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -8,7 +9,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
-import { LogOut, Plus, ExternalLink, FileText, Eye, Archive, Trash2, CreditCard, Settings, RotateCcw } from 'lucide-react';
+import { LogOut, Plus, ExternalLink, FileText, Eye, Archive, Trash2, CreditCard, Settings, RotateCcw, MoreVertical, Menu } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import ReportMessaging from '@/components/ReportMessaging';
 import ReportContentDisplay from '@/components/ReportContentDisplay';
@@ -343,77 +344,164 @@ const Dashboard = () => {
     ) : (
       <div className="space-y-4">
         {reportsList.map((report) => (
-          <div key={report.id} className="flex items-center justify-between p-4 border rounded-lg hover:bg-gray-50 transition-colors">
-            <div className="flex-1">
-              <h3 className="font-medium">{report.title}</h3>
-              <p className="text-sm text-gray-600">
-                {report.tracking_id} • {new Date(report.created_at).toLocaleDateString()}
-              </p>
+          <div key={report.id} className="border rounded-lg hover:bg-gray-50 transition-colors">
+            {/* Mobile Layout */}
+            <div className="block md:hidden p-4 space-y-3">
+              <div className="flex items-start justify-between">
+                <div className="flex-1 min-w-0">
+                  <h3 className="font-medium text-sm truncate">{report.title}</h3>
+                  <p className="text-xs text-gray-600 mt-1">
+                    {report.tracking_id}
+                  </p>
+                  <p className="text-xs text-gray-500">
+                    {new Date(report.created_at).toLocaleDateString()}
+                  </p>
+                </div>
+                <span className={`px-2 py-1 text-xs rounded-full flex-shrink-0 ml-2 ${
+                  report.status === 'new' ? 'bg-blue-100 text-blue-800' :
+                  report.status === 'in_review' ? 'bg-yellow-100 text-yellow-800' :
+                  report.status === 'investigating' ? 'bg-orange-100 text-orange-800' :
+                  report.status === 'resolved' ? 'bg-green-100 text-green-800' :
+                  report.status === 'closed' ? 'bg-gray-100 text-gray-800' :
+                  'bg-gray-100 text-gray-800'
+                }`}>
+                  {report.status.replace('_', ' ')}
+                </span>
+              </div>
+              
+              <div className="flex flex-wrap gap-2">
+                <Button 
+                  size="sm" 
+                  variant="outline"
+                  onClick={() => handleViewReport(report)}
+                  className="flex-1 min-w-0"
+                >
+                  <Eye className="h-3 w-3 mr-1" />
+                  View
+                </Button>
+                
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button size="sm" variant="outline" className="px-2">
+                      <MoreVertical className="h-3 w-3" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end">
+                    {isArchived ? (
+                      <DropdownMenuItem onClick={() => handleUnarchiveReport(report.id)}>
+                        <RotateCcw className="h-4 w-4 mr-2" />
+                        Unarchive
+                      </DropdownMenuItem>
+                    ) : (
+                      <DropdownMenuItem onClick={() => handleArchiveReport(report.id)}>
+                        <Archive className="h-4 w-4 mr-2" />
+                        Archive
+                      </DropdownMenuItem>
+                    )}
+                    <AlertDialog>
+                      <AlertDialogTrigger asChild>
+                        <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
+                          <Trash2 className="h-4 w-4 mr-2" />
+                          Delete
+                        </DropdownMenuItem>
+                      </AlertDialogTrigger>
+                      <AlertDialogContent>
+                        <AlertDialogHeader>
+                          <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+                          <AlertDialogDescription>
+                            This action cannot be undone. This will permanently delete the report 
+                            and all associated messages.
+                          </AlertDialogDescription>
+                        </AlertDialogHeader>
+                        <AlertDialogFooter>
+                          <AlertDialogCancel>Cancel</AlertDialogCancel>
+                          <AlertDialogAction 
+                            onClick={() => handleDeleteReport(report.id)}
+                            className="bg-red-600 hover:bg-red-700"
+                          >
+                            Delete Report
+                          </AlertDialogAction>
+                        </AlertDialogFooter>
+                      </AlertDialogContent>
+                    </AlertDialog>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              </div>
             </div>
-            <div className="flex items-center space-x-3">
-              <span className={`px-2 py-1 text-xs rounded-full ${
-                report.status === 'new' ? 'bg-blue-100 text-blue-800' :
-                report.status === 'in_review' ? 'bg-yellow-100 text-yellow-800' :
-                report.status === 'investigating' ? 'bg-orange-100 text-orange-800' :
-                report.status === 'resolved' ? 'bg-green-100 text-green-800' :
-                report.status === 'closed' ? 'bg-gray-100 text-gray-800' :
-                'bg-gray-100 text-gray-800'
-              }`}>
-                {report.status.replace('_', ' ')}
-              </span>
-              <Button 
-                size="sm" 
-                variant="outline"
-                onClick={() => handleViewReport(report)}
-              >
-                <Eye className="h-4 w-4 mr-1" />
-                View
-              </Button>
-              {isArchived ? (
+
+            {/* Desktop Layout */}
+            <div className="hidden md:flex items-center justify-between p-4">
+              <div className="flex-1">
+                <h3 className="font-medium">{report.title}</h3>
+                <p className="text-sm text-gray-600">
+                  {report.tracking_id} • {new Date(report.created_at).toLocaleDateString()}
+                </p>
+              </div>
+              <div className="flex items-center space-x-3">
+                <span className={`px-2 py-1 text-xs rounded-full ${
+                  report.status === 'new' ? 'bg-blue-100 text-blue-800' :
+                  report.status === 'in_review' ? 'bg-yellow-100 text-yellow-800' :
+                  report.status === 'investigating' ? 'bg-orange-100 text-orange-800' :
+                  report.status === 'resolved' ? 'bg-green-100 text-green-800' :
+                  report.status === 'closed' ? 'bg-gray-100 text-gray-800' :
+                  'bg-gray-100 text-gray-800'
+                }`}>
+                  {report.status.replace('_', ' ')}
+                </span>
                 <Button 
                   size="sm" 
                   variant="outline"
-                  onClick={() => handleUnarchiveReport(report.id)}
+                  onClick={() => handleViewReport(report)}
                 >
-                  <RotateCcw className="h-4 w-4 mr-1" />
-                  Unarchive
+                  <Eye className="h-4 w-4 mr-1" />
+                  View
                 </Button>
-              ) : (
-                <Button 
-                  size="sm" 
-                  variant="outline"
-                  onClick={() => handleArchiveReport(report.id)}
-                >
-                  <Archive className="h-4 w-4 mr-1" />
-                  Archive
-                </Button>
-              )}
-              <AlertDialog>
-                <AlertDialogTrigger asChild>
-                  <Button size="sm" variant="destructive">
-                    <Trash2 className="h-4 w-4 mr-1" />
-                    Delete
+                {isArchived ? (
+                  <Button 
+                    size="sm" 
+                    variant="outline"
+                    onClick={() => handleUnarchiveReport(report.id)}
+                  >
+                    <RotateCcw className="h-4 w-4 mr-1" />
+                    Unarchive
                   </Button>
-                </AlertDialogTrigger>
-                <AlertDialogContent>
-                  <AlertDialogHeader>
-                    <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
-                    <AlertDialogDescription>
-                      This action cannot be undone. This will permanently delete the report 
-                      and all associated messages.
-                    </AlertDialogDescription>
-                  </AlertDialogHeader>
-                  <AlertDialogFooter>
-                    <AlertDialogCancel>Cancel</AlertDialogCancel>
-                    <AlertDialogAction 
-                      onClick={() => handleDeleteReport(report.id)}
-                      className="bg-red-600 hover:bg-red-700"
-                    >
-                      Delete Report
-                    </AlertDialogAction>
-                  </AlertDialogFooter>
-                </AlertDialogContent>
-              </AlertDialog>
+                ) : (
+                  <Button 
+                    size="sm" 
+                    variant="outline"
+                    onClick={() => handleArchiveReport(report.id)}
+                  >
+                    <Archive className="h-4 w-4 mr-1" />
+                    Archive
+                  </Button>
+                )}
+                <AlertDialog>
+                  <AlertDialogTrigger asChild>
+                    <Button size="sm" variant="destructive">
+                      <Trash2 className="h-4 w-4 mr-1" />
+                      Delete
+                    </Button>
+                  </AlertDialogTrigger>
+                  <AlertDialogContent>
+                    <AlertDialogHeader>
+                      <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+                      <AlertDialogDescription>
+                        This action cannot be undone. This will permanently delete the report 
+                        and all associated messages.
+                      </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                      <AlertDialogCancel>Cancel</AlertDialogCancel>
+                      <AlertDialogAction 
+                        onClick={() => handleDeleteReport(report.id)}
+                        className="bg-red-600 hover:bg-red-700"
+                      >
+                        Delete Report
+                      </AlertDialogAction>
+                    </AlertDialogFooter>
+                  </AlertDialogContent>
+                </AlertDialog>
+              </div>
             </div>
           </div>
         ))}
@@ -424,35 +512,41 @@ const Dashboard = () => {
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
-      <header className="bg-white shadow">
+      <header className="bg-white shadow sticky top-0 z-40">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center py-6">
-            <div className="flex items-center space-x-4">
+          <div className="flex justify-between items-center py-4">
+            <div className="flex items-center space-x-3 min-w-0 flex-1">
               <img 
                 src="/lovable-uploads/c46ace0e-df58-4119-b5e3-8dcfa075ea2f.png" 
                 alt="Disclosurely" 
-                className="h-8 w-auto"
+                className="h-6 w-auto sm:h-8 flex-shrink-0"
               />
-              <div>
-                <h1 className="text-2xl font-bold text-gray-900">Dashboard</h1>
-                <div className="flex items-center gap-4">
-                  <p className="text-sm text-gray-600">Welcome back, {user?.email}</p>
+              <div className="min-w-0 flex-1">
+                <h1 className="text-lg sm:text-2xl font-bold text-gray-900 truncate">Dashboard</h1>
+                <div className="flex flex-col sm:flex-row sm:items-center sm:gap-4">
+                  <p className="text-xs sm:text-sm text-gray-600 truncate">Welcome back, {user?.email}</p>
                   {subscriptionData.subscribed && (
-                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                    <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800 mt-1 sm:mt-0 self-start">
                       {subscriptionData.subscription_tier}
                     </span>
                   )}
                 </div>
               </div>
             </div>
-            <div className="flex items-center space-x-2">
-              <Button variant="outline" size="sm" onClick={() => setIsSettingsOpen(true)}>
+            <div className="flex items-center space-x-2 flex-shrink-0">
+              <Button variant="outline" size="sm" onClick={() => setIsSettingsOpen(true)} className="hidden sm:flex">
                 <Settings className="h-4 w-4 mr-2" />
                 Settings
               </Button>
-              <Button onClick={handleLogout} variant="outline">
+              <Button variant="outline" size="sm" onClick={() => setIsSettingsOpen(true)} className="sm:hidden">
+                <Settings className="h-4 w-4" />
+              </Button>
+              <Button onClick={handleLogout} variant="outline" size="sm" className="hidden sm:flex">
                 <LogOut className="h-4 w-4 mr-2" />
                 Sign out
+              </Button>
+              <Button onClick={handleLogout} variant="outline" size="sm" className="sm:hidden">
+                <LogOut className="h-4 w-4" />
               </Button>
             </div>
           </div>
@@ -460,49 +554,49 @@ const Dashboard = () => {
       </header>
 
       {/* Main Content */}
-      <main className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
-        <div className="px-4 py-6 sm:px-0">
+      <main className="max-w-7xl mx-auto py-4 sm:py-6 px-4 sm:px-6 lg:px-8">
+        <div className="space-y-6">
           <Tabs defaultValue="cases" className="space-y-6">
-            <TabsList>
-              <TabsTrigger value="cases">Cases</TabsTrigger>
-              <TabsTrigger value="reports">Reports</TabsTrigger>
-              <TabsTrigger value="subscription">Subscription</TabsTrigger>
+            <TabsList className="grid w-full grid-cols-3">
+              <TabsTrigger value="cases" className="text-xs sm:text-sm">Cases</TabsTrigger>
+              <TabsTrigger value="reports" className="text-xs sm:text-sm">Reports</TabsTrigger>
+              <TabsTrigger value="subscription" className="text-xs sm:text-sm">Subscription</TabsTrigger>
             </TabsList>
 
             <TabsContent value="cases" className="space-y-6">
               {/* Quick Stats */}
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                 <Card>
-                  <CardContent className="p-6">
+                  <CardContent className="p-4 sm:p-6">
                     <div className="flex items-center">
-                      <FileText className="h-8 w-8 text-blue-600" />
-                      <div className="ml-4">
-                        <p className="text-sm font-medium text-gray-600">Active Reports</p>
-                        <p className="text-2xl font-bold text-gray-900">{reports.length}</p>
+                      <FileText className="h-6 w-6 sm:h-8 sm:w-8 text-blue-600 flex-shrink-0" />
+                      <div className="ml-3 sm:ml-4 min-w-0 flex-1">
+                        <p className="text-xs sm:text-sm font-medium text-gray-600">Active Reports</p>
+                        <p className="text-xl sm:text-2xl font-bold text-gray-900">{reports.length}</p>
                       </div>
                     </div>
                   </CardContent>
                 </Card>
                 
                 <Card>
-                  <CardContent className="p-6">
+                  <CardContent className="p-4 sm:p-6">
                     <div className="flex items-center">
-                      <Archive className="h-8 w-8 text-gray-600" />
-                      <div className="ml-4">
-                        <p className="text-sm font-medium text-gray-600">Archived Reports</p>
-                        <p className="text-2xl font-bold text-gray-900">{archivedReports.length}</p>
+                      <Archive className="h-6 w-6 sm:h-8 sm:w-8 text-gray-600 flex-shrink-0" />
+                      <div className="ml-3 sm:ml-4 min-w-0 flex-1">
+                        <p className="text-xs sm:text-sm font-medium text-gray-600">Archived Reports</p>
+                        <p className="text-xl sm:text-2xl font-bold text-gray-900">{archivedReports.length}</p>
                       </div>
                     </div>
                   </CardContent>
                 </Card>
                 
                 <Card>
-                  <CardContent className="p-6">
+                  <CardContent className="p-4 sm:p-6">
                     <div className="flex items-center">
-                      <ExternalLink className="h-8 w-8 text-green-600" />
-                      <div className="ml-4">
-                        <p className="text-sm font-medium text-gray-600">Submission Link</p>
-                        <p className="text-2xl font-bold text-gray-900">{links.length > 0 ? 'Active' : 'None'}</p>
+                      <ExternalLink className="h-6 w-6 sm:h-8 sm:w-8 text-green-600 flex-shrink-0" />
+                      <div className="ml-3 sm:ml-4 min-w-0 flex-1">
+                        <p className="text-xs sm:text-sm font-medium text-gray-600">Submission Link</p>
+                        <p className="text-xl sm:text-2xl font-bold text-gray-900">{links.length > 0 ? 'Active' : 'None'}</p>
                       </div>
                     </div>
                   </CardContent>
@@ -512,15 +606,15 @@ const Dashboard = () => {
               {/* Subscription Alert */}
               {!subscriptionData.subscribed && (
                 <Card className="border-orange-200 bg-orange-50">
-                  <CardContent className="p-6">
-                    <div className="flex items-center justify-between">
+                  <CardContent className="p-4 sm:p-6">
+                    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                       <div>
                         <h3 className="font-medium text-orange-800">Subscription Required</h3>
                         <p className="text-sm text-orange-700">
                           A subscription is required to create submission links and manage reports.
                         </p>
                       </div>
-                      <Button onClick={() => navigate('#subscription')} className="bg-orange-600 hover:bg-orange-700">
+                      <Button onClick={() => navigate('#subscription')} className="bg-orange-600 hover:bg-orange-700 self-start sm:self-auto">
                         View Plans
                       </Button>
                     </div>
@@ -531,13 +625,13 @@ const Dashboard = () => {
               {/* Create/Manage Link Section */}
               {links.length === 0 ? (
                 <Card>
-                  <CardContent className="p-6">
-                    <div className="flex items-center">
-                      <Plus className="h-8 w-8 text-purple-600" />
-                      <div className="ml-4">
+                  <CardContent className="p-4 sm:p-6">
+                    <div className="flex flex-col sm:flex-row sm:items-center gap-4">
+                      <Plus className="h-6 w-6 sm:h-8 sm:w-8 text-purple-600 flex-shrink-0" />
+                      <div className="flex-1">
                         <Button 
                           onClick={createOrGetSubmissionLink} 
-                          className="w-full" 
+                          className="w-full sm:w-auto" 
                           disabled={!subscriptionData.subscribed}
                         >
                           Create Submission Link
@@ -551,24 +645,26 @@ const Dashboard = () => {
                 </Card>
               ) : (
                 <Card>
-                  <CardHeader>
-                    <CardTitle>Submission Link</CardTitle>
+                  <CardHeader className="pb-4">
+                    <CardTitle className="text-lg sm:text-xl">Submission Link</CardTitle>
                     <CardDescription>Your organization's secure report submission link</CardDescription>
                   </CardHeader>
                   <CardContent>
                     {links.map((link) => (
-                      <div key={link.id} className="flex items-center justify-between p-4 border rounded-lg">
-                        <div>
-                          <h3 className="font-medium">{link.name}</h3>
-                          <p className="text-sm text-gray-600">Used {link.usage_count} times</p>
-                        </div>
-                        <div className="flex items-center space-x-2">
-                          <code className="text-xs bg-gray-100 px-2 py-1 rounded">
-                            /secure/tool/submit/{link.link_token}
-                          </code>
-                          <Button size="sm" onClick={() => copyLink(link.link_token)}>
-                            Copy Link
-                          </Button>
+                      <div key={link.id} className="border rounded-lg p-4">
+                        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                          <div className="min-w-0 flex-1">
+                            <h3 className="font-medium text-sm sm:text-base">{link.name}</h3>
+                            <p className="text-xs sm:text-sm text-gray-600">Used {link.usage_count} times</p>
+                          </div>
+                          <div className="flex flex-col sm:flex-row sm:items-center gap-2">
+                            <code className="text-xs bg-gray-100 px-2 py-1 rounded break-all">
+                              /secure/tool/submit/{link.link_token}
+                            </code>
+                            <Button size="sm" onClick={() => copyLink(link.link_token)} className="self-start sm:self-auto">
+                              Copy Link
+                            </Button>
+                          </div>
                         </div>
                       </div>
                     ))}
@@ -578,10 +674,10 @@ const Dashboard = () => {
 
               {/* Reports List with Toggle */}
               <Card>
-                <CardHeader>
-                  <div className="flex items-center justify-between">
+                <CardHeader className="pb-4">
+                  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                     <div>
-                      <CardTitle>{showArchived ? 'Archived Reports' : 'Active Reports'}</CardTitle>
+                      <CardTitle className="text-lg sm:text-xl">{showArchived ? 'Archived Reports' : 'Active Reports'}</CardTitle>
                       <CardDescription>
                         {showArchived ? 'Previously archived report submissions' : 'Current active report submissions'}
                       </CardDescription>
@@ -589,6 +685,8 @@ const Dashboard = () => {
                     <Button 
                       variant="outline" 
                       onClick={() => setShowArchived(!showArchived)}
+                      size="sm"
+                      className="self-start sm:self-auto"
                     >
                       {showArchived ? 'Show Active' : 'Show Archived'}
                     </Button>
@@ -613,9 +711,9 @@ const Dashboard = () => {
 
       {/* Report Details Dialog */}
       <Dialog open={isReportDialogOpen} onOpenChange={setIsReportDialogOpen}>
-        <DialogContent className="max-w-6xl max-h-[90vh] overflow-y-auto">
+        <DialogContent className="max-w-[95vw] sm:max-w-6xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>Report Details: {selectedReport?.tracking_id}</DialogTitle>
+            <DialogTitle className="text-base sm:text-lg">Report Details: {selectedReport?.tracking_id}</DialogTitle>
             <DialogDescription>
               View submitted report information, attachments, and secure messages
             </DialogDescription>
