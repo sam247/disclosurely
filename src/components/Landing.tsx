@@ -1,6 +1,8 @@
-import { Shield, Users, MessageSquare, Scale, Infinity, ArrowRight, Check, Star, Building, Globe, Award } from 'lucide-react';
+
+import { Shield, Users, MessageSquare, Scale, Infinity, ArrowRight, Check, Star, Building, Globe, Award, Lock } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from '@/components/ui/carousel';
 import { Link } from 'react-router-dom';
 import AnonymousReportingArt from './artwork/AnonymousReportingArt';
 import EncryptionArt from './artwork/EncryptionArt';
@@ -19,7 +21,7 @@ const Landing = () => {
                 <img 
                   src="/lovable-uploads/c46ace0e-df58-4119-b5e3-8dcfa075ea2f.png" 
                   alt="Disclosurely" 
-                  className="h-8 w-auto"
+                  className="h-6 sm:h-8 w-auto"
                 />
               </Link>
             </div>
@@ -31,6 +33,12 @@ const Landing = () => {
                 Get Started
               </Link>
             </div>
+            {/* Mobile Sign-in button */}
+            <div className="md:hidden">
+              <Link to="/auth/login" className="bg-blue-600 text-white px-3 py-2 rounded-lg hover:bg-blue-700 transition-colors text-sm">
+                Sign in
+              </Link>
+            </div>
           </div>
         </div>
       </nav>
@@ -38,20 +46,29 @@ const Landing = () => {
       {/* Hero Section */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-[150px] pb-20">
         <div className="text-center">
+          {/* Blue lock icon */}
+          <div className="flex justify-center mb-6">
+            <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center">
+              <Lock className="h-8 w-8 text-blue-600" />
+            </div>
+          </div>
+          <p className="text-sm font-medium text-blue-600 mb-4 uppercase tracking-wide">End to End Encryption</p>
           <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold text-gray-900 mb-6">
-            Secure Whistleblowing
-            <span className="block text-blue-600">For Modern Organizations</span>
+            Secure Disclosure and Whistleblowing Software
+            <span className="block text-blue-600">for Modern Organisations</span>
           </h1>
           <p className="text-lg sm:text-xl text-gray-600 mb-8 max-w-3xl mx-auto px-4">
             Protect your organization with our secure, anonymous whistleblowing platform.
           </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
+          <div className="flex flex-col items-center gap-4">
             <a href="https://app.disclosurely.com/auth/signup" className="bg-blue-600 hover:bg-blue-700 text-white px-6 sm:px-8 py-3 rounded-lg text-lg font-semibold">
               Start Free Trial
             </a>
-            <Link to="/compliance-software" className="inline-flex items-center text-blue-600 hover:text-blue-700 text-lg font-semibold">
-              Learn about Compliance <ArrowRight className="ml-2 h-5 w-5" />
-            </Link>
+            <div className="text-center">
+              <Link to="/compliance-software" className="inline-flex items-center text-blue-600 hover:text-blue-700 text-lg font-semibold">
+                Learn about Compliance <ArrowRight className="ml-2 h-5 w-5" />
+              </Link>
+            </div>
           </div>
         </div>
       </div>
@@ -301,7 +318,7 @@ const Landing = () => {
         </div>
       </div>
 
-      {/* Testimonials */}
+      {/* Testimonials - Restored as Carousel */}
       <div className="bg-gray-50 py-16 sm:py-20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">
@@ -310,52 +327,107 @@ const Landing = () => {
             </h2>
           </div>
 
-          <div className="grid md:grid-cols-3 gap-8">
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center">
-                  <Star className="h-5 w-5 mr-2 text-yellow-500" />
-                  Excellent Security
-                </CardTitle>
-                <CardDescription>Top-notch encryption</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <p className="text-gray-600">
-                  "Disclosurely's end-to-end encryption keeps our data safe. Highly recommended!"
-                </p>
-              </CardContent>
-            </Card>
+          <Carousel className="w-full max-w-4xl mx-auto">
+            <CarouselContent>
+              <CarouselItem className="md:basis-1/2 lg:basis-1/3">
+                <Card className="h-full">
+                  <CardHeader className="text-center">
+                    <div className="w-16 h-16 bg-gray-200 rounded-full mx-auto mb-4 flex items-center justify-center">
+                      <Users className="h-8 w-8 text-gray-400" />
+                    </div>
+                    <CardTitle className="flex items-center justify-center">
+                      <div className="flex mr-2">
+                        {[...Array(5)].map((_, i) => (
+                          <Star key={i} className="h-4 w-4 text-yellow-500 fill-current" />
+                        ))}
+                      </div>
+                      Excellent Security
+                    </CardTitle>
+                    <CardDescription>Sarah M., Compliance Officer</CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <p className="text-gray-600 text-center">
+                      "Disclosurely's end-to-end encryption keeps our data safe. The platform is intuitive and our employees feel confident reporting issues."
+                    </p>
+                  </CardContent>
+                </Card>
+              </CarouselItem>
 
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center">
-                  <Star className="h-5 w-5 mr-2 text-yellow-500" />
-                  Easy to Use
-                </CardTitle>
-                <CardDescription>Simple and intuitive</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <p className="text-gray-600">
-                  "The platform is user-friendly and easy to navigate. Our team loves it!"
-                </p>
-              </CardContent>
-            </Card>
+              <CarouselItem className="md:basis-1/2 lg:basis-1/3">
+                <Card className="h-full">
+                  <CardHeader className="text-center">
+                    <div className="w-16 h-16 bg-gray-200 rounded-full mx-auto mb-4 flex items-center justify-center">
+                      <Building className="h-8 w-8 text-gray-400" />
+                    </div>
+                    <CardTitle className="flex items-center justify-center">
+                      <div className="flex mr-2">
+                        {[...Array(5)].map((_, i) => (
+                          <Star key={i} className="h-4 w-4 text-yellow-500 fill-current" />
+                        ))}
+                      </div>
+                      Easy to Use
+                    </CardTitle>
+                    <CardDescription>Michael R., HR Director</CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <p className="text-gray-600 text-center">
+                      "The platform is user-friendly and easy to navigate. Our team was up and running within hours of setup."
+                    </p>
+                  </CardContent>
+                </Card>
+              </CarouselItem>
 
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center">
-                  <Star className="h-5 w-5 mr-2 text-yellow-500" />
-                  Great Support
-                </CardTitle>
-                <CardDescription>Responsive and helpful</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <p className="text-gray-600">
-                  "The support team is always available and quick to resolve any issues."
-                </p>
-              </CardContent>
-            </Card>
-          </div>
+              <CarouselItem className="md:basis-1/2 lg:basis-1/3">
+                <Card className="h-full">
+                  <CardHeader className="text-center">
+                    <div className="w-16 h-16 bg-gray-200 rounded-full mx-auto mb-4 flex items-center justify-center">
+                      <Award className="h-8 w-8 text-gray-400" />
+                    </div>
+                    <CardTitle className="flex items-center justify-center">
+                      <div className="flex mr-2">
+                        {[...Array(5)].map((_, i) => (
+                          <Star key={i} className="h-4 w-4 text-yellow-500 fill-current" />
+                        ))}
+                      </div>
+                      Great Support
+                    </CardTitle>
+                    <CardDescription>Jennifer L., Legal Counsel</CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <p className="text-gray-600 text-center">
+                      "The support team is always available and quick to resolve any issues. Highly recommend for any organization."
+                    </p>
+                  </CardContent>
+                </Card>
+              </CarouselItem>
+
+              <CarouselItem className="md:basis-1/2 lg:basis-1/3">
+                <Card className="h-full">
+                  <CardHeader className="text-center">
+                    <div className="w-16 h-16 bg-gray-200 rounded-full mx-auto mb-4 flex items-center justify-center">
+                      <Shield className="h-8 w-8 text-gray-400" />
+                    </div>
+                    <CardTitle className="flex items-center justify-center">
+                      <div className="flex mr-2">
+                        {[...Array(5)].map((_, i) => (
+                          <Star key={i} className="h-4 w-4 text-yellow-500 fill-current" />
+                        ))}
+                      </div>
+                      Comprehensive Solution
+                    </CardTitle>
+                    <CardDescription>David K., Risk Manager</CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <p className="text-gray-600 text-center">
+                      "Finally, a whistleblowing solution that covers all our compliance needs while maintaining complete anonymity."
+                    </p>
+                  </CardContent>
+                </Card>
+              </CarouselItem>
+            </CarouselContent>
+            <CarouselPrevious />
+            <CarouselNext />
+          </Carousel>
         </div>
       </div>
 
@@ -383,7 +455,7 @@ const Landing = () => {
                 <img 
                   src="/lovable-uploads/416d39db-53ff-402e-a2cf-26d1a3618601.png" 
                   alt="Disclosurely" 
-                  className="h-8 w-auto"
+                  className="h-6 sm:h-8 w-auto"
                 />
               </div>
               <p className="text-gray-400 mb-4">
