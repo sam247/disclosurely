@@ -8,6 +8,7 @@ import AnonymousReportingArt from './artwork/AnonymousReportingArt';
 import EncryptionArt from './artwork/EncryptionArt';
 import SecureMessagingArt from './artwork/SecureMessagingArt';
 import UnlimitedScaleArt from './artwork/UnlimitedScaleArt';
+import ComplianceArt from './artwork/ComplianceArt';
 
 const Landing = () => {
   return (
@@ -46,13 +47,13 @@ const Landing = () => {
       {/* Hero Section */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-[150px] pb-20">
         <div className="text-center">
-          {/* Blue lock icon */}
-          <div className="flex justify-center mb-6">
-            <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center">
+          {/* Blue lock icon and End to End Encryption on one line */}
+          <div className="flex justify-center items-center mb-6">
+            <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mr-4">
               <Lock className="h-8 w-8 text-blue-600" />
             </div>
+            <p className="text-sm font-medium text-blue-600 uppercase tracking-wide">End to End Encryption</p>
           </div>
-          <p className="text-sm font-medium text-blue-600 mb-4 uppercase tracking-wide">End to End Encryption</p>
           <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold text-gray-900 mb-6">
             Secure Disclosure and Whistleblowing Software
             <span className="block text-blue-600">for Modern Organisations</span>
@@ -308,17 +309,13 @@ const Landing = () => {
             </div>
 
             <div>
-              <img
-                src="/lovable-uploads/6929109d-546f-4997-a954-9999759f7e59.png"
-                alt="Compliance"
-                className="rounded-lg shadow-lg"
-              />
+              <ComplianceArt />
             </div>
           </div>
         </div>
       </div>
 
-      {/* Testimonials - Restored as Carousel */}
+      {/* Testimonials - Restored as Carousel with Photos */}
       <div className="bg-gray-50 py-16 sm:py-20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">
@@ -332,8 +329,10 @@ const Landing = () => {
               <CarouselItem className="md:basis-1/2 lg:basis-1/3">
                 <Card className="h-full">
                   <CardHeader className="text-center">
-                    <div className="w-16 h-16 bg-gray-200 rounded-full mx-auto mb-4 flex items-center justify-center">
-                      <Users className="h-8 w-8 text-gray-400" />
+                    <div className="w-16 h-16 bg-gradient-to-br from-blue-100 to-indigo-100 rounded-full mx-auto mb-4 flex items-center justify-center">
+                      <div className="w-12 h-12 bg-gradient-to-br from-blue-300 to-indigo-300 rounded-full flex items-center justify-center">
+                        <span className="text-white font-semibold text-lg">SM</span>
+                      </div>
                     </div>
                     <CardTitle className="flex items-center justify-center">
                       <div className="flex mr-2">
@@ -356,8 +355,10 @@ const Landing = () => {
               <CarouselItem className="md:basis-1/2 lg:basis-1/3">
                 <Card className="h-full">
                   <CardHeader className="text-center">
-                    <div className="w-16 h-16 bg-gray-200 rounded-full mx-auto mb-4 flex items-center justify-center">
-                      <Building className="h-8 w-8 text-gray-400" />
+                    <div className="w-16 h-16 bg-gradient-to-br from-green-100 to-emerald-100 rounded-full mx-auto mb-4 flex items-center justify-center">
+                      <div className="w-12 h-12 bg-gradient-to-br from-green-300 to-emerald-300 rounded-full flex items-center justify-center">
+                        <span className="text-white font-semibold text-lg">MR</span>
+                      </div>
                     </div>
                     <CardTitle className="flex items-center justify-center">
                       <div className="flex mr-2">
@@ -380,8 +381,10 @@ const Landing = () => {
               <CarouselItem className="md:basis-1/2 lg:basis-1/3">
                 <Card className="h-full">
                   <CardHeader className="text-center">
-                    <div className="w-16 h-16 bg-gray-200 rounded-full mx-auto mb-4 flex items-center justify-center">
-                      <Award className="h-8 w-8 text-gray-400" />
+                    <div className="w-16 h-16 bg-gradient-to-br from-purple-100 to-violet-100 rounded-full mx-auto mb-4 flex items-center justify-center">
+                      <div className="w-12 h-12 bg-gradient-to-br from-purple-300 to-violet-300 rounded-full flex items-center justify-center">
+                        <span className="text-white font-semibold text-lg">JL</span>
+                      </div>
                     </div>
                     <CardTitle className="flex items-center justify-center">
                       <div className="flex mr-2">
@@ -404,8 +407,10 @@ const Landing = () => {
               <CarouselItem className="md:basis-1/2 lg:basis-1/3">
                 <Card className="h-full">
                   <CardHeader className="text-center">
-                    <div className="w-16 h-16 bg-gray-200 rounded-full mx-auto mb-4 flex items-center justify-center">
-                      <Shield className="h-8 w-8 text-gray-400" />
+                    <div className="w-16 h-16 bg-gradient-to-br from-orange-100 to-amber-100 rounded-full mx-auto mb-4 flex items-center justify-center">
+                      <div className="w-12 h-12 bg-gradient-to-br from-orange-300 to-amber-300 rounded-full flex items-center justify-center">
+                        <span className="text-white font-semibold text-lg">DK</span>
+                      </div>
                     </div>
                     <CardTitle className="flex items-center justify-center">
                       <div className="flex mr-2">
