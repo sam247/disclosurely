@@ -156,7 +156,7 @@ const Landing = () => {
         <div className="max-w-7xl mx-auto text-center">
           <div className="flex items-center justify-center space-x-3 mb-6">
             <div className="flex items-center space-x-2 bg-blue-100 text-blue-800 px-4 py-2 rounded-full text-sm font-medium">
-              <Lock className="h-3 w-3" />
+              <Lock className="h-1.5 w-1.5" />
               <span>End to End Encryption</span>
             </div>
           </div>
