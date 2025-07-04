@@ -47,10 +47,36 @@ const NotificationSystem = () => {
             fetchNotifications();
             // Show toast for new notification
             const newNotification = payload.new as Notification;
+            
+            // Trigger email notification for new reports
+            if (newNotification.type === 'new_report' && newNotification.report_id) {
+              triggerEmailNotification('new_report', newNotification.report_id);
+            }
+            
             toast({
               title: newNotification.title,
               description: newNotification.message,
             });
+          }
+        )
+        .on(
+          'postgres_changes',
+          {
+            event: 'INSERT',
+            schema: 'public',
+            table: 'report_messages',
+          },
+          (payload) => {
+            console.log('New message received:', payload);
+            const newMessage = payload.new as any;
+            
+            // Check if message is from whistleblower and unread
+            if (newMessage.sender_type === 'whistleblower' && !newMessage.is_read) {
+              // Set up a delay to check if still unread after 24 hours
+              setTimeout(() => {
+                checkAndNotifyUnreadMessages(newMessage.report_id);
+              }, 24 * 60 * 60 * 1000); // 24 hours
+            }
           }
         )
         .subscribe();
@@ -60,6 +86,53 @@ const NotificationSystem = () => {
       };
     }
   }, [user]);
+
+  const triggerEmailNotification = async (type: 'new_report' | 'unread_messages', reportId?: string) => {
+    try {
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('organization_id')
+        .eq('id', user?.id)
+        .single();
+
+      if (!profile?.organization_id) return;
+
+      await supabase.functions.invoke('send-notification-emails', {
+        body: {
+          type,
+          reportId,
+          organizationId: profile.organization_id,
+        },
+      });
+    } catch (error) {
+      console.error('Error triggering email notification:', error);
+    }
+  };
+
+  const checkAndNotifyUnreadMessages = async (reportId: string) => {
+    try {
+      const { data: unreadMessages } = await supabase
+        .from('report_messages')
+        .select('*')
+        .eq('report_id', reportId)
+        .eq('is_read', false)
+        .eq('sender_type', 'whistleblower');
+
+      if (unreadMessages && unreadMessages.length > 0) {
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('organization_id')
+          .eq('id', user?.id)
+          .single();
+
+        if (profile?.organization_id) {
+          await triggerEmailNotification('unread_messages');
+        }
+      }
+    } catch (error) {
+      console.error('Error checking unread messages:', error);
+    }
+  };
 
   const fetchNotifications = async () => {
     if (!user) return;

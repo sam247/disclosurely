@@ -1,4 +1,3 @@
-
 import { Shield, Users, MessageSquare, Scale, Infinity, ArrowRight, Check, Star, Building, Globe, Award, Lock } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -315,7 +314,7 @@ const Landing = () => {
         </div>
       </div>
 
-      {/* Testimonials - Restored as Carousel with Photos */}
+      {/* Testimonials - Restored as Carousel with Human Photos */}
       <div className="bg-gray-50 py-16 sm:py-20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">
@@ -329,11 +328,11 @@ const Landing = () => {
               <CarouselItem className="md:basis-1/2 lg:basis-1/3">
                 <Card className="h-full">
                   <CardHeader className="text-center">
-                    <div className="w-16 h-16 bg-gradient-to-br from-blue-100 to-indigo-100 rounded-full mx-auto mb-4 flex items-center justify-center">
-                      <div className="w-12 h-12 bg-gradient-to-br from-blue-300 to-indigo-300 rounded-full flex items-center justify-center">
-                        <span className="text-white font-semibold text-lg">SM</span>
-                      </div>
-                    </div>
+                    <img 
+                      src="https://images.unsplash.com/photo-1494790108755-2616b612b789?w=150&h=150&fit=crop&crop=face&auto=format&q=80" 
+                      alt="Sarah M." 
+                      className="w-16 h-16 rounded-full mx-auto mb-4 object-cover"
+                    />
                     <CardTitle className="flex items-center justify-center">
                       <div className="flex mr-2">
                         {[...Array(5)].map((_, i) => (
@@ -355,11 +354,11 @@ const Landing = () => {
               <CarouselItem className="md:basis-1/2 lg:basis-1/3">
                 <Card className="h-full">
                   <CardHeader className="text-center">
-                    <div className="w-16 h-16 bg-gradient-to-br from-green-100 to-emerald-100 rounded-full mx-auto mb-4 flex items-center justify-center">
-                      <div className="w-12 h-12 bg-gradient-to-br from-green-300 to-emerald-300 rounded-full flex items-center justify-center">
-                        <span className="text-white font-semibold text-lg">MR</span>
-                      </div>
-                    </div>
+                    <img 
+                      src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150&h=150&fit=crop&crop=face&auto=format&q=80" 
+                      alt="Michael R." 
+                      className="w-16 h-16 rounded-full mx-auto mb-4 object-cover"
+                    />
                     <CardTitle className="flex items-center justify-center">
                       <div className="flex mr-2">
                         {[...Array(5)].map((_, i) => (
@@ -381,11 +380,11 @@ const Landing = () => {
               <CarouselItem className="md:basis-1/2 lg:basis-1/3">
                 <Card className="h-full">
                   <CardHeader className="text-center">
-                    <div className="w-16 h-16 bg-gradient-to-br from-purple-100 to-violet-100 rounded-full mx-auto mb-4 flex items-center justify-center">
-                      <div className="w-12 h-12 bg-gradient-to-br from-purple-300 to-violet-300 rounded-full flex items-center justify-center">
-                        <span className="text-white font-semibold text-lg">JL</span>
-                      </div>
-                    </div>
+                    <img 
+                      src="https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=150&h=150&fit=crop&crop=face&auto=format&q=80" 
+                      alt="Jennifer L." 
+                      className="w-16 h-16 rounded-full mx-auto mb-4 object-cover"
+                    />
                     <CardTitle className="flex items-center justify-center">
                       <div className="flex mr-2">
                         {[...Array(5)].map((_, i) => (
@@ -407,11 +406,11 @@ const Landing = () => {
               <CarouselItem className="md:basis-1/2 lg:basis-1/3">
                 <Card className="h-full">
                   <CardHeader className="text-center">
-                    <div className="w-16 h-16 bg-gradient-to-br from-orange-100 to-amber-100 rounded-full mx-auto mb-4 flex items-center justify-center">
-                      <div className="w-12 h-12 bg-gradient-to-br from-orange-300 to-amber-300 rounded-full flex items-center justify-center">
-                        <span className="text-white font-semibold text-lg">DK</span>
-                      </div>
-                    </div>
+                    <img 
+                      src="https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=150&h=150&fit=crop&crop=face&auto=format&q=80" 
+                      alt="David K." 
+                      className="w-16 h-16 rounded-full mx-auto mb-4 object-cover"
+                    />
                     <CardTitle className="flex items-center justify-center">
                       <div className="flex mr-2">
                         {[...Array(5)].map((_, i) => (
