@@ -1,435 +1,495 @@
 
-import React from 'react';
+import { Shield, Users, MessageSquare, Scale, Infinity, ArrowRight, Check, Star, Building, Globe, Award, Lock } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Shield, Lock, MessageSquare, Eye, Users, Star, ArrowRight, CheckCircle, Globe, Zap, FileText, UserCheck, Clock, BarChart3 } from 'lucide-react';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from '@/components/ui/carousel';
 import { Link } from 'react-router-dom';
 import AnonymousReportingArt from './artwork/AnonymousReportingArt';
-import SecureMessagingArt from './artwork/SecureMessagingArt';
 import EncryptionArt from './artwork/EncryptionArt';
+import SecureMessagingArt from './artwork/SecureMessagingArt';
 import UnlimitedScaleArt from './artwork/UnlimitedScaleArt';
 import ComplianceArt from './artwork/ComplianceArt';
 
 const Landing = () => {
-  const features = [
-    {
-      icon: <Shield className="h-8 w-8 text-blue-600" />,
-      title: "Anonymous Reporting",
-      description: "Complete anonymity with zero tracking or data collection from whistleblowers.",
-      component: <AnonymousReportingArt />
-    },
-    {
-      icon: <MessageSquare className="h-8 w-8 text-green-600" />,
-      title: "Secure Messaging",
-      description: "End-to-end encrypted communication between whistleblowers and your organization.",
-      component: <SecureMessagingArt />
-    },
-    {
-      icon: <Lock className="h-8 w-8 text-purple-600" />,
-      title: "Military-Grade Encryption",
-      description: "AES-256 encryption ensures all data remains completely secure and private.",
-      component: <EncryptionArt />
-    },
-    {
-      icon: <Globe className="h-8 w-8 text-orange-600" />,
-      title: "Unlimited Scale",
-      description: "Handle thousands of reports with enterprise-grade infrastructure and reliability.",
-      component: <UnlimitedScaleArt />
-    }
-  ];
-
-  const complianceFeatures = [
-    {
-      icon: <CheckCircle className="h-6 w-6 text-green-600" />,
-      title: "GDPR Compliant",
-      description: "Full compliance with European data protection regulations"
-    },
-    {
-      icon: <Shield className="h-6 w-6 text-blue-600" />,
-      title: "ISO 27001",
-      description: "Information security management system certified"
-    },
-    {
-      icon: <FileText className="h-6 w-6 text-purple-600" />,
-      title: "SOC 2 Type II",
-      description: "Rigorous security and availability controls audited"
-    },
-    {
-      icon: <Globe className="h-6 w-6 text-orange-600" />,
-      title: "Global Standards",
-      description: "Meets international whistleblower protection requirements"
-    }
-  ];
-
-  const dashboardFeatures = [
-    {
-      icon: <BarChart3 className="h-6 w-6 text-blue-600" />,
-      title: "Real-time Analytics",
-      description: "Track report trends, response times, and resolution rates with comprehensive dashboards."
-    },
-    {
-      icon: <UserCheck className="h-6 w-6 text-green-600" />,
-      title: "Case Management",
-      description: "Assign cases, set priorities, track progress, and collaborate with your team efficiently."
-    },
-    {
-      icon: <Clock className="h-6 w-6 text-purple-600" />,
-      title: "Automated Workflows",
-      description: "Set up automatic notifications, escalations, and reminders to ensure no case is missed."
-    },
-    {
-      icon: <Shield className="h-6 w-6 text-orange-600" />,
-      title: "Audit Trail",
-      description: "Complete audit logging of all actions and changes for compliance and accountability."
-    }
-  ];
-
-  const reviews = [
-    {
-      name: "Sarah Johnson",
-      role: "Compliance Director",
-      company: "TechCorp Industries",
-      rating: 5,
-      review: "Disclosurely has transformed our whistleblower program. The anonymous reporting feature gives our employees confidence to speak up, and the secure messaging keeps everything confidential.",
-      avatar: "https://images.unsplash.com/photo-1494790108755-2616b9e88263?w=64&h=64&fit=crop&crop=face"
-    },
-    {
-      name: "Michael Chen",
-      role: "Chief Ethics Officer",
-      company: "Global Finance Ltd",
-      rating: 5,
-      review: "The encryption and security features are top-notch. We've seen a 300% increase in reports since implementing Disclosurely, and our legal team loves the compliance features.",
-      avatar: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=64&h=64&fit=crop&crop=face"
-    },
-    {
-      name: "Emily Rodriguez",
-      role: "HR Director",
-      company: "Manufacturing Plus",
-      rating: 5,
-      review: "The case management system is incredibly intuitive. We can track every report from submission to resolution, and the automated workflows save us hours each week.",
-      avatar: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=64&h=64&fit=crop&crop=face"
-    },
-    {
-      name: "David Park",
-      role: "Risk Manager",
-      company: "Healthcare Solutions",
-      rating: 5,
-      review: "Disclosurely's GDPR compliance features were exactly what we needed for our European operations. The team was incredibly helpful during implementation.",
-      avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=64&h=64&fit=crop&crop=face"
-    },
-    {
-      name: "Lisa Thompson",
-      role: "Internal Audit Lead",
-      company: "Energy Corp",
-      rating: 5,
-      review: "The audit trail and reporting capabilities are exceptional. We can generate compliance reports in minutes instead of hours, and the data insights help us improve our processes.",
-      avatar: "https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=64&h=64&fit=crop&crop=face"
-    }
-  ];
-
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
-      {/* Header */}
-      <header className="bg-white/80 backdrop-blur-sm border-b border-gray-200 sticky top-0 z-50">
+    <div className="min-h-screen bg-white">
+      {/* Navigation */}
+      <nav className="bg-white shadow-sm sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center py-4">
-            <div className="flex items-center space-x-2">
-              <Shield className="h-8 w-8 text-blue-600" />
-              <span className="text-2xl font-bold text-gray-900">Disclosurely</span>
-            </div>
-            <nav className="hidden md:flex items-center space-x-8">
-              <Link to="/pricing" className="text-gray-600 hover:text-gray-900 transition-colors">Pricing</Link>
-              <Link to="/compliance-software" className="text-gray-600 hover:text-gray-900 transition-colors">Compliance</Link>
-              <Link to="/vs-whistleblower-software" className="text-gray-600 hover:text-gray-900 transition-colors">Compare</Link>
-              <Link to="/auth/login" className="text-blue-600 hover:text-blue-700 font-medium transition-colors">Login</Link>
-              <Link to="/auth/signup">
-                <Button className="bg-blue-600 hover:bg-blue-700 text-white">Get Started</Button>
+            <div className="flex items-center">
+              <Link to="/" className="flex items-center space-x-3">
+                <img 
+                  src="/lovable-uploads/c46ace0e-df58-4119-b5e3-8dcfa075ea2f.png" 
+                  alt="Disclosurely" 
+                  className="h-6 sm:h-8 w-auto"
+                />
               </Link>
-            </nav>
+            </div>
+            <div className="hidden md:flex items-center space-x-8">
+              <Link to="/pricing" className="text-gray-600 hover:text-gray-900">Pricing</Link>
+              <Link to="/compliance-software" className="text-gray-600 hover:text-gray-900">Compliance</Link>
+              <Link to="/auth/login" className="text-gray-600 hover:text-gray-900">Sign in</Link>
+              <Link to="/auth/signup" className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors">
+                Get Started
+              </Link>
+            </div>
+            {/* Mobile Sign-in button */}
+            <div className="md:hidden">
+              <Link to="/auth/login" className="bg-blue-600 text-white px-3 py-2 rounded-lg hover:bg-blue-700 transition-colors text-sm">
+                Sign in
+              </Link>
+            </div>
           </div>
         </div>
-      </header>
+      </nav>
 
       {/* Hero Section */}
-      <section className="pt-20 pb-16 px-4 sm:px-6 lg:px-8">
-        <div className="max-w-7xl mx-auto text-center">
-          <div className="flex items-center justify-center space-x-3 mb-6">
-            <div className="flex items-center space-x-2 bg-blue-100 text-blue-800 px-4 py-2 rounded-full text-sm font-medium">
-              <Lock className="h-1.5 w-1.5" />
-              <span>End to End Encryption</span>
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-[150px] pb-20">
+        <div className="text-center">
+          {/* Blue lock icon and End to End Encryption on one line */}
+          <div className="flex justify-center items-center mb-6">
+            <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mr-4">
+              <Lock className="h-8 w-8 text-blue-600" />
             </div>
+            <p className="text-sm font-medium text-blue-600 uppercase tracking-wide">End to End Encryption</p>
           </div>
-          
-          <h1 className="text-5xl md:text-7xl font-bold text-gray-900 mb-6 leading-tight">
-            Secure Whistleblower <br />
-            <span className="text-blue-600">Reporting Platform</span>
+          <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold text-gray-900 mb-6">
+            Secure Disclosure and Whistleblowing Software
+            <span className="block text-blue-600">for Modern Organisations</span>
           </h1>
-          
-          <p className="text-xl text-gray-600 mb-8 max-w-3xl mx-auto leading-relaxed">
-            Empower your organization with anonymous reporting, secure messaging, and comprehensive case management. 
-            Build trust, ensure compliance, and protect whistleblowers with military-grade encryption.
+          <p className="text-lg sm:text-xl text-gray-600 mb-8 max-w-3xl mx-auto px-4">
+            Protect your organization with our secure, anonymous whistleblowing platform.
           </p>
-          
-          <div className="flex flex-col sm:flex-row gap-4 justify-center mb-12">
-            <Link to="/auth/signup">
-              <Button size="lg" className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-4 text-lg font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all duration-300">
-                Start Free Trial
-                <ArrowRight className="ml-2 h-5 w-5" />
-              </Button>
-            </Link>
-            <Link to="/secure/tool">
-              <Button size="lg" variant="outline" className="border-gray-300 text-gray-700 hover:bg-gray-50 px-8 py-4 text-lg font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all duration-300">
-                Submit Anonymous Report
-                <Eye className="ml-2 h-5 w-5" />
-              </Button>
-            </Link>
-          </div>
-
-          <div className="flex items-center justify-center space-x-8 text-sm text-gray-500">
-            <div className="flex items-center space-x-2">
-              <CheckCircle className="h-4 w-4 text-green-500" />
-              <span>No Credit Card Required</span>
-            </div>
-            <div className="flex items-center space-x-2">
-              <CheckCircle className="h-4 w-4 text-green-500" />
-              <span>14-Day Free Trial</span>
-            </div>
-            <div className="flex items-center space-x-2">
-              <CheckCircle className="h-4 w-4 text-green-500" />
-              <span>GDPR Compliant</span>
+          <div className="flex flex-col items-center gap-4">
+            <a href="https://app.disclosurely.com/auth/signup" className="bg-blue-600 hover:bg-blue-700 text-white px-6 sm:px-8 py-3 rounded-lg text-lg font-semibold">
+              Start Free Trial
+            </a>
+            <div className="text-center">
+              <Link to="/compliance-software" className="inline-flex items-center text-blue-600 hover:text-blue-700 text-lg font-semibold">
+                Learn about Compliance <ArrowRight className="ml-2 h-5 w-5" />
+              </Link>
             </div>
           </div>
         </div>
-      </section>
+      </div>
 
-      {/* Features Section */}
-      <section className="py-20 px-4 sm:px-6 lg:px-8 bg-white">
-        <div className="max-w-7xl mx-auto">
-          <div className="text-center mb-16">
-            <h2 className="text-4xl font-bold text-gray-900 mb-4">Everything You Need for Secure Reporting</h2>
-            <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-              Built from the ground up with security, compliance, and user experience in mind. 
-              Our platform provides all the tools you need to create a safe environment for whistleblowers.
+      {/* Key Features with Artwork */}
+      <div className="bg-white py-16 sm:py-20">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-12 sm:mb-16">
+            <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-4">
+              Built for Security, Designed for Trust
+            </h2>
+            <p className="text-base sm:text-lg text-gray-600 max-w-2xl mx-auto px-4">
+              Advanced features that protect whistleblowers and organizations
             </p>
           </div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
-            {features.map((feature, index) => (
-              <div key={index} className={`${index % 2 === 0 ? 'lg:order-1' : 'lg:order-2'}`}>
-                <Card className="border-0 shadow-xl bg-gradient-to-br from-white to-gray-50 hover:shadow-2xl transition-all duration-300">
-                  <CardHeader className="pb-4">
-                    <div className="flex items-center space-x-4 mb-4">
-                      {feature.icon}
-                      <CardTitle className="text-2xl font-bold text-gray-900">{feature.title}</CardTitle>
-                    </div>
-                  </CardHeader>
-                  <CardContent>
-                    <p className="text-gray-600 text-lg leading-relaxed mb-6">{feature.description}</p>
-                    <div className="bg-gradient-to-r from-blue-50 to-purple-50 p-6 rounded-xl">
-                      {feature.component}
-                    </div>
-                  </CardContent>
-                </Card>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Dashboard Features */}
-      <section className="py-20 px-4 sm:px-6 lg:px-8 bg-gradient-to-br from-gray-50 to-blue-50">
-        <div className="max-w-7xl mx-auto">
-          <div className="text-center mb-16">
-            <h2 className="text-4xl font-bold text-gray-900 mb-4">Powerful Management Dashboard</h2>
-            <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-              Streamline your workflow with our comprehensive case management system designed for compliance teams and investigators.
-            </p>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-            {dashboardFeatures.map((feature, index) => (
-              <Card key={index} className="border-0 shadow-lg bg-white hover:shadow-xl transition-all duration-300">
-                <CardHeader>
-                  <div className="flex items-center space-x-3 mb-2">
-                    {feature.icon}
-                    <CardTitle className="text-xl font-semibold text-gray-900">{feature.title}</CardTitle>
+          <div className="space-y-16 sm:space-y-20">
+            {/* Anonymous Reporting - Content > Image */}
+            <div className="grid lg:grid-cols-2 gap-8 lg:gap-12 items-center">
+              <div className="order-2 lg:order-1">
+                <div className="flex items-center mb-4">
+                  <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center mr-4">
+                    <Shield className="h-6 w-6 text-blue-600" />
                   </div>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-gray-600 leading-relaxed">{feature.description}</p>
-                </CardContent>
-              </Card>
-            ))}
+                  <h3 className="text-xl sm:text-2xl font-bold text-gray-900">Anonymous Reporting</h3>
+                </div>
+                <p className="text-base sm:text-lg text-gray-600 mb-6">
+                  Complete anonymity protection for whistleblowers. Our advanced system ensures that reports can be submitted without revealing the identity of the reporter, providing a safe space for truth.
+                </p>
+                <ul className="space-y-2 text-gray-600">
+                  <li className="flex items-center">
+                    <Check className="h-5 w-5 text-green-600 mr-2" />
+                    Zero-knowledge architecture
+                  </li>
+                  <li className="flex items-center">
+                    <Check className="h-5 w-5 text-green-600 mr-2" />
+                    IP address protection
+                  </li>
+                  <li className="flex items-center">
+                    <Check className="h-5 w-5 text-green-600 mr-2" />
+                    Metadata removal
+                  </li>
+                </ul>
+              </div>
+              <div className="order-1 lg:order-2">
+                <AnonymousReportingArt />
+              </div>
+            </div>
+
+            {/* End-to-End Encryption - Image > Content */}
+            <div className="grid lg:grid-cols-2 gap-8 lg:gap-12 items-center">
+              <div className="order-1">
+                <EncryptionArt />
+              </div>
+              <div className="order-2">
+                <div className="flex items-center mb-4">
+                  <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center mr-4">
+                    <Shield className="h-6 w-6 text-blue-600" />
+                  </div>
+                  <h3 className="text-xl sm:text-2xl font-bold text-gray-900">End-to-End Encryption</h3>
+                </div>
+                <p className="text-base sm:text-lg text-gray-600 mb-6">
+                  Military-grade AES-256 encryption protects all data. From submission to storage, your sensitive information remains secure and accessible only to authorized personnel.
+                </p>
+                <ul className="space-y-2 text-gray-600">
+                  <li className="flex items-center">
+                    <Check className="h-5 w-5 text-green-600 mr-2" />
+                    AES-256 encryption standard
+                  </li>
+                  <li className="flex items-center">
+                    <Check className="h-5 w-5 text-green-600 mr-2" />
+                    Encrypted file storage
+                  </li>
+                  <li className="flex items-center">
+                    <Check className="h-5 w-5 text-green-600 mr-2" />
+                    Secure key management
+                  </li>
+                </ul>
+              </div>
+            </div>
+
+            {/* Secure Two-Way Messaging - Content > Image */}
+            <div className="grid lg:grid-cols-2 gap-8 lg:gap-12 items-center">
+              <div className="order-2 lg:order-1">
+                <div className="flex items-center mb-4">
+                  <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center mr-4">
+                    <MessageSquare className="h-6 w-6 text-blue-600" />
+                  </div>
+                  <h3 className="text-xl sm:text-2xl font-bold text-gray-900">Secure Two-Way Messaging</h3>
+                </div>
+                <p className="text-base sm:text-lg text-gray-600 mb-6">
+                  Maintain anonymous communication throughout the investigation process. Ask questions, provide updates, and gather additional information while preserving anonymity.
+                </p>
+                <ul className="space-y-2 text-gray-600">
+                  <li className="flex items-center">
+                    <Check className="h-5 w-5 text-green-600 mr-2" />
+                    Anonymous messaging
+                  </li>
+                  <li className="flex items-center">
+                    <Check className="h-5 w-5 text-green-600 mr-2" />
+                    Real-time notifications
+                  </li>
+                  <li className="flex items-center">
+                    <Check className="h-5 w-5 text-green-600 mr-2" />
+                    Message encryption
+                  </li>
+                </ul>
+              </div>
+              <div className="order-1 lg:order-2">
+                <SecureMessagingArt />
+              </div>
+            </div>
+
+            {/* Unlimited Scale - Image > Content */}
+            <div className="grid lg:grid-cols-2 gap-8 lg:gap-12 items-center">
+              <div className="order-1">
+                <UnlimitedScaleArt />
+              </div>
+              <div className="order-2">
+                <div className="flex items-center mb-4">
+                  <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center mr-4">
+                    <Infinity className="h-6 w-6 text-blue-600" />
+                  </div>
+                  <h3 className="text-xl sm:text-2xl font-bold text-gray-900">Unlimited Scale</h3>
+                </div>
+                <p className="text-base sm:text-lg text-gray-600 mb-6">
+                  No restrictions on users, cases, or storage. Our platform grows with your organization, handling everything from small teams to enterprise-level deployments.
+                </p>
+                <ul className="space-y-2 text-gray-600">
+                  <li className="flex items-center">
+                    <Check className="h-5 w-5 text-green-600 mr-2" />
+                    Unlimited users and cases
+                  </li>
+                  <li className="flex items-center">
+                    <Check className="h-5 w-5 text-green-600 mr-2" />
+                    Enterprise-grade infrastructure
+                  </li>
+                  <li className="flex items-center">
+                    <Check className="h-5 w-5 text-green-600 mr-2" />
+                    Global deployment
+                  </li>
+                </ul>
+              </div>
+            </div>
           </div>
         </div>
-      </section>
+      </div>
 
-      {/* Compliance Section */}
-      <section className="py-20 px-4 sm:px-6 lg:px-8 bg-white">
-        <div className="max-w-7xl mx-auto">
-          <div className="text-center mb-16">
-            <h2 className="text-4xl font-bold text-gray-900 mb-4">Enterprise-Grade Compliance</h2>
-            <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-              Meet the highest standards of data protection and regulatory compliance with our certified security framework.
+      {/* How It Works */}
+      <div className="bg-gray-50 py-16 sm:py-20">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-12 sm:mb-16">
+            <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-4">
+              How It Works
+            </h2>
+            <p className="text-base sm:text-lg text-gray-600 max-w-2xl mx-auto px-4">
+              Simple steps to create a secure whistleblowing channel
             </p>
           </div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
-            <div>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {complianceFeatures.map((feature, index) => (
-                  <Card key={index} className="border-0 shadow-lg bg-gradient-to-br from-white to-gray-50 hover:shadow-xl transition-all duration-300">
-                    <CardHeader className="pb-2">
-                      <div className="flex items-center space-x-3 mb-2">
-                        {feature.icon}
-                        <CardTitle className="text-lg font-semibold text-gray-900">{feature.title}</CardTitle>
-                      </div>
-                    </CardHeader>
-                    <CardContent>
-                      <p className="text-gray-600 text-sm leading-relaxed">{feature.description}</p>
-                    </CardContent>
-                  </Card>
-                ))}
-              </div>
+          <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-6 sm:gap-8">
+            <Card className="text-center p-6">
+              <CardContent className="pt-6">
+                <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <Users className="h-6 w-6 text-blue-600" />
+                </div>
+                <h3 className="font-semibold text-gray-900 mb-2">1. Invite Users</h3>
+                <p className="text-sm text-gray-600">Invite your team and stakeholders to the platform</p>
+              </CardContent>
+            </Card>
+
+            <Card className="text-center p-6">
+              <CardContent className="pt-6">
+                <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <Shield className="h-6 w-6 text-blue-600" />
+                </div>
+                <h3 className="font-semibold text-gray-900 mb-2">2. Customize Settings</h3>
+                <p className="text-sm text-gray-600">Configure security and anonymity settings</p>
+              </CardContent>
+            </Card>
+
+            <Card className="text-center p-6">
+              <CardContent className="pt-6">
+                <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <Globe className="h-6 w-6 text-blue-600" />
+                </div>
+                <h3 className="font-semibold text-gray-900 mb-2">3. Launch Platform</h3>
+                <p className="text-sm text-gray-600">Launch your secure whistleblowing platform</p>
+              </CardContent>
+            </Card>
+          </div>
+        </div>
+      </div>
+
+      {/* Compliance & Security */}
+      <div className="bg-white py-16 sm:py-20">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="grid md:grid-cols-2 gap-8 sm:gap-12 items-center">
+            <div className="space-y-6">
+              <h2 className="text-2xl sm:text-3xl font-bold text-gray-900">
+                Compliance and Security
+              </h2>
+              <p className="text-base sm:text-lg text-gray-600">
+                We take compliance and security seriously. Our platform is built to meet the highest standards.
+              </p>
+              <ul className="space-y-4">
+                <li className="flex items-start space-x-4">
+                  <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center flex-shrink-0">
+                    <Check className="h-5 w-5 text-blue-600" />
+                  </div>
+                  <div>
+                    <h3 className="text-lg font-semibold text-gray-900 mb-2">ISO 27001 Certified</h3>
+                    <p className="text-gray-600 text-sm sm:text-base">International security standard certification</p>
+                  </div>
+                </li>
+
+                <li className="flex items-start space-x-4">
+                  <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center flex-shrink-0">
+                    <Check className="h-5 w-5 text-blue-600" />
+                  </div>
+                  <div>
+                    <h3 className="text-lg font-semibold text-gray-900 mb-2">GDPR Compliant</h3>
+                    <p className="text-gray-600 text-sm sm:text-base">Built-in GDPR compliance and data protection</p>
+                  </div>
+                </li>
+
+                <li className="flex items-start space-x-4">
+                  <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center flex-shrink-0">
+                    <Check className="h-5 w-5 text-blue-600" />
+                  </div>
+                  <div>
+                    <h3 className="text-lg font-semibold text-gray-900 mb-2">End-to-End Encryption</h3>
+                    <p className="text-gray-600 text-sm sm:text-base">Military-grade AES-256 encryption for all data</p>
+                  </div>
+                </li>
+              </ul>
             </div>
-            <div className="bg-gradient-to-r from-blue-50 to-purple-50 p-8 rounded-2xl">
+
+            <div>
               <ComplianceArt />
             </div>
           </div>
         </div>
-      </section>
+      </div>
 
-      {/* Reviews Section */}
-      <section className="py-20 px-4 sm:px-6 lg:px-8 bg-gradient-to-br from-blue-50 to-purple-50">
-        <div className="max-w-7xl mx-auto">
-          <div className="text-center mb-16">
-            <h2 className="text-4xl font-bold text-gray-900 mb-4">Trusted by Compliance Teams Worldwide</h2>
-            <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-              Join thousands of organizations that trust Disclosurely to protect their whistleblowers and maintain compliance.
-            </p>
+      {/* Testimonials - Restored as Carousel with Photos */}
+      <div className="bg-gray-50 py-16 sm:py-20">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-12">
+            <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-4">
+              What Our Clients Say
+            </h2>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {reviews.slice(0, 3).map((review, index) => (
-              <Card key={index} className="border-0 shadow-lg bg-white hover:shadow-xl transition-all duration-300">
-                <CardHeader className="pb-4">
-                  <div className="flex items-center space-x-4">
-                    <img 
-                      src={review.avatar} 
-                      alt={review.name}
-                      className="w-12 h-12 rounded-full object-cover"
-                    />
-                    <div>
-                      <h4 className="font-semibold text-gray-900">{review.name}</h4>
-                      <p className="text-sm text-gray-600">{review.role}</p>
-                      <p className="text-sm text-gray-500">{review.company}</p>
+          <Carousel className="w-full max-w-4xl mx-auto">
+            <CarouselContent>
+              <CarouselItem className="md:basis-1/2 lg:basis-1/3">
+                <Card className="h-full">
+                  <CardHeader className="text-center">
+                    <div className="w-16 h-16 bg-gradient-to-br from-blue-100 to-indigo-100 rounded-full mx-auto mb-4 flex items-center justify-center">
+                      <div className="w-12 h-12 bg-gradient-to-br from-blue-300 to-indigo-300 rounded-full flex items-center justify-center">
+                        <span className="text-white font-semibold text-lg">SM</span>
+                      </div>
                     </div>
-                  </div>
-                  <div className="flex items-center space-x-1 mt-2">
-                    {[...Array(review.rating)].map((_, i) => (
-                      <Star key={i} className="h-4 w-4 text-yellow-400 fill-current" />
-                    ))}
-                  </div>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-gray-600 leading-relaxed">"{review.review}"</p>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
+                    <CardTitle className="flex items-center justify-center">
+                      <div className="flex mr-2">
+                        {[...Array(5)].map((_, i) => (
+                          <Star key={i} className="h-4 w-4 text-yellow-500 fill-current" />
+                        ))}
+                      </div>
+                      Excellent Security
+                    </CardTitle>
+                    <CardDescription>Sarah M., Compliance Officer</CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <p className="text-gray-600 text-center">
+                      "Disclosurely's end-to-end encryption keeps our data safe. The platform is intuitive and our employees feel confident reporting issues."
+                    </p>
+                  </CardContent>
+                </Card>
+              </CarouselItem>
 
-          <div className="mt-12 grid grid-cols-1 md:grid-cols-2 gap-8">
-            {reviews.slice(3).map((review, index) => (
-              <Card key={index + 3} className="border-0 shadow-lg bg-white hover:shadow-xl transition-all duration-300">
-                <CardHeader className="pb-4">
-                  <div className="flex items-center space-x-4">
-                    <img 
-                      src={review.avatar} 
-                      alt={review.name}
-                      className="w-12 h-12 rounded-full object-cover"
-                    />
-                    <div>
-                      <h4 className="font-semibold text-gray-900">{review.name}</h4>
-                      <p className="text-sm text-gray-600">{review.role}</p>
-                      <p className="text-sm text-gray-500">{review.company}</p>
+              <CarouselItem className="md:basis-1/2 lg:basis-1/3">
+                <Card className="h-full">
+                  <CardHeader className="text-center">
+                    <div className="w-16 h-16 bg-gradient-to-br from-green-100 to-emerald-100 rounded-full mx-auto mb-4 flex items-center justify-center">
+                      <div className="w-12 h-12 bg-gradient-to-br from-green-300 to-emerald-300 rounded-full flex items-center justify-center">
+                        <span className="text-white font-semibold text-lg">MR</span>
+                      </div>
                     </div>
-                  </div>
-                  <div className="flex items-center space-x-1 mt-2">
-                    {[...Array(review.rating)].map((_, i) => (
-                      <Star key={i} className="h-4 w-4 text-yellow-400 fill-current" />
-                    ))}
-                  </div>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-gray-600 leading-relaxed">"{review.review}"</p>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
+                    <CardTitle className="flex items-center justify-center">
+                      <div className="flex mr-2">
+                        {[...Array(5)].map((_, i) => (
+                          <Star key={i} className="h-4 w-4 text-yellow-500 fill-current" />
+                        ))}
+                      </div>
+                      Easy to Use
+                    </CardTitle>
+                    <CardDescription>Michael R., HR Director</CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <p className="text-gray-600 text-center">
+                      "The platform is user-friendly and easy to navigate. Our team was up and running within hours of setup."
+                    </p>
+                  </CardContent>
+                </Card>
+              </CarouselItem>
+
+              <CarouselItem className="md:basis-1/2 lg:basis-1/3">
+                <Card className="h-full">
+                  <CardHeader className="text-center">
+                    <div className="w-16 h-16 bg-gradient-to-br from-purple-100 to-violet-100 rounded-full mx-auto mb-4 flex items-center justify-center">
+                      <div className="w-12 h-12 bg-gradient-to-br from-purple-300 to-violet-300 rounded-full flex items-center justify-center">
+                        <span className="text-white font-semibold text-lg">JL</span>
+                      </div>
+                    </div>
+                    <CardTitle className="flex items-center justify-center">
+                      <div className="flex mr-2">
+                        {[...Array(5)].map((_, i) => (
+                          <Star key={i} className="h-4 w-4 text-yellow-500 fill-current" />
+                        ))}
+                      </div>
+                      Great Support
+                    </CardTitle>
+                    <CardDescription>Jennifer L., Legal Counsel</CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <p className="text-gray-600 text-center">
+                      "The support team is always available and quick to resolve any issues. Highly recommend for any organization."
+                    </p>
+                  </CardContent>
+                </Card>
+              </CarouselItem>
+
+              <CarouselItem className="md:basis-1/2 lg:basis-1/3">
+                <Card className="h-full">
+                  <CardHeader className="text-center">
+                    <div className="w-16 h-16 bg-gradient-to-br from-orange-100 to-amber-100 rounded-full mx-auto mb-4 flex items-center justify-center">
+                      <div className="w-12 h-12 bg-gradient-to-br from-orange-300 to-amber-300 rounded-full flex items-center justify-center">
+                        <span className="text-white font-semibold text-lg">DK</span>
+                      </div>
+                    </div>
+                    <CardTitle className="flex items-center justify-center">
+                      <div className="flex mr-2">
+                        {[...Array(5)].map((_, i) => (
+                          <Star key={i} className="h-4 w-4 text-yellow-500 fill-current" />
+                        ))}
+                      </div>
+                      Comprehensive Solution
+                    </CardTitle>
+                    <CardDescription>David K., Risk Manager</CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <p className="text-gray-600 text-center">
+                      "Finally, a whistleblowing solution that covers all our compliance needs while maintaining complete anonymity."
+                    </p>
+                  </CardContent>
+                </Card>
+              </CarouselItem>
+            </CarouselContent>
+            <CarouselPrevious />
+            <CarouselNext />
+          </Carousel>
         </div>
-      </section>
+      </div>
 
       {/* CTA Section */}
-      <section className="py-20 px-4 sm:px-6 lg:px-8 bg-gradient-to-r from-blue-600 to-purple-600">
-        <div className="max-w-4xl mx-auto text-center">
-          <h2 className="text-4xl font-bold text-white mb-6">Ready to Build Trust in Your Organization?</h2>
-          <p className="text-xl text-blue-100 mb-8 max-w-2xl mx-auto">
-            Start your free trial today and see how Disclosurely can transform your whistleblower program.
+      <div className="bg-blue-600 py-12 sm:py-16">
+        <div className="max-w-4xl mx-auto text-center px-4 sm:px-6 lg:px-8">
+          <h2 className="text-2xl sm:text-3xl font-bold text-white mb-4">
+            Ready to Protect Your Organization?
+          </h2>
+          <p className="text-lg sm:text-xl text-blue-100 mb-6 sm:mb-8 px-4">
+            Join organizations worldwide who trust Disclosurely for secure whistleblowing.
           </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Link to="/auth/signup">
-              <Button size="lg" className="bg-white text-blue-600 hover:bg-gray-100 px-8 py-4 text-lg font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all duration-300">
-                Start Free Trial
-                <ArrowRight className="ml-2 h-5 w-5" />
-              </Button>
-            </Link>
-            <Link to="/pricing">
-              <Button size="lg" variant="outline" className="border-white text-white hover:bg-white hover:text-blue-600 px-8 py-4 text-lg font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all duration-300">
-                View Pricing
-              </Button>
-            </Link>
-          </div>
+          <a href="https://app.disclosurely.com/auth/signup" className="bg-white hover:bg-gray-100 text-blue-600 px-6 sm:px-8 py-3 rounded-lg text-lg font-semibold inline-block">
+            Start Free Trial
+          </a>
         </div>
-      </section>
+      </div>
 
       {/* Footer */}
-      <footer className="bg-gray-900 text-white py-16 px-4 sm:px-6 lg:px-8">
-        <div className="max-w-7xl mx-auto">
+      <footer className="bg-gray-900 text-white">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
           <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
             <div className="col-span-1 md:col-span-2">
-              <div className="flex items-center space-x-2 mb-4">
-                <Shield className="h-8 w-8 text-blue-400" />
-                <span className="text-2xl font-bold">Disclosurely</span>
+              <div className="flex items-center space-x-3 mb-4">
+                <img 
+                  src="/lovable-uploads/416d39db-53ff-402e-a2cf-26d1a3618601.png" 
+                  alt="Disclosurely" 
+                  className="h-6 sm:h-8 w-auto"
+                />
               </div>
-              <p className="text-gray-400 mb-6 max-w-md">
-                The most secure and compliant whistleblower reporting platform for modern organizations.
+              <p className="text-gray-400 mb-4">
+                Secure whistleblowing platform for organizations. Anonymous reporting, 
+                end-to-end encryption, and compliance features.
               </p>
-              <div className="flex space-x-4">
-                <Badge variant="secondary" className="bg-gray-800 text-gray-300">GDPR Compliant</Badge>
-                <Badge variant="secondary" className="bg-gray-800 text-gray-300">ISO 27001</Badge>
-                <Badge variant="secondary" className="bg-gray-800 text-gray-300">SOC 2</Badge>
-              </div>
             </div>
+            
             <div>
               <h3 className="font-semibold mb-4">Product</h3>
-              <ul className="space-y-2 text-gray-400">
-                <li><Link to="/pricing" className="hover:text-white transition-colors">Pricing</Link></li>
-                <li><Link to="/compliance-software" className="hover:text-white transition-colors">Compliance</Link></li>
-                <li><Link to="/vs-whistleblower-software" className="hover:text-white transition-colors">Comparisons</Link></li>
+              <ul className="space-y-2">
+                <li><Link to="/pricing" className="text-gray-400 hover:text-white">Pricing</Link></li>
+                <li><Link to="/compliance-software" className="text-gray-400 hover:text-white">Compliance Software</Link></li>
+                <li><Link to="/vs-whistleblower-software" className="text-gray-400 hover:text-white">Disclosurely vs Whistleblower Software</Link></li>
+                <li><Link to="/vs-speak-up" className="text-gray-400 hover:text-white">Disclosurely vs Speak Up</Link></li>
               </ul>
             </div>
+            
             <div>
               <h3 className="font-semibold mb-4">Company</h3>
-              <ul className="space-y-2 text-gray-400">
-                <li><Link to="/auth/login" className="hover:text-white transition-colors">Login</Link></li>
-                <li><Link to="/auth/signup" className="hover:text-white transition-colors">Sign Up</Link></li>
-                <li><Link to="/secure/tool" className="hover:text-white transition-colors">Submit Report</Link></li>
+              <ul className="space-y-2">
+                <li><Link to="/auth/login" className="text-gray-400 hover:text-white">Sign In</Link></li>
+                <li><Link to="/auth/signup" className="text-gray-400 hover:text-white">Get Started</Link></li>
               </ul>
             </div>
           </div>
-          <div className="border-t border-gray-800 mt-12 pt-8 text-center text-gray-400">
-            <p>&copy; 2024 Disclosurely. All rights reserved.</p>
+          
+          <div className="border-t border-gray-800 mt-8 pt-8 text-center text-gray-400">
+            <p>© 2025 Disclosurely. All rights reserved. <Link to="/compliance-software" className="hover:text-white">Compliance Software</Link>. Powered by <a href="https://betterranking.co.uk/?utm_source=footer&utm_medium=internal&utm_campaign=disclosurely&utm_id=links" target="_blank" rel="noopener noreferrer" className="hover:text-white">Better Ranking</a>.</p>
           </div>
         </div>
       </footer>
