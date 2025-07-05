@@ -8,7 +8,7 @@ import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
-import { Globe, CheckCircle, AlertCircle, Copy, ExternalLink } from 'lucide-react';
+import { Globe, CheckCircle, AlertCircle, Copy, ExternalLink, Info } from 'lucide-react';
 
 interface DomainVerification {
   id: string;
@@ -198,11 +198,27 @@ const CustomDomainSettings = ({ hasActiveTier2Subscription }: CustomDomainSettin
           </div>
         </CardHeader>
         <CardContent>
+          {/* Important Information Box */}
+          <div className="mb-6 p-4 bg-blue-50 rounded-lg border border-blue-200">
+            <div className="flex items-start gap-3">
+              <Info className="h-5 w-5 text-blue-600 mt-0.5 flex-shrink-0" />
+              <div className="text-sm">
+                <h4 className="font-medium text-blue-900 mb-2">How Custom Domain Branding Works</h4>
+                <ul className="text-blue-800 space-y-1">
+                  <li>• Your submission links will use your domain (e.g., reports.yourcompany.com/submit/xyz)</li>
+                  <li>• Requires adding 2 CNAME records to your DNS settings</li>
+                  <li>• Verification typically takes 5-10 minutes after DNS changes</li>
+                  <li>• SSL certificates are automatically managed</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+
           {showAddForm && (
             <form onSubmit={addDomain} className="mb-6 p-4 border rounded-lg bg-gray-50">
               <div className="space-y-4">
                 <div>
-                  <Label htmlFor="domain">Domain Name</Label>
+                  <Label htmlFor="domain">Custom Domain</Label>
                   <Input
                     id="domain"
                     value={newDomain}
@@ -211,7 +227,7 @@ const CustomDomainSettings = ({ hasActiveTier2Subscription }: CustomDomainSettin
                     required
                   />
                   <p className="text-xs text-gray-500 mt-1">
-                    Enter the subdomain you want to use for your submission links
+                    Enter the subdomain you want to use (e.g., reports.yourcompany.com)
                   </p>
                 </div>
                 <div className="flex space-x-2">
@@ -246,19 +262,19 @@ const CustomDomainSettings = ({ hasActiveTier2Subscription }: CustomDomainSettin
                           {domain.verified_at ? (
                             <Badge variant="default" className="bg-green-100 text-green-800">
                               <CheckCircle className="h-3 w-3 mr-1" />
-                              Verified
+                              Verified & Active
                             </Badge>
                           ) : (
                             <Badge variant="secondary" className="bg-yellow-100 text-yellow-800">
                               <AlertCircle className="h-3 w-3 mr-1" />
-                              Pending Verification
+                              DNS Configuration Required
                             </Badge>
                           )}
                         </div>
                       </div>
                       {!domain.verified_at && (
                         <Button onClick={() => verifyDomain(domain.id)} disabled={loading}>
-                          Verify Domain
+                          Check Verification
                         </Button>
                       )}
                     </div>
@@ -267,42 +283,92 @@ const CustomDomainSettings = ({ hasActiveTier2Subscription }: CustomDomainSettin
                       <div className="space-y-4 bg-blue-50 p-4 rounded-lg">
                         <h5 className="font-medium text-blue-900">DNS Configuration Required</h5>
                         <p className="text-sm text-blue-800">
-                          Add the following CNAME record to your DNS settings:
+                          Add these 2 CNAME records to your DNS settings:
                         </p>
                         
-                        <div className="space-y-2">
-                          <div className="flex items-center justify-between bg-white p-3 rounded border">
-                            <div>
-                              <Label className="text-xs font-medium text-gray-500">NAME/HOST</Label>
-                              <p className="font-mono text-sm">{domain.domain}</p>
+                        <div className="space-y-3">
+                          {/* Main CNAME for the domain */}
+                          <div className="bg-white p-3 rounded border">
+                            <Label className="text-xs font-medium text-gray-500">CNAME RECORD #1 - Main Domain</Label>
+                            <div className="grid grid-cols-1 md:grid-cols-3 gap-2 mt-2">
+                              <div>
+                                <Label className="text-xs text-gray-500">NAME/HOST:</Label>
+                                <div className="flex items-center justify-between">
+                                  <code className="text-sm bg-gray-100 px-2 py-1 rounded">{domain.domain.split('.')[0]}</code>
+                                  <Button
+                                    size="sm"
+                                    variant="outline"
+                                    onClick={() => copyToClipboard(domain.domain.split('.')[0], 'CNAME name')}
+                                  >
+                                    <Copy className="h-3 w-3" />
+                                  </Button>
+                                </div>
+                              </div>
+                              <div>
+                                <Label className="text-xs text-gray-500">VALUE/TARGET:</Label>
+                                <div className="flex items-center justify-between">
+                                  <code className="text-sm bg-gray-100 px-2 py-1 rounded">cname.disclosurely.com</code>
+                                  <Button
+                                    size="sm"
+                                    variant="outline"
+                                    onClick={() => copyToClipboard('cname.disclosurely.com', 'CNAME target')}
+                                  >
+                                    <Copy className="h-3 w-3" />
+                                  </Button>
+                                </div>
+                              </div>
+                              <div>
+                                <Label className="text-xs text-gray-500">TTL:</Label>
+                                <code className="text-sm bg-gray-100 px-2 py-1 rounded">300</code>
+                              </div>
                             </div>
-                            <Button
-                              size="sm"
-                              variant="outline"
-                              onClick={() => copyToClipboard(domain.domain, 'Domain name')}
-                            >
-                              <Copy className="h-4 w-4" />
-                            </Button>
                           </div>
-                          
-                          <div className="flex items-center justify-between bg-white p-3 rounded border">
-                            <div>
-                              <Label className="text-xs font-medium text-gray-500">VALUE/TARGET</Label>
-                              <p className="font-mono text-sm">cname.disclosurely.com</p>
+
+                          {/* Verification CNAME */}
+                          <div className="bg-white p-3 rounded border">
+                            <Label className="text-xs font-medium text-gray-500">CNAME RECORD #2 - Verification</Label>
+                            <div className="grid grid-cols-1 md:grid-cols-3 gap-2 mt-2">
+                              <div>
+                                <Label className="text-xs text-gray-500">NAME/HOST:</Label>
+                                <div className="flex items-center justify-between">
+                                  <code className="text-sm bg-gray-100 px-2 py-1 rounded">_verify.{domain.domain.split('.')[0]}</code>
+                                  <Button
+                                    size="sm"
+                                    variant="outline"
+                                    onClick={() => copyToClipboard(`_verify.${domain.domain.split('.')[0]}`, 'Verification name')}
+                                  >
+                                    <Copy className="h-3 w-3" />
+                                  </Button>
+                                </div>
+                              </div>
+                              <div>
+                                <Label className="text-xs text-gray-500">VALUE/TARGET:</Label>
+                                <div className="flex items-center justify-between">
+                                  <code className="text-sm bg-gray-100 px-2 py-1 rounded">{domain.verification_token}.verify.disclosurely.com</code>
+                                  <Button
+                                    size="sm"
+                                    variant="outline"
+                                    onClick={() => copyToClipboard(`${domain.verification_token}.verify.disclosurely.com`, 'Verification target')}
+                                  >
+                                    <Copy className="h-3 w-3" />
+                                  </Button>
+                                </div>
+                              </div>
+                              <div>
+                                <Label className="text-xs text-gray-500">TTL:</Label>
+                                <code className="text-sm bg-gray-100 px-2 py-1 rounded">300</code>
+                              </div>
                             </div>
-                            <Button
-                              size="sm"
-                              variant="outline"
-                              onClick={() => copyToClipboard('cname.disclosurely.com', 'CNAME target')}
-                            >
-                              <Copy className="h-4 w-4" />
-                            </Button>
                           </div>
                         </div>
 
-                        <div className="text-xs text-blue-700">
-                          <p className="mb-1">• TTL can be set to 300 seconds (5 minutes) or your DNS provider's default</p>
-                          <p>• DNS changes can take up to 24 hours to propagate</p>
+                        <div className="text-xs text-blue-700 space-y-1">
+                          <p><strong>Step-by-step:</strong></p>
+                          <p>1. Log in to your domain registrar (GoDaddy, Namecheap, Cloudflare, etc.)</p>
+                          <p>2. Find DNS management or DNS settings</p>
+                          <p>3. Add both CNAME records exactly as shown above</p>
+                          <p>4. Wait 5-10 minutes, then click "Check Verification"</p>
+                          <p><strong>Note:</strong> DNS changes can take up to 24 hours to fully propagate</p>
                         </div>
                       </div>
                     )}
@@ -311,11 +377,18 @@ const CustomDomainSettings = ({ hasActiveTier2Subscription }: CustomDomainSettin
                       <div className="bg-green-50 p-4 rounded-lg">
                         <div className="flex items-center gap-2 mb-2">
                           <CheckCircle className="h-4 w-4 text-green-600" />
-                          <span className="text-green-800 font-medium">Domain Active</span>
+                          <span className="text-green-800 font-medium">Domain Active & Verified</span>
                         </div>
-                        <p className="text-sm text-green-700">
-                          Your submission links will now use your custom domain: 
-                          <span className="font-mono ml-1">{domain.domain}/secure/tool/submit/...</span>
+                        <p className="text-sm text-green-700 mb-2">
+                          Your submission links now use your custom domain:
+                        </p>
+                        <div className="bg-white p-2 rounded border">
+                          <code className="text-sm font-mono text-green-800">
+                            https://{domain.domain}/secure/tool/submit/[link-id]
+                          </code>
+                        </div>
+                        <p className="text-xs text-green-600 mt-2">
+                          All new submission links will automatically use this domain.
                         </p>
                       </div>
                     )}
