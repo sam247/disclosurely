@@ -1,4 +1,3 @@
-
 import { Shield, Users, MessageSquare, Scale, Infinity, ArrowRight, Check, Star, Building, Globe, Award, Lock } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -49,8 +48,8 @@ const Landing = () => {
         <div className="text-center">
           {/* Blue lock icon and End to End Encryption on one line */}
           <div className="flex justify-center items-center mb-6">
-            <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mr-4">
-              <Lock className="h-8 w-8 text-blue-600" />
+            <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center mr-4">
+              <Lock className="h-4 w-4 text-blue-600" />
             </div>
             <p className="text-sm font-medium text-blue-600 uppercase tracking-wide">End to End Encryption</p>
           </div>
@@ -74,6 +73,7 @@ const Landing = () => {
         </div>
       </div>
 
+      
       {/* Key Features with Artwork */}
       <div className="bg-white py-16 sm:py-20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -436,6 +436,7 @@ const Landing = () => {
         </div>
       </div>
 
+      
       {/* CTA Section */}
       <div className="bg-blue-600 py-12 sm:py-16">
         <div className="max-w-4xl mx-auto text-center px-4 sm:px-6 lg:px-8">
