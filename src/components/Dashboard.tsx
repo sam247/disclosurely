@@ -15,11 +15,9 @@ import {
   Users, 
   FileText, 
   AlertTriangle, 
-  TrendingUp,
   Settings,
   Copy,
-  ExternalLink,
-  Plus
+  ExternalLink
 } from 'lucide-react';
 import ReportsManagement from './ReportsManagement';
 import SettingsPanel from './SettingsPanel';
@@ -221,17 +219,6 @@ const Dashboard = () => {
                         </p>
                       </div>
                     )}
-
-                    <div className="pt-2">
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => setShowSettings(true)}
-                      >
-                        <Plus className="h-4 w-4 mr-2" />
-                        Create Custom Links
-                      </Button>
-                    </div>
                   </div>
                 </CardContent>
               </Card>
@@ -292,25 +279,8 @@ const Dashboard = () => {
               </Card>
             </div>
 
-            {/* Trending Cases */}
-            <Card className="mb-8">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <TrendingUp className="h-5 w-5" />
-                  Trending Cases
-                </CardTitle>
-                <CardDescription>
-                  Cases with the most activity in the past week
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <ul>
-                  <li>Case #123 - High Priority</li>
-                  <li>Case #456 - Medium Priority</li>
-                  <li>Case #789 - Low Priority</li>
-                </ul>
-              </CardContent>
-            </Card>
+            {/* Case List */}
+            <ReportsManagement />
           </TabsContent>
 
           <TabsContent value="reports" className="mt-6">
