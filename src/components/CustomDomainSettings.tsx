@@ -8,7 +8,7 @@ import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
-import { Globe, CheckCircle, AlertCircle, Copy, ExternalLink, Info } from 'lucide-react';
+import { Globe, CheckCircle, AlertCircle, Copy, ExternalLink, Info, AlertTriangle } from 'lucide-react';
 
 interface DomainVerification {
   id: string;
@@ -139,7 +139,7 @@ const CustomDomainSettings = ({ hasActiveTier2Subscription }: CustomDomainSettin
 
       toast({
         title: "Domain verified!",
-        description: "Your custom domain is now active.",
+        description: "Your custom domain verification is complete. Contact support to enable routing.",
       });
 
       fetchDomainVerifications();
@@ -189,7 +189,7 @@ const CustomDomainSettings = ({ hasActiveTier2Subscription }: CustomDomainSettin
                 Custom Domain Branding
               </CardTitle>
               <CardDescription>
-                Use your own domain for submission links instead of the default domain
+                Set up your custom domain for branded submission links
               </CardDescription>
             </div>
             <Button onClick={() => setShowAddForm(!showAddForm)}>
@@ -198,18 +198,41 @@ const CustomDomainSettings = ({ hasActiveTier2Subscription }: CustomDomainSettin
           </div>
         </CardHeader>
         <CardContent>
-          {/* Important Information Box */}
+          {/* Important Server Configuration Notice */}
+          <div className="mb-6 p-4 bg-orange-50 rounded-lg border border-orange-200">
+            <div className="flex items-start gap-3">
+              <AlertTriangle className="h-5 w-5 text-orange-600 mt-0.5 flex-shrink-0" />
+              <div className="text-sm">
+                <h4 className="font-medium text-orange-900 mb-2">Server Configuration Required</h4>
+                <div className="text-orange-800 space-y-2">
+                  <p>Custom domain routing requires server-side configuration that cannot be automated through DNS alone.</p>
+                  <p><strong>After DNS verification:</strong></p>
+                  <ul className="list-disc ml-4 space-y-1">
+                    <li>Contact our support team to enable custom domain routing</li>
+                    <li>We'll configure the necessary server infrastructure</li>
+                    <li>Your links will then work with your custom domain</li>
+                  </ul>
+                  <p className="text-sm mt-2">
+                    <strong>Contact:</strong> support@disclosurely.com with your verified domain
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* DNS Setup Information */}
           <div className="mb-6 p-4 bg-blue-50 rounded-lg border border-blue-200">
             <div className="flex items-start gap-3">
               <Info className="h-5 w-5 text-blue-600 mt-0.5 flex-shrink-0" />
               <div className="text-sm">
-                <h4 className="font-medium text-blue-900 mb-2">How Custom Domain Branding Works</h4>
-                <ul className="text-blue-800 space-y-1">
-                  <li>• Your submission links will use your domain (e.g., reports.yourcompany.com/submit/xyz)</li>
-                  <li>• Requires adding 2 CNAME records to your DNS settings</li>
-                  <li>• Verification typically takes 5-10 minutes after DNS changes</li>
-                  <li>• SSL certificates are automatically managed</li>
-                </ul>
+                <h4 className="font-medium text-blue-900 mb-2">How Custom Domain Setup Works</h4>
+                <ol className="text-blue-800 space-y-1 list-decimal ml-4">
+                  <li>Add your custom domain below</li>
+                  <li>Configure DNS CNAME records as instructed</li>
+                  <li>Verify domain ownership</li>
+                  <li>Contact support to enable server-side routing</li>
+                  <li>Your submission links will use your custom domain</li>
+                </ol>
               </div>
             </div>
           </div>
@@ -262,7 +285,7 @@ const CustomDomainSettings = ({ hasActiveTier2Subscription }: CustomDomainSettin
                           {domain.verified_at ? (
                             <Badge variant="default" className="bg-green-100 text-green-800">
                               <CheckCircle className="h-3 w-3 mr-1" />
-                              Verified & Active
+                              DNS Verified
                             </Badge>
                           ) : (
                             <Badge variant="secondary" className="bg-yellow-100 text-yellow-800">
@@ -283,7 +306,7 @@ const CustomDomainSettings = ({ hasActiveTier2Subscription }: CustomDomainSettin
                       <div className="space-y-4 bg-blue-50 p-4 rounded-lg">
                         <h5 className="font-medium text-blue-900">DNS Configuration Required</h5>
                         <p className="text-sm text-blue-800">
-                          Add these 2 CNAME records to your DNS settings:
+                          Add these CNAME records to your DNS settings:
                         </p>
                         
                         <div className="space-y-3">
@@ -377,18 +400,22 @@ const CustomDomainSettings = ({ hasActiveTier2Subscription }: CustomDomainSettin
                       <div className="bg-green-50 p-4 rounded-lg">
                         <div className="flex items-center gap-2 mb-2">
                           <CheckCircle className="h-4 w-4 text-green-600" />
-                          <span className="text-green-800 font-medium">Domain Active & Verified</span>
+                          <span className="text-green-800 font-medium">DNS Verified - Server Setup Required</span>
                         </div>
-                        <p className="text-sm text-green-700 mb-2">
-                          Your submission links now use your custom domain:
+                        <p className="text-sm text-green-700 mb-3">
+                          Your DNS is configured correctly! To complete the setup:
                         </p>
-                        <div className="bg-white p-2 rounded border">
-                          <code className="text-sm font-mono text-green-800">
-                            https://{domain.domain}/secure/tool/submit/[link-id]
-                          </code>
+                        <div className="bg-white p-3 rounded border border-green-200 space-y-2">
+                          <p className="text-sm font-medium text-green-800">Next Steps:</p>
+                          <ol className="text-sm text-green-700 list-decimal ml-4 space-y-1">
+                            <li>Contact our support team at <strong>support@disclosurely.com</strong></li>
+                            <li>Include your verified domain: <strong>{domain.domain}</strong></li>
+                            <li>We'll configure server-side routing within 24-48 hours</li>
+                            <li>Your submission links will then work with your custom domain</li>
+                          </ol>
                         </div>
                         <p className="text-xs text-green-600 mt-2">
-                          All new submission links will automatically use this domain.
+                          Expected URL format: https://{domain.domain}/secure/tool/submit/[link-id]
                         </p>
                       </div>
                     )}
