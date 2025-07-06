@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useToast } from '@/hooks/use-toast';
@@ -21,7 +22,7 @@ interface DomainVerification {
   id: string;
   organization_id: string;
   domain: string;
-  verification_type: 'CNAME' | 'SUBDOMAIN';
+  verification_type: string;
   verification_token: string | null;
   verified_at: string | null;
   created_at: string;
