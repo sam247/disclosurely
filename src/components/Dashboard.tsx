@@ -1,299 +1,810 @@
-
-import React, { useState, useEffect } from 'react';
-import { useAuth } from '@/hooks/useAuth';
-import { supabase } from '@/integrations/supabase/client';
-import { useToast } from '@/hooks/use-toast';
-import { useQuery } from '@tanstack/react-query';
+import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { 
-  BarChart3, 
-  Users, 
-  FileText, 
-  AlertTriangle, 
-  Settings,
-  Copy,
-  ExternalLink
-} from 'lucide-react';
-import ReportsManagement from './ReportsManagement';
-import SettingsPanel from './SettingsPanel';
-import AICaseHelper from './AICaseHelper';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
+import { Badge } from '@/components/ui/badge';
+import { useAuth } from '@/hooks/useAuth';
+import { useToast } from '@/hooks/use-toast';
+import { LogOut, Plus, ExternalLink, FileText, Eye, Archive, Trash2, CreditCard, Settings, RotateCcw, MoreVertical, Menu, Bot } from 'lucide-react';
+import { supabase } from '@/integrations/supabase/client';
+import ReportMessaging from '@/components/ReportMessaging';
+import ReportContentDisplay from '@/components/ReportContentDisplay';
+import ReportAttachments from '@/components/ReportAttachments';
+import SubscriptionManagement from '@/components/SubscriptionManagement';
+import OrganizationSettings from '@/components/OrganizationSettings';
+import ReportsManagement from '@/components/ReportsManagement';
+import SettingsPanel from '@/components/SettingsPanel';
 
-interface Profile {
+interface Report {
   id: string;
-  email: string;
-  organization_id: string | null;
+  title: string;
+  tracking_id: string;
+  status: string;
   created_at: string;
-  updated_at: string;
+  encrypted_content: string;
+  encryption_key_hash: string;
+  priority: number;
+  report_type: string;
+  organizations?: {
+    name: string;
+  };
+  submitted_by_email?: string;
+}
+
+interface SubmissionLink {
+  id: string;
+  name: string;
+  link_token: string;
+  usage_count: number;
 }
 
 const Dashboard = () => {
-  const { user, signOut } = useAuth();
+  const { user, signOut, subscriptionData } = useAuth();
+  const navigate = useNavigate();
   const { toast } = useToast();
-  const [activeTab, setActiveTab] = useState('cases');
-  const [showSettings, setShowSettings] = useState(false);
+  const [reports, setReports] = useState<Report[]>([]);
+  const [archivedReports, setArchivedReports] = useState<Report[]>([]);
+  const [links, setLinks] = useState<SubmissionLink[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [selectedReport, setSelectedReport] = useState<Report | null>(null);
+  const [isReportDialogOpen, setIsReportDialogOpen] = useState(false);
+  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+  const [showArchived, setShowArchived] = useState(false);
 
-  // Fetch profile data
-  const { data: profile, isLoading: profileLoading, error: profileError } = useQuery({
-    queryKey: ['profile'],
-    queryFn: async () => {
-      if (!user) return null;
+  useEffect(() => {
+    if (user) {
+      fetchData();
+    }
+  }, [user]);
 
-      const { data, error } = await supabase
-        .from('profiles')
-        .select('*')
-        .eq('id', user.id)
-        .single();
-
-      if (error) throw error;
-      return data as Profile;
-    },
-    enabled: !!user,
-  });
-
-  // Fetch verified custom domains and subdomains
-  const { data: customDomains } = useQuery({
-    queryKey: ['custom-domains'],
-    queryFn: async () => {
-      if (!user) return [];
-
+  const fetchData = async () => {
+    if (!user) return;
+    
+    try {
+      // Get user's profile and organization
       const { data: profile } = await supabase
         .from('profiles')
         .select('organization_id')
         .eq('id', user.id)
         .single();
 
-      if (!profile?.organization_id) return [];
+      if (!profile?.organization_id) {
+        setLoading(false);
+        return;
+      }
 
-      const { data: domains } = await supabase
-        .from('domain_verifications')
-        .select('domain, verified_at, verification_type')
+      // Fetch active reports - now including submitted_by_email
+      const { data: reportsData, error: reportsError } = await supabase
+        .from('reports')
+        .select('id, title, tracking_id, status, created_at, encrypted_content, encryption_key_hash, priority, report_type, submitted_by_email')
         .eq('organization_id', profile.organization_id)
-        .not('verified_at', 'is', null);
+        .neq('status', 'closed')
+        .order('created_at', { ascending: false })
+        .limit(20);
 
-      return domains || [];
-    },
-    enabled: !!user,
-  });
+      if (reportsError) {
+        console.error('Error fetching reports:', reportsError);
+      }
 
-  // Get the primary domain (prefer subdomain for immediate availability)
-  const primaryDomain = customDomains?.find(d => d.verification_type === 'SUBDOMAIN')?.domain || null;
+      // Fetch archived reports - now including submitted_by_email
+      const { data: archivedData, error: archivedError } = await supabase
+        .from('reports')
+        .select('id, title, tracking_id, status, created_at, encrypted_content, encryption_key_hash, priority, report_type, submitted_by_email')
+        .eq('organization_id', profile.organization_id)
+        .eq('status', 'closed')
+        .order('created_at', { ascending: false })
+        .limit(20);
 
-  const handleSignOut = async () => {
-    await signOut();
+      if (archivedError) {
+        console.error('Error fetching archived reports:', archivedError);
+      }
+
+      // Fetch the single organization link (simplified to one link per org)
+      const { data: linksData } = await supabase
+        .from('organization_links')
+        .select('id, name, link_token, usage_count')
+        .eq('organization_id', profile.organization_id)
+        .eq('is_active', true)
+        .limit(1);
+
+      setReports(reportsData || []);
+      setArchivedReports(archivedData || []);
+      setLinks(linksData || []);
+    } catch (error) {
+      console.error('Error fetching dashboard data:', error);
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const getSubmissionUrl = () => {
-    return `${window.location.origin}/secure/tool`;
+  const handleViewReport = async (report: Report) => {
+    setSelectedReport(report);
+    setIsReportDialogOpen(true);
   };
 
-  const copyToClipboard = (text: string, label: string) => {
-    navigator.clipboard.writeText(text);
+  const handleArchiveReport = async (reportId: string) => {
+    try {
+      const { error } = await supabase
+        .from('reports')
+        .update({ status: 'closed' })
+        .eq('id', reportId);
+
+      if (error) throw error;
+
+      toast({
+        title: "Report archived",
+        description: "The report has been moved to closed status",
+      });
+
+      if (selectedReport?.id === reportId) {
+        setIsReportDialogOpen(false);
+        setSelectedReport(null);
+      }
+
+      setReports(prevReports => prevReports.filter(report => report.id !== reportId));
+      
+      setTimeout(() => {
+        fetchData();
+      }, 1000);
+    } catch (error) {
+      console.error('Error archiving report:', error);
+      toast({
+        title: "Error",
+        description: "Failed to archive report. Please try again.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleUnarchiveReport = async (reportId: string) => {
+    try {
+      const { error } = await supabase
+        .from('reports')
+        .update({ status: 'new' })
+        .eq('id', reportId);
+
+      if (error) throw error;
+
+      toast({
+        title: "Report unarchived",
+        description: "The report has been moved back to active status",
+      });
+
+      if (selectedReport?.id === reportId) {
+        setIsReportDialogOpen(false);
+        setSelectedReport(null);
+      }
+
+      setArchivedReports(prevReports => prevReports.filter(report => report.id !== reportId));
+      
+      setTimeout(() => {
+        fetchData();
+      }, 1000);
+    } catch (error) {
+      console.error('Error unarchiving report:', error);
+      toast({
+        title: "Error",
+        description: "Failed to unarchive report. Please try again.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleDeleteReport = async (reportId: string) => {
+    try {
+      setReports(prevReports => prevReports.filter(report => report.id !== reportId));
+      setArchivedReports(prevReports => prevReports.filter(report => report.id !== reportId));
+
+      if (selectedReport?.id === reportId) {
+        setIsReportDialogOpen(false);
+        setSelectedReport(null);
+      }
+
+      await supabase.from('report_messages').delete().eq('report_id', reportId);
+      await supabase.from('report_notes').delete().eq('report_id', reportId);
+      await supabase.from('notifications').delete().eq('report_id', reportId);
+
+      const { error: reportError } = await supabase
+        .from('reports')
+        .delete()
+        .eq('id', reportId);
+
+      if (reportError) {
+        console.error('Error deleting report:', reportError);
+        throw reportError;
+      }
+
+      toast({
+        title: "Report deleted",
+        description: "The report has been permanently deleted",
+      });
+
+      setTimeout(() => {
+        fetchData();
+      }, 1000);
+      
+    } catch (error) {
+      console.error('Error deleting report:', error);
+      
+      toast({
+        title: "Error",
+        description: "Failed to delete report. Please try again.",
+        variant: "destructive",
+      });
+      
+      setTimeout(() => {
+        fetchData();
+      }, 500);
+    }
+  };
+
+  const createOrGetSubmissionLink = async () => {
+    if (!user) return;
+
+    try {
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('organization_id')
+        .eq('id', user.id)
+        .single();
+
+      if (!profile?.organization_id) {
+        toast({
+          title: "Setup required",
+          description: "Please complete your profile setup first",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      if (links.length > 0) {
+        toast({
+          title: "Link already exists",
+          description: "Your organization already has a submission link",
+        });
+        return;
+      }
+
+      const generateToken = () => {
+        return Math.random().toString(36).substring(2, 14);
+      };
+
+      const { data, error } = await supabase
+        .from('organization_links')
+        .insert({
+          organization_id: profile.organization_id,
+          name: 'Report Submission Link',
+          description: 'Submit reports securely to our organization',
+          created_by: user.id,
+          link_token: generateToken()
+        })
+        .select()
+        .single();
+
+      if (error) throw error;
+
+      toast({
+        title: "Link created!",
+        description: "Your submission link is ready to use.",
+      });
+
+      fetchData();
+    } catch (error: any) {
+      console.error('Error creating link:', error);
+      toast({
+        title: "Error",
+        description: error.message || "Failed to create link",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const copyLink = (token: string) => {
+    const link = `${window.location.origin}/secure/tool/submit/${token}`;
+    navigator.clipboard.writeText(link);
     toast({
-      title: `${label} copied!`,
-      description: "The value has been copied to your clipboard.",
+      title: "Link copied!",
+      description: "The submission link has been copied to your clipboard.",
     });
   };
+
+  const handleLogout = async () => {
+    try {
+      await signOut();
+      navigate('/auth/login');
+    } catch (error) {
+      console.error('Logout error:', error);
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-4"></div>
+          <p>Loading dashboard...</p>
+        </div>
+      </div>
+    );
+  }
+
+  const renderReportsList = (reportsList: Report[], isArchived = false) => (
+    reportsList.length === 0 ? (
+      <div className="text-center py-8">
+        <FileText className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+        <p className="text-gray-600">No {isArchived ? 'archived ' : ''}reports found</p>
+        <p className="text-sm text-gray-500">
+          {isArchived ? 'Archived reports will appear here' : 'Reports will appear here once submitted through your link'}
+        </p>
+      </div>
+    ) : (
+      <div className="space-y-4">
+        {reportsList.map((report) => (
+          <div key={report.id} className="border rounded-lg hover:bg-gray-50 transition-colors">
+            {/* Mobile Layout */}
+            <div className="block md:hidden p-4 space-y-3">
+              <div className="flex items-start justify-between">
+                <div className="flex-1 min-w-0">
+                  <h3 className="font-medium text-sm truncate">{report.title}</h3>
+                  <p className="text-xs text-gray-600 mt-1">
+                    {report.tracking_id}
+                  </p>
+                  <p className="text-xs text-gray-500">
+                    {new Date(report.created_at).toLocaleDateString()}
+                  </p>
+                </div>
+                <span className={`px-2 py-1 text-xs rounded-full flex-shrink-0 ml-2 ${
+                  report.status === 'new' ? 'bg-blue-100 text-blue-800' :
+                  report.status === 'in_review' ? 'bg-yellow-100 text-yellow-800' :
+                  report.status === 'investigating' ? 'bg-orange-100 text-orange-800' :
+                  report.status === 'resolved' ? 'bg-green-100 text-green-800' :
+                  report.status === 'closed' ? 'bg-gray-100 text-gray-800' :
+                  'bg-gray-100 text-gray-800'
+                }`}>
+                  {report.status.replace('_', ' ')}
+                </span>
+              </div>
+              
+              <div className="flex flex-wrap gap-2">
+                <Button 
+                  size="sm" 
+                  variant="outline"
+                  onClick={() => handleViewReport(report)}
+                  className="flex-1 min-w-0"
+                >
+                  <Eye className="h-3 w-3 mr-1" />
+                  View
+                </Button>
+                
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button size="sm" variant="outline" className="px-2">
+                      <MoreVertical className="h-3 w-3" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end">
+                    {isArchived ? (
+                      <DropdownMenuItem onClick={() => handleUnarchiveReport(report.id)}>
+                        <RotateCcw className="h-4 w-4 mr-2" />
+                        Unarchive
+                      </DropdownMenuItem>
+                    ) : (
+                      <DropdownMenuItem onClick={() => handleArchiveReport(report.id)}>
+                        <Archive className="h-4 w-4 mr-2" />
+                        Archive
+                      </DropdownMenuItem>
+                    )}
+                    <AlertDialog>
+                      <AlertDialogTrigger asChild>
+                        <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
+                          <Trash2 className="h-4 w-4 mr-2" />
+                          Delete
+                        </DropdownMenuItem>
+                      </AlertDialogTrigger>
+                      <AlertDialogContent>
+                        <AlertDialogHeader>
+                          <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+                          <AlertDialogDescription>
+                            This action cannot be undone. This will permanently delete the report 
+                            and all associated messages.
+                          </AlertDialogDescription>
+                        </AlertDialogHeader>
+                        <AlertDialogFooter>
+                          <AlertDialogCancel>Cancel</AlertDialogCancel>
+                          <AlertDialogAction 
+                            onClick={() => handleDeleteReport(report.id)}
+                            className="bg-red-600 hover:bg-red-700"
+                          >
+                            Delete Report
+                          </AlertDialogAction>
+                        </AlertDialogFooter>
+                      </AlertDialogContent>
+                    </AlertDialog>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              </div>
+            </div>
+
+            {/* Desktop Layout */}
+            <div className="hidden md:flex items-center justify-between p-4">
+              <div className="flex-1">
+                <h3 className="font-medium">{report.title}</h3>
+                <p className="text-sm text-gray-600">
+                  {report.tracking_id} • {new Date(report.created_at).toLocaleDateString()}
+                </p>
+              </div>
+              <div className="flex items-center space-x-3">
+                <span className={`px-2 py-1 text-xs rounded-full ${
+                  report.status === 'new' ? 'bg-blue-100 text-blue-800' :
+                  report.status === 'in_review' ? 'bg-yellow-100 text-yellow-800' :
+                  report.status === 'investigating' ? 'bg-orange-100 text-orange-800' :
+                  report.status === 'resolved' ? 'bg-green-100 text-green-800' :
+                  report.status === 'closed' ? 'bg-gray-100 text-gray-800' :
+                  'bg-gray-100 text-gray-800'
+                }`}>
+                  {report.status.replace('_', ' ')}
+                </span>
+                <Button 
+                  size="sm" 
+                  variant="outline"
+                  onClick={() => handleViewReport(report)}
+                >
+                  <Eye className="h-4 w-4 mr-1" />
+                  View
+                </Button>
+                {isArchived ? (
+                  <Button 
+                    size="sm" 
+                    variant="outline"
+                    onClick={() => handleUnarchiveReport(report.id)}
+                  >
+                    <RotateCcw className="h-4 w-4 mr-1" />
+                    Unarchive
+                  </Button>
+                ) : (
+                  <Button 
+                    size="sm" 
+                    variant="outline"
+                    onClick={() => handleArchiveReport(report.id)}
+                  >
+                    <Archive className="h-4 w-4 mr-1" />
+                    Archive
+                  </Button>
+                )}
+                <AlertDialog>
+                  <AlertDialogTrigger asChild>
+                    <Button size="sm" variant="destructive">
+                      <Trash2 className="h-4 w-4 mr-1" />
+                      Delete
+                    </Button>
+                  </AlertDialogTrigger>
+                  <AlertDialogContent>
+                    <AlertDialogHeader>
+                      <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+                      <AlertDialogDescription>
+                        This action cannot be undone. This will permanently delete the report 
+                        and all associated messages.
+                      </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                      <AlertDialogCancel>Cancel</AlertDialogCancel>
+                      <AlertDialogAction 
+                        onClick={() => handleDeleteReport(report.id)}
+                        className="bg-red-600 hover:bg-red-700"
+                      >
+                        Delete Report
+                      </AlertDialogAction>
+                    </AlertDialogFooter>
+                  </AlertDialogContent>
+                </AlertDialog>
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+    )
+  );
 
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
-      <div className="bg-white border-b border-gray-200">
-        <div className="px-4 sm:px-6 lg:px-8">
+      <header className="bg-white shadow sticky top-0 z-40">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center py-4">
-            <div className="flex items-center space-x-4">
-              <h1 className="text-2xl font-bold text-gray-900">Dashboard</h1>
-              {/* Only show welcome message on larger screens */}
-              <div className="hidden md:flex items-center space-x-2 text-sm text-gray-600">
-                <span>Welcome back, {profile?.email}</span>
+            <div className="flex items-center space-x-3 min-w-0 flex-1">
+              <img 
+                src="/lovable-uploads/c46ace0e-df58-4119-b5e3-8dcfa075ea2f.png" 
+                alt="Disclosurely" 
+                className="h-6 w-auto sm:h-8 flex-shrink-0"
+              />
+              <div className="min-w-0 flex-1">
+                <h1 className="text-lg sm:text-2xl font-bold text-gray-900 truncate">Dashboard</h1>
+                <div className="hidden sm:flex sm:flex-row sm:items-center sm:gap-4">
+                  <p className="text-xs sm:text-sm text-gray-600 truncate">Welcome back, {user?.email}</p>
+                  {subscriptionData.subscribed && (
+                    <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                      {subscriptionData.subscription_tier}
+                    </span>
+                  )}
+                </div>
               </div>
             </div>
-            <div className="flex items-center space-x-4">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => setShowSettings(true)}
-              >
+            <div className="flex items-center space-x-2 flex-shrink-0">
+              <Button variant="outline" size="sm" onClick={() => setIsSettingsOpen(true)} className="hidden sm:flex">
                 <Settings className="h-4 w-4 mr-2" />
                 Settings
               </Button>
-              <Button variant="outline" onClick={handleSignOut}>
-                Sign Out
+              <Button variant="outline" size="sm" onClick={() => setIsSettingsOpen(true)} className="sm:hidden">
+                <Settings className="h-4 w-4" />
+              </Button>
+              <Button onClick={handleLogout} variant="outline" size="sm" className="hidden sm:flex">
+                <LogOut className="h-4 w-4 mr-2" />
+                Sign out
+              </Button>
+              <Button onClick={handleLogout} variant="outline" size="sm" className="sm:hidden">
+                <LogOut className="h-4 w-4" />
               </Button>
             </div>
           </div>
         </div>
-      </div>
+      </header>
 
-      <div className="px-4 sm:px-6 lg:px-8 py-8">
-        <Tabs value={activeTab} onValueChange={setActiveTab}>
-          <TabsList className="grid w-full grid-cols-3">
-            <TabsTrigger value="cases">Cases</TabsTrigger>
-            <TabsTrigger value="reports">Reports</TabsTrigger>
-            <TabsTrigger value="ai-help" className="relative">
-              AI Case Help
-              <Badge 
-                variant="secondary" 
-                className="ml-2 text-xs bg-purple-100 text-purple-800 border-purple-200"
-              >
-                PRO
-              </Badge>
-            </TabsTrigger>
-          </TabsList>
+      {/* Main Content */}
+      <main className="max-w-7xl mx-auto py-4 sm:py-6 px-4 sm:px-6 lg:px-8">
+        <div className="space-y-6">
+          <Tabs defaultValue="cases" className="space-y-6">
+            <TabsList className="grid w-full grid-cols-4">
+              <TabsTrigger value="cases" className="text-xs sm:text-sm">Cases</TabsTrigger>
+              <TabsTrigger value="reports" className="text-xs sm:text-sm">Reports</TabsTrigger>
+              <TabsTrigger value="ai-help" className="text-xs sm:text-sm flex items-center gap-1">
+                <Bot className="h-3 w-3" />
+                AI Case Help
+                {(!subscriptionData.subscribed || subscriptionData.subscription_tier === 'Tier 1') && (
+                  <Badge variant="secondary" className="text-xs">PRO</Badge>
+                )}
+              </TabsTrigger>
+              <TabsTrigger value="subscription" className="text-xs sm:text-sm">Subscription</TabsTrigger>
+            </TabsList>
 
-          <TabsContent value="cases" className="mt-6">
-            {/* Submission Link Section */}
-            <div className="mb-8">
+            <TabsContent value="cases" className="space-y-6">
+              {/* Quick Stats */}
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                <Card>
+                  <CardContent className="p-4 sm:p-6">
+                    <div className="flex items-center">
+                      <FileText className="h-6 w-6 sm:h-8 sm:w-8 text-blue-600 flex-shrink-0" />
+                      <div className="ml-3 sm:ml-4 min-w-0 flex-1">
+                        <p className="text-xs sm:text-sm font-medium text-gray-600">Active Reports</p>
+                        <p className="text-xl sm:text-2xl font-bold text-gray-900">{reports.length}</p>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+                
+                <Card>
+                  <CardContent className="p-4 sm:p-6">
+                    <div className="flex items-center">
+                      <Archive className="h-6 w-6 sm:h-8 sm:w-8 text-gray-600 flex-shrink-0" />
+                      <div className="ml-3 sm:ml-4 min-w-0 flex-1">
+                        <p className="text-xs sm:text-sm font-medium text-gray-600">Archived Reports</p>
+                        <p className="text-xl sm:text-2xl font-bold text-gray-900">{archivedReports.length}</p>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+                
+                <Card>
+                  <CardContent className="p-4 sm:p-6">
+                    <div className="flex items-center">
+                      <ExternalLink className="h-6 w-6 sm:h-8 sm:w-8 text-green-600 flex-shrink-0" />
+                      <div className="ml-3 sm:ml-4 min-w-0 flex-1">
+                        <p className="text-xs sm:text-sm font-medium text-gray-600">Submission Link</p>
+                        <p className="text-xl sm:text-2xl font-bold text-gray-900">{links.length > 0 ? 'Active' : 'None'}</p>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+
+              {/* Subscription Alert */}
+              {!subscriptionData.subscribed && (
+                <Card className="border-orange-200 bg-orange-50">
+                  <CardContent className="p-4 sm:p-6">
+                    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                      <div>
+                        <h3 className="font-medium text-orange-800">Subscription Required</h3>
+                        <p className="text-sm text-orange-700">
+                          A subscription is required to create submission links and manage reports.
+                        </p>
+                      </div>
+                      <Button onClick={() => navigate('#subscription')} className="bg-orange-600 hover:bg-orange-700 self-start sm:self-auto">
+                        View Plans
+                      </Button>
+                    </div>
+                  </CardContent>
+                </Card>
+              )}
+
+              {/* Create/Manage Link Section */}
+              {links.length === 0 ? (
+                <Card>
+                  <CardContent className="p-4 sm:p-6">
+                    <div className="flex flex-col sm:flex-row sm:items-center gap-4">
+                      <Plus className="h-6 w-6 sm:h-8 sm:w-8 text-purple-600 flex-shrink-0" />
+                      <div className="flex-1">
+                        <Button 
+                          onClick={createOrGetSubmissionLink} 
+                          className="w-full sm:w-auto" 
+                          disabled={!subscriptionData.subscribed}
+                        >
+                          Create Submission Link
+                        </Button>
+                        {!subscriptionData.subscribed && (
+                          <p className="text-xs text-gray-500 mt-2">Subscription required</p>
+                        )}
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              ) : (
+                <Card>
+                  <CardHeader className="pb-4">
+                    <CardTitle className="text-lg sm:text-xl">Submission Link</CardTitle>
+                    <CardDescription>Your organization's secure report submission link</CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    {links.map((link) => (
+                      <div key={link.id} className="border rounded-lg p-4">
+                        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                          <div className="min-w-0 flex-1">
+                            <h3 className="font-medium text-sm sm:text-base">{link.name}</h3>
+                            <p className="text-xs sm:text-sm text-gray-600">Used {link.usage_count} times</p>
+                          </div>
+                          <div className="flex flex-col sm:flex-row sm:items-center gap-2">
+                            <code className="text-xs bg-gray-100 px-2 py-1 rounded break-all">
+                              /secure/tool/submit/{link.link_token}
+                            </code>
+                            <Button size="sm" onClick={() => copyLink(link.link_token)} className="self-start sm:self-auto">
+                              Copy Link
+                            </Button>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </CardContent>
+                </Card>
+              )}
+
+              {/* Reports List with Toggle */}
+              <Card>
+                <CardHeader className="pb-4">
+                  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                    <div>
+                      <CardTitle className="text-lg sm:text-xl">{showArchived ? 'Archived Reports' : 'Active Reports'}</CardTitle>
+                      <CardDescription>
+                        {showArchived ? 'Previously archived report submissions' : 'Current active report submissions'}
+                      </CardDescription>
+                    </div>
+                    <Button 
+                      variant="outline" 
+                      onClick={() => setShowArchived(!showArchived)}
+                      size="sm"
+                      className="self-start sm:self-auto"
+                    >
+                      {showArchived ? 'Show Active' : 'Show Archived'}
+                    </Button>
+                  </div>
+                </CardHeader>
+                <CardContent>
+                  {renderReportsList(showArchived ? archivedReports : reports, showArchived)}
+                </CardContent>
+              </Card>
+            </TabsContent>
+
+            <TabsContent value="reports">
+              <ReportsManagement />
+            </TabsContent>
+
+            <TabsContent value="ai-help">
               <Card>
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
-                    <ExternalLink className="h-5 w-5" />
-                    Submission Link
+                    <Bot className="h-5 w-5" />
+                    AI Case Help
+                    {(!subscriptionData.subscribed || subscriptionData.subscription_tier === 'Tier 1') && (
+                      <Badge variant="secondary">PRO Feature</Badge>
+                    )}
                   </CardTitle>
                   <CardDescription>
-                    Your organization's secure report submission link
+                    Get AI-powered assistance with case management and analysis
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
-                  <div className="space-y-4">
-                    <div>
-                      <Label htmlFor="submission-link" className="text-sm font-medium">
-                        Default Submission URL
-                      </Label>
-                      <div className="flex items-center space-x-2 mt-1">
-                        <Input
-                          id="submission-link"
-                          value={getSubmissionUrl()}
-                          readOnly
-                          className="font-mono text-sm"
-                        />
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          onClick={() => copyToClipboard(getSubmissionUrl(), 'Submission link')}
-                        >
-                          <Copy className="h-4 w-4" />
-                        </Button>
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          onClick={() => window.open(getSubmissionUrl(), '_blank')}
-                        >
-                          <ExternalLink className="h-4 w-4" />
-                        </Button>
-                      </div>
+                  {subscriptionData.subscribed && (subscriptionData.subscription_tier === 'Tier 2' || subscriptionData.subscription_tier === 'Tier 3') ? (
+                    <div className="space-y-4">
+                      <p className="text-sm text-gray-600">
+                        AI Case Help is currently being developed. This feature will provide intelligent insights and assistance for your cases.
+                      </p>
+                      <Button disabled>
+                        <Bot className="h-4 w-4 mr-2" />
+                        Coming Soon
+                      </Button>
                     </div>
-
-                    {primaryDomain && (
-                      <div>
-                        <Label className="text-sm font-medium">
-                          Branded Subdomain URL
-                        </Label>
-                        <div className="flex items-center space-x-2 mt-1">
-                          <Input
-                            value={`https://${primaryDomain}/secure/tool`}
-                            readOnly
-                            className="font-mono text-sm"
-                          />
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            onClick={() => copyToClipboard(`https://${primaryDomain}/secure/tool`, 'Branded submission link')}
-                          >
-                            <Copy className="h-4 w-4" />
-                          </Button>
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            onClick={() => window.open(`https://${primaryDomain}/secure/tool`, '_blank')}
-                          >
-                            <ExternalLink className="h-4 w-4" />
-                          </Button>
-                        </div>
-                        <p className="text-xs text-green-600 mt-1">
-                          ✓ Using your branded subdomain
-                        </p>
-                      </div>
-                    )}
-                  </div>
+                  ) : (
+                    <div className="space-y-4">
+                      <p className="text-sm text-gray-600">
+                        Upgrade to Tier 2 or higher to access AI-powered case analysis and assistance.
+                      </p>
+                      <Button onClick={() => navigate('#subscription')} className="bg-blue-600 hover:bg-blue-700">
+                        <CreditCard className="h-4 w-4 mr-2" />
+                        Upgrade Plan
+                      </Button>
+                    </div>
+                  )}
                 </CardContent>
               </Card>
+            </TabsContent>
+
+            <TabsContent value="subscription">
+              <SubscriptionManagement />
+            </TabsContent>
+          </Tabs>
+        </div>
+      </main>
+
+      {/* Report Details Dialog */}
+      <Dialog open={isReportDialogOpen} onOpenChange={setIsReportDialogOpen}>
+        <DialogContent className="max-w-[95vw] sm:max-w-6xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="text-base sm:text-lg">Report Details: {selectedReport?.tracking_id}</DialogTitle>
+            <DialogDescription>
+              View submitted report information, attachments, and secure messages
+            </DialogDescription>
+          </DialogHeader>
+          
+          {selectedReport && (
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <div className="space-y-6">
+                <ReportContentDisplay
+                  encryptedContent={selectedReport.encrypted_content}
+                  title={selectedReport.title}
+                  status={selectedReport.status}
+                  trackingId={selectedReport.tracking_id}
+                  reportType={selectedReport.report_type}
+                  createdAt={selectedReport.created_at}
+                  priority={selectedReport.priority}
+                  submittedByEmail={selectedReport.submitted_by_email}
+                />
+                <ReportAttachments reportId={selectedReport.id} />
+              </div>
+              <div>
+                <ReportMessaging 
+                  report={{
+                    id: selectedReport.id,
+                    title: selectedReport.title,
+                    tracking_id: selectedReport.tracking_id,
+                    status: selectedReport.status,
+                    created_at: selectedReport.created_at,
+                    report_type: selectedReport.report_type,
+                    encrypted_content: selectedReport.encrypted_content,
+                    organizations: selectedReport.organizations || { name: 'Organization' }
+                  }}
+                  onClose={() => setIsReportDialogOpen(false)}
+                />
+              </div>
             </div>
+          )}
+        </DialogContent>
+      </Dialog>
 
-            {/* Stats Cards */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-              <Card>
-                <CardHeader>
-                  <CardTitle className="text-sm font-medium">Total Cases</CardTitle>
-                  <CardDescription className="text-xs text-gray-500">All cases submitted</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="flex items-center space-x-2">
-                    <BarChart3 className="h-4 w-4 text-gray-500" />
-                    <span className="text-2xl font-bold">42</span>
-                  </div>
-                </CardContent>
-              </Card>
-
-              <Card>
-                <CardHeader>
-                  <CardTitle className="text-sm font-medium">Active Users</CardTitle>
-                  <CardDescription className="text-xs text-gray-500">Users with active accounts</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="flex items-center space-x-2">
-                    <Users className="h-4 w-4 text-gray-500" />
-                    <span className="text-2xl font-bold">12</span>
-                  </div>
-                </CardContent>
-              </Card>
-
-              <Card>
-                <CardHeader>
-                  <CardTitle className="text-sm font-medium">Reports Generated</CardTitle>
-                  <CardDescription className="text-xs text-gray-500">Number of reports generated</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="flex items-center space-x-2">
-                    <FileText className="h-4 w-4 text-gray-500" />
-                    <span className="text-2xl font-bold">15</span>
-                  </div>
-                </CardContent>
-              </Card>
-
-              <Card>
-                <CardHeader>
-                  <CardTitle className="text-sm font-medium">Potential Risks</CardTitle>
-                  <CardDescription className="text-xs text-gray-500">Identified potential risks</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="flex items-center space-x-2">
-                    <AlertTriangle className="h-4 w-4 text-gray-500" />
-                    <span className="text-2xl font-bold">3</span>
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
-
-            {/* Case List */}
-            <ReportsManagement />
-          </TabsContent>
-
-          <TabsContent value="reports" className="mt-6">
-            <ReportsManagement />
-          </TabsContent>
-
-          <TabsContent value="ai-help" className="mt-6">
-            <AICaseHelper hasAccess={true} />
-          </TabsContent>
-        </Tabs>
-      </div>
-
-      <SettingsPanel isOpen={showSettings} onClose={() => setShowSettings(false)} />
+      <SettingsPanel 
+        isOpen={isSettingsOpen} 
+        onClose={() => setIsSettingsOpen(false)} 
+      />
     </div>
   );
 };
