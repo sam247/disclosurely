@@ -76,8 +76,7 @@ const LinkGenerator = () => {
   });
 
   // Get the primary domain (prefer subdomain for immediate availability)
-  const primaryDomain = customDomains?.find(d => d.verification_type === 'SUBDOMAIN')?.domain || 
-                       customDomains?.[0]?.domain || null;
+  const primaryDomain = customDomains?.find(d => d.verification_type === 'SUBDOMAIN')?.domain || null;
 
   // Fetch links
   const { data: links, isLoading, error } = useQuery({
@@ -331,7 +330,7 @@ const LinkGenerator = () => {
           {primaryDomain && (
             <div className="mt-2 p-3 bg-green-50 border border-green-200 rounded-lg">
               <p className="text-sm text-green-800">
-                <strong>✓ Branded domains active:</strong> Your links will use {primaryDomain}
+                <strong>✓ Branded subdomain active:</strong> Your links will use {primaryDomain}
               </p>
             </div>
           )}

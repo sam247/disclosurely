@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -7,9 +6,10 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } f
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
+import { Badge } from '@/components/ui/badge';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
-import { LogOut, Plus, ExternalLink, FileText, Eye, Archive, Trash2, CreditCard, Settings, RotateCcw, MoreVertical, Menu } from 'lucide-react';
+import { LogOut, Plus, ExternalLink, FileText, Eye, Archive, Trash2, CreditCard, Settings, RotateCcw, MoreVertical, Menu, Bot } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import ReportMessaging from '@/components/ReportMessaging';
 import ReportContentDisplay from '@/components/ReportContentDisplay';
@@ -523,10 +523,10 @@ const Dashboard = () => {
               />
               <div className="min-w-0 flex-1">
                 <h1 className="text-lg sm:text-2xl font-bold text-gray-900 truncate">Dashboard</h1>
-                <div className="flex flex-col sm:flex-row sm:items-center sm:gap-4">
+                <div className="hidden sm:flex sm:flex-row sm:items-center sm:gap-4">
                   <p className="text-xs sm:text-sm text-gray-600 truncate">Welcome back, {user?.email}</p>
                   {subscriptionData.subscribed && (
-                    <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800 mt-1 sm:mt-0 self-start">
+                    <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
                       {subscriptionData.subscription_tier}
                     </span>
                   )}
@@ -557,9 +557,16 @@ const Dashboard = () => {
       <main className="max-w-7xl mx-auto py-4 sm:py-6 px-4 sm:px-6 lg:px-8">
         <div className="space-y-6">
           <Tabs defaultValue="cases" className="space-y-6">
-            <TabsList className="grid w-full grid-cols-3">
+            <TabsList className="grid w-full grid-cols-4">
               <TabsTrigger value="cases" className="text-xs sm:text-sm">Cases</TabsTrigger>
               <TabsTrigger value="reports" className="text-xs sm:text-sm">Reports</TabsTrigger>
+              <TabsTrigger value="ai-help" className="text-xs sm:text-sm flex items-center gap-1">
+                <Bot className="h-3 w-3" />
+                AI Case Help
+                {(!subscriptionData.subscribed || subscriptionData.subscription_tier === 'Tier 1') && (
+                  <Badge variant="secondary" className="text-xs">PRO</Badge>
+                )}
+              </TabsTrigger>
               <TabsTrigger value="subscription" className="text-xs sm:text-sm">Subscription</TabsTrigger>
             </TabsList>
 
@@ -700,6 +707,46 @@ const Dashboard = () => {
 
             <TabsContent value="reports">
               <ReportsManagement />
+            </TabsContent>
+
+            <TabsContent value="ai-help">
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Bot className="h-5 w-5" />
+                    AI Case Help
+                    {(!subscriptionData.subscribed || subscriptionData.subscription_tier === 'Tier 1') && (
+                      <Badge variant="secondary">PRO Feature</Badge>
+                    )}
+                  </CardTitle>
+                  <CardDescription>
+                    Get AI-powered assistance with case management and analysis
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  {subscriptionData.subscribed && (subscriptionData.subscription_tier === 'Tier 2' || subscriptionData.subscription_tier === 'Tier 3') ? (
+                    <div className="space-y-4">
+                      <p className="text-sm text-gray-600">
+                        AI Case Help is currently being developed. This feature will provide intelligent insights and assistance for your cases.
+                      </p>
+                      <Button disabled>
+                        <Bot className="h-4 w-4 mr-2" />
+                        Coming Soon
+                      </Button>
+                    </div>
+                  ) : (
+                    <div className="space-y-4">
+                      <p className="text-sm text-gray-600">
+                        Upgrade to Tier 2 or higher to access AI-powered case analysis and assistance.
+                      </p>
+                      <Button onClick={() => navigate('#subscription')} className="bg-blue-600 hover:bg-blue-700">
+                        <CreditCard className="h-4 w-4 mr-2" />
+                        Upgrade Plan
+                      </Button>
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
             </TabsContent>
 
             <TabsContent value="subscription">
