@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -9,15 +10,16 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { Badge } from '@/components/ui/badge';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
-import { LogOut, Plus, ExternalLink, FileText, Eye, Archive, Trash2, CreditCard, Settings, RotateCcw, MoreVertical, Menu, Bot } from 'lucide-react';
+import { LogOut, ExternalLink, FileText, Eye, Archive, Trash2, Settings, RotateCcw, MoreVertical, Bot } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import ReportMessaging from '@/components/ReportMessaging';
 import ReportContentDisplay from '@/components/ReportContentDisplay';
 import ReportAttachments from '@/components/ReportAttachments';
-import SubscriptionManagement from '@/components/SubscriptionManagement';
 import OrganizationSettings from '@/components/OrganizationSettings';
 import ReportsManagement from '@/components/ReportsManagement';
 import SettingsPanel from '@/components/SettingsPanel';
+import AICaseHelper from '@/components/AICaseHelper';
+import { useCustomDomain } from '@/hooks/useCustomDomain';
 
 interface Report {
   id: string;
@@ -44,6 +46,7 @@ interface SubmissionLink {
 
 const Dashboard = () => {
   const { user, signOut, subscriptionData } = useAuth();
+  const { customDomain, organizationId, isCustomDomain } = useCustomDomain();
   const navigate = useNavigate();
   const { toast } = useToast();
   const [reports, setReports] = useState<Report[]>([]);
@@ -242,67 +245,6 @@ const Dashboard = () => {
     }
   };
 
-  const createOrGetSubmissionLink = async () => {
-    if (!user) return;
-
-    try {
-      const { data: profile } = await supabase
-        .from('profiles')
-        .select('organization_id')
-        .eq('id', user.id)
-        .single();
-
-      if (!profile?.organization_id) {
-        toast({
-          title: "Setup required",
-          description: "Please complete your profile setup first",
-          variant: "destructive",
-        });
-        return;
-      }
-
-      if (links.length > 0) {
-        toast({
-          title: "Link already exists",
-          description: "Your organization already has a submission link",
-        });
-        return;
-      }
-
-      const generateToken = () => {
-        return Math.random().toString(36).substring(2, 14);
-      };
-
-      const { data, error } = await supabase
-        .from('organization_links')
-        .insert({
-          organization_id: profile.organization_id,
-          name: 'Report Submission Link',
-          description: 'Submit reports securely to our organization',
-          created_by: user.id,
-          link_token: generateToken()
-        })
-        .select()
-        .single();
-
-      if (error) throw error;
-
-      toast({
-        title: "Link created!",
-        description: "Your submission link is ready to use.",
-      });
-
-      fetchData();
-    } catch (error: any) {
-      console.error('Error creating link:', error);
-      toast({
-        title: "Error",
-        description: error.message || "Failed to create link",
-        variant: "destructive",
-      });
-    }
-  };
-
   const copyLink = (token: string) => {
     const link = `${window.location.origin}/secure/tool/submit/${token}`;
     navigator.clipboard.writeText(link);
@@ -310,6 +252,17 @@ const Dashboard = () => {
       title: "Link copied!",
       description: "The submission link has been copied to your clipboard.",
     });
+  };
+
+  const copySubdomainLink = () => {
+    if (customDomain) {
+      const link = `https://${customDomain}/secure/tool/submit`;
+      navigator.clipboard.writeText(link);
+      toast({
+        title: "Subdomain link copied!",
+        description: "The branded submission link has been copied to your clipboard.",
+      });
+    }
   };
 
   const handleLogout = async () => {
@@ -557,17 +510,16 @@ const Dashboard = () => {
       <main className="max-w-7xl mx-auto py-4 sm:py-6 px-4 sm:px-6 lg:px-8">
         <div className="space-y-6">
           <Tabs defaultValue="cases" className="space-y-6">
-            <TabsList className="grid w-full grid-cols-4">
+            <TabsList className="grid w-full grid-cols-3">
               <TabsTrigger value="cases" className="text-xs sm:text-sm">Cases</TabsTrigger>
               <TabsTrigger value="reports" className="text-xs sm:text-sm">Reports</TabsTrigger>
               <TabsTrigger value="ai-help" className="text-xs sm:text-sm flex items-center gap-1">
                 <Bot className="h-3 w-3" />
-                AI Case Help
+                AI Case Helper
                 {(!subscriptionData.subscribed || subscriptionData.subscription_tier === 'Tier 1') && (
                   <Badge variant="secondary" className="text-xs">PRO</Badge>
                 )}
               </TabsTrigger>
-              <TabsTrigger value="subscription" className="text-xs sm:text-sm">Subscription</TabsTrigger>
             </TabsList>
 
             <TabsContent value="cases" className="space-y-6">
@@ -602,15 +554,17 @@ const Dashboard = () => {
                     <div className="flex items-center">
                       <ExternalLink className="h-6 w-6 sm:h-8 sm:w-8 text-green-600 flex-shrink-0" />
                       <div className="ml-3 sm:ml-4 min-w-0 flex-1">
-                        <p className="text-xs sm:text-sm font-medium text-gray-600">Submission Link</p>
-                        <p className="text-xl sm:text-2xl font-bold text-gray-900">{links.length > 0 ? 'Active' : 'None'}</p>
+                        <p className="text-xs sm:text-sm font-medium text-gray-600">Quick Report</p>
+                        <p className="text-xl sm:text-2xl font-bold text-gray-900">
+                          {isCustomDomain && customDomain ? 'Branded' : (links.length > 0 ? 'Active' : 'None')}
+                        </p>
                       </div>
                     </div>
                   </CardContent>
                 </Card>
               </div>
 
-              {/* Subscription Alert */}
+              {/* Submission Alert */}
               {!subscriptionData.subscribed && (
                 <Card className="border-orange-200 bg-orange-50">
                   <CardContent className="p-4 sm:p-6">
@@ -621,43 +575,42 @@ const Dashboard = () => {
                           A subscription is required to create submission links and manage reports.
                         </p>
                       </div>
-                      <Button onClick={() => navigate('#subscription')} className="bg-orange-600 hover:bg-orange-700 self-start sm:self-auto">
-                        View Plans
-                      </Button>
                     </div>
                   </CardContent>
                 </Card>
               )}
 
-              {/* Create/Manage Link Section */}
-              {links.length === 0 ? (
-                <Card>
-                  <CardContent className="p-4 sm:p-6">
-                    <div className="flex flex-col sm:flex-row sm:items-center gap-4">
-                      <Plus className="h-6 w-6 sm:h-8 sm:w-8 text-purple-600 flex-shrink-0" />
-                      <div className="flex-1">
-                        <Button 
-                          onClick={createOrGetSubmissionLink} 
-                          className="w-full sm:w-auto" 
-                          disabled={!subscriptionData.subscribed}
-                        >
-                          Create Submission Link
-                        </Button>
-                        {!subscriptionData.subscribed && (
-                          <p className="text-xs text-gray-500 mt-2">Subscription required</p>
-                        )}
+              {/* Quick Report Link Section */}
+              <Card>
+                <CardHeader className="pb-4">
+                  <CardTitle className="text-lg sm:text-xl">Quick Report Link</CardTitle>
+                  <CardDescription>
+                    {isCustomDomain && customDomain 
+                      ? 'Your branded submission portal' 
+                      : 'Direct link for report submissions'
+                    }
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  {isCustomDomain && customDomain ? (
+                    <div className="border rounded-lg p-4">
+                      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                        <div className="min-w-0 flex-1">
+                          <h3 className="font-medium text-sm sm:text-base">Branded Submission Portal</h3>
+                          <p className="text-xs sm:text-sm text-gray-600">Available at your custom subdomain</p>
+                        </div>
+                        <div className="flex flex-col sm:flex-row sm:items-center gap-2">
+                          <code className="text-xs bg-gray-100 px-2 py-1 rounded break-all">
+                            https://{customDomain}/secure/tool/submit
+                          </code>
+                          <Button size="sm" onClick={copySubdomainLink} className="self-start sm:self-auto">
+                            Copy Link
+                          </Button>
+                        </div>
                       </div>
                     </div>
-                  </CardContent>
-                </Card>
-              ) : (
-                <Card>
-                  <CardHeader className="pb-4">
-                    <CardTitle className="text-lg sm:text-xl">Submission Link</CardTitle>
-                    <CardDescription>Your organization's secure report submission link</CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    {links.map((link) => (
+                  ) : links.length > 0 ? (
+                    links.map((link) => (
                       <div key={link.id} className="border rounded-lg p-4">
                         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                           <div className="min-w-0 flex-1">
@@ -674,10 +627,16 @@ const Dashboard = () => {
                           </div>
                         </div>
                       </div>
-                    ))}
-                  </CardContent>
-                </Card>
-              )}
+                    ))
+                  ) : (
+                    <div className="text-center py-8">
+                      <ExternalLink className="h-8 w-8 text-gray-400 mx-auto mb-4" />
+                      <p className="text-gray-600">No submission link available</p>
+                      <p className="text-sm text-gray-500">Contact your administrator to set up a submission link</p>
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
 
               {/* Reports List with Toggle */}
               <Card>
@@ -710,47 +669,7 @@ const Dashboard = () => {
             </TabsContent>
 
             <TabsContent value="ai-help">
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Bot className="h-5 w-5" />
-                    AI Case Help
-                    {(!subscriptionData.subscribed || subscriptionData.subscription_tier === 'Tier 1') && (
-                      <Badge variant="secondary">PRO Feature</Badge>
-                    )}
-                  </CardTitle>
-                  <CardDescription>
-                    Get AI-powered assistance with case management and analysis
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  {subscriptionData.subscribed && (subscriptionData.subscription_tier === 'Tier 2' || subscriptionData.subscription_tier === 'Tier 3') ? (
-                    <div className="space-y-4">
-                      <p className="text-sm text-gray-600">
-                        AI Case Help is currently being developed. This feature will provide intelligent insights and assistance for your cases.
-                      </p>
-                      <Button disabled>
-                        <Bot className="h-4 w-4 mr-2" />
-                        Coming Soon
-                      </Button>
-                    </div>
-                  ) : (
-                    <div className="space-y-4">
-                      <p className="text-sm text-gray-600">
-                        Upgrade to Tier 2 or higher to access AI-powered case analysis and assistance.
-                      </p>
-                      <Button onClick={() => navigate('#subscription')} className="bg-blue-600 hover:bg-blue-700">
-                        <CreditCard className="h-4 w-4 mr-2" />
-                        Upgrade Plan
-                      </Button>
-                    </div>
-                  )}
-                </CardContent>
-              </Card>
-            </TabsContent>
-
-            <TabsContent value="subscription">
-              <SubscriptionManagement />
+              <AICaseHelper />
             </TabsContent>
           </Tabs>
         </div>
