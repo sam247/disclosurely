@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useToast } from '@/hooks/use-toast';
@@ -136,6 +135,27 @@ const OrganizationSettings = () => {
     try {
       const fullSubdomain = `${subdomainName}.disclosurely.com`;
       
+      // Check if subdomain already exists
+      const { data: existingDomain, error: checkError } = await supabase
+        .from('domain_verifications')
+        .select('id')
+        .eq('domain', fullSubdomain)
+        .single();
+
+      if (existingDomain) {
+        toast({
+          title: "Error",
+          description: "This subdomain is already taken. Please choose a different one.",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      // Only proceed if no existing domain found (ignore "PGRST116" error which means no rows found)
+      if (checkError && checkError.code !== 'PGRST116') {
+        throw checkError;
+      }
+      
       const { error } = await supabase
         .from('domain_verifications')
         .insert({
@@ -157,9 +177,17 @@ const OrganizationSettings = () => {
       fetchDomains();
     } catch (error: any) {
       console.error('Subdomain setup error:', error);
+      let errorMessage = "Failed to set up subdomain";
+      
+      if (error.code === '23505') {
+        errorMessage = "This subdomain is already taken. Please choose a different one.";
+      } else if (error.message) {
+        errorMessage = error.message;
+      }
+      
       toast({
         title: "Error",
-        description: error.message || "Failed to set up subdomain",
+        description: errorMessage,
         variant: "destructive",
       });
     } finally {
