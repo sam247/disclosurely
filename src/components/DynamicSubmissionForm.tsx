@@ -68,6 +68,27 @@ const DynamicSubmissionForm = () => {
 
     try {
       console.log('Fetching link data for token:', linkToken);
+      
+      // First check if we're on a custom domain
+      const currentHost = window.location.hostname;
+      let organizationFilter = {};
+      
+      // If on custom domain, filter by organization
+      if (!currentHost.includes('lovable.app') && 
+          !currentHost.includes('disclosurely.com') && 
+          currentHost !== 'localhost') {
+        
+        const { data: domainVerification } = await supabase
+          .from('domain_verifications')
+          .select('organization_id')
+          .eq('domain', currentHost)
+          .not('verified_at', 'is', null)
+          .single();
+        
+        if (domainVerification) {
+          organizationFilter = { organization_id: domainVerification.organization_id };
+        }
+      }
 
       const { data: linkInfo, error: linkError } = await supabase
         .from('organization_links')
@@ -85,6 +106,7 @@ const DynamicSubmissionForm = () => {
         `)
         .eq('link_token', linkToken)
         .eq('is_active', true)
+        .match(organizationFilter)
         .single();
 
       if (linkError || !linkInfo) {
@@ -220,7 +242,7 @@ const DynamicSubmissionForm = () => {
           submitted_via_link_id: linkData.id,
           status: 'new',
           priority: formData.priority,
-          tags: [finalCategory] // Store category as a tag for statistics
+          tags: [finalCategory]
         })
         .select()
         .single();
@@ -269,8 +291,21 @@ const DynamicSubmissionForm = () => {
           .eq('id', linkData.id);
       }
 
-      // Navigate to success page with tracking ID
-      navigate(`/secure/tool/success?trackingId=${encodeURIComponent(trackingId)}`);
+      // Determine success page URL based on current domain
+      const currentHost = window.location.hostname;
+      let successUrl;
+      
+      if (currentHost !== 'localhost' && 
+          !currentHost.includes('lovable.app') && 
+          !currentHost.includes('disclosurely.com')) {
+        // We're on a custom domain, construct the success URL for this domain
+        successUrl = `${window.location.protocol}//${currentHost}/secure/tool/success?trackingId=${encodeURIComponent(trackingId)}`;
+      } else {
+        // Default behavior for main domain
+        successUrl = `/secure/tool/success?trackingId=${encodeURIComponent(trackingId)}`;
+      }
+
+      window.location.href = successUrl;
 
     } catch (error: any) {
       console.error('Error submitting report:', error);
