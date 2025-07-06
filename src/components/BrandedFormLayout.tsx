@@ -21,10 +21,10 @@ const BrandedFormLayout = ({
 }: BrandedFormLayoutProps) => {
   return (
     <div className="min-h-screen bg-gray-50">
-      <div className="container mx-auto px-4 py-8">
-        <div className="max-w-2xl mx-auto">
-          {/* Header with organization branding */}
-          <div className="text-center mb-8">
+      {/* White header section */}
+      <div className="bg-white shadow-sm">
+        <div className="container mx-auto px-4 py-8">
+          <div className="max-w-2xl mx-auto text-center">
             {logoUrl && (
               <div className="mb-4">
                 <img 
@@ -41,21 +41,22 @@ const BrandedFormLayout = ({
               </h1>
             )}
             
-            <h2 
-              className="text-xl font-semibold mb-2"
-              style={{ color: brandColor }}
-            >
+            <h2 className="text-xl font-semibold mb-2" style={{ color: brandColor }}>
               {title}
             </h2>
             
             {description && (
-              <p className="text-gray-600 mb-6">
+              <p className="text-gray-600">
                 {description}
               </p>
             )}
           </div>
+        </div>
+      </div>
 
-          {/* Main content */}
+      {/* Main content */}
+      <div className="container mx-auto px-4 py-8">
+        <div className="max-w-2xl mx-auto">
           <Card>
             <CardContent className="p-6">
               {children}

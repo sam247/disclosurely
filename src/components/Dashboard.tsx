@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -44,6 +43,13 @@ interface SubmissionLink {
   usage_count: number;
 }
 
+interface DomainVerification {
+  id: string;
+  domain: string;
+  verification_type: string;
+  verified_at: string | null;
+}
+
 const Dashboard = () => {
   const { user, signOut, subscriptionData } = useAuth();
   const { customDomain, organizationId, isCustomDomain } = useCustomDomain();
@@ -52,6 +58,7 @@ const Dashboard = () => {
   const [reports, setReports] = useState<Report[]>([]);
   const [archivedReports, setArchivedReports] = useState<Report[]>([]);
   const [links, setLinks] = useState<SubmissionLink[]>([]);
+  const [subdomains, setSubdomains] = useState<DomainVerification[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedReport, setSelectedReport] = useState<Report | null>(null);
   const [isReportDialogOpen, setIsReportDialogOpen] = useState(false);
@@ -114,9 +121,18 @@ const Dashboard = () => {
         .eq('is_active', true)
         .limit(1);
 
+      // Fetch subdomains for this organization
+      const { data: subdomainsData } = await supabase
+        .from('domain_verifications')
+        .select('id, domain, verification_type, verified_at')
+        .eq('organization_id', profile.organization_id)
+        .eq('verification_type', 'SUBDOMAIN')
+        .not('verified_at', 'is', null);
+
       setReports(reportsData || []);
       setArchivedReports(archivedData || []);
       setLinks(linksData || []);
+      setSubdomains(subdomainsData || []);
     } catch (error) {
       console.error('Error fetching dashboard data:', error);
     } finally {
@@ -254,15 +270,13 @@ const Dashboard = () => {
     });
   };
 
-  const copySubdomainLink = () => {
-    if (customDomain) {
-      const link = `https://${customDomain}/secure/tool/submit`;
-      navigator.clipboard.writeText(link);
-      toast({
-        title: "Subdomain link copied!",
-        description: "The branded submission link has been copied to your clipboard.",
-      });
-    }
+  const copySubdomainLink = (domain: string) => {
+    const link = `https://${domain}/secure/tool/submit`;
+    navigator.clipboard.writeText(link);
+    toast({
+      title: "Subdomain link copied!",
+      description: "The branded submission link has been copied to your clipboard.",
+    });
   };
 
   const handleLogout = async () => {
@@ -556,7 +570,7 @@ const Dashboard = () => {
                       <div className="ml-3 sm:ml-4 min-w-0 flex-1">
                         <p className="text-xs sm:text-sm font-medium text-gray-600">Quick Report</p>
                         <p className="text-xl sm:text-2xl font-bold text-gray-900">
-                          {isCustomDomain && customDomain ? 'Branded' : (links.length > 0 ? 'Active' : 'None')}
+                          {subdomains.length > 0 ? 'Branded' : (links.length > 0 ? 'Active' : 'None')}
                         </p>
                       </div>
                     </div>
@@ -585,30 +599,32 @@ const Dashboard = () => {
                 <CardHeader className="pb-4">
                   <CardTitle className="text-lg sm:text-xl">Quick Report Link</CardTitle>
                   <CardDescription>
-                    {isCustomDomain && customDomain 
+                    {subdomains.length > 0 
                       ? 'Your branded submission portal' 
                       : 'Direct link for report submissions'
                     }
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
-                  {isCustomDomain && customDomain ? (
-                    <div className="border rounded-lg p-4">
-                      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-                        <div className="min-w-0 flex-1">
-                          <h3 className="font-medium text-sm sm:text-base">Branded Submission Portal</h3>
-                          <p className="text-xs sm:text-sm text-gray-600">Available at your custom subdomain</p>
-                        </div>
-                        <div className="flex flex-col sm:flex-row sm:items-center gap-2">
-                          <code className="text-xs bg-gray-100 px-2 py-1 rounded break-all">
-                            https://{customDomain}/secure/tool/submit
-                          </code>
-                          <Button size="sm" onClick={copySubdomainLink} className="self-start sm:self-auto">
-                            Copy Link
-                          </Button>
+                  {subdomains.length > 0 ? (
+                    subdomains.map((subdomain) => (
+                      <div key={subdomain.id} className="border rounded-lg p-4 bg-green-50 border-green-200">
+                        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                          <div className="min-w-0 flex-1">
+                            <h3 className="font-medium text-sm sm:text-base text-green-800">Branded Submission Portal</h3>
+                            <p className="text-xs sm:text-sm text-green-600">Available at your custom subdomain</p>
+                          </div>
+                          <div className="flex flex-col sm:flex-row sm:items-center gap-2">
+                            <code className="text-xs bg-white px-2 py-1 rounded break-all border">
+                              https://{subdomain.domain}/secure/tool/submit
+                            </code>
+                            <Button size="sm" onClick={() => copySubdomainLink(subdomain.domain)} className="self-start sm:self-auto bg-green-600 hover:bg-green-700">
+                              Copy Link
+                            </Button>
+                          </div>
                         </div>
                       </div>
-                    </div>
+                    ))
                   ) : links.length > 0 ? (
                     links.map((link) => (
                       <div key={link.id} className="border rounded-lg p-4">

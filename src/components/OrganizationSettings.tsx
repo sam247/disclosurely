@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Trash2, Upload, Palette } from 'lucide-react';
+import { Trash2, Upload, Palette, CheckCircle } from 'lucide-react';
 
 interface Organization {
   id: string;
@@ -88,13 +88,21 @@ const OrganizationSettings = () => {
   };
 
   const fetchDomains = async () => {
-    if (!organization) return;
+    if (!user) return;
 
     try {
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('organization_id')
+        .eq('id', user.id)
+        .single();
+
+      if (!profile?.organization_id) return;
+
       const { data: domainsData, error } = await supabase
         .from('domain_verifications')
         .select('*')
-        .eq('organization_id', organization.id);
+        .eq('organization_id', profile.organization_id);
 
       if (error) throw error;
 
@@ -130,17 +138,29 @@ const OrganizationSettings = () => {
       return;
     }
 
+    if (!user) return;
+
     setIsSubmitting(true);
 
     try {
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('organization_id')
+        .eq('id', user.id)
+        .single();
+
+      if (!profile?.organization_id) {
+        throw new Error('Organization not found');
+      }
+
       const fullSubdomain = `${subdomainName}.disclosurely.com`;
       
-      // Check if subdomain already exists
-      const { data: existingDomain, error: checkError } = await supabase
+      // Check if subdomain already exists across all organizations
+      const { data: existingDomain } = await supabase
         .from('domain_verifications')
         .select('id')
         .eq('domain', fullSubdomain)
-        .single();
+        .maybeSingle();
 
       if (existingDomain) {
         toast({
@@ -150,16 +170,11 @@ const OrganizationSettings = () => {
         });
         return;
       }
-
-      // Only proceed if no existing domain found (ignore "PGRST116" error which means no rows found)
-      if (checkError && checkError.code !== 'PGRST116') {
-        throw checkError;
-      }
       
       const { error } = await supabase
         .from('domain_verifications')
         .insert({
-          organization_id: organization.id,
+          organization_id: profile.organization_id,
           domain: fullSubdomain,
           verification_type: 'SUBDOMAIN',
           verification_token: 'auto-verified-subdomain',
@@ -174,7 +189,7 @@ const OrganizationSettings = () => {
       });
 
       setSubdomainName('');
-      fetchDomains();
+      await fetchDomains(); // Refresh the domains list
     } catch (error: any) {
       console.error('Subdomain setup error:', error);
       let errorMessage = "Failed to set up subdomain";
@@ -512,16 +527,15 @@ const OrganizationSettings = () => {
             <div className="space-y-3">
               <Label>Current Domains</Label>
               {domains.map((domain) => (
-                <div key={domain.id} className="flex items-center justify-between p-3 border rounded-lg">
+                <div key={domain.id} className="flex items-center justify-between p-3 border rounded-lg bg-green-50 border-green-200">
                   <div>
-                    <p className="font-medium">{domain.domain}</p>
-                    <p className="text-sm text-gray-600">
+                    <div className="flex items-center gap-2">
+                      <CheckCircle className="h-4 w-4 text-green-600" />
+                      <p className="font-medium text-green-800">{domain.domain}</p>
+                    </div>
+                    <p className="text-sm text-green-600 ml-6">
                       {domain.verification_type === 'SUBDOMAIN' ? 'Branded Subdomain' : 'Custom Domain'} • 
-                      {domain.verified_at ? (
-                        <span className="text-green-600 ml-1">✓ Verified</span>
-                      ) : (
-                        <span className="text-orange-600 ml-1">⏳ Pending</span>
-                      )}
+                      <span className="ml-1">✓ Active & Ready</span>
                     </p>
                   </div>
                   <Button

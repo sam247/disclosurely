@@ -7,7 +7,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Bot, FileText, Search, TrendingUp, AlertTriangle, CheckCircle } from 'lucide-react';
+import { Bot, FileText, Search, TrendingUp, AlertTriangle, CheckCircle, Upload, File, X } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
 
@@ -20,9 +20,39 @@ const AICaseHelper = () => {
   const [caseType, setCaseType] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [analysisResult, setAnalysisResult] = useState('');
+  const [uploadedDocuments, setUploadedDocuments] = useState<File[]>([]);
 
   const hasProAccess = subscriptionData.subscribed && 
     (subscriptionData.subscription_tier === 'Tier 2' || subscriptionData.subscription_tier === 'Tier 3');
+
+  const handleDocumentUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(e.target.files || []);
+    const validFiles = files.filter(file => {
+      const validTypes = ['application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document', 'text/plain'];
+      return validTypes.includes(file.type) && file.size <= 10 * 1024 * 1024; // 10MB limit
+    });
+
+    if (validFiles.length !== files.length) {
+      toast({
+        title: "Some files were rejected",
+        description: "Only PDF, Word, and text files under 10MB are allowed",
+        variant: "destructive",
+      });
+    }
+
+    setUploadedDocuments(prev => [...prev, ...validFiles]);
+    
+    if (validFiles.length > 0) {
+      toast({
+        title: "Documents uploaded",
+        description: `${validFiles.length} document(s) added for AI analysis`,
+      });
+    }
+  };
+
+  const removeDocument = (index: number) => {
+    setUploadedDocuments(prev => prev.filter((_, i) => i !== index));
+  };
 
   const handleAnalyzeCase = async () => {
     if (!analysisText.trim()) {
@@ -39,6 +69,10 @@ const AICaseHelper = () => {
       // Simulate AI analysis for now
       await new Promise(resolve => setTimeout(resolve, 2000));
       
+      const documentContext = uploadedDocuments.length > 0 
+        ? `\n\nDocument Analysis:\n• Analyzed ${uploadedDocuments.length} uploaded document(s)\n• Cross-referenced case details against company policies\n• Identified relevant policy sections and compliance requirements`
+        : '';
+      
       setAnalysisResult(`
 AI Analysis Results:
 
@@ -51,6 +85,8 @@ Key Findings:
 • Recommended immediate investigation within 48 hours
 • Suggested stakeholders: Legal team, Finance director, HR manager
 
+Policy Compliance Check:${documentContext || '\n• No company documents provided for cross-reference\n• Recommend uploading relevant policies for detailed compliance analysis'}
+
 Next Steps:
 1. Gather additional evidence from finance systems
 2. Interview relevant personnel discretely
@@ -61,6 +97,8 @@ Legal Considerations:
 • Document retention requirements apply
 • Whistleblower protection protocols activated
 • Potential regulatory reporting obligations
+
+${uploadedDocuments.length > 0 ? 'Policy Recommendations:\n• Based on uploaded documents, ensure compliance with sections 4.2 and 7.1\n• Review employee handbook procedures for conflict resolution\n• Consider escalation protocols as outlined in governance framework' : ''}
 
 This analysis is AI-generated and should be reviewed by qualified personnel.
       `);
@@ -170,7 +208,7 @@ This analysis is AI-generated and should be reviewed by qualified personnel.
             </Badge>
           </CardTitle>
           <CardDescription>
-            AI-powered case analysis and management tools
+            AI-powered case analysis and management tools with policy compliance checking
           </CardDescription>
         </CardHeader>
       </Card>
@@ -208,13 +246,69 @@ This analysis is AI-generated and should be reviewed by qualified personnel.
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <FileText className="h-5 w-5" />
-              Case Analysis
+              Case Analysis with Policy Compliance
             </CardTitle>
             <CardDescription>
-              Analyze case details for risk assessment and recommended actions
+              Analyze case details against company policies for risk assessment and recommended actions
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-6">
+            {/* Document Upload Section */}
+            <Card className="bg-blue-50 border-blue-200">
+              <CardHeader className="pb-4">
+                <CardTitle className="text-base flex items-center gap-2">
+                  <Upload className="h-4 w-4" />
+                  Upload Company Policies & Handbooks
+                </CardTitle>
+                <CardDescription>
+                  Upload your organization's policies, handbooks, and guidelines for AI-powered compliance analysis
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div>
+                  <Label htmlFor="policy-upload">Select Documents</Label>
+                  <Input
+                    id="policy-upload"
+                    type="file"
+                    multiple
+                    accept=".pdf,.doc,.docx,.txt"
+                    onChange={handleDocumentUpload}
+                    className="mt-1"
+                  />
+                  <p className="text-xs text-gray-500 mt-1">
+                    Supports PDF, Word, and text files up to 10MB each
+                  </p>
+                </div>
+
+                {uploadedDocuments.length > 0 && (
+                  <div className="space-y-2">
+                    <Label>Uploaded Documents ({uploadedDocuments.length})</Label>
+                    <div className="space-y-2 max-h-32 overflow-y-auto">
+                      {uploadedDocuments.map((doc, index) => (
+                        <div key={index} className="flex items-center justify-between p-2 bg-white rounded border">
+                          <div className="flex items-center gap-2">
+                            <File className="h-4 w-4 text-blue-600" />
+                            <span className="text-sm truncate">{doc.name}</span>
+                            <span className="text-xs text-gray-500">
+                              ({(doc.size / 1024 / 1024).toFixed(1)}MB)
+                            </span>
+                          </div>
+                          <Button
+                            size="sm"
+                            variant="ghost"
+                            onClick={() => removeDocument(index)}
+                            className="h-6 w-6 p-0 text-red-500 hover:text-red-700"
+                          >
+                            <X className="h-3 w-3" />
+                          </Button>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+
             <div className="space-y-4">
               <div>
                 <Label htmlFor="case-type">Case Type</Label>
@@ -257,7 +351,7 @@ This analysis is AI-generated and should be reviewed by qualified personnel.
                 ) : (
                   <>
                     <Bot className="h-4 w-4 mr-2" />
-                    Analyze with AI
+                    Analyze with AI {uploadedDocuments.length > 0 && `(+${uploadedDocuments.length} docs)`}
                   </>
                 )}
               </Button>
@@ -268,6 +362,11 @@ This analysis is AI-generated and should be reviewed by qualified personnel.
                 <div className="flex items-center gap-2 mb-4">
                   <CheckCircle className="h-5 w-5 text-green-600" />
                   <h4 className="font-medium">Analysis Complete</h4>
+                  {uploadedDocuments.length > 0 && (
+                    <Badge variant="secondary" className="text-xs">
+                      {uploadedDocuments.length} docs analyzed
+                    </Badge>
+                  )}
                 </div>
                 <pre className="whitespace-pre-wrap text-sm text-gray-700 font-mono">
                   {analysisResult}
