@@ -75,13 +75,21 @@ const OrganizationSettings = () => {
   };
 
   const fetchDomains = async () => {
-    if (!organization) return;
+    if (!user) return;
 
     try {
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('organization_id')
+        .eq('id', user.id)
+        .single();
+
+      if (!profile?.organization_id) return;
+
       const { data: domainsData, error } = await supabase
         .from('domain_verifications')
         .select('*')
-        .eq('organization_id', organization.id);
+        .eq('organization_id', profile.organization_id);
 
       if (error) throw error;
 
@@ -117,10 +125,48 @@ const OrganizationSettings = () => {
       return;
     }
 
+    if (!organization) {
+      toast({
+        title: "Error",
+        description: "Organization not found",
+        variant: "destructive",
+      });
+      return;
+    }
+
     setIsSubmitting(true);
 
     try {
       const fullSubdomain = `${subdomainName}.disclosurely.com`;
+      
+      // Check if subdomain already exists for this organization
+      const existingDomain = domains.find(d => d.domain === fullSubdomain);
+      if (existingDomain) {
+        toast({
+          title: "Error",
+          description: "This subdomain is already configured for your organization",
+          variant: "destructive",
+        });
+        setIsSubmitting(false);
+        return;
+      }
+
+      // Check if subdomain exists globally
+      const { data: globalCheck } = await supabase
+        .from('domain_verifications')
+        .select('domain')
+        .eq('domain', fullSubdomain)
+        .single();
+
+      if (globalCheck) {
+        toast({
+          title: "Error",
+          description: "This subdomain is already taken",
+          variant: "destructive",
+        });
+        setIsSubmitting(false);
+        return;
+      }
       
       const { error } = await supabase
         .from('domain_verifications')
@@ -213,7 +259,7 @@ const OrganizationSettings = () => {
         </Card>
       )}
 
-      {/* Custom Domain Settings */}
+      {/* Branded Subdomain Settings */}
       <Card>
         <CardHeader>
           <CardTitle>Branded Subdomain</CardTitle>
