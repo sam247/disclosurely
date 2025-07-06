@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
@@ -32,20 +33,11 @@ interface Profile {
   updated_at: string;
 }
 
-interface SubscriptionData {
-  subscribed: boolean;
-  subscription_tier: string | null;
-}
-
-interface DomainVerification {
-  domain: string;
-  verified_at: string | null;
-}
-
 const Dashboard = () => {
   const { user, signOut } = useAuth();
   const { toast } = useToast();
   const [activeTab, setActiveTab] = useState('cases');
+  const [showSettings, setShowSettings] = useState(false);
 
   // Fetch profile data
   const { data: profile, isLoading: profileLoading, error: profileError } = useQuery({
@@ -63,24 +55,6 @@ const Dashboard = () => {
       return data as Profile;
     },
     enabled: !!user,
-  });
-
-  // Fetch subscription data
-  const { data: subscriptionData, isLoading: subscriptionLoading, error: subscriptionError } = useQuery({
-    queryKey: ['subscription'],
-    queryFn: async () => {
-      if (!profile?.organization_id) return null;
-
-      const { data, error } = await supabase
-        .from('subscriptions')
-        .select('subscribed, subscription_tier')
-        .eq('organization_id', profile.organization_id)
-        .single();
-
-      if (error) throw error;
-      return data as SubscriptionData;
-    },
-    enabled: !!profile?.organization_id,
   });
 
   // Fetch verified custom domains and subdomains
@@ -138,18 +112,13 @@ const Dashboard = () => {
               {/* Only show welcome message on larger screens */}
               <div className="hidden md:flex items-center space-x-2 text-sm text-gray-600">
                 <span>Welcome back, {profile?.email}</span>
-                {subscriptionData?.subscription_tier && (
-                  <Badge variant="secondary">
-                    {subscriptionData.subscription_tier}
-                  </Badge>
-                )}
               </div>
             </div>
             <div className="flex items-center space-x-4">
               <Button
                 variant="outline"
                 size="sm"
-                onClick={() => setActiveTab('settings')}
+                onClick={() => setShowSettings(true)}
               >
                 <Settings className="h-4 w-4 mr-2" />
                 Settings
@@ -169,14 +138,12 @@ const Dashboard = () => {
             <TabsTrigger value="reports">Reports</TabsTrigger>
             <TabsTrigger value="ai-help" className="relative">
               AI Case Help
-              {(!subscriptionData?.subscribed || subscriptionData?.subscription_tier !== 'Tier 2') && (
-                <Badge 
-                  variant="secondary" 
-                  className="ml-2 text-xs bg-purple-100 text-purple-800 border-purple-200"
-                >
-                  PRO
-                </Badge>
-              )}
+              <Badge 
+                variant="secondary" 
+                className="ml-2 text-xs bg-purple-100 text-purple-800 border-purple-200"
+              >
+                PRO
+              </Badge>
             </TabsTrigger>
           </TabsList>
 
@@ -259,7 +226,7 @@ const Dashboard = () => {
                       <Button
                         variant="outline"
                         size="sm"
-                        onClick={() => setActiveTab('settings')}
+                        onClick={() => setShowSettings(true)}
                       >
                         <Plus className="h-4 w-4 mr-2" />
                         Create Custom Links
@@ -351,16 +318,12 @@ const Dashboard = () => {
           </TabsContent>
 
           <TabsContent value="ai-help" className="mt-6">
-            <AICaseHelper 
-              hasAccess={subscriptionData?.subscribed && subscriptionData?.subscription_tier === 'Tier 2'} 
-            />
-          </TabsContent>
-
-          <TabsContent value="settings" className="mt-6">
-            <SettingsPanel />
+            <AICaseHelper hasAccess={true} />
           </TabsContent>
         </Tabs>
       </div>
+
+      <SettingsPanel isOpen={showSettings} onClose={() => setShowSettings(false)} />
     </div>
   );
 };
