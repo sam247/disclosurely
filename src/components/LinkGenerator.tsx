@@ -50,7 +50,7 @@ const LinkGenerator = () => {
     is_active: true
   });
 
-  // Fetch verified custom domains
+  // Fetch verified custom domains and subdomains
   const { data: customDomains } = useQuery({
     queryKey: ['custom-domains'],
     queryFn: async () => {
@@ -66,7 +66,7 @@ const LinkGenerator = () => {
 
       const { data: domains } = await supabase
         .from('domain_verifications')
-        .select('domain, verified_at')
+        .select('domain, verified_at, verification_type')
         .eq('organization_id', profile.organization_id)
         .not('verified_at', 'is', null);
 
@@ -75,8 +75,9 @@ const LinkGenerator = () => {
     enabled: !!user,
   });
 
-  // Get the primary custom domain (first verified one)
-  const primaryCustomDomain = customDomains?.[0]?.domain || null;
+  // Get the primary domain (prefer subdomain for immediate availability)
+  const primaryDomain = customDomains?.find(d => d.verification_type === 'SUBDOMAIN')?.domain || 
+                       customDomains?.[0]?.domain || null;
 
   // Fetch links
   const { data: links, isLoading, error } = useQuery({
@@ -221,12 +222,18 @@ const LinkGenerator = () => {
   });
 
   const generateLinkUrl = (linkToken: string) => {
-    // Always use the main domain since dynamic custom domains need server configuration
+    if (primaryDomain) {
+      return `https://${primaryDomain}/secure/tool/submit/${linkToken}`;
+    }
+    // Fallback to main domain
     return `${window.location.origin}/secure/tool/submit/${linkToken}`;
   };
 
   const generateStatusUrl = (linkToken: string) => {
-    // Always use the main domain since dynamic custom domains need server configuration
+    if (primaryDomain) {
+      return `https://${primaryDomain}/secure/tool/submit/${linkToken}/status`;
+    }
+    // Fallback to main domain
     return `${window.location.origin}/secure/tool/submit/${linkToken}/status`;
   };
 
@@ -321,11 +328,10 @@ const LinkGenerator = () => {
           <p className="text-muted-foreground">
             Create and manage secure submission links for your organization
           </p>
-          {primaryCustomDomain && (
-            <div className="mt-2 p-3 bg-amber-50 border border-amber-200 rounded-lg">
-              <p className="text-sm text-amber-800">
-                <strong>Note:</strong> Custom domain branding requires server configuration. 
-                Contact support to enable custom domain routing for {primaryCustomDomain}
+          {primaryDomain && (
+            <div className="mt-2 p-3 bg-green-50 border border-green-200 rounded-lg">
+              <p className="text-sm text-green-800">
+                <strong>✓ Branded domains active:</strong> Your links will use {primaryDomain}
               </p>
             </div>
           )}
