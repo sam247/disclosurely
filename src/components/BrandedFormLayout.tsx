@@ -1,6 +1,7 @@
 
 import React from 'react';
 import { Card, CardContent } from '@/components/ui/card';
+import { Shield } from 'lucide-react';
 
 interface BrandedFormLayoutProps {
   title: string;
@@ -20,42 +21,57 @@ const BrandedFormLayout = ({
   children 
 }: BrandedFormLayoutProps) => {
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* White header section */}
-      <div className="bg-white shadow-sm">
-        <div className="container mx-auto px-4 py-8">
-          <div className="max-w-2xl mx-auto text-center">
-            {logoUrl && (
-              <div className="mb-4">
-                <img 
-                  src={logoUrl} 
-                  alt={organizationName || 'Organization'} 
-                  className="h-16 mx-auto object-contain"
-                />
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100">
+      {/* Header with Organization Branding - Matching CompanyStatusPage */}
+      <header className="bg-white shadow-sm border-t-4 w-full" style={{ borderTopColor: brandColor }}>
+        <div className="w-full px-4 sm:px-6 lg:px-8">
+          <div className="flex items-center justify-between py-4 max-w-7xl mx-auto">
+            <div className="flex items-center">
+              <div className="flex items-center justify-center mr-4">
+                {logoUrl ? (
+                  <img 
+                    src={logoUrl} 
+                    alt={`${organizationName || 'Organization'} logo`}
+                    className="w-10 h-10 object-contain"
+                    onError={(e) => {
+                      const target = e.target as HTMLImageElement;
+                      target.style.display = 'none';
+                      target.nextElementSibling?.classList.remove('hidden');
+                    }}
+                  />
+                ) : null}
+                <div 
+                  className={`w-10 h-10 rounded-lg flex items-center justify-center ${logoUrl ? 'hidden' : ''}`}
+                  style={{ backgroundColor: brandColor }}
+                >
+                  <Shield className="h-6 w-6 text-white" />
+                </div>
               </div>
-            )}
-            
-            {organizationName && (
-              <h1 className="text-2xl font-bold text-gray-900 mb-2">
-                {organizationName}
-              </h1>
-            )}
-            
-            <h2 className="text-xl font-semibold mb-2" style={{ color: brandColor }}>
-              {title}
-            </h2>
-            
-            {description && (
-              <p className="text-gray-600">
-                {description}
-              </p>
-            )}
+              <div>
+                <h1 className="text-xl font-bold text-gray-900">{organizationName || 'Organization'}</h1>
+                <p className="text-sm text-gray-600">Secure Report Submission</p>
+              </div>
+            </div>
           </div>
+        </div>
+      </header>
+
+      {/* Title section below header */}
+      <div className="container mx-auto px-4 py-6">
+        <div className="max-w-2xl mx-auto text-center">
+          <h2 className="text-xl font-semibold mb-2" style={{ color: brandColor }}>
+            {title}
+          </h2>
+          {description && (
+            <p className="text-gray-600">
+              {description}
+            </p>
+          )}
         </div>
       </div>
 
       {/* Main content */}
-      <div className="container mx-auto px-4 py-8">
+      <div className="container mx-auto px-4 pb-8">
         <div className="max-w-2xl mx-auto">
           <Card>
             <CardContent className="p-6">
