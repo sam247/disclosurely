@@ -100,9 +100,17 @@ const SecureReportTool = () => {
     );
   }
 
-  // Since DynamicSubmissionForm handles its own data fetching and branding,
-  // we can render it directly without the BrandedFormLayout wrapper
-  return <DynamicSubmissionForm />;
+  return (
+    <BrandedFormLayout
+      title="Submit Report Securely"
+      description="Your submission will be encrypted and handled confidentially"
+      organizationName={organizationData?.name}
+      logoUrl={organizationData?.logo_url}
+      brandColor={organizationData?.brand_color}
+    >
+      <DynamicSubmissionForm />
+    </BrandedFormLayout>
+  );
 };
 
 export default SecureReportTool;

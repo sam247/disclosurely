@@ -71,6 +71,12 @@ const Dashboard = () => {
     }
   }, [user]);
 
+  useEffect(() => {
+    if (user && !loading) {
+      fetchData();
+    }
+  }, [customDomain, isCustomDomain]);
+
   const fetchData = async () => {
     if (!user) return;
     
