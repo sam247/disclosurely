@@ -102,8 +102,8 @@ const SecureReportTool = () => {
 
   return (
     <BrandedFormLayout
-      title="Submit Report Securely"
-      description="Your submission will be encrypted and handled confidentially"
+      title={organizationData?.name || "Secure Reporting"}
+      description="Submit your report securely and confidentially"
       organizationName={organizationData?.name}
       logoUrl={organizationData?.logo_url}
       brandColor={organizationData?.brand_color}

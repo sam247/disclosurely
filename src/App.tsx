@@ -5,6 +5,7 @@ import { Toaster } from '@/components/ui/toaster';
 import { AuthProvider } from '@/hooks/useAuth';
 import Index from '@/pages/Index';
 import Pricing from '@/pages/Pricing';
+import Contact from '@/pages/Contact';
 import ComplianceSoftware from '@/pages/ComplianceSoftware';
 import VsWhistleblowerSoftware from '@/pages/VsWhistleblowerSoftware';
 import VsSpeakUp from '@/pages/VsSpeakUp';
@@ -34,6 +35,7 @@ function App() {
               {/* Public routes */}
               <Route path="/" element={<Index />} />
               <Route path="/pricing" element={<Pricing />} />
+              <Route path="/contact" element={<Contact />} />
               <Route path="/compliance-software" element={<ComplianceSoftware />} />
               <Route path="/vs-whistleblower-software" element={<VsWhistleblowerSoftware />} />
               <Route path="/vs-speak-up" element={<VsSpeakUp />} />
