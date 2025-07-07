@@ -530,9 +530,6 @@ const Dashboard = () => {
               <TabsTrigger value="ai-help" className="text-xs sm:text-sm flex items-center gap-1">
                 <Bot className="h-3 w-3" />
                 AI Case Helper
-                {(!subscriptionData.subscribed || subscriptionData.subscription_tier === 'Tier 1') && (
-                  <Badge variant="secondary" className="text-xs">PRO</Badge>
-                )}
               </TabsTrigger>
             </TabsList>
 
@@ -617,8 +614,20 @@ const Dashboard = () => {
                           <div className="flex flex-col sm:flex-row sm:items-center gap-2">
                             <code className="text-xs bg-white px-2 py-1 rounded break-all border">
                               https://{subdomain.domain}/secure/tool/submit
+                              {links.length > 0 && `/${links[0].link_token}`}
                             </code>
-                            <Button size="sm" onClick={() => copySubdomainLink(subdomain.domain)} className="self-start sm:self-auto bg-green-600 hover:bg-green-700">
+                            <Button 
+                              size="sm" 
+                              onClick={() => {
+                                const fullUrl = `https://${subdomain.domain}/secure/tool/submit${links.length > 0 ? `/${links[0].link_token}` : ''}`;
+                                navigator.clipboard.writeText(fullUrl);
+                                toast({
+                                  title: "Branded link copied!",
+                                  description: "The branded submission link has been copied to your clipboard.",
+                                });
+                              }} 
+                              className="self-start sm:self-auto bg-green-600 hover:bg-green-700"
+                            >
                               Copy Link
                             </Button>
                           </div>
