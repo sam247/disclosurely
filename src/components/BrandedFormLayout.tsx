@@ -56,19 +56,6 @@ const BrandedFormLayout = ({
         </div>
       </header>
 
-      {/* Title section below header */}
-      <div className="container mx-auto px-4 py-6">
-        <div className="max-w-2xl mx-auto text-center">
-          <h2 className="text-xl font-semibold mb-2" style={{ color: brandColor }}>
-            {title}
-          </h2>
-          {description && (
-            <p className="text-gray-600">
-              {description}
-            </p>
-          )}
-        </div>
-      </div>
 
       {/* Main content */}
       <div className="container mx-auto px-4 pb-8">
