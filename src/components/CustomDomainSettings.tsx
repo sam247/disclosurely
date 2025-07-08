@@ -109,6 +109,9 @@ const CustomDomainSettings = ({ hasActiveTier2Subscription }: CustomDomainSettin
       setNewSubdomain('');
       setShowAddForm(false);
       fetchDomainVerifications();
+      
+      // Trigger dashboard refresh via custom event
+      window.dispatchEvent(new CustomEvent('domain-updated'));
     } catch (error: any) {
       console.error('Error adding subdomain:', error);
       toast({

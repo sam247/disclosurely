@@ -52,7 +52,7 @@ interface DomainVerification {
 
 const Dashboard = () => {
   const { user, signOut, subscriptionData } = useAuth();
-  const { customDomain, organizationId, isCustomDomain } = useCustomDomain();
+  const { customDomain, organizationId, isCustomDomain, refreshDomainInfo } = useCustomDomain();
   const navigate = useNavigate();
   const { toast } = useToast();
   const [reports, setReports] = useState<Report[]>([]);
@@ -76,6 +76,19 @@ const Dashboard = () => {
       fetchData();
     }
   }, [customDomain, isCustomDomain]);
+
+  // Listen for domain updates
+  useEffect(() => {
+    const handleDomainUpdate = () => {
+      if (refreshDomainInfo) {
+        refreshDomainInfo();
+      }
+      fetchData();
+    };
+
+    window.addEventListener('domain-updated', handleDomainUpdate);
+    return () => window.removeEventListener('domain-updated', handleDomainUpdate);
+  }, [refreshDomainInfo]);
 
   const fetchData = async () => {
     if (!user) return;

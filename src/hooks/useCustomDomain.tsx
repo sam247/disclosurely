@@ -7,6 +7,7 @@ interface CustomDomainInfo {
   organizationId: string | null;
   isCustomDomain: boolean;
   loading: boolean;
+  refreshDomainInfo?: () => void;
 }
 
 export const useCustomDomain = (): CustomDomainInfo => {
@@ -17,8 +18,7 @@ export const useCustomDomain = (): CustomDomainInfo => {
     loading: true
   });
 
-  useEffect(() => {
-    const checkCustomDomain = async () => {
+  const checkCustomDomain = async () => {
       const currentHost = window.location.hostname;
       
       // Skip if on localhost or default Lovable domains
@@ -88,10 +88,16 @@ export const useCustomDomain = (): CustomDomainInfo => {
         isCustomDomain: false,
         loading: false
       });
-    };
+  };
 
+  useEffect(() => {
     checkCustomDomain();
   }, []);
 
-  return domainInfo;
+  // Add a refresh function to allow manual refresh
+  const refreshDomainInfo = () => {
+    checkCustomDomain();
+  };
+
+  return { ...domainInfo, refreshDomainInfo };
 };

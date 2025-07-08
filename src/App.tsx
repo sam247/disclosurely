@@ -40,6 +40,10 @@ function App() {
               <Route path="/auth/login" element={<Login />} />
               <Route path="/auth/signup" element={<Signup />} />
               
+              {/* Auth routes for app subdomain */}
+              <Route path="/app/auth/login" element={<Login />} />
+              <Route path="/app/auth/signup" element={<Signup />} />
+              
               {/* Public submission routes */}
               <Route path="/secure/tool" element={<SecureReportTool />} />
               <Route path="/secure/tool/submit/:linkToken" element={<DynamicSubmissionForm />} />
