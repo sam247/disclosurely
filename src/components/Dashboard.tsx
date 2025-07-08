@@ -500,7 +500,7 @@ const Dashboard = () => {
                   <p className="text-xs sm:text-sm text-gray-600 truncate">Welcome back, {user?.email}</p>
                   {subscriptionData.subscribed && (
                     <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                      {subscriptionData.subscription_tier}
+                      PRO
                     </span>
                   )}
                 </div>
