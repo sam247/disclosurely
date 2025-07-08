@@ -20,6 +20,7 @@ import AdminPanel from '@/components/AdminPanel';
 import ProtectedRoute from '@/components/ProtectedRoute';
 import CompanyStatusPage from '@/components/CompanyStatusPage';
 import CookieConsentBanner from '@/components/CookieConsentBanner';
+import SubdomainRedirect from '@/components/SubdomainRedirect';
 import './App.css';
 
 const queryClient = new QueryClient();
@@ -37,12 +38,16 @@ function App() {
               <Route path="/compliance-software" element={<ComplianceSoftware />} />
               <Route path="/vs-whistleblower-software" element={<VsWhistleblowerSoftware />} />
               <Route path="/vs-speak-up" element={<VsSpeakUp />} />
-              <Route path="/auth/login" element={<Login />} />
-              <Route path="/auth/signup" element={<Signup />} />
-              
-              {/* Auth routes for app subdomain */}
-              <Route path="/app/auth/login" element={<Login />} />
-              <Route path="/app/auth/signup" element={<Signup />} />
+              <Route path="/auth/login" element={
+                <SubdomainRedirect targetPath="/auth/login">
+                  <Login />
+                </SubdomainRedirect>
+              } />
+              <Route path="/auth/signup" element={
+                <SubdomainRedirect targetPath="/auth/signup">
+                  <Signup />
+                </SubdomainRedirect>
+              } />
               
               {/* Public submission routes */}
               <Route path="/secure/tool" element={<SecureReportTool />} />
@@ -55,9 +60,11 @@ function App() {
               <Route 
                 path="/dashboard" 
                 element={
-                  <ProtectedRoute>
-                    <Dashboard />
-                  </ProtectedRoute>
+                  <SubdomainRedirect targetPath="/dashboard">
+                    <ProtectedRoute>
+                      <Dashboard />
+                    </ProtectedRoute>
+                  </SubdomainRedirect>
                 } 
               />
               
@@ -65,9 +72,11 @@ function App() {
               <Route 
                 path="/admin" 
                 element={
-                  <ProtectedRoute>
-                    <AdminPanel />
-                  </ProtectedRoute>
+                  <SubdomainRedirect targetPath="/admin">
+                    <ProtectedRoute>
+                      <AdminPanel />
+                    </ProtectedRoute>
+                  </SubdomainRedirect>
                 } 
               />
               

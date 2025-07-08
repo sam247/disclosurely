@@ -20,7 +20,7 @@ const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
   }
 
   if (!user) {
-    return <Navigate to="/auth/login" replace />;
+    return <Navigate to="https://app.disclosurely.com/auth/login" replace />;
   }
 
   // For dashboard route, always use AuthenticatedApp which handles setup flow

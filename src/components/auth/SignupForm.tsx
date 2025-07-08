@@ -58,7 +58,7 @@ const SignupForm = () => {
           title: "Success",
           description: "Account created! Please check your email to verify your account.",
         });
-        navigate('/auth/login');
+        window.location.href = 'https://app.disclosurely.com/auth/login';
       }
     } catch (error) {
       toast({
@@ -237,9 +237,9 @@ const SignupForm = () => {
         <div className="text-center">
           <p className="text-sm text-gray-600">
             Already have an account?{' '}
-            <Link to="/auth/login" className="font-medium text-blue-600 hover:text-blue-500">
+            <a href="https://app.disclosurely.com/auth/login" className="font-medium text-blue-600 hover:text-blue-500">
               Sign in
-            </Link>
+            </a>
           </p>
         </div>
       </form>

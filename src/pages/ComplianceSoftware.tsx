@@ -23,10 +23,10 @@ const ComplianceSoftware = () => {
             <div className="hidden md:flex items-center space-x-8">
               <Link to="/pricing" className="text-gray-600 hover:text-gray-900">Pricing</Link>
               <Link to="/compliance-software" className="text-blue-600 font-medium">Compliance</Link>
-              <Link to="/auth/login" className="text-gray-600 hover:text-gray-900">Sign in</Link>
-              <Link to="/auth/signup" className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors">
+              <a href="https://app.disclosurely.com/auth/login" className="text-gray-600 hover:text-gray-900">Sign in</a>
+              <a href="https://app.disclosurely.com/auth/signup" className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors">
                 Get Started
-              </Link>
+              </a>
             </div>
           </div>
         </div>
@@ -292,8 +292,8 @@ const ComplianceSoftware = () => {
             <div>
               <h3 className="font-semibold mb-4">Company</h3>
               <ul className="space-y-2">
-                <li><Link to="/auth/login" className="text-gray-400 hover:text-white">Sign In</Link></li>
-                <li><Link to="/auth/signup" className="text-gray-400 hover:text-white">Get Started</Link></li>
+                <li><a href="https://app.disclosurely.com/auth/login" className="text-gray-400 hover:text-white">Sign In</a></li>
+                <li><a href="https://app.disclosurely.com/auth/signup" className="text-gray-400 hover:text-white">Get Started</a></li>
               </ul>
             </div>
           </div>
