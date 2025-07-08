@@ -10,5 +10,11 @@ Allow: /
 User-agent: facebookexternalhit
 Allow: /
 
+User-agent: Yandex
+Disallow: /
+
+User-agent: YandexBot
+Disallow: /
+
 User-agent: *
-Allow: /
+Disallow:
