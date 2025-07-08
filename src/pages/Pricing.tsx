@@ -1,4 +1,3 @@
-
 import { Shield, Check, Star } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -22,7 +21,6 @@ const Pricing = () => {
             </div>
             <div className="hidden md:flex items-center space-x-8">
               <Link to="/pricing" className="text-blue-600 font-medium">Pricing</Link>
-              <Link to="/compliance-software" className="text-gray-600 hover:text-gray-900">Compliance</Link>
               <Link to="/auth/login" className="text-gray-600 hover:text-gray-900">Sign in</Link>
               <Link to="/auth/signup" className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors">
                 Get Started
