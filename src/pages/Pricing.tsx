@@ -15,7 +15,7 @@ const Pricing = () => {
                 <img 
                   src="/lovable-uploads/c46ace0e-df58-4119-b5e3-8dcfa075ea2f.png" 
                   alt="Disclosurely" 
-                  className="h-8 w-auto"
+                  className="h-8 w-auto md:h-8 h-6"
                 />
               </Link>
             </div>
@@ -25,6 +25,11 @@ const Pricing = () => {
               <Link to="/auth/signup" className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors">
                 Get Started
               </Link>
+            </div>
+            <div className="md:hidden">
+              <a href="https://app.disclosurely.com/auth/login" className="bg-blue-600 text-white px-3 py-2 rounded-lg hover:bg-blue-700 transition-colors text-sm">
+                Sign In
+              </a>
             </div>
           </div>
         </div>
@@ -216,7 +221,7 @@ const Pricing = () => {
                 <img 
                   src="/lovable-uploads/416d39db-53ff-402e-a2cf-26d1a3618601.png" 
                   alt="Disclosurely" 
-                  className="h-8 w-auto"
+                  className="h-8 w-auto md:h-8 h-6"
                 />
               </div>
               <p className="text-gray-400 mb-4">

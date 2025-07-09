@@ -7,9 +7,11 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { CreditCard, Calendar, Users, FileText, Shield, Zap } from 'lucide-react';
+import { useUsageStats } from '@/hooks/useUsageStats';
 
 const SubscriptionManagement = () => {
   const [isLoading, setIsLoading] = useState(false);
+  const { stats, loading: statsLoading, formatStorage } = useUsageStats();
 
   // Mock subscription data - replace with actual Supabase query
   const { data: subscription } = useQuery({
@@ -161,21 +163,29 @@ const SubscriptionManagement = () => {
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
-          <div className="grid grid-cols-2 gap-4">
-            <div className="text-center p-4 bg-gray-50 rounded-lg">
-              <p className="text-2xl font-bold text-blue-600">24</p>
-              <p className="text-sm text-gray-600">Reports Submitted</p>
+          {statsLoading ? (
+            <div className="text-center py-8">
+              <p className="text-gray-500">Loading usage statistics...</p>
             </div>
-            <div className="text-center p-4 bg-gray-50 rounded-lg">
-              <p className="text-2xl font-bold text-green-600">8</p>
-              <p className="text-sm text-gray-600">Active Users</p>
-            </div>
-          </div>
-          
-          <div className="text-center p-4 bg-gray-50 rounded-lg">
-            <p className="text-2xl font-bold text-purple-600">156 MB</p>
-            <p className="text-sm text-gray-600">Storage Used</p>
-          </div>
+          ) : (
+            <>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="text-center p-4 bg-gray-50 rounded-lg">
+                  <p className="text-2xl font-bold text-blue-600">{stats.reportsThisMonth}</p>
+                  <p className="text-sm text-gray-600">Reports Submitted</p>
+                </div>
+                <div className="text-center p-4 bg-gray-50 rounded-lg">
+                  <p className="text-2xl font-bold text-green-600">{stats.activeUsers}</p>
+                  <p className="text-sm text-gray-600">Active Users</p>
+                </div>
+              </div>
+              
+              <div className="text-center p-4 bg-gray-50 rounded-lg">
+                <p className="text-2xl font-bold text-purple-600">{formatStorage(stats.storageUsed)}</p>
+                <p className="text-sm text-gray-600">Storage Used</p>
+              </div>
+            </>
+          )}
         </CardContent>
       </Card>
     </div>
