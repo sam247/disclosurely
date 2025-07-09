@@ -505,7 +505,7 @@ const Dashboard = () => {
               <img 
                 src="/lovable-uploads/c46ace0e-df58-4119-b5e3-8dcfa075ea2f.png" 
                 alt="Disclosurely" 
-                className="h-6 w-auto sm:h-8 flex-shrink-0"
+                className="h-4 sm:h-8 w-auto flex-shrink-0"
               />
               <div className="min-w-0 flex-1">
                 <h1 className="text-lg sm:text-2xl font-bold text-gray-900 truncate">Dashboard</h1>

@@ -25,7 +25,7 @@ const AuthLayout = ({ children }: AuthLayoutProps) => {
             <img 
               src="/lovable-uploads/c46ace0e-df58-4119-b5e3-8dcfa075ea2f.png" 
               alt="Disclosurely" 
-              className="h-8 sm:h-12 w-auto"
+              className="h-6 sm:h-12 w-auto"
             />
           </div>
           <p className="mt-2 text-sm text-gray-600">Secure Whistleblowing Platform</p>

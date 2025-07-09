@@ -25,7 +25,7 @@ const Landing = () => {
                 <img 
                   src="/lovable-uploads/c46ace0e-df58-4119-b5e3-8dcfa075ea2f.png" 
                   alt="Disclosurely" 
-                  className="h-8 w-auto"
+                  className="h-6 md:h-8 w-auto"
                 />
               </Link>
             </div>
@@ -34,6 +34,11 @@ const Landing = () => {
               <a href="https://app.disclosurely.com/auth/login" className="text-gray-600 hover:text-gray-900">Sign in</a>
               <a href="https://app.disclosurely.com/auth/signup" className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors">
                 Get Started
+              </a>
+            </div>
+            <div className="md:hidden">
+              <a href="https://app.disclosurely.com/auth/login" className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors">
+                Sign In
               </a>
             </div>
           </div>
@@ -550,7 +555,7 @@ const Landing = () => {
                 <img 
                   src="/lovable-uploads/416d39db-53ff-402e-a2cf-26d1a3618601.png" 
                   alt="Disclosurely" 
-                  className="h-8 w-auto"
+                  className="h-6 md:h-8 w-auto"
                 />
               </div>
               <p className="text-gray-400 mb-4">
