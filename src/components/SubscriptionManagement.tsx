@@ -8,28 +8,65 @@ import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { CreditCard, Calendar, Users, FileText, Shield, Zap } from 'lucide-react';
 import { useUsageStats } from '@/hooks/useUsageStats';
+import { useSubscriptionLimits } from '@/hooks/useSubscriptionLimits';
 
 const SubscriptionManagement = () => {
   const [isLoading, setIsLoading] = useState(false);
   const { stats, loading: statsLoading, formatStorage } = useUsageStats();
+  const { 
+    limits, 
+    isAtCaseLimit, 
+    isAtStorageLimit, 
+    getCaseUsagePercentage, 
+    getStorageUsagePercentage,
+    formatStorageLimit,
+    formatCaseLimit
+  } = useSubscriptionLimits();
 
-  // Mock subscription data - replace with actual Supabase query
+  // Query subscription data from Supabase
   const { data: subscription } = useQuery({
     queryKey: ['subscription'],
     queryFn: async () => {
-      // Mock data for now
-      return {
-        plan: 'Tier 2',
-        status: 'active',
-        currentPeriodEnd: '2025-02-01',
-        price: 49,
+      const user = (await supabase.auth.getUser()).data.user;
+      if (!user) return null;
+
+      const { data } = await supabase
+        .from('subscribers')
+        .select('*')
+        .eq('user_id', user.id)
+        .single();
+
+      if (!data || !data.subscribed) {
+        return {
+          plan: 'Free',
+          status: 'free',
+          currentPeriodEnd: null,
+          price: 0,
+          features: ['1 case per month', '100MB storage', 'Basic email support']
+        };
+      }
+
+      const planData = data.subscription_tier === 'starter' ? {
+        plan: 'Starter',
+        price: 19.99,
+        features: ['5 cases per month', '1GB storage', 'Email support']
+      } : {
+        plan: 'Pro',
+        price: 49.99,
         features: [
-          'Unlimited Reports',
-          'Advanced Analytics',
-          'Priority Support',
-          'Custom Branding',
-          'API Access'
+          'Unlimited cases per month',
+          'Unlimited storage',
+          'Email Support',
+          'Secure two-way Messaging',
+          'AI Case Helper',
+          'Custom branding'
         ]
+      };
+
+      return {
+        ...planData,
+        status: 'active',
+        currentPeriodEnd: data.subscription_end,
       };
     },
   });
@@ -114,7 +151,7 @@ const SubscriptionManagement = () => {
               {isLoading ? 'Loading...' : 'Manage Subscription'}
             </Button>
             
-            {subscription?.plan !== 'Tier 3' && (
+            {subscription?.plan !== 'Pro' && (
               <Button 
                 onClick={handleUpgrade}
                 disabled={isLoading}
@@ -172,7 +209,16 @@ const SubscriptionManagement = () => {
               <div className="grid grid-cols-2 gap-4">
                 <div className="text-center p-4 bg-gray-50 rounded-lg">
                   <p className="text-2xl font-bold text-blue-600">{stats.reportsThisMonth}</p>
-                  <p className="text-sm text-gray-600">Reports Submitted</p>
+                  <p className="text-sm text-gray-600">Cases This Month</p>
+                  <p className="text-xs text-gray-500">{formatCaseLimit()}</p>
+                  {limits.maxCasesPerMonth > 0 && (
+                    <div className="w-full bg-gray-200 rounded-full h-2 mt-2">
+                      <div 
+                        className={`h-2 rounded-full ${isAtCaseLimit() ? 'bg-red-600' : 'bg-blue-600'}`}
+                        style={{ width: `${getCaseUsagePercentage()}%` }}
+                      ></div>
+                    </div>
+                  )}
                 </div>
                 <div className="text-center p-4 bg-gray-50 rounded-lg">
                   <p className="text-2xl font-bold text-green-600">{stats.activeUsers}</p>
@@ -183,6 +229,15 @@ const SubscriptionManagement = () => {
               <div className="text-center p-4 bg-gray-50 rounded-lg">
                 <p className="text-2xl font-bold text-purple-600">{formatStorage(stats.storageUsed)}</p>
                 <p className="text-sm text-gray-600">Storage Used</p>
+                <p className="text-xs text-gray-500">{formatStorageLimit()} limit</p>
+                {limits.maxStorageGB > 0 && (
+                  <div className="w-full bg-gray-200 rounded-full h-2 mt-2">
+                    <div 
+                      className={`h-2 rounded-full ${isAtStorageLimit() ? 'bg-red-600' : 'bg-purple-600'}`}
+                      style={{ width: `${getStorageUsagePercentage()}%` }}
+                    ></div>
+                  </div>
+                )}
               </div>
             </>
           )}

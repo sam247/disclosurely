@@ -20,10 +20,10 @@ interface DomainVerification {
 }
 
 interface CustomDomainSettingsProps {
-  hasActiveTier2Subscription: boolean;
+  hasActiveProSubscription: boolean;
 }
 
-const CustomDomainSettings = ({ hasActiveTier2Subscription }: CustomDomainSettingsProps) => {
+const CustomDomainSettings = ({ hasActiveProSubscription }: CustomDomainSettingsProps) => {
   const { user } = useAuth();
   const { toast } = useToast();
   const [loading, setLoading] = useState(false);
@@ -34,10 +34,10 @@ const CustomDomainSettings = ({ hasActiveTier2Subscription }: CustomDomainSettin
   const [activeTab, setActiveTab] = useState('subdomain');
 
   useEffect(() => {
-    if (user && hasActiveTier2Subscription) {
+    if (user && hasActiveProSubscription) {
       fetchDomainVerifications();
     }
-  }, [user, hasActiveTier2Subscription]);
+  }, [user, hasActiveProSubscription]);
 
   const fetchDomainVerifications = async () => {
     if (!user) return;
@@ -218,7 +218,7 @@ const CustomDomainSettings = ({ hasActiveTier2Subscription }: CustomDomainSettin
     }
   };
 
-  if (!hasActiveTier2Subscription) {
+  if (!hasActiveProSubscription) {
     return (
       <Card className="border-amber-200 bg-amber-50">
         <CardHeader>
@@ -227,15 +227,15 @@ const CustomDomainSettings = ({ hasActiveTier2Subscription }: CustomDomainSettin
             Custom Domain Branding
           </CardTitle>
           <CardDescription>
-            Use your own domain for submission links (Tier 2 feature)
+            Use your own domain for submission links (Pro feature)
           </CardDescription>
         </CardHeader>
         <CardContent>
           <p className="text-sm text-gray-600 mb-4">
-            Upgrade to Tier 2 to use your own custom domain for your submission links, 
+            Upgrade to Pro to use your own custom domain for your submission links, 
             giving your reports a more professional and branded appearance.
           </p>
-          <Badge variant="secondary">Tier 2 Required</Badge>
+          <Badge variant="secondary">Pro Required</Badge>
         </CardContent>
       </Card>
     );

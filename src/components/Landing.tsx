@@ -292,7 +292,7 @@ const Landing = () => {
                 <div className="space-y-4">
                   <div className="flex items-center space-x-3">
                     <Check className="h-5 w-5 text-green-600 flex-shrink-0" />
-                    <span className="text-gray-700">Unlimited users and reports</span>
+                    <span className="text-gray-700">Unlimited users and cases</span>
                   </div>
                   <div className="flex items-center space-x-3">
                     <Check className="h-5 w-5 text-green-600 flex-shrink-0" />
@@ -330,7 +330,7 @@ const Landing = () => {
               <CardHeader className="text-center pb-8">
                 <CardTitle className="text-xl font-bold mb-2">Starter</CardTitle>
                 <div className="text-3xl font-bold text-gray-900 mb-2">
-                  £29<span className="text-lg font-normal text-gray-600">/month</span>
+                  £19.99<span className="text-lg font-normal text-gray-600">/month</span>
                 </div>
                 <CardDescription>Perfect for small teams getting started</CardDescription>
               </CardHeader>
@@ -338,19 +338,15 @@ const Landing = () => {
                 <ul className="space-y-3 mb-8">
                   <li className="flex items-center space-x-3">
                     <Check className="h-5 w-5 text-green-600 flex-shrink-0" />
-                    <span className="text-gray-700">Up to 50 reports/month</span>
+                    <span className="text-gray-700">5 cases/month</span>
                   </li>
                   <li className="flex items-center space-x-3">
                     <Check className="h-5 w-5 text-green-600 flex-shrink-0" />
-                    <span className="text-gray-700">Basic case management</span>
+                    <span className="text-gray-700">1GB Storage</span>
                   </li>
                   <li className="flex items-center space-x-3">
                     <Check className="h-5 w-5 text-green-600 flex-shrink-0" />
-                    <span className="text-gray-700">Email support</span>
-                  </li>
-                  <li className="flex items-center space-x-3">
-                    <Check className="h-5 w-5 text-green-600 flex-shrink-0" />
-                    <span className="text-gray-700">Standard encryption</span>
+                    <span className="text-gray-700">Email Support</span>
                   </li>
                 </ul>
                 <a href="https://app.disclosurely.com/auth/signup" className="w-full bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-semibold text-center block">
@@ -367,7 +363,7 @@ const Landing = () => {
               <CardHeader className="text-center pb-8">
                 <CardTitle className="text-xl font-bold mb-2">Pro</CardTitle>
                 <div className="text-3xl font-bold text-gray-900 mb-2">
-                  £89<span className="text-lg font-normal text-gray-600">/month</span>
+                  £49.99<span className="text-lg font-normal text-gray-600">/month</span>
                 </div>
                 <CardDescription>Advanced features for growing organizations</CardDescription>
               </CardHeader>
@@ -375,23 +371,27 @@ const Landing = () => {
                 <ul className="space-y-3 mb-8">
                   <li className="flex items-center space-x-3">
                     <Check className="h-5 w-5 text-green-600 flex-shrink-0" />
-                    <span className="text-gray-700">Unlimited reports</span>
+                    <span className="text-gray-700">Unlimited cases/month</span>
                   </li>
                   <li className="flex items-center space-x-3">
                     <Check className="h-5 w-5 text-green-600 flex-shrink-0" />
-                    <span className="text-gray-700">Advanced case management</span>
+                    <span className="text-gray-700">Unlimited storage</span>
                   </li>
                   <li className="flex items-center space-x-3">
                     <Check className="h-5 w-5 text-green-600 flex-shrink-0" />
-                    <span className="text-gray-700">Priority support</span>
+                    <span className="text-gray-700">Email Support</span>
+                  </li>
+                  <li className="flex items-center space-x-3">
+                    <Check className="h-5 w-5 text-green-600 flex-shrink-0" />
+                    <span className="text-gray-700">Secure two-way Messaging</span>
+                  </li>
+                  <li className="flex items-center space-x-3">
+                    <Check className="h-5 w-5 text-green-600 flex-shrink-0" />
+                    <span className="text-gray-700">AI Case Helper</span>
                   </li>
                   <li className="flex items-center space-x-3">
                     <Check className="h-5 w-5 text-green-600 flex-shrink-0" />
                     <span className="text-gray-700">Custom branding</span>
-                  </li>
-                  <li className="flex items-center space-x-3">
-                    <Check className="h-5 w-5 text-green-600 flex-shrink-0" />
-                    <span className="text-gray-700">Analytics dashboard</span>
                   </li>
                 </ul>
                 <a href="https://app.disclosurely.com/auth/signup" className="w-full bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-semibold text-center block">

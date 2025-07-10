@@ -5,7 +5,7 @@ import { supabase } from '@/integrations/supabase/client';
 
 interface SubscriptionData {
   subscribed: boolean;
-  subscription_tier?: string;
+  subscription_tier?: 'starter' | 'pro';
   subscription_end?: string;
   employee_count?: string;
 }

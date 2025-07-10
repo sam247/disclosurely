@@ -33,8 +33,7 @@ const AICaseHelper = () => {
   const [analysisResult, setAnalysisResult] = useState('');
   const [uploadedDocuments, setUploadedDocuments] = useState<File[]>([]);
 
-  const hasProAccess = subscriptionData.subscribed && 
-    (subscriptionData.subscription_tier === 'Tier 2' || subscriptionData.subscription_tier === 'Tier 3');
+  const hasProAccess = subscriptionData.subscribed && subscriptionData.subscription_tier === 'pro';
 
   // Fetch live cases on component mount
   useEffect(() => {
@@ -232,7 +231,7 @@ Generated: ${new Date().toLocaleString()}
             <Bot className="h-16 w-16 text-gray-300 mx-auto mb-4" />
             <h3 className="text-lg font-semibold text-gray-900 mb-2">Upgrade to Access AI Case Analysis</h3>
             <p className="text-gray-600 mb-6">
-              Get AI-powered case analysis against your organization's policies and compliance requirements with Tier 2 or higher subscription.
+              Get AI-powered case analysis against your organization's policies and compliance requirements with Pro subscription.
             </p>
             
             <div className="p-4 border rounded-lg bg-gray-50 mb-6">
@@ -249,10 +248,10 @@ Generated: ${new Date().toLocaleString()}
 
             <div className="space-y-2">
               <Button className="bg-blue-600 hover:bg-blue-700" disabled>
-                Upgrade to Tier 2 - Coming Soon
+                Upgrade to Pro - Coming Soon
               </Button>
               <p className="text-xs text-gray-500">
-                AI Case Helper will be available with subscription tiers
+                AI Case Helper is available with Pro subscription
               </p>
             </div>
           </div>
@@ -269,7 +268,7 @@ Generated: ${new Date().toLocaleString()}
             <Bot className="h-5 w-5" />
             AI Case Helper
             <Badge variant="default" className="bg-green-600">
-              {subscriptionData.subscription_tier}
+              {subscriptionData.subscription_tier?.toUpperCase() || 'FREE'}
             </Badge>
           </CardTitle>
           <CardDescription>

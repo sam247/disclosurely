@@ -57,7 +57,7 @@ const Pricing = () => {
               <CardHeader className="text-center pb-6">
                 <CardTitle className="text-xl sm:text-2xl font-bold">Starter</CardTitle>
                 <div className="mt-4">
-                  <span className="text-3xl sm:text-4xl font-bold">$29</span>
+                  <span className="text-3xl sm:text-4xl font-bold">£19.99</span>
                   <span className="text-gray-600 text-sm sm:text-base">/month</span>
                 </div>
                 <CardDescription className="text-sm sm:text-base">Perfect for small organizations</CardDescription>
@@ -66,19 +66,15 @@ const Pricing = () => {
                 <div className="space-y-3">
                   <div className="flex items-center space-x-3">
                     <Check className="h-5 w-5 text-green-600" />
-                    <span className="text-gray-700 text-sm sm:text-base">Up to 50 reports/month</span>
+                    <span className="text-gray-700 text-sm sm:text-base">5 cases/month</span>
                   </div>
                   <div className="flex items-center space-x-3">
                     <Check className="h-5 w-5 text-green-600" />
-                    <span className="text-gray-700 text-sm sm:text-base">Basic encryption</span>
+                    <span className="text-gray-700 text-sm sm:text-base">1GB Storage</span>
                   </div>
                   <div className="flex items-center space-x-3">
                     <Check className="h-5 w-5 text-green-600" />
-                    <span className="text-gray-700 text-sm sm:text-base">Email support</span>
-                  </div>
-                  <div className="flex items-center space-x-3">
-                    <Check className="h-5 w-5 text-green-600" />
-                    <span className="text-gray-700 text-sm sm:text-base">Standard branding</span>
+                    <span className="text-gray-700 text-sm sm:text-base">Email Support</span>
                   </div>
                 </div>
                 <Button className="w-full mt-6" variant="outline">
@@ -87,7 +83,7 @@ const Pricing = () => {
               </CardContent>
             </Card>
 
-            {/* Professional Plan */}
+            {/* Pro Plan */}
             <Card className="relative border-blue-200 shadow-lg">
               <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
                 <span className="bg-blue-600 text-white px-4 py-1 rounded-full text-xs sm:text-sm font-medium">
@@ -95,9 +91,9 @@ const Pricing = () => {
                 </span>
               </div>
               <CardHeader className="text-center pb-6">
-                <CardTitle className="text-xl sm:text-2xl font-bold">Professional</CardTitle>
+                <CardTitle className="text-xl sm:text-2xl font-bold">Pro</CardTitle>
                 <div className="mt-4">
-                  <span className="text-3xl sm:text-4xl font-bold">$99</span>
+                  <span className="text-3xl sm:text-4xl font-bold">£49.99</span>
                   <span className="text-gray-600 text-sm sm:text-base">/month</span>
                 </div>
                 <CardDescription className="text-sm sm:text-base">For growing organizations</CardDescription>
@@ -106,23 +102,27 @@ const Pricing = () => {
                 <div className="space-y-3">
                   <div className="flex items-center space-x-3">
                     <Check className="h-5 w-5 text-green-600" />
-                    <span className="text-gray-700 text-sm sm:text-base">Unlimited reports</span>
+                    <span className="text-gray-700 text-sm sm:text-base">Unlimited cases/month</span>
                   </div>
                   <div className="flex items-center space-x-3">
                     <Check className="h-5 w-5 text-green-600" />
-                    <span className="text-gray-700 text-sm sm:text-base">Advanced encryption</span>
+                    <span className="text-gray-700 text-sm sm:text-base">Unlimited storage</span>
                   </div>
                   <div className="flex items-center space-x-3">
                     <Check className="h-5 w-5 text-green-600" />
-                    <span className="text-gray-700 text-sm sm:text-base">Priority support</span>
+                    <span className="text-gray-700 text-sm sm:text-base">Email Support</span>
+                  </div>
+                  <div className="flex items-center space-x-3">
+                    <Check className="h-5 w-5 text-green-600" />
+                    <span className="text-gray-700 text-sm sm:text-base">Secure two-way Messaging</span>
+                  </div>
+                  <div className="flex items-center space-x-3">
+                    <Check className="h-5 w-5 text-green-600" />
+                    <span className="text-gray-700 text-sm sm:text-base">AI Case Helper</span>
                   </div>
                   <div className="flex items-center space-x-3">
                     <Check className="h-5 w-5 text-green-600" />
                     <span className="text-gray-700 text-sm sm:text-base">Custom branding</span>
-                  </div>
-                  <div className="flex items-center space-x-3">
-                    <Check className="h-5 w-5 text-green-600" />
-                    <span className="text-gray-700 text-sm sm:text-base">Analytics dashboard</span>
                   </div>
                 </div>
                 <Button className="w-full mt-6">
