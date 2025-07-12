@@ -8,6 +8,7 @@ import Pricing from '@/pages/Pricing';
 import ComplianceSoftware from '@/pages/ComplianceSoftware';
 import VsWhistleblowerSoftware from '@/pages/VsWhistleblowerSoftware';
 import VsSpeakUp from '@/pages/VsSpeakUp';
+import Contact from '@/pages/Contact';
 import Login from '@/pages/Login';
 import Signup from '@/pages/Signup';
 import NotFound from '@/pages/NotFound';
@@ -38,6 +39,7 @@ function App() {
               <Route path="/compliance-software" element={<ComplianceSoftware />} />
               <Route path="/vs-whistleblower-software" element={<VsWhistleblowerSoftware />} />
               <Route path="/vs-speak-up" element={<VsSpeakUp />} />
+              <Route path="/contact" element={<Contact />} />
               <Route path="/auth/login" element={
                 <SubdomainRedirect targetPath="/auth/login">
                   <Login />

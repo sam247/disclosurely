@@ -279,33 +279,65 @@ const Landing = () => {
               </div>
             </div>
 
-            {/* Unlimited Scale */}
+            {/* AI Case Helper */}
             <div className="grid md:grid-cols-2 gap-8 sm:gap-12 items-center">
               <div className="space-y-6">
                 <h3 className="text-2xl sm:text-3xl font-bold text-gray-900">
-                  Scale Without Limits
+                  AI-Powered Case Analysis
                 </h3>
                 <p className="text-base sm:text-lg text-gray-600">
-                  From small teams to enterprise organizations, our platform scales 
-                  seamlessly to meet your needs. No limits on users, reports, or storage.
+                  Our advanced AI Case Helper analyzes reports for policy compliance, 
+                  suggests investigation steps, and identifies potential risks automatically.
                 </p>
                 <div className="space-y-4">
                   <div className="flex items-center space-x-3">
                     <Check className="h-5 w-5 text-green-600 flex-shrink-0" />
-                    <span className="text-gray-700">Unlimited users and cases</span>
+                    <span className="text-gray-700">Automated policy compliance checking</span>
                   </div>
                   <div className="flex items-center space-x-3">
                     <Check className="h-5 w-5 text-green-600 flex-shrink-0" />
-                    <span className="text-gray-700">Enterprise-grade infrastructure</span>
+                    <span className="text-gray-700">Smart investigation recommendations</span>
                   </div>
                   <div className="flex items-center space-x-3">
                     <Check className="h-5 w-5 text-green-600 flex-shrink-0" />
-                    <span className="text-gray-700">99.9% uptime guarantee</span>
+                    <span className="text-gray-700">Risk assessment and prioritization</span>
                   </div>
                 </div>
               </div>
-              <div className="bg-gradient-to-br from-teal-50 to-cyan-100 p-6 sm:p-8 rounded-lg">
-                <UnlimitedScaleArt />
+              <div className="bg-gradient-to-br from-violet-50 to-purple-100 p-6 sm:p-8 rounded-lg">
+                <div className="w-full h-64 flex items-center justify-center">
+                  <svg width="200" height="160" viewBox="0 0 200 160" className="drop-shadow-lg">
+                    {/* AI Brain */}
+                    <circle cx="100" cy="80" r="50" stroke="#8B5CF6" strokeWidth="3" fill="none" opacity="0.8" />
+                    <circle cx="100" cy="80" r="35" stroke="#A855F7" strokeWidth="2" fill="none" opacity="0.6" />
+                    <circle cx="100" cy="80" r="20" stroke="#C084FC" strokeWidth="2" fill="none" opacity="0.4" />
+                    
+                    {/* Neural connections */}
+                    <g stroke="#8B5CF6" strokeWidth="1.5" opacity="0.7">
+                      <line x1="70" y1="60" x2="85" y2="70" />
+                      <line x1="130" y1="60" x2="115" y2="70" />
+                      <line x1="70" y1="100" x2="85" y2="90" />
+                      <line x1="130" y1="100" x2="115" y2="90" />
+                    </g>
+                    
+                    {/* Data nodes */}
+                    <g fill="#8B5CF6" opacity="0.8">
+                      <circle cx="60" cy="50" r="6" />
+                      <circle cx="140" cy="50" r="6" />
+                      <circle cx="60" cy="110" r="6" />
+                      <circle cx="140" cy="110" r="6" />
+                      <circle cx="100" cy="30" r="6" />
+                      <circle cx="100" cy="130" r="6" />
+                    </g>
+                    
+                    {/* Analysis waves */}
+                    <g stroke="#A855F7" strokeWidth="2" fill="none" opacity="0.6">
+                      <path d="M20 80 Q40 60, 60 80 T100 80 T140 80 T180 80" />
+                      <path d="M20 90 Q40 70, 60 90 T100 90 T140 90 T180 90" />
+                      <path d="M20 70 Q40 50, 60 70 T100 70 T140 70 T180 70" />
+                    </g>
+                  </svg>
+                </div>
               </div>
             </div>
           </div>
@@ -432,9 +464,9 @@ const Landing = () => {
                     <span className="text-gray-700">SLA guarantee</span>
                   </li>
                 </ul>
-                <a href="https://app.disclosurely.com/auth/signup" className="w-full border border-gray-300 text-gray-700 px-6 py-3 rounded-lg font-semibold hover:bg-gray-50 text-center block">
+                <Link to="/contact" className="w-full border border-gray-300 text-gray-700 px-6 py-3 rounded-lg font-semibold hover:bg-gray-50 text-center block">
                   Contact Sales
-                </a>
+                </Link>
               </CardContent>
             </Card>
           </div>
@@ -466,9 +498,11 @@ const Landing = () => {
                   messaging feature is particularly valuable for our organization."
                 </p>
                 <div className="flex items-center">
-                  <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center mr-3">
-                    <span className="text-blue-600 font-semibold">SJ</span>
-                  </div>
+                  <img 
+                    src="https://images.unsplash.com/photo-1649972904349-6e44c42644a7?w=40&h=40&fit=crop&crop=face"
+                    alt="Sarah Johnson"
+                    className="w-10 h-10 rounded-full object-cover mr-3"
+                  />
                   <div>
                     <p className="font-semibold text-gray-900">Sarah Johnson</p>
                     <p className="text-sm text-gray-600">HR Director, TechCorp</p>
@@ -489,9 +523,11 @@ const Landing = () => {
                   reporting issues, and we can investigate them effectively."
                 </p>
                 <div className="flex items-center">
-                  <div className="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center mr-3">
-                    <span className="text-green-600 font-semibold">MC</span>
-                  </div>
+                  <img 
+                    src="https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?w=40&h=40&fit=crop&crop=face"
+                    alt="Michael Chen"
+                    className="w-10 h-10 rounded-full object-cover mr-3"
+                  />
                   <div>
                     <p className="font-semibold text-gray-900">Michael Chen</p>
                     <p className="text-sm text-gray-600">Compliance Officer, FinanceGlobal</p>
@@ -512,9 +548,11 @@ const Landing = () => {
                   Highly recommend for any organization serious about compliance."
                 </p>
                 <div className="flex items-center">
-                  <div className="w-10 h-10 bg-purple-100 rounded-full flex items-center justify-center mr-3">
-                    <span className="text-purple-600 font-semibold">ER</span>
-                  </div>
+                  <img 
+                    src="https://images.unsplash.com/photo-1581092795360-fd1ca04f0952?w=40&h=40&fit=crop&crop=face"
+                    alt="Emily Rodriguez"
+                    className="w-10 h-10 rounded-full object-cover mr-3"
+                  />
                   <div>
                     <p className="font-semibold text-gray-900">Emily Rodriguez</p>
                     <p className="text-sm text-gray-600">Legal Director, ManufacturingPlus</p>
@@ -587,6 +625,7 @@ const Landing = () => {
             <div>
               <h3 className="font-semibold mb-4">Company</h3>
               <ul className="space-y-2">
+                <li><Link to="/contact" className="text-gray-400 hover:text-white">Contact</Link></li>
                 <li><a href="https://app.disclosurely.com/auth/login" className="text-gray-400 hover:text-white">Sign In</a></li>
                 <li><a href="https://app.disclosurely.com/auth/signup" className="text-gray-400 hover:text-white">Get Started</a></li>
               </ul>
