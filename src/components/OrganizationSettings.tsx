@@ -269,7 +269,7 @@ const OrganizationSettings = () => {
     reader.readAsDataURL(file);
   };
 
-  const handleSaveBranding = async () => {
+  const handleSaveOrganization = async () => {
     if (!organization) return;
 
     setIsSubmitting(true);
@@ -294,10 +294,11 @@ const OrganizationSettings = () => {
         logoUrl = urlData.publicUrl;
       }
 
-      // Update organization with new branding
+      // Update organization with name, logo, and branding
       const { error: updateError } = await supabase
         .from('organizations')
         .update({
+          name: organization.name,
           logo_url: logoUrl,
           brand_color: brandColor,
           updated_at: new Date().toISOString()
@@ -308,17 +309,17 @@ const OrganizationSettings = () => {
 
       toast({
         title: "Success",
-        description: "Branding settings updated successfully",
+        description: "Organization settings updated successfully",
       });
 
       // Refresh organization data
       fetchOrganization();
       setLogoFile(null);
     } catch (error: any) {
-      console.error('Error updating branding:', error);
+      console.error('Error updating organization:', error);
       toast({
         title: "Error",
-        description: error.message || "Failed to update branding settings",
+        description: error.message || "Failed to update organization settings",
         variant: "destructive",
       });
     } finally {
@@ -387,7 +388,12 @@ const OrganizationSettings = () => {
           <CardContent className="space-y-4">
             <div>
               <Label>Name</Label>
-              <Input type="text" value={organization.name} readOnly />
+              <Input 
+                type="text" 
+                value={organization.name} 
+                onChange={(e) => setOrganization({...organization, name: e.target.value})}
+                placeholder="Enter organization name"
+              />
             </div>
             <div>
               <Label>Description</Label>
@@ -481,11 +487,11 @@ const OrganizationSettings = () => {
           </div>
 
           <Button 
-            onClick={handleSaveBranding}
+            onClick={handleSaveOrganization}
             disabled={isSubmitting}
             className="w-full"
           >
-            {isSubmitting ? 'Saving...' : 'Save Branding Settings'}
+            {isSubmitting ? 'Saving...' : 'Save Organization Settings'}
           </Button>
         </CardContent>
       </Card>

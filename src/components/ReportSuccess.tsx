@@ -269,7 +269,7 @@ const ReportSuccess = () => {
                 </Button>
               </Link>
             ) : (
-              <Link to="/secure/tool/messages" className="flex-1">
+              <Link to="/secure/tool/status" className="flex-1">
                 <Button 
                   className="w-full hover:opacity-90" 
                   size="lg"
