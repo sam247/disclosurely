@@ -40,19 +40,28 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
   const [subscriptionData, setSubscriptionData] = useState<SubscriptionData>({ subscribed: false });
 
   const refreshSubscription = async () => {
-    if (!user) return;
+    if (!user || !session?.access_token) return;
     
     try {
       console.log('Refreshing subscription data...');
       
-      const { data, error } = await supabase.functions.invoke('check-subscription', {
+      // Add timeout using Promise.race to prevent hanging requests
+      const subscriptionPromise = supabase.functions.invoke('check-subscription', {
         headers: {
-          Authorization: `Bearer ${session?.access_token}`,
+          Authorization: `Bearer ${session.access_token}`,
         },
       });
 
+      const timeoutPromise = new Promise((_, reject) =>
+        setTimeout(() => reject(new Error('Subscription check timeout')), 5000)
+      );
+
+      const { data, error } = await Promise.race([subscriptionPromise, timeoutPromise]) as any;
+
       if (error) {
         console.error('Subscription check error:', error);
+        // Set default subscription data on error to prevent blocking UI
+        setSubscriptionData({ subscribed: false });
         return;
       }
 
@@ -60,21 +69,23 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
       setSubscriptionData(data);
     } catch (error) {
       console.error('Error refreshing subscription:', error);
+      // Set default subscription data on error to prevent blocking UI
+      setSubscriptionData({ subscribed: false });
     }
   };
 
   useEffect(() => {
     // Set up auth state listener
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (event, session) => {
+      (event, session) => {
         console.log('Auth state changed:', event, session?.user?.email);
         setSession(session);
         setUser(session?.user ?? null);
         setLoading(false);
         
-        // Refresh subscription data on login
+        // Immediately check subscription on login - use setTimeout to avoid blocking auth flow
         if (event === 'SIGNED_IN' && session?.user) {
-          refreshSubscription();
+          setTimeout(() => refreshSubscription(), 0);
         }
       }
     );
@@ -86,22 +97,22 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
       setUser(session?.user ?? null);
       setLoading(false);
       
-      // Check subscription on initial load
+      // Immediately check subscription on initial load if user exists
       if (session?.user) {
-        refreshSubscription();
+        setTimeout(() => refreshSubscription(), 0);
       }
     });
 
     return () => subscription.unsubscribe();
   }, []);
 
-  // Auto-refresh subscription every 30 seconds when user is logged in
+  // Auto-refresh subscription every 5 minutes when user is logged in (reduced frequency)
   useEffect(() => {
     if (!user) return;
     
     const interval = setInterval(() => {
       refreshSubscription();
-    }, 30000);
+    }, 300000); // 5 minutes instead of 30 seconds
     
     return () => clearInterval(interval);
   }, [user, session]);
