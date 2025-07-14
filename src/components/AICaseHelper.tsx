@@ -33,7 +33,7 @@ const AICaseHelper = () => {
   const [analysisResult, setAnalysisResult] = useState('');
   const [uploadedDocuments, setUploadedDocuments] = useState<File[]>([]);
 
-  const hasProAccess = subscriptionData.subscribed && subscriptionData.subscription_tier === 'pro';
+  const hasProAccess = subscriptionData.subscribed && (subscriptionData.subscription_tier === 'pro' || subscriptionData.subscription_tier?.includes('tier_'));
   
   // Debug subscription data
   console.log('AICaseHelper - Subscription data:', subscriptionData);
