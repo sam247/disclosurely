@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { Shield, Lock, Users, FileText, Eye, Award, Check, ArrowRight, Star } from 'lucide-react';
+import { Shield, Lock, Users, FileText, Eye, Award, Check, ArrowRight, Star, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -379,6 +379,18 @@ const Landing = () => {
                   <li className="flex items-center space-x-3">
                     <Check className="h-5 w-5 text-green-600 flex-shrink-0" />
                     <span className="text-gray-700">Email Support</span>
+                  </li>
+                  <li className="flex items-center space-x-3">
+                    <X className="h-5 w-5 text-red-500 flex-shrink-0" />
+                    <span className="text-gray-500">Secure two-way Messaging</span>
+                  </li>
+                  <li className="flex items-center space-x-3">
+                    <X className="h-5 w-5 text-red-500 flex-shrink-0" />
+                    <span className="text-gray-500">AI Case Helper</span>
+                  </li>
+                  <li className="flex items-center space-x-3">
+                    <X className="h-5 w-5 text-red-500 flex-shrink-0" />
+                    <span className="text-gray-500">Custom branding</span>
                   </li>
                 </ul>
                 <a href="https://app.disclosurely.com/auth/signup" className="w-full bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-semibold text-center block">

@@ -138,79 +138,86 @@ const AICaseHelper = () => {
 
     setIsLoading(true);
     try {
-      // Simulate AI analysis for now
-      await new Promise(resolve => setTimeout(resolve, 2000));
+      // Prepare company documents data
+      const companyDocuments = uploadedDocuments.map(doc => ({
+        name: doc.name,
+        size: doc.size,
+        type: doc.type,
+        content: `[Document content would be extracted in a real implementation: ${doc.name}]`
+      }));
+
+      // Call the AI analysis edge function
+      const response = await supabase.functions.invoke('analyze-case-with-ai', {
+        body: {
+          caseData: {
+            title: selectedCase.title,
+            tracking_id: selectedCase.tracking_id,
+            status: selectedCase.status,
+            priority: selectedCase.priority,
+            report_type: selectedCase.report_type,
+            created_at: selectedCase.created_at
+          },
+          companyDocuments,
+          caseContent: `[Encrypted case content - would be decrypted in real implementation for ${selectedCase.tracking_id}]`
+        }
+      });
+
+      if (response.error) {
+        throw new Error(response.error.message || 'AI analysis failed');
+      }
+
+      const { analysis, fallbackAnalysis } = response.data;
       
-      const documentContext = uploadedDocuments.length > 0 
-        ? `\n\nPolicy Document Analysis:\n• Analyzed ${uploadedDocuments.length} uploaded policy document(s)\n• Cross-referenced case against company policies and guidelines\n• Identified relevant compliance sections and requirements`
-        : '\n\nPolicy Document Analysis:\n• No company policy documents provided\n• Recommend uploading relevant policies for detailed compliance analysis';
-      
-      setAnalysisResult(`
-AI Case Analysis Report
-Case: ${selectedCase.title} (${selectedCase.tracking_id})
-Status: ${selectedCase.status}
-Priority: ${selectedCase.priority}/5
-Type: ${selectedCase.report_type}
-
-COMPLIANCE ASSESSMENT:
-Risk Level: MEDIUM-HIGH
-Confidence: 87%
-
-KEY FINDINGS:
-• Case requires immediate attention based on content analysis
-• Potential policy violations identified in submitted materials
-• Recommended escalation to legal team within 24 hours
-• Pattern matches with 2 similar cases in organization history
-
-POLICY COMPLIANCE REVIEW:${documentContext}
-
-RECOMMENDED COURSE OF ACTION:
-1. IMMEDIATE (0-24 hours):
-   - Assign case to senior case handler
-   - Notify legal department of potential compliance issues
-   - Secure all evidence and documentation
-   - Implement interim protective measures if applicable
-
-2. SHORT-TERM (1-7 days):
-   - Conduct preliminary investigation interviews
-   - Review relevant company policies and procedures
-   - Document all findings and evidence chain
-   - Prepare interim report for management
-
-3. MEDIUM-TERM (1-4 weeks):
-   - Complete comprehensive investigation
-   - Implement corrective actions as required
-   - Update policies if systemic issues identified
-   - Provide feedback to reporting party
-
-LEGAL CONSIDERATIONS:
-• Whistleblower protection protocols must be maintained
-• Document retention requirements apply (${selectedCase.report_type === 'anonymous' ? 'Anonymous' : 'Confidential'} reporting)
-• Potential regulatory reporting obligations under relevant legislation
-• Consider external legal counsel if criminal activity suspected
-
-POLICY RECOMMENDATIONS:
-${uploadedDocuments.length > 0 ? '• Based on uploaded policies, ensure compliance with discrimination and harassment protocols\n• Review section 4.2 of employee handbook for escalation procedures\n• Consider policy updates to prevent similar incidents' : '• Upload relevant company policies for specific recommendations\n• Review current whistleblower and incident reporting procedures\n• Ensure compliance frameworks are up to date'}
-
-STAKEHOLDER NOTIFICATIONS:
-• HR Director (immediate)
-• Legal Counsel (within 24 hours)
-• Department Manager (as appropriate)
-• Compliance Officer (if applicable)
-
-This AI analysis should be reviewed by qualified personnel and used as guidance only.
-Generated: ${new Date().toLocaleString()}
-      `);
+      setAnalysisResult(analysis || fallbackAnalysis || 'Analysis could not be completed at this time.');
 
       toast({
         title: "Analysis Complete",
         description: "AI case analysis has been generated successfully",
       });
     } catch (error) {
+      console.error('AI Analysis error:', error);
+      
+      // Fallback analysis if API fails
+      const fallbackAnalysis = `
+AI CASE ANALYSIS REPORT
+Case: ${selectedCase.title} (${selectedCase.tracking_id})
+Status: ${selectedCase.status}
+Priority: ${selectedCase.priority}/5
+Type: ${selectedCase.report_type}
+
+NOTE: AI analysis service temporarily unavailable. Proceeding with standard analysis.
+
+IMMEDIATE ACTIONS REQUIRED:
+1. Assign case to senior case handler within 24 hours
+2. Review case content for urgency indicators
+3. Implement standard escalation procedures based on priority level
+4. Document all actions taken for audit trail
+
+RECOMMENDED TIMELINE:
+- Initial review and triage: Within 24 hours
+- Preliminary investigation: 1-7 days
+- Full investigation completion: 1-4 weeks
+
+POLICY COMPLIANCE:
+${uploadedDocuments.length > 0 ? 
+  `• ${uploadedDocuments.length} policy document(s) uploaded for reference\n• Manual review required for compliance checking\n• Cross-reference with uploaded documentation` : 
+  '• Upload company policies for detailed compliance analysis\n• Review current whistleblower procedures\n• Ensure proper documentation throughout process'}
+
+STAKEHOLDER NOTIFICATIONS:
+• Case Handler (immediate assignment)
+• Department Manager (as appropriate)
+• Legal/Compliance team (if escalation required)
+
+This is a fallback analysis. For detailed AI insights, please try again or contact support.
+Generated: ${new Date().toLocaleString()}
+      `;
+      
+      setAnalysisResult(fallbackAnalysis);
+      
       toast({
-        title: "Analysis Failed",
-        description: "Failed to analyze case. Please try again.",
-        variant: "destructive",
+        title: "Analysis Completed with Fallback",
+        description: "Standard analysis provided. AI service temporarily unavailable.",
+        variant: "default",
       });
     } finally {
       setIsLoading(false);

@@ -1,7 +1,8 @@
-import { Shield, Check, Star } from 'lucide-react';
+import { Shield, Check, Star, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Link } from 'react-router-dom';
+import { Footer } from '@/components/ui/footer';
 
 const Pricing = () => {
   return (
@@ -75,6 +76,18 @@ const Pricing = () => {
                   <div className="flex items-center space-x-3">
                     <Check className="h-5 w-5 text-green-600" />
                     <span className="text-gray-700 text-sm sm:text-base">Email Support</span>
+                  </div>
+                  <div className="flex items-center space-x-3">
+                    <X className="h-5 w-5 text-red-500" />
+                    <span className="text-gray-500 text-sm sm:text-base">Secure two-way Messaging</span>
+                  </div>
+                  <div className="flex items-center space-x-3">
+                    <X className="h-5 w-5 text-red-500" />
+                    <span className="text-gray-500 text-sm sm:text-base">AI Case Helper</span>
+                  </div>
+                  <div className="flex items-center space-x-3">
+                    <X className="h-5 w-5 text-red-500" />
+                    <span className="text-gray-500 text-sm sm:text-base">Custom branding</span>
                   </div>
                 </div>
                 <Button className="w-full mt-6" variant="outline">
@@ -212,48 +225,7 @@ const Pricing = () => {
         </div>
       </div>
 
-      {/* Footer */}
-      <footer className="bg-gray-900 text-white">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
-            <div className="col-span-1 md:col-span-2">
-              <div className="flex items-center space-x-3 mb-4">
-                <img 
-                  src="/lovable-uploads/416d39db-53ff-402e-a2cf-26d1a3618601.png" 
-                  alt="Disclosurely" 
-                  className="h-8 w-auto md:h-8 h-6"
-                />
-              </div>
-              <p className="text-gray-400 mb-4">
-                Secure whistleblowing platform for organizations. Anonymous reporting, 
-                end-to-end encryption, and compliance features.
-              </p>
-            </div>
-            
-            <div>
-              <h3 className="font-semibold mb-4">Product</h3>
-              <ul className="space-y-2">
-                <li><Link to="/pricing" className="text-gray-400 hover:text-white">Pricing</Link></li>
-                <li><Link to="/compliance-software" className="text-gray-400 hover:text-white">Compliance Software</Link></li>
-                <li><Link to="/vs-whistleblower-software" className="text-gray-400 hover:text-white">Disclosurely vs Whistleblower Software</Link></li>
-                <li><Link to="/vs-speak-up" className="text-gray-400 hover:text-white">Disclosurely vs Speak Up</Link></li>
-              </ul>
-            </div>
-            
-            <div>
-              <h3 className="font-semibold mb-4">Company</h3>
-              <ul className="space-y-2">
-                <li><Link to="/auth/login" className="text-gray-400 hover:text-white">Sign In</Link></li>
-                <li><Link to="/auth/signup" className="text-gray-400 hover:text-white">Get Started</Link></li>
-              </ul>
-            </div>
-          </div>
-          
-          <div className="border-t border-gray-800 mt-8 pt-8 text-center text-gray-400">
-            <p>© 2025 Disclosurely. All rights reserved. <Link to="/compliance-software" className="hover:text-white">Compliance Software</Link>. Powered by <a href="https://betterranking.co.uk/?utm_source=footer&utm_medium=internal&utm_campaign=disclosurely&utm_id=links" target="_blank" rel="noopener noreferrer" className="hover:text-white">Better Ranking</a>.</p>
-          </div>
-        </div>
-      </footer>
+      <Footer />
     </div>
   );
 };
