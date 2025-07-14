@@ -34,6 +34,10 @@ const AICaseHelper = () => {
   const [uploadedDocuments, setUploadedDocuments] = useState<File[]>([]);
 
   const hasProAccess = subscriptionData.subscribed && subscriptionData.subscription_tier === 'pro';
+  
+  // Debug subscription data
+  console.log('AICaseHelper - Subscription data:', subscriptionData);
+  console.log('AICaseHelper - Has Pro Access:', hasProAccess);
 
   // Fetch live cases on component mount
   useEffect(() => {

@@ -104,7 +104,12 @@ const OrganizationSettings = () => {
         .select('*')
         .eq('organization_id', profile.organization_id);
 
-      if (error) throw error;
+      if (error) {
+        console.error('Error fetching domains:', error);
+        // Continue with empty domains array instead of throwing
+        setDomains([]);
+        return;
+      }
 
       setDomains(domainsData || []);
     } catch (error) {
