@@ -5,7 +5,7 @@ export const Footer = () => {
     <footer className="bg-gray-900 text-white">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
-          <div className="col-span-1 md:col-span-2">
+          <div className="col-span-1">
             <div className="flex items-center space-x-3 mb-4">
               <img 
                 src="/lovable-uploads/416d39db-53ff-402e-a2cf-26d1a3618601.png" 
@@ -34,6 +34,17 @@ export const Footer = () => {
             <ul className="space-y-2">
               <li><Link to="/auth/login" className="text-gray-400 hover:text-white">Sign In</Link></li>
               <li><Link to="/auth/signup" className="text-gray-400 hover:text-white">Get Started</Link></li>
+              <li><Link to="/contact" className="text-gray-400 hover:text-white">Contact</Link></li>
+            </ul>
+          </div>
+          
+          <div>
+            <h3 className="font-semibold mb-4">Resources</h3>
+            <ul className="space-y-2">
+              <li><a href="#" className="text-gray-400 hover:text-white">Documentation</a></li>
+              <li><a href="#" className="text-gray-400 hover:text-white">Support</a></li>
+              <li><a href="#" className="text-gray-400 hover:text-white">Privacy Policy</a></li>
+              <li><a href="#" className="text-gray-400 hover:text-white">Terms of Service</a></li>
             </ul>
           </div>
         </div>
