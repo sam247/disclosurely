@@ -24,7 +24,7 @@ export const useSubscriptionLimits = () => {
   useEffect(() => {
     const tier = subscriptionData.subscription_tier;
     
-    if (tier === 'starter') {
+    if (tier === 'basic') {
       setLimits({
         maxCasesPerMonth: 5,
         maxStorageGB: 1,
@@ -41,10 +41,10 @@ export const useSubscriptionLimits = () => {
         hasCustomBranding: true,
       });
     } else {
-      // Free tier (no subscription)
+      // Free tier (no subscription or subscription_tier is 'free')
       setLimits({
-        maxCasesPerMonth: 1,
-        maxStorageGB: 0.1, // 100MB
+        maxCasesPerMonth: 0, // No usage allowed
+        maxStorageGB: 0,
         hasMessaging: false,
         hasAIHelper: false,
         hasCustomBranding: false,

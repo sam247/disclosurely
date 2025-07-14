@@ -42,12 +42,12 @@ const SubscriptionManagement = () => {
           status: 'free',
           currentPeriodEnd: null,
           price: 0,
-          features: ['1 case per month', '100MB storage', 'Basic email support']
+          features: ['No cases allowed', 'No storage', 'Community support only']
         };
       }
 
-      const planData = data.subscription_tier === 'starter' ? {
-        plan: 'Starter',
+      const planData = data.subscription_tier === 'basic' ? {
+        plan: 'Basic',
         price: 19.99,
         features: ['5 cases per month', '1GB storage', 'Email support']
       } : {

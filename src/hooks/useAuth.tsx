@@ -5,7 +5,7 @@ import { supabase } from '@/integrations/supabase/client';
 
 interface SubscriptionData {
   subscribed: boolean;
-  subscription_tier?: 'starter' | 'pro';
+  subscription_tier?: 'free' | 'basic' | 'pro';
   subscription_end?: string;
   employee_count?: string;
 }
@@ -74,9 +74,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
         
         // Refresh subscription data on login
         if (event === 'SIGNED_IN' && session?.user) {
-          setTimeout(() => {
-            refreshSubscription();
-          }, 1000);
+          refreshSubscription();
         }
       }
     );
@@ -90,22 +88,20 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
       
       // Check subscription on initial load
       if (session?.user) {
-        setTimeout(() => {
-          refreshSubscription();
-        }, 1000);
+        refreshSubscription();
       }
     });
 
     return () => subscription.unsubscribe();
   }, []);
 
-  // Auto-refresh subscription every 10 seconds when user is logged in
+  // Auto-refresh subscription every 30 seconds when user is logged in
   useEffect(() => {
     if (!user) return;
     
     const interval = setInterval(() => {
       refreshSubscription();
-    }, 10000);
+    }, 30000);
     
     return () => clearInterval(interval);
   }, [user, session]);

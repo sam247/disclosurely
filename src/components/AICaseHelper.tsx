@@ -9,6 +9,8 @@ import { Bot, CheckCircle, Upload, File, X, FileSearch } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
+import FeatureRestriction from './FeatureRestriction';
+import SubscribePrompt from './SubscribePrompt';
 
 interface Report {
   id: string;
@@ -33,7 +35,7 @@ const AICaseHelper = () => {
   const [analysisResult, setAnalysisResult] = useState('');
   const [uploadedDocuments, setUploadedDocuments] = useState<File[]>([]);
 
-  const hasProAccess = subscriptionData.subscribed && (subscriptionData.subscription_tier === 'pro' || subscriptionData.subscription_tier?.includes('tier_'));
+  const hasProAccess = subscriptionData.subscribed && subscriptionData.subscription_tier === 'pro';
   
   // Debug subscription data
   console.log('AICaseHelper - Subscription data:', subscriptionData);
@@ -225,50 +227,28 @@ Generated: ${new Date().toLocaleString()}
   };
 
   if (!hasProAccess) {
-    return (
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Bot className="h-5 w-5" />
-            AI Case Helper
-            <Badge variant="secondary">PRO Feature</Badge>
-          </CardTitle>
-          <CardDescription>
-            AI-powered case analysis with policy compliance checking
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-6">
-          <div className="text-center py-8">
-            <Bot className="h-16 w-16 text-gray-300 mx-auto mb-4" />
-            <h3 className="text-lg font-semibold text-gray-900 mb-2">Upgrade to Access AI Case Analysis</h3>
-            <p className="text-gray-600 mb-6">
-              Get AI-powered case analysis against your organization's policies and compliance requirements with Pro subscription.
-            </p>
-            
-            <div className="p-4 border rounded-lg bg-gray-50 mb-6">
-              <div className="flex items-start gap-3">
-                <div className="text-gray-400 mt-1">
-                  <FileSearch className="h-5 w-5" />
-                </div>
-                <div>
-                  <h4 className="font-medium text-gray-700">AI Case Analysis</h4>
-                  <p className="text-sm text-gray-500 mt-1">Select live cases and get AI recommendations based on your policies</p>
-                </div>
-              </div>
-            </div>
-
-            <div className="space-y-2">
-              <Button className="bg-blue-600 hover:bg-blue-700" disabled>
-                Upgrade to Pro - Coming Soon
-              </Button>
-              <p className="text-xs text-gray-500">
-                AI Case Helper is available with Pro subscription
-              </p>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-    );
+    // Check if user is on free tier (no subscription) vs basic tier
+    const isFree = !subscriptionData.subscribed || subscriptionData.subscription_tier === 'free';
+    
+    if (isFree) {
+      return (
+        <SubscribePrompt 
+          feature="AI Case Helper"
+          description="Get AI-powered compliance analysis and recommendations based on your organization's policies"
+        />
+      );
+    } else {
+      return (
+        <FeatureRestriction 
+          feature="AI Case Helper"
+          requiredTier="pro"
+          onUpgrade={() => {
+            // Handle upgrade logic
+            console.log('Upgrade to Pro clicked');
+          }}
+        />
+      );
+    }
   }
 
   return (
