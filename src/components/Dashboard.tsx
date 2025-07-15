@@ -52,7 +52,7 @@ interface DomainVerification {
 }
 
 const Dashboard = () => {
-  const { user, signOut, subscriptionData } = useAuth();
+  const { user, signOut, subscriptionData, refreshSubscription } = useAuth();
   const { customDomain, organizationId, isCustomDomain, refreshDomainInfo } = useCustomDomain();
   const navigate = useNavigate();
   const { toast } = useToast();
@@ -67,6 +67,68 @@ const Dashboard = () => {
   const [showArchived, setShowArchived] = useState(false);
   const [showSubscriptionModal, setShowSubscriptionModal] = useState(false);
   const [hasShownSubscriptionModal, setHasShownSubscriptionModal] = useState(false);
+  const [isCheckingSubscription, setIsCheckingSubscription] = useState(false);
+
+  // Check for successful subscription return from Stripe
+  useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const subscriptionStatus = urlParams.get('subscription');
+    
+    if (subscriptionStatus === 'success') {
+      setIsCheckingSubscription(true);
+      toast({
+        title: "Welcome back!",
+        description: "Checking your subscription status...",
+      });
+      
+      // Remove the URL parameter
+      window.history.replaceState({}, '', window.location.pathname);
+      
+      // Wait a moment for Stripe to process, then refresh multiple times if needed
+      const checkSubscription = async (attempt = 1) => {
+        try {
+          await refreshSubscription();
+          
+          // Check if subscription is now active after 2 seconds
+          setTimeout(() => {
+            if (!subscriptionData.subscribed && attempt < 5) {
+              console.log(`Subscription check attempt ${attempt + 1}`);
+              checkSubscription(attempt + 1);
+            } else {
+              setIsCheckingSubscription(false);
+              if (subscriptionData.subscribed) {
+                toast({
+                  title: "Subscription Active!",
+                  description: "Your subscription has been successfully activated.",
+                });
+              } else {
+                toast({
+                  title: "Please wait",
+                  description: "Your subscription is still being processed. Please refresh in a moment.",
+                  variant: "default",
+                });
+              }
+            }
+          }, 2000);
+        } catch (error) {
+          console.error('Error checking subscription:', error);
+          if (attempt < 5) {
+            setTimeout(() => checkSubscription(attempt + 1), 3000);
+          } else {
+            setIsCheckingSubscription(false);
+            toast({
+              title: "Subscription Check",
+              description: "Please refresh the page if your subscription status hasn't updated.",
+              variant: "default",
+            });
+          }
+        }
+      };
+      
+      // Start checking after 2 seconds to allow Stripe processing time
+      setTimeout(() => checkSubscription(), 2000);
+    }
+  }, [refreshSubscription, toast]);
 
   useEffect(() => {
     if (user) {
@@ -74,9 +136,12 @@ const Dashboard = () => {
     }
   }, [user]);
 
-  // Show subscription modal for new unsubscribed users
+  // Show subscription modal for new unsubscribed users (but not if just returned from Stripe)
   useEffect(() => {
-    if (user && !loading && !hasShownSubscriptionModal && !subscriptionData.subscribed) {
+    const urlParams = new URLSearchParams(window.location.search);
+    const subscriptionStatus = urlParams.get('subscription');
+    
+    if (user && !loading && !hasShownSubscriptionModal && !subscriptionData.subscribed && !subscriptionStatus && !isCheckingSubscription) {
       // Show modal after a short delay to allow dashboard to load
       const timer = setTimeout(() => {
         setShowSubscriptionModal(true);
@@ -84,7 +149,7 @@ const Dashboard = () => {
       }, 1500);
       return () => clearTimeout(timer);
     }
-  }, [user, loading, hasShownSubscriptionModal, subscriptionData.subscribed]);
+  }, [user, loading, hasShownSubscriptionModal, subscriptionData.subscribed, isCheckingSubscription]);
 
   useEffect(() => {
     if (user && !loading) {
@@ -609,8 +674,26 @@ const Dashboard = () => {
                 </Card>
               </div>
 
-              {/* Submission Alert */}
-              {!subscriptionData.subscribed && (
+              {/* Subscription Status Alerts */}
+              {isCheckingSubscription && (
+                <Card className="border-green-200 bg-green-50">
+                  <CardContent className="p-4 sm:p-6">
+                    <div className="flex items-center">
+                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-green-600 mr-3"></div>
+                      <div>
+                        <h3 className="font-medium text-green-800">
+                          Verifying Subscription
+                        </h3>
+                        <p className="text-sm text-green-700 mt-1">
+                          Please wait while we confirm your subscription status...
+                        </p>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              )}
+
+              {!subscriptionData.subscribed && !isCheckingSubscription && (
                 <Card className="border-orange-200 bg-orange-50">
                   <CardContent className="p-4 sm:p-6">
                     <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
@@ -620,6 +703,12 @@ const Dashboard = () => {
                           A subscription is required to create submission links and manage reports.
                         </p>
                       </div>
+                      <button 
+                        onClick={() => setShowSubscriptionModal(true)}
+                        className="bg-orange-600 text-white px-4 py-2 rounded-lg hover:bg-orange-700 transition-colors text-sm font-medium self-start sm:self-auto"
+                      >
+                        Upgrade Now
+                      </button>
                     </div>
                   </CardContent>
                 </Card>
