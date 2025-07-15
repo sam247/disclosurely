@@ -29,11 +29,20 @@ const LoginForm = () => {
       });
 
       if (signInError) {
-        toast({
-          title: "Login Failed",
-          description: signInError.message,
-          variant: "destructive",
-        });
+        // Handle email not confirmed specifically
+        if (signInError.message.includes('Email not confirmed')) {
+          toast({
+            title: "Email Not Confirmed",
+            description: "Please check your email and click the confirmation link before signing in. Check your spam folder if you don't see it.",
+            variant: "destructive",
+          });
+        } else {
+          toast({
+            title: "Login Failed",
+            description: signInError.message,
+            variant: "destructive",
+          });
+        }
         setLoading(false);
         return;
       }

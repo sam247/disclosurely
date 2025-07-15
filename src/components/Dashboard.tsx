@@ -19,6 +19,7 @@ import ReportsManagement from '@/components/ReportsManagement';
 import SettingsPanel from '@/components/SettingsPanel';
 import AICaseHelper from '@/components/AICaseHelper';
 import { useCustomDomain } from '@/hooks/useCustomDomain';
+import SubscriptionPromptModal from '@/components/SubscriptionPromptModal';
 
 interface Report {
   id: string;
@@ -64,12 +65,26 @@ const Dashboard = () => {
   const [isReportDialogOpen, setIsReportDialogOpen] = useState(false);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [showArchived, setShowArchived] = useState(false);
+  const [showSubscriptionModal, setShowSubscriptionModal] = useState(false);
+  const [hasShownSubscriptionModal, setHasShownSubscriptionModal] = useState(false);
 
   useEffect(() => {
     if (user) {
       fetchData();
     }
   }, [user]);
+
+  // Show subscription modal for new unsubscribed users
+  useEffect(() => {
+    if (user && !loading && !hasShownSubscriptionModal && !subscriptionData.subscribed) {
+      // Show modal after a short delay to allow dashboard to load
+      const timer = setTimeout(() => {
+        setShowSubscriptionModal(true);
+        setHasShownSubscriptionModal(true);
+      }, 1500);
+      return () => clearTimeout(timer);
+    }
+  }, [user, loading, hasShownSubscriptionModal, subscriptionData.subscribed]);
 
   useEffect(() => {
     if (user && !loading) {
@@ -767,6 +782,11 @@ const Dashboard = () => {
       <SettingsPanel 
         isOpen={isSettingsOpen} 
         onClose={() => setIsSettingsOpen(false)} 
+      />
+
+      <SubscriptionPromptModal
+        open={showSubscriptionModal}
+        onOpenChange={setShowSubscriptionModal}
       />
     </div>
   );
