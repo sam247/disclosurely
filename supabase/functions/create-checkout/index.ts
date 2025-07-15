@@ -59,12 +59,12 @@ serve(async (req) => {
     
     switch (tier) {
       case 'tier1':
-        unitAmount = 3000; // £30 in pence
-        tierName = 'Tier 1 (0-49 employees)';
+        unitAmount = 1999; // £19.99 in pence
+        tierName = 'Starter';
         break;
       case 'tier2':
-        unitAmount = 5000; // £50 in pence
-        tierName = 'Tier 2 (50-199 employees)';
+        unitAmount = 4999; // £49.99 in pence
+        tierName = 'Pro';
         break;
       default:
         throw new Error("Invalid tier selected");

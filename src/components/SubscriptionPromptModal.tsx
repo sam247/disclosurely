@@ -15,14 +15,17 @@ const SubscriptionPromptModal = ({ open, onOpenChange }: SubscriptionPromptModal
   const [loading, setLoading] = useState(false);
   const { toast } = useToast();
 
-  const handleSubscribe = async (plan: 'basic' | 'pro') => {
+  const handleSubscribe = async (plan: 'starter' | 'pro') => {
     setLoading(true);
     try {
       const { data, error } = await supabase.functions.invoke('create-checkout', {
         headers: {
           Authorization: `Bearer ${(await supabase.auth.getSession()).data.session?.access_token}`,
         },
-        body: { plan }
+        body: { 
+          tier: plan === 'starter' ? 'tier1' : 'tier2',
+          employee_count: plan === 'starter' ? '0-49' : '50+'
+        }
       });
 
       if (error) {
@@ -59,16 +62,16 @@ const SubscriptionPromptModal = ({ open, onOpenChange }: SubscriptionPromptModal
         </DialogHeader>
 
         <div className="grid md:grid-cols-2 gap-6 mt-6">
-          {/* Basic Plan */}
+          {/* Starter Plan */}
           <Card className="relative border-2 border-gray-200 hover:border-blue-300 transition-colors">
             <CardHeader className="text-center">
               <div className="mx-auto mb-2 p-2 bg-blue-100 rounded-full w-fit">
                 <Zap className="h-6 w-6 text-blue-600" />
               </div>
-              <CardTitle className="text-xl">Basic Plan</CardTitle>
+              <CardTitle className="text-xl">Starter</CardTitle>
               <CardDescription>Perfect for small organizations</CardDescription>
               <div className="mt-4">
-                <span className="text-3xl font-bold">$49</span>
+                <span className="text-3xl font-bold">£19.99</span>
                 <span className="text-gray-600">/month</span>
               </div>
             </CardHeader>
@@ -76,31 +79,23 @@ const SubscriptionPromptModal = ({ open, onOpenChange }: SubscriptionPromptModal
               <ul className="space-y-3 mb-6">
                 <li className="flex items-center">
                   <Check className="h-4 w-4 text-green-500 mr-2" />
-                  <span className="text-sm">Up to 50 reports per month</span>
+                  <span className="text-sm">5 cases/month</span>
                 </li>
                 <li className="flex items-center">
                   <Check className="h-4 w-4 text-green-500 mr-2" />
-                  <span className="text-sm">5 submission links</span>
+                  <span className="text-sm">1GB Storage</span>
                 </li>
                 <li className="flex items-center">
                   <Check className="h-4 w-4 text-green-500 mr-2" />
-                  <span className="text-sm">Secure messaging</span>
-                </li>
-                <li className="flex items-center">
-                  <Check className="h-4 w-4 text-green-500 mr-2" />
-                  <span className="text-sm">Email notifications</span>
-                </li>
-                <li className="flex items-center">
-                  <Check className="h-4 w-4 text-green-500 mr-2" />
-                  <span className="text-sm">GDPR compliance tools</span>
+                  <span className="text-sm">Email Support</span>
                 </li>
               </ul>
               <Button 
-                onClick={() => handleSubscribe('basic')}
+                onClick={() => handleSubscribe('starter')}
                 className="w-full"
                 disabled={loading}
               >
-                {loading ? 'Processing...' : 'Start Basic Plan'}
+                {loading ? 'Processing...' : 'Start Starter Plan'}
               </Button>
             </CardContent>
           </Card>
@@ -116,10 +111,10 @@ const SubscriptionPromptModal = ({ open, onOpenChange }: SubscriptionPromptModal
               <div className="mx-auto mb-2 p-2 bg-blue-100 rounded-full w-fit">
                 <Crown className="h-6 w-6 text-blue-600" />
               </div>
-              <CardTitle className="text-xl">Pro Plan</CardTitle>
+              <CardTitle className="text-xl">Pro</CardTitle>
               <CardDescription>For growing organizations</CardDescription>
               <div className="mt-4">
-                <span className="text-3xl font-bold">$149</span>
+                <span className="text-3xl font-bold">£49.99</span>
                 <span className="text-gray-600">/month</span>
               </div>
             </CardHeader>
@@ -127,11 +122,19 @@ const SubscriptionPromptModal = ({ open, onOpenChange }: SubscriptionPromptModal
               <ul className="space-y-3 mb-6">
                 <li className="flex items-center">
                   <Check className="h-4 w-4 text-green-500 mr-2" />
-                  <span className="text-sm">Unlimited reports</span>
+                  <span className="text-sm">Unlimited cases/month</span>
                 </li>
                 <li className="flex items-center">
                   <Check className="h-4 w-4 text-green-500 mr-2" />
-                  <span className="text-sm">Unlimited submission links</span>
+                  <span className="text-sm">Unlimited storage</span>
+                </li>
+                <li className="flex items-center">
+                  <Check className="h-4 w-4 text-green-500 mr-2" />
+                  <span className="text-sm">Secure two-way Messaging</span>
+                </li>
+                <li className="flex items-center">
+                  <Check className="h-4 w-4 text-green-500 mr-2" />
+                  <span className="text-sm">AI Case Helper</span>
                 </li>
                 <li className="flex items-center">
                   <Check className="h-4 w-4 text-green-500 mr-2" />
@@ -139,15 +142,7 @@ const SubscriptionPromptModal = ({ open, onOpenChange }: SubscriptionPromptModal
                 </li>
                 <li className="flex items-center">
                   <Check className="h-4 w-4 text-green-500 mr-2" />
-                  <span className="text-sm">AI case analysis</span>
-                </li>
-                <li className="flex items-center">
-                  <Check className="h-4 w-4 text-green-500 mr-2" />
-                  <span className="text-sm">Advanced analytics</span>
-                </li>
-                <li className="flex items-center">
-                  <Check className="h-4 w-4 text-green-500 mr-2" />
-                  <span className="text-sm">Priority support</span>
+                  <span className="text-sm">Email Support</span>
                 </li>
               </ul>
               <Button 
