@@ -67,7 +67,6 @@ serve(async (req) => {
         subscribed: false,
         subscription_tier: null,
         subscription_end: null,
-        employee_count: null,
         updated_at: new Date().toISOString(),
       }, { onConflict: 'email' });
       return new Response(JSON.stringify({ subscribed: false }), {
@@ -103,8 +102,6 @@ serve(async (req) => {
     const hasActiveSub = !!activeSubscription;
     let subscriptionTier = null;
     let subscriptionEnd = null;
-    let employeeCount = null;
-
     if (hasActiveSub && activeSubscription) {
       subscriptionEnd = new Date(activeSubscription.current_period_end * 1000).toISOString();
       logStep("Active subscription found", { 
@@ -123,16 +120,13 @@ serve(async (req) => {
       // Updated pricing logic to match your tiers
       if (amount <= 1999) { // £19.99 or less
         subscriptionTier = "basic";
-        employeeCount = "0-49";
       } else if (amount >= 2000) { // £20.00 or more (£49.99)
         subscriptionTier = "pro";
-        employeeCount = "50+";
       } else {
         subscriptionTier = "basic"; // Default fallback
-        employeeCount = "0-49";
       }
       
-      logStep("Determined subscription tier", { priceId, amount, subscriptionTier, employeeCount });
+      logStep("Determined subscription tier", { priceId, amount, subscriptionTier });
     } else {
       logStep("No active subscription found");
     }
@@ -145,19 +139,17 @@ serve(async (req) => {
       subscribed: hasActiveSub,
       subscription_tier: subscriptionTier,
       subscription_end: subscriptionEnd,
-      employee_count: employeeCount,
       updated_at: new Date().toISOString(),
     };
 
     await supabaseClient.from("subscribers").upsert(updateData, { onConflict: 'email' });
 
-    logStep("Updated database with subscription info", { subscribed: hasActiveSub, subscriptionTier, employeeCount });
+    logStep("Updated database with subscription info", { subscribed: hasActiveSub, subscriptionTier });
     
     const responseData = {
       subscribed: hasActiveSub,
       subscription_tier: subscriptionTier,
-      subscription_end: subscriptionEnd,
-      employee_count: employeeCount
+      subscription_end: subscriptionEnd
     };
     
     logStep("Returning response", responseData);
