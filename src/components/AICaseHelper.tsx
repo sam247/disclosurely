@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -227,10 +228,10 @@ Generated: ${new Date().toLocaleString()}
   };
 
   if (!hasProAccess) {
-    // Check if user is on free tier (no subscription) vs basic tier
-    const isFree = !subscriptionData.subscribed || subscriptionData.subscription_tier === 'free';
+    // Check if user is not subscribed at all (null/undefined tier or not subscribed)
+    const isUnsubscribed = !subscriptionData.subscribed || !subscriptionData.subscription_tier;
     
-    if (isFree) {
+    if (isUnsubscribed) {
       return (
         <SubscribePrompt 
           feature="AI Case Helper"
@@ -238,6 +239,7 @@ Generated: ${new Date().toLocaleString()}
         />
       );
     } else {
+      // User has basic tier but needs pro
       return (
         <FeatureRestriction 
           feature="AI Case Helper"
