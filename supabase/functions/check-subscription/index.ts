@@ -45,6 +45,17 @@ serve(async (req) => {
     logStep("User authenticated", { userId: user.id, email: user.email });
 
     const stripe = new Stripe(stripeKey, { apiVersion: "2023-10-16" });
+    
+    // First check if we have an existing customer record in our database
+    const { data: existingSubscriber } = await supabaseClient
+      .from("subscribers")
+      .select("stripe_customer_id, subscribed, subscription_tier")
+      .eq("email", user.email)
+      .single();
+    
+    logStep("Existing subscriber record", existingSubscriber);
+
+    // Look for Stripe customer by email
     const customers = await stripe.customers.list({ email: user.email, limit: 1 });
     
     if (customers.data.length === 0) {
@@ -68,42 +79,66 @@ serve(async (req) => {
     const customerId = customers.data[0].id;
     logStep("Found Stripe customer", { customerId });
 
+    // Check for ALL subscription statuses (active, trialing, past_due)
     const subscriptions = await stripe.subscriptions.list({
       customer: customerId,
-      status: "active",
-      limit: 1,
+      status: "all", // Check all statuses
+      limit: 10, // Get more subscriptions to be thorough
     });
-    const hasActiveSub = subscriptions.data.length > 0;
+    
+    logStep("All subscriptions found", { 
+      count: subscriptions.data.length,
+      subscriptions: subscriptions.data.map(sub => ({
+        id: sub.id,
+        status: sub.status,
+        current_period_end: sub.current_period_end
+      }))
+    });
+
+    // Look for active, trialing, or past_due subscriptions
+    const activeSubscription = subscriptions.data.find(sub => 
+      ['active', 'trialing', 'past_due'].includes(sub.status)
+    );
+    
+    const hasActiveSub = !!activeSubscription;
     let subscriptionTier = null;
     let subscriptionEnd = null;
     let employeeCount = null;
 
-    if (hasActiveSub) {
-      const subscription = subscriptions.data[0];
-      subscriptionEnd = new Date(subscription.current_period_end * 1000).toISOString();
-      logStep("Active subscription found", { subscriptionId: subscription.id, endDate: subscriptionEnd });
+    if (hasActiveSub && activeSubscription) {
+      subscriptionEnd = new Date(activeSubscription.current_period_end * 1000).toISOString();
+      logStep("Active subscription found", { 
+        subscriptionId: activeSubscription.id, 
+        status: activeSubscription.status,
+        endDate: subscriptionEnd 
+      });
       
       // Determine subscription tier from price
-      const priceId = subscription.items.data[0].price.id;
+      const priceId = activeSubscription.items.data[0].price.id;
       const price = await stripe.prices.retrieve(priceId);
       const amount = price.unit_amount || 0;
       
-      if (amount <= 1999) {
+      logStep("Price details", { priceId, amount, currency: price.currency });
+      
+      // Updated pricing logic to match your tiers
+      if (amount <= 1999) { // £19.99 or less
         subscriptionTier = "basic";
         employeeCount = "0-49";
-      } else if (amount >= 2000) {
+      } else if (amount >= 2000) { // £20.00 or more (£49.99)
         subscriptionTier = "pro";
         employeeCount = "50+";
       } else {
-        subscriptionTier = "free";
+        subscriptionTier = "basic"; // Default fallback
+        employeeCount = "0-49";
       }
       
-      logStep("Determined subscription tier", { priceId, amount, subscriptionTier });
+      logStep("Determined subscription tier", { priceId, amount, subscriptionTier, employeeCount });
     } else {
       logStep("No active subscription found");
     }
 
-    await supabaseClient.from("subscribers").upsert({
+    // Always update the database with the latest info
+    const updateData = {
       email: user.email,
       user_id: user.id,
       stripe_customer_id: customerId,
@@ -112,15 +147,22 @@ serve(async (req) => {
       subscription_end: subscriptionEnd,
       employee_count: employeeCount,
       updated_at: new Date().toISOString(),
-    }, { onConflict: 'email' });
+    };
 
-    logStep("Updated database with subscription info", { subscribed: hasActiveSub, subscriptionTier });
-    return new Response(JSON.stringify({
+    await supabaseClient.from("subscribers").upsert(updateData, { onConflict: 'email' });
+
+    logStep("Updated database with subscription info", { subscribed: hasActiveSub, subscriptionTier, employeeCount });
+    
+    const responseData = {
       subscribed: hasActiveSub,
       subscription_tier: subscriptionTier,
       subscription_end: subscriptionEnd,
       employee_count: employeeCount
-    }), {
+    };
+    
+    logStep("Returning response", responseData);
+    
+    return new Response(JSON.stringify(responseData), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
       status: 200,
     });

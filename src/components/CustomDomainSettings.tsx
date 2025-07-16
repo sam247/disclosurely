@@ -14,8 +14,8 @@ interface DomainVerification {
   id: string;
   domain: string;
   verification_token: string;
-  verified_at: string | null;
   verification_type: string;
+  verified_at: string | null;
 }
 
 const CustomDomainSettings = () => {
@@ -31,13 +31,17 @@ const CustomDomainSettings = () => {
     if (!user) return;
     
     try {
-      const { data: profile } = await supabase
+      // Get user's profile and organization
+      const { data: profile, error: profileError } = await supabase
         .from('profiles')
         .select('organization_id')
         .eq('id', user.id)
         .single();
 
-      if (!profile?.organization_id) return;
+      if (profileError || !profile?.organization_id) {
+        console.error('Error fetching profile:', profileError);
+        return;
+      }
 
       const { data, error } = await supabase
         .from('domain_verifications')
@@ -58,39 +62,50 @@ const CustomDomainSettings = () => {
 
   const refreshVerifications = async () => {
     setRefreshing(true);
-    await fetchVerifications();
-    setRefreshing(false);
-    toast({
-      title: "Refreshed",
-      description: "Domain verifications updated",
-    });
+    try {
+      await fetchVerifications();
+      toast({
+        title: "Refreshed",
+        description: "Domain verifications updated",
+      });
+    } catch (error) {
+      console.error('Error refreshing verifications:', error);
+      toast({
+        title: "Error",
+        description: "Failed to refresh verifications",
+        variant: "destructive",
+      });
+    } finally {
+      setRefreshing(false);
+    }
   };
 
   useEffect(() => {
-    fetchVerifications();
+    if (user) {
+      fetchVerifications();
+    }
   }, [user]);
 
   const addDomain = async () => {
     if (!domain.trim()) {
       toast({
         title: "Error",
-        description: "Please enter a domain name",
+        description: "Please enter a domain",
         variant: "destructive",
       });
       return;
     }
 
-    if (!user) return;
-
     setLoading(true);
     try {
-      const { data: profile } = await supabase
+      // Get user's profile first
+      const { data: profile, error: profileError } = await supabase
         .from('profiles')
         .select('organization_id')
-        .eq('id', user.id)
+        .eq('id', user?.id)
         .single();
 
-      if (!profile?.organization_id) {
+      if (profileError || !profile?.organization_id) {
         toast({
           title: "Error",
           description: "Organization not found",
@@ -123,7 +138,7 @@ const CustomDomainSettings = () => {
 
       toast({
         title: "Success",
-        description: "Domain added for verification",
+        description: "Domain added successfully",
       });
 
       setDomain('');
@@ -176,7 +191,7 @@ const CustomDomainSettings = () => {
     }
   };
 
-  const deleteDomain = async (id: string) => {
+  const removeDomain = async (id: string) => {
     try {
       const { error } = await supabase
         .from('domain_verifications')
@@ -232,17 +247,18 @@ const CustomDomainSettings = () => {
       </CardHeader>
       <CardContent className="space-y-6">
         <div className="space-y-4">
-          <div className="space-y-2">
-            <Label htmlFor="domain">Domain Name</Label>
-            <div className="flex gap-2">
+          <div className="grid grid-cols-4 gap-4">
+            <div className="col-span-3">
+              <Label htmlFor="domain">Domain</Label>
               <Input
                 id="domain"
+                placeholder="reports.yourcompany.com"
                 value={domain}
                 onChange={(e) => setDomain(e.target.value)}
-                placeholder="reports.yourcompany.com"
-                disabled={loading}
               />
-              <Button onClick={addDomain} disabled={loading}>
+            </div>
+            <div className="flex items-end">
+              <Button onClick={addDomain} disabled={loading} className="w-full">
                 {loading ? 'Adding...' : 'Add Domain'}
               </Button>
             </div>
@@ -251,35 +267,25 @@ const CustomDomainSettings = () => {
 
         {verifications.length > 0 && (
           <div className="space-y-4">
-            <h3 className="text-lg font-medium">Domain Verifications</h3>
+            <h3 className="text-lg font-semibold">Domain Verifications</h3>
             {verifications.map((verification) => (
-              <Card key={verification.id} className="p-4">
+              <div key={verification.id} className="border rounded-lg p-4 space-y-3">
                 <div className="flex items-center justify-between">
-                  <div className="space-y-2">
-                    <div className="flex items-center gap-2">
-                      <span className="font-medium">{verification.domain}</span>
-                      {verification.verified_at ? (
-                        <Badge variant="default" className="bg-green-100 text-green-800">
-                          <CheckCircle className="w-3 h-3 mr-1" />
-                          Verified
-                        </Badge>
-                      ) : (
-                        <Badge variant="secondary">
-                          <AlertCircle className="w-3 h-3 mr-1" />
-                          Pending
-                        </Badge>
-                      )}
-                    </div>
-                    {!verification.verified_at && (
-                      <div className="text-sm text-gray-600">
-                        <p>Add this TXT record to your DNS:</p>
-                        <code className="bg-gray-100 px-2 py-1 rounded text-xs">
-                          {verification.verification_token}
-                        </code>
-                      </div>
+                  <div className="flex items-center space-x-2">
+                    <span className="font-medium">{verification.domain}</span>
+                    {verification.verified_at ? (
+                      <Badge variant="default" className="bg-green-100 text-green-800">
+                        <CheckCircle className="w-3 h-3 mr-1" />
+                        Verified
+                      </Badge>
+                    ) : (
+                      <Badge variant="secondary">
+                        <AlertCircle className="w-3 h-3 mr-1" />
+                        Pending
+                      </Badge>
                     )}
                   </div>
-                  <div className="flex gap-2">
+                  <div className="flex space-x-2">
                     {!verification.verified_at && (
                       <Button
                         size="sm"
@@ -292,26 +298,42 @@ const CustomDomainSettings = () => {
                     <Button
                       size="sm"
                       variant="destructive"
-                      onClick={() => deleteDomain(verification.id)}
+                      onClick={() => removeDomain(verification.id)}
                     >
                       Remove
                     </Button>
                   </div>
                 </div>
-              </Card>
+
+                {!verification.verified_at && (
+                  <div className="bg-gray-50 p-3 rounded space-y-2">
+                    <p className="text-sm font-medium">DNS Configuration Required:</p>
+                    <div className="text-sm space-y-1">
+                      <p><strong>Type:</strong> {verification.verification_type}</p>
+                      <p><strong>Name:</strong> _disclosurely-verification</p>
+                      <p><strong>Value:</strong> {verification.verification_token}</p>
+                    </div>
+                    <p className="text-xs text-gray-600">
+                      Add this TXT record to your DNS settings and click Verify.
+                    </p>
+                  </div>
+                )}
+              </div>
             ))}
           </div>
         )}
 
-        <div className="bg-blue-50 p-4 rounded-lg">
-          <div className="flex items-start gap-2">
-            <ExternalLink className="w-5 h-5 text-blue-600 mt-0.5" />
+        <div className="bg-blue-50 p-4 rounded-lg space-y-2">
+          <div className="flex items-start space-x-2">
+            <ExternalLink className="w-4 h-4 mt-0.5 text-blue-600" />
             <div className="text-sm">
-              <p className="font-medium text-blue-900">How it works:</p>
-              <p className="text-blue-700 mt-1">
-                Once verified, your custom domain will point to your organization's 
-                secure report submission portal, giving you a branded experience.
-              </p>
+              <p className="font-medium text-blue-900">How to set up custom domains:</p>
+              <ol className="list-decimal list-inside mt-2 space-y-1 text-blue-800">
+                <li>Add your domain above</li>
+                <li>Add the TXT record to your DNS settings</li>
+                <li>Click "Verify" to confirm setup</li>
+                <li>Once verified, your domain will be active</li>
+              </ol>
             </div>
           </div>
         </div>
