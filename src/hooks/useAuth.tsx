@@ -5,7 +5,7 @@ import { supabase } from '@/integrations/supabase/client';
 
 interface SubscriptionData {
   subscribed: boolean;
-  subscription_tier?: 'free' | 'basic' | 'pro';
+  subscription_tier?: 'basic' | 'pro';
   subscription_end?: string;
   employee_count?: string;
 }
@@ -65,8 +65,18 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
         return;
       }
 
-      console.log('Subscription data updated:', data);
-      setSubscriptionData(data);
+      console.log('Subscription data received from API:', data);
+      
+      // Ensure we properly map the subscription data
+      const mappedData = {
+        subscribed: data?.subscribed || false,
+        subscription_tier: data?.subscription_tier || undefined,
+        subscription_end: data?.subscription_end || undefined,
+        employee_count: data?.employee_count || undefined,
+      };
+      
+      console.log('Mapped subscription data:', mappedData);
+      setSubscriptionData(mappedData);
     } catch (error) {
       console.error('Error refreshing subscription:', error);
       // Set default subscription data on error to prevent blocking UI

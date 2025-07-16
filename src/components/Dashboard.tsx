@@ -69,6 +69,8 @@ const Dashboard = () => {
   const [hasShownSubscriptionModal, setHasShownSubscriptionModal] = useState(false);
   const [isCheckingSubscription, setIsCheckingSubscription] = useState(false);
 
+  console.log('Dashboard - Current subscription data:', subscriptionData);
+
   // Check for successful subscription return from Stripe
   useEffect(() => {
     const urlParams = new URLSearchParams(window.location.search);
@@ -141,9 +143,19 @@ const Dashboard = () => {
     const urlParams = new URLSearchParams(window.location.search);
     const subscriptionStatus = urlParams.get('subscription');
     
+    console.log('Checking if should show subscription modal:', {
+      user: !!user,
+      loading,
+      hasShownSubscriptionModal,
+      subscribed: subscriptionData.subscribed,
+      subscriptionStatus,
+      isCheckingSubscription
+    });
+    
     if (user && !loading && !hasShownSubscriptionModal && !subscriptionData.subscribed && !subscriptionStatus && !isCheckingSubscription) {
       // Show modal after a short delay to allow dashboard to load
       const timer = setTimeout(() => {
+        console.log('Showing subscription modal for unsubscribed user');
         setShowSubscriptionModal(true);
         setHasShownSubscriptionModal(true);
       }, 1500);
@@ -593,7 +605,7 @@ const Dashboard = () => {
                   <p className="text-xs sm:text-sm text-gray-600 truncate">Welcome back, {user?.email}</p>
                   {subscriptionData.subscribed && (
                     <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                      PRO
+                      {subscriptionData.subscription_tier === 'basic' ? 'STARTER' : 'PRO'}
                     </span>
                   )}
                 </div>

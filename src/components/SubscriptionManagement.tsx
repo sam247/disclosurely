@@ -1,17 +1,18 @@
 
 import { useState } from 'react';
-import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
-import { CreditCard, Calendar, Users, FileText, Shield, Zap } from 'lucide-react';
+import { CreditCard, Calendar, FileText, Shield, Zap } from 'lucide-react';
 import { useUsageStats } from '@/hooks/useUsageStats';
 import { useSubscriptionLimits } from '@/hooks/useSubscriptionLimits';
+import { useAuth } from '@/hooks/useAuth';
 
 const SubscriptionManagement = () => {
   const [isLoading, setIsLoading] = useState(false);
+  const { subscriptionData, refreshSubscription } = useAuth();
   const { stats, loading: statsLoading, formatStorage } = useUsageStats();
   const { 
     limits, 
@@ -23,53 +24,7 @@ const SubscriptionManagement = () => {
     formatCaseLimit
   } = useSubscriptionLimits();
 
-  // Query subscription data from Supabase
-  const { data: subscription } = useQuery({
-    queryKey: ['subscription'],
-    queryFn: async () => {
-      const user = (await supabase.auth.getUser()).data.user;
-      if (!user) return null;
-
-      const { data } = await supabase
-        .from('subscribers')
-        .select('*')
-        .eq('user_id', user.id)
-        .single();
-
-      if (!data || !data.subscribed) {
-        return {
-          plan: 'Free',
-          status: 'free',
-          currentPeriodEnd: null,
-          price: 0,
-          features: ['No cases allowed', 'No storage', 'Community support only']
-        };
-      }
-
-      const planData = data.subscription_tier === 'basic' ? {
-        plan: 'Basic',
-        price: 19.99,
-        features: ['5 cases per month', '1GB storage', 'Email support']
-      } : {
-        plan: 'Pro',
-        price: 49.99,
-        features: [
-          'Unlimited cases per month',
-          'Unlimited storage',
-          'Email Support',
-          'Secure two-way Messaging',
-          'AI Case Helper',
-          'Custom branding'
-        ]
-      };
-
-      return {
-        ...planData,
-        status: 'active',
-        currentPeriodEnd: data.subscription_end,
-      };
-    },
-  });
+  console.log('SubscriptionManagement - Current subscription data:', subscriptionData);
 
   const handleManageSubscription = async () => {
     setIsLoading(true);
@@ -94,7 +49,10 @@ const SubscriptionManagement = () => {
     try {
       // Call Supabase edge function to create checkout session
       const { data, error } = await supabase.functions.invoke('create-checkout', {
-        body: { priceId: 'price_tier3' } // Replace with actual price ID
+        body: { 
+          tier: subscriptionData.subscription_tier === 'basic' ? 'tier2' : 'tier1',
+          employee_count: '50+'
+        }
       });
       
       if (error) throw error;
@@ -109,6 +67,56 @@ const SubscriptionManagement = () => {
     }
   };
 
+  // Get subscription details based on the auth context data
+  const getSubscriptionDetails = () => {
+    if (!subscriptionData.subscribed) {
+      return {
+        plan: 'Free',
+        status: 'free',
+        currentPeriodEnd: null,
+        price: 0,
+        features: ['No cases allowed', 'No storage', 'Community support only']
+      };
+    }
+
+    if (subscriptionData.subscription_tier === 'basic') {
+      return {
+        plan: 'Starter',
+        price: 19.99,
+        status: 'active',
+        currentPeriodEnd: subscriptionData.subscription_end,
+        features: ['5 cases per month', '1GB storage', 'Email support']
+      };
+    }
+
+    if (subscriptionData.subscription_tier === 'pro') {
+      return {
+        plan: 'Pro',
+        price: 49.99,
+        status: 'active',
+        currentPeriodEnd: subscriptionData.subscription_end,
+        features: [
+          'Unlimited cases per month',
+          'Unlimited storage',
+          'Email Support',
+          'Secure two-way Messaging',
+          'AI Case Helper',
+          'Custom branding'
+        ]
+      };
+    }
+
+    return {
+      plan: 'Free',
+      status: 'free',
+      currentPeriodEnd: null,
+      price: 0,
+      features: ['No cases allowed', 'No storage', 'Community support only']
+    };
+  };
+
+  const subscription = getSubscriptionDetails();
+
   return (
     <div className="space-y-6">
       {/* Current Subscription */}
@@ -117,6 +125,14 @@ const SubscriptionManagement = () => {
           <CardTitle className="flex items-center space-x-2">
             <CreditCard className="h-5 w-5" />
             <span>Current Subscription</span>
+            <Button 
+              variant="outline" 
+              size="sm" 
+              onClick={refreshSubscription}
+              className="ml-auto"
+            >
+              Refresh Status
+            </Button>
           </CardTitle>
           <CardDescription>
             Manage your subscription plan and billing
@@ -125,17 +141,17 @@ const SubscriptionManagement = () => {
         <CardContent className="space-y-4">
           <div className="flex items-center justify-between">
             <div>
-              <p className="font-semibold text-lg">{subscription?.plan || 'Free Tier'}</p>
+              <p className="font-semibold text-lg">{subscription.plan}</p>
               <p className="text-gray-600">
-                ${subscription?.price || 0}/month
+                £{subscription.price}/month
               </p>
             </div>
-            <Badge variant={subscription?.status === 'active' ? 'default' : 'secondary'}>
-              {subscription?.status || 'Free'}
+            <Badge variant={subscription.status === 'active' ? 'default' : 'secondary'}>
+              {subscription.status === 'active' ? 'Active' : 'Free'}
             </Badge>
           </div>
 
-          {subscription?.currentPeriodEnd && (
+          {subscription.currentPeriodEnd && (
             <div className="flex items-center space-x-2 text-sm text-gray-600">
               <Calendar className="h-4 w-4" />
               <span>Renews on {new Date(subscription.currentPeriodEnd).toLocaleDateString()}</span>
@@ -143,20 +159,22 @@ const SubscriptionManagement = () => {
           )}
 
           <div className="flex space-x-2">
-            <Button 
-              onClick={handleManageSubscription}
-              disabled={isLoading}
-              variant="outline"
-            >
-              {isLoading ? 'Loading...' : 'Manage Subscription'}
-            </Button>
+            {subscription.status === 'active' && (
+              <Button 
+                onClick={handleManageSubscription}
+                disabled={isLoading}
+                variant="outline"
+              >
+                {isLoading ? 'Loading...' : 'Manage Subscription'}
+              </Button>
+            )}
             
-            {subscription?.plan !== 'Pro' && (
+            {subscription.plan !== 'Pro' && (
               <Button 
                 onClick={handleUpgrade}
                 disabled={isLoading}
               >
-                {isLoading ? 'Loading...' : 'Upgrade Plan'}
+                {isLoading ? 'Loading...' : subscription.plan === 'Free' ? 'Subscribe Now' : 'Upgrade Plan'}
               </Button>
             )}
           </div>
@@ -178,7 +196,7 @@ const SubscriptionManagement = () => {
         </CardHeader>
         <CardContent>
           <div className="grid gap-3">
-            {subscription?.features?.map((feature, index) => (
+            {subscription.features?.map((feature, index) => (
               <div key={index} className="flex items-center space-x-3">
                 <Shield className="h-4 w-4 text-green-500" />
                 <span className="text-sm">{feature}</span>
