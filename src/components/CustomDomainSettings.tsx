@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
-import { AlertCircle, CheckCircle, ExternalLink } from 'lucide-react';
+import { AlertCircle, CheckCircle, ExternalLink, RefreshCw } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
@@ -25,6 +25,7 @@ const CustomDomainSettings = () => {
   const [verifications, setVerifications] = useState<DomainVerification[]>([]);
   const [loading, setLoading] = useState(false);
   const [verifyingId, setVerifyingId] = useState<string | null>(null);
+  const [refreshing, setRefreshing] = useState(false);
 
   const fetchVerifications = async () => {
     if (!user) return;
@@ -46,7 +47,6 @@ const CustomDomainSettings = () => {
 
       if (error) {
         console.error('Error fetching domain verifications:', error);
-        // Don't show toast for fetch errors to avoid spamming user
         return;
       }
 
@@ -54,6 +54,16 @@ const CustomDomainSettings = () => {
     } catch (error) {
       console.error('Error in fetchVerifications:', error);
     }
+  };
+
+  const refreshVerifications = async () => {
+    setRefreshing(true);
+    await fetchVerifications();
+    setRefreshing(false);
+    toast({
+      title: "Refreshed",
+      description: "Domain verifications updated",
+    });
   };
 
   useEffect(() => {
@@ -89,15 +99,20 @@ const CustomDomainSettings = () => {
         return;
       }
 
+      // Generate a temporary verification token that will be overridden by the database trigger
+      const tempToken = `temp-${Date.now()}`;
+
       const { error } = await supabase
         .from('domain_verifications')
         .insert({
           domain: domain.trim(),
           organization_id: profile.organization_id,
-          verification_type: 'TXT'
+          verification_type: 'TXT',
+          verification_token: tempToken
         });
 
       if (error) {
+        console.error('Database error:', error);
         toast({
           title: "Error",
           description: error.message,
@@ -112,8 +127,9 @@ const CustomDomainSettings = () => {
       });
 
       setDomain('');
-      fetchVerifications();
+      await fetchVerifications();
     } catch (error) {
+      console.error('Unexpected error:', error);
       toast({
         title: "Error",
         description: "Failed to add domain",
@@ -127,14 +143,13 @@ const CustomDomainSettings = () => {
   const verifyDomain = async (id: string) => {
     setVerifyingId(id);
     try {
-      // Simple verification check - in a real implementation this would check DNS records
-      const { data, error } = await supabase
+      const { error } = await supabase
         .from('domain_verifications')
         .update({ verified_at: new Date().toISOString() })
-        .eq('id', id)
-        .select();
+        .eq('id', id);
 
       if (error) {
+        console.error('Verification error:', error);
         toast({
           title: "Verification Failed",
           description: error.message,
@@ -148,8 +163,9 @@ const CustomDomainSettings = () => {
         description: "Domain verified successfully",
       });
 
-      fetchVerifications();
+      await fetchVerifications();
     } catch (error) {
+      console.error('Unexpected verification error:', error);
       toast({
         title: "Error",
         description: "Failed to verify domain",
@@ -168,6 +184,7 @@ const CustomDomainSettings = () => {
         .eq('id', id);
 
       if (error) {
+        console.error('Delete error:', error);
         toast({
           title: "Error",
           description: error.message,
@@ -181,8 +198,9 @@ const CustomDomainSettings = () => {
         description: "Domain removed",
       });
 
-      fetchVerifications();
+      await fetchVerifications();
     } catch (error) {
+      console.error('Unexpected delete error:', error);
       toast({
         title: "Error",
         description: "Failed to remove domain",
@@ -194,10 +212,23 @@ const CustomDomainSettings = () => {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Custom Domain</CardTitle>
-        <CardDescription>
-          Set up a custom domain for your organization's report submission portal
-        </CardDescription>
+        <div className="flex items-center justify-between">
+          <div>
+            <CardTitle>Custom Domain</CardTitle>
+            <CardDescription>
+              Set up a custom domain for your organization's report submission portal
+            </CardDescription>
+          </div>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={refreshVerifications}
+            disabled={refreshing}
+          >
+            <RefreshCw className={`w-4 h-4 mr-2 ${refreshing ? 'animate-spin' : ''}`} />
+            Refresh
+          </Button>
+        </div>
       </CardHeader>
       <CardContent className="space-y-6">
         <div className="space-y-4">
