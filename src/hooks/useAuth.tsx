@@ -7,7 +7,6 @@ interface SubscriptionData {
   subscribed: boolean;
   subscription_tier?: 'basic' | 'pro';
   subscription_end?: string;
-  employee_count?: string;
 }
 
 interface AuthContextType {
@@ -43,43 +42,32 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     if (!user || !session?.access_token) return;
     
     try {
-      console.log('Refreshing subscription data...');
+      console.log('Subscription check attempt', new Date().toISOString());
       
-      // Add timeout using Promise.race to prevent hanging requests
-      const subscriptionPromise = supabase.functions.invoke('check-subscription', {
+      const { data, error } = await supabase.functions.invoke('check-subscription', {
         headers: {
           Authorization: `Bearer ${session.access_token}`,
         },
       });
 
-      const timeoutPromise = new Promise((_, reject) =>
-        setTimeout(() => reject(new Error('Subscription check timeout')), 5000)
-      );
-
-      const { data, error } = await Promise.race([subscriptionPromise, timeoutPromise]) as any;
-
       if (error) {
         console.error('Subscription check error:', error);
-        // Set default subscription data on error to prevent blocking UI
         setSubscriptionData({ subscribed: false });
         return;
       }
 
       console.log('Subscription data received from API:', data);
       
-      // Ensure we properly map the subscription data
       const mappedData = {
         subscribed: data?.subscribed || false,
         subscription_tier: data?.subscription_tier || undefined,
         subscription_end: data?.subscription_end || undefined,
-        employee_count: data?.employee_count || undefined,
       };
       
       console.log('Mapped subscription data:', mappedData);
       setSubscriptionData(mappedData);
     } catch (error) {
       console.error('Error refreshing subscription:', error);
-      // Set default subscription data on error to prevent blocking UI
       setSubscriptionData({ subscribed: false });
     }
   };
@@ -92,11 +80,6 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
         setSession(session);
         setUser(session?.user ?? null);
         setLoading(false);
-        
-        // Immediately check subscription on login - use setTimeout to avoid blocking auth flow
-        if (event === 'SIGNED_IN' && session?.user) {
-          setTimeout(() => refreshSubscription(), 0);
-        }
       }
     );
 
@@ -106,26 +89,21 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
       setSession(session);
       setUser(session?.user ?? null);
       setLoading(false);
-      
-      // Immediately check subscription on initial load if user exists
-      if (session?.user) {
-        setTimeout(() => refreshSubscription(), 0);
-      }
     });
 
     return () => subscription.unsubscribe();
   }, []);
 
-  // Auto-refresh subscription every 5 minutes when user is logged in (reduced frequency)
+  // Check subscription when user/session changes
   useEffect(() => {
-    if (!user) return;
-    
-    const interval = setInterval(() => {
+    if (user && session?.access_token) {
+      console.log('User authenticated, checking subscription...');
       refreshSubscription();
-    }, 300000); // 5 minutes instead of 30 seconds
-    
-    return () => clearInterval(interval);
-  }, [user, session]);
+    } else if (!user) {
+      // Clear subscription data when user logs out
+      setSubscriptionData({ subscribed: false });
+    }
+  }, [user?.id, session?.access_token]); // Only depend on user ID and access token
 
   const signOut = async () => {
     await supabase.auth.signOut();
