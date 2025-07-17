@@ -19,6 +19,7 @@ import ReportsManagement from '@/components/ReportsManagement';
 import SettingsPanel from '@/components/SettingsPanel';
 import AICaseHelper from '@/components/AICaseHelper';
 import { useCustomDomain } from '@/hooks/useCustomDomain';
+import { useSubscriptionLimits } from '@/hooks/useSubscriptionLimits';
 import SubscriptionPromptModal from '@/components/SubscriptionPromptModal';
 
 interface Report {
@@ -54,6 +55,7 @@ interface DomainVerification {
 const Dashboard = () => {
   const { user, signOut, subscriptionData, subscriptionLoading, refreshSubscription } = useAuth();
   const { customDomain, organizationId, isCustomDomain, refreshDomainInfo } = useCustomDomain();
+  const { limits } = useSubscriptionLimits();
   const navigate = useNavigate();
   const { toast } = useToast();
   const [reports, setReports] = useState<Report[]>([]);
@@ -862,21 +864,23 @@ const Dashboard = () => {
                 />
                 <ReportAttachments reportId={selectedReport.id} />
               </div>
-              <div>
-                <ReportMessaging 
-                  report={{
-                    id: selectedReport.id,
-                    title: selectedReport.title,
-                    tracking_id: selectedReport.tracking_id,
-                    status: selectedReport.status,
-                    created_at: selectedReport.created_at,
-                    report_type: selectedReport.report_type,
-                    encrypted_content: selectedReport.encrypted_content,
-                    organizations: selectedReport.organizations || { name: 'Organization' }
-                  }}
-                  onClose={() => setIsReportDialogOpen(false)}
-                />
-              </div>
+              {limits.hasMessaging && (
+                <div>
+                  <ReportMessaging 
+                    report={{
+                      id: selectedReport.id,
+                      title: selectedReport.title,
+                      tracking_id: selectedReport.tracking_id,
+                      status: selectedReport.status,
+                      created_at: selectedReport.created_at,
+                      report_type: selectedReport.report_type,
+                      encrypted_content: selectedReport.encrypted_content,
+                      organizations: selectedReport.organizations || { name: 'Organization' }
+                    }}
+                    onClose={() => setIsReportDialogOpen(false)}
+                  />
+                </div>
+              )}
             </div>
           )}
         </DialogContent>
