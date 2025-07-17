@@ -16,7 +16,7 @@ interface AuthContextType {
   subscriptionLoading: boolean;
   subscriptionData: SubscriptionData;
   signOut: () => Promise<void>;
-  refreshSubscription: () => Promise<void>;
+  refreshSubscription: (currentSession?: Session | null) => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -40,23 +40,31 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
   const [subscriptionLoading, setSubscriptionLoading] = useState(true);
   const [subscriptionData, setSubscriptionData] = useState<SubscriptionData>({ subscribed: false });
 
-  const refreshSubscription = async () => {
-    if (!user || !session?.access_token) {
-      console.log('Skipping subscription check - no user or session');
+  const refreshSubscription = async (currentSession?: Session | null) => {
+    // Use passed session or current session state
+    const sessionToUse = currentSession || session;
+    const userToUse = currentSession?.user || user;
+    
+    if (!userToUse || !sessionToUse?.access_token) {
+      console.log('Skipping subscription check - no user or session', {
+        hasUser: !!userToUse,
+        hasSession: !!sessionToUse,
+        hasAccessToken: !!sessionToUse?.access_token
+      });
       setSubscriptionLoading(false);
       return;
     }
     
     setSubscriptionLoading(true);
     try {
-      console.log('Subscription check attempt for user:', user.email);
+      console.log('Subscription check attempt for user:', userToUse.email);
       
       // Add a small delay to ensure session is fully established
       await new Promise(resolve => setTimeout(resolve, 100));
       
       const { data, error } = await supabase.functions.invoke('check-subscription', {
         headers: {
-          Authorization: `Bearer ${session.access_token}`,
+          Authorization: `Bearer ${sessionToUse.access_token}`,
         },
       });
 
@@ -101,7 +109,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
           // Delay subscription check to ensure session is fully established
           setTimeout(() => {
             console.log('User signed in successfully, checking subscription...');
-            refreshSubscription();
+            refreshSubscription(session);
           }, 1000); // Increased delay for OTP flow stability
         } else if (event === 'SIGNED_OUT') {
           // Only clear subscription data on actual logout, not during OTP flow
@@ -122,7 +130,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
       if (session?.user && session?.access_token) {
         setTimeout(() => {
           console.log('Initial session found, checking subscription...');
-          refreshSubscription();
+          refreshSubscription(session);
         }, 1000);
       }
     });

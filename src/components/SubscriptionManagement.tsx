@@ -128,7 +128,7 @@ const SubscriptionManagement = () => {
             <Button 
               variant="outline" 
               size="sm" 
-              onClick={refreshSubscription}
+              onClick={() => refreshSubscription()}
               className="ml-auto"
             >
               Refresh Status
