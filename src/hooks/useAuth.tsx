@@ -88,16 +88,22 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
         setUser(session?.user ?? null);
         setLoading(false);
         
-        // Handle subscription check for sign-in events
+        // Handle subscription check for successful sign-in events only
+        // Skip subscription checks for intermediate states during OTP flow
         if (event === 'SIGNED_IN' && session?.user && session?.access_token) {
           // Delay subscription check to ensure session is fully established
           setTimeout(() => {
-            console.log('User signed in, checking subscription...');
+            console.log('User signed in successfully, checking subscription...');
             refreshSubscription();
-          }, 500);
-        } else if (event === 'SIGNED_OUT' || !session?.user) {
-          // Clear subscription data when user logs out
-          setSubscriptionData({ subscribed: false });
+          }, 1000); // Increased delay for OTP flow stability
+        } else if (event === 'SIGNED_OUT') {
+          // Only clear subscription data on actual logout, not during OTP flow
+          // Check if this is a temporary sign-out for OTP by looking at the URL or state
+          const isOTPFlow = window.location.pathname.includes('/auth/login');
+          if (!isOTPFlow) {
+            console.log('User signed out, clearing subscription data');
+            setSubscriptionData({ subscribed: false });
+          }
         }
       }
     );
@@ -114,7 +120,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
         setTimeout(() => {
           console.log('Initial session found, checking subscription...');
           refreshSubscription();
-        }, 500);
+        }, 1000);
       }
     });
 
