@@ -13,6 +13,7 @@ interface AuthContextType {
   user: User | null;
   session: Session | null;
   loading: boolean;
+  subscriptionLoading: boolean;
   subscriptionData: SubscriptionData;
   signOut: () => Promise<void>;
   refreshSubscription: () => Promise<void>;
@@ -36,14 +37,17 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
   const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
+  const [subscriptionLoading, setSubscriptionLoading] = useState(true);
   const [subscriptionData, setSubscriptionData] = useState<SubscriptionData>({ subscribed: false });
 
   const refreshSubscription = async () => {
     if (!user || !session?.access_token) {
       console.log('Skipping subscription check - no user or session');
+      setSubscriptionLoading(false);
       return;
     }
     
+    setSubscriptionLoading(true);
     try {
       console.log('Subscription check attempt for user:', user.email);
       
@@ -59,6 +63,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
       if (error) {
         console.error('Subscription check error:', error);
         // Don't reset subscription data on error, keep existing state
+        setSubscriptionLoading(false);
         return;
       }
 
@@ -75,6 +80,8 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     } catch (error) {
       console.error('Error refreshing subscription:', error);
       // Don't reset subscription data on error, keep existing state
+    } finally {
+      setSubscriptionLoading(false);
     }
   };
 
@@ -134,6 +141,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     user,
     session,
     loading,
+    subscriptionLoading,
     subscriptionData,
     signOut,
     refreshSubscription,

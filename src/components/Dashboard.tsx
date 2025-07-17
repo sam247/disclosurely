@@ -52,7 +52,7 @@ interface DomainVerification {
 }
 
 const Dashboard = () => {
-  const { user, signOut, subscriptionData, refreshSubscription } = useAuth();
+  const { user, signOut, subscriptionData, subscriptionLoading, refreshSubscription } = useAuth();
   const { customDomain, organizationId, isCustomDomain, refreshDomainInfo } = useCustomDomain();
   const navigate = useNavigate();
   const { toast } = useToast();
@@ -146,13 +146,15 @@ const Dashboard = () => {
     console.log('Checking if should show subscription modal:', {
       user: !!user,
       loading,
+      subscriptionLoading,
       hasShownSubscriptionModal,
       subscribed: subscriptionData.subscribed,
       subscriptionStatus,
       isCheckingSubscription
     });
     
-    if (user && !loading && !hasShownSubscriptionModal && !subscriptionData.subscribed && !subscriptionStatus && !isCheckingSubscription) {
+    // Only check after both auth loading and subscription loading are complete
+    if (user && !loading && !subscriptionLoading && !hasShownSubscriptionModal && !subscriptionData.subscribed && !subscriptionStatus && !isCheckingSubscription) {
       // Show modal after a short delay to allow dashboard to load
       const timer = setTimeout(() => {
         console.log('Showing subscription modal for unsubscribed user');
@@ -161,7 +163,7 @@ const Dashboard = () => {
       }, 1500);
       return () => clearTimeout(timer);
     }
-  }, [user, loading, hasShownSubscriptionModal, subscriptionData.subscribed, isCheckingSubscription]);
+  }, [user, loading, subscriptionLoading, hasShownSubscriptionModal, subscriptionData.subscribed, isCheckingSubscription]);
 
   useEffect(() => {
     if (user && !loading) {
