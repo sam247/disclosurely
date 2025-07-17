@@ -98,12 +98,8 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
           }, 1000); // Increased delay for OTP flow stability
         } else if (event === 'SIGNED_OUT') {
           // Only clear subscription data on actual logout, not during OTP flow
-          // Check if this is a temporary sign-out for OTP by looking at the URL or state
-          const isOTPFlow = window.location.pathname.includes('/auth/login');
-          if (!isOTPFlow) {
-            console.log('User signed out, clearing subscription data');
-            setSubscriptionData({ subscribed: false });
-          }
+          // Don't clear subscription data during intermediate auth states
+          console.log('Sign out event detected, preserving subscription data during auth flow');
         }
       }
     );
