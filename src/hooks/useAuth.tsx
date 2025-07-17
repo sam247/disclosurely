@@ -39,14 +39,10 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
   const [subscriptionData, setSubscriptionData] = useState<SubscriptionData>({ subscribed: false });
 
   const refreshSubscription = async () => {
-    if (!user || !session?.access_token) {
-      console.log('No user or session, skipping subscription check');
-      setSubscriptionData({ subscribed: false });
-      return;
-    }
+    if (!user || !session?.access_token) return;
     
     try {
-      console.log('Subscription check attempt', new Date().toISOString(), 'for user:', user.email);
+      console.log('Subscription check attempt', new Date().toISOString());
       
       const { data, error } = await supabase.functions.invoke('check-subscription', {
         headers: {
@@ -56,76 +52,62 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
 
       if (error) {
         console.error('Subscription check error:', error);
-        // Don't reset to false immediately on error - could be temporary
+        setSubscriptionData({ subscribed: false });
         return;
       }
 
-      console.log('Raw subscription data received:', data);
+      console.log('Subscription data received from API:', data);
       
-      if (data) {
-        const mappedData = {
-          subscribed: Boolean(data.subscribed),
-          subscription_tier: data.subscription_tier || undefined,
-          subscription_end: data.subscription_end || undefined,
-        };
-        
-        console.log('Setting subscription data:', mappedData);
-        setSubscriptionData(mappedData);
-      }
+      const mappedData = {
+        subscribed: data?.subscribed || false,
+        subscription_tier: data?.subscription_tier || undefined,
+        subscription_end: data?.subscription_end || undefined,
+      };
+      
+      console.log('Mapped subscription data:', mappedData);
+      setSubscriptionData(mappedData);
     } catch (error) {
       console.error('Error refreshing subscription:', error);
-      // Don't reset subscription data on network errors
+      setSubscriptionData({ subscribed: false });
     }
   };
 
   useEffect(() => {
-    console.log('Setting up auth state listener...');
-    
     // Set up auth state listener
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (event, session) => {
-        console.log('Auth state changed:', event, session?.user?.email || 'no user');
+      (event, session) => {
+        console.log('Auth state changed:', event, session?.user?.email);
         setSession(session);
         setUser(session?.user ?? null);
         setLoading(false);
-        
-        // Handle subscription check based on event
-        if (event === 'SIGNED_IN' && session?.user) {
-          console.log('User signed in, will check subscription...');
-          // Small delay to ensure session is fully established
-          setTimeout(() => {
-            refreshSubscription();
-          }, 1000);
-        } else if (event === 'SIGNED_OUT') {
-          console.log('User signed out, clearing subscription data');
-          setSubscriptionData({ subscribed: false });
-        }
       }
     );
 
     // Get initial session
     supabase.auth.getSession().then(({ data: { session } }) => {
-      console.log('Initial session:', session?.user?.email || 'no user');
+      console.log('Initial session:', session?.user?.email);
       setSession(session);
       setUser(session?.user ?? null);
       setLoading(false);
-      
-      // If there's an initial session, check subscription
-      if (session?.user) {
-        console.log('Initial session found, checking subscription...');
-        setTimeout(() => {
-          refreshSubscription();
-        }, 1000);
-      }
     });
 
     return () => subscription.unsubscribe();
   }, []);
 
+  // Check subscription when user/session changes
+  useEffect(() => {
+    if (user && session?.access_token) {
+      console.log('User authenticated, checking subscription...');
+      refreshSubscription();
+    } else if (!user) {
+      // Clear subscription data when user logs out
+      setSubscriptionData({ subscribed: false });
+    }
+  }, [user?.id, session?.access_token]); // Only depend on user ID and access token
+
   const signOut = async () => {
-    console.log('Signing out...');
-    setSubscriptionData({ subscribed: false });
     await supabase.auth.signOut();
+    setSubscriptionData({ subscribed: false });
     // Redirect to main domain instead of app subdomain
     window.location.href = 'https://disclosurely.com';
   };
