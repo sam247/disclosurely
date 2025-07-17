@@ -1,19 +1,17 @@
 
 import { useState } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
-import OTPVerification from './OTPVerification';
 
 const LoginForm = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [googleLoading, setGoogleLoading] = useState(false);
-  const [showOTP, setShowOTP] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
 
@@ -22,15 +20,14 @@ const LoginForm = () => {
     setLoading(true);
 
     try {
-      // First verify password
-      const { error: signInError } = await supabase.auth.signInWithPassword({
+      const { error } = await supabase.auth.signInWithPassword({
         email,
         password,
       });
 
-      if (signInError) {
+      if (error) {
         // Handle email not confirmed specifically
-        if (signInError.message.includes('Email not confirmed')) {
+        if (error.message.includes('Email not confirmed')) {
           toast({
             title: "Email Not Confirmed",
             description: "Please check your email and click the confirmation link before signing in. Check your spam folder if you don't see it.",
@@ -39,43 +36,20 @@ const LoginForm = () => {
         } else {
           toast({
             title: "Login Failed",
-            description: signInError.message,
+            description: error.message,
             variant: "destructive",
           });
         }
-        setLoading(false);
         return;
       }
 
-      // Sign out immediately after password verification
-      await supabase.auth.signOut();
-
-      // Send OTP for second factor - use the correct method for verification code only
-      const { error: otpError } = await supabase.auth.signInWithOtp({
-        email,
-        options: {
-          emailRedirectTo: undefined, // Prevent magic link
-          shouldCreateUser: false,
-          data: {
-            // This helps ensure it's treated as a verification code
-            verification: true
-          }
-        }
+      // Success - user is now authenticated
+      toast({
+        title: "Login Successful",
+        description: "Welcome back!",
       });
-
-      if (otpError) {
-        toast({
-          title: "Failed to Send Code",
-          description: otpError.message,
-          variant: "destructive",
-        });
-      } else {
-        toast({
-          title: "Code Sent",
-          description: "Please check your email for the 6-digit verification code",
-        });
-        setShowOTP(true);
-      }
+      
+      navigate('/dashboard');
     } catch (error) {
       toast({
         title: "Error",
@@ -87,16 +61,6 @@ const LoginForm = () => {
     }
   };
 
-  const handleOTPSuccess = () => {
-    setShowOTP(false);
-    navigate('/dashboard');
-  };
-
-  const handleBackToLogin = () => {
-    setShowOTP(false);
-    setEmail('');
-    setPassword('');
-  };
 
   const handleGoogleLogin = async () => {
     setGoogleLoading(true);
@@ -127,15 +91,6 @@ const LoginForm = () => {
     }
   };
 
-  if (showOTP) {
-    return (
-      <OTPVerification
-        email={email}
-        onSuccess={handleOTPSuccess}
-        onBack={handleBackToLogin}
-      />
-    );
-  }
 
   return (
     <div className="space-y-6">

@@ -6,8 +6,6 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } f
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 import { Cookie, Settings, X } from 'lucide-react';
-import { useAuth } from '@/hooks/useAuth';
-import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 
 interface CookiePreferences {
@@ -26,12 +24,11 @@ const CookieConsentBanner = () => {
   });
   const [loading, setLoading] = useState(false);
   
-  const { user } = useAuth();
   const { toast } = useToast();
 
   useEffect(() => {
     checkConsentStatus();
-  }, [user]);
+  }, []);
 
   const checkConsentStatus = async () => {
     // Check localStorage first for immediate response

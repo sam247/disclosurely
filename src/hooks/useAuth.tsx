@@ -39,10 +39,16 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
   const [subscriptionData, setSubscriptionData] = useState<SubscriptionData>({ subscribed: false });
 
   const refreshSubscription = async () => {
-    if (!user || !session?.access_token) return;
+    if (!user || !session?.access_token) {
+      console.log('Skipping subscription check - no user or session');
+      return;
+    }
     
     try {
-      console.log('Subscription check attempt', new Date().toISOString());
+      console.log('Subscription check attempt for user:', user.email);
+      
+      // Add a small delay to ensure session is fully established
+      await new Promise(resolve => setTimeout(resolve, 100));
       
       const { data, error } = await supabase.functions.invoke('check-subscription', {
         headers: {
@@ -52,7 +58,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
 
       if (error) {
         console.error('Subscription check error:', error);
-        setSubscriptionData({ subscribed: false });
+        // Don't reset subscription data on error, keep existing state
         return;
       }
 
@@ -68,7 +74,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
       setSubscriptionData(mappedData);
     } catch (error) {
       console.error('Error refreshing subscription:', error);
-      setSubscriptionData({ subscribed: false });
+      // Don't reset subscription data on error, keep existing state
     }
   };
 
@@ -77,9 +83,22 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       (event, session) => {
         console.log('Auth state changed:', event, session?.user?.email);
+        
         setSession(session);
         setUser(session?.user ?? null);
         setLoading(false);
+        
+        // Handle subscription check for sign-in events
+        if (event === 'SIGNED_IN' && session?.user && session?.access_token) {
+          // Delay subscription check to ensure session is fully established
+          setTimeout(() => {
+            console.log('User signed in, checking subscription...');
+            refreshSubscription();
+          }, 500);
+        } else if (event === 'SIGNED_OUT' || !session?.user) {
+          // Clear subscription data when user logs out
+          setSubscriptionData({ subscribed: false });
+        }
       }
     );
 
@@ -89,21 +108,18 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
       setSession(session);
       setUser(session?.user ?? null);
       setLoading(false);
+      
+      // Check subscription for existing session
+      if (session?.user && session?.access_token) {
+        setTimeout(() => {
+          console.log('Initial session found, checking subscription...');
+          refreshSubscription();
+        }, 500);
+      }
     });
 
     return () => subscription.unsubscribe();
   }, []);
-
-  // Check subscription when user/session changes
-  useEffect(() => {
-    if (user && session?.access_token) {
-      console.log('User authenticated, checking subscription...');
-      refreshSubscription();
-    } else if (!user) {
-      // Clear subscription data when user logs out
-      setSubscriptionData({ subscribed: false });
-    }
-  }, [user?.id, session?.access_token]); // Only depend on user ID and access token
 
   const signOut = async () => {
     await supabase.auth.signOut();
