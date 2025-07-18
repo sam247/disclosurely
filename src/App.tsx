@@ -1,95 +1,94 @@
 
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { Toaster } from '@/components/ui/toaster';
-import { AuthProvider } from '@/hooks/useAuth';
-import Index from '@/pages/Index';
-import Pricing from '@/pages/Pricing';
-import ComplianceSoftware from '@/pages/ComplianceSoftware';
-import VsWhistleblowerSoftware from '@/pages/VsWhistleblowerSoftware';
-import VsSpeakUp from '@/pages/VsSpeakUp';
-import Contact from '@/pages/Contact';
-import Login from '@/pages/Login';
-import Signup from '@/pages/Signup';
-import NotFound from '@/pages/NotFound';
-import Dashboard from '@/components/Dashboard';
-import DynamicSubmissionForm from '@/components/DynamicSubmissionForm';
-import ReportSuccess from '@/components/ReportSuccess';
-import ReportStatus from '@/components/ReportStatus';
-import SecureReportTool from '@/components/SecureReportTool';
-import AdminPanel from '@/components/AdminPanel';
-import ProtectedRoute from '@/components/ProtectedRoute';
-import CompanyStatusPage from '@/components/CompanyStatusPage';
-import CookieConsentBanner from '@/components/CookieConsentBanner';
-import SubdomainRedirect from '@/components/SubdomainRedirect';
-import './App.css';
+import { Toaster } from "@/components/ui/toaster";
+import { Toaster as Sonner } from "@/components/ui/sonner";
+import { TooltipProvider } from "@/components/ui/tooltip";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { useEffect } from "react";
+import Index from "./pages/Index";
+import Login from "./pages/Login";
+import Signup from "./pages/Signup";
+import Contact from "./pages/Contact";
+import Pricing from "./pages/Pricing";
+import NotFound from "./pages/NotFound";
+import ComplianceSoftware from "./pages/ComplianceSoftware";
+import VsSpeakUp from "./pages/VsSpeakUp";
+import VsWhistleblowerSoftware from "./pages/VsWhistleblowerSoftware";
+import WhistleblowerChat from "./pages/WhistleblowerChat";
+import AuthenticatedApp from "./components/AuthenticatedApp";
+import DynamicSubmissionForm from "./components/DynamicSubmissionForm";
+import ReportStatus from "./components/ReportStatus";
+import ReportSuccess from "./components/ReportSuccess";
+import CompanyStatusPage from "./components/CompanyStatusPage";
+import CookieConsentBanner from "./components/CookieConsentBanner";
+import SubdomainRedirect from "./components/SubdomainRedirect";
 
 const queryClient = new QueryClient();
 
 function App() {
+  useEffect(() => {
+    // Set security headers
+    const setSecurityHeaders = () => {
+      // Content Security Policy
+      const meta = document.createElement('meta');
+      meta.httpEquiv = 'Content-Security-Policy';
+      meta.content = "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://js.stripe.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; font-src 'self' https:; connect-src 'self' https:; frame-src 'self' https://js.stripe.com;";
+      document.head.appendChild(meta);
+
+      // X-Frame-Options
+      const frameOptions = document.createElement('meta');
+      frameOptions.httpEquiv = 'X-Frame-Options';
+      frameOptions.content = 'DENY';
+      document.head.appendChild(frameOptions);
+
+      // X-Content-Type-Options
+      const contentType = document.createElement('meta');
+      contentType.httpEquiv = 'X-Content-Type-Options';
+      contentType.content = 'nosniff';
+      document.head.appendChild(contentType);
+    };
+
+    setSecurityHeaders();
+  }, []);
+
   return (
     <QueryClientProvider client={queryClient}>
-      <AuthProvider>
-        <Router>
-          <div className="App">
-            <Routes>
-              {/* Public routes */}
-              <Route path="/" element={<Index />} />
-              <Route path="/pricing" element={<Pricing />} />
-              <Route path="/compliance-software" element={<ComplianceSoftware />} />
-              <Route path="/vs-whistleblower-software" element={<VsWhistleblowerSoftware />} />
-              <Route path="/vs-speak-up" element={<VsSpeakUp />} />
-              <Route path="/contact" element={<Contact />} />
-              <Route path="/auth/login" element={
-                <SubdomainRedirect targetPath="/auth/login">
-                  <Login />
-                </SubdomainRedirect>
-              } />
-              <Route path="/auth/signup" element={
-                <SubdomainRedirect targetPath="/auth/signup">
-                  <Signup />
-                </SubdomainRedirect>
-              } />
-              
-              {/* Public submission routes */}
-              <Route path="/secure/tool" element={<SecureReportTool />} />
-              <Route path="/secure/tool/submit/:linkToken" element={<DynamicSubmissionForm />} />
-              <Route path="/secure/tool/submit/:linkToken/status" element={<CompanyStatusPage />} />
-              <Route path="/secure/tool/success" element={<ReportSuccess />} />
-              <Route path="/secure/tool/messages" element={<ReportStatus />} />
-              
-              {/* Protected routes */}
-              <Route 
-                path="/dashboard" 
-                element={
-                  <SubdomainRedirect targetPath="/dashboard">
-                    <ProtectedRoute>
-                      <Dashboard />
-                    </ProtectedRoute>
-                  </SubdomainRedirect>
-                } 
-              />
-              
-              {/* Admin routes */}
-              <Route 
-                path="/admin" 
-                element={
-                  <SubdomainRedirect targetPath="/admin">
-                    <ProtectedRoute>
-                      <AdminPanel />
-                    </ProtectedRoute>
-                  </SubdomainRedirect>
-                } 
-              />
-              
-              {/* 404 route */}
-              <Route path="*" element={<NotFound />} />
-            </Routes>
-            <Toaster />
-            <CookieConsentBanner />
-          </div>
-        </Router>
-      </AuthProvider>
+      <TooltipProvider>
+        <Toaster />
+        <Sonner />
+        <BrowserRouter>
+          <SubdomainRedirect />
+          <CookieConsentBanner />
+          <Routes>
+            {/* Public routes */}
+            <Route path="/" element={<Index />} />
+            <Route path="/login" element={<Login />} />
+            <Route path="/signup" element={<Signup />} />
+            <Route path="/contact" element={<Contact />} />
+            <Route path="/pricing" element={<Pricing />} />
+            <Route path="/compliance-software" element={<ComplianceSoftware />} />
+            <Route path="/vs-speakup" element={<VsSpeakUp />} />
+            <Route path="/vs-whistleblower-software" element={<VsWhistleblowerSoftware />} />
+            
+            {/* Whistleblower communication */}
+            <Route path="/chat" element={<WhistleblowerChat />} />
+            
+            {/* Report submission routes */}
+            <Route path="/secure/tool/submit/:linkToken" element={<DynamicSubmissionForm />} />
+            <Route path="/secure/tool/submit/:linkToken/status" element={<ReportStatus />} />
+            <Route path="/secure/tool/success" element={<ReportSuccess />} />
+            
+            {/* Company status page */}
+            <Route path="/company/:domain/status" element={<CompanyStatusPage />} />
+            
+            {/* Protected routes */}
+            <Route path="/dashboard/*" element={<AuthenticatedApp />} />
+            
+            {/* 404 */}
+            <Route path="*" element={<NotFound />} />
+          </Routes>
+        </BrowserRouter>
+      </TooltipProvider>
     </QueryClientProvider>
   );
 }

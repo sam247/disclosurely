@@ -44,10 +44,34 @@ const ReportMessaging = ({ report, onClose }: ReportMessagingProps) => {
 
   useEffect(() => {
     fetchMessages();
+    
+    // Set up real-time subscription for new messages
+    const channel = supabase
+      .channel('report-messages')
+      .on(
+        'postgres_changes',
+        {
+          event: 'INSERT',
+          schema: 'public',
+          table: 'report_messages',
+          filter: `report_id=eq.${report.id}`,
+        },
+        (payload) => {
+          console.log('New message received:', payload.new);
+          setMessages(prev => [...prev, payload.new as Message]);
+        }
+      )
+      .subscribe();
+
+    return () => {
+      channel.unsubscribe();
+    };
   }, [report.id]);
 
   const fetchMessages = async () => {
     try {
+      console.log('Fetching messages for report:', report.id);
+      
       const { data, error } = await supabase
         .from('report_messages')
         .select('*')
@@ -64,6 +88,7 @@ const ReportMessaging = ({ report, onClose }: ReportMessagingProps) => {
         return;
       }
 
+      console.log('Messages loaded:', data);
       setMessages(data || []);
     } catch (error) {
       console.error('Error fetching messages:', error);
@@ -85,13 +110,15 @@ const ReportMessaging = ({ report, onClose }: ReportMessagingProps) => {
     setIsSending(true);
 
     try {
+      console.log('Sending message for report:', report.id);
+      
       const { error } = await supabase
         .from('report_messages')
         .insert({
           report_id: report.id,
           sender_type: 'organization',
           encrypted_message: newMessage.trim(),
-          sender_id: null // Will be populated by RLS/auth context
+          sender_id: null // Will be populated by RLS/auth context if authenticated
         });
 
       if (error) {
@@ -99,6 +126,8 @@ const ReportMessaging = ({ report, onClose }: ReportMessagingProps) => {
         throw error;
       }
 
+      console.log('Message sent successfully');
+      
       toast({
         title: "Success",
         description: "Message sent successfully",
@@ -116,6 +145,13 @@ const ReportMessaging = ({ report, onClose }: ReportMessagingProps) => {
       });
     } finally {
       setIsSending(false);
+    }
+  };
+
+  const handleKeyPress = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      sendMessage();
     }
   };
 
@@ -176,7 +212,7 @@ const ReportMessaging = ({ report, onClose }: ReportMessagingProps) => {
                     {new Date(message.created_at).toLocaleString()}
                   </span>
                 </div>
-                <p className="text-sm">{message.encrypted_message}</p>
+                <p className="text-sm whitespace-pre-wrap">{message.encrypted_message}</p>
               </div>
             ))
           )}
@@ -189,8 +225,10 @@ const ReportMessaging = ({ report, onClose }: ReportMessagingProps) => {
             id="newMessage"
             value={newMessage}
             onChange={(e) => setNewMessage(e.target.value)}
-            placeholder="Type your message to the whistleblower..."
+            onKeyPress={handleKeyPress}
+            placeholder="Type your message to the whistleblower... (Press Enter to send, Shift+Enter for new line)"
             rows={3}
+            disabled={isSending}
           />
           <div className="flex items-center justify-between">
             <div className="flex items-center text-sm text-gray-500">
