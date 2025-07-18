@@ -60,6 +60,28 @@ const DynamicSubmissionForm = () => {
     fetchLinkData();
   }, [linkToken]);
 
+  // Function to validate organization link using the new diagnostic function
+  const validateOrganizationLink = async (linkId: string) => {
+    try {
+      console.log('Validating organization link:', linkId);
+      const { data, error } = await supabase.rpc('validate_organization_link', { 
+        link_id: linkId 
+      });
+
+      if (error) {
+        console.error('Link validation error:', error);
+        return { valid: false, reason: 'Validation failed: ' + error.message };
+      }
+
+      const result = data && data.length > 0 ? data[0] : { valid: false, reason: 'No validation result' };
+      console.log('Link Validation Result:', result);
+      return result;
+    } catch (error) {
+      console.error('Link validation exception:', error);
+      return { valid: false, reason: 'Validation exception occurred' };
+    }
+  };
+
   const fetchLinkData = async () => {
     if (!linkToken) {
       navigate('/404');
@@ -121,6 +143,19 @@ const DynamicSubmissionForm = () => {
       }
 
       console.log('Link found:', linkInfo);
+
+      // Validate the link using the new diagnostic function
+      const linkValidation = await validateOrganizationLink(linkInfo.id);
+      if (!linkValidation.valid) {
+        console.error('Link validation failed:', linkValidation.reason);
+        toast({
+          title: "Link not available",
+          description: `This submission link is not available: ${linkValidation.reason}`,
+          variant: "destructive",
+        });
+        navigate('/404');
+        return;
+      }
 
       setLinkData({
         id: linkInfo.id,
@@ -207,6 +242,13 @@ const DynamicSubmissionForm = () => {
     setSubmitting(true);
 
     try {
+      // Pre-validate the link before submission
+      console.log('Pre-validating link before submission...');
+      const linkValidation = await validateOrganizationLink(linkData.id);
+      if (!linkValidation.valid) {
+        throw new Error(`Link validation failed: ${linkValidation.reason}`);
+      }
+
       const trackingId = generateTrackingId();
       const finalCategory = getFinalCategory();
       
