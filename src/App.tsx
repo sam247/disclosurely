@@ -57,36 +57,37 @@ function App() {
         <Toaster />
         <Sonner />
         <BrowserRouter>
-          <SubdomainRedirect />
-          <CookieConsentBanner />
-          <Routes>
-            {/* Public routes */}
-            <Route path="/" element={<Index />} />
-            <Route path="/login" element={<Login />} />
-            <Route path="/signup" element={<Signup />} />
-            <Route path="/contact" element={<Contact />} />
-            <Route path="/pricing" element={<Pricing />} />
-            <Route path="/compliance-software" element={<ComplianceSoftware />} />
-            <Route path="/vs-speakup" element={<VsSpeakUp />} />
-            <Route path="/vs-whistleblower-software" element={<VsWhistleblowerSoftware />} />
-            
-            {/* Whistleblower communication */}
-            <Route path="/chat" element={<WhistleblowerChat />} />
-            
-            {/* Report submission routes */}
-            <Route path="/secure/tool/submit/:linkToken" element={<DynamicSubmissionForm />} />
-            <Route path="/secure/tool/submit/:linkToken/status" element={<ReportStatus />} />
-            <Route path="/secure/tool/success" element={<ReportSuccess />} />
-            
-            {/* Company status page */}
-            <Route path="/company/:domain/status" element={<CompanyStatusPage />} />
-            
-            {/* Protected routes */}
-            <Route path="/dashboard/*" element={<AuthenticatedApp />} />
-            
-            {/* 404 */}
-            <Route path="*" element={<NotFound />} />
-          </Routes>
+          <SubdomainRedirect targetPath="/dashboard">
+            <CookieConsentBanner />
+            <Routes>
+              {/* Public routes */}
+              <Route path="/" element={<Index />} />
+              <Route path="/login" element={<Login />} />
+              <Route path="/signup" element={<Signup />} />
+              <Route path="/contact" element={<Contact />} />
+              <Route path="/pricing" element={<Pricing />} />
+              <Route path="/compliance-software" element={<ComplianceSoftware />} />
+              <Route path="/vs-speakup" element={<VsSpeakUp />} />
+              <Route path="/vs-whistleblower-software" element={<VsWhistleblowerSoftware />} />
+              
+              {/* Whistleblower communication */}
+              <Route path="/chat" element={<WhistleblowerChat />} />
+              
+              {/* Report submission routes */}
+              <Route path="/secure/tool/submit/:linkToken" element={<DynamicSubmissionForm />} />
+              <Route path="/secure/tool/submit/:linkToken/status" element={<ReportStatus />} />
+              <Route path="/secure/tool/success" element={<ReportSuccess />} />
+              
+              {/* Company status page */}
+              <Route path="/company/:domain/status" element={<CompanyStatusPage />} />
+              
+              {/* Protected routes */}
+              <Route path="/dashboard/*" element={<AuthenticatedApp />} />
+              
+              {/* 404 */}
+              <Route path="*" element={<NotFound />} />
+            </Routes>
+          </SubdomainRedirect>
         </BrowserRouter>
       </TooltipProvider>
     </QueryClientProvider>
