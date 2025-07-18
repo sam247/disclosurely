@@ -1108,6 +1108,10 @@ export type Database = {
         }
         Returns: boolean
       }
+      validate_organization_link: {
+        Args: { link_id: string }
+        Returns: boolean
+      }
     }
     Enums: {
       report_status:
