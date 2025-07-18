@@ -210,10 +210,11 @@ const DynamicSubmissionForm = () => {
       const trackingId = generateTrackingId();
       const finalCategory = getFinalCategory();
       
-      console.log('Submitting report:', {
+      console.log('Submitting report with data:', {
         title: formData.title,
         organizationId: linkData.organization_id,
         linkId: linkData.id,
+        trackingId,
         isAnonymous,
         priority: formData.priority,
         category: finalCategory
@@ -229,7 +230,7 @@ const DynamicSubmissionForm = () => {
 
       const { encryptedData, keyHash } = encryptReport(reportData, linkData.organization_id);
 
-      // Create the report with proper link validation
+      // Create the report - the database trigger will handle usage count increment
       const { data: report, error: reportError } = await supabase
         .from('reports')
         .insert({
@@ -240,7 +241,7 @@ const DynamicSubmissionForm = () => {
           encryption_key_hash: keyHash,
           report_type: isAnonymous ? 'anonymous' : 'confidential',
           submitted_by_email: isAnonymous ? null : formData.submitter_email,
-          submitted_via_link_id: linkData.id, // This is crucial for RLS
+          submitted_via_link_id: linkData.id,
           status: 'new',
           priority: formData.priority,
           tags: [finalCategory]
@@ -251,14 +252,18 @@ const DynamicSubmissionForm = () => {
       if (reportError) {
         console.error('Report submission error:', reportError);
         
-        // Provide more specific error messages
+        // Provide more specific error messages based on error codes
+        let errorMessage = 'Failed to submit report. Please try again.';
+        
         if (reportError.code === '42501') {
-          throw new Error('Permission denied. Please check that the submission link is still active.');
+          errorMessage = 'Permission denied. The submission link may be inactive or expired.';
         } else if (reportError.code === '23503') {
-          throw new Error('Invalid submission link. Please contact the organization for a new link.');
-        } else {
-          throw new Error(reportError.message || 'Failed to submit report');
+          errorMessage = 'Invalid submission link. Please contact the organization for a new link.';
+        } else if (reportError.message) {
+          errorMessage = reportError.message;
         }
+        
+        throw new Error(errorMessage);
       }
 
       console.log('Report created successfully:', report);
@@ -279,25 +284,7 @@ const DynamicSubmissionForm = () => {
             description: `Report submitted successfully, but ${failedUploads.length} file(s) failed to upload.`,
             variant: "destructive",
           });
-        } else {
-          console.log('All files uploaded successfully');
         }
-      }
-
-      // Update link usage count
-      const { data: currentLink } = await supabase
-        .from('organization_links')
-        .select('usage_count')
-        .eq('id', linkData.id)
-        .single();
-
-      if (currentLink) {
-        await supabase
-          .from('organization_links')
-          .update({ 
-            usage_count: (currentLink.usage_count || 0) + 1
-          })
-          .eq('id', linkData.id);
       }
 
       // Determine success page URL based on current domain
