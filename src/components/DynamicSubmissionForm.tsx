@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -228,7 +229,7 @@ const DynamicSubmissionForm = () => {
 
       const { encryptedData, keyHash } = encryptReport(reportData, linkData.organization_id);
 
-      // Create the report
+      // Create the report - ensure we're using the anon key properly
       const { data: report, error: reportError } = await supabase
         .from('reports')
         .insert({
@@ -249,7 +250,15 @@ const DynamicSubmissionForm = () => {
 
       if (reportError) {
         console.error('Report submission error:', reportError);
-        throw reportError;
+        
+        // Provide more specific error messages
+        if (reportError.code === '42501') {
+          throw new Error('Permission denied. Please check that the submission link is still active.');
+        } else if (reportError.code === '23503') {
+          throw new Error('Invalid submission link. Please contact the organization for a new link.');
+        } else {
+          throw new Error(reportError.message || 'Failed to submit report');
+        }
       }
 
       console.log('Report created successfully:', report);

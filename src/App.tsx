@@ -1,11 +1,11 @@
 
 
+
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
-import { useEffect } from "react";
 import Index from "./pages/Index";
 import Login from "./pages/Login";
 import Signup from "./pages/Signup";
@@ -27,31 +27,6 @@ import SubdomainRedirect from "./components/SubdomainRedirect";
 const queryClient = new QueryClient();
 
 function App() {
-  useEffect(() => {
-    // Set security headers
-    const setSecurityHeaders = () => {
-      // Content Security Policy
-      const meta = document.createElement('meta');
-      meta.httpEquiv = 'Content-Security-Policy';
-      meta.content = "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://js.stripe.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; font-src 'self' https:; connect-src 'self' https:; frame-src 'self' https://js.stripe.com;";
-      document.head.appendChild(meta);
-
-      // X-Frame-Options
-      const frameOptions = document.createElement('meta');
-      frameOptions.httpEquiv = 'X-Frame-Options';
-      frameOptions.content = 'DENY';
-      document.head.appendChild(frameOptions);
-
-      // X-Content-Type-Options
-      const contentType = document.createElement('meta');
-      contentType.httpEquiv = 'X-Content-Type-Options';
-      contentType.content = 'nosniff';
-      document.head.appendChild(contentType);
-    };
-
-    setSecurityHeaders();
-  }, []);
-
   return (
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
@@ -98,4 +73,3 @@ function App() {
 }
 
 export default App;
-
