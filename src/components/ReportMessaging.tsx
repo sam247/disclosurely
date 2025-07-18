@@ -58,7 +58,8 @@ const ReportMessaging = ({ report, onClose }: ReportMessagingProps) => {
         },
         (payload) => {
           console.log('New message received:', payload.new);
-          setMessages(prev => [...prev, payload.new as Message]);
+          const newMsg = payload.new as Message;
+          setMessages(prev => [...prev, newMsg]);
         }
       )
       .subscribe();
@@ -134,7 +135,7 @@ const ReportMessaging = ({ report, onClose }: ReportMessagingProps) => {
       });
 
       setNewMessage('');
-      await fetchMessages(); // Refresh messages
+      // Don't refresh messages here - let the real-time subscription handle it
 
     } catch (error) {
       console.error('Error sending message:', error);

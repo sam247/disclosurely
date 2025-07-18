@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -214,6 +213,7 @@ const DynamicSubmissionForm = () => {
       console.log('Submitting report:', {
         title: formData.title,
         organizationId: linkData.organization_id,
+        linkId: linkData.id,
         isAnonymous,
         priority: formData.priority,
         category: finalCategory
@@ -229,7 +229,7 @@ const DynamicSubmissionForm = () => {
 
       const { encryptedData, keyHash } = encryptReport(reportData, linkData.organization_id);
 
-      // Create the report - ensure we're using the anon key properly
+      // Create the report with proper link validation
       const { data: report, error: reportError } = await supabase
         .from('reports')
         .insert({
@@ -240,7 +240,7 @@ const DynamicSubmissionForm = () => {
           encryption_key_hash: keyHash,
           report_type: isAnonymous ? 'anonymous' : 'confidential',
           submitted_by_email: isAnonymous ? null : formData.submitter_email,
-          submitted_via_link_id: linkData.id,
+          submitted_via_link_id: linkData.id, // This is crucial for RLS
           status: 'new',
           priority: formData.priority,
           tags: [finalCategory]
