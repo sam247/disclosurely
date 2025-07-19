@@ -1110,7 +1110,10 @@ export type Database = {
       }
       validate_organization_link: {
         Args: { link_id: string }
-        Returns: boolean
+        Returns: {
+          valid: boolean
+          reason: string
+        }[]
       }
     }
     Enums: {

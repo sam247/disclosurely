@@ -61,12 +61,12 @@ const DynamicSubmissionForm = () => {
   }, [linkToken]);
 
   // Function to validate organization link using the new diagnostic function
-  const validateOrganizationLink = async (linkId: string) => {
+  const validateOrganizationLink = async (linkId: string): Promise<{ valid: boolean; reason: string }> => {
     try {
       console.log('Validating organization link:', linkId);
-      const { data, error } = await supabase.rpc('validate_organization_link', { 
-        link_id: linkId 
-      });
+      
+      const { data, error } = await supabase
+        .rpc('validate_organization_link', { link_id: linkId });
 
       if (error) {
         console.error('Link validation error:', error);
@@ -75,15 +75,23 @@ const DynamicSubmissionForm = () => {
 
       // Handle the response properly - data should be an array of objects with valid and reason properties
       if (!data || !Array.isArray(data) || data.length === 0) {
+        console.log('No validation result returned from RPC, data:', data);
         return { valid: false, reason: 'No validation result returned' };
       }
 
       const result = data[0];
       console.log('Link Validation Result:', result);
+      
+      // Ensure result has the expected properties
+      if (typeof result.valid !== 'boolean' || typeof result.reason !== 'string') {
+        console.error('Invalid validation result format:', result);
+        return { valid: false, reason: 'Invalid validation response format' };
+      }
+      
       return result;
     } catch (error) {
-      console.error('Link validation exception:', error);
-      return { valid: false, reason: 'Validation exception occurred' };
+      console.error('Unexpected validation error:', error);
+      return { valid: false, reason: 'Validation failed unexpectedly' };
     }
   };
 
