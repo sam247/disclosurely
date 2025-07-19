@@ -73,7 +73,12 @@ const DynamicSubmissionForm = () => {
         return { valid: false, reason: 'Validation failed: ' + error.message };
       }
 
-      const result = data && data.length > 0 ? data[0] : { valid: false, reason: 'No validation result' };
+      // Handle the response properly - data should be an array of objects with valid and reason properties
+      if (!data || !Array.isArray(data) || data.length === 0) {
+        return { valid: false, reason: 'No validation result returned' };
+      }
+
+      const result = data[0];
       console.log('Link Validation Result:', result);
       return result;
     } catch (error) {
