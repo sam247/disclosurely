@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -24,7 +24,15 @@ interface Report {
   organizations: {
     name: string;
     brand_color: string;
+    custom_logo_url?: string;
   };
+}
+
+interface OrganizationBranding {
+  name: string;
+  logo_url?: string;
+  custom_logo_url?: string;
+  brand_color: string;
 }
 
 interface Message {
@@ -42,6 +50,48 @@ const ReportStatus = () => {
   const [newMessage, setNewMessage] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [isSubmittingMessage, setIsSubmittingMessage] = useState(false);
+  const [organizationBranding, setOrganizationBranding] = useState<OrganizationBranding | null>(null);
+  const [linkToken, setLinkToken] = useState<string | null>(null);
+
+  useEffect(() => {
+    // Extract the link token from URL if present
+    const path = window.location.pathname;
+    const match = path.match(/\/secure\/tool\/submit\/([^\/]+)\/status/);
+    if (match) {
+      setLinkToken(match[1]);
+      fetchOrganizationBranding(match[1]);
+    }
+  }, []);
+
+  const fetchOrganizationBranding = async (token: string) => {
+    try {
+      const { data: linkInfo } = await supabase
+        .from('organization_links')
+        .select(`
+          organization_id,
+          organizations!inner(
+            name,
+            logo_url,
+            custom_logo_url,
+            brand_color
+          )
+        `)
+        .eq('link_token', token)
+        .eq('is_active', true)
+        .single();
+
+      if (linkInfo) {
+        setOrganizationBranding({
+          name: linkInfo.organizations.name,
+          logo_url: linkInfo.organizations.logo_url,
+          custom_logo_url: linkInfo.organizations.custom_logo_url,
+          brand_color: linkInfo.organizations.brand_color
+        });
+      }
+    } catch (error) {
+      console.error('Error fetching organization branding:', error);
+    }
+  };
 
   const handleLookup = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -172,15 +222,25 @@ const ReportStatus = () => {
       <header className="border-b bg-white/80 backdrop-blur-sm">
         <div className="container mx-auto px-4 py-4">
           <div className="flex items-center space-x-2">
-            {report ? (
+            {organizationBranding || report?.organizations ? (
               <>
-                <div 
-                  className="w-8 h-8 rounded-lg flex items-center justify-center"
-                  style={{ backgroundColor: report.organizations?.brand_color || '#2563eb' }}
-                >
-                  <Shield className="h-6 w-6 text-white" />
-                </div>
-                <span className="text-xl font-bold text-gray-900">{report.organizations?.name || 'Disclosurely'}</span>
+                {organizationBranding?.custom_logo_url || report?.organizations?.custom_logo_url ? (
+                  <img 
+                    src={organizationBranding?.custom_logo_url || report?.organizations?.custom_logo_url} 
+                    alt="Organization Logo" 
+                    className="h-8 w-8 object-contain rounded-lg"
+                  />
+                ) : (
+                  <div 
+                    className="w-8 h-8 rounded-lg flex items-center justify-center"
+                    style={{ backgroundColor: organizationBranding?.brand_color || report?.organizations?.brand_color || '#2563eb' }}
+                  >
+                    <Shield className="h-6 w-6 text-white" />
+                  </div>
+                )}
+                <span className="text-xl font-bold text-gray-900">
+                  {organizationBranding?.name || report?.organizations?.name || 'Disclosurely'}
+                </span>
                 <span className="text-sm text-gray-500 ml-4">Report Status Portal</span>
               </>
             ) : (
