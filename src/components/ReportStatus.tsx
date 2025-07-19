@@ -168,13 +168,28 @@ const ReportStatus = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100">
-      {/* Header */}
+      {/* Header with dynamic branding */}
       <header className="border-b bg-white/80 backdrop-blur-sm">
         <div className="container mx-auto px-4 py-4">
           <div className="flex items-center space-x-2">
-            <Shield className="h-8 w-8 text-blue-600" />
-            <span className="text-xl font-bold text-gray-900">Disclosurely</span>
-            <span className="text-sm text-gray-500 ml-4">Report Status Portal</span>
+            {report ? (
+              <>
+                <div 
+                  className="w-8 h-8 rounded-lg flex items-center justify-center"
+                  style={{ backgroundColor: report.organizations?.brand_color || '#2563eb' }}
+                >
+                  <Shield className="h-6 w-6 text-white" />
+                </div>
+                <span className="text-xl font-bold text-gray-900">{report.organizations?.name || 'Disclosurely'}</span>
+                <span className="text-sm text-gray-500 ml-4">Report Status Portal</span>
+              </>
+            ) : (
+              <>
+                <Shield className="h-8 w-8 text-blue-600" />
+                <span className="text-xl font-bold text-gray-900">Disclosurely</span>
+                <span className="text-sm text-gray-500 ml-4">Report Status Portal</span>
+              </>
+            )}
           </div>
         </div>
       </header>
