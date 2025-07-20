@@ -9,6 +9,7 @@ import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { Badge } from "@/components/ui/badge";
 import { Textarea } from "@/components/ui/textarea";
+import BrandedFormLayout from './BrandedFormLayout';
 
 interface Report {
   id: string;
@@ -217,56 +218,14 @@ const ReportStatus = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100">
-      {/* Header with Organization Branding - Copied exactly from DynamicSubmissionForm */}
-      <header className="bg-white shadow-sm border-t-4 w-full" style={{ borderTopColor: organizationBranding?.brand_color || '#2563eb' }}>
-        <div className="w-full px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between py-4 max-w-7xl mx-auto">
-            <div className="flex items-center">
-              <div className="flex items-center justify-center mr-4">
-                {organizationBranding?.custom_logo_url || organizationBranding?.logo_url ? (
-                  <img 
-                    src={organizationBranding.custom_logo_url || organizationBranding.logo_url} 
-                    alt={`${organizationBranding.name || 'Organization'} logo`}
-                    className="w-10 h-10 object-contain"
-                    onError={(e) => {
-                      const target = e.target as HTMLImageElement;
-                      target.style.display = 'none';
-                      target.nextElementSibling?.classList.remove('hidden');
-                    }}
-                  />
-                ) : (
-                  <div 
-                    className="w-10 h-10 rounded-lg flex items-center justify-center"
-                    style={{ backgroundColor: organizationBranding?.brand_color || '#2563eb' }}
-                  >
-                    <Shield className="h-6 w-6 text-white" />
-                  </div>
-                )}
-                {(organizationBranding?.custom_logo_url || organizationBranding?.logo_url) && (
-                  <div 
-                    className="w-10 h-10 rounded-lg flex items-center justify-center hidden"
-                    style={{ backgroundColor: organizationBranding?.brand_color || '#2563eb' }}
-                  >
-                    <Shield className="h-6 w-6 text-white" />
-                  </div>
-                )}
-              </div>
-              <div>
-                <h1 className="text-xl font-bold text-gray-900">{organizationBranding?.name || 'Organization'}</h1>
-                <p className="text-sm text-gray-600">Report Status Portal</p>
-              </div>
-            </div>
-          </div>
-        </div>
-      </header>
-
-      {/* Main content */}
-      <div className="container mx-auto px-4 py-8">
-        <div className="max-w-2xl mx-auto">
-          <Card>
-            <CardContent className="p-6">
-              <div className="space-y-6">
+    <BrandedFormLayout
+      title={organizationBranding?.name || 'Report Status Portal'}
+      description="Track and manage your secure report submissions"
+      organizationName={organizationBranding?.name}
+      logoUrl={organizationBranding?.custom_logo_url}
+      brandColor={organizationBranding?.brand_color}
+    >
+      <div className="space-y-6">
                 {/* Lookup Form */}
                 <Card>
                   <CardHeader>
@@ -402,12 +361,8 @@ const ReportStatus = () => {
                     </Card>
                   </div>
                 )}
-              </div>
-            </CardContent>
-          </Card>
-        </div>
       </div>
-    </div>
+    </BrandedFormLayout>
   );
 };
 

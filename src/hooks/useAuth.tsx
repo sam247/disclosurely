@@ -53,7 +53,12 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
       return;
     }
     
-    // Don't show loading state or reset subscription data during check
+    // Skip if we already have subscription data to avoid unnecessary calls
+    if (subscriptionData.subscribed && subscriptionData.subscription_tier) {
+      console.log('Subscription data already exists, skipping check');
+      return;
+    }
+    
     try {
       console.log('Subscription check attempt for user:', userToUse.email);
       
@@ -65,7 +70,10 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
 
       if (error) {
         console.error('Subscription check error:', error);
-        // Don't reset subscription data on error, keep existing state
+        // Only set basic data on error if we don't have any subscription data
+        if (!subscriptionData.subscribed) {
+          setSubscriptionData({ subscribed: false });
+        }
         return;
       }
 
@@ -81,7 +89,10 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
       setSubscriptionData(mappedData);
     } catch (error) {
       console.error('Error refreshing subscription:', error);
-      // Don't reset subscription data on error, keep existing state
+      // Only set basic data on error if we don't have any subscription data
+      if (!subscriptionData.subscribed) {
+        setSubscriptionData({ subscribed: false });
+      }
     }
   };
 
@@ -95,13 +106,13 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
         setUser(session?.user ?? null);
         setLoading(false);
         
-        // Only check subscription for successful sign-in events with valid session
-        if (event === 'SIGNED_IN' && session?.user && session?.access_token) {
-          // Delay subscription check slightly to ensure session is fully established
+        // Only check subscription for token refresh and sign in events, not during OTP process
+        if ((event === 'TOKEN_REFRESHED' || event === 'SIGNED_IN') && session?.user && session?.access_token) {
+          // Delay subscription check to ensure session is fully established
           setTimeout(() => {
-            console.log('User signed in successfully, checking subscription...');
+            console.log('Checking subscription after auth event:', event);
             refreshSubscription(session);
-          }, 500);
+          }, 100);
         } else if (event === 'SIGNED_OUT') {
           // Clear subscription data on actual logout
           setSubscriptionData({ subscribed: false });
@@ -110,19 +121,17 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
       }
     );
 
-    // Get initial session
+    // Get initial session and check subscription once
     supabase.auth.getSession().then(({ data: { session } }) => {
       console.log('Initial session:', session?.user?.email);
       setSession(session);
       setUser(session?.user ?? null);
       setLoading(false);
       
-      // Check subscription for existing session
-      if (session?.user && session?.access_token) {
-        setTimeout(() => {
-          console.log('Initial session found, checking subscription...');
-          refreshSubscription(session);
-        }, 500);
+      // Only check subscription if we have a valid session and no existing subscription data
+      if (session?.user && session?.access_token && !subscriptionData.subscribed) {
+        console.log('Initial session found, checking subscription...');
+        refreshSubscription(session);
       }
     });
 
