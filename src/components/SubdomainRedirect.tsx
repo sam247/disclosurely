@@ -8,10 +8,16 @@ interface SubdomainRedirectProps {
 const SubdomainRedirect = ({ targetPath, children }: SubdomainRedirectProps) => {
   useEffect(() => {
     const currentHost = window.location.hostname;
+    const currentPath = window.location.pathname;
     
-    // Only redirect if we're on disclosurely.com (not app.disclosurely.com or localhost)
-    if (currentHost === 'disclosurely.com') {
-      const newUrl = `https://app.disclosurely.com${targetPath}`;
+    // Only redirect to app subdomain for specific auth and dashboard paths
+    // Don't redirect the main site to app subdomain automatically
+    if (currentHost === 'disclosurely.com' && 
+        (currentPath.startsWith('/dashboard') || 
+         currentPath.startsWith('/auth/') || 
+         currentPath === '/login' || 
+         currentPath === '/signup')) {
+      const newUrl = `https://app.disclosurely.com${currentPath}`;
       window.location.href = newUrl;
       return;
     }

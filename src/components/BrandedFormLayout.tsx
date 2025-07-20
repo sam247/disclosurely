@@ -39,13 +39,22 @@ const BrandedFormLayout = ({
                       target.nextElementSibling?.classList.remove('hidden');
                     }}
                   />
-                ) : null}
-                <div 
-                  className={`w-10 h-10 rounded-lg flex items-center justify-center ${logoUrl ? 'hidden' : ''}`}
-                  style={{ backgroundColor: brandColor }}
-                >
-                  <Shield className="h-6 w-6 text-white" />
-                </div>
+                ) : (
+                  <div 
+                    className="w-10 h-10 rounded-lg flex items-center justify-center"
+                    style={{ backgroundColor: brandColor }}
+                  >
+                    <Shield className="h-6 w-6 text-white" />
+                  </div>
+                )}
+                {logoUrl && (
+                  <div 
+                    className="w-10 h-10 rounded-lg flex items-center justify-center hidden"
+                    style={{ backgroundColor: brandColor }}
+                  >
+                    <Shield className="h-6 w-6 text-white" />
+                  </div>
+                )}
               </div>
               <div>
                 <h1 className="text-xl font-bold text-gray-900">{organizationName || 'Organization'}</h1>
