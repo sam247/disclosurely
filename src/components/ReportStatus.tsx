@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -8,7 +9,6 @@ import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { Badge } from "@/components/ui/badge";
 import { Textarea } from "@/components/ui/textarea";
-import BrandedFormLayout from "./BrandedFormLayout";
 
 interface Report {
   id: string;
@@ -217,151 +217,197 @@ const ReportStatus = () => {
   };
 
   return (
-    <BrandedFormLayout
-      title="Report Status Portal"
-      description="Check your report status and communicate securely"
-      organizationName={organizationBranding?.name}
-      logoUrl={organizationBranding?.custom_logo_url || organizationBranding?.logo_url}
-      brandColor={organizationBranding?.brand_color}
-    >
-      <div className="space-y-6">
-        {/* Lookup Form */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center space-x-2">
-              <Search className="h-5 w-5 text-blue-600" />
-              <span>Check Report Status</span>
-            </CardTitle>
-            <CardDescription>
-              Enter your tracking ID to view your report status and communicate securely.
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <form onSubmit={handleLookup} className="space-y-4">
-              <div>
-                <Label htmlFor="trackingId">Tracking ID</Label>
-                <Input
-                  id="trackingId"
-                  value={trackingId}
-                  onChange={(e) => setTrackingId(e.target.value)}
-                  placeholder="WB-XXXXXXXX"
-                  required
-                />
-                <p className="text-sm text-gray-500 mt-1">
-                  Use the tracking ID provided when you submitted your report
-                </p>
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100">
+      {/* Header with Organization Branding - Copied exactly from DynamicSubmissionForm */}
+      <header className="bg-white shadow-sm border-t-4 w-full" style={{ borderTopColor: organizationBranding?.brand_color || '#2563eb' }}>
+        <div className="w-full px-4 sm:px-6 lg:px-8">
+          <div className="flex items-center justify-between py-4 max-w-7xl mx-auto">
+            <div className="flex items-center">
+              <div className="flex items-center justify-center mr-4">
+                {organizationBranding?.custom_logo_url || organizationBranding?.logo_url ? (
+                  <img 
+                    src={organizationBranding.custom_logo_url || organizationBranding.logo_url} 
+                    alt={`${organizationBranding.name || 'Organization'} logo`}
+                    className="w-10 h-10 object-contain"
+                    onError={(e) => {
+                      const target = e.target as HTMLImageElement;
+                      target.style.display = 'none';
+                      target.nextElementSibling?.classList.remove('hidden');
+                    }}
+                  />
+                ) : (
+                  <div 
+                    className="w-10 h-10 rounded-lg flex items-center justify-center"
+                    style={{ backgroundColor: organizationBranding?.brand_color || '#2563eb' }}
+                  >
+                    <Shield className="h-6 w-6 text-white" />
+                  </div>
+                )}
+                {(organizationBranding?.custom_logo_url || organizationBranding?.logo_url) && (
+                  <div 
+                    className="w-10 h-10 rounded-lg flex items-center justify-center hidden"
+                    style={{ backgroundColor: organizationBranding?.brand_color || '#2563eb' }}
+                  >
+                    <Shield className="h-6 w-6 text-white" />
+                  </div>
+                )}
               </div>
-              <Button type="submit" disabled={isLoading}>
-                {isLoading ? "Looking up..." : "Check Status"}
-              </Button>
-            </form>
-          </CardContent>
-        </Card>
-
-        {/* Report Details */}
-        {report && (
-          <div className="space-y-6">
-            <Card>
-              <CardHeader>
-                <div className="flex justify-between items-start">
-                  <div>
-                    <CardTitle>{report.title}</CardTitle>
-                    <CardDescription>
-                      Submitted to {report.organizations?.name} on{" "}
-                      {new Date(report.created_at).toLocaleDateString()}
-                    </CardDescription>
-                  </div>
-                  <Badge className={getStatusColor(report.status)}>
-                    {formatStatus(report.status)}
-                  </Badge>
-                </div>
-              </CardHeader>
-              <CardContent>
-                <div className="grid md:grid-cols-2 gap-4">
-                  <div>
-                    <p className="text-sm font-medium text-gray-500">Tracking ID</p>
-                    <p className="font-mono">{report.tracking_id}</p>
-                  </div>
-                  <div>
-                    <p className="text-sm font-medium text-gray-500">Priority</p>
-                    <p>Level {report.priority}</p>
-                  </div>
-                  <div>
-                    <p className="text-sm font-medium text-gray-500">Report Type</p>
-                    <p className="capitalize">{report.report_type}</p>
-                  </div>
-                  <div>
-                    <p className="text-sm font-medium text-gray-500">Last Updated</p>
-                    <p>{new Date(report.updated_at).toLocaleDateString()}</p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* Messages */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center space-x-2">
-                  <MessageSquare className="h-5 w-5 text-blue-600" />
-                  <span>Secure Communication</span>
-                </CardTitle>
-                <CardDescription>
-                  Communicate securely with the case handler assigned to your report.
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4 mb-6">
-                  {messages.length === 0 ? (
-                    <div className="text-center py-8 text-gray-500">
-                      <Clock className="h-8 w-8 mx-auto mb-2 opacity-50" />
-                      <p>No messages yet. Your case handler will respond soon.</p>
-                    </div>
-                  ) : (
-                    messages.map((message) => (
-                      <div
-                        key={message.id}
-                        className={`p-4 rounded-lg ${
-                          message.sender_type === "whistleblower"
-                            ? "bg-blue-50 ml-8"
-                            : "bg-gray-50 mr-8"
-                        }`}
-                      >
-                        <div className="flex justify-between items-start mb-2">
-                          <span className="text-sm font-medium">
-                            {message.sender_type === "whistleblower" ? "You" : "Case Handler"}
-                          </span>
-                          <span className="text-xs text-gray-500">
-                            {new Date(message.created_at).toLocaleString()}
-                          </span>
-                        </div>
-                        <p className="text-sm">{message.encrypted_message}</p>
-                      </div>
-                    ))
-                  )}
-                </div>
-
-                {/* Send Message Form */}
-                <form onSubmit={handleSendMessage} className="space-y-4">
-                  <div>
-                    <Label htmlFor="newMessage">Send a message</Label>
-                    <Textarea
-                      id="newMessage"
-                      value={newMessage}
-                      onChange={(e) => setNewMessage(e.target.value)}
-                      placeholder="Type your message here..."
-                      rows={3}
-                    />
-                  </div>
-                  <Button type="submit" disabled={isSubmittingMessage || !newMessage.trim()}>
-                    {isSubmittingMessage ? "Sending..." : "Send Message"}
-                  </Button>
-                </form>
-              </CardContent>
-            </Card>
+              <div>
+                <h1 className="text-xl font-bold text-gray-900">{organizationBranding?.name || 'Organization'}</h1>
+                <p className="text-sm text-gray-600">Report Status Portal</p>
+              </div>
+            </div>
           </div>
-        )}
+        </div>
+      </header>
+
+      {/* Main content */}
+      <div className="container mx-auto px-4 py-8">
+        <div className="max-w-2xl mx-auto">
+          <Card>
+            <CardContent className="p-6">
+              <div className="space-y-6">
+                {/* Lookup Form */}
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center space-x-2">
+                      <Search className="h-5 w-5 text-blue-600" />
+                      <span>Check Report Status</span>
+                    </CardTitle>
+                    <CardDescription>
+                      Enter your tracking ID to view your report status and communicate securely.
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <form onSubmit={handleLookup} className="space-y-4">
+                      <div>
+                        <Label htmlFor="trackingId">Tracking ID</Label>
+                        <Input
+                          id="trackingId"
+                          value={trackingId}
+                          onChange={(e) => setTrackingId(e.target.value)}
+                          placeholder="WB-XXXXXXXX"
+                          required
+                        />
+                        <p className="text-sm text-gray-500 mt-1">
+                          Use the tracking ID provided when you submitted your report
+                        </p>
+                      </div>
+                      <Button type="submit" disabled={isLoading}>
+                        {isLoading ? "Looking up..." : "Check Status"}
+                      </Button>
+                    </form>
+                  </CardContent>
+                </Card>
+
+                {/* Report Details */}
+                {report && (
+                  <div className="space-y-6">
+                    <Card>
+                      <CardHeader>
+                        <div className="flex justify-between items-start">
+                          <div>
+                            <CardTitle>{report.title}</CardTitle>
+                            <CardDescription>
+                              Submitted to {report.organizations?.name} on{" "}
+                              {new Date(report.created_at).toLocaleDateString()}
+                            </CardDescription>
+                          </div>
+                          <Badge className={getStatusColor(report.status)}>
+                            {formatStatus(report.status)}
+                          </Badge>
+                        </div>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="grid md:grid-cols-2 gap-4">
+                          <div>
+                            <p className="text-sm font-medium text-gray-500">Tracking ID</p>
+                            <p className="font-mono">{report.tracking_id}</p>
+                          </div>
+                          <div>
+                            <p className="text-sm font-medium text-gray-500">Priority</p>
+                            <p>Level {report.priority}</p>
+                          </div>
+                          <div>
+                            <p className="text-sm font-medium text-gray-500">Report Type</p>
+                            <p className="capitalize">{report.report_type}</p>
+                          </div>
+                          <div>
+                            <p className="text-sm font-medium text-gray-500">Last Updated</p>
+                            <p>{new Date(report.updated_at).toLocaleDateString()}</p>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    {/* Messages */}
+                    <Card>
+                      <CardHeader>
+                        <CardTitle className="flex items-center space-x-2">
+                          <MessageSquare className="h-5 w-5 text-blue-600" />
+                          <span>Secure Communication</span>
+                        </CardTitle>
+                        <CardDescription>
+                          Communicate securely with the case handler assigned to your report.
+                        </CardDescription>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="space-y-4 mb-6">
+                          {messages.length === 0 ? (
+                            <div className="text-center py-8 text-gray-500">
+                              <Clock className="h-8 w-8 mx-auto mb-2 opacity-50" />
+                              <p>No messages yet. Your case handler will respond soon.</p>
+                            </div>
+                          ) : (
+                            messages.map((message) => (
+                              <div
+                                key={message.id}
+                                className={`p-4 rounded-lg ${
+                                  message.sender_type === "whistleblower"
+                                    ? "bg-blue-50 ml-8"
+                                    : "bg-gray-50 mr-8"
+                                }`}
+                              >
+                                <div className="flex justify-between items-start mb-2">
+                                  <span className="text-sm font-medium">
+                                    {message.sender_type === "whistleblower" ? "You" : "Case Handler"}
+                                  </span>
+                                  <span className="text-xs text-gray-500">
+                                    {new Date(message.created_at).toLocaleString()}
+                                  </span>
+                                </div>
+                                <p className="text-sm">{message.encrypted_message}</p>
+                              </div>
+                            ))
+                          )}
+                        </div>
+
+                        {/* Send Message Form */}
+                        <form onSubmit={handleSendMessage} className="space-y-4">
+                          <div>
+                            <Label htmlFor="newMessage">Send a message</Label>
+                            <Textarea
+                              id="newMessage"
+                              value={newMessage}
+                              onChange={(e) => setNewMessage(e.target.value)}
+                              placeholder="Type your message here..."
+                              rows={3}
+                            />
+                          </div>
+                          <Button type="submit" disabled={isSubmittingMessage || !newMessage.trim()}>
+                            {isSubmittingMessage ? "Sending..." : "Send Message"}
+                          </Button>
+                        </form>
+                      </CardContent>
+                    </Card>
+                  </div>
+                )}
+              </div>
+            </CardContent>
+          </Card>
+        </div>
       </div>
-    </BrandedFormLayout>
+    </div>
   );
 };
 

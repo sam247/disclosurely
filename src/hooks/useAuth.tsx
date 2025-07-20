@@ -1,4 +1,3 @@
-
 import { useState, useEffect, createContext, useContext, ReactNode } from 'react';
 import { User, Session } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
@@ -37,7 +36,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
   const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
-  const [subscriptionLoading, setSubscriptionLoading] = useState(true);
+  const [subscriptionLoading, setSubscriptionLoading] = useState(false);
   const [subscriptionData, setSubscriptionData] = useState<SubscriptionData>({ subscribed: false });
 
   const refreshSubscription = async (currentSession?: Session | null) => {
@@ -51,16 +50,12 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
         hasSession: !!sessionToUse,
         hasAccessToken: !!sessionToUse?.access_token
       });
-      setSubscriptionLoading(false);
       return;
     }
     
-    setSubscriptionLoading(true);
+    // Don't show loading state or reset subscription data during check
     try {
       console.log('Subscription check attempt for user:', userToUse.email);
-      
-      // Add a small delay to ensure session is fully established
-      await new Promise(resolve => setTimeout(resolve, 100));
       
       const { data, error } = await supabase.functions.invoke('check-subscription', {
         headers: {
@@ -71,7 +66,6 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
       if (error) {
         console.error('Subscription check error:', error);
         // Don't reset subscription data on error, keep existing state
-        setSubscriptionLoading(false);
         return;
       }
 
@@ -88,8 +82,6 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     } catch (error) {
       console.error('Error refreshing subscription:', error);
       // Don't reset subscription data on error, keep existing state
-    } finally {
-      setSubscriptionLoading(false);
     }
   };
 
@@ -103,18 +95,17 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
         setUser(session?.user ?? null);
         setLoading(false);
         
-        // Handle subscription check for successful sign-in events only
-        // Skip subscription checks for intermediate states during OTP flow
+        // Only check subscription for successful sign-in events with valid session
         if (event === 'SIGNED_IN' && session?.user && session?.access_token) {
-          // Delay subscription check to ensure session is fully established
+          // Delay subscription check slightly to ensure session is fully established
           setTimeout(() => {
             console.log('User signed in successfully, checking subscription...');
             refreshSubscription(session);
-          }, 1000); // Increased delay for OTP flow stability
+          }, 500);
         } else if (event === 'SIGNED_OUT') {
-          // Only clear subscription data on actual logout, not during OTP flow
-          // Don't clear subscription data during intermediate auth states
-          console.log('Sign out event detected, preserving subscription data during auth flow');
+          // Clear subscription data on actual logout
+          setSubscriptionData({ subscribed: false });
+          console.log('User signed out, clearing subscription data');
         }
       }
     );
@@ -131,7 +122,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
         setTimeout(() => {
           console.log('Initial session found, checking subscription...');
           refreshSubscription(session);
-        }, 1000);
+        }, 500);
       }
     });
 

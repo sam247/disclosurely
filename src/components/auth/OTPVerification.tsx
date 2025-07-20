@@ -50,7 +50,10 @@ const OTPVerification = ({ email, onSuccess, onBack }: OTPVerificationProps) => 
           title: "Success",
           description: "Successfully logged in!",
         });
-        onSuccess();
+        // Small delay to ensure auth state is properly set before calling onSuccess
+        setTimeout(() => {
+          onSuccess();
+        }, 100);
       }
     } catch (error) {
       toast({
