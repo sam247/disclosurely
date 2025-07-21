@@ -53,6 +53,7 @@ const ReportStatus = () => {
   const [isSubmittingMessage, setIsSubmittingMessage] = useState(false);
   const [organizationBranding, setOrganizationBranding] = useState<OrganizationBranding | null>(null);
   const [linkToken, setLinkToken] = useState<string | null>(null);
+  const [brandingLoading, setBrandingLoading] = useState(true);
 
   useEffect(() => {
     // Extract the link token from URL if present
@@ -91,6 +92,8 @@ const ReportStatus = () => {
       }
     } catch (error) {
       console.error('Error fetching organization branding:', error);
+    } finally {
+      setBrandingLoading(false);
     }
   };
 
@@ -219,6 +222,17 @@ const ReportStatus = () => {
 
   const logoUrl = organizationBranding?.custom_logo_url || organizationBranding?.logo_url;
   const brandColor = organizationBranding?.brand_color;
+
+  if (brandingLoading) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+          <p className="text-gray-600">Loading status portal...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <BrandedFormLayout
