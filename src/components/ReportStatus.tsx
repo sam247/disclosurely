@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Shield, Search, MessageSquare, Clock } from "lucide-react";
+import { Search, MessageSquare, Clock } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { Badge } from "@/components/ui/badge";
@@ -217,13 +217,16 @@ const ReportStatus = () => {
     ).join(' ');
   };
 
+  const logoUrl = organizationBranding?.custom_logo_url || organizationBranding?.logo_url;
+  const brandColor = organizationBranding?.brand_color;
+
   return (
     <BrandedFormLayout
       title={organizationBranding?.name || 'Report Status Portal'}
-      description="Track and manage your secure report submissions"
+      description="Report Status Portal"
       organizationName={organizationBranding?.name}
-      logoUrl={organizationBranding?.custom_logo_url}
-      brandColor={organizationBranding?.brand_color}
+      logoUrl={logoUrl}
+      brandColor={brandColor}
     >
       <div className="space-y-6">
                 {/* Lookup Form */}
