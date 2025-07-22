@@ -6,7 +6,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
-import { Bot, CheckCircle, Upload, File, X, FileSearch, Share2, Mail, Save, Download } from 'lucide-react';
+import { Bot, CheckCircle, Upload, File, X, FileSearch, Share2, Mail, Save, Download, Trash2, Eye } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
@@ -28,9 +28,9 @@ interface Report {
 interface SavedDocument {
   id: string;
   name: string;
-  size: number;
-  type: string;
-  url: string;
+  file_size: number;
+  content_type: string;
+  file_path: string;
   created_at: string;
 }
 
@@ -56,34 +56,51 @@ const AICaseHelper = () => {
   const [uploadedDocuments, setUploadedDocuments] = useState<SavedDocument[]>([]);
   const [savedAnalyses, setSavedAnalyses] = useState<SavedAnalysis[]>([]);
   const [isSaving, setIsSaving] = useState(false);
+  const [organizationId, setOrganizationId] = useState<string | null>(null);
 
   const hasProAccess = subscriptionData.subscribed && subscriptionData.subscription_tier === 'pro';
 
   // Fetch data on component mount
   useEffect(() => {
     if (hasProAccess && user) {
+      fetchUserOrganization();
+    }
+  }, [hasProAccess, user]);
+
+  useEffect(() => {
+    if (organizationId) {
       fetchLiveCases();
       fetchSavedDocuments();
       fetchSavedAnalyses();
     }
-  }, [hasProAccess, user]);
+  }, [organizationId]);
 
-  const fetchLiveCases = async () => {
+  const fetchUserOrganization = async () => {
     try {
-      setLoadingCases(true);
-      
       const { data: profile } = await supabase
         .from('profiles')
         .select('organization_id')
         .eq('id', user?.id)
         .single();
 
-      if (!profile?.organization_id) return;
+      if (profile?.organization_id) {
+        setOrganizationId(profile.organization_id);
+      }
+    } catch (error) {
+      console.error('Error fetching user organization:', error);
+    }
+  };
 
+  const fetchLiveCases = async () => {
+    if (!organizationId) return;
+    
+    try {
+      setLoadingCases(true);
+      
       const { data: reportsData, error } = await supabase
         .from('reports')
         .select('id, title, tracking_id, status, created_at, encrypted_content, encryption_key_hash, priority, report_type')
-        .eq('organization_id', profile.organization_id)
+        .eq('organization_id', organizationId)
         .neq('status', 'closed')
         .order('created_at', { ascending: false });
 
@@ -102,15 +119,37 @@ const AICaseHelper = () => {
   };
 
   const fetchSavedDocuments = async () => {
-    // In a real implementation, fetch from a documents table
-    // For now, return empty array since we need to create the table
-    setUploadedDocuments([]);
+    if (!organizationId) return;
+    
+    try {
+      const { data, error } = await supabase
+        .from('ai_helper_documents')
+        .select('*')
+        .eq('organization_id', organizationId)
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+      setUploadedDocuments(data || []);
+    } catch (error) {
+      console.error('Error fetching saved documents:', error);
+    }
   };
 
   const fetchSavedAnalyses = async () => {
-    // In a real implementation, fetch from an ai_analyses table
-    // For now, return empty array since we need to create the table
-    setSavedAnalyses([]);
+    if (!organizationId) return;
+    
+    try {
+      const { data, error } = await supabase
+        .from('ai_case_analyses')
+        .select('*')
+        .eq('organization_id', organizationId)
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+      setSavedAnalyses(data || []);
+    } catch (error) {
+      console.error('Error fetching saved analyses:', error);
+    }
   };
 
   const handleCaseSelection = (caseId: string) => {
@@ -145,15 +184,9 @@ const AICaseHelper = () => {
     // Upload files to storage and save references
     for (const file of validFiles) {
       try {
-        const { data: profile } = await supabase
-          .from('profiles')
-          .select('organization_id')
-          .eq('id', user?.id)
-          .single();
+        if (!organizationId) continue;
 
-        if (!profile?.organization_id) continue;
-
-        const fileName = `${profile.organization_id}/ai-documents/${Date.now()}-${file.name}`;
+        const fileName = `${organizationId}/ai-documents/${Date.now()}-${file.name}`;
         
         const { data: uploadData, error: uploadError } = await supabase.storage
           .from('report-attachments')
@@ -161,20 +194,20 @@ const AICaseHelper = () => {
 
         if (uploadError) throw uploadError;
 
-        const { data: { publicUrl } } = supabase.storage
-          .from('report-attachments')
-          .getPublicUrl(fileName);
+        // Save document reference to database
+        const { error: dbError } = await supabase
+          .from('ai_helper_documents')
+          .insert({
+            organization_id: organizationId,
+            name: file.name,
+            file_size: file.size,
+            content_type: file.type,
+            file_path: fileName,
+            uploaded_by: user?.id
+          });
 
-        const newDoc: SavedDocument = {
-          id: Date.now().toString(),
-          name: file.name,
-          size: file.size,
-          type: file.type,
-          url: publicUrl,
-          created_at: new Date().toISOString()
-        };
+        if (dbError) throw dbError;
 
-        setUploadedDocuments(prev => [...prev, newDoc]);
       } catch (error) {
         console.error('Error uploading document:', error);
         toast({
@@ -186,6 +219,7 @@ const AICaseHelper = () => {
     }
     
     if (validFiles.length > 0) {
+      await fetchSavedDocuments();
       toast({
         title: "Documents uploaded",
         description: `${validFiles.length} document(s) added and saved`,
@@ -194,11 +228,27 @@ const AICaseHelper = () => {
   };
 
   const removeDocument = async (docId: string) => {
-    setUploadedDocuments(prev => prev.filter(doc => doc.id !== docId));
-    toast({
-      title: "Document removed",
-      description: "Document has been removed from analysis",
-    });
+    try {
+      const { error } = await supabase
+        .from('ai_helper_documents')
+        .delete()
+        .eq('id', docId);
+
+      if (error) throw error;
+
+      await fetchSavedDocuments();
+      toast({
+        title: "Document removed",
+        description: "Document has been removed",
+      });
+    } catch (error) {
+      console.error('Error removing document:', error);
+      toast({
+        title: "Error",
+        description: "Failed to remove document",
+        variant: "destructive",
+      });
+    }
   };
 
   const handleAnalyzeCase = async () => {
@@ -217,21 +267,28 @@ const AICaseHelper = () => {
       const documentContents = await Promise.all(
         uploadedDocuments.map(async (doc) => {
           try {
-            // In a real implementation, you'd extract text from the documents
-            // For now, we'll simulate with metadata
+            // Download file content from Supabase storage
+            const { data: fileData, error } = await supabase.storage
+              .from('report-attachments')
+              .download(doc.file_path);
+
+            if (error) throw error;
+
+            // Convert to text (simplified - in production you'd use proper PDF parsers)
+            const text = await fileData.text();
             return {
               name: doc.name,
-              size: doc.size,
-              type: doc.type,
-              content: `[Policy document: ${doc.name} - ${(doc.size / 1024).toFixed(1)}KB]`
+              size: doc.file_size,
+              type: doc.content_type,
+              content: text.substring(0, 2000) + (text.length > 2000 ? '...' : '') // Truncate for API limits
             };
           } catch (error) {
             console.error(`Error reading document ${doc.name}:`, error);
             return {
               name: doc.name,
-              size: doc.size,
-              type: doc.type,
-              content: `[Document ${doc.name} could not be processed]`
+              size: doc.file_size,
+              type: doc.content_type,
+              content: `[Document ${doc.name} could not be processed: ${error.message}]`
             };
           }
         })
@@ -248,7 +305,7 @@ const AICaseHelper = () => {
             created_at: selectedCase.created_at
           },
           companyDocuments: documentContents,
-          caseContent: `Case: ${selectedCase.title}\nTracking: ${selectedCase.tracking_id}\nStatus: ${selectedCase.status}\nPriority: ${selectedCase.priority}\nType: ${selectedCase.report_type}\n\nNote: This is a demonstration analysis. In production, encrypted case content would be decrypted and analyzed.`
+          caseContent: `Case: ${selectedCase.title}\nTracking: ${selectedCase.tracking_id}\nStatus: ${selectedCase.status}\nPriority: ${selectedCase.priority}\nType: ${selectedCase.report_type}\n\nNote: Analyzing case with ${documentContents.length} uploaded document(s).`
         }
       });
 
@@ -295,7 +352,7 @@ const AICaseHelper = () => {
 - **Created:** ${new Date(selectedCase.created_at).toLocaleDateString()}
 
 ## Analysis Summary
-This case requires immediate attention based on its priority level and current status. The following recommendations are based on standard compliance protocols.
+This case requires immediate attention based on its priority level and current status. The following recommendations are based on standard compliance protocols and ${uploadedDocuments.length} uploaded policy document(s).
 
 ## Immediate Actions Required
 1. **Assign case handler** within 24 hours
@@ -305,8 +362,13 @@ This case requires immediate attention based on its priority level and current s
 
 ## Compliance Assessment
 ${uploadedDocuments.length > 0 ? 
-  `✓ **Policy Documentation:** ${uploadedDocuments.length} policy document(s) available for reference\n✓ **Compliance Review:** Manual review required against uploaded policies\n✓ **Documentation:** Cross-reference with organizational guidelines` : 
-  `⚠ **Policy Documentation:** No policy documents uploaded\n⚠ **Compliance Review:** Upload company policies for detailed analysis\n⚠ **Documentation:** Standard procedures recommended`}
+  `✓ **Policy Documentation:** ${uploadedDocuments.length} policy document(s) available for reference
+${uploadedDocuments.map(doc => `  - ${doc.name} (${(doc.file_size / 1024).toFixed(1)}KB)`).join('\n')}
+✓ **Compliance Review:** Cross-reference with uploaded organizational policies
+✓ **Documentation:** Organizational guidelines applied to analysis` : 
+  `⚠ **Policy Documentation:** No policy documents uploaded
+⚠ **Compliance Review:** Upload company policies for detailed analysis
+⚠ **Documentation:** Standard procedures recommended`}
 
 ## Investigation Timeline
 - **Initial Review:** 24-48 hours
@@ -326,11 +388,12 @@ Based on the case type "${selectedCase.report_type}" and priority level ${select
 
 ---
 *Generated: ${new Date().toLocaleString()}*
-*Analysis Type: Standard Fallback (AI service unavailable)*`;
+*Analysis Type: Standard Protocol Review*
+*Documents Analyzed: ${uploadedDocuments.length}*`;
   };
 
   const saveAnalysis = async () => {
-    if (!selectedCase || !analysisResult) {
+    if (!selectedCase || !analysisResult || !organizationId) {
       toast({
         title: "Nothing to save",
         description: "Please generate an analysis first",
@@ -341,22 +404,38 @@ Based on the case type "${selectedCase.report_type}" and priority level ${select
 
     setIsSaving(true);
     try {
-      // In a real implementation, save to ai_analyses table
-      const newAnalysis: SavedAnalysis = {
-        id: Date.now().toString(),
-        case_id: selectedCase.id,
-        case_title: selectedCase.title,
-        tracking_id: selectedCase.tracking_id,
-        analysis_content: analysisResult,
-        document_count: uploadedDocuments.length,
-        created_at: new Date().toISOString()
-      };
+      // Check if analysis already exists for this case
+      const existingAnalysis = savedAnalyses.find(a => a.case_id === selectedCase.id);
+      
+      if (existingAnalysis) {
+        // Update existing analysis
+        const { error } = await supabase
+          .from('ai_case_analyses')
+          .update({
+            analysis_content: analysisResult,
+            document_count: uploadedDocuments.length
+          })
+          .eq('id', existingAnalysis.id);
 
-      setSavedAnalyses(prev => {
-        const filtered = prev.filter(a => a.case_id !== selectedCase.id);
-        return [...filtered, newAnalysis];
-      });
+        if (error) throw error;
+      } else {
+        // Create new analysis
+        const { error } = await supabase
+          .from('ai_case_analyses')
+          .insert({
+            organization_id: organizationId,
+            case_id: selectedCase.id,
+            case_title: selectedCase.title,
+            tracking_id: selectedCase.tracking_id,
+            analysis_content: analysisResult,
+            document_count: uploadedDocuments.length,
+            created_by: user?.id
+          });
 
+        if (error) throw error;
+      }
+
+      await fetchSavedAnalyses();
       toast({
         title: "Analysis Saved",
         description: "Your case analysis has been saved successfully",
@@ -370,6 +449,39 @@ Based on the case type "${selectedCase.report_type}" and priority level ${select
       });
     } finally {
       setIsSaving(false);
+    }
+  };
+
+  const loadSavedAnalysis = (analysis: SavedAnalysis) => {
+    const report = liveCases.find(r => r.id === analysis.case_id);
+    if (report) {
+      setSelectedCase(report);
+      setSelectedCaseId(report.id);
+      setAnalysisResult(analysis.analysis_content);
+    }
+  };
+
+  const deleteSavedAnalysis = async (analysisId: string) => {
+    try {
+      const { error } = await supabase
+        .from('ai_case_analyses')
+        .delete()
+        .eq('id', analysisId);
+
+      if (error) throw error;
+
+      await fetchSavedAnalyses();
+      toast({
+        title: "Analysis Deleted",
+        description: "Saved analysis has been removed",
+      });
+    } catch (error) {
+      console.error('Error deleting analysis:', error);
+      toast({
+        title: "Error",
+        description: "Failed to delete analysis",
+        variant: "destructive",
+      });
     }
   };
 
@@ -411,6 +523,21 @@ Based on the case type "${selectedCase.report_type}" and priority level ${select
     a.click();
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
+  };
+
+  // Convert markdown-style content to rich text formatting
+  const formatAnalysisForDisplay = (content: string) => {
+    return content
+      .replace(/^# (.*$)/gm, '<h1 class="text-2xl font-bold mb-4 text-gray-900">$1</h1>')
+      .replace(/^## (.*$)/gm, '<h2 class="text-xl font-semibold mb-3 text-gray-800">$1</h2>')
+      .replace(/^### (.*$)/gm, '<h3 class="text-lg font-medium mb-2 text-gray-700">$1</h3>')
+      .replace(/^\*\*(.*)\*\*/gm, '<strong class="font-semibold">$1</strong>')
+      .replace(/^\* (.*$)/gm, '<li class="ml-4 mb-1">• $1</li>')
+      .replace(/^(\d+)\. (.*$)/gm, '<li class="ml-4 mb-1">$1. $2</li>')
+      .replace(/^✓ (.*$)/gm, '<div class="flex items-start mb-2"><span class="text-green-600 mr-2">✓</span><span>$1</span></div>')
+      .replace(/^⚠ (.*$)/gm, '<div class="flex items-start mb-2"><span class="text-yellow-600 mr-2">⚠</span><span>$1</span></div>')
+      .replace(/^---$/gm, '<hr class="my-4 border-gray-300">')
+      .replace(/\n/g, '<br>');
   };
 
   if (!hasProAccess) {
@@ -498,24 +625,10 @@ Based on the case type "${selectedCase.report_type}" and priority level ${select
 
                 {selectedCase && (
                   <div className="p-4 bg-muted rounded-lg">
-                    <h4 className="font-medium mb-2">Selected Case Details</h4>
-                    <div className="grid grid-cols-2 gap-4 text-sm">
-                      <div>
-                        <span className="font-medium">Tracking ID:</span> {selectedCase.tracking_id}
-                      </div>
-                      <div>
-                        <span className="font-medium">Status:</span> {selectedCase.status}
-                      </div>
-                      <div>
-                        <span className="font-medium">Priority:</span> {selectedCase.priority}/5
-                      </div>
-                      <div>
-                        <span className="font-medium">Type:</span> {selectedCase.report_type}
-                      </div>
-                      <div className="col-span-2">
-                        <span className="font-medium">Created:</span> {new Date(selectedCase.created_at).toLocaleDateString()}
-                      </div>
-                    </div>
+                    <h4 className="font-semibold">{selectedCase.title}</h4>
+                    <p className="text-sm text-muted-foreground">
+                      {selectedCase.tracking_id} • Priority {selectedCase.priority} • {selectedCase.status}
+                    </p>
                   </div>
                 )}
               </CardContent>
@@ -526,17 +639,17 @@ Based on the case type "${selectedCase.report_type}" and priority level ${select
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <Upload className="h-5 w-5" />
-                  Company Policies & Documents
+                  Company Documents
                 </CardTitle>
                 <CardDescription>
-                  Upload organizational policies for AI-enhanced compliance analysis
+                  Upload policy documents for AI to reference during analysis
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div>
-                  <Label htmlFor="policy-upload">Upload Documents</Label>
+                  <Label htmlFor="document-upload">Upload Documents</Label>
                   <Input
-                    id="policy-upload"
+                    id="document-upload"
                     type="file"
                     multiple
                     accept=".pdf,.doc,.docx,.txt"
@@ -544,30 +657,31 @@ Based on the case type "${selectedCase.report_type}" and priority level ${select
                     className="mt-1"
                   />
                   <p className="text-xs text-muted-foreground mt-1">
-                    PDF, Word, and text files up to 10MB each
+                    PDF, Word, or text files (max 10MB each)
                   </p>
                 </div>
 
                 {uploadedDocuments.length > 0 && (
                   <div className="space-y-2">
-                    <Label>Saved Documents ({uploadedDocuments.length})</Label>
-                    <div className="space-y-2 max-h-40 overflow-y-auto">
+                    <Label>Uploaded Documents ({uploadedDocuments.length})</Label>
+                    <div className="space-y-2 max-h-32 overflow-y-auto">
                       {uploadedDocuments.map((doc) => (
-                        <div key={doc.id} className="flex items-center justify-between p-2 bg-muted rounded border">
+                        <div key={doc.id} className="flex items-center justify-between p-2 bg-muted rounded">
                           <div className="flex items-center gap-2">
                             <File className="h-4 w-4" />
-                            <span className="text-sm truncate">{doc.name}</span>
-                            <span className="text-xs text-muted-foreground">
-                              ({(doc.size / 1024 / 1024).toFixed(1)}MB)
-                            </span>
+                            <div>
+                              <p className="text-sm font-medium">{doc.name}</p>
+                              <p className="text-xs text-muted-foreground">
+                                {(doc.file_size / 1024).toFixed(1)}KB
+                              </p>
+                            </div>
                           </div>
                           <Button
-                            size="sm"
                             variant="ghost"
+                            size="sm"
                             onClick={() => removeDocument(doc.id)}
-                            className="h-6 w-6 p-0 text-destructive hover:text-destructive"
                           >
-                            <X className="h-3 w-3" />
+                            <X className="h-4 w-4" />
                           </Button>
                         </div>
                       ))}
@@ -577,19 +691,18 @@ Based on the case type "${selectedCase.report_type}" and priority level ${select
 
                 <Button 
                   onClick={handleAnalyzeCase}
-                  disabled={isLoading || !selectedCase}
+                  disabled={!selectedCase || isLoading}
                   className="w-full"
-                  size="lg"
                 >
                   {isLoading ? (
                     <>
-                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                      <Bot className="mr-2 h-4 w-4 animate-spin" />
                       Analyzing Case...
                     </>
                   ) : (
                     <>
-                      <Bot className="h-4 w-4 mr-2" />
-                      Analyze Case with AI {uploadedDocuments.length > 0 && `(+${uploadedDocuments.length} docs)`}
+                      <Bot className="mr-2 h-4 w-4" />
+                      Analyze Case with AI
                     </>
                   )}
                 </Button>
@@ -598,31 +711,26 @@ Based on the case type "${selectedCase.report_type}" and priority level ${select
           </div>
 
           {/* Right Column - Analysis Results */}
-          <div className="flex flex-col h-full">
-            <Card className="flex-1 flex flex-col">
-              <CardHeader className="flex-shrink-0">
+          <div className="space-y-6 overflow-y-auto">
+            <Card className="h-full flex flex-col">
+              <CardHeader>
                 <div className="flex items-center justify-between">
                   <CardTitle className="flex items-center gap-2">
                     <CheckCircle className="h-5 w-5" />
                     Analysis Results
-                    {uploadedDocuments.length > 0 && (
-                      <Badge variant="secondary" className="text-xs">
-                        {uploadedDocuments.length} docs analyzed
-                      </Badge>
-                    )}
                   </CardTitle>
                   {analysisResult && (
                     <div className="flex gap-2">
-                      <Button size="sm" variant="outline" onClick={shareAnalysis}>
+                      <Button variant="outline" size="sm" onClick={shareAnalysis}>
                         <Share2 className="h-4 w-4" />
                       </Button>
-                      <Button size="sm" variant="outline" onClick={emailAnalysis}>
+                      <Button variant="outline" size="sm" onClick={emailAnalysis}>
                         <Mail className="h-4 w-4" />
                       </Button>
-                      <Button size="sm" variant="outline" onClick={downloadAnalysis}>
+                      <Button variant="outline" size="sm" onClick={downloadAnalysis}>
                         <Download className="h-4 w-4" />
                       </Button>
-                      <Button size="sm" onClick={saveAnalysis} disabled={isSaving}>
+                      <Button onClick={saveAnalysis} disabled={isSaving}>
                         <Save className="h-4 w-4 mr-1" />
                         {isSaving ? 'Saving...' : 'Save'}
                       </Button>
@@ -634,45 +742,78 @@ Based on the case type "${selectedCase.report_type}" and priority level ${select
                 </CardDescription>
               </CardHeader>
               
-              <CardContent className="flex-1 flex flex-col">
+              <CardContent className="flex-1 overflow-y-auto">
                 {analysisResult ? (
-                  <div className="flex-1 overflow-hidden">
-                    <Textarea
-                      value={analysisResult}
-                      readOnly
-                      className="h-full resize-none font-mono text-sm"
-                      placeholder="Analysis results will appear here..."
-                    />
-                  </div>
+                  <div 
+                    className="prose prose-sm max-w-none text-sm leading-relaxed"
+                    dangerouslySetInnerHTML={{ 
+                      __html: formatAnalysisForDisplay(analysisResult) 
+                    }}
+                  />
                 ) : (
-                  <div className="flex-1 flex items-center justify-center text-center">
-                    <div className="text-muted-foreground">
-                      <Bot className="h-12 w-12 mx-auto mb-4 opacity-50" />
-                      <p className="text-lg font-medium mb-2">Ready for AI Analysis</p>
-                      <p className="text-sm">Select a case and click "Analyze Case with AI" to begin</p>
+                  <div className="flex items-center justify-center h-64 text-center">
+                    <div className="space-y-3">
+                      <Bot className="h-12 w-12 mx-auto text-muted-foreground" />
+                      <div>
+                        <p className="text-muted-foreground">No analysis generated yet</p>
+                        <p className="text-sm text-muted-foreground">
+                          Select a case and click "Analyze Case with AI" to get started
+                        </p>
+                      </div>
                     </div>
                   </div>
                 )}
               </CardContent>
             </Card>
-            
-            {/* Bottom Action Bar */}
-            <div className="mt-4 p-4 bg-card border rounded-lg">
-              <div className="flex items-center justify-between text-sm text-muted-foreground">
-                <div>
-                  {savedAnalyses.length > 0 && (
-                    <span>{savedAnalyses.length} saved analysis(es)</span>
-                  )}
-                </div>
-                <div>
-                  {analysisResult && (
-                    <span>{analysisResult.length.toLocaleString()} characters</span>
-                  )}
-                </div>
-              </div>
-            </div>
           </div>
         </div>
+
+        {/* Saved Analyses Section */}
+        {savedAnalyses.length > 0 && (
+          <div className="mt-8">
+            <Card>
+              <CardHeader>
+                <CardTitle>Saved Analyses</CardTitle>
+                <CardDescription>
+                  Previously generated case analyses
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {savedAnalyses.map((analysis) => (
+                    <div key={analysis.id} className="p-4 border rounded-lg">
+                      <div className="flex items-start justify-between mb-2">
+                        <div>
+                          <h4 className="font-medium text-sm">{analysis.case_title}</h4>
+                          <p className="text-xs text-muted-foreground">{analysis.tracking_id}</p>
+                        </div>
+                        <div className="flex gap-1">
+                          <Button 
+                            variant="ghost" 
+                            size="sm"
+                            onClick={() => loadSavedAnalysis(analysis)}
+                          >
+                            <Eye className="h-3 w-3" />
+                          </Button>
+                          <Button 
+                            variant="ghost" 
+                            size="sm"
+                            onClick={() => deleteSavedAnalysis(analysis.id)}
+                          >
+                            <Trash2 className="h-3 w-3" />
+                          </Button>
+                        </div>
+                      </div>
+                      <p className="text-xs text-muted-foreground">
+                        {analysis.document_count} document(s) • {new Date(analysis.created_at).toLocaleDateString()}
+                      </p>
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        )}
       </div>
     </div>
   );

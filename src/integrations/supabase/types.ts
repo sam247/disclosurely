@@ -14,6 +14,78 @@ export type Database = {
   }
   public: {
     Tables: {
+      ai_case_analyses: {
+        Row: {
+          analysis_content: string
+          case_id: string
+          case_title: string
+          created_at: string
+          created_by: string | null
+          document_count: number | null
+          id: string
+          organization_id: string
+          tracking_id: string
+          updated_at: string
+        }
+        Insert: {
+          analysis_content: string
+          case_id: string
+          case_title: string
+          created_at?: string
+          created_by?: string | null
+          document_count?: number | null
+          id?: string
+          organization_id: string
+          tracking_id: string
+          updated_at?: string
+        }
+        Update: {
+          analysis_content?: string
+          case_id?: string
+          case_title?: string
+          created_at?: string
+          created_by?: string | null
+          document_count?: number | null
+          id?: string
+          organization_id?: string
+          tracking_id?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      ai_helper_documents: {
+        Row: {
+          content_type: string
+          created_at: string
+          file_path: string
+          file_size: number
+          id: string
+          name: string
+          organization_id: string
+          uploaded_by: string | null
+        }
+        Insert: {
+          content_type: string
+          created_at?: string
+          file_path: string
+          file_size: number
+          id?: string
+          name: string
+          organization_id: string
+          uploaded_by?: string | null
+        }
+        Update: {
+          content_type?: string
+          created_at?: string
+          file_path?: string
+          file_size?: number
+          id?: string
+          name?: string
+          organization_id?: string
+          uploaded_by?: string | null
+        }
+        Relationships: []
+      }
       audit_logs: {
         Row: {
           action: string
