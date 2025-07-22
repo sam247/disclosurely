@@ -57,10 +57,24 @@ const WhistleblowerMessaging = () => {
             setMessages(prev => [...prev, newMsg]);
           }
         )
+        .on(
+          'postgres_changes',
+          {
+            event: 'UPDATE',
+            schema: 'public',
+            table: 'report_messages',
+            filter: `report_id=eq.${report.id}`,
+          },
+          (payload) => {
+            console.log('Message updated:', payload.new);
+            const updatedMsg = payload.new as Message;
+            setMessages(prev => prev.map(msg => msg.id === updatedMsg.id ? updatedMsg : msg));
+          }
+        )
         .subscribe();
 
       return () => {
-        channel.unsubscribe();
+        supabase.removeChannel(channel);
       };
     }
   }, [report?.id]);

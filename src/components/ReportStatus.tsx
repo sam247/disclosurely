@@ -65,6 +65,32 @@ const ReportStatus = () => {
     }
   }, []);
 
+  // Set up real-time messaging
+  useEffect(() => {
+    if (report?.id) {
+      const channel = supabase
+        .channel('report-messages')
+        .on(
+          'postgres_changes',
+          {
+            event: 'INSERT',
+            schema: 'public',
+            table: 'report_messages',
+            filter: `report_id=eq.${report.id}`,
+          },
+          (payload) => {
+            const newMessage = payload.new as Message;
+            setMessages(prev => [...prev, newMessage]);
+          }
+        )
+        .subscribe();
+
+      return () => {
+        supabase.removeChannel(channel);
+      };
+    }
+  }, [report?.id]);
+
   const fetchOrganizationBranding = async (token: string) => {
     try {
       const { data: linkInfo } = await supabase
