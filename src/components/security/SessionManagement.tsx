@@ -2,19 +2,20 @@
 import { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
-import { Clock, LogOut, Shield } from 'lucide-react';
+import { useSessionTimeout } from '@/hooks/useSessionTimeout';
+import { Clock, LogOut, Shield, Timer } from 'lucide-react';
 
 const SessionManagement = () => {
   const { user, signOut } = useAuth();
   const { toast } = useToast();
-  const [sessionTimeout, setSessionTimeout] = useState('24');
+  const { getIdleTimeRemaining, getAbsoluteTimeRemaining } = useSessionTimeout();
   const [lastActivity, setLastActivity] = useState<Date>(new Date());
   const [activeSessions, setActiveSessions] = useState(1);
+  const [timeRemaining, setTimeRemaining] = useState({ idle: 0, absolute: 0 });
 
   useEffect(() => {
     // Update last activity on user interaction
@@ -25,47 +26,41 @@ const SessionManagement = () => {
       document.addEventListener(event, updateActivity, true);
     });
 
+    // Update remaining time display every minute
+    const interval = setInterval(() => {
+      setTimeRemaining({
+        idle: getIdleTimeRemaining(),
+        absolute: getAbsoluteTimeRemaining()
+      });
+    }, 60000);
+
     return () => {
       events.forEach(event => {
         document.removeEventListener(event, updateActivity, true);
       });
+      clearInterval(interval);
     };
-  }, []);
+  }, [getIdleTimeRemaining, getAbsoluteTimeRemaining]);
 
+  // Initialize time remaining display
   useEffect(() => {
-    // Set up session timeout
-    const timeout = parseInt(sessionTimeout) * 60 * 60 * 1000; // Convert hours to milliseconds
-    
-    const checkSession = () => {
-      const now = new Date();
-      const timeSinceActivity = now.getTime() - lastActivity.getTime();
-      
-      if (timeSinceActivity > timeout) {
-        handleSessionTimeout();
-      }
-    };
-
-    const interval = setInterval(checkSession, 5 * 60 * 1000); // Check every 5 minutes
-    
-    return () => clearInterval(interval);
-  }, [sessionTimeout, lastActivity]);
-
-  const handleSessionTimeout = async () => {
-    toast({
-      title: "Session Expired",
-      description: "Your session has expired due to inactivity. Please log in again.",
-      variant: "destructive",
+    setTimeRemaining({
+      idle: getIdleTimeRemaining(),
+      absolute: getAbsoluteTimeRemaining()
     });
-    
-    await signOut();
-  };
+  }, [getIdleTimeRemaining, getAbsoluteTimeRemaining]);
 
-  const handleTimeoutChange = (value: string) => {
-    setSessionTimeout(value);
-    toast({
-      title: "Session Timeout Updated",
-      description: `Session will expire after ${value} hours of inactivity`,
-    });
+  const formatTimeRemaining = (milliseconds: number) => {
+    if (milliseconds <= 0) return 'Expired';
+    
+    const minutes = Math.floor(milliseconds / (1000 * 60));
+    const hours = Math.floor(minutes / 60);
+    const remainingMinutes = minutes % 60;
+    
+    if (hours > 0) {
+      return `${hours}h ${remainingMinutes}m`;
+    }
+    return `${remainingMinutes}m`;
   };
 
   const terminateAllSessions = async () => {
@@ -107,34 +102,41 @@ const SessionManagement = () => {
       </CardHeader>
       <CardContent className="space-y-6">
         <div className="space-y-4">
-          <div>
-            <h4 className="font-medium mb-2">Session Timeout</h4>
-            <Select value={sessionTimeout} onValueChange={handleTimeoutChange}>
-              <SelectTrigger>
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="1">1 hour</SelectItem>
-                <SelectItem value="4">4 hours</SelectItem>
-                <SelectItem value="8">8 hours</SelectItem>
-                <SelectItem value="24">24 hours</SelectItem>
-                <SelectItem value="168">1 week</SelectItem>
-              </SelectContent>
-            </Select>
-            <p className="text-sm text-gray-600 mt-1">
-              Automatically sign out after this period of inactivity
-            </p>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="p-3 border rounded-lg">
+              <div className="flex items-center gap-2 mb-1">
+                <Timer className="h-4 w-4" />
+                <h4 className="font-medium">Idle Timeout</h4>
+              </div>
+              <p className="text-2xl font-bold text-orange-600">7 minutes</p>
+              <p className="text-sm text-gray-600">Auto logout when inactive</p>
+            </div>
+            
+            <div className="p-3 border rounded-lg">
+              <div className="flex items-center gap-2 mb-1">
+                <Clock className="h-4 w-4" />
+                <h4 className="font-medium">Session Limit</h4>
+              </div>
+              <p className="text-2xl font-bold text-red-600">4 hours</p>
+              <p className="text-sm text-gray-600">Maximum session duration</p>
+            </div>
           </div>
 
-          <div className="flex items-center justify-between">
-            <div>
-              <h4 className="font-medium">Last Activity</h4>
-              <p className="text-sm text-gray-600">{formatLastActivity()}</p>
+          <div className="space-y-2">
+            <div className="flex items-center justify-between">
+              <div>
+                <h4 className="font-medium">Last Activity</h4>
+                <p className="text-sm text-gray-600">{formatLastActivity()}</p>
+              </div>
+              <Badge variant="outline">
+                <Shield className="h-3 w-3 mr-1" />
+                Active
+              </Badge>
             </div>
-            <Badge variant="outline">
-              <Shield className="h-3 w-3 mr-1" />
-              Active
-            </Badge>
+            
+            <div className="text-sm text-gray-600 bg-gray-50 p-2 rounded">
+              <strong>Security:</strong> Sessions automatically expire after 7 minutes of inactivity or 4 hours maximum duration for enhanced security.
+            </div>
           </div>
 
           <div className="flex items-center justify-between">

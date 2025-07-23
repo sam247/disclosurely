@@ -1,6 +1,7 @@
 
 import { useEffect, useState } from 'react';
 import { useAuth } from '@/hooks/useAuth';
+import { useSessionTimeout } from '@/hooks/useSessionTimeout';
 import { supabase } from '@/integrations/supabase/client';
 import Dashboard from './Dashboard';
 import SimpleOrganizationSetup from './SimpleOrganizationSetup';
@@ -10,6 +11,9 @@ const AuthenticatedApp = () => {
   const { user } = useAuth();
   const { toast } = useToast();
   const [profileStatus, setProfileStatus] = useState<'loading' | 'needs_setup' | 'complete'>('loading');
+  
+  // Initialize session timeout monitoring
+  useSessionTimeout();
 
   useEffect(() => {
     if (user) {
