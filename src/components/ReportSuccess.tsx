@@ -257,29 +257,16 @@ const ReportSuccess = () => {
 
           {/* Action Buttons */}
           <div className="flex flex-col sm:flex-row gap-4">
-            {organizationLinkToken ? (
-              <Link to={`/secure/tool/submit/${organizationLinkToken}/status`} className="flex-1">
-                <Button 
-                  className="w-full hover:opacity-90" 
-                  size="lg"
-                  style={{ backgroundColor: brandColor }}
-                >
-                  <MessageSquare className="h-5 w-5 mr-2" />
-                  Check Messages & Status
-                </Button>
-              </Link>
-            ) : (
-              <Link to="/chat" className="flex-1">
-                <Button 
-                  className="w-full hover:opacity-90" 
-                  size="lg"
-                  style={{ backgroundColor: brandColor }}
-                >
-                  <MessageSquare className="h-5 w-5 mr-2" />
-                  Check Messages & Status
-                </Button>
-              </Link>
-            )}
+            <Link to={`/chat?trackingId=${trackingId}`} className="flex-1">
+              <Button 
+                className="w-full hover:opacity-90" 
+                size="lg"
+                style={{ backgroundColor: brandColor }}
+              >
+                <MessageSquare className="h-5 w-5 mr-2" />
+                Check Messages & Status
+              </Button>
+            </Link>
             <Link to="/" className="flex-1">
               <Button variant="outline" className="w-full" size="lg">
                 <Home className="h-5 w-5 mr-2" />

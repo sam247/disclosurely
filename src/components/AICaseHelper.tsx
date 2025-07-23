@@ -267,23 +267,40 @@ const AICaseHelper = () => {
       const documentContents = await Promise.all(
         uploadedDocuments.map(async (doc) => {
           try {
-            // Download file content from Supabase storage
-            const { data: fileData, error } = await supabase.storage
+            // Get public URL for the file
+            const { data: urlData } = supabase.storage
               .from('report-attachments')
-              .download(doc.file_path);
+              .getPublicUrl(doc.file_path);
 
-            if (error) throw error;
+            let content = '';
+            
+            if (doc.content_type === 'application/pdf') {
+              // For PDFs, include metadata only since we can't easily parse binary content
+              content = `[PDF Document: ${doc.name}, Size: ${Math.round(doc.file_size / 1024)}KB - Content parsing not available for PDF files. This document should be manually reviewed.]`;
+            } else {
+              try {
+                // Try to download and read text files
+                const { data: fileData, error } = await supabase.storage
+                  .from('report-attachments')
+                  .download(doc.file_path);
 
-            // Convert to text (simplified - in production you'd use proper PDF parsers)
-            const text = await fileData.text();
+                if (error) throw error;
+                
+                content = await fileData.text();
+                content = content.substring(0, 2000) + (content.length > 2000 ? '...' : '');
+              } catch (downloadError) {
+                content = `[Document ${doc.name} could not be accessed: ${downloadError.message}]`;
+              }
+            }
+
             return {
               name: doc.name,
               size: doc.file_size,
               type: doc.content_type,
-              content: text.substring(0, 2000) + (text.length > 2000 ? '...' : '') // Truncate for API limits
+              content: content
             };
           } catch (error) {
-            console.error(`Error reading document ${doc.name}:`, error);
+            console.error(`Error processing document ${doc.name}:`, error);
             return {
               name: doc.name,
               size: doc.file_size,

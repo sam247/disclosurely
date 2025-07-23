@@ -47,7 +47,7 @@ const ReportMessaging = ({ report, onClose }: ReportMessagingProps) => {
     
     // Set up real-time subscription for new messages
     const channel = supabase
-      .channel(`report-messages-${report.id}`)
+      .channel(`report-messages-admin-${report.id}`)
       .on(
         'postgres_changes',
         {
@@ -59,13 +59,19 @@ const ReportMessaging = ({ report, onClose }: ReportMessagingProps) => {
         (payload) => {
           console.log('New message received on admin side:', payload.new);
           const newMsg = payload.new as Message;
-          setMessages(prev => [...prev, newMsg]);
+          setMessages(prev => {
+            // Check if message already exists to prevent duplicates
+            if (prev.some(msg => msg.id === newMsg.id)) {
+              return prev;
+            }
+            return [...prev, newMsg];
+          });
         }
       )
       .subscribe();
 
     return () => {
-      channel.unsubscribe();
+      supabase.removeChannel(channel);
     };
   }, [report.id]);
 
