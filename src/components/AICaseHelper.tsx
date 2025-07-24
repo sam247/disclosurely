@@ -12,6 +12,7 @@ import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import FeatureRestriction from './FeatureRestriction';
 import SubscribePrompt from './SubscribePrompt';
+import * as pdfjsLib from 'pdfjs-dist';
 
 interface Report {
   id: string;
@@ -275,8 +276,48 @@ const AICaseHelper = () => {
             let content = '';
             
             if (doc.content_type === 'application/pdf') {
-              // For PDFs, include metadata only since we can't easily parse binary content
-              content = `[PDF Document: ${doc.name}, Size: ${Math.round(doc.file_size / 1024)}KB - Content parsing not available for PDF files. This document should be manually reviewed.]`;
+              try {
+                // Configure PDF.js worker
+                pdfjsLib.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js`;
+                
+                // Download PDF file
+                const { data: fileData, error } = await supabase.storage
+                  .from('report-attachments')
+                  .download(doc.file_path);
+
+                if (error) throw error;
+                
+                // Convert file to array buffer
+                const arrayBuffer = await fileData.arrayBuffer();
+                
+                // Load PDF document
+                const loadingTask = pdfjsLib.getDocument({ data: arrayBuffer });
+                const pdf = await loadingTask.promise;
+                
+                let fullText = '';
+                
+                // Extract text from first 3 pages to keep within reasonable limits
+                const numPages = Math.min(pdf.numPages, 3);
+                for (let pageNum = 1; pageNum <= numPages; pageNum++) {
+                  const page = await pdf.getPage(pageNum);
+                  const textContent = await page.getTextContent();
+                  const pageText = textContent.items
+                    .filter((item: any) => item.str)
+                    .map((item: any) => item.str)
+                    .join(' ');
+                  fullText += pageText + '\n';
+                }
+                
+                // Truncate to reasonable length for AI processing
+                content = fullText.substring(0, 3000) + (fullText.length > 3000 ? '\n[Content truncated due to length...]' : '');
+                
+                if (!content.trim()) {
+                  content = `[PDF Document: ${doc.name}, Size: ${Math.round(doc.file_size / 1024)}KB - Text could not be extracted from this PDF file.]`;
+                }
+              } catch (pdfError) {
+                console.error('Error parsing PDF:', pdfError);
+                content = `[PDF Document: ${doc.name}, Size: ${Math.round(doc.file_size / 1024)}KB - Error extracting text: ${pdfError.message}]`;
+              }
             } else {
               try {
                 // Try to download and read text files
