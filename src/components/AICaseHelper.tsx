@@ -12,7 +12,7 @@ import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import FeatureRestriction from './FeatureRestriction';
 import SubscribePrompt from './SubscribePrompt';
-import * as pdfjsLib from 'pdfjs-dist';
+
 
 interface Report {
   id: string;
@@ -277,45 +277,22 @@ const AICaseHelper = () => {
             
             if (doc.content_type === 'application/pdf') {
               try {
-                // Configure PDF.js worker
-                pdfjsLib.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js`;
+                // Use edge function to extract PDF text with proper storage access
+                const { data: pdfData, error: pdfError } = await supabase.functions.invoke('extract-pdf-text', {
+                  body: { filePath: doc.file_path }
+                });
                 
-                // Download PDF file
-                const { data: fileData, error } = await supabase.storage
-                  .from('report-attachments')
-                  .download(doc.file_path);
-
-                if (error) throw error;
-                
-                // Convert file to array buffer
-                const arrayBuffer = await fileData.arrayBuffer();
-                
-                // Load PDF document
-                const loadingTask = pdfjsLib.getDocument({ data: arrayBuffer });
-                const pdf = await loadingTask.promise;
-                
-                let fullText = '';
-                
-                // Extract text from first 3 pages to keep within reasonable limits
-                const numPages = Math.min(pdf.numPages, 3);
-                for (let pageNum = 1; pageNum <= numPages; pageNum++) {
-                  const page = await pdf.getPage(pageNum);
-                  const textContent = await page.getTextContent();
-                  const pageText = textContent.items
-                    .filter((item: any) => item.str)
-                    .map((item: any) => item.str)
-                    .join(' ');
-                  fullText += pageText + '\n';
+                if (pdfError) {
+                  throw new Error(pdfError.message);
                 }
                 
-                // Truncate to reasonable length for AI processing
-                content = fullText.substring(0, 3000) + (fullText.length > 3000 ? '\n[Content truncated due to length...]' : '');
-                
-                if (!content.trim()) {
-                  content = `[PDF Document: ${doc.name}, Size: ${Math.round(doc.file_size / 1024)}KB - Text could not be extracted from this PDF file.]`;
+                if (pdfData?.success && pdfData?.textContent) {
+                  content = pdfData.textContent;
+                } else {
+                  content = pdfData?.textContent || `[PDF Document: ${doc.name}, Size: ${Math.round(doc.file_size / 1024)}KB - Text extraction service unavailable]`;
                 }
               } catch (pdfError) {
-                console.error('Error parsing PDF:', pdfError);
+                console.error('Error extracting PDF text:', pdfError);
                 content = `[PDF Document: ${doc.name}, Size: ${Math.round(doc.file_size / 1024)}KB - Error extracting text: ${pdfError.message}]`;
               }
             } else {
