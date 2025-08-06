@@ -1,4 +1,5 @@
-import { Shield, CheckCircle, MessageSquare, BarChart3, Users, Lock } from 'lucide-react';
+
+import { Shield, CheckCircle, MessageSquare, BarChart3, Users, Lock, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Link } from 'react-router-dom';
@@ -163,7 +164,7 @@ const Landing = () => {
       </div>
 
       {/* Anonymous Reporting Made Simple */}
-      <div className="bg-blue-50 py-16 sm:py-20">
+      <div className="py-16 sm:py-20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid lg:grid-cols-2 gap-12 items-center">
             <div>
@@ -196,7 +197,7 @@ const Landing = () => {
       </div>
 
       {/* Military-Grade Encryption */}
-      <div className="bg-green-50 py-16 sm:py-20">
+      <div className="py-16 sm:py-20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid lg:grid-cols-2 gap-12 items-center">
             <div className="order-2 lg:order-1">
@@ -211,15 +212,15 @@ const Landing = () => {
               </p>
               <ul className="space-y-3">
                 <li className="flex items-center">
-                  <CheckCircle className="h-5 w-5 text-green-600 mr-3" />
+                  <CheckCircle className="h-5 w-5 text-blue-600 mr-3" />
                   <span>AES-256 end-to-end encryption</span>
                 </li>
                 <li className="flex items-center">
-                  <CheckCircle className="h-5 w-5 text-green-600 mr-3" />
+                  <CheckCircle className="h-5 w-5 text-blue-600 mr-3" />
                   <span>Encrypted file attachments</span>
                 </li>
                 <li className="flex items-center">
-                  <CheckCircle className="h-5 w-5 text-green-600 mr-3" />
+                  <CheckCircle className="h-5 w-5 text-blue-600 mr-3" />
                   <span>SOC 2 Type II compliant infrastructure</span>
                 </li>
               </ul>
@@ -229,7 +230,7 @@ const Landing = () => {
       </div>
 
       {/* Compliance Made Easy */}
-      <div className="bg-purple-50 py-16 sm:py-20">
+      <div className="py-16 sm:py-20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid lg:grid-cols-2 gap-12 items-center">
             <div>
@@ -241,15 +242,15 @@ const Landing = () => {
               </p>
               <ul className="space-y-3">
                 <li className="flex items-center">
-                  <CheckCircle className="h-5 w-5 text-purple-600 mr-3" />
+                  <CheckCircle className="h-5 w-5 text-blue-600 mr-3" />
                   <span>GDPR & SOX compliant</span>
                 </li>
                 <li className="flex items-center">
-                  <CheckCircle className="h-5 w-5 text-purple-600 mr-3" />
+                  <CheckCircle className="h-5 w-5 text-blue-600 mr-3" />
                   <span>Automated audit trails</span>
                 </li>
                 <li className="flex items-center">
-                  <CheckCircle className="h-5 w-5 text-purple-600 mr-3" />
+                  <CheckCircle className="h-5 w-5 text-blue-600 mr-3" />
                   <span>Legal-ready documentation</span>
                 </li>
               </ul>
@@ -262,7 +263,7 @@ const Landing = () => {
       </div>
 
       {/* Secure Two-Way Communication */}
-      <div className="bg-yellow-50 py-16 sm:py-20">
+      <div className="py-16 sm:py-20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid lg:grid-cols-2 gap-12 items-center">
             <div className="order-2 lg:order-1">
@@ -277,15 +278,15 @@ const Landing = () => {
               </p>
               <ul className="space-y-3">
                 <li className="flex items-center">
-                  <CheckCircle className="h-5 w-5 text-yellow-600 mr-3" />
+                  <CheckCircle className="h-5 w-5 text-blue-600 mr-3" />
                   <span>Anonymous messaging system</span>
                 </li>
                 <li className="flex items-center">
-                  <CheckCircle className="h-5 w-5 text-yellow-600 mr-3" />
+                  <CheckCircle className="h-5 w-5 text-blue-600 mr-3" />
                   <span>File sharing capabilities</span>
                 </li>
                 <li className="flex items-center">
-                  <CheckCircle className="h-5 w-5 text-yellow-600 mr-3" />
+                  <CheckCircle className="h-5 w-5 text-blue-600 mr-3" />
                   <span>Real-time notifications</span>
                 </li>
               </ul>
@@ -294,29 +295,29 @@ const Landing = () => {
         </div>
       </div>
 
-      {/* Scale Without Limits */}
-      <div className="bg-cyan-50 py-16 sm:py-20">
+      {/* AI-Powered Case Analysis */}
+      <div className="py-16 sm:py-20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid lg:grid-cols-2 gap-12 items-center">
             <div>
               <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-6">
-                Scale Without Limits
+                AI-Powered Case Analysis
               </h2>
               <p className="text-lg text-gray-600 mb-6">
-                From startups to Fortune 500 companies, our platform scales with your organization. Handle thousands of reports with the same speed and security as your first.
+                Our AI case helper automatically analyzes reports, identifies key information, and suggests next steps. Streamline your investigation process while ensuring nothing important is overlooked.
               </p>
               <ul className="space-y-3">
                 <li className="flex items-center">
-                  <CheckCircle className="h-5 w-5 text-cyan-600 mr-3" />
-                  <span>Unlimited report handling</span>
+                  <CheckCircle className="h-5 w-5 text-blue-600 mr-3" />
+                  <span>Intelligent case categorization</span>
                 </li>
                 <li className="flex items-center">
-                  <CheckCircle className="h-5 w-5 text-cyan-600 mr-3" />
-                  <span>Multi-organization support</span>
+                  <CheckCircle className="h-5 w-5 text-blue-600 mr-3" />
+                  <span>Risk assessment automation</span>
                 </li>
                 <li className="flex items-center">
-                  <CheckCircle className="h-5 w-5 text-cyan-600 mr-3" />
-                  <span>Global infrastructure</span>
+                  <CheckCircle className="h-5 w-5 text-blue-600 mr-3" />
+                  <span>Investigation recommendations</span>
                 </li>
               </ul>
             </div>
@@ -360,8 +361,20 @@ const Landing = () => {
                     <span className="text-gray-700 text-sm sm:text-base">1GB Storage</span>
                   </div>
                   <div className="flex items-center space-x-3">
-                    <CheckCircle className="h-5 w-5 text-green-600" />
-                    <span className="text-gray-700 text-sm sm:text-base">Email Support</span>
+                    <X className="h-5 w-5 text-red-500" />
+                    <span className="text-gray-500 text-sm sm:text-base">Secure two-way Messaging</span>
+                  </div>
+                  <div className="flex items-center space-x-3">
+                    <X className="h-5 w-5 text-red-500" />
+                    <span className="text-gray-500 text-sm sm:text-base">AI Case Helper</span>
+                  </div>
+                  <div className="flex items-center space-x-3">
+                    <X className="h-5 w-5 text-red-500" />
+                    <span className="text-gray-500 text-sm sm:text-base">Custom branding</span>
+                  </div>
+                  <div className="flex items-center space-x-3">
+                    <X className="h-5 w-5 text-red-500" />
+                    <span className="text-gray-500 text-sm sm:text-base">Email Support</span>
                   </div>
                 </div>
                 <Button className="w-full mt-6" variant="outline" asChild>
