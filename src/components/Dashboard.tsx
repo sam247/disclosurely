@@ -904,22 +904,12 @@ const Dashboard = () => {
                       id: selectedReportForAI.id,
                       title: selectedReportForAI.title,
                       tracking_id: selectedReportForAI.tracking_id,
-                      status: selectedReportForAI.status as any,
+                      status: selectedReportForAI.status,
                       created_at: selectedReportForAI.created_at,
-                      report_type: selectedReportForAI.report_type as any,
+                      report_type: selectedReportForAI.report_type,
                       encrypted_content: selectedReportForAI.encrypted_content,
-                      organizations: selectedReportForAI.organizations || { name: 'Organization' },
-                      assigned_to: null,
-                      due_date: null,
-                      encryption_key_hash: selectedReportForAI.encryption_key_hash,
-                      organization_id: '',
-                      priority: selectedReportForAI.priority,
-                      resolved_at: null,
-                      submitted_by_email: selectedReportForAI.submitted_by_email,
-                      submitted_via_link_id: null,
-                      tags: [],
-                      updated_at: selectedReportForAI.created_at
-                    } as DatabaseReport}
+                      organizations: selectedReportForAI.organizations || { name: 'Organization' }
+                    }}
                     companyDocuments={[]}
                   />
                 </div>
