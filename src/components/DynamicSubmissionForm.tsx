@@ -285,8 +285,7 @@ const DynamicSubmissionForm = () => {
 
       const { encryptedData, keyHash } = encryptReport(reportData, linkData.organization_id);
 
-      // Create the report without authentication (using service role permissions)
-      // This bypasses RLS by using the service role key for public submissions
+      // Create the report and return the inserted data
       const { data: report, error: reportError } = await supabase
         .from('reports')
         .insert({
