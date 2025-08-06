@@ -17,17 +17,20 @@ const ComplianceSoftware = () => {
                 <img 
                   src="/lovable-uploads/c46ace0e-df58-4119-b5e3-8dcfa075ea2f.png" 
                   alt="Disclosurely" 
-                  className="h-8 w-auto"
+                  className="h-6 md:h-8 w-auto"
                 />
               </Link>
             </div>
             <div className="hidden md:flex items-center space-x-8">
               <Link to="/pricing" className="text-gray-600 hover:text-gray-900">Pricing</Link>
-              <Link to="/compliance-software" className="text-blue-600 font-medium">Compliance</Link>
-              <Link to="/contact" className="text-gray-600 hover:text-gray-900">Contact</Link>
               <a href="https://app.disclosurely.com/auth/login" className="text-gray-600 hover:text-gray-900">Sign in</a>
               <a href="https://app.disclosurely.com/auth/signup" className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors">
                 Get Started
+              </a>
+            </div>
+            <div className="md:hidden">
+              <a href="https://app.disclosurely.com/auth/login" className="bg-blue-600 text-white px-3 py-2 rounded-lg hover:bg-blue-700 transition-colors text-sm">
+                Sign In
               </a>
             </div>
           </div>

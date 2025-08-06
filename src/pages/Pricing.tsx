@@ -1,3 +1,4 @@
+
 import { Shield, Check, Star, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -58,7 +59,7 @@ const Pricing = () => {
               <CardHeader className="text-center pb-6">
                 <CardTitle className="text-xl sm:text-2xl font-bold">Starter</CardTitle>
                 <div className="mt-4">
-                  <span className="text-3xl sm:text-4xl font-bold">£19.99</span>
+                  <span className="text-3xl sm:text-4xl font-bold">£9.99</span>
                   <span className="text-gray-600 text-sm sm:text-base">/month</span>
                 </div>
                 <CardDescription className="text-sm sm:text-base">Perfect for small organizations</CardDescription>
@@ -106,7 +107,7 @@ const Pricing = () => {
               <CardHeader className="text-center pb-6">
                 <CardTitle className="text-xl sm:text-2xl font-bold">Pro</CardTitle>
                 <div className="mt-4">
-                  <span className="text-3xl sm:text-4xl font-bold">£49.99</span>
+                  <span className="text-3xl sm:text-4xl font-bold">£19.99</span>
                   <span className="text-gray-600 text-sm sm:text-base">/month</span>
                 </div>
                 <CardDescription className="text-sm sm:text-base">For growing organizations</CardDescription>

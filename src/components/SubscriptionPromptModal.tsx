@@ -71,7 +71,7 @@ const SubscriptionPromptModal = ({ open, onOpenChange }: SubscriptionPromptModal
               <CardTitle className="text-xl">Starter</CardTitle>
               <CardDescription>Perfect for small organizations</CardDescription>
               <div className="mt-4">
-                <span className="text-3xl font-bold">£19.99</span>
+                <span className="text-3xl font-bold">£9.99</span>
                 <span className="text-gray-600">/month</span>
               </div>
             </CardHeader>
@@ -114,7 +114,7 @@ const SubscriptionPromptModal = ({ open, onOpenChange }: SubscriptionPromptModal
               <CardTitle className="text-xl">Pro</CardTitle>
               <CardDescription>For growing organizations</CardDescription>
               <div className="mt-4">
-                <span className="text-3xl font-bold">£49.99</span>
+                <span className="text-3xl font-bold">£19.99</span>
                 <span className="text-gray-600">/month</span>
               </div>
             </CardHeader>
