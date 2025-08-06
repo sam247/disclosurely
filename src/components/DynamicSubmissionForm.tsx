@@ -301,7 +301,9 @@ const DynamicSubmissionForm = () => {
           status: 'new',
           priority: formData.priority,
           tags: [finalCategory]
-        });
+        })
+        .select()
+        .single();
 
       if (reportError) {
         console.error('Report submission error:', reportError);
@@ -325,7 +327,7 @@ const DynamicSubmissionForm = () => {
       // Upload attached files if any
       if (attachedFiles.length > 0 && report) {
         const uploadPromises = attachedFiles.map(file => 
-          uploadReportFile(file, trackingId, report[0]?.id || report.id)
+          uploadReportFile(file, trackingId, report.id)
         );
 
         const uploadResults = await Promise.all(uploadPromises);
