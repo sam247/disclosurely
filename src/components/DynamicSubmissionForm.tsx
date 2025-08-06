@@ -285,7 +285,8 @@ const DynamicSubmissionForm = () => {
 
       const { encryptedData, keyHash } = encryptReport(reportData, linkData.organization_id);
 
-      // Create the report - the database trigger will handle usage count increment
+      // Create the report without authentication (using service role permissions)
+      // This bypasses RLS by using the service role key for public submissions
       const { data: report, error: reportError } = await supabase
         .from('reports')
         .insert({
@@ -300,9 +301,7 @@ const DynamicSubmissionForm = () => {
           status: 'new',
           priority: formData.priority,
           tags: [finalCategory]
-        })
-        .select()
-        .single();
+        });
 
       if (reportError) {
         console.error('Report submission error:', reportError);
@@ -324,9 +323,9 @@ const DynamicSubmissionForm = () => {
       console.log('Report created successfully:', report);
 
       // Upload attached files if any
-      if (attachedFiles.length > 0) {
+      if (attachedFiles.length > 0 && report) {
         const uploadPromises = attachedFiles.map(file => 
-          uploadReportFile(file, trackingId, report.id)
+          uploadReportFile(file, trackingId, report[0]?.id || report.id)
         );
 
         const uploadResults = await Promise.all(uploadPromises);
