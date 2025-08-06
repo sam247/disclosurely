@@ -1,23 +1,27 @@
 
 import { ReactNode } from 'react';
 import { Home } from 'lucide-react';
-import { Link } from 'react-router-dom';
 
 interface AuthLayoutProps {
   children: ReactNode;
 }
 
 const AuthLayout = ({ children }: AuthLayoutProps) => {
+  const handleHomeClick = () => {
+    // Always redirect to main domain from auth pages
+    window.location.href = 'https://disclosurely.com';
+  };
+
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8 relative">
       {/* Home icon in top left of the page */}
-      <Link 
-        to="/" 
+      <button 
+        onClick={handleHomeClick}
         className="absolute top-6 left-6 p-2 text-gray-400 hover:text-gray-600 transition-colors bg-white rounded-lg shadow-sm z-10"
         title="Back to Home"
       >
         <Home className="h-6 w-6" />
-      </Link>
+      </button>
 
       <div className="sm:mx-auto sm:w-full sm:max-w-md">
         <div className="text-center">
