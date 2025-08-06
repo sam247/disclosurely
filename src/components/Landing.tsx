@@ -184,14 +184,14 @@ const Landing = () => {
                   </div>
                 </div>
               </div>
-              <div className="bg-gradient-to-br from-blue-50 to-indigo-100 p-6 sm:p-8 rounded-lg">
+              <div className="bg-gradient-to-br from-blue-50 to-blue-100 p-6 sm:p-8 rounded-lg">
                 <AnonymousReportingArt />
               </div>
             </div>
 
             {/* Encryption */}
             <div className="grid md:grid-cols-2 gap-8 sm:gap-12 items-center">
-              <div className="bg-gradient-to-br from-green-50 to-emerald-100 p-6 sm:p-8 rounded-lg order-2 md:order-1">
+              <div className="bg-gradient-to-br from-blue-50 to-blue-100 p-6 sm:p-8 rounded-lg order-2 md:order-1">
                 <EncryptionArt />
               </div>
               <div className="space-y-6 order-1 md:order-2">
@@ -244,14 +244,14 @@ const Landing = () => {
                   </div>
                 </div>
               </div>
-              <div className="bg-gradient-to-br from-purple-50 to-violet-100 p-6 sm:p-8 rounded-lg">
+              <div className="bg-gradient-to-br from-blue-50 to-blue-100 p-6 sm:p-8 rounded-lg">
                 <ComplianceArt />
               </div>
             </div>
 
             {/* Secure Messaging */}
             <div className="grid md:grid-cols-2 gap-8 sm:gap-12 items-center">
-              <div className="bg-gradient-to-br from-orange-50 to-amber-100 p-6 sm:p-8 rounded-lg order-2 md:order-1">
+              <div className="bg-gradient-to-br from-blue-50 to-blue-100 p-6 sm:p-8 rounded-lg order-2 md:order-1">
                 <SecureMessagingArt />
               </div>
               <div className="space-y-6 order-1 md:order-2">
@@ -304,16 +304,16 @@ const Landing = () => {
                   </div>
                 </div>
               </div>
-              <div className="bg-gradient-to-br from-violet-50 to-purple-100 p-6 sm:p-8 rounded-lg">
+              <div className="bg-gradient-to-br from-blue-50 to-blue-100 p-6 sm:p-8 rounded-lg">
                 <div className="w-full h-64 flex items-center justify-center">
                   <svg width="200" height="160" viewBox="0 0 200 160" className="drop-shadow-lg">
                     {/* AI Brain */}
-                    <circle cx="100" cy="80" r="50" stroke="#8B5CF6" strokeWidth="3" fill="none" opacity="0.8" />
-                    <circle cx="100" cy="80" r="35" stroke="#A855F7" strokeWidth="2" fill="none" opacity="0.6" />
-                    <circle cx="100" cy="80" r="20" stroke="#C084FC" strokeWidth="2" fill="none" opacity="0.4" />
+                    <circle cx="100" cy="80" r="50" stroke="#2563EB" strokeWidth="3" fill="none" opacity="0.8" />
+                    <circle cx="100" cy="80" r="35" stroke="#3B82F6" strokeWidth="2" fill="none" opacity="0.6" />
+                    <circle cx="100" cy="80" r="20" stroke="#60A5FA" strokeWidth="2" fill="none" opacity="0.4" />
                     
                     {/* Neural connections */}
-                    <g stroke="#8B5CF6" strokeWidth="1.5" opacity="0.7">
+                    <g stroke="#2563EB" strokeWidth="1.5" opacity="0.7">
                       <line x1="70" y1="60" x2="85" y2="70" />
                       <line x1="130" y1="60" x2="115" y2="70" />
                       <line x1="70" y1="100" x2="85" y2="90" />
@@ -321,7 +321,7 @@ const Landing = () => {
                     </g>
                     
                     {/* Data nodes */}
-                    <g fill="#8B5CF6" opacity="0.8">
+                    <g fill="#2563EB" opacity="0.8">
                       <circle cx="60" cy="50" r="6" />
                       <circle cx="140" cy="50" r="6" />
                       <circle cx="60" cy="110" r="6" />
@@ -331,7 +331,7 @@ const Landing = () => {
                     </g>
                     
                     {/* Analysis waves */}
-                    <g stroke="#A855F7" strokeWidth="2" fill="none" opacity="0.6">
+                    <g stroke="#3B82F6" strokeWidth="2" fill="none" opacity="0.6">
                       <path d="M20 80 Q40 60, 60 80 T100 80 T140 80 T180 80" />
                       <path d="M20 90 Q40 70, 60 90 T100 90 T140 90 T180 90" />
                       <path d="M20 70 Q40 50, 60 70 T100 70 T140 70 T180 70" />
