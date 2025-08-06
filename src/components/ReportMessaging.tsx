@@ -1,5 +1,5 @@
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Textarea } from '@/components/ui/textarea';
@@ -41,6 +41,15 @@ const ReportMessaging = ({ report, onClose }: ReportMessagingProps) => {
   const [newMessage, setNewMessage] = useState('');
   const [isLoading, setIsLoading] = useState(true);
   const [isSending, setIsSending] = useState(false);
+  const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  };
+
+  useEffect(() => {
+    scrollToBottom();
+  }, [messages]);
 
   useEffect(() => {
     fetchMessages();
@@ -64,13 +73,30 @@ const ReportMessaging = ({ report, onClose }: ReportMessagingProps) => {
             if (prev.some(msg => msg.id === newMsg.id)) {
               return prev;
             }
-            return [...prev, newMsg];
+            return [...prev, newMsg].sort((a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime());
           });
         }
       )
-      .subscribe();
+      .on(
+        'postgres_changes',
+        {
+          event: 'UPDATE',
+          schema: 'public',
+          table: 'report_messages',
+          filter: `report_id=eq.${report.id}`,
+        },
+        (payload) => {
+          console.log('Message updated on admin side:', payload.new);
+          const updatedMsg = payload.new as Message;
+          setMessages(prev => prev.map(msg => msg.id === updatedMsg.id ? updatedMsg : msg));
+        }
+      )
+      .subscribe((status) => {
+        console.log('Admin messaging subscription status:', status);
+      });
 
     return () => {
+      console.log('Cleaning up admin messaging subscription');
       supabase.removeChannel(channel);
     };
   }, [report.id]);
@@ -195,33 +221,36 @@ const ReportMessaging = ({ report, onClose }: ReportMessagingProps) => {
       </CardHeader>
       <CardContent className="space-y-4">
         {/* Messages Display */}
-        <div className="space-y-3 max-h-96 overflow-y-auto">
+        <div className="space-y-3 max-h-96 overflow-y-auto border rounded-lg p-4">
           {messages.length === 0 ? (
             <div className="text-center py-8 text-gray-500">
               <MessageSquare className="h-8 w-8 mx-auto mb-2 opacity-50" />
               <p>No messages yet. Start the conversation by sending a message below.</p>
             </div>
           ) : (
-            messages.map((message) => (
-              <div
-                key={message.id}
-                className={`p-3 rounded-lg ${
-                  message.sender_type === 'organization'
-                    ? 'bg-blue-50 ml-8 border-l-4 border-blue-500'
-                    : 'bg-gray-50 mr-8 border-l-4 border-gray-400'
-                }`}
-              >
-                <div className="flex justify-between items-start mb-1">
-                  <span className="text-sm font-medium">
-                    {message.sender_type === 'organization' ? 'You' : 'Whistleblower'}
-                  </span>
-                  <span className="text-xs text-gray-500">
-                    {new Date(message.created_at).toLocaleString()}
-                  </span>
+            <>
+              {messages.map((message) => (
+                <div
+                  key={message.id}
+                  className={`p-3 rounded-lg ${
+                    message.sender_type === 'organization'
+                      ? 'bg-blue-50 ml-8 border-l-4 border-blue-500'
+                      : 'bg-gray-50 mr-8 border-l-4 border-gray-400'
+                  }`}
+                >
+                  <div className="flex justify-between items-start mb-1">
+                    <span className="text-sm font-medium">
+                      {message.sender_type === 'organization' ? 'You' : 'Whistleblower'}
+                    </span>
+                    <span className="text-xs text-gray-500">
+                      {new Date(message.created_at).toLocaleString()}
+                    </span>
+                  </div>
+                  <p className="text-sm whitespace-pre-wrap">{message.encrypted_message}</p>
                 </div>
-                <p className="text-sm whitespace-pre-wrap">{message.encrypted_message}</p>
-              </div>
-            ))
+              ))}
+              <div ref={messagesEndRef} />
+            </>
           )}
         </div>
 

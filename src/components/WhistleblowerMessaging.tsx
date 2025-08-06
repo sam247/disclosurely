@@ -1,5 +1,5 @@
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Textarea } from '@/components/ui/textarea';
@@ -35,6 +35,15 @@ const WhistleblowerMessaging = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [isSending, setIsSending] = useState(false);
   const [isSearching, setIsSearching] = useState(false);
+  const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  };
+
+  useEffect(() => {
+    scrollToBottom();
+  }, [messages]);
 
   useEffect(() => {
     if (report) {
@@ -42,7 +51,7 @@ const WhistleblowerMessaging = () => {
       
       // Set up real-time subscription for new messages
       const channel = supabase
-        .channel('whistleblower-messages')
+        .channel(`whistleblower-messages-${report.id}`)
         .on(
           'postgres_changes',
           {
@@ -52,9 +61,15 @@ const WhistleblowerMessaging = () => {
             filter: `report_id=eq.${report.id}`,
           },
           (payload) => {
-            console.log('New message received:', payload.new);
+            console.log('New message received on whistleblower side:', payload.new);
             const newMsg = payload.new as Message;
-            setMessages(prev => [...prev, newMsg]);
+            setMessages(prev => {
+              // Check if message already exists to prevent duplicates
+              if (prev.some(msg => msg.id === newMsg.id)) {
+                return prev;
+              }
+              return [...prev, newMsg].sort((a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime());
+            });
           }
         )
         .on(
@@ -66,14 +81,17 @@ const WhistleblowerMessaging = () => {
             filter: `report_id=eq.${report.id}`,
           },
           (payload) => {
-            console.log('Message updated:', payload.new);
+            console.log('Message updated on whistleblower side:', payload.new);
             const updatedMsg = payload.new as Message;
             setMessages(prev => prev.map(msg => msg.id === updatedMsg.id ? updatedMsg : msg));
           }
         )
-        .subscribe();
+        .subscribe((status) => {
+          console.log('Whistleblower messaging subscription status:', status);
+        });
 
       return () => {
+        console.log('Cleaning up whistleblower messaging subscription');
         supabase.removeChannel(channel);
       };
     }
@@ -293,7 +311,7 @@ const WhistleblowerMessaging = () => {
           </CardHeader>
           <CardContent className="space-y-4">
             {/* Messages Display */}
-            <div className="space-y-3 max-h-96 overflow-y-auto">
+            <div className="space-y-3 max-h-96 overflow-y-auto border rounded-lg p-4">
               {isLoading ? (
                 <div className="flex items-center justify-center py-8">
                   <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
@@ -305,26 +323,29 @@ const WhistleblowerMessaging = () => {
                   <p>No messages yet. Send a message to start the conversation.</p>
                 </div>
               ) : (
-                messages.map((message) => (
-                  <div
-                    key={message.id}
-                    className={`p-3 rounded-lg ${
-                      message.sender_type === 'whistleblower'
-                        ? 'bg-green-50 ml-8 border-l-4 border-green-500'
-                        : 'bg-gray-50 mr-8 border-l-4 border-gray-400'
-                    }`}
-                  >
-                    <div className="flex justify-between items-start mb-1">
-                      <span className="text-sm font-medium">
-                        {message.sender_type === 'whistleblower' ? 'You' : 'Organization'}
-                      </span>
-                      <span className="text-xs text-gray-500">
-                        {new Date(message.created_at).toLocaleString()}
-                      </span>
+                <>
+                  {messages.map((message) => (
+                    <div
+                      key={message.id}
+                      className={`p-3 rounded-lg ${
+                        message.sender_type === 'whistleblower'
+                          ? 'bg-green-50 ml-8 border-l-4 border-green-500'
+                          : 'bg-gray-50 mr-8 border-l-4 border-gray-400'
+                      }`}
+                    >
+                      <div className="flex justify-between items-start mb-1">
+                        <span className="text-sm font-medium">
+                          {message.sender_type === 'whistleblower' ? 'You' : 'Organization'}
+                        </span>
+                        <span className="text-xs text-gray-500">
+                          {new Date(message.created_at).toLocaleString()}
+                        </span>
+                      </div>
+                      <p className="text-sm whitespace-pre-wrap">{message.encrypted_message}</p>
                     </div>
-                    <p className="text-sm whitespace-pre-wrap">{message.encrypted_message}</p>
-                  </div>
-                ))
+                  ))}
+                  <div ref={messagesEndRef} />
+                </>
               )}
             </div>
 
