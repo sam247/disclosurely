@@ -3,6 +3,11 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Link } from 'react-router-dom';
 import { Footer } from '@/components/ui/footer';
+import AnonymousReportingArt from '@/components/artwork/AnonymousReportingArt';
+import EncryptionArt from '@/components/artwork/EncryptionArt';
+import SecureMessagingArt from '@/components/artwork/SecureMessagingArt';
+import ComplianceArt from '@/components/artwork/ComplianceArt';
+import UnlimitedScaleArt from '@/components/artwork/UnlimitedScaleArt';
 
 const Landing = () => {
   return (
@@ -153,6 +158,171 @@ const Landing = () => {
                 </CardDescription>
               </CardContent>
             </Card>
+          </div>
+        </div>
+      </div>
+
+      {/* Anonymous Reporting Made Simple */}
+      <div className="bg-blue-50 py-16 sm:py-20">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="grid lg:grid-cols-2 gap-12 items-center">
+            <div>
+              <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-6">
+                Anonymous Reporting Made Simple
+              </h2>
+              <p className="text-lg text-gray-600 mb-6">
+                Enable employees to report misconduct, ethics violations, or other concerns completely anonymously. Our advanced encryption ensures whistleblower identity protection while maintaining full compliance with regulatory requirements.
+              </p>
+              <ul className="space-y-3">
+                <li className="flex items-center">
+                  <CheckCircle className="h-5 w-5 text-blue-600 mr-3" />
+                  <span>Zero data collection on reporters</span>
+                </li>
+                <li className="flex items-center">
+                  <CheckCircle className="h-5 w-5 text-blue-600 mr-3" />
+                  <span>Anonymous follow-up messaging</span>
+                </li>
+                <li className="flex items-center">
+                  <CheckCircle className="h-5 w-5 text-blue-600 mr-3" />
+                  <span>Multiple language support</span>
+                </li>
+              </ul>
+            </div>
+            <div>
+              <AnonymousReportingArt />
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Military-Grade Encryption */}
+      <div className="bg-green-50 py-16 sm:py-20">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="grid lg:grid-cols-2 gap-12 items-center">
+            <div className="order-2 lg:order-1">
+              <EncryptionArt />
+            </div>
+            <div className="order-1 lg:order-2">
+              <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-6">
+                Military-Grade Encryption
+              </h2>
+              <p className="text-lg text-gray-600 mb-6">
+                Every report is protected with AES-256 encryption, the same standard used by banks and government agencies. Your sensitive data is secure from submission to resolution.
+              </p>
+              <ul className="space-y-3">
+                <li className="flex items-center">
+                  <CheckCircle className="h-5 w-5 text-green-600 mr-3" />
+                  <span>AES-256 end-to-end encryption</span>
+                </li>
+                <li className="flex items-center">
+                  <CheckCircle className="h-5 w-5 text-green-600 mr-3" />
+                  <span>Encrypted file attachments</span>
+                </li>
+                <li className="flex items-center">
+                  <CheckCircle className="h-5 w-5 text-green-600 mr-3" />
+                  <span>SOC 2 Type II compliant infrastructure</span>
+                </li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Compliance Made Easy */}
+      <div className="bg-purple-50 py-16 sm:py-20">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="grid lg:grid-cols-2 gap-12 items-center">
+            <div>
+              <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-6">
+                Compliance Made Easy
+              </h2>
+              <p className="text-lg text-gray-600 mb-6">
+                Built-in compliance with major regulations including GDPR, SOX, and industry-specific requirements. Automated documentation and audit trails keep you compliant without extra effort.
+              </p>
+              <ul className="space-y-3">
+                <li className="flex items-center">
+                  <CheckCircle className="h-5 w-5 text-purple-600 mr-3" />
+                  <span>GDPR & SOX compliant</span>
+                </li>
+                <li className="flex items-center">
+                  <CheckCircle className="h-5 w-5 text-purple-600 mr-3" />
+                  <span>Automated audit trails</span>
+                </li>
+                <li className="flex items-center">
+                  <CheckCircle className="h-5 w-5 text-purple-600 mr-3" />
+                  <span>Legal-ready documentation</span>
+                </li>
+              </ul>
+            </div>
+            <div>
+              <ComplianceArt />
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Secure Two-Way Communication */}
+      <div className="bg-yellow-50 py-16 sm:py-20">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="grid lg:grid-cols-2 gap-12 items-center">
+            <div className="order-2 lg:order-1">
+              <SecureMessagingArt />
+            </div>
+            <div className="order-1 lg:order-2">
+              <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-6">
+                Secure Two-Way Communication
+              </h2>
+              <p className="text-lg text-gray-600 mb-6">
+                Enable follow-up conversations between investigators and whistleblowers while maintaining complete anonymity. Request additional information and provide updates securely.
+              </p>
+              <ul className="space-y-3">
+                <li className="flex items-center">
+                  <CheckCircle className="h-5 w-5 text-yellow-600 mr-3" />
+                  <span>Anonymous messaging system</span>
+                </li>
+                <li className="flex items-center">
+                  <CheckCircle className="h-5 w-5 text-yellow-600 mr-3" />
+                  <span>File sharing capabilities</span>
+                </li>
+                <li className="flex items-center">
+                  <CheckCircle className="h-5 w-5 text-yellow-600 mr-3" />
+                  <span>Real-time notifications</span>
+                </li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Scale Without Limits */}
+      <div className="bg-cyan-50 py-16 sm:py-20">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="grid lg:grid-cols-2 gap-12 items-center">
+            <div>
+              <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-6">
+                Scale Without Limits
+              </h2>
+              <p className="text-lg text-gray-600 mb-6">
+                From startups to Fortune 500 companies, our platform scales with your organization. Handle thousands of reports with the same speed and security as your first.
+              </p>
+              <ul className="space-y-3">
+                <li className="flex items-center">
+                  <CheckCircle className="h-5 w-5 text-cyan-600 mr-3" />
+                  <span>Unlimited report handling</span>
+                </li>
+                <li className="flex items-center">
+                  <CheckCircle className="h-5 w-5 text-cyan-600 mr-3" />
+                  <span>Multi-organization support</span>
+                </li>
+                <li className="flex items-center">
+                  <CheckCircle className="h-5 w-5 text-cyan-600 mr-3" />
+                  <span>Global infrastructure</span>
+                </li>
+              </ul>
+            </div>
+            <div>
+              <UnlimitedScaleArt />
+            </div>
           </div>
         </div>
       </div>
