@@ -70,6 +70,7 @@ const Dashboard = () => {
   const [showSubscriptionModal, setShowSubscriptionModal] = useState(false);
   const [hasShownSubscriptionModal, setHasShownSubscriptionModal] = useState(false);
   const [isCheckingSubscription, setIsCheckingSubscription] = useState(false);
+  const [selectedReportForAI, setSelectedReportForAI] = useState<Report | null>(null);
 
   console.log('Dashboard - Current subscription data:', subscriptionData);
 
@@ -833,7 +834,76 @@ const Dashboard = () => {
             </TabsContent>
 
             <TabsContent value="ai-help">
-              <AICaseHelper />
+              {!selectedReportForAI ? (
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <Bot className="h-5 w-5" />
+                      AI Case Helper
+                      <span className="bg-green-100 text-green-800 text-xs font-medium px-2.5 py-0.5 rounded-full">PRO</span>
+                    </CardTitle>
+                    <CardDescription>
+                      Select a case to get AI-powered analysis and recommendations
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    {reports.length === 0 && archivedReports.length === 0 ? (
+                      <div className="text-center py-8">
+                        <FileText className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+                        <p className="text-gray-600">No cases available for analysis</p>
+                        <p className="text-sm text-gray-500">Cases will appear here once submitted through your link</p>
+                      </div>
+                    ) : (
+                      <div className="space-y-4">
+                        <h3 className="font-medium">Select a case to analyze:</h3>
+                        <div className="space-y-2">
+                          {[...reports, ...archivedReports].map((report) => (
+                            <div
+                              key={report.id}
+                              className="border rounded-lg p-3 hover:bg-gray-50 cursor-pointer transition-colors"
+                              onClick={() => setSelectedReportForAI(report)}
+                            >
+                              <div className="flex justify-between items-start">
+                                <div>
+                                  <h4 className="font-medium text-sm">{report.title}</h4>
+                                  <p className="text-xs text-gray-600">{report.tracking_id}</p>
+                                  <p className="text-xs text-gray-500">
+                                    {new Date(report.created_at).toLocaleDateString()}
+                                  </p>
+                                </div>
+                                <span className={`px-2 py-1 text-xs rounded-full ${
+                                  report.status === 'new' ? 'bg-blue-100 text-blue-800' :
+                                  report.status === 'in_review' ? 'bg-yellow-100 text-yellow-800' :
+                                  report.status === 'investigating' ? 'bg-orange-100 text-orange-800' :
+                                  report.status === 'resolved' ? 'bg-green-100 text-green-800' :
+                                  report.status === 'closed' ? 'bg-gray-100 text-gray-800' :
+                                  'bg-gray-100 text-gray-800'
+                                }`}>
+                                  {report.status.replace('_', ' ')}
+                                </span>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                  </CardContent>
+                </Card>
+              ) : (
+                <div className="space-y-4">
+                  <Button 
+                    variant="outline" 
+                    onClick={() => setSelectedReportForAI(null)}
+                    className="mb-4"
+                  >
+                    ← Back to Case Selection
+                  </Button>
+                  <AICaseHelper 
+                    report={selectedReportForAI}
+                    companyDocuments={[]}
+                  />
+                </div>
+              )}
             </TabsContent>
           </Tabs>
         </div>
