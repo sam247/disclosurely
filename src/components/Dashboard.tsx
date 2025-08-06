@@ -21,6 +21,7 @@ import AICaseHelper from '@/components/AICaseHelper';
 import { useCustomDomain } from '@/hooks/useCustomDomain';
 import { useSubscriptionLimits } from '@/hooks/useSubscriptionLimits';
 import SubscriptionPromptModal from '@/components/SubscriptionPromptModal';
+import type { Report as DatabaseReport } from '@/types/database';
 
 interface Report {
   id: string;
@@ -899,7 +900,16 @@ const Dashboard = () => {
                     ← Back to Case Selection
                   </Button>
                   <AICaseHelper 
-                    report={selectedReportForAI}
+                    report={{
+                      id: selectedReportForAI.id,
+                      title: selectedReportForAI.title,
+                      tracking_id: selectedReportForAI.tracking_id,
+                      status: selectedReportForAI.status as any,
+                      created_at: selectedReportForAI.created_at,
+                      report_type: selectedReportForAI.report_type as any,
+                      encrypted_content: selectedReportForAI.encrypted_content,
+                      organizations: selectedReportForAI.organizations || { name: 'Organization' }
+                    } as DatabaseReport}
                     companyDocuments={[]}
                   />
                 </div>
