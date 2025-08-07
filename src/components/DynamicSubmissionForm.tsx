@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -208,7 +209,6 @@ const DynamicSubmissionForm = () => {
       const trackingId = generateTrackingId();
       const finalCategory = getFinalCategory();
       
-      // Encrypt the report data
       const reportContent = {
         title: formData.title,
         description: formData.description,
@@ -218,23 +218,18 @@ const DynamicSubmissionForm = () => {
 
       const { encryptedData, keyHash } = encryptReport(reportContent, linkData.organization_id);
 
-      console.log('=== DEBUGGING SUBMISSION ===');
-      console.log('Link token:', linkToken);
-      console.log('Link data:', linkData);
+      console.log('=== TARGETED RLS DEBUGGING ===');
       
-      // Verify the link exists and get its actual ID
-      const { data: linkVerification, error: linkVerifyError } = await supabase
+      // Step 1: Get the exact link data we'll use for insertion
+      const { data: linkForInsertion, error: linkError } = await supabase
         .from('organization_links')
-        .select('*')
+        .select('id, organization_id, is_active, expires_at, usage_count, usage_limit')
         .eq('link_token', linkToken)
         .eq('is_active', true)
         .single();
 
-      console.log('Link verification result:', linkVerification);
-      console.log('Link verification error:', linkVerifyError);
-        
-      if (linkVerifyError || !linkVerification) {
-        console.error('Link verification failed:', linkVerifyError);
+      if (linkError || !linkForInsertion) {
+        console.error('Cannot get link for insertion:', linkError);
         toast({
           title: "Link verification failed",
           description: "Unable to verify submission link.",
@@ -243,31 +238,68 @@ const DynamicSubmissionForm = () => {
         return;
       }
 
-      // Use the verified link data for insertion
+      console.log('Link for insertion:', linkForInsertion);
+
+      // Step 2: Test each part of the RLS policy condition manually
+      console.log('=== TESTING EACH RLS CONDITION ===');
+      
+      // Test basic link existence and activity
+      const { data: linkExists } = await supabase
+        .from('organization_links')
+        .select('id, is_active')
+        .eq('id', linkForInsertion.id)
+        .single();
+      console.log('Link exists and active check:', linkExists);
+
+      // Test expiration condition
+      const now = new Date().toISOString();
+      const expirationTest = !linkForInsertion.expires_at || linkForInsertion.expires_at > now;
+      console.log('Expiration test:', {
+        expires_at: linkForInsertion.expires_at,
+        now: now,
+        passes: expirationTest
+      });
+
+      // Test usage limit condition  
+      const usageTest = !linkForInsertion.usage_limit || linkForInsertion.usage_count < linkForInsertion.usage_limit;
+      console.log('Usage limit test:', {
+        usage_limit: linkForInsertion.usage_limit,
+        usage_count: linkForInsertion.usage_count,
+        passes: usageTest
+      });
+
+      // Step 3: Test the exact RLS subquery manually
+      const { data: rlsSubqueryTest, error: rlsError } = await supabase
+        .from('organization_links')
+        .select('id')
+        .eq('id', linkForInsertion.id)
+        .eq('is_active', true)
+        .or(`expires_at.is.null,expires_at.gt.${now}`)
+        .or(`usage_limit.is.null,usage_count.lt.${linkForInsertion.usage_limit || 999999}`);
+
+      console.log('RLS subquery simulation:', rlsSubqueryTest);
+      console.log('RLS subquery error:', rlsError);
+
+      // Step 4: Prepare the exact payload we're trying to insert
       const reportPayload = {
-        organization_id: linkVerification.organization_id,
+        organization_id: linkForInsertion.organization_id,
         tracking_id: trackingId,
         title: formData.title,
         encrypted_content: encryptedData,
         encryption_key_hash: keyHash,
         report_type: isAnonymous ? 'anonymous' as const : 'confidential' as const,
         submitted_by_email: isAnonymous ? null : formData.submitter_email || null,
-        submitted_via_link_id: linkVerification.id,
+        submitted_via_link_id: linkForInsertion.id,
         status: 'new' as const,
         priority: formData.priority,
         tags: [finalCategory]
       };
 
-      console.log('Final report payload:', reportPayload);
-
-      // Test if we can validate the link using the existing function
-      const { data: linkValidation, error: validationError } = await supabase.rpc('validate_organization_link', {
-        link_id: linkVerification.id
-      });
+      console.log('=== INSERTION ATTEMPT ===');
+      console.log('Final payload:', reportPayload);
+      console.log('submitted_via_link_id is NOT NULL:', reportPayload.submitted_via_link_id !== null);
       
-      console.log('Link validation result:', linkValidation);
-      console.log('Link validation error:', validationError);
-
+      // Step 5: Attempt the insertion
       const { data: reportData, error: reportError } = await supabase
         .from('reports')
         .insert(reportPayload)
@@ -279,11 +311,26 @@ const DynamicSubmissionForm = () => {
         console.error('Error message:', reportError.message);
         console.error('Error details:', reportError.details);
         console.error('Error hint:', reportError.hint);
-        console.error('Full error:', JSON.stringify(reportError, null, 2));
+        
+        // If RLS is the issue, let's try to understand why
+        if (reportError.code === '42501') {
+          console.error('RLS POLICY VIOLATION - The policy check failed');
+          console.error('This means the EXISTS clause in Allow_anonymous_link_submissions returned false');
+          console.error('Even though our manual tests passed, the policy subquery failed');
+          
+          // Try a direct policy test
+          const { data: directPolicyTest } = await supabase
+            .from('organization_links')  
+            .select('id')
+            .eq('id', linkForInsertion.id)
+            .eq('is_active', true);
+            
+          console.log('Direct policy test (just id and is_active):', directPolicyTest);
+        }
         
         toast({
           title: "Submission failed",
-          description: `Database error: ${reportError.message}. Please check console for details.`,
+          description: `RLS Policy Error: ${reportError.message}. Check console for detailed analysis.`,
           variant: "destructive",
         });
         return;
@@ -316,8 +363,6 @@ const DynamicSubmissionForm = () => {
     } catch (error: any) {
       console.error('=== SUBMISSION CATCH BLOCK ===');
       console.error('Caught error:', error);
-      console.error('Error message:', error.message);
-      console.error('Error stack:', error.stack);
       
       toast({
         title: "Submission failed",
