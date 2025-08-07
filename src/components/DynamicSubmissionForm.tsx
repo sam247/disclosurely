@@ -5,7 +5,20 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
-import { supabase } from '@/integrations/supabase/client';
+import { createClient } from '@supabase/supabase-js';
+import type { Database } from '@/integrations/supabase/types';
+
+// Create anonymous client for report submissions
+const anonSupabase = createClient<Database>(
+  "https://cxmuzperkittvibslnff.supabase.co",
+  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImN4bXV6cGVya2l0dHZpYnNsbmZmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTAyNTk1MDEsImV4cCI6MjA2NTgzNTUwMX0.NxqrBnzSR-dxfWw4mn7nIHB-QTt900MtAh96fCCm1Lg",
+  {
+    auth: {
+      persistSession: false,
+      autoRefreshToken: false
+    }
+  }
+);
 import { Shield, AlertTriangle, Search } from 'lucide-react';
 import { encryptReport } from '@/utils/encryption';
 import BrandedFormLayout from './BrandedFormLayout';
@@ -63,7 +76,7 @@ const DynamicSubmissionForm = () => {
     try {
       console.log('Fetching link data for token:', linkToken);
       
-      const { data: linkInfo, error: linkError } = await supabase
+      const { data: linkInfo, error: linkError } = await anonSupabase
         .from('organization_links')
         .select(`
           id,
@@ -244,7 +257,7 @@ const DynamicSubmissionForm = () => {
 
       console.log('Report payload:', reportPayload);
 
-      const { data: reportData, error: reportError } = await supabase
+      const { data: reportData, error: reportError } = await anonSupabase
         .from('reports')
         .insert(reportPayload)
         .select();
