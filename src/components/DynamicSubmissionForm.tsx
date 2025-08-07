@@ -207,49 +207,12 @@ const DynamicSubmissionForm = () => {
       const trackingId = generateTrackingId();
       const finalCategory = getFinalCategory();
       
-      console.log('=== DEBUGGING REPORT SUBMISSION ===');
-      console.log('1. Form data:', {
+      console.log('Submitting report with data:', {
         title: formData.title,
-        description: formData.description,
         category: finalCategory,
         isAnonymous,
-        priority: formData.priority
+        organizationId: linkData.organization_id
       });
-      
-      console.log('2. Link data:', {
-        organizationId: linkData.organization_id,
-        linkId: linkData.id,
-        trackingId
-      });
-
-      // Check current auth state
-      const { data: { user }, error: authError } = await supabase.auth.getUser();
-      console.log('3. Current auth state:', {
-        user: user ? { id: user.id, email: user.email } : null,
-        authError,
-        isAnonymous
-      });
-
-      // Test connection to database
-      console.log('4. Testing database connection...');
-      const { data: testData, error: testError } = await supabase
-        .from('organizations')
-        .select('id, name')
-        .eq('id', linkData.organization_id)
-        .single();
-      
-      console.log('5. Organization test:', { testData, testError });
-
-      // Check if organization exists and is accessible
-      if (testError || !testData) {
-        console.error('Organization not found or not accessible:', testError);
-        toast({
-          title: "Organization Error",
-          description: "Unable to verify organization. Please try again.",
-          variant: "destructive",
-        });
-        return;
-      }
 
       // Encrypt the report data
       const reportContent = {
@@ -259,11 +222,9 @@ const DynamicSubmissionForm = () => {
         submission_method: 'web_form'
       };
 
-      console.log('6. Encrypting report content...');
       const { encryptedData, keyHash } = encryptReport(reportContent, linkData.organization_id);
-      console.log('7. Encryption completed');
 
-      // Prepare the exact payload we'll send
+      // Prepare the report payload
       const reportPayload = {
         organization_id: linkData.organization_id,
         tracking_id: trackingId,
@@ -278,95 +239,29 @@ const DynamicSubmissionForm = () => {
         tags: [finalCategory]
       };
 
-      console.log('8. Final report payload:', reportPayload);
+      console.log('Creating report with payload:', reportPayload);
 
-      // Test a simple insert first
-      console.log('9. Testing simple insert...');
-      const testPayload = {
-        organization_id: linkData.organization_id,
-        tracking_id: trackingId + '_test',
-        title: 'Test Report',
-        encrypted_content: 'test_content',
-        encryption_key_hash: 'test_hash',
-        report_type: 'anonymous' as const,
-        status: 'new' as const,
-        priority: 3,
-        tags: ['test']
-      };
-
-      console.log('10. Simple test payload:', testPayload);
-
-      const { data: testReport, error: testReportError } = await supabase
-        .from('reports')
-        .insert(testPayload)
-        .select();
-
-      if (testReportError) {
-        console.error('11. Test report failed:', {
-          error: testReportError,
-          message: testReportError.message,
-          details: testReportError.details,
-          code: testReportError.code,
-          hint: testReportError.hint
-        });
-        
-        // Test with minimal payload
-        console.log('12. Testing with absolute minimal payload...');
-        const minimalPayload = {
-          organization_id: linkData.organization_id,
-          tracking_id: trackingId + '_minimal',
-          title: 'Minimal Test',
-          encrypted_content: 'test',
-          encryption_key_hash: 'test'
-        };
-
-        const { data: minimalTest, error: minimalError } = await supabase
-          .from('reports')
-          .insert(minimalPayload)
-          .select();
-
-        console.log('13. Minimal test result:', { minimalTest, minimalError });
-        
-        toast({
-          title: "Submission failed",
-          description: `Database error: ${testReportError.message}. Please contact support.`,
-          variant: "destructive",
-        });
-        return;
-      }
-
-      console.log('14. Test report created successfully:', testReport);
-
-      // Now try the actual report
-      console.log('15. Creating actual report...');
       const { data: reportData, error: reportError } = await supabase
         .from('reports')
         .insert(reportPayload)
         .select();
 
       if (reportError) {
-        console.error('16. Actual report submission failed:', {
-          error: reportError,
-          message: reportError.message,
-          details: reportError.details,
-          code: reportError.code,
-          hint: reportError.hint
-        });
-        
+        console.error('Report submission error:', reportError);
         toast({
           title: "Submission failed",
-          description: `Database error: ${reportError.message}. Please contact support.`,
+          description: `Error: ${reportError.message}. Please try again.`,
           variant: "destructive",
         });
         return;
       }
 
       const report = reportData?.[0];
-      console.log('17. Report created successfully:', report);
+      console.log('Report created successfully:', report);
 
       // Upload attached files if any
       if (attachedFiles.length > 0 && report) {
-        console.log('18. Uploading files...');
+        console.log('Uploading files...');
         const uploadPromises = attachedFiles.map(file => 
           uploadReportFile(file, trackingId, report.id)
         );
@@ -375,7 +270,7 @@ const DynamicSubmissionForm = () => {
         const failedUploads = uploadResults.filter(result => !result.success);
 
         if (failedUploads.length > 0) {
-          console.error('19. Some file uploads failed:', failedUploads);
+          console.error('Some file uploads failed:', failedUploads);
           toast({
             title: "Report submitted",
             description: `Report submitted successfully, but ${failedUploads.length} file(s) failed to upload.`,
@@ -384,12 +279,11 @@ const DynamicSubmissionForm = () => {
         }
       }
 
-      console.log('20. Navigating to success page...');
       // Navigate to success page
       navigate(`/secure/tool/success?trackingId=${encodeURIComponent(trackingId)}`);
 
     } catch (error: any) {
-      console.error('21. Catch block error:', error);
+      console.error('Submission error:', error);
       toast({
         title: "Submission failed",
         description: error.message || "There was an error submitting your report. Please try again.",
