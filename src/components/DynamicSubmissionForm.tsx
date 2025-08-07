@@ -64,9 +64,6 @@ const DynamicSubmissionForm = () => {
     }
 
     try {
-      console.log('=== FETCHING LINK DATA ===');
-      console.log('Link token:', linkToken);
-      
       const { data: linkInfo, error: linkError } = await supabase
         .from('organization_links')
         .select(`
@@ -100,16 +97,8 @@ const DynamicSubmissionForm = () => {
         return;
       }
 
-      console.log('=== LINK VALIDATION ===');
-      console.log('Link found:', linkInfo);
-      console.log('Is active:', linkInfo.is_active);
-      console.log('Expires at:', linkInfo.expires_at);
-      console.log('Usage count:', linkInfo.usage_count);
-      console.log('Usage limit:', linkInfo.usage_limit);
-
       // Validation checks
       if (linkInfo.expires_at && new Date(linkInfo.expires_at) < new Date()) {
-        console.error('Link has expired');
         toast({
           title: "Link expired",
           description: "This submission link has expired.",
@@ -120,7 +109,6 @@ const DynamicSubmissionForm = () => {
       }
 
       if (linkInfo.usage_limit && linkInfo.usage_count >= linkInfo.usage_limit) {
-        console.error('Link usage limit reached');
         toast({
           title: "Usage limit reached",
           description: "This submission link has reached its usage limit.",
@@ -212,8 +200,6 @@ const DynamicSubmissionForm = () => {
     e.preventDefault();
     if (!linkData) return;
 
-    console.log('=== STARTING REPORT SUBMISSION ===');
-
     if (!validateForm()) return;
 
     setSubmitting(true);
@@ -222,12 +208,6 @@ const DynamicSubmissionForm = () => {
       const trackingId = generateTrackingId();
       const finalCategory = getFinalCategory();
       
-      console.log('Form validation passed. Proceeding with submission...');
-      console.log('Tracking ID:', trackingId);
-      console.log('Organization ID:', linkData.organization_id);
-      console.log('Anonymous submission:', isAnonymous);
-      console.log('Link ID:', linkData.id);
-
       // Encrypt the report data
       const reportContent = {
         title: formData.title,
@@ -236,9 +216,7 @@ const DynamicSubmissionForm = () => {
         submission_method: 'web_form'
       };
 
-      console.log('Encrypting report content...');
       const { encryptedData, keyHash } = encryptReport(reportContent, linkData.organization_id);
-      console.log('Encryption completed. Key hash length:', keyHash.length);
 
       // Prepare the report payload
       const reportPayload = {
@@ -255,48 +233,13 @@ const DynamicSubmissionForm = () => {
         tags: [finalCategory]
       };
 
-      console.log('=== FINAL PAYLOAD FOR INSERTION ===');
-      console.log('Payload:', JSON.stringify(reportPayload, null, 2));
-
-      console.log('=== RLS POLICY VALIDATION ===');
-      console.log('submitted_via_link_id is NOT NULL:', reportPayload.submitted_via_link_id !== null);
-      console.log('Link ID matches:', reportPayload.submitted_via_link_id === linkData.id);
-      console.log('Organization ID matches:', reportPayload.organization_id === linkData.organization_id);
-      console.log('Link is active:', linkData.is_active);
-      console.log('Link not expired:', !linkData.expires_at || new Date(linkData.expires_at) > new Date());
-      console.log('Under usage limit:', !linkData.usage_limit || linkData.usage_count < linkData.usage_limit);
-
-      // Try inserting without any auth context for anonymous submissions
-      console.log('Attempting database insertion...');
-      
-      // Create a new Supabase client instance without auth for anonymous submissions
-      const anonClient = supabase;
-      
-      const { data: reportData, error: reportError } = await anonClient
+      const { data: reportData, error: reportError } = await supabase
         .from('reports')
         .insert(reportPayload)
         .select();
 
-      console.log('=== DATABASE RESPONSE ===');
       if (reportError) {
-        console.error('Database insertion failed:');
-        console.error('Error code:', reportError.code);
-        console.error('Error message:', reportError.message);
-        console.error('Error details:', reportError.details);
-        console.error('Error hint:', reportError.hint);
-        console.error('Full error object:', JSON.stringify(reportError, null, 2));
-        
-        // Let's test if we can verify the link manually
-        console.log('=== MANUAL LINK VERIFICATION ===');
-        const { data: linkVerification, error: linkVerifyError } = await supabase
-          .from('organization_links')
-          .select('*')
-          .eq('id', linkData.id)
-          .single();
-        
-        console.log('Link verification result:', linkVerification);
-        console.log('Link verification error:', linkVerifyError);
-        
+        console.error('Database insertion failed:', reportError);
         toast({
           title: "Submission failed",
           description: `Unable to submit report: ${reportError.message}`,
@@ -306,11 +249,9 @@ const DynamicSubmissionForm = () => {
       }
 
       const report = reportData?.[0];
-      console.log('Report created successfully:', report);
 
       // Upload attached files if any
       if (attachedFiles.length > 0 && report) {
-        console.log('Uploading files...');
         const uploadPromises = attachedFiles.map(file => 
           uploadReportFile(file, trackingId, report.id)
         );
@@ -319,7 +260,6 @@ const DynamicSubmissionForm = () => {
         const failedUploads = uploadResults.filter(result => !result.success);
 
         if (failedUploads.length > 0) {
-          console.error('Some file uploads failed:', failedUploads);
           toast({
             title: "Report submitted",
             description: `Report submitted successfully, but ${failedUploads.length} file(s) failed to upload.`,
@@ -328,18 +268,11 @@ const DynamicSubmissionForm = () => {
         }
       }
 
-      console.log('=== SUBMISSION COMPLETED SUCCESSFULLY ===');
-      console.log('Navigating to success page...');
-
       // Navigate to success page
       navigate(`/secure/tool/success?trackingId=${encodeURIComponent(trackingId)}`);
 
     } catch (error: any) {
-      console.error('=== SUBMISSION ERROR ===');
-      console.error('Error type:', typeof error);
-      console.error('Error message:', error?.message);
-      console.error('Error stack:', error?.stack);
-      console.error('Full error object:', error);
+      console.error('Submission error:', error);
       
       toast({
         title: "Submission failed",
@@ -348,7 +281,6 @@ const DynamicSubmissionForm = () => {
       });
     } finally {
       setSubmitting(false);
-      console.log('=== SUBMISSION PROCESS ENDED ===');
     }
   };
 
