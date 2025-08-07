@@ -1,12 +1,9 @@
+
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
-import { Switch } from '@/components/ui/switch';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { Shield, AlertTriangle, Search } from 'lucide-react';
@@ -14,16 +11,9 @@ import { encryptReport } from '@/utils/encryption';
 import BrandedFormLayout from './BrandedFormLayout';
 import FileUpload from './FileUpload';
 import { uploadReportFile } from '@/utils/fileUpload';
-
-const PREDEFINED_CATEGORIES = [
-  "Bribery",
-  "Fraud", 
-  "GDPR",
-  "Corruption",
-  "Failure to comply with laws and regulation",
-  "Endangering the health & safety of individuals",
-  "Other (Please Specify)"
-];
+import ReportTypeSelector from './forms/ReportTypeSelector';
+import ReportDetailsForm from './forms/ReportDetailsForm';
+import ErrorBoundary from './forms/ErrorBoundary';
 
 interface LinkData {
   id: string;
@@ -60,6 +50,10 @@ const DynamicSubmissionForm = () => {
     fetchLinkData();
   }, [linkToken]);
 
+  const updateFormData = (updates: Partial<typeof formData>) => {
+    setFormData(prev => ({ ...prev, ...updates }));
+  };
+
   const fetchLinkData = async () => {
     if (!linkToken) {
       navigate('/404');
@@ -69,7 +63,6 @@ const DynamicSubmissionForm = () => {
     try {
       console.log('Fetching link data for token:', linkToken);
       
-      // Simplified approach - just fetch the link data without complex validation
       const { data: linkInfo, error: linkError } = await supabase
         .from('organization_links')
         .select(`
@@ -89,6 +82,7 @@ const DynamicSubmissionForm = () => {
           )
         `)
         .eq('link_token', linkToken)
+        .eq('is_active', true)
         .single();
 
       if (linkError || !linkInfo) {
@@ -104,18 +98,7 @@ const DynamicSubmissionForm = () => {
 
       console.log('Link found:', linkInfo);
 
-      // Basic validation checks
-      if (!linkInfo.is_active) {
-        console.error('Link is not active');
-        toast({
-          title: "Link not available",
-          description: "This submission link is not active.",
-          variant: "destructive",
-        });
-        navigate('/404');
-        return;
-      }
-
+      // Validation checks
       if (linkInfo.expires_at && new Date(linkInfo.expires_at) < new Date()) {
         console.error('Link has expired');
         toast({
@@ -174,14 +157,6 @@ const DynamicSubmissionForm = () => {
     return 'WB-' + Math.random().toString(36).substr(2, 8).toUpperCase();
   };
 
-  const handleCategoryChange = (value: string) => {
-    setFormData(prev => ({ 
-      ...prev, 
-      category: value,
-      customCategory: value === "Other (Please Specify)" ? prev.customCategory : ""
-    }));
-  };
-
   const getFinalCategory = () => {
     if (formData.category === "Other (Please Specify)" && formData.customCategory.trim()) {
       return formData.customCategory.trim();
@@ -189,17 +164,14 @@ const DynamicSubmissionForm = () => {
     return formData.category;
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!linkData) return;
-
+  const validateForm = () => {
     if (!formData.title.trim() || !formData.description.trim()) {
       toast({
         title: "Required fields missing",
         description: "Please fill in the title and description.",
         variant: "destructive",
       });
-      return;
+      return false;
     }
 
     if (!formData.category) {
@@ -208,7 +180,7 @@ const DynamicSubmissionForm = () => {
         description: "Please select a category.",
         variant: "destructive",
       });
-      return;
+      return false;
     }
 
     if (formData.category === "Other (Please Specify)" && !formData.customCategory.trim()) {
@@ -217,8 +189,17 @@ const DynamicSubmissionForm = () => {
         description: "Please specify the category.",
         variant: "destructive",
       });
-      return;
+      return false;
     }
+
+    return true;
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!linkData) return;
+
+    if (!validateForm()) return;
 
     setSubmitting(true);
 
@@ -236,7 +217,7 @@ const DynamicSubmissionForm = () => {
         category: finalCategory
       });
 
-      // Encrypt the report data using organization-based encryption
+      // Encrypt the report data
       const reportData = {
         title: formData.title,
         description: formData.description,
@@ -246,28 +227,37 @@ const DynamicSubmissionForm = () => {
 
       const { encryptedData, keyHash } = encryptReport(reportData, linkData.organization_id);
 
-      // Create the report and return the inserted data
+      // Create the report with explicit values to ensure RLS compliance
+      const reportPayload = {
+        organization_id: linkData.organization_id,
+        tracking_id: trackingId,
+        title: formData.title,
+        encrypted_content: encryptedData,
+        encryption_key_hash: keyHash,
+        report_type: isAnonymous ? 'anonymous' as const : 'confidential' as const,
+        submitted_by_email: isAnonymous ? null : formData.submitter_email || null,
+        submitted_via_link_id: linkData.id,
+        status: 'new' as const,
+        priority: formData.priority,
+        tags: [finalCategory]
+      };
+
+      console.log('Report payload:', reportPayload);
+
       const { data: report, error: reportError } = await supabase
         .from('reports')
-        .insert({
-          organization_id: linkData.organization_id,
-          tracking_id: trackingId,
-          title: formData.title,
-          encrypted_content: encryptedData,
-          encryption_key_hash: keyHash,
-          report_type: isAnonymous ? 'anonymous' : 'confidential',
-          submitted_by_email: isAnonymous ? null : formData.submitter_email,
-          submitted_via_link_id: linkData.id,
-          status: 'new',
-          priority: formData.priority,
-          tags: [finalCategory]
-        })
+        .insert(reportPayload)
         .select()
         .single();
 
       if (reportError) {
         console.error('Report submission error:', reportError);
-        throw new Error(reportError.message || 'Failed to submit report');
+        toast({
+          title: "Submission failed",
+          description: `Database error: ${reportError.message}. Please contact support if this persists.`,
+          variant: "destructive",
+        });
+        return;
       }
 
       console.log('Report created successfully:', report);
@@ -335,188 +325,94 @@ const DynamicSubmissionForm = () => {
   const brandColor = getBrandColor();
 
   return (
-    <BrandedFormLayout
-      title={linkData.name}
-      description={linkData.description || 'Submit your report securely and confidentially.'}
-      organizationName={linkData.organization_name}
-      logoUrl={logoUrl}
-      brandColor={brandColor}
-    >
-      <div className="space-y-6">
-        {/* Check Status Button */}
-        <Card className="border-blue-200 bg-blue-50">
-          <CardContent className="pt-4">
-            <div className="flex items-center justify-between">
-              <div className="flex items-start gap-3">
-                <Search className="h-4 w-4 text-blue-600 mt-0.5" />
-                <div className="text-sm">
-                  <p className="font-medium text-blue-900 mb-1">Already submitted a report?</p>
-                  <p className="text-blue-800">
-                    Check the status of your existing report using your tracking ID.
-                  </p>
-                </div>
-              </div>
-              <Link to={`/secure/tool/submit/${linkToken}/status`}>
-                <Button 
-                  variant="outline" 
-                  size="sm"
-                  className="border-blue-300 text-blue-700 hover:bg-blue-100"
-                >
-                  <Search className="h-4 w-4 mr-2" />
-                  Check Status
-                </Button>
-              </Link>
-            </div>
-          </CardContent>
-        </Card>
-
-        <form onSubmit={handleSubmit} className="space-y-4">
-          {/* Report Type Selection */}
-          <div className="space-y-3">
-            <Label className="text-base font-medium">Report Type</Label>
-            <div className="flex items-center space-x-3">
-              <Switch
-                id="anonymous"
-                checked={isAnonymous}
-                onCheckedChange={setIsAnonymous}
-              />
-              <Label htmlFor="anonymous" className="flex items-center gap-2 text-sm">
-                {isAnonymous ? 'Anonymous Submission' : 'Confidential Submission'}
-                <span className="text-xs text-gray-500">
-                  ({isAnonymous ? 'No personal information required' : 'Provide email for follow-up'})
-                </span>
-              </Label>
-            </div>
-          </div>
-
-          {/* Contact Information (if not anonymous) */}
-          {!isAnonymous && (
-            <div className="space-y-2">
-              <Label htmlFor="submitter_email">Email Address</Label>
-              <Input
-                id="submitter_email"
-                type="email"
-                value={formData.submitter_email}
-                onChange={(e) => setFormData({ ...formData, submitter_email: e.target.value })}
-                placeholder="your@email.com"
-                required={!isAnonymous}
-              />
-            </div>
-          )}
-
-          {/* Report Details */}
-          <div className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="title">Report Title *</Label>
-              <Input
-                id="title"
-                required
-                value={formData.title}
-                onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                placeholder="Brief summary of the issue"
-              />
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="category">Category *</Label>
-              <Select value={formData.category} onValueChange={handleCategoryChange} required>
-                <SelectTrigger>
-                  <SelectValue placeholder="Select a category" />
-                </SelectTrigger>
-                <SelectContent>
-                  {PREDEFINED_CATEGORIES.map((category) => (
-                    <SelectItem key={category} value={category}>
-                      {category}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-
-            {/* Custom Category Input */}
-            {formData.category === "Other (Please Specify)" && (
-              <div className="space-y-2">
-                <Label htmlFor="customCategory">Please Specify Category *</Label>
-                <Input
-                  id="customCategory"
-                  value={formData.customCategory}
-                  onChange={(e) => setFormData({ ...formData, customCategory: e.target.value })}
-                  placeholder="Enter the specific category"
-                  required
-                />
-              </div>
-            )}
-
-            <div className="space-y-2">
-              <Label htmlFor="description">Detailed Description *</Label>
-              <Textarea
-                id="description"
-                required
-                value={formData.description}
-                onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                placeholder="Please provide a detailed description of what happened..."
-                rows={4}
-              />
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="priority">Priority Level</Label>
-              <Select
-                value={formData.priority.toString()}
-                onValueChange={(value) => setFormData({ ...formData, priority: parseInt(value) })}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Select priority level" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="1">1 - Critical (Immediate danger/serious violation)</SelectItem>
-                  <SelectItem value="2">2 - High (Significant impact)</SelectItem>
-                  <SelectItem value="3">3 - Medium (Standard concern)</SelectItem>
-                  <SelectItem value="4">4 - Low (Minor issue)</SelectItem>
-                  <SelectItem value="5">5 - Informational (General feedback)</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
-
-          {/* File Upload Section */}
-          <div className="space-y-2">
-            <Label>Supporting Evidence</Label>
-            <FileUpload
-              onFilesChange={setAttachedFiles}
-              maxFiles={5}
-              maxSize={10}
-              disabled={submitting}
-            />
-          </div>
-
-          {/* Security Notice */}
+    <ErrorBoundary>
+      <BrandedFormLayout
+        title={linkData.name}
+        description={linkData.description || 'Submit your report securely and confidentially.'}
+        organizationName={linkData.organization_name}
+        logoUrl={logoUrl}
+        brandColor={brandColor}
+      >
+        <div className="space-y-6">
+          {/* Check Status Button */}
           <Card className="border-blue-200 bg-blue-50">
             <CardContent className="pt-4">
-              <div className="flex items-start gap-3">
-                <Shield className="h-4 w-4 text-blue-600 mt-0.5" />
-                <div className="text-sm">
-                  <p className="font-medium text-blue-900 mb-1">Your Privacy is Protected</p>
-                  <p className="text-blue-800">
-                    All information is encrypted and stored securely. {isAnonymous ? 'This anonymous report cannot be traced back to you.' : 'Your identity will be kept confidential.'}
-                  </p>
+              <div className="flex items-center justify-between">
+                <div className="flex items-start gap-3">
+                  <Search className="h-4 w-4 text-blue-600 mt-0.5" />
+                  <div className="text-sm">
+                    <p className="font-medium text-blue-900 mb-1">Already submitted a report?</p>
+                    <p className="text-blue-800">
+                      Check the status of your existing report using your tracking ID.
+                    </p>
+                  </div>
                 </div>
+                <Link to={`/secure/tool/submit/${linkToken}/status`}>
+                  <Button 
+                    variant="outline" 
+                    size="sm"
+                    className="border-blue-300 text-blue-700 hover:bg-blue-100"
+                  >
+                    <Search className="h-4 w-4 mr-2" />
+                    Check Status
+                  </Button>
+                </Link>
               </div>
             </CardContent>
           </Card>
 
-          {/* Submit Button */}
-          <Button 
-            type="submit" 
-            disabled={submitting}
-            className="w-full hover:opacity-90"
-            style={{ backgroundColor: brandColor }}
-          >
-            {submitting ? 'Submitting...' : 'Submit Report'}
-          </Button>
-        </form>
-      </div>
-    </BrandedFormLayout>
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <ReportTypeSelector
+              isAnonymous={isAnonymous}
+              setIsAnonymous={setIsAnonymous}
+              submitterEmail={formData.submitter_email}
+              setSubmitterEmail={(email) => updateFormData({ submitter_email: email })}
+            />
+
+            <ReportDetailsForm
+              formData={formData}
+              updateFormData={updateFormData}
+            />
+
+            {/* File Upload Section */}
+            <div className="space-y-2">
+              <Label>Supporting Evidence</Label>
+              <FileUpload
+                onFilesChange={setAttachedFiles}
+                maxFiles={5}
+                maxSize={10}
+                disabled={submitting}
+              />
+            </div>
+
+            {/* Security Notice */}
+            <Card className="border-blue-200 bg-blue-50">
+              <CardContent className="pt-4">
+                <div className="flex items-start gap-3">
+                  <Shield className="h-4 w-4 text-blue-600 mt-0.5" />
+                  <div className="text-sm">
+                    <p className="font-medium text-blue-900 mb-1">Your Privacy is Protected</p>
+                    <p className="text-blue-800">
+                      All information is encrypted and stored securely. {isAnonymous ? 'This anonymous report cannot be traced back to you.' : 'Your identity will be kept confidential.'}
+                    </p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Submit Button */}
+            <Button 
+              type="submit" 
+              disabled={submitting}
+              className="w-full hover:opacity-90"
+              style={{ backgroundColor: brandColor }}
+            >
+              {submitting ? 'Submitting...' : 'Submit Report'}
+            </Button>
+          </form>
+        </div>
+      </BrandedFormLayout>
+    </ErrorBoundary>
   );
 };
 
