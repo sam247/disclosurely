@@ -14,15 +14,17 @@ const PREDEFINED_CATEGORIES = [
   "Other (Please Specify)"
 ];
 
+interface FormData {
+  title: string;
+  description: string;
+  category: string;
+  customCategory: string;
+  priority: number;
+}
+
 interface ReportDetailsFormProps {
-  formData: {
-    title: string;
-    description: string;
-    category: string;
-    customCategory: string;
-    priority: number;
-  };
-  updateFormData: (updates: Partial<typeof formData>) => void;
+  formData: FormData;
+  updateFormData: (updates: Partial<FormData>) => void;
 }
 
 const ReportDetailsForm = ({ formData, updateFormData }: ReportDetailsFormProps) => {
