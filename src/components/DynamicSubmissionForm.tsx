@@ -60,41 +60,6 @@ const DynamicSubmissionForm = () => {
     fetchLinkData();
   }, [linkToken]);
 
-  // Function to validate organization link using the new diagnostic function
-  const validateOrganizationLink = async (linkId: string): Promise<{ valid: boolean; reason: string }> => {
-    try {
-      console.log('Validating organization link:', linkId);
-      
-      const { data, error } = await supabase
-        .rpc('validate_organization_link', { link_id: linkId });
-
-      if (error) {
-        console.error('Link validation error:', error);
-        return { valid: false, reason: 'Validation failed: ' + error.message };
-      }
-
-      // Handle the response properly - data should be an array of objects with valid and reason properties
-      if (!data || !Array.isArray(data) || data.length === 0) {
-        console.log('No validation result returned from RPC, data:', data);
-        return { valid: false, reason: 'No validation result returned' };
-      }
-
-      const result = data[0];
-      console.log('Link Validation Result:', result);
-      
-      // Ensure result has the expected properties
-      if (typeof result.valid !== 'boolean' || typeof result.reason !== 'string') {
-        console.error('Invalid validation result format:', result);
-        return { valid: false, reason: 'Invalid validation response format' };
-      }
-      
-      return result;
-    } catch (error) {
-      console.error('Unexpected validation error:', error);
-      return { valid: false, reason: 'Validation failed unexpectedly' };
-    }
-  };
-
   const fetchLinkData = async () => {
     if (!linkToken) {
       navigate('/404');
@@ -104,27 +69,7 @@ const DynamicSubmissionForm = () => {
     try {
       console.log('Fetching link data for token:', linkToken);
       
-      // First check if we're on a custom domain
-      const currentHost = window.location.hostname;
-      let organizationFilter = {};
-      
-      // If on custom domain, filter by organization
-      if (!currentHost.includes('lovable.app') && 
-          !currentHost.includes('disclosurely.com') && 
-          currentHost !== 'localhost') {
-        
-        const { data: domainVerification } = await supabase
-          .from('domain_verifications')
-          .select('organization_id')
-          .eq('domain', currentHost)
-          .not('verified_at', 'is', null)
-          .single();
-        
-        if (domainVerification) {
-          organizationFilter = { organization_id: domainVerification.organization_id };
-        }
-      }
-
+      // Simplified approach - just fetch the link data without complex validation
       const { data: linkInfo, error: linkError } = await supabase
         .from('organization_links')
         .select(`
@@ -132,6 +77,10 @@ const DynamicSubmissionForm = () => {
           name,
           description,
           organization_id,
+          is_active,
+          expires_at,
+          usage_limit,
+          usage_count,
           organizations!inner(
             name,
             logo_url,
@@ -140,8 +89,6 @@ const DynamicSubmissionForm = () => {
           )
         `)
         .eq('link_token', linkToken)
-        .eq('is_active', true)
-        .match(organizationFilter)
         .single();
 
       if (linkError || !linkInfo) {
@@ -157,13 +104,34 @@ const DynamicSubmissionForm = () => {
 
       console.log('Link found:', linkInfo);
 
-      // Validate the link using the new diagnostic function
-      const linkValidation = await validateOrganizationLink(linkInfo.id);
-      if (!linkValidation.valid) {
-        console.error('Link validation failed:', linkValidation.reason);
+      // Basic validation checks
+      if (!linkInfo.is_active) {
+        console.error('Link is not active');
         toast({
           title: "Link not available",
-          description: `This submission link is not available: ${linkValidation.reason}`,
+          description: "This submission link is not active.",
+          variant: "destructive",
+        });
+        navigate('/404');
+        return;
+      }
+
+      if (linkInfo.expires_at && new Date(linkInfo.expires_at) < new Date()) {
+        console.error('Link has expired');
+        toast({
+          title: "Link expired",
+          description: "This submission link has expired.",
+          variant: "destructive",
+        });
+        navigate('/404');
+        return;
+      }
+
+      if (linkInfo.usage_limit && linkInfo.usage_count >= linkInfo.usage_limit) {
+        console.error('Link usage limit reached');
+        toast({
+          title: "Usage limit reached",
+          description: "This submission link has reached its usage limit.",
           variant: "destructive",
         });
         navigate('/404');
@@ -255,13 +223,6 @@ const DynamicSubmissionForm = () => {
     setSubmitting(true);
 
     try {
-      // Pre-validate the link before submission
-      console.log('Pre-validating link before submission...');
-      const linkValidation = await validateOrganizationLink(linkData.id);
-      if (!linkValidation.valid) {
-        throw new Error(`Link validation failed: ${linkValidation.reason}`);
-      }
-
       const trackingId = generateTrackingId();
       const finalCategory = getFinalCategory();
       
@@ -306,19 +267,7 @@ const DynamicSubmissionForm = () => {
 
       if (reportError) {
         console.error('Report submission error:', reportError);
-        
-        // Provide more specific error messages based on error codes
-        let errorMessage = 'Failed to submit report. Please try again.';
-        
-        if (reportError.code === '42501') {
-          errorMessage = 'Permission denied. The submission link may be inactive or expired.';
-        } else if (reportError.code === '23503') {
-          errorMessage = 'Invalid submission link. Please contact the organization for a new link.';
-        } else if (reportError.message) {
-          errorMessage = reportError.message;
-        }
-        
-        throw new Error(errorMessage);
+        throw new Error(reportError.message || 'Failed to submit report');
       }
 
       console.log('Report created successfully:', report);
@@ -342,21 +291,8 @@ const DynamicSubmissionForm = () => {
         }
       }
 
-      // Determine success page URL based on current domain
-      const currentHost = window.location.hostname;
-      let successUrl;
-      
-      if (currentHost !== 'localhost' && 
-          !currentHost.includes('lovable.app') && 
-          !currentHost.includes('disclosurely.com')) {
-        // We're on a custom domain, construct the success URL for this domain
-        successUrl = `${window.location.protocol}//${currentHost}/secure/tool/success?trackingId=${encodeURIComponent(trackingId)}`;
-      } else {
-        // Default behavior for main domain
-        successUrl = `/secure/tool/success?trackingId=${encodeURIComponent(trackingId)}`;
-      }
-
-      window.location.href = successUrl;
+      // Navigate to success page
+      navigate(`/secure/tool/success?trackingId=${encodeURIComponent(trackingId)}`);
 
     } catch (error: any) {
       console.error('Error submitting report:', error);
