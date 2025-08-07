@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -199,6 +198,8 @@ const DynamicSubmissionForm = () => {
     e.preventDefault();
     if (!linkData) return;
 
+    console.log('=== STARTING REPORT SUBMISSION DEBUG ===');
+
     if (!validateForm()) return;
 
     setSubmitting(true);
@@ -207,12 +208,10 @@ const DynamicSubmissionForm = () => {
       const trackingId = generateTrackingId();
       const finalCategory = getFinalCategory();
       
-      console.log('Submitting report with data:', {
-        title: formData.title,
-        category: finalCategory,
-        isAnonymous,
-        organizationId: linkData.organization_id
-      });
+      console.log('Form validation passed. Proceeding with submission...');
+      console.log('Tracking ID:', trackingId);
+      console.log('Organization ID:', linkData.organization_id);
+      console.log('Anonymous submission:', isAnonymous);
 
       // Encrypt the report data
       const reportContent = {
@@ -222,7 +221,9 @@ const DynamicSubmissionForm = () => {
         submission_method: 'web_form'
       };
 
+      console.log('Encrypting report content...');
       const { encryptedData, keyHash } = encryptReport(reportContent, linkData.organization_id);
+      console.log('Encryption completed. Key hash length:', keyHash.length);
 
       // Prepare the report payload
       const reportPayload = {
@@ -239,18 +240,28 @@ const DynamicSubmissionForm = () => {
         tags: [finalCategory]
       };
 
-      console.log('Creating report with payload:', reportPayload);
+      console.log('=== REPORT PAYLOAD ===');
+      console.log('Payload structure:', JSON.stringify(reportPayload, null, 2));
+
+      console.log('Attempting to insert report into database...');
 
       const { data: reportData, error: reportError } = await supabase
         .from('reports')
         .insert(reportPayload)
         .select();
 
+      console.log('=== DATABASE RESPONSE ===');
       if (reportError) {
-        console.error('Report submission error:', reportError);
+        console.error('Database error details:');
+        console.error('Error code:', reportError.code);
+        console.error('Error message:', reportError.message);
+        console.error('Error details:', reportError.details);
+        console.error('Error hint:', reportError.hint);
+        console.error('Full error object:', reportError);
+        
         toast({
           title: "Submission failed",
-          description: `Error: ${reportError.message}. Please try again.`,
+          description: `Database error: ${reportError.message}. Please try again.`,
           variant: "destructive",
         });
         return;
@@ -279,11 +290,19 @@ const DynamicSubmissionForm = () => {
         }
       }
 
+      console.log('=== SUBMISSION COMPLETED SUCCESSFULLY ===');
+      console.log('Navigating to success page...');
+
       // Navigate to success page
       navigate(`/secure/tool/success?trackingId=${encodeURIComponent(trackingId)}`);
 
     } catch (error: any) {
-      console.error('Submission error:', error);
+      console.error('=== SUBMISSION ERROR ===');
+      console.error('Error type:', typeof error);
+      console.error('Error message:', error?.message);
+      console.error('Error stack:', error?.stack);
+      console.error('Full error object:', error);
+      
       toast({
         title: "Submission failed",
         description: error.message || "There was an error submitting your report. Please try again.",
@@ -291,6 +310,7 @@ const DynamicSubmissionForm = () => {
       });
     } finally {
       setSubmitting(false);
+      console.log('=== SUBMISSION PROCESS ENDED ===');
     }
   };
 
