@@ -218,6 +218,10 @@ const DynamicSubmissionForm = () => {
 
       const { encryptedData, keyHash } = encryptReport(reportContent, linkData.organization_id);
 
+      console.log('=== DEBUGGING SUBMISSION ISSUE ===');
+      console.log('Link token:', linkToken);
+      console.log('Link data organization_id:', linkData.organization_id);
+
       // Verify the link exists and get its actual ID
       const { data: linkVerification, error: linkVerifyError } = await supabase
         .from('organization_links')
@@ -225,8 +229,12 @@ const DynamicSubmissionForm = () => {
         .eq('link_token', linkToken)
         .eq('is_active', true)
         .single();
+
+      console.log('Link verification result:', linkVerification);
+      console.log('Link verification error:', linkVerifyError);
         
       if (linkVerifyError || !linkVerification) {
+        console.error('Link verification failed:', linkVerifyError);
         toast({
           title: "Link verification failed",
           description: "Unable to verify submission link.",
@@ -234,6 +242,26 @@ const DynamicSubmissionForm = () => {
         });
         return;
       }
+
+      // Test if the link would pass our RLS policy check
+      const rlsTestQuery = `
+        SELECT EXISTS (
+          SELECT 1 
+          FROM organization_links ol 
+          WHERE ol.id = $1
+          AND ol.is_active = true 
+          AND (ol.expires_at IS NULL OR ol.expires_at > NOW())
+          AND (ol.usage_limit IS NULL OR ol.usage_count < ol.usage_limit)
+        ) as policy_would_pass
+      `;
+      
+      const { data: rlsTest, error: rlsTestError } = await supabase.rpc('execute_raw_sql', {
+        query: rlsTestQuery,
+        params: [linkVerification.id]
+      });
+      
+      console.log('RLS policy test result:', rlsTest);
+      console.log('RLS policy test error:', rlsTestError);
 
       // Use the verified link data
       const reportPayload = {
@@ -250,22 +278,42 @@ const DynamicSubmissionForm = () => {
         tags: [finalCategory]
       };
 
+      console.log('Final report payload:', reportPayload);
+      console.log('About to insert with these values:');
+      console.log('- submitted_via_link_id:', linkVerification.id);
+      console.log('- organization_id:', linkVerification.organization_id);
+
       const { data: reportData, error: reportError } = await supabase
         .from('reports')
         .insert(reportPayload)
         .select();
 
       if (reportError) {
-        console.error('Database insertion failed:', reportError);
+        console.error('=== INSERTION FAILED ===');
+        console.error('Error code:', reportError.code);
+        console.error('Error message:', reportError.message);
+        console.error('Error details:', reportError.details);
+        console.error('Error hint:', reportError.hint);
+        console.error('Full error:', JSON.stringify(reportError, null, 2));
+        
+        // Test if we can query organization_links directly
+        const { data: directLinkQuery, error: directLinkError } = await supabase
+          .from('organization_links')
+          .select('*')
+          .eq('id', linkVerification.id);
+        
+        console.log('Direct link query result:', directLinkQuery);
+        console.log('Direct link query error:', directLinkError);
+        
         toast({
           title: "Submission failed",
-          description: `Unable to submit report: ${reportError.message}. Please try again.`,
+          description: `Database error: ${reportError.message}. Check console for details.`,
           variant: "destructive",
         });
         return;
       }
 
-      console.log('Report created successfully:', reportData);
+      console.log('SUCCESS! Report created:', reportData);
       const report = reportData?.[0];
 
       // Upload attached files if any
@@ -290,7 +338,10 @@ const DynamicSubmissionForm = () => {
       navigate(`/secure/tool/success?trackingId=${encodeURIComponent(trackingId)}`);
 
     } catch (error: any) {
-      console.error('Submission error:', error);
+      console.error('=== SUBMISSION CATCH BLOCK ===');
+      console.error('Caught error:', error);
+      console.error('Error message:', error.message);
+      console.error('Error stack:', error.stack);
       
       toast({
         title: "Submission failed",
