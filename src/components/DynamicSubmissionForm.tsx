@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -218,7 +219,7 @@ const DynamicSubmissionForm = () => {
 
       const { encryptedData, keyHash } = encryptReport(reportContent, linkData.organization_id);
 
-      // Prepare the report payload
+      // Prepare the report payload with detailed logging
       const reportPayload = {
         organization_id: linkData.organization_id,
         tracking_id: trackingId,
@@ -233,6 +234,19 @@ const DynamicSubmissionForm = () => {
         tags: [finalCategory]
       };
 
+      console.log('=== REPORT SUBMISSION DEBUG ===');
+      console.log('Link Data:', {
+        id: linkData.id,
+        organization_id: linkData.organization_id,
+        is_active: linkData.is_active,
+        expires_at: linkData.expires_at,
+        usage_count: linkData.usage_count,
+        usage_limit: linkData.usage_limit
+      });
+      console.log('Report Payload:', reportPayload);
+      console.log('Current User:', await supabase.auth.getUser());
+      console.log('=== END DEBUG ===');
+
       const { data: reportData, error: reportError } = await supabase
         .from('reports')
         .insert(reportPayload)
@@ -240,14 +254,17 @@ const DynamicSubmissionForm = () => {
 
       if (reportError) {
         console.error('Database insertion failed:', reportError);
+        console.error('Full error object:', JSON.stringify(reportError, null, 2));
+        
         toast({
           title: "Submission failed",
-          description: `Unable to submit report: ${reportError.message}`,
+          description: `Unable to submit report: ${reportError.message}. Please check console for details.`,
           variant: "destructive",
         });
         return;
       }
 
+      console.log('Report created successfully:', reportData);
       const report = reportData?.[0];
 
       // Upload attached files if any
