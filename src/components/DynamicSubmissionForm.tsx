@@ -306,16 +306,14 @@ const DynamicSubmissionForm = () => {
       console.log('report_type type:', typeof reportPayload.report_type, 'value:', reportPayload.report_type);
       console.log('status type:', typeof reportPayload.status, 'value:', reportPayload.status);
       console.log('priority type:', typeof reportPayload.priority, 'value:', reportPayload.priority);
-      console.log('');
-      console.log('=== RLS POLICY VALIDATION CHECK ===');
-      console.log('submitted_via_link_id is NOT NULL:', reportPayload.submitted_via_link_id !== null);
-      console.log('organization_id matches link:', reportPayload.organization_id === linkData.organization_id);
-      console.log('Link is active:', linkData.is_active);
-      console.log('Link not expired:', !linkData.expires_at || new Date(linkData.expires_at) > new Date());
-      console.log('Under usage limit:', !linkData.usage_limit || linkData.usage_count < linkData.usage_limit);
 
+      console.log('=== AUTHENTICATION STATE CHECK ===');
+      const { data: currentUser, error: authError } = await supabase.auth.getUser();
+      console.log('Current auth state:', currentUser, authError);
+      
       console.log('Attempting to insert report into database...');
 
+      // For anonymous submissions, we need to make sure we're not using authentication
       const { data: reportData, error: reportError } = await supabase
         .from('reports')
         .insert(reportPayload)
@@ -329,22 +327,6 @@ const DynamicSubmissionForm = () => {
         console.error('Error details:', reportError.details);
         console.error('Error hint:', reportError.hint);
         console.error('Full error object:', reportError);
-        
-        // Additional debugging for RLS policy violations
-        if (reportError.message?.includes('row-level security policy')) {
-          console.error('=== RLS POLICY VIOLATION DEBUGGING ===');
-          console.error('This is an RLS policy violation. Let\'s debug:');
-          console.error('Current auth state:', await supabase.auth.getUser());
-          
-          // Test the exact conditions from our RLS policy
-          console.error('Testing RLS policy conditions manually...');
-          
-          const { data: linkTest } = await supabase
-            .from('organization_links')
-            .select('*')
-            .eq('id', linkData.id);
-          console.error('Link test from RLS perspective:', linkTest);
-        }
         
         toast({
           title: "Submission failed",
