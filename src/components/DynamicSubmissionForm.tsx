@@ -23,6 +23,10 @@ interface LinkData {
   organization_logo_url?: string;
   organization_custom_logo_url?: string;
   organization_brand_color?: string;
+  usage_count: number;
+  usage_limit: number | null;
+  expires_at: string | null;
+  is_active: boolean;
 }
 
 const DynamicSubmissionForm = () => {
@@ -60,7 +64,8 @@ const DynamicSubmissionForm = () => {
     }
 
     try {
-      console.log('Fetching link data for token:', linkToken);
+      console.log('=== FETCHING LINK DATA ===');
+      console.log('Link token:', linkToken);
       
       const { data: linkInfo, error: linkError } = await supabase
         .from('organization_links')
@@ -95,7 +100,12 @@ const DynamicSubmissionForm = () => {
         return;
       }
 
+      console.log('=== LINK VALIDATION ===');
       console.log('Link found:', linkInfo);
+      console.log('Is active:', linkInfo.is_active);
+      console.log('Expires at:', linkInfo.expires_at);
+      console.log('Usage count:', linkInfo.usage_count);
+      console.log('Usage limit:', linkInfo.usage_limit);
 
       // Validation checks
       if (linkInfo.expires_at && new Date(linkInfo.expires_at) < new Date()) {
@@ -128,7 +138,11 @@ const DynamicSubmissionForm = () => {
         organization_name: linkInfo.organizations.name,
         organization_logo_url: linkInfo.organizations.logo_url,
         organization_custom_logo_url: linkInfo.organizations.custom_logo_url,
-        organization_brand_color: linkInfo.organizations.brand_color
+        organization_brand_color: linkInfo.organizations.brand_color,
+        usage_count: linkInfo.usage_count,
+        usage_limit: linkInfo.usage_limit,
+        expires_at: linkInfo.expires_at,
+        is_active: linkInfo.is_active
       });
 
     } catch (error) {
@@ -194,6 +208,44 @@ const DynamicSubmissionForm = () => {
     return true;
   };
 
+  const debugLinkValidation = async (linkId: string) => {
+    console.log('=== DEBUGGING LINK VALIDATION FOR RLS ===');
+    
+    try {
+      const { data: linkCheck, error: linkCheckError } = await supabase
+        .from('organization_links')
+        .select('*')
+        .eq('id', linkId)
+        .single();
+
+      console.log('Link check result:', linkCheck);
+      console.log('Link check error:', linkCheckError);
+
+      if (linkCheck) {
+        console.log('Link validation details:');
+        console.log('- ID:', linkCheck.id);
+        console.log('- Is Active:', linkCheck.is_active);
+        console.log('- Expires At:', linkCheck.expires_at);
+        console.log('- Current Time:', new Date().toISOString());
+        console.log('- Usage Count:', linkCheck.usage_count);
+        console.log('- Usage Limit:', linkCheck.usage_limit);
+        
+        // Check each condition individually
+        const isActive = linkCheck.is_active === true;
+        const notExpired = !linkCheck.expires_at || new Date(linkCheck.expires_at) > new Date();
+        const underUsageLimit = !linkCheck.usage_limit || linkCheck.usage_count < linkCheck.usage_limit;
+        
+        console.log('RLS Condition checks:');
+        console.log('- Is Active:', isActive);
+        console.log('- Not Expired:', notExpired);
+        console.log('- Under Usage Limit:', underUsageLimit);
+        console.log('- All conditions met:', isActive && notExpired && underUsageLimit);
+      }
+    } catch (error) {
+      console.error('Error debugging link validation:', error);
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!linkData) return;
@@ -212,6 +264,10 @@ const DynamicSubmissionForm = () => {
       console.log('Tracking ID:', trackingId);
       console.log('Organization ID:', linkData.organization_id);
       console.log('Anonymous submission:', isAnonymous);
+      console.log('Link ID:', linkData.id);
+
+      // Debug the link validation first
+      await debugLinkValidation(linkData.id);
 
       // Encrypt the report data
       const reportContent = {
@@ -225,7 +281,7 @@ const DynamicSubmissionForm = () => {
       const { encryptedData, keyHash } = encryptReport(reportContent, linkData.organization_id);
       console.log('Encryption completed. Key hash length:', keyHash.length);
 
-      // Prepare the report payload
+      // Prepare the report payload with extensive debugging
       const reportPayload = {
         organization_id: linkData.organization_id,
         tracking_id: trackingId,
@@ -240,8 +296,23 @@ const DynamicSubmissionForm = () => {
         tags: [finalCategory]
       };
 
-      console.log('=== REPORT PAYLOAD ===');
-      console.log('Payload structure:', JSON.stringify(reportPayload, null, 2));
+      console.log('=== COMPREHENSIVE PAYLOAD DEBUG ===');
+      console.log('Complete payload:', JSON.stringify(reportPayload, null, 2));
+      console.log('');
+      console.log('=== INDIVIDUAL FIELD ANALYSIS ===');
+      console.log('organization_id type:', typeof reportPayload.organization_id, 'value:', reportPayload.organization_id);
+      console.log('tracking_id type:', typeof reportPayload.tracking_id, 'value:', reportPayload.tracking_id);
+      console.log('submitted_via_link_id type:', typeof reportPayload.submitted_via_link_id, 'value:', reportPayload.submitted_via_link_id);
+      console.log('report_type type:', typeof reportPayload.report_type, 'value:', reportPayload.report_type);
+      console.log('status type:', typeof reportPayload.status, 'value:', reportPayload.status);
+      console.log('priority type:', typeof reportPayload.priority, 'value:', reportPayload.priority);
+      console.log('');
+      console.log('=== RLS POLICY VALIDATION CHECK ===');
+      console.log('submitted_via_link_id is NOT NULL:', reportPayload.submitted_via_link_id !== null);
+      console.log('organization_id matches link:', reportPayload.organization_id === linkData.organization_id);
+      console.log('Link is active:', linkData.is_active);
+      console.log('Link not expired:', !linkData.expires_at || new Date(linkData.expires_at) > new Date());
+      console.log('Under usage limit:', !linkData.usage_limit || linkData.usage_count < linkData.usage_limit);
 
       console.log('Attempting to insert report into database...');
 
@@ -258,6 +329,22 @@ const DynamicSubmissionForm = () => {
         console.error('Error details:', reportError.details);
         console.error('Error hint:', reportError.hint);
         console.error('Full error object:', reportError);
+        
+        // Additional debugging for RLS policy violations
+        if (reportError.message?.includes('row-level security policy')) {
+          console.error('=== RLS POLICY VIOLATION DEBUGGING ===');
+          console.error('This is an RLS policy violation. Let\'s debug:');
+          console.error('Current auth state:', await supabase.auth.getUser());
+          
+          // Test the exact conditions from our RLS policy
+          console.error('Testing RLS policy conditions manually...');
+          
+          const { data: linkTest } = await supabase
+            .from('organization_links')
+            .select('*')
+            .eq('id', linkData.id);
+          console.error('Link test from RLS perspective:', linkTest);
+        }
         
         toast({
           title: "Submission failed",
