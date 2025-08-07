@@ -218,14 +218,14 @@ const DynamicSubmissionForm = () => {
 
       const { encryptedData, keyHash } = encryptReport(reportContent, linkData.organization_id);
 
-      console.log('=== DEBUGGING SUBMISSION ISSUE ===');
+      console.log('=== DEBUGGING SUBMISSION ===');
       console.log('Link token:', linkToken);
-      console.log('Link data organization_id:', linkData.organization_id);
-
+      console.log('Link data:', linkData);
+      
       // Verify the link exists and get its actual ID
       const { data: linkVerification, error: linkVerifyError } = await supabase
         .from('organization_links')
-        .select('id, organization_id, is_active, expires_at, usage_count, usage_limit')
+        .select('*')
         .eq('link_token', linkToken)
         .eq('is_active', true)
         .single();
@@ -243,27 +243,7 @@ const DynamicSubmissionForm = () => {
         return;
       }
 
-      // Test if the link would pass our RLS policy check
-      const rlsTestQuery = `
-        SELECT EXISTS (
-          SELECT 1 
-          FROM organization_links ol 
-          WHERE ol.id = $1
-          AND ol.is_active = true 
-          AND (ol.expires_at IS NULL OR ol.expires_at > NOW())
-          AND (ol.usage_limit IS NULL OR ol.usage_count < ol.usage_limit)
-        ) as policy_would_pass
-      `;
-      
-      const { data: rlsTest, error: rlsTestError } = await supabase.rpc('execute_raw_sql', {
-        query: rlsTestQuery,
-        params: [linkVerification.id]
-      });
-      
-      console.log('RLS policy test result:', rlsTest);
-      console.log('RLS policy test error:', rlsTestError);
-
-      // Use the verified link data
+      // Use the verified link data for insertion
       const reportPayload = {
         organization_id: linkVerification.organization_id,
         tracking_id: trackingId,
@@ -279,9 +259,14 @@ const DynamicSubmissionForm = () => {
       };
 
       console.log('Final report payload:', reportPayload);
-      console.log('About to insert with these values:');
-      console.log('- submitted_via_link_id:', linkVerification.id);
-      console.log('- organization_id:', linkVerification.organization_id);
+
+      // Test if we can validate the link using the existing function
+      const { data: linkValidation, error: validationError } = await supabase.rpc('validate_organization_link', {
+        link_id: linkVerification.id
+      });
+      
+      console.log('Link validation result:', linkValidation);
+      console.log('Link validation error:', validationError);
 
       const { data: reportData, error: reportError } = await supabase
         .from('reports')
@@ -296,18 +281,9 @@ const DynamicSubmissionForm = () => {
         console.error('Error hint:', reportError.hint);
         console.error('Full error:', JSON.stringify(reportError, null, 2));
         
-        // Test if we can query organization_links directly
-        const { data: directLinkQuery, error: directLinkError } = await supabase
-          .from('organization_links')
-          .select('*')
-          .eq('id', linkVerification.id);
-        
-        console.log('Direct link query result:', directLinkQuery);
-        console.log('Direct link query error:', directLinkError);
-        
         toast({
           title: "Submission failed",
-          description: `Database error: ${reportError.message}. Check console for details.`,
+          description: `Database error: ${reportError.message}. Please check console for details.`,
           variant: "destructive",
         });
         return;
