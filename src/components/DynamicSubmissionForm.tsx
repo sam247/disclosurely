@@ -215,6 +215,15 @@ const DynamicSubmissionForm = () => {
         submission_method: 'web_form'
       };
 
+      console.log('=== SUBMISSION DEBUG INFO ===');
+      
+      // Check current auth state
+      const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+      console.log('Current session:', session);
+      console.log('Session error:', sessionError);
+      console.log('User ID:', session?.user?.id);
+      console.log('Is authenticated:', !!session?.user);
+      
       const { encryptedData, keyHash } = encryptReport(reportContent, linkData.organization_id);
 
       const reportPayload = {
@@ -231,13 +240,32 @@ const DynamicSubmissionForm = () => {
         tags: [finalCategory]
       };
 
+      console.log('Report payload:', reportPayload);
+      console.log('Link ID being used:', linkData.id);
+      
+      // Verify the link exists and is valid before submitting
+      const { data: linkCheck, error: linkCheckError } = await supabase
+        .from('organization_links')
+        .select('id, is_active, expires_at, usage_limit, usage_count')
+        .eq('id', linkData.id)
+        .single();
+        
+      console.log('Link verification:', linkCheck);
+      console.log('Link verification error:', linkCheckError);
+
       const { data: reportData, error: reportError } = await supabase
         .from('reports')
         .insert(reportPayload)
         .select();
 
       if (reportError) {
-        console.error('Report submission error:', reportError);
+        console.error('=== DETAILED REPORT ERROR ===');
+        console.error('Error code:', reportError.code);
+        console.error('Error message:', reportError.message);
+        console.error('Error details:', reportError.details);
+        console.error('Error hint:', reportError.hint);
+        console.error('Full error object:', reportError);
+        
         toast({
           title: "Submission failed",
           description: reportError.message || "There was an error submitting your report. Please try again.",
