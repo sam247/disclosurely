@@ -5,20 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
-import { createClient } from '@supabase/supabase-js';
-import type { Database } from '@/integrations/supabase/types';
-
-// Create anonymous client for report submissions
-const anonSupabase = createClient<Database>(
-  "https://cxmuzperkittvibslnff.supabase.co",
-  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImN4bXV6cGVya2l0dHZpYnNsbmZmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTAyNTk1MDEsImV4cCI6MjA2NTgzNTUwMX0.NxqrBnzSR-dxfWw4mn7nIHB-QTt900MtAh96fCCm1Lg",
-  {
-    auth: {
-      persistSession: false,
-      autoRefreshToken: false
-    }
-  }
-);
+import { supabase } from '@/integrations/supabase/client';
 import { Shield, AlertTriangle, Search } from 'lucide-react';
 import { encryptReport } from '@/utils/encryption';
 import BrandedFormLayout from './BrandedFormLayout';
@@ -76,7 +63,7 @@ const DynamicSubmissionForm = () => {
     try {
       console.log('Fetching link data for token:', linkToken);
       
-      const { data: linkInfo, error: linkError } = await anonSupabase
+      const { data: linkInfo, error: linkError } = await supabase
         .from('organization_links')
         .select(`
           id,
@@ -255,9 +242,11 @@ const DynamicSubmissionForm = () => {
         tags: [finalCategory]
       };
 
-      console.log('Report payload:', reportPayload);
+      console.log('Report payload before submission:', reportPayload);
+      console.log('Current Supabase auth state:', await supabase.auth.getUser());
 
-      const { data: reportData, error: reportError } = await anonSupabase
+      // Use the main supabase client for the insertion
+      const { data: reportData, error: reportError } = await supabase
         .from('reports')
         .insert(reportPayload)
         .select();
@@ -265,7 +254,13 @@ const DynamicSubmissionForm = () => {
       const report = reportData?.[0];
 
       if (reportError) {
-        console.error('Report submission error:', reportError);
+        console.error('Report submission error details:', {
+          error: reportError,
+          message: reportError.message,
+          details: reportError.details,
+          code: reportError.code,
+          hint: reportError.hint
+        });
         toast({
           title: "Submission failed",
           description: `Database error: ${reportError.message}. Please contact support if this persists.`,
