@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -218,125 +217,35 @@ const DynamicSubmissionForm = () => {
 
       const { encryptedData, keyHash } = encryptReport(reportContent, linkData.organization_id);
 
-      console.log('=== TARGETED RLS DEBUGGING ===');
-      
-      // Step 1: Get the exact link data we'll use for insertion
-      const { data: linkForInsertion, error: linkError } = await supabase
-        .from('organization_links')
-        .select('id, organization_id, is_active, expires_at, usage_count, usage_limit')
-        .eq('link_token', linkToken)
-        .eq('is_active', true)
-        .single();
-
-      if (linkError || !linkForInsertion) {
-        console.error('Cannot get link for insertion:', linkError);
-        toast({
-          title: "Link verification failed",
-          description: "Unable to verify submission link.",
-          variant: "destructive",
-        });
-        return;
-      }
-
-      console.log('Link for insertion:', linkForInsertion);
-
-      // Step 2: Test each part of the RLS policy condition manually
-      console.log('=== TESTING EACH RLS CONDITION ===');
-      
-      // Test basic link existence and activity
-      const { data: linkExists } = await supabase
-        .from('organization_links')
-        .select('id, is_active')
-        .eq('id', linkForInsertion.id)
-        .single();
-      console.log('Link exists and active check:', linkExists);
-
-      // Test expiration condition
-      const now = new Date().toISOString();
-      const expirationTest = !linkForInsertion.expires_at || linkForInsertion.expires_at > now;
-      console.log('Expiration test:', {
-        expires_at: linkForInsertion.expires_at,
-        now: now,
-        passes: expirationTest
-      });
-
-      // Test usage limit condition  
-      const usageTest = !linkForInsertion.usage_limit || linkForInsertion.usage_count < linkForInsertion.usage_limit;
-      console.log('Usage limit test:', {
-        usage_limit: linkForInsertion.usage_limit,
-        usage_count: linkForInsertion.usage_count,
-        passes: usageTest
-      });
-
-      // Step 3: Test the exact RLS subquery manually
-      const { data: rlsSubqueryTest, error: rlsError } = await supabase
-        .from('organization_links')
-        .select('id')
-        .eq('id', linkForInsertion.id)
-        .eq('is_active', true)
-        .or(`expires_at.is.null,expires_at.gt.${now}`)
-        .or(`usage_limit.is.null,usage_count.lt.${linkForInsertion.usage_limit || 999999}`);
-
-      console.log('RLS subquery simulation:', rlsSubqueryTest);
-      console.log('RLS subquery error:', rlsError);
-
-      // Step 4: Prepare the exact payload we're trying to insert
       const reportPayload = {
-        organization_id: linkForInsertion.organization_id,
+        organization_id: linkData.organization_id,
         tracking_id: trackingId,
         title: formData.title,
         encrypted_content: encryptedData,
         encryption_key_hash: keyHash,
         report_type: isAnonymous ? 'anonymous' as const : 'confidential' as const,
         submitted_by_email: isAnonymous ? null : formData.submitter_email || null,
-        submitted_via_link_id: linkForInsertion.id,
+        submitted_via_link_id: linkData.id,
         status: 'new' as const,
         priority: formData.priority,
         tags: [finalCategory]
       };
 
-      console.log('=== INSERTION ATTEMPT ===');
-      console.log('Final payload:', reportPayload);
-      console.log('submitted_via_link_id is NOT NULL:', reportPayload.submitted_via_link_id !== null);
-      
-      // Step 5: Attempt the insertion
       const { data: reportData, error: reportError } = await supabase
         .from('reports')
         .insert(reportPayload)
         .select();
 
       if (reportError) {
-        console.error('=== INSERTION FAILED ===');
-        console.error('Error code:', reportError.code);
-        console.error('Error message:', reportError.message);
-        console.error('Error details:', reportError.details);
-        console.error('Error hint:', reportError.hint);
-        
-        // If RLS is the issue, let's try to understand why
-        if (reportError.code === '42501') {
-          console.error('RLS POLICY VIOLATION - The policy check failed');
-          console.error('This means the EXISTS clause in Allow_anonymous_link_submissions returned false');
-          console.error('Even though our manual tests passed, the policy subquery failed');
-          
-          // Try a direct policy test
-          const { data: directPolicyTest } = await supabase
-            .from('organization_links')  
-            .select('id')
-            .eq('id', linkForInsertion.id)
-            .eq('is_active', true);
-            
-          console.log('Direct policy test (just id and is_active):', directPolicyTest);
-        }
-        
+        console.error('Report submission error:', reportError);
         toast({
           title: "Submission failed",
-          description: `RLS Policy Error: ${reportError.message}. Check console for detailed analysis.`,
+          description: reportError.message || "There was an error submitting your report. Please try again.",
           variant: "destructive",
         });
         return;
       }
 
-      console.log('SUCCESS! Report created:', reportData);
       const report = reportData?.[0];
 
       // Upload attached files if any
@@ -361,8 +270,7 @@ const DynamicSubmissionForm = () => {
       navigate(`/secure/tool/success?trackingId=${encodeURIComponent(trackingId)}`);
 
     } catch (error: any) {
-      console.error('=== SUBMISSION CATCH BLOCK ===');
-      console.error('Caught error:', error);
+      console.error('Submission error:', error);
       
       toast({
         title: "Submission failed",
