@@ -218,14 +218,14 @@ const DynamicSubmissionForm = () => {
       });
 
       // Encrypt the report data
-      const reportData = {
+      const reportContent = {
         title: formData.title,
         description: formData.description,
         category: finalCategory,
         submission_method: 'web_form'
       };
 
-      const { encryptedData, keyHash } = encryptReport(reportData, linkData.organization_id);
+      const { encryptedData, keyHash } = encryptReport(reportContent, linkData.organization_id);
 
       // Create the report with explicit values to ensure RLS compliance
       const reportPayload = {
@@ -244,11 +244,12 @@ const DynamicSubmissionForm = () => {
 
       console.log('Report payload:', reportPayload);
 
-      const { data: report, error: reportError } = await supabase
+      const { data: reportData, error: reportError } = await supabase
         .from('reports')
         .insert(reportPayload)
-        .select()
-        .single();
+        .select();
+
+      const report = reportData?.[0];
 
       if (reportError) {
         console.error('Report submission error:', reportError);
