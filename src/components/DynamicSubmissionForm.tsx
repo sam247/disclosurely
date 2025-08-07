@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -283,7 +284,7 @@ const DynamicSubmissionForm = () => {
       console.log('9. Testing simple insert...');
       const testPayload = {
         organization_id: linkData.organization_id,
-        tracking_id: trackingId,
+        tracking_id: trackingId + '_test',
         title: 'Test Report',
         encrypted_content: 'test_content',
         encryption_key_hash: 'test_hash',
@@ -309,14 +310,22 @@ const DynamicSubmissionForm = () => {
           hint: testReportError.hint
         });
         
-        // Log additional debugging info
-        console.log('12. Debugging RLS policies...');
-        const { data: policies, error: policiesError } = await supabase
-          .from('pg_policies')
-          .select('*')
-          .eq('tablename', 'reports');
-        
-        console.log('13. Current RLS policies:', { policies, policiesError });
+        // Test with minimal payload
+        console.log('12. Testing with absolute minimal payload...');
+        const minimalPayload = {
+          organization_id: linkData.organization_id,
+          tracking_id: trackingId + '_minimal',
+          title: 'Minimal Test',
+          encrypted_content: 'test',
+          encryption_key_hash: 'test'
+        };
+
+        const { data: minimalTest, error: minimalError } = await supabase
+          .from('reports')
+          .insert(minimalPayload)
+          .select();
+
+        console.log('13. Minimal test result:', { minimalTest, minimalError });
         
         toast({
           title: "Submission failed",
