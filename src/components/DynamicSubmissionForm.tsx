@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -219,11 +218,7 @@ const DynamicSubmissionForm = () => {
 
       const { encryptedData, keyHash } = encryptReport(reportContent, linkData.organization_id);
 
-      // CRITICAL: First verify the link exists and get its actual ID
-      console.log('=== PRE-SUBMISSION VERIFICATION ===');
-      console.log('Link token from URL:', linkToken);
-      console.log('Link data from state:', linkData);
-      
+      // Verify the link exists and get its actual ID
       const { data: linkVerification, error: linkVerifyError } = await supabase
         .from('organization_links')
         .select('id, organization_id, is_active, expires_at, usage_count, usage_limit')
@@ -231,9 +226,6 @@ const DynamicSubmissionForm = () => {
         .eq('is_active', true)
         .single();
         
-      console.log('Link verification result:', linkVerification);
-      console.log('Link verification error:', linkVerifyError);
-      
       if (linkVerifyError || !linkVerification) {
         toast({
           title: "Link verification failed",
@@ -252,28 +244,11 @@ const DynamicSubmissionForm = () => {
         encryption_key_hash: keyHash,
         report_type: isAnonymous ? 'anonymous' as const : 'confidential' as const,
         submitted_by_email: isAnonymous ? null : formData.submitter_email || null,
-        submitted_via_link_id: linkVerification.id, // Use verified ID
+        submitted_via_link_id: linkVerification.id,
         status: 'new' as const,
         priority: formData.priority,
         tags: [finalCategory]
       };
-
-      console.log('=== FINAL SUBMISSION DEBUG ===');
-      console.log('Verified Link ID:', linkVerification.id);
-      console.log('Organization ID:', linkVerification.organization_id);
-      console.log('Report Payload:', reportPayload);
-      console.log('Current Auth State:', await supabase.auth.getSession());
-      console.log('=== END DEBUG ===');
-
-      // Test the RLS policy directly first
-      console.log('Testing RLS policy compliance...');
-      const { data: testData, error: testError } = await supabase
-        .from('reports')
-        .select('id')
-        .eq('submitted_via_link_id', linkVerification.id)
-        .limit(1);
-      
-      console.log('RLS test query result:', { testData, testError });
 
       const { data: reportData, error: reportError } = await supabase
         .from('reports')
@@ -282,17 +257,9 @@ const DynamicSubmissionForm = () => {
 
       if (reportError) {
         console.error('Database insertion failed:', reportError);
-        console.error('Full error object:', JSON.stringify(reportError, null, 2));
-        
-        // Additional debugging for RLS
-        console.log('=== RLS DEBUGGING ===');
-        console.log('Auth user:', await supabase.auth.getUser());
-        console.log('Submitted via link ID:', reportPayload.submitted_via_link_id);
-        console.log('Organization ID:', reportPayload.organization_id);
-        
         toast({
           title: "Submission failed",
-          description: `Unable to submit report: ${reportError.message}. Please check console for details.`,
+          description: `Unable to submit report: ${reportError.message}. Please try again.`,
           variant: "destructive",
         });
         return;
