@@ -219,33 +219,61 @@ const DynamicSubmissionForm = () => {
 
       const { encryptedData, keyHash } = encryptReport(reportContent, linkData.organization_id);
 
-      // Prepare the report payload with detailed logging
+      // CRITICAL: First verify the link exists and get its actual ID
+      console.log('=== PRE-SUBMISSION VERIFICATION ===');
+      console.log('Link token from URL:', linkToken);
+      console.log('Link data from state:', linkData);
+      
+      const { data: linkVerification, error: linkVerifyError } = await supabase
+        .from('organization_links')
+        .select('id, organization_id, is_active, expires_at, usage_count, usage_limit')
+        .eq('link_token', linkToken)
+        .eq('is_active', true)
+        .single();
+        
+      console.log('Link verification result:', linkVerification);
+      console.log('Link verification error:', linkVerifyError);
+      
+      if (linkVerifyError || !linkVerification) {
+        toast({
+          title: "Link verification failed",
+          description: "Unable to verify submission link.",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      // Use the verified link data
       const reportPayload = {
-        organization_id: linkData.organization_id,
+        organization_id: linkVerification.organization_id,
         tracking_id: trackingId,
         title: formData.title,
         encrypted_content: encryptedData,
         encryption_key_hash: keyHash,
         report_type: isAnonymous ? 'anonymous' as const : 'confidential' as const,
         submitted_by_email: isAnonymous ? null : formData.submitter_email || null,
-        submitted_via_link_id: linkData.id,
+        submitted_via_link_id: linkVerification.id, // Use verified ID
         status: 'new' as const,
         priority: formData.priority,
         tags: [finalCategory]
       };
 
-      console.log('=== REPORT SUBMISSION DEBUG ===');
-      console.log('Link Data:', {
-        id: linkData.id,
-        organization_id: linkData.organization_id,
-        is_active: linkData.is_active,
-        expires_at: linkData.expires_at,
-        usage_count: linkData.usage_count,
-        usage_limit: linkData.usage_limit
-      });
+      console.log('=== FINAL SUBMISSION DEBUG ===');
+      console.log('Verified Link ID:', linkVerification.id);
+      console.log('Organization ID:', linkVerification.organization_id);
       console.log('Report Payload:', reportPayload);
-      console.log('Current User:', await supabase.auth.getUser());
+      console.log('Current Auth State:', await supabase.auth.getSession());
       console.log('=== END DEBUG ===');
+
+      // Test the RLS policy directly first
+      console.log('Testing RLS policy compliance...');
+      const { data: testData, error: testError } = await supabase
+        .from('reports')
+        .select('id')
+        .eq('submitted_via_link_id', linkVerification.id)
+        .limit(1);
+      
+      console.log('RLS test query result:', { testData, testError });
 
       const { data: reportData, error: reportError } = await supabase
         .from('reports')
@@ -255,6 +283,12 @@ const DynamicSubmissionForm = () => {
       if (reportError) {
         console.error('Database insertion failed:', reportError);
         console.error('Full error object:', JSON.stringify(reportError, null, 2));
+        
+        // Additional debugging for RLS
+        console.log('=== RLS DEBUGGING ===');
+        console.log('Auth user:', await supabase.auth.getUser());
+        console.log('Submitted via link ID:', reportPayload.submitted_via_link_id);
+        console.log('Organization ID:', reportPayload.organization_id);
         
         toast({
           title: "Submission failed",
