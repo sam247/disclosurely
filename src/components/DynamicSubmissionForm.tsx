@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -207,15 +206,49 @@ const DynamicSubmissionForm = () => {
       const trackingId = generateTrackingId();
       const finalCategory = getFinalCategory();
       
-      console.log('Submitting report with data:', {
+      console.log('=== DEBUGGING REPORT SUBMISSION ===');
+      console.log('1. Form data:', {
         title: formData.title,
+        description: formData.description,
+        category: finalCategory,
+        isAnonymous,
+        priority: formData.priority
+      });
+      
+      console.log('2. Link data:', {
         organizationId: linkData.organization_id,
         linkId: linkData.id,
-        trackingId,
-        isAnonymous,
-        priority: formData.priority,
-        category: finalCategory
+        trackingId
       });
+
+      // Check current auth state
+      const { data: { user }, error: authError } = await supabase.auth.getUser();
+      console.log('3. Current auth state:', {
+        user: user ? { id: user.id, email: user.email } : null,
+        authError,
+        isAnonymous
+      });
+
+      // Test connection to database
+      console.log('4. Testing database connection...');
+      const { data: testData, error: testError } = await supabase
+        .from('organizations')
+        .select('id, name')
+        .eq('id', linkData.organization_id)
+        .single();
+      
+      console.log('5. Organization test:', { testData, testError });
+
+      // Check if organization exists and is accessible
+      if (testError || !testData) {
+        console.error('Organization not found or not accessible:', testError);
+        toast({
+          title: "Organization Error",
+          description: "Unable to verify organization. Please try again.",
+          variant: "destructive",
+        });
+        return;
+      }
 
       // Encrypt the report data
       const reportContent = {
@@ -225,9 +258,11 @@ const DynamicSubmissionForm = () => {
         submission_method: 'web_form'
       };
 
+      console.log('6. Encrypting report content...');
       const { encryptedData, keyHash } = encryptReport(reportContent, linkData.organization_id);
+      console.log('7. Encryption completed');
 
-      // Create the report with explicit values to ensure RLS compliance
+      // Prepare the exact payload we'll send
       const reportPayload = {
         organization_id: linkData.organization_id,
         tracking_id: trackingId,
@@ -242,37 +277,87 @@ const DynamicSubmissionForm = () => {
         tags: [finalCategory]
       };
 
-      console.log('Report payload before submission:', reportPayload);
-      console.log('Current Supabase auth state:', await supabase.auth.getUser());
+      console.log('8. Final report payload:', reportPayload);
 
-      // Use the main supabase client for the insertion
+      // Test a simple insert first
+      console.log('9. Testing simple insert...');
+      const testPayload = {
+        organization_id: linkData.organization_id,
+        tracking_id: trackingId,
+        title: 'Test Report',
+        encrypted_content: 'test_content',
+        encryption_key_hash: 'test_hash',
+        report_type: 'anonymous' as const,
+        status: 'new' as const,
+        priority: 3,
+        tags: ['test']
+      };
+
+      console.log('10. Simple test payload:', testPayload);
+
+      const { data: testReport, error: testReportError } = await supabase
+        .from('reports')
+        .insert(testPayload)
+        .select();
+
+      if (testReportError) {
+        console.error('11. Test report failed:', {
+          error: testReportError,
+          message: testReportError.message,
+          details: testReportError.details,
+          code: testReportError.code,
+          hint: testReportError.hint
+        });
+        
+        // Log additional debugging info
+        console.log('12. Debugging RLS policies...');
+        const { data: policies, error: policiesError } = await supabase
+          .from('pg_policies')
+          .select('*')
+          .eq('tablename', 'reports');
+        
+        console.log('13. Current RLS policies:', { policies, policiesError });
+        
+        toast({
+          title: "Submission failed",
+          description: `Database error: ${testReportError.message}. Please contact support.`,
+          variant: "destructive",
+        });
+        return;
+      }
+
+      console.log('14. Test report created successfully:', testReport);
+
+      // Now try the actual report
+      console.log('15. Creating actual report...');
       const { data: reportData, error: reportError } = await supabase
         .from('reports')
         .insert(reportPayload)
         .select();
 
-      const report = reportData?.[0];
-
       if (reportError) {
-        console.error('Report submission error details:', {
+        console.error('16. Actual report submission failed:', {
           error: reportError,
           message: reportError.message,
           details: reportError.details,
           code: reportError.code,
           hint: reportError.hint
         });
+        
         toast({
           title: "Submission failed",
-          description: `Database error: ${reportError.message}. Please contact support if this persists.`,
+          description: `Database error: ${reportError.message}. Please contact support.`,
           variant: "destructive",
         });
         return;
       }
 
-      console.log('Report created successfully:', report);
+      const report = reportData?.[0];
+      console.log('17. Report created successfully:', report);
 
       // Upload attached files if any
       if (attachedFiles.length > 0 && report) {
+        console.log('18. Uploading files...');
         const uploadPromises = attachedFiles.map(file => 
           uploadReportFile(file, trackingId, report.id)
         );
@@ -281,7 +366,7 @@ const DynamicSubmissionForm = () => {
         const failedUploads = uploadResults.filter(result => !result.success);
 
         if (failedUploads.length > 0) {
-          console.error('Some file uploads failed:', failedUploads);
+          console.error('19. Some file uploads failed:', failedUploads);
           toast({
             title: "Report submitted",
             description: `Report submitted successfully, but ${failedUploads.length} file(s) failed to upload.`,
@@ -290,11 +375,12 @@ const DynamicSubmissionForm = () => {
         }
       }
 
+      console.log('20. Navigating to success page...');
       // Navigate to success page
       navigate(`/secure/tool/success?trackingId=${encodeURIComponent(trackingId)}`);
 
     } catch (error: any) {
-      console.error('Error submitting report:', error);
+      console.error('21. Catch block error:', error);
       toast({
         title: "Submission failed",
         description: error.message || "There was an error submitting your report. Please try again.",
