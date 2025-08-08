@@ -375,10 +375,10 @@ const DynamicSubmissionForm = () => {
         hasAccessToken: !!finalAuthCheck.data.session?.access_token
       });
       
-      // 13. LOG THE EXACT REQUEST CONFIGURATION
+      // 13. REQUEST CONFIGURATION (BASIC INFO ONLY)
       console.log('=== 13. REQUEST CONFIGURATION ANALYSIS ===');
-      console.log('Supabase URL:', supabase.supabaseUrl);
-      console.log('Supabase Key (first 20 chars):', supabase.supabaseKey.substring(0, 20) + '...');
+      console.log('Supabase client instance type:', typeof supabase);
+      console.log('Auth instance ready:', !!supabase.auth);
       
       // 14. ATTEMPT THE SUBMISSION
       console.log('=== 14. EXECUTING SUBMISSION ===');
