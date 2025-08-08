@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -205,15 +206,30 @@ const DynamicSubmissionForm = () => {
     setSubmitting(true);
 
     try {
-      console.log('Starting report submission process...');
+      console.log('🚀 Starting report submission process...');
       
-      // Ensure we're in anonymous context
-      const currentSession = await supabase.auth.getSession();
-      if (currentSession.data.session) {
-        console.log('Signing out to ensure anonymous context');
-        await supabase.auth.signOut();
-        // Wait for signout to complete
-        await new Promise(resolve => setTimeout(resolve, 500));
+      // Get current session state before making changes
+      const initialSession = await supabase.auth.getSession();
+      console.log('📊 Initial session state:', {
+        hasSession: !!initialSession.data.session,
+        sessionUser: initialSession.data.session?.user?.email,
+        accessToken: initialSession.data.session?.access_token ? 'present' : 'not present'
+      });
+
+      // For anonymous submissions, ensure we're not authenticated
+      if (initialSession.data.session) {
+        console.log('🔐 Current user is authenticated, signing out for anonymous submission');
+        const signOutResult = await supabase.auth.signOut();
+        console.log('🚪 Sign out result:', signOutResult);
+        
+        // Wait for sign out to complete properly
+        await new Promise(resolve => setTimeout(resolve, 1000));
+        
+        const postSignOutSession = await supabase.auth.getSession();
+        console.log('✅ Post-signout session check:', {
+          hasSession: !!postSignOutSession.data.session,
+          sessionUser: postSignOutSession.data.session?.user?.email
+        });
       }
 
       const trackingId = generateTrackingId();
@@ -226,7 +242,8 @@ const DynamicSubmissionForm = () => {
         submission_method: 'web_form'
       };
 
-      console.log('Encrypting report content...');
+      console.log('🔐 Encrypting report content...');
+      console.log('📝 Report content to encrypt:', reportContent);
       const { encryptedData, keyHash } = encryptReport(reportContent, linkData.organization_id);
 
       const reportPayload = {
@@ -243,33 +260,91 @@ const DynamicSubmissionForm = () => {
         tags: [finalCategory]
       };
 
-      console.log('Submitting report with tracking ID:', trackingId);
+      console.log('📦 Final report payload:', {
+        ...reportPayload,
+        encrypted_content: `${encryptedData.substring(0, 50)}...`,
+        encryption_key_hash: `${keyHash.substring(0, 16)}...`
+      });
+
+      // Log the Supabase client configuration
+      console.log('🔧 Supabase client configuration check:');
+      console.log('🌐 Making authenticated check...');
+      
+      // Make sure we have a fresh anonymous client
+      console.log('🔄 Creating fresh anonymous client for submission...');
+      
+      // Log current auth state one more time before submission
+      const finalAuthCheck = await supabase.auth.getSession();
+      console.log('🔍 Final auth state before submission:', {
+        hasSession: !!finalAuthCheck.data.session,
+        user: finalAuthCheck.data.session?.user?.email || 'anonymous'
+      });
+
+      console.log('📨 Submitting report with tracking ID:', trackingId);
+      console.log('🎯 Submission attempt starting...');
       
       const { data: reportData, error: reportError } = await supabase
         .from('reports')
         .insert(reportPayload)
         .select();
 
+      console.log('📬 Raw submission response:', {
+        data: reportData,
+        error: reportError,
+        errorDetails: reportError ? {
+          message: reportError.message,
+          details: reportError.details,
+          hint: reportError.hint,
+          code: reportError.code
+        } : null
+      });
+
       if (reportError) {
-        console.error('Report submission error:', reportError);
-        throw new Error(`Submission failed: ${reportError.message}`);
+        console.error('❌ Report submission error details:', {
+          message: reportError.message,
+          details: reportError.details,
+          hint: reportError.hint,
+          code: reportError.code,
+          payload: reportPayload
+        });
+        
+        // Log additional context
+        console.error('🔍 Error context:', {
+          linkDataId: linkData.id,
+          organizationId: linkData.organization_id,
+          isAnonymous: true,
+          reportType: 'anonymous',
+          submittedByEmail: null
+        });
+        
+        throw new Error(`Submission failed: ${reportError.message} (Code: ${reportError.code})`);
       }
 
-      console.log('Report submitted successfully:', reportData?.[0]?.id);
+      console.log('✅ Report submitted successfully!');
+      console.log('📄 Report data:', reportData?.[0]);
       const report = reportData?.[0];
 
       // Handle file uploads if any
       if (attachedFiles.length > 0 && report) {
-        console.log('Processing file uploads...');
-        const uploadPromises = attachedFiles.map(file => 
-          uploadReportFile(file, trackingId, report.id)
-        );
+        console.log('📎 Processing file uploads...', attachedFiles.length, 'files');
+        const uploadPromises = attachedFiles.map((file, index) => {
+          console.log(`📁 Uploading file ${index + 1}:`, file.name, file.size, 'bytes');
+          return uploadReportFile(file, trackingId, report.id);
+        });
 
         const uploadResults = await Promise.all(uploadPromises);
+        const successfulUploads = uploadResults.filter(result => result.success);
         const failedUploads = uploadResults.filter(result => !result.success);
 
+        console.log('📊 File upload results:', {
+          total: attachedFiles.length,
+          successful: successfulUploads.length,
+          failed: failedUploads.length,
+          failedDetails: failedUploads
+        });
+
         if (failedUploads.length > 0) {
-          console.warn('Some file uploads failed:', failedUploads.length);
+          console.warn('⚠️ Some file uploads failed:', failedUploads);
           toast({
             title: "Report submitted",
             description: `Report submitted successfully, but ${failedUploads.length} file(s) failed to upload.`,
@@ -278,11 +353,18 @@ const DynamicSubmissionForm = () => {
         }
       }
 
+      console.log('🎉 Success! Navigating to success page...');
       // Navigate to success page
       navigate(`/secure/tool/success?trackingId=${encodeURIComponent(trackingId)}`);
 
     } catch (error: any) {
-      console.error('Submission error:', error);
+      console.error('💥 Submission error caught:', error);
+      console.error('🔍 Error details:', {
+        message: error.message,
+        stack: error.stack,
+        name: error.name
+      });
+      
       toast({
         title: "Submission failed",
         description: error.message || "There was an error submitting your report. Please try again.",
@@ -290,6 +372,7 @@ const DynamicSubmissionForm = () => {
       });
     } finally {
       setSubmitting(false);
+      console.log('🏁 Submission process completed');
     }
   };
 
