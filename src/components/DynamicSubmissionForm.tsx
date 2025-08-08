@@ -207,26 +207,46 @@ const DynamicSubmissionForm = () => {
     try {
       console.log('=== ANONYMOUS SUBMISSION ATTEMPT ===');
       
-      // Store current session state to restore later
+      // Get the current auth headers before any changes
+      const initialHeaders = await supabase.auth.getSession();
+      console.log('=== INITIAL AUTH STATE ===');
+      console.log('Initial session:', initialHeaders.data.session?.user?.email || 'none');
+      console.log('Initial access_token exists:', !!initialHeaders.data.session?.access_token);
+      
+      // Store current session to potentially restore later (but we won't in anonymous case)
       const { data: { session: currentSession } } = await supabase.auth.getSession();
-      console.log('Current session before submission:', currentSession?.user?.email || 'none');
-
-      // Temporarily sign out to ensure anonymous submission
+      
+      // Force sign out and wait for it to complete
       if (currentSession) {
-        console.log('Temporarily signing out for anonymous submission...');
+        console.log('=== SIGNING OUT FOR ANONYMOUS SUBMISSION ===');
         await supabase.auth.signOut();
         
-        // Wait a moment for the signout to take effect
-        await new Promise(resolve => setTimeout(resolve, 100));
+        // Wait longer for the signout to propagate
+        await new Promise(resolve => setTimeout(resolve, 500));
       }
 
-      // Verify we're now anonymous
-      const { data: { session: anonymousSession } } = await supabase.auth.getSession();
-      console.log('Session after signout:', anonymousSession);
-
-      if (anonymousSession) {
-        throw new Error('Failed to create anonymous context - session still exists');
+      // Verify auth state multiple times to be absolutely sure
+      for (let i = 0; i < 3; i++) {
+        const { data: { session: checkSession } } = await supabase.auth.getSession();
+        console.log(`=== AUTH CHECK ${i + 1} ===`);
+        console.log('Session exists:', !!checkSession);
+        console.log('User:', checkSession?.user?.email || 'none');
+        console.log('Access token exists:', !!checkSession?.access_token);
+        
+        if (checkSession) {
+          console.error('CRITICAL: Session still exists after signout attempt');
+          await new Promise(resolve => setTimeout(resolve, 200));
+        } else {
+          console.log('SUCCESS: No session detected');
+          break;
+        }
       }
+
+      // Final check - get the exact headers that will be sent
+      const finalAuthState = await supabase.auth.getSession();
+      console.log('=== FINAL AUTH STATE BEFORE REQUEST ===');
+      console.log('Final session:', finalAuthState.data.session);
+      console.log('Will send Authorization header:', !!finalAuthState.data.session?.access_token);
 
       const trackingId = generateTrackingId();
       const finalCategory = getFinalCategory();
@@ -238,9 +258,12 @@ const DynamicSubmissionForm = () => {
         submission_method: 'web_form'
       };
 
+      console.log('=== REPORT DATA ===');
       console.log('Tracking ID:', trackingId);
       console.log('Link ID:', linkData.id);
       console.log('Organization ID:', linkData.organization_id);
+      console.log('Report type: anonymous');
+      console.log('Submitted by email: null');
 
       const { encryptedData, keyHash } = encryptReport(reportContent, linkData.organization_id);
 
@@ -258,9 +281,20 @@ const DynamicSubmissionForm = () => {
         tags: [finalCategory]
       };
 
-      console.log('Report payload for anonymous submission:', reportPayload);
+      console.log('=== PAYLOAD VALIDATION ===');
+      console.log('submitted_via_link_id is not null:', reportPayload.submitted_via_link_id !== null);
+      console.log('report_type is anonymous:', reportPayload.report_type === 'anonymous');
+      console.log('submitted_by_email is null:', reportPayload.submitted_by_email === null);
+      console.log('Full payload:', reportPayload);
 
-      // Make the submission with the now-anonymous client
+      // Check the current RLS policy manually
+      console.log('=== RLS POLICY CHECK ===');
+      console.log('Policy should allow if:');
+      console.log('1. submitted_via_link_id IS NOT NULL:', reportPayload.submitted_via_link_id !== null);
+      console.log('2. report_type = anonymous:', reportPayload.report_type === 'anonymous'); 
+      console.log('3. submitted_by_email IS NULL:', reportPayload.submitted_by_email === null);
+
+      // Make the submission
       console.log('=== EXECUTING ANONYMOUS INSERT ===');
       const { data: reportData, error: reportError } = await supabase
         .from('reports')
@@ -268,16 +302,24 @@ const DynamicSubmissionForm = () => {
         .select();
 
       if (reportError) {
-        console.error('=== ANONYMOUS SUBMISSION ERROR ===');
+        console.error('=== SUBMISSION FAILED ===');
         console.error('Error code:', reportError.code);
         console.error('Error message:', reportError.message);
         console.error('Error details:', reportError.details);
         console.error('Error hint:', reportError.hint);
         
+        // Let's also check what the current auth state is when the error occurs
+        const errorAuthState = await supabase.auth.getSession();
+        console.error('Auth state when error occurred:', {
+          hasSession: !!errorAuthState.data.session,
+          userEmail: errorAuthState.data.session?.user?.email,
+          hasAccessToken: !!errorAuthState.data.session?.access_token
+        });
+        
         throw new Error(`Submission failed: ${reportError.message}`);
       }
 
-      console.log('=== ANONYMOUS SUBMISSION SUCCESS ===');
+      console.log('=== SUBMISSION SUCCESS ===');
       console.log('Report created:', reportData?.[0]?.id);
 
       const report = reportData?.[0];
