@@ -215,6 +215,11 @@ const DynamicSubmissionForm = () => {
         submission_method: 'web_form'
       };
 
+      console.log('=== SUBMISSION ATTEMPT ===');
+      console.log('Tracking ID:', trackingId);
+      console.log('Link ID:', linkData.id);
+      console.log('Organization ID:', linkData.organization_id);
+
       const { encryptedData, keyHash } = encryptReport(reportContent, linkData.organization_id);
 
       const reportPayload = {
@@ -231,13 +236,35 @@ const DynamicSubmissionForm = () => {
         tags: [finalCategory]
       };
 
+      console.log('Report payload keys:', Object.keys(reportPayload));
+      console.log('submitted_via_link_id:', reportPayload.submitted_via_link_id);
+
+      // Check if the link exists before attempting submission
+      const { data: linkExists, error: linkExistsError } = await supabase
+        .from('organization_links')
+        .select('id, is_active, organization_id')
+        .eq('id', linkData.id)
+        .single();
+
+      console.log('Link verification:', linkExists);
+      console.log('Link verification error:', linkExistsError);
+
+      if (linkExistsError || !linkExists) {
+        throw new Error('Link validation failed: ' + (linkExistsError?.message || 'Link not found'));
+      }
+
+      console.log('Attempting to insert report...');
       const { data: reportData, error: reportError } = await supabase
         .from('reports')
         .insert(reportPayload)
         .select();
 
       if (reportError) {
-        console.error('Report submission error:', reportError);
+        console.error('=== SUBMISSION ERROR DETAILS ===');
+        console.error('Error code:', reportError.code);
+        console.error('Error message:', reportError.message);
+        console.error('Error details:', reportError.details);
+        console.error('Error hint:', reportError.hint);
         
         toast({
           title: "Submission failed",
@@ -246,6 +273,9 @@ const DynamicSubmissionForm = () => {
         });
         return;
       }
+
+      console.log('=== SUBMISSION SUCCESS ===');
+      console.log('Report created:', reportData?.[0]?.id);
 
       const report = reportData?.[0];
 
@@ -271,7 +301,9 @@ const DynamicSubmissionForm = () => {
       navigate(`/secure/tool/success?trackingId=${encodeURIComponent(trackingId)}`);
 
     } catch (error: any) {
-      console.error('Submission error:', error);
+      console.error('=== SUBMISSION EXCEPTION ===');
+      console.error('Exception message:', error.message);
+      console.error('Exception stack:', error.stack);
       
       toast({
         title: "Submission failed",
