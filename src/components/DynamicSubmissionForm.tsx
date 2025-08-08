@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -6,6 +5,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
+import { createClient } from '@supabase/supabase-js';
 import { Shield, AlertTriangle, Search } from 'lucide-react';
 import { encryptReport } from '@/utils/encryption';
 import BrandedFormLayout from './BrandedFormLayout';
@@ -208,28 +208,19 @@ const DynamicSubmissionForm = () => {
     try {
       console.log('🚀 Starting report submission process...');
       
-      // Get current session state before making changes
-      const initialSession = await supabase.auth.getSession();
-      console.log('📊 Initial session state:', {
-        hasSession: !!initialSession.data.session,
-        sessionUser: initialSession.data.session?.user?.email,
-        accessToken: initialSession.data.session?.access_token ? 'present' : 'not present'
-      });
+      // Create a fresh anonymous Supabase client specifically for this submission
+      console.log('🔧 Creating dedicated anonymous client for submission...');
+      const SUPABASE_URL = "https://cxmuzperkittvibslnff.supabase.co";
+      const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImN4bXV6cGVya2l0dHZpYnNsbmZmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTAyNTk1MDEsImV4cCI6MjA2NTgzNTUwMX0.NxqrBnzSR-dxfWw4mn7nIHB-QTt900MtAh96fCCm1Lg";
+      
+      const anonymousClient = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+      console.log('✅ Anonymous client created successfully');
 
-      // For anonymous submissions, ensure we're not authenticated
-      if (initialSession.data.session) {
-        console.log('🔐 Current user is authenticated, signing out for anonymous submission');
-        const signOutResult = await supabase.auth.signOut();
-        console.log('🚪 Sign out result:', signOutResult);
-        
-        // Wait for sign out to complete properly
-        await new Promise(resolve => setTimeout(resolve, 1000));
-        
-        const postSignOutSession = await supabase.auth.getSession();
-        console.log('✅ Post-signout session check:', {
-          hasSession: !!postSignOutSession.data.session,
-          sessionUser: postSignOutSession.data.session?.user?.email
-        });
+      // Ensure no authentication on the anonymous client
+      const { data: sessionCheck } = await anonymousClient.auth.getSession();
+      if (sessionCheck.session) {
+        console.log('🚪 Signing out from anonymous client to ensure clean state');
+        await anonymousClient.auth.signOut();
       }
 
       const trackingId = generateTrackingId();
@@ -243,7 +234,6 @@ const DynamicSubmissionForm = () => {
       };
 
       console.log('🔐 Encrypting report content...');
-      console.log('📝 Report content to encrypt:', reportContent);
       const { encryptedData, keyHash } = encryptReport(reportContent, linkData.organization_id);
 
       const reportPayload = {
@@ -260,35 +250,23 @@ const DynamicSubmissionForm = () => {
         tags: [finalCategory]
       };
 
-      console.log('📦 Final report payload:', {
+      console.log('📦 Final report payload for anonymous client:', {
         ...reportPayload,
         encrypted_content: `${encryptedData.substring(0, 50)}...`,
-        encryption_key_hash: `${keyHash.substring(0, 16)}...`
+        encryption_key_hash: `${keyHash.substring(0, 16)}...`,
+        submitted_via_link_id: reportPayload.submitted_via_link_id,
+        report_type: reportPayload.report_type,
+        submitted_by_email: reportPayload.submitted_by_email
       });
 
-      // Log the Supabase client configuration
-      console.log('🔧 Supabase client configuration check:');
-      console.log('🌐 Making authenticated check...');
+      console.log('📨 Submitting report via anonymous client...');
       
-      // Make sure we have a fresh anonymous client
-      console.log('🔄 Creating fresh anonymous client for submission...');
-      
-      // Log current auth state one more time before submission
-      const finalAuthCheck = await supabase.auth.getSession();
-      console.log('🔍 Final auth state before submission:', {
-        hasSession: !!finalAuthCheck.data.session,
-        user: finalAuthCheck.data.session?.user?.email || 'anonymous'
-      });
-
-      console.log('📨 Submitting report with tracking ID:', trackingId);
-      console.log('🎯 Submission attempt starting...');
-      
-      const { data: reportData, error: reportError } = await supabase
+      const { data: reportData, error: reportError } = await anonymousClient
         .from('reports')
         .insert(reportPayload)
         .select();
 
-      console.log('📬 Raw submission response:', {
+      console.log('📬 Anonymous submission response:', {
         data: reportData,
         error: reportError,
         errorDetails: reportError ? {
@@ -300,7 +278,7 @@ const DynamicSubmissionForm = () => {
       });
 
       if (reportError) {
-        console.error('❌ Report submission error details:', {
+        console.error('❌ Anonymous submission error:', {
           message: reportError.message,
           details: reportError.details,
           hint: reportError.hint,
@@ -308,20 +286,10 @@ const DynamicSubmissionForm = () => {
           payload: reportPayload
         });
         
-        // Log additional context
-        console.error('🔍 Error context:', {
-          linkDataId: linkData.id,
-          organizationId: linkData.organization_id,
-          isAnonymous: true,
-          reportType: 'anonymous',
-          submittedByEmail: null
-        });
-        
-        throw new Error(`Submission failed: ${reportError.message} (Code: ${reportError.code})`);
+        throw new Error(`Anonymous submission failed: ${reportError.message} (Code: ${reportError.code})`);
       }
 
-      console.log('✅ Report submitted successfully!');
-      console.log('📄 Report data:', reportData?.[0]);
+      console.log('✅ Report submitted successfully via anonymous client!');
       const report = reportData?.[0];
 
       // Handle file uploads if any
@@ -354,7 +322,6 @@ const DynamicSubmissionForm = () => {
       }
 
       console.log('🎉 Success! Navigating to success page...');
-      // Navigate to success page
       navigate(`/secure/tool/success?trackingId=${encodeURIComponent(trackingId)}`);
 
     } catch (error: any) {
