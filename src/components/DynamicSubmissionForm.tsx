@@ -206,20 +206,18 @@ const DynamicSubmissionForm = () => {
     setSubmitting(true);
 
     try {
-      console.log('🚀 Starting report submission process...');
+      console.log('Starting anonymous report submission...');
       
       // Create a fresh anonymous Supabase client specifically for this submission
-      console.log('🔧 Creating dedicated anonymous client for submission...');
       const SUPABASE_URL = "https://cxmuzperkittvibslnff.supabase.co";
       const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImN4bXV6cGVya2l0dHZpYnNsbmZmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTAyNTk1MDEsImV4cCI6MjA2NTgzNTUwMX0.NxqrBnzSR-dxfWw4mn7nIHB-QTt900MtAh96fCCm1Lg";
       
       const anonymousClient = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-      console.log('✅ Anonymous client created successfully');
 
       // Ensure no authentication on the anonymous client
       const { data: sessionCheck } = await anonymousClient.auth.getSession();
       if (sessionCheck.session) {
-        console.log('🚪 Signing out from anonymous client to ensure clean state');
+        console.log('Signing out from anonymous client to ensure clean state');
         await anonymousClient.auth.signOut();
       }
 
@@ -233,7 +231,7 @@ const DynamicSubmissionForm = () => {
         submission_method: 'web_form'
       };
 
-      console.log('🔐 Encrypting report content...');
+      console.log('Encrypting report content...');
       const { encryptedData, keyHash } = encryptReport(reportContent, linkData.organization_id);
 
       const reportPayload = {
@@ -250,69 +248,35 @@ const DynamicSubmissionForm = () => {
         tags: [finalCategory]
       };
 
-      console.log('📦 Final report payload for anonymous client:', {
-        ...reportPayload,
-        encrypted_content: `${encryptedData.substring(0, 50)}...`,
-        encryption_key_hash: `${keyHash.substring(0, 16)}...`,
-        submitted_via_link_id: reportPayload.submitted_via_link_id,
-        report_type: reportPayload.report_type,
-        submitted_by_email: reportPayload.submitted_by_email
-      });
-
-      console.log('📨 Submitting report via anonymous client...');
+      console.log('Submitting anonymous report...');
       
       const { data: reportData, error: reportError } = await anonymousClient
         .from('reports')
         .insert(reportPayload)
         .select();
 
-      console.log('📬 Anonymous submission response:', {
-        data: reportData,
-        error: reportError,
-        errorDetails: reportError ? {
-          message: reportError.message,
-          details: reportError.details,
-          hint: reportError.hint,
-          code: reportError.code
-        } : null
-      });
-
       if (reportError) {
-        console.error('❌ Anonymous submission error:', {
+        console.error('Anonymous submission error:', {
           message: reportError.message,
-          details: reportError.details,
-          hint: reportError.hint,
           code: reportError.code,
-          payload: reportPayload
+          details: reportError.details
         });
         
-        throw new Error(`Anonymous submission failed: ${reportError.message} (Code: ${reportError.code})`);
+        throw new Error(`Anonymous submission failed: ${reportError.message}`);
       }
 
-      console.log('✅ Report submitted successfully via anonymous client!');
+      console.log('Report submitted successfully!');
       const report = reportData?.[0];
 
       // Handle file uploads if any
       if (attachedFiles.length > 0 && report) {
-        console.log('📎 Processing file uploads...', attachedFiles.length, 'files');
-        const uploadPromises = attachedFiles.map((file, index) => {
-          console.log(`📁 Uploading file ${index + 1}:`, file.name, file.size, 'bytes');
-          return uploadReportFile(file, trackingId, report.id);
-        });
-
+        console.log('Processing file uploads...', attachedFiles.length, 'files');
+        const uploadPromises = attachedFiles.map(file => uploadReportFile(file, trackingId, report.id));
         const uploadResults = await Promise.all(uploadPromises);
-        const successfulUploads = uploadResults.filter(result => result.success);
         const failedUploads = uploadResults.filter(result => !result.success);
 
-        console.log('📊 File upload results:', {
-          total: attachedFiles.length,
-          successful: successfulUploads.length,
-          failed: failedUploads.length,
-          failedDetails: failedUploads
-        });
-
         if (failedUploads.length > 0) {
-          console.warn('⚠️ Some file uploads failed:', failedUploads);
+          console.warn('Some file uploads failed:', failedUploads);
           toast({
             title: "Report submitted",
             description: `Report submitted successfully, but ${failedUploads.length} file(s) failed to upload.`,
@@ -321,16 +285,11 @@ const DynamicSubmissionForm = () => {
         }
       }
 
-      console.log('🎉 Success! Navigating to success page...');
+      console.log('Success! Navigating to success page...');
       navigate(`/secure/tool/success?trackingId=${encodeURIComponent(trackingId)}`);
 
     } catch (error: any) {
-      console.error('💥 Submission error caught:', error);
-      console.error('🔍 Error details:', {
-        message: error.message,
-        stack: error.stack,
-        name: error.name
-      });
+      console.error('Submission error:', error.message);
       
       toast({
         title: "Submission failed",
@@ -339,7 +298,6 @@ const DynamicSubmissionForm = () => {
       });
     } finally {
       setSubmitting(false);
-      console.log('🏁 Submission process completed');
     }
   };
 
