@@ -205,88 +205,17 @@ const DynamicSubmissionForm = () => {
     setSubmitting(true);
 
     try {
-      console.log('🔥🔥🔥 ULTIMATE DEBUGGING SESSION START 🔥🔥🔥');
-      console.log('Timestamp:', new Date().toISOString());
+      console.log('Starting report submission process...');
       
-      // 1. CAPTURE INITIAL STATE
-      console.log('=== 1. INITIAL STATE CAPTURE ===');
-      const initialSession = await supabase.auth.getSession();
-      console.log('Initial session exists:', !!initialSession.data.session);
-      console.log('Initial user email:', initialSession.data.session?.user?.email);
-      console.log('Initial access token exists:', !!initialSession.data.session?.access_token);
-      console.log('Initial session object keys:', initialSession.data.session ? Object.keys(initialSession.data.session) : 'null');
-      
-      // 2. TEST RLS POLICY CONDITIONS
-      console.log('=== 2. RLS POLICY CONDITIONS TEST ===');
-      const testPayload = {
-        submitted_via_link_id: linkData.id,
-        report_type: 'anonymous' as const,
-        submitted_by_email: null
-      };
-      console.log('Test payload for RLS conditions:');
-      console.log('  submitted_via_link_id IS NOT NULL:', testPayload.submitted_via_link_id !== null);
-      console.log('  report_type = anonymous:', testPayload.report_type === 'anonymous');
-      console.log('  submitted_by_email IS NULL:', testPayload.submitted_by_email === null);
-      console.log('  Link ID value:', testPayload.submitted_via_link_id);
-      console.log('  Link ID type:', typeof testPayload.submitted_via_link_id);
-      
-      // 3. VERIFY LINK EXISTS AND IS VALID
-      console.log('=== 3. LINK VERIFICATION ===');
-      const linkVerification = await supabase
-        .from('organization_links')
-        .select('id, is_active, organization_id, usage_limit, usage_count, expires_at')
-        .eq('id', linkData.id)
-        .single();
-      
-      console.log('Link verification result:', linkVerification);
-      if (linkVerification.error) {
-        console.error('Link verification failed:', linkVerification.error);
-      } else {
-        console.log('Link is valid and active:', linkVerification.data?.is_active);
-        console.log('Link organization_id:', linkVerification.data?.organization_id);
-      }
-      
-      // 4. CHECK CURRENT USER CONTEXT
-      console.log('=== 4. USER CONTEXT CHECK ===');
-      const currentUser = await supabase.auth.getUser();
-      console.log('Current user result:', currentUser);
-      console.log('User exists:', !!currentUser.data.user);
-      console.log('User email:', currentUser.data.user?.email);
-      
-      // 5. FORCE SIGNOUT TO ENSURE ANONYMOUS CONTEXT
-      console.log('=== 5. FORCING SIGNOUT FOR ANONYMOUS CONTEXT ===');
-      if (initialSession.data.session) {
-        console.log('Session detected, signing out...');
-        const signOutResult = await supabase.auth.signOut();
-        console.log('Signout result:', signOutResult);
-        
+      // Ensure we're in anonymous context
+      const currentSession = await supabase.auth.getSession();
+      if (currentSession.data.session) {
+        console.log('Signing out to ensure anonymous context');
+        await supabase.auth.signOut();
         // Wait for signout to complete
-        await new Promise(resolve => setTimeout(resolve, 1000));
+        await new Promise(resolve => setTimeout(resolve, 500));
       }
-      
-      // 6. VERIFY NO SESSION EXISTS MULTIPLE TIMES
-      console.log('=== 6. SESSION VERIFICATION (MULTIPLE CHECKS) ===');
-      for (let i = 0; i < 5; i++) {
-        const sessionCheck = await supabase.auth.getSession();
-        console.log(`Session check ${i + 1}:`, {
-          exists: !!sessionCheck.data.session,
-          user: sessionCheck.data.session?.user?.email,
-          accessToken: !!sessionCheck.data.session?.access_token
-        });
-        
-        if (sessionCheck.data.session) {
-          console.error(`CRITICAL: Session still exists on check ${i + 1}`);
-          await new Promise(resolve => setTimeout(resolve, 200));
-        }
-      }
-      
-      // 7. CHECK SUPABASE CLIENT INTERNAL STATE
-      console.log('=== 7. SUPABASE CLIENT INTERNAL STATE ===');
-      console.log('Supabase client auth instance:', supabase.auth);
-      console.log('Client ready:', !!supabase.auth);
-      
-      // 8. PREPARE SUBMISSION DATA
-      console.log('=== 8. SUBMISSION DATA PREPARATION ===');
+
       const trackingId = generateTrackingId();
       const finalCategory = getFinalCategory();
       
@@ -297,12 +226,8 @@ const DynamicSubmissionForm = () => {
         submission_method: 'web_form'
       };
 
-      console.log('Report content to encrypt:', reportContent);
-      
+      console.log('Encrypting report content...');
       const { encryptedData, keyHash } = encryptReport(reportContent, linkData.organization_id);
-      console.log('Encryption completed successfully');
-      console.log('Encrypted data length:', encryptedData.length);
-      console.log('Key hash preview:', keyHash.substring(0, 16) + '...');
 
       const reportPayload = {
         organization_id: linkData.organization_id,
@@ -318,124 +243,24 @@ const DynamicSubmissionForm = () => {
         tags: [finalCategory]
       };
 
-      console.log('=== 9. FINAL PAYLOAD VALIDATION ===');
-      console.log('Complete payload:', JSON.stringify(reportPayload, null, 2));
-      
-      // Validate each RLS condition one more time
-      console.log('RLS Condition 1 - submitted_via_link_id IS NOT NULL:');
-      console.log('  Value:', reportPayload.submitted_via_link_id);
-      console.log('  Is not null:', reportPayload.submitted_via_link_id !== null);
-      console.log('  Type:', typeof reportPayload.submitted_via_link_id);
-      
-      console.log('RLS Condition 2 - report_type = anonymous:');
-      console.log('  Value:', reportPayload.report_type);
-      console.log('  Equals anonymous:', reportPayload.report_type === 'anonymous');
-      console.log('  Type:', typeof reportPayload.report_type);
-      
-      console.log('RLS Condition 3 - submitted_by_email IS NULL:');
-      console.log('  Value:', reportPayload.submitted_by_email);
-      console.log('  Is null:', reportPayload.submitted_by_email === null);
-      console.log('  Type:', typeof reportPayload.submitted_by_email);
-      
-      // 10. PERFORM A TEST QUERY FIRST
-      console.log('=== 10. PRE-SUBMISSION TEST QUERY ===');
-      try {
-        const testQuery = await supabase
-          .from('reports')
-          .select('id')
-          .limit(1);
-        
-        console.log('Test query result:', testQuery);
-        console.log('Test query error:', testQuery.error);
-        
-        if (testQuery.error) {
-          console.error('Pre-submission test query failed:', testQuery.error);
-        }
-      } catch (testError) {
-        console.error('Test query exception:', testError);
-      }
-      
-      // 11. CHECK ALL RLS POLICIES ON REPORTS TABLE
-      console.log('=== 11. CHECKING ALL RLS POLICIES ===');
-      try {
-        const rlsCheck = await supabase
-          .rpc('validate_organization_link', { link_id: linkData.id });
-        
-        console.log('RLS validation function result:', rlsCheck);
-      } catch (rlsError) {
-        console.log('RLS validation function not available or failed:', rlsError);
-      }
-      
-      // 12. FINAL AUTH STATE BEFORE SUBMISSION
-      console.log('=== 12. FINAL AUTH STATE BEFORE SUBMISSION ===');
-      const finalAuthCheck = await supabase.auth.getSession();
-      console.log('Final auth check:', {
-        hasSession: !!finalAuthCheck.data.session,
-        userEmail: finalAuthCheck.data.session?.user?.email,
-        hasAccessToken: !!finalAuthCheck.data.session?.access_token
-      });
-      
-      // 13. REQUEST CONFIGURATION (BASIC INFO ONLY)
-      console.log('=== 13. REQUEST CONFIGURATION ANALYSIS ===');
-      console.log('Supabase client instance type:', typeof supabase);
-      console.log('Auth instance ready:', !!supabase.auth);
-      
-      // 14. ATTEMPT THE SUBMISSION
-      console.log('=== 14. EXECUTING SUBMISSION ===');
-      console.log('About to call supabase.from(reports).insert()');
-      console.log('Exact payload being sent:', reportPayload);
+      console.log('Submitting report with tracking ID:', trackingId);
       
       const { data: reportData, error: reportError } = await supabase
         .from('reports')
         .insert(reportPayload)
         .select();
 
-      // 15. DETAILED ERROR ANALYSIS
       if (reportError) {
-        console.error('=== 15. SUBMISSION FAILED - DETAILED ERROR ANALYSIS ===');
-        console.error('Error object:', reportError);
-        console.error('Error code:', reportError.code);
-        console.error('Error message:', reportError.message);
-        console.error('Error details:', reportError.details);
-        console.error('Error hint:', reportError.hint);
-        
-        // Check auth state at time of error
-        const errorAuthState = await supabase.auth.getSession();
-        console.error('Auth state when error occurred:', {
-          hasSession: !!errorAuthState.data.session,
-          userEmail: errorAuthState.data.session?.user?.email,
-          hasAccessToken: !!errorAuthState.data.session?.access_token
-        });
-        
-        // Check if it's specifically an RLS error
-        if (reportError.code === '42501' || reportError.message.includes('row-level security')) {
-          console.error('🚨 CONFIRMED RLS POLICY VIOLATION');
-          console.error('This means the RLS policy is not allowing the insert');
-          console.error('Policy conditions that should be met:');
-          console.error('1. submitted_via_link_id IS NOT NULL:', reportPayload.submitted_via_link_id !== null);
-          console.error('2. report_type = anonymous:', reportPayload.report_type === 'anonymous');
-          console.error('3. submitted_by_email IS NULL:', reportPayload.submitted_by_email === null);
-          
-          // Try to understand what's happening
-          console.error('Possible issues:');
-          console.error('- RLS policy syntax error');
-          console.error('- Database trigger interfering');
-          console.error('- Type mismatch in policy conditions');
-          console.error('- Hidden authentication context');
-        }
-        
+        console.error('Report submission error:', reportError);
         throw new Error(`Submission failed: ${reportError.message}`);
       }
 
-      console.log('=== 16. SUBMISSION SUCCESS ===');
-      console.log('Report created successfully:', reportData?.[0]?.id);
-      console.log('Full response data:', reportData);
-
+      console.log('Report submitted successfully:', reportData?.[0]?.id);
       const report = reportData?.[0];
 
       // Handle file uploads if any
       if (attachedFiles.length > 0 && report) {
-        console.log('=== 17. FILE UPLOAD PROCESS ===');
+        console.log('Processing file uploads...');
         const uploadPromises = attachedFiles.map(file => 
           uploadReportFile(file, trackingId, report.id)
         );
@@ -444,7 +269,7 @@ const DynamicSubmissionForm = () => {
         const failedUploads = uploadResults.filter(result => !result.success);
 
         if (failedUploads.length > 0) {
-          console.warn('Some file uploads failed:', failedUploads);
+          console.warn('Some file uploads failed:', failedUploads.length);
           toast({
             title: "Report submitted",
             description: `Report submitted successfully, but ${failedUploads.length} file(s) failed to upload.`,
@@ -454,17 +279,10 @@ const DynamicSubmissionForm = () => {
       }
 
       // Navigate to success page
-      console.log('=== 18. NAVIGATION TO SUCCESS ===');
       navigate(`/secure/tool/success?trackingId=${encodeURIComponent(trackingId)}`);
 
     } catch (error: any) {
-      console.error('=== 🚨 SUBMISSION EXCEPTION 🚨 ===');
-      console.error('Exception type:', typeof error);
-      console.error('Exception instanceof Error:', error instanceof Error);
-      console.error('Exception message:', error?.message);
-      console.error('Exception stack:', error?.stack);
-      console.error('Full exception object:', error);
-      
+      console.error('Submission error:', error);
       toast({
         title: "Submission failed",
         description: error.message || "There was an error submitting your report. Please try again.",
@@ -472,7 +290,6 @@ const DynamicSubmissionForm = () => {
       });
     } finally {
       setSubmitting(false);
-      console.log('🔥🔥🔥 ULTIMATE DEBUGGING SESSION END 🔥🔥🔥');
     }
   };
 
