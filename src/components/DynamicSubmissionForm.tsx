@@ -5,6 +5,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
+import { createClient } from '@supabase/supabase-js';
 import { Shield, AlertTriangle, Search } from 'lucide-react';
 import { encryptReport } from '@/utils/encryption';
 import BrandedFormLayout from './BrandedFormLayout';
@@ -205,26 +206,17 @@ const DynamicSubmissionForm = () => {
     setSubmitting(true);
 
     try {
-      console.log('=== DEBUGGING SUPABASE CLIENT STATE ===');
+      console.log('=== CREATING FRESH ANONYMOUS CLIENT ===');
       
-      // Get current session
-      const { data: { session }, error: sessionError } = await supabase.auth.getSession();
-      console.log('Current session:', session);
-      console.log('Session error:', sessionError);
-      console.log('User ID:', session?.user?.id);
-      
-      // Create a new anonymous client for this submission
-      console.log('Creating anonymous submission...');
-      
-      // Clear any existing session to ensure anonymous submission
-      await supabase.auth.signOut();
-      
-      // Wait a moment for the signout to complete
-      await new Promise(resolve => setTimeout(resolve, 100));
-      
-      // Verify we're now anonymous
-      const { data: { session: anonSession } } = await supabase.auth.getSession();
-      console.log('Anonymous session check:', anonSession);
+      // Create a completely fresh Supabase client without any cached auth
+      const anonymousClient = createClient(
+        'https://cxmuzperkittvibslnff.supabase.co',
+        'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImN4bXV6cGVya2l0dHZpYnNsbmZmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTAyNTk1MDEsImV4cCI6MjA2NTgzNTUwMX0.NxqrBnzSR-dxfWw4mn7nIHB-QTt900MtAh96fCCm1Lg'
+      );
+
+      // Verify the anonymous client has no session
+      const { data: { session: anonSession } } = await anonymousClient.auth.getSession();
+      console.log('Anonymous client session check:', anonSession);
 
       const trackingId = generateTrackingId();
       const finalCategory = getFinalCategory();
@@ -236,7 +228,7 @@ const DynamicSubmissionForm = () => {
         submission_method: 'web_form'
       };
 
-      console.log('=== SUBMISSION ATTEMPT (ANONYMOUS) ===');
+      console.log('=== SUBMISSION ATTEMPT (FRESH ANONYMOUS CLIENT) ===');
       console.log('Tracking ID:', trackingId);
       console.log('Link ID:', linkData.id);
       console.log('Organization ID:', linkData.organization_id);
@@ -249,8 +241,8 @@ const DynamicSubmissionForm = () => {
         title: formData.title,
         encrypted_content: encryptedData,
         encryption_key_hash: keyHash,
-        report_type: 'anonymous' as const, // Force anonymous for now
-        submitted_by_email: null, // Force null for anonymous
+        report_type: 'anonymous' as const,
+        submitted_by_email: null,
         submitted_via_link_id: linkData.id,
         status: 'new' as const,
         priority: formData.priority,
@@ -259,22 +251,22 @@ const DynamicSubmissionForm = () => {
 
       console.log('Report payload:', reportPayload);
 
-      // Verify link exists one more time
-      const { data: linkExists, error: linkExistsError } = await supabase
+      // Verify link exists with the anonymous client
+      const { data: linkExists, error: linkExistsError } = await anonymousClient
         .from('organization_links')
         .select('id, is_active, organization_id')
         .eq('id', linkData.id)
         .single();
 
-      console.log('Link verification:', linkExists);
+      console.log('Link verification with anonymous client:', linkExists);
       console.log('Link verification error:', linkExistsError);
 
       if (linkExistsError || !linkExists) {
         throw new Error('Link validation failed: ' + (linkExistsError?.message || 'Link not found'));
       }
 
-      console.log('Attempting anonymous insert...');
-      const { data: reportData, error: reportError } = await supabase
+      console.log('Attempting anonymous insert with fresh client...');
+      const { data: reportData, error: reportError } = await anonymousClient
         .from('reports')
         .insert(reportPayload)
         .select();
