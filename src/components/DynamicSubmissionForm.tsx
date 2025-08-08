@@ -5,7 +5,6 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
-import { createClient } from '@supabase/supabase-js';
 import { Shield, AlertTriangle, Search } from 'lucide-react';
 import { encryptReport } from '@/utils/encryption';
 import BrandedFormLayout from './BrandedFormLayout';
@@ -208,28 +207,25 @@ const DynamicSubmissionForm = () => {
     try {
       console.log('=== ANONYMOUS SUBMISSION ATTEMPT ===');
       
-      // Create completely isolated anonymous client
-      const anonymousClient = createClient(
-        'https://cxmuzperkittvibslnff.supabase.co',
-        'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImN4bXV6cGVya2l0dHZpYnNsbmZmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTAyNTk1MDEsImV4cCI6MjA2NTgzNTUwMX0.NxqrBnzSR-dxfWw4mn7nIHB-QTt900MtAh96fCCm1Lg',
-        {
-          auth: {
-            autoRefreshToken: false,
-            persistSession: false,
-            detectSessionInUrl: false
-          }
-        }
-      );
+      // Store current session state to restore later
+      const { data: { session: currentSession } } = await supabase.auth.getSession();
+      console.log('Current session before submission:', currentSession?.user?.email || 'none');
 
-      // Explicitly sign out any existing session on this client
-      await anonymousClient.auth.signOut();
+      // Temporarily sign out to ensure anonymous submission
+      if (currentSession) {
+        console.log('Temporarily signing out for anonymous submission...');
+        await supabase.auth.signOut();
+        
+        // Wait a moment for the signout to take effect
+        await new Promise(resolve => setTimeout(resolve, 100));
+      }
 
-      // Double check - ensure no session exists
-      const { data: { session } } = await anonymousClient.auth.getSession();
-      console.log('Anonymous client session after signOut:', session);
+      // Verify we're now anonymous
+      const { data: { session: anonymousSession } } = await supabase.auth.getSession();
+      console.log('Session after signout:', anonymousSession);
 
-      if (session) {
-        throw new Error('Failed to create truly anonymous client - session still exists');
+      if (anonymousSession) {
+        throw new Error('Failed to create anonymous context - session still exists');
       }
 
       const trackingId = generateTrackingId();
@@ -264,9 +260,9 @@ const DynamicSubmissionForm = () => {
 
       console.log('Report payload for anonymous submission:', reportPayload);
 
-      // Make the actual anonymous submission
+      // Make the submission with the now-anonymous client
       console.log('=== EXECUTING ANONYMOUS INSERT ===');
-      const { data: reportData, error: reportError } = await anonymousClient
+      const { data: reportData, error: reportError } = await supabase
         .from('reports')
         .insert(reportPayload)
         .select();
@@ -277,9 +273,6 @@ const DynamicSubmissionForm = () => {
         console.error('Error message:', reportError.message);
         console.error('Error details:', reportError.details);
         console.error('Error hint:', reportError.hint);
-        
-        // Log the headers being sent
-        console.error('Client auth state:', await anonymousClient.auth.getSession());
         
         throw new Error(`Submission failed: ${reportError.message}`);
       }
