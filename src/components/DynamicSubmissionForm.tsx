@@ -372,14 +372,13 @@ const DynamicSubmissionForm = () => {
       console.log('Final auth check:', {
         hasSession: !!finalAuthCheck.data.session,
         userEmail: finalAuthCheck.data.session?.user?.email,
-        hasAccessToken: !!finalAuthCheck.data.session?.access_token,
-        sessionId: finalAuthCheck.data.session?.id
+        hasAccessToken: !!finalAuthCheck.data.session?.access_token
       });
       
-      // 13. LOG THE EXACT REQUEST HEADERS
-      console.log('=== 13. REQUEST HEADERS ANALYSIS ===');
-      const requestHeaders = supabase.rest.headers;
-      console.log('Supabase REST headers:', requestHeaders);
+      // 13. LOG THE EXACT REQUEST CONFIGURATION
+      console.log('=== 13. REQUEST CONFIGURATION ANALYSIS ===');
+      console.log('Supabase URL:', supabase.supabaseUrl);
+      console.log('Supabase Key (first 20 chars):', supabase.supabaseKey.substring(0, 20) + '...');
       
       // 14. ATTEMPT THE SUBMISSION
       console.log('=== 14. EXECUTING SUBMISSION ===');
