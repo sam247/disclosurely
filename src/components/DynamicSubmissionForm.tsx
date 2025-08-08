@@ -206,17 +206,31 @@ const DynamicSubmissionForm = () => {
     setSubmitting(true);
 
     try {
-      console.log('=== CREATING FRESH ANONYMOUS CLIENT ===');
+      console.log('=== ANONYMOUS SUBMISSION ATTEMPT ===');
       
-      // Create a completely fresh Supabase client without any cached auth
+      // Create completely isolated anonymous client
       const anonymousClient = createClient(
         'https://cxmuzperkittvibslnff.supabase.co',
-        'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImN4bXV6cGVya2l0dHZpYnNsbmZmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTAyNTk1MDEsImV4cCI6MjA2NTgzNTUwMX0.NxqrBnzSR-dxfWw4mn7nIHB-QTt900MtAh96fCCm1Lg'
+        'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImN4bXV6cGVya2l0dHZpYnNsbmZmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTAyNTk1MDEsImV4cCI6MjA2NTgzNTUwMX0.NxqrBnzSR-dxfWw4mn7nIHB-QTt900MtAh96fCCm1Lg',
+        {
+          auth: {
+            autoRefreshToken: false,
+            persistSession: false,
+            detectSessionInUrl: false
+          }
+        }
       );
 
-      // Verify the anonymous client has no session
-      const { data: { session: anonSession } } = await anonymousClient.auth.getSession();
-      console.log('Anonymous client session check:', anonSession);
+      // Explicitly sign out any existing session on this client
+      await anonymousClient.auth.signOut();
+
+      // Double check - ensure no session exists
+      const { data: { session } } = await anonymousClient.auth.getSession();
+      console.log('Anonymous client session after signOut:', session);
+
+      if (session) {
+        throw new Error('Failed to create truly anonymous client - session still exists');
+      }
 
       const trackingId = generateTrackingId();
       const finalCategory = getFinalCategory();
@@ -228,7 +242,6 @@ const DynamicSubmissionForm = () => {
         submission_method: 'web_form'
       };
 
-      console.log('=== SUBMISSION ATTEMPT (FRESH ANONYMOUS CLIENT) ===');
       console.log('Tracking ID:', trackingId);
       console.log('Link ID:', linkData.id);
       console.log('Organization ID:', linkData.organization_id);
@@ -249,45 +262,29 @@ const DynamicSubmissionForm = () => {
         tags: [finalCategory]
       };
 
-      console.log('Report payload:', reportPayload);
+      console.log('Report payload for anonymous submission:', reportPayload);
 
-      // Verify link exists with the anonymous client
-      const { data: linkExists, error: linkExistsError } = await anonymousClient
-        .from('organization_links')
-        .select('id, is_active, organization_id')
-        .eq('id', linkData.id)
-        .single();
-
-      console.log('Link verification with anonymous client:', linkExists);
-      console.log('Link verification error:', linkExistsError);
-
-      if (linkExistsError || !linkExists) {
-        throw new Error('Link validation failed: ' + (linkExistsError?.message || 'Link not found'));
-      }
-
-      console.log('Attempting anonymous insert with fresh client...');
+      // Make the actual anonymous submission
+      console.log('=== EXECUTING ANONYMOUS INSERT ===');
       const { data: reportData, error: reportError } = await anonymousClient
         .from('reports')
         .insert(reportPayload)
         .select();
 
       if (reportError) {
-        console.error('=== SUBMISSION ERROR DETAILS ===');
+        console.error('=== ANONYMOUS SUBMISSION ERROR ===');
         console.error('Error code:', reportError.code);
         console.error('Error message:', reportError.message);
         console.error('Error details:', reportError.details);
         console.error('Error hint:', reportError.hint);
-        console.error('Full error object:', reportError);
         
-        toast({
-          title: "Submission failed",
-          description: reportError.message || "There was an error submitting your report. Please try again.",
-          variant: "destructive",
-        });
-        return;
+        // Log the headers being sent
+        console.error('Client auth state:', await anonymousClient.auth.getSession());
+        
+        throw new Error(`Submission failed: ${reportError.message}`);
       }
 
-      console.log('=== SUBMISSION SUCCESS ===');
+      console.log('=== ANONYMOUS SUBMISSION SUCCESS ===');
       console.log('Report created:', reportData?.[0]?.id);
 
       const report = reportData?.[0];
@@ -315,8 +312,7 @@ const DynamicSubmissionForm = () => {
 
     } catch (error: any) {
       console.error('=== SUBMISSION EXCEPTION ===');
-      console.error('Exception message:', error.message);
-      console.error('Exception stack:', error.stack);
+      console.error('Exception:', error);
       
       toast({
         title: "Submission failed",
