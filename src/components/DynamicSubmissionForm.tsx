@@ -205,6 +205,27 @@ const DynamicSubmissionForm = () => {
     setSubmitting(true);
 
     try {
+      console.log('=== DEBUGGING SUPABASE CLIENT STATE ===');
+      
+      // Get current session
+      const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+      console.log('Current session:', session);
+      console.log('Session error:', sessionError);
+      console.log('User ID:', session?.user?.id);
+      
+      // Create a new anonymous client for this submission
+      console.log('Creating anonymous submission...');
+      
+      // Clear any existing session to ensure anonymous submission
+      await supabase.auth.signOut();
+      
+      // Wait a moment for the signout to complete
+      await new Promise(resolve => setTimeout(resolve, 100));
+      
+      // Verify we're now anonymous
+      const { data: { session: anonSession } } = await supabase.auth.getSession();
+      console.log('Anonymous session check:', anonSession);
+
       const trackingId = generateTrackingId();
       const finalCategory = getFinalCategory();
       
@@ -215,7 +236,7 @@ const DynamicSubmissionForm = () => {
         submission_method: 'web_form'
       };
 
-      console.log('=== SUBMISSION ATTEMPT ===');
+      console.log('=== SUBMISSION ATTEMPT (ANONYMOUS) ===');
       console.log('Tracking ID:', trackingId);
       console.log('Link ID:', linkData.id);
       console.log('Organization ID:', linkData.organization_id);
@@ -228,18 +249,17 @@ const DynamicSubmissionForm = () => {
         title: formData.title,
         encrypted_content: encryptedData,
         encryption_key_hash: keyHash,
-        report_type: isAnonymous ? 'anonymous' as const : 'confidential' as const,
-        submitted_by_email: isAnonymous ? null : formData.submitter_email || null,
+        report_type: 'anonymous' as const, // Force anonymous for now
+        submitted_by_email: null, // Force null for anonymous
         submitted_via_link_id: linkData.id,
         status: 'new' as const,
         priority: formData.priority,
         tags: [finalCategory]
       };
 
-      console.log('Report payload keys:', Object.keys(reportPayload));
-      console.log('submitted_via_link_id:', reportPayload.submitted_via_link_id);
+      console.log('Report payload:', reportPayload);
 
-      // Check if the link exists before attempting submission
+      // Verify link exists one more time
       const { data: linkExists, error: linkExistsError } = await supabase
         .from('organization_links')
         .select('id, is_active, organization_id')
@@ -253,7 +273,7 @@ const DynamicSubmissionForm = () => {
         throw new Error('Link validation failed: ' + (linkExistsError?.message || 'Link not found'));
       }
 
-      console.log('Attempting to insert report...');
+      console.log('Attempting anonymous insert...');
       const { data: reportData, error: reportError } = await supabase
         .from('reports')
         .insert(reportPayload)
@@ -265,6 +285,7 @@ const DynamicSubmissionForm = () => {
         console.error('Error message:', reportError.message);
         console.error('Error details:', reportError.details);
         console.error('Error hint:', reportError.hint);
+        console.error('Full error object:', reportError);
         
         toast({
           title: "Submission failed",
