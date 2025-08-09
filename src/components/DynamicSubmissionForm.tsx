@@ -5,7 +5,6 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
-import { createClient } from '@supabase/supabase-js';
 import { Shield, AlertTriangle, Search } from 'lucide-react';
 import { encryptReport } from '@/utils/encryption';
 import BrandedFormLayout from './BrandedFormLayout';
@@ -208,18 +207,6 @@ const DynamicSubmissionForm = () => {
     try {
       console.log('Starting anonymous report submission...');
       
-      // Create a fresh anonymous Supabase client
-      const SUPABASE_URL = "https://cxmuzperkittvibslnff.supabase.co";
-      const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImN4bXV6cGVya2l0dHZpYnNsbmZmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTAyNTk1MDEsImV4cCI6MjA2NTgzNTUwMX0.NxqrBnzSR-dxfWw4mn7nIHB-QTt900MtAh96fCCm1Lg";
-      
-      const anonymousClient = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-
-      // Ensure no authentication on the anonymous client
-      const { data: sessionCheck } = await anonymousClient.auth.getSession();
-      if (sessionCheck.session) {
-        await anonymousClient.auth.signOut();
-      }
-
       const trackingId = generateTrackingId();
       const finalCategory = getFinalCategory();
       
@@ -247,15 +234,29 @@ const DynamicSubmissionForm = () => {
         tags: [finalCategory]
       };
 
-      console.log('Submitting anonymous report with completely open RLS policy...');
+      console.log('Making direct anonymous request to Supabase...');
       
-      const { data: reportData, error: reportError } = await anonymousClient
+      // Use the existing supabase client but ensure we're making an anonymous request
+      // First, sign out any existing session to ensure we're anonymous
+      const { data: sessionCheck } = await supabase.auth.getSession();
+      if (sessionCheck.session) {
+        console.log('Found existing session, signing out for anonymous submission');
+        await supabase.auth.signOut();
+      }
+
+      // Make the request using the standard supabase client
+      const { data: reportData, error: reportError } = await supabase
         .from('reports')
         .insert(reportPayload)
         .select();
 
       if (reportError) {
-        console.error('Anonymous submission error:', reportError);
+        console.error('Anonymous submission error details:', {
+          message: reportError.message,
+          code: reportError.code,
+          details: reportError.details,
+          hint: reportError.hint
+        });
         throw new Error(`Anonymous submission failed: ${reportError.message}`);
       }
 
