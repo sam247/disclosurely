@@ -208,7 +208,7 @@ const DynamicSubmissionForm = () => {
     try {
       console.log('Starting anonymous report submission...');
       
-      // Create a fresh anonymous Supabase client specifically for this submission
+      // Create a fresh anonymous Supabase client
       const SUPABASE_URL = "https://cxmuzperkittvibslnff.supabase.co";
       const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImN4bXV6cGVya2l0dHZpYnNsbmZmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTAyNTk1MDEsImV4cCI6MjA2NTgzNTUwMX0.NxqrBnzSR-dxfWw4mn7nIHB-QTt900MtAh96fCCm1Lg";
       
@@ -217,7 +217,6 @@ const DynamicSubmissionForm = () => {
       // Ensure no authentication on the anonymous client
       const { data: sessionCheck } = await anonymousClient.auth.getSession();
       if (sessionCheck.session) {
-        console.log('Signing out from anonymous client to ensure clean state');
         await anonymousClient.auth.signOut();
       }
 
@@ -248,7 +247,7 @@ const DynamicSubmissionForm = () => {
         tags: [finalCategory]
       };
 
-      console.log('Submitting anonymous report...');
+      console.log('Submitting anonymous report with completely open RLS policy...');
       
       const { data: reportData, error: reportError } = await anonymousClient
         .from('reports')
@@ -256,21 +255,16 @@ const DynamicSubmissionForm = () => {
         .select();
 
       if (reportError) {
-        console.error('Anonymous submission error:', {
-          message: reportError.message,
-          code: reportError.code,
-          details: reportError.details
-        });
-        
+        console.error('Anonymous submission error:', reportError);
         throw new Error(`Anonymous submission failed: ${reportError.message}`);
       }
 
-      console.log('Report submitted successfully!');
+      console.log('Report submitted successfully!', reportData);
       const report = reportData?.[0];
 
       // Handle file uploads if any
       if (attachedFiles.length > 0 && report) {
-        console.log('Processing file uploads...', attachedFiles.length, 'files');
+        console.log('Processing file uploads...');
         const uploadPromises = attachedFiles.map(file => uploadReportFile(file, trackingId, report.id));
         const uploadResults = await Promise.all(uploadPromises);
         const failedUploads = uploadResults.filter(result => !result.success);
@@ -289,7 +283,7 @@ const DynamicSubmissionForm = () => {
       navigate(`/secure/tool/success?trackingId=${encodeURIComponent(trackingId)}`);
 
     } catch (error: any) {
-      console.error('Submission error:', error.message);
+      console.error('Submission error:', error);
       
       toast({
         title: "Submission failed",
