@@ -19,7 +19,6 @@ const ReportSuccess = () => {
   const [searchParams] = useSearchParams();
   const [trackingId, setTrackingId] = useState<string>('');
   const [organizationBranding, setOrganizationBranding] = useState<OrganizationBranding | null>(null);
-  const [organizationLinkToken, setOrganizationLinkToken] = useState<string>('');
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -34,6 +33,8 @@ const ReportSuccess = () => {
 
   const fetchOrganizationBranding = async (trackingId: string) => {
     try {
+      console.log('Fetching organization branding for tracking ID:', trackingId);
+
       // Find the report by tracking ID to get the organization
       const { data: report, error: reportError } = await supabase
         .from('reports')
@@ -48,25 +49,21 @@ const ReportSuccess = () => {
           )
         `)
         .eq('tracking_id', trackingId)
-        .single();
+        .maybeSingle();
 
-      if (reportError || !report) {
-        console.error('Report not found:', reportError);
+      if (reportError) {
+        console.error('Error fetching report:', reportError);
         setLoading(false);
         return;
       }
 
-      // Get the organization's link token for status checking
-      const { data: linkData, error: linkError } = await supabase
-        .from('organization_links')
-        .select('link_token')
-        .eq('organization_id', report.organization_id)
-        .eq('is_active', true)
-        .single();
-
-      if (linkError) {
-        console.error('Organization link not found:', linkError);
+      if (!report) {
+        console.error('Report not found for tracking ID:', trackingId);
+        setLoading(false);
+        return;
       }
+
+      console.log('Report found:', report);
 
       setOrganizationBranding({
         name: report.organizations.name,
@@ -76,9 +73,6 @@ const ReportSuccess = () => {
         domain: report.organizations.domain
       });
 
-      if (linkData?.link_token) {
-        setOrganizationLinkToken(linkData.link_token);
-      }
     } catch (error) {
       console.error('Error fetching organization branding:', error);
     } finally {

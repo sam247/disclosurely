@@ -59,9 +59,14 @@ const CompanyStatusPage = () => {
   }, [linkToken]);
 
   const fetchOrganizationBranding = async () => {
-    if (!linkToken) return;
+    if (!linkToken) {
+      setLoadingBranding(false);
+      return;
+    }
 
     try {
+      console.log('Fetching organization branding for link token:', linkToken);
+
       const { data: linkInfo, error: linkError } = await supabase
         .from('organization_links')
         .select(`
@@ -75,12 +80,21 @@ const CompanyStatusPage = () => {
         `)
         .eq('link_token', linkToken)
         .eq('is_active', true)
-        .single();
+        .maybeSingle();
 
-      if (linkError || !linkInfo) {
-        console.error('Organization link not found:', linkError);
+      if (linkError) {
+        console.error('Organization link error:', linkError);
+        setLoadingBranding(false);
         return;
       }
+
+      if (!linkInfo) {
+        console.error('Organization link not found for token:', linkToken);
+        setLoadingBranding(false);
+        return;
+      }
+
+      console.log('Organization link found:', linkInfo);
 
       setOrganizationBranding({
         name: linkInfo.organizations.name,
@@ -103,8 +117,8 @@ const CompanyStatusPage = () => {
       return;
     }
 
-    if (!organizationBranding) {
-      toast.error("Organization information not available");
+    if (!linkToken) {
+      toast.error("Invalid access link");
       return;
     }
 
@@ -114,16 +128,19 @@ const CompanyStatusPage = () => {
       console.log("Looking up report with tracking ID:", trackingId.trim());
 
       // Get the organization ID from the link token first
-      const { data: linkInfo } = await supabase
+      const { data: linkInfo, error: linkError } = await supabase
         .from('organization_links')
         .select('organization_id')
         .eq('link_token', linkToken)
-        .single();
+        .maybeSingle();
 
-      if (!linkInfo) {
+      if (linkError || !linkInfo) {
+        console.error('Link validation error:', linkError);
         toast.error("Invalid access link");
         return;
       }
+
+      console.log('Link validated, organization ID:', linkInfo.organization_id);
 
       // Look up report by tracking ID and organization ID to ensure security
       const { data: reportData, error: reportError } = await supabase
@@ -134,10 +151,16 @@ const CompanyStatusPage = () => {
         `)
         .eq("tracking_id", trackingId.trim())
         .eq("organization_id", linkInfo.organization_id)
-        .single();
+        .maybeSingle();
 
-      if (reportError || !reportData) {
+      if (reportError) {
         console.error("Report lookup error:", reportError);
+        toast.error("Error looking up report. Please try again.");
+        return;
+      }
+
+      if (!reportData) {
+        console.log("Report not found for tracking ID:", trackingId.trim());
         toast.error("Report not found. Please check your tracking ID.");
         return;
       }
@@ -259,9 +282,9 @@ const CompanyStatusPage = () => {
     );
   }
 
-  const logoUrl = getLogoUrl();
-  const brandColor = getBrandColor();
-  const organizationName = getOrganizationName();
+  const logoUrl = organizationBranding?.custom_logo_url || organizationBranding?.logo_url;
+  const brandColor = organizationBranding?.brand_color || '#2563eb';
+  const organizationName = organizationBranding?.name || 'Organization';
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100">

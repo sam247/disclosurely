@@ -22,6 +22,7 @@ import ReportSuccess from "./components/ReportSuccess";
 import CompanyStatusPage from "./components/CompanyStatusPage";
 import CookieConsentBanner from "./components/CookieConsentBanner";
 import SubdomainRedirect from "./components/SubdomainRedirect";
+import AnonymousSubmissionTest from "./components/testing/AnonymousSubmissionTest";
 
 const queryClient = new QueryClient();
 
@@ -58,6 +59,9 @@ function App() {
               
               {/* Company status page */}
               <Route path="/company/:domain/status" element={<CompanyStatusPage />} />
+              
+              {/* Testing route */}
+              <Route path="/test/anonymous-submission" element={<AnonymousSubmissionTest />} />
               
               {/* Protected routes */}
               <Route path="/dashboard/*" element={<AuthenticatedApp />} />
