@@ -198,7 +198,7 @@ const DynamicSubmissionForm = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!linkData) return;
+    if (!linkData || !linkToken) return;
 
     if (!validateForm()) return;
 
@@ -221,47 +221,39 @@ const DynamicSubmissionForm = () => {
       const { encryptedData, keyHash } = encryptReport(reportContent, linkData.organization_id);
 
       const reportPayload = {
-        organization_id: linkData.organization_id,
         tracking_id: trackingId,
         title: formData.title,
         encrypted_content: encryptedData,
         encryption_key_hash: keyHash,
         report_type: 'anonymous' as const,
         submitted_by_email: null,
-        submitted_via_link_id: linkData.id,
         status: 'new' as const,
         priority: formData.priority,
         tags: [finalCategory]
       };
 
-      console.log('Making direct anonymous request to Supabase...');
+      console.log('Submitting via edge function...');
       
-      // Use the existing supabase client but ensure we're making an anonymous request
-      // First, sign out any existing session to ensure we're anonymous
-      const { data: sessionCheck } = await supabase.auth.getSession();
-      if (sessionCheck.session) {
-        console.log('Found existing session, signing out for anonymous submission');
-        await supabase.auth.signOut();
+      // Use the edge function instead of direct database access
+      const { data, error } = await supabase.functions.invoke('submit-anonymous-report', {
+        body: {
+          reportData: reportPayload,
+          linkToken: linkToken
+        }
+      });
+
+      if (error) {
+        console.error('Edge function error:', error);
+        throw new Error(`Submission failed: ${error.message}`);
       }
 
-      // Make the request using the standard supabase client
-      const { data: reportData, error: reportError } = await supabase
-        .from('reports')
-        .insert(reportPayload)
-        .select();
-
-      if (reportError) {
-        console.error('Anonymous submission error details:', {
-          message: reportError.message,
-          code: reportError.code,
-          details: reportError.details,
-          hint: reportError.hint
-        });
-        throw new Error(`Anonymous submission failed: ${reportError.message}`);
+      if (!data.success) {
+        console.error('Submission error:', data);
+        throw new Error(data.error || 'Submission failed');
       }
 
-      console.log('Report submitted successfully!', reportData);
-      const report = reportData?.[0];
+      console.log('Report submitted successfully!', data.report);
+      const report = data.report;
 
       // Handle file uploads if any
       if (attachedFiles.length > 0 && report) {
