@@ -1,4 +1,3 @@
-
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -23,6 +22,8 @@ import CompanyStatusPage from "./components/CompanyStatusPage";
 import CookieConsentBanner from "./components/CookieConsentBanner";
 import SubdomainRedirect from "./components/SubdomainRedirect";
 import AnonymousSubmissionTest from "./components/testing/AnonymousSubmissionTest";
+import { OrganizationProvider } from "./contexts/OrganizationContext";
+import SubmissionFormWrapper from "./components/forms/SubmissionFormWrapper";
 
 const queryClient = new QueryClient();
 
@@ -35,40 +36,42 @@ function App() {
         <BrowserRouter>
           <ScrollToTop />
           <SubdomainRedirect targetPath="/dashboard">
-            <CookieConsentBanner />
-            <Routes>
-              {/* Public routes */}
-              <Route path="/" element={<Index />} />
-              <Route path="/login" element={<Login />} />
-              <Route path="/auth/login" element={<Login />} />
-              <Route path="/signup" element={<Signup />} />
-              <Route path="/auth/signup" element={<Signup />} />
-              <Route path="/contact" element={<Contact />} />
-              <Route path="/pricing" element={<Pricing />} />
-              <Route path="/compliance-software" element={<ComplianceSoftware />} />
-              <Route path="/vs-speakup" element={<VsSpeakUp />} />
-              <Route path="/vs-whistleblower-software" element={<VsWhistleblowerSoftware />} />
-              
-              {/* Whistleblower communication */}
-              <Route path="/chat" element={<WhistleblowerChat />} />
-              
-              {/* Report submission routes */}
-              <Route path="/secure/tool/submit/:linkToken" element={<DynamicSubmissionForm />} />
-              <Route path="/secure/tool/submit/:linkToken/status" element={<ReportStatus />} />
-              <Route path="/secure/tool/success" element={<ReportSuccess />} />
-              
-              {/* Company status page */}
-              <Route path="/company/:domain/status" element={<CompanyStatusPage />} />
-              
-              {/* Testing route */}
-              <Route path="/test/anonymous-submission" element={<AnonymousSubmissionTest />} />
-              
-              {/* Protected routes */}
-              <Route path="/dashboard/*" element={<AuthenticatedApp />} />
-              
-              {/* 404 */}
-              <Route path="*" element={<NotFound />} />
-            </Routes>
+            <OrganizationProvider>
+              <CookieConsentBanner />
+              <Routes>
+                {/* Public routes */}
+                <Route path="/" element={<Index />} />
+                <Route path="/login" element={<Login />} />
+                <Route path="/auth/login" element={<Login />} />
+                <Route path="/signup" element={<Signup />} />
+                <Route path="/auth/signup" element={<Signup />} />
+                <Route path="/contact" element={<Contact />} />
+                <Route path="/pricing" element={<Pricing />} />
+                <Route path="/compliance-software" element={<ComplianceSoftware />} />
+                <Route path="/vs-speakup" element={<VsSpeakUp />} />
+                <Route path="/vs-whistleblower-software" element={<VsWhistleblowerSoftware />} />
+                
+                {/* Whistleblower communication */}
+                <Route path="/chat" element={<WhistleblowerChat />} />
+                
+                {/* Report submission routes - using new wrapper */}
+                <Route path="/secure/tool/submit/:linkToken" element={<SubmissionFormWrapper />} />
+                <Route path="/secure/tool/submit/:linkToken/status" element={<ReportStatus />} />
+                <Route path="/secure/tool/success" element={<ReportSuccess />} />
+                
+                {/* Company status page */}
+                <Route path="/company/:domain/status" element={<CompanyStatusPage />} />
+                
+                {/* Testing route */}
+                <Route path="/test/anonymous-submission" element={<AnonymousSubmissionTest />} />
+                
+                {/* Protected routes */}
+                <Route path="/dashboard/*" element={<AuthenticatedApp />} />
+                
+                {/* 404 */}
+                <Route path="*" element={<NotFound />} />
+              </Routes>
+            </OrganizationProvider>
           </SubdomainRedirect>
         </BrowserRouter>
       </TooltipProvider>
