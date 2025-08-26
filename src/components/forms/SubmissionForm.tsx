@@ -12,33 +12,30 @@ import FileUpload from '../FileUpload';
 import { uploadReportFile } from '@/utils/fileUpload';
 import ReportTypeSelector from './ReportTypeSelector';
 import ReportDetailsForm from './ReportDetailsForm';
+import ErrorBoundary from './ErrorBoundary';
 
 interface LinkData {
   id: string;
   name: string;
   description: string;
+  organization_id: string;
+  organization_name: string;
+  organization_logo_url?: string;
+  organization_custom_logo_url?: string;
+  organization_brand_color?: string;
   usage_count: number;
   usage_limit: number | null;
   expires_at: string | null;
   is_active: boolean;
 }
 
-interface OrganizationData {
-  id: string;
-  name: string;
-  logo_url?: string;
-  custom_logo_url?: string;
-  brand_color?: string;
-}
-
 interface SubmissionFormProps {
   linkToken: string;
   linkData: LinkData;
-  organizationData: OrganizationData;
   brandColor: string;
 }
 
-const SubmissionForm = ({ linkToken, linkData, organizationData, brandColor }: SubmissionFormProps) => {
+const SubmissionForm = ({ linkToken, linkData, brandColor }: SubmissionFormProps) => {
   const navigate = useNavigate();
   const { toast } = useToast();
 
@@ -103,6 +100,8 @@ const SubmissionForm = ({ linkToken, linkData, organizationData, brandColor }: S
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!linkData || !linkToken) return;
+
     if (!validateForm()) return;
 
     setSubmitting(true);
@@ -121,7 +120,7 @@ const SubmissionForm = ({ linkToken, linkData, organizationData, brandColor }: S
       };
 
       console.log('Encrypting report content...');
-      const { encryptedData, keyHash } = encryptReport(reportContent, organizationData.id);
+      const { encryptedData, keyHash } = encryptReport(reportContent, linkData.organization_id);
 
       const reportPayload = {
         tracking_id: trackingId,
@@ -137,6 +136,7 @@ const SubmissionForm = ({ linkToken, linkData, organizationData, brandColor }: S
 
       console.log('Submitting via edge function...');
       
+      // Use the edge function instead of direct database access
       const { data, error } = await supabase.functions.invoke('submit-anonymous-report', {
         body: {
           reportData: reportPayload,
@@ -191,84 +191,86 @@ const SubmissionForm = ({ linkToken, linkData, organizationData, brandColor }: S
   };
 
   return (
-    <div className="space-y-6">
-      {/* Check Status Button */}
-      <Card className="border-blue-200 bg-blue-50">
-        <CardContent className="pt-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-start gap-3">
-              <Search className="h-4 w-4 text-blue-600 mt-0.5" />
-              <div className="text-sm">
-                <p className="font-medium text-blue-900 mb-1">Already submitted a report?</p>
-                <p className="text-blue-800">
-                  Check the status of your existing report using your tracking ID.
-                </p>
-              </div>
-            </div>
-            <Link to={`/secure/tool/submit/${linkToken}/status`}>
-              <Button 
-                variant="outline" 
-                size="sm"
-                className="border-blue-300 text-blue-700 hover:bg-blue-100"
-              >
-                <Search className="h-4 w-4 mr-2" />
-                Check Status
-              </Button>
-            </Link>
-          </div>
-        </CardContent>
-      </Card>
-
-      <form onSubmit={handleSubmit} className="space-y-4">
-        <ReportTypeSelector
-          isAnonymous={isAnonymous}
-          setIsAnonymous={setIsAnonymous}
-          submitterEmail={formData.submitter_email}
-          setSubmitterEmail={(email) => updateFormData({ submitter_email: email })}
-        />
-
-        <ReportDetailsForm
-          formData={formData}
-          updateFormData={updateFormData}
-        />
-
-        {/* File Upload Section */}
-        <div className="space-y-2">
-          <Label>Supporting Evidence</Label>
-          <FileUpload
-            onFilesChange={setAttachedFiles}
-            maxFiles={5}
-            maxSize={10}
-            disabled={submitting}
-          />
-        </div>
-
-        {/* Security Notice */}
+    <ErrorBoundary>
+      <div className="space-y-6">
+        {/* Check Status Button */}
         <Card className="border-blue-200 bg-blue-50">
           <CardContent className="pt-4">
-            <div className="flex items-start gap-3">
-              <Shield className="h-4 w-4 text-blue-600 mt-0.5" />
-              <div className="text-sm">
-                <p className="font-medium text-blue-900 mb-1">Your Privacy is Protected</p>
-                <p className="text-blue-800">
-                  All information is encrypted and stored securely. {isAnonymous ? 'This anonymous report cannot be traced back to you.' : 'Your identity will be kept confidential.'}
-                </p>
+            <div className="flex items-center justify-between">
+              <div className="flex items-start gap-3">
+                <Search className="h-4 w-4 text-blue-600 mt-0.5" />
+                <div className="text-sm">
+                  <p className="font-medium text-blue-900 mb-1">Already submitted a report?</p>
+                  <p className="text-blue-800">
+                    Check the status of your existing report using your tracking ID.
+                  </p>
+                </div>
               </div>
+              <Link to={`/secure/tool/submit/${linkToken}/status`}>
+                <Button 
+                  variant="outline" 
+                  size="sm"
+                  className="border-blue-300 text-blue-700 hover:bg-blue-100"
+                >
+                  <Search className="h-4 w-4 mr-2" />
+                  Check Status
+                </Button>
+              </Link>
             </div>
           </CardContent>
         </Card>
 
-        {/* Submit Button */}
-        <Button 
-          type="submit" 
-          disabled={submitting}
-          className="w-full hover:opacity-90"
-          style={{ backgroundColor: brandColor }}
-        >
-          {submitting ? 'Submitting...' : 'Submit Report'}
-        </Button>
-      </form>
-    </div>
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <ReportTypeSelector
+            isAnonymous={isAnonymous}
+            setIsAnonymous={setIsAnonymous}
+            submitterEmail={formData.submitter_email}
+            setSubmitterEmail={(email) => updateFormData({ submitter_email: email })}
+          />
+
+          <ReportDetailsForm
+            formData={formData}
+            updateFormData={updateFormData}
+          />
+
+          {/* File Upload Section */}
+          <div className="space-y-2">
+            <Label>Supporting Evidence</Label>
+            <FileUpload
+              onFilesChange={setAttachedFiles}
+              maxFiles={5}
+              maxSize={10}
+              disabled={submitting}
+            />
+          </div>
+
+          {/* Security Notice */}
+          <Card className="border-blue-200 bg-blue-50">
+            <CardContent className="pt-4">
+              <div className="flex items-start gap-3">
+                <Shield className="h-4 w-4 text-blue-600 mt-0.5" />
+                <div className="text-sm">
+                  <p className="font-medium text-blue-900 mb-1">Your Privacy is Protected</p>
+                  <p className="text-blue-800">
+                    All information is encrypted and stored securely. {isAnonymous ? 'This anonymous report cannot be traced back to you.' : 'Your identity will be kept confidential.'}
+                  </p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Submit Button */}
+          <Button 
+            type="submit" 
+            disabled={submitting}
+            className="w-full hover:opacity-90"
+            style={{ backgroundColor: brandColor }}
+          >
+            {submitting ? 'Submitting...' : 'Submit Report'}
+          </Button>
+        </form>
+      </div>
+    </ErrorBoundary>
   );
 };
 
