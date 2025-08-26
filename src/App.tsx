@@ -1,3 +1,4 @@
+
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -15,7 +16,6 @@ import VsSpeakUp from "./pages/VsSpeakUp";
 import VsWhistleblowerSoftware from "./pages/VsWhistleblowerSoftware";
 import WhistleblowerChat from "./pages/WhistleblowerChat";
 import AuthenticatedApp from "./components/AuthenticatedApp";
-import DynamicSubmissionForm from "./components/DynamicSubmissionForm";
 import ReportStatus from "./components/ReportStatus";
 import ReportSuccess from "./components/ReportSuccess";
 import CompanyStatusPage from "./components/CompanyStatusPage";
