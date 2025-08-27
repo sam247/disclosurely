@@ -1,81 +1,69 @@
-
-import { Toaster } from "@/components/ui/toaster";
-import { Toaster as Sonner } from "@/components/ui/sonner";
-import { TooltipProvider } from "@/components/ui/tooltip";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
-import ScrollToTop from "./components/ScrollToTop";
-import Index from "./pages/Index";
-import Login from "./pages/Login";
-import Signup from "./pages/Signup";
-import Contact from "./pages/Contact";
-import Pricing from "./pages/Pricing";
-import NotFound from "./pages/NotFound";
-import ComplianceSoftware from "./pages/ComplianceSoftware";
-import VsSpeakUp from "./pages/VsSpeakUp";
-import VsWhistleblowerSoftware from "./pages/VsWhistleblowerSoftware";
-import WhistleblowerChat from "./pages/WhistleblowerChat";
-import AuthenticatedApp from "./components/AuthenticatedApp";
-import ReportStatus from "./components/ReportStatus";
-import ReportSuccess from "./components/ReportSuccess";
-import CompanyStatusPage from "./components/CompanyStatusPage";
-import CookieConsentBanner from "./components/CookieConsentBanner";
-import SubdomainRedirect from "./components/SubdomainRedirect";
-import AnonymousSubmissionTest from "./components/testing/AnonymousSubmissionTest";
-import { OrganizationProvider } from "./contexts/OrganizationContext";
-import SubmissionFormWrapper from "./components/forms/SubmissionFormWrapper";
-
-const queryClient = new QueryClient();
+import React from 'react';
+import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
+import { AuthProvider } from './hooks/useAuth';
+import { OrganizationProvider } from './contexts/OrganizationContext';
+import { ProtectedRoute } from './components/ProtectedRoute';
+import { AuthenticatedApp } from './AuthenticatedApp';
+import { Index } from './pages/Index';
+import { Login } from './pages/Login';
+import { Signup } from './pages/Signup';
+import { NotFound } from './pages/NotFound';
+import { Pricing } from './pages/Pricing';
+import { Contact } from './pages/Contact';
+import { VsSpeakUp } from './pages/VsSpeakUp';
+import { VsWhistleblowerSoftware } from './pages/VsWhistleblowerSoftware';
+import { ComplianceSoftware } from './pages/ComplianceSoftware';
+import SubmissionFormWrapper from './components/forms/SubmissionFormWrapper';
+import ReportSuccess from './components/ReportSuccess';
+import AnonymousSubmissionTest from './pages/TestAnonymousSubmission';
+import ScrollToTop from './components/ScrollToTop';
+import ReportStatusLookup from './components/ReportStatusLookup';
+import WhistleblowerMessaging from './pages/WhistleblowerMessaging';
 
 function App() {
   return (
-    <QueryClientProvider client={queryClient}>
-      <TooltipProvider>
-        <Toaster />
-        <Sonner />
-        <BrowserRouter>
+    <Router>
+      <AuthProvider>
+        <OrganizationProvider>
           <ScrollToTop />
-          <SubdomainRedirect targetPath="/dashboard">
-            <OrganizationProvider>
-              <CookieConsentBanner />
-              <Routes>
-                {/* Public routes */}
-                <Route path="/" element={<Index />} />
-                <Route path="/login" element={<Login />} />
-                <Route path="/auth/login" element={<Login />} />
-                <Route path="/signup" element={<Signup />} />
-                <Route path="/auth/signup" element={<Signup />} />
-                <Route path="/contact" element={<Contact />} />
-                <Route path="/pricing" element={<Pricing />} />
-                <Route path="/compliance-software" element={<ComplianceSoftware />} />
-                <Route path="/vs-speakup" element={<VsSpeakUp />} />
-                <Route path="/vs-whistleblower-software" element={<VsWhistleblowerSoftware />} />
-                
-                {/* Whistleblower communication */}
-                <Route path="/chat" element={<WhistleblowerChat />} />
-                
-                {/* Report submission routes - using new wrapper */}
-                <Route path="/secure/tool/submit/:linkToken" element={<SubmissionFormWrapper />} />
-                <Route path="/secure/tool/submit/:linkToken/status" element={<ReportStatus />} />
-                <Route path="/secure/tool/success" element={<ReportSuccess />} />
-                
-                {/* Company status page */}
-                <Route path="/company/:domain/status" element={<CompanyStatusPage />} />
-                
-                {/* Testing route */}
-                <Route path="/test/anonymous-submission" element={<AnonymousSubmissionTest />} />
-                
-                {/* Protected routes */}
-                <Route path="/dashboard/*" element={<AuthenticatedApp />} />
-                
-                {/* 404 */}
-                <Route path="*" element={<NotFound />} />
-              </Routes>
-            </OrganizationProvider>
-          </SubdomainRedirect>
-        </BrowserRouter>
-      </TooltipProvider>
-    </QueryClientProvider>
+          <Routes>
+            {/* Public routes */}
+            <Route path="/" element={<Index />} />
+            <Route path="/pricing" element={<Pricing />} />
+            <Route path="/contact" element={<Contact />} />
+            <Route path="/vs-speakup" element={<VsSpeakUp />} />
+            <Route path="/vs-whistleblower-software" element={<VsWhistleblowerSoftware />} />
+            <Route path="/compliance-software" element={<ComplianceSoftware />} />
+            
+            {/* Authentication routes */}
+            <Route path="/login" element={<Login />} />
+            <Route path="/signup" element={<Signup />} />
+            
+            {/* Anonymous report routes */}
+            <Route path="/secure/tool/submit/:linkToken" element={<SubmissionFormWrapper />} />
+            <Route path="/secure/tool/success" element={<ReportSuccess />} />
+            <Route path="/secure/tool/lookup" element={<ReportStatusLookup />} />
+            <Route path="/report/status/:trackingId" element={<WhistleblowerMessaging />} />
+            
+            {/* Testing routes */}
+            <Route path="/test/anonymous-submission" element={<AnonymousSubmissionTest />} />
+            
+            {/* Authenticated routes */}
+            <Route 
+              path="/app" 
+              element={
+                <ProtectedRoute>
+                  <AuthenticatedApp />
+                </ProtectedRoute>
+              } 
+            />
+            
+            {/* Catch all - 404 */}
+            <Route path="*" element={<NotFound />} />
+          </Routes>
+        </OrganizationProvider>
+      </AuthProvider>
+    </Router>
   );
 }
 

@@ -93,6 +93,8 @@ export const OrganizationProvider = ({ children }: OrganizationProviderProps) =>
     setError(null);
 
     try {
+      console.log('Looking up report with tracking ID:', trackingId);
+      
       const { data: reportData, error: reportError } = await supabase
         .from('reports')
         .select(`
@@ -109,9 +111,12 @@ export const OrganizationProvider = ({ children }: OrganizationProviderProps) =>
         .single();
 
       if (reportError || !reportData) {
+        console.error('Report lookup error:', reportError);
         throw new Error('Report not found');
       }
 
+      console.log('Found report, setting organization data:', reportData.organizations);
+      
       setOrganizationData({
         id: reportData.organizations.id,
         name: reportData.organizations.name,
