@@ -1,21 +1,22 @@
+
 import React from 'react';
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import { AuthProvider } from './hooks/useAuth';
 import { OrganizationProvider } from './contexts/OrganizationContext';
-import { ProtectedRoute } from './components/ProtectedRoute';
-import { AuthenticatedApp } from './AuthenticatedApp';
-import { Index } from './pages/Index';
-import { Login } from './pages/Login';
-import { Signup } from './pages/Signup';
-import { NotFound } from './pages/NotFound';
-import { Pricing } from './pages/Pricing';
-import { Contact } from './pages/Contact';
-import { VsSpeakUp } from './pages/VsSpeakUp';
-import { VsWhistleblowerSoftware } from './pages/VsWhistleblowerSoftware';
-import { ComplianceSoftware } from './pages/ComplianceSoftware';
+import ProtectedRoute from './components/ProtectedRoute';
+import AuthenticatedApp from './components/AuthenticatedApp';
+import Index from './pages/Index';
+import Login from './pages/Login';
+import Signup from './pages/Signup';
+import NotFound from './pages/NotFound';
+import Pricing from './pages/Pricing';
+import Contact from './pages/Contact';
+import VsSpeakUp from './pages/VsSpeakUp';
+import VsWhistleblowerSoftware from './pages/VsWhistleblowerSoftware';
+import ComplianceSoftware from './pages/ComplianceSoftware';
 import SubmissionFormWrapper from './components/forms/SubmissionFormWrapper';
 import ReportSuccess from './components/ReportSuccess';
-import AnonymousSubmissionTest from './pages/TestAnonymousSubmission';
+import TestAnonymousSubmission from './pages/TestAnonymousSubmission';
 import ScrollToTop from './components/ScrollToTop';
 import ReportStatusLookup from './components/ReportStatusLookup';
 import WhistleblowerMessaging from './pages/WhistleblowerMessaging';
@@ -46,7 +47,7 @@ function App() {
             <Route path="/report/status/:trackingId" element={<WhistleblowerMessaging />} />
             
             {/* Testing routes */}
-            <Route path="/test/anonymous-submission" element={<AnonymousSubmissionTest />} />
+            <Route path="/test/anonymous-submission" element={<TestAnonymousSubmission />} />
             
             {/* Authenticated routes */}
             <Route 
