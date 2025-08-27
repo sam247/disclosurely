@@ -1,11 +1,8 @@
 
 import React from 'react';
-import { useParams } from 'react-router-dom';
 import WhistleblowerMessaging from '@/components/WhistleblowerMessaging';
 
 const WhistleblowerMessagingPage = () => {
-  const { trackingId } = useParams<{ trackingId: string }>();
-
   return (
     <div className="min-h-screen bg-gray-50">
       <div className="container mx-auto py-8">
@@ -17,7 +14,7 @@ const WhistleblowerMessagingPage = () => {
             Use your tracking ID to communicate securely about your report
           </p>
         </div>
-        <WhistleblowerMessaging trackingId={trackingId} />
+        <WhistleblowerMessaging />
       </div>
     </div>
   );
