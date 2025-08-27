@@ -39,6 +39,8 @@ function App() {
             {/* Authentication routes */}
             <Route path="/login" element={<Login />} />
             <Route path="/signup" element={<Signup />} />
+            <Route path="/auth/login" element={<Login />} />
+            <Route path="/auth/signup" element={<Signup />} />
             
             {/* Anonymous report routes */}
             <Route path="/secure/tool/submit/:linkToken" element={<SubmissionFormWrapper />} />
@@ -52,6 +54,30 @@ function App() {
             {/* Authenticated routes */}
             <Route 
               path="/app" 
+              element={
+                <ProtectedRoute>
+                  <AuthenticatedApp />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/app/*" 
+              element={
+                <ProtectedRoute>
+                  <AuthenticatedApp />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/dashboard" 
+              element={
+                <ProtectedRoute>
+                  <AuthenticatedApp />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/dashboard/*" 
               element={
                 <ProtectedRoute>
                   <AuthenticatedApp />
