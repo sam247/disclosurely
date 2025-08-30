@@ -7,7 +7,7 @@ export type Json =
   | Json[]
 
 export type Database = {
-  // Allows to automatically instanciate createClient with right options
+  // Allows to automatically instantiate createClient with right options
   // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
   __InternalSupabase: {
     PostgrestVersion: "12.2.3 (519615d)"
@@ -1154,37 +1154,37 @@ export type Database = {
       log_login_attempt: {
         Args: {
           p_email: string
-          p_ip_address: string
-          p_user_agent: string
-          p_success: boolean
           p_failure_reason?: string
+          p_ip_address: string
+          p_success: boolean
+          p_user_agent: string
         }
         Returns: undefined
       }
       log_security_event: {
         Args: {
-          p_event_type: string
-          p_user_id?: string
-          p_organization_id?: string
           p_details?: Json
+          p_event_type: string
           p_ip_address?: string
-          p_user_agent?: string
+          p_organization_id?: string
           p_severity?: string
+          p_user_agent?: string
+          p_user_id?: string
         }
         Returns: undefined
       }
       user_has_role: {
         Args: {
-          p_user_id: string
           p_role: Database["public"]["Enums"]["user_role"]
+          p_user_id: string
         }
         Returns: boolean
       }
       validate_organization_link: {
         Args: { link_id: string }
         Returns: {
-          valid: boolean
           reason: string
+          valid: boolean
         }[]
       }
     }
