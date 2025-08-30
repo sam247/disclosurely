@@ -900,17 +900,8 @@ const Dashboard = () => {
                     ← Back to Case Selection
                   </Button>
                   <AICaseHelper 
-                    report={{
-                      id: selectedReportForAI.id,
-                      title: selectedReportForAI.title,
-                      tracking_id: selectedReportForAI.tracking_id,
-                      status: selectedReportForAI.status,
-                      created_at: selectedReportForAI.created_at,
-                      report_type: selectedReportForAI.report_type,
-                      encrypted_content: selectedReportForAI.encrypted_content,
-                      organizations: selectedReportForAI.organizations || { name: 'Organization' }
-                    }}
-                    companyDocuments={[]}
+                    reportId={selectedReportForAI.id}
+                    reportContent={selectedReportForAI.encrypted_content}
                   />
                 </div>
               )}
