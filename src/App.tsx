@@ -44,6 +44,7 @@ function App() {
             
             {/* Anonymous report routes */}
             <Route path="/secure/tool/submit/:linkToken" element={<SubmissionFormWrapper />} />
+            <Route path="/secure/tool/submit/:linkToken/status" element={<ReportStatusLookup />} />
             <Route path="/secure/tool/success" element={<ReportSuccess />} />
             <Route path="/secure/tool/lookup" element={<ReportStatusLookup />} />
             <Route path="/report/status/:trackingId" element={<WhistleblowerMessaging />} />

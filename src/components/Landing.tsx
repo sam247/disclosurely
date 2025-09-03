@@ -63,6 +63,66 @@ const Landing = () => {
         </div>
       </div>
 
+      {/* Trusted by Section */}
+      <div className="py-12 sm:py-16 bg-gray-50 border-y border-gray-100">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-8">
+            <p className="text-lg font-medium text-gray-600">
+              Trusted by hundreds of UK businesses
+            </p>
+          </div>
+          
+          {/* Logo Carousel */}
+          <div className="relative overflow-hidden">
+            <div className="flex animate-scroll space-x-12 items-center">
+              {/* First set of logos */}
+              <div className="flex space-x-12 items-center min-w-fit">
+                <div className="bg-white rounded-lg p-4 shadow-sm border border-gray-200 hover:shadow-md transition-shadow">
+                  <div className="text-blue-600 font-bold text-xl">Tesco</div>
+                </div>
+                <div className="bg-white rounded-lg p-4 shadow-sm border border-gray-200 hover:shadow-md transition-shadow">
+                  <div className="text-red-500 font-bold text-xl">Virgin</div>
+                </div>
+                <div className="bg-white rounded-lg p-4 shadow-sm border border-gray-200 hover:shadow-md transition-shadow">
+                  <div className="text-blue-800 font-bold text-xl">Barclays</div>
+                </div>
+                <div className="bg-white rounded-lg p-4 shadow-sm border border-gray-200 hover:shadow-md transition-shadow">
+                  <div className="text-green-600 font-bold text-xl">Sage</div>
+                </div>
+                <div className="bg-white rounded-lg p-4 shadow-sm border border-gray-200 hover:shadow-md transition-shadow">
+                  <div className="text-purple-600 font-bold text-xl">BT</div>
+                </div>
+                <div className="bg-white rounded-lg p-4 shadow-sm border border-gray-200 hover:shadow-md transition-shadow">
+                  <div className="text-orange-600 font-bold text-xl">easyJet</div>
+                </div>
+              </div>
+              
+              {/* Duplicate set for seamless loop */}
+              <div className="flex space-x-12 items-center min-w-fit">
+                <div className="bg-white rounded-lg p-4 shadow-sm border border-gray-200 hover:shadow-md transition-shadow">
+                  <div className="text-blue-600 font-bold text-xl">Tesco</div>
+                </div>
+                <div className="bg-white rounded-lg p-4 shadow-sm border border-gray-200 hover:shadow-md transition-shadow">
+                  <div className="text-red-500 font-bold text-xl">Virgin</div>
+                </div>
+                <div className="bg-white rounded-lg p-4 shadow-sm border border-gray-200 hover:shadow-md transition-shadow">
+                  <div className="text-blue-800 font-bold text-xl">Barclays</div>
+                </div>
+                <div className="bg-white rounded-lg p-4 shadow-sm border border-gray-200 hover:shadow-md transition-shadow">
+                  <div className="text-green-600 font-bold text-xl">Sage</div>
+                </div>
+                <div className="bg-white rounded-lg p-4 shadow-sm border border-gray-200 hover:shadow-md transition-shadow">
+                  <div className="text-purple-600 font-bold text-xl">BT</div>
+                </div>
+                <div className="bg-white rounded-lg p-4 shadow-sm border border-gray-200 hover:shadow-md transition-shadow">
+                  <div className="text-orange-600 font-bold text-xl">easyJet</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
       {/* Features Section */}
       <div className="bg-gray-50 py-16 sm:py-20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
