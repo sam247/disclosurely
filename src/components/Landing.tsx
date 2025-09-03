@@ -531,6 +531,59 @@ const Landing = () => {
         </div>
       </div>
 
+      {/* Certifications Section */}
+      <div className="bg-white py-16 sm:py-20">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-4 flex items-center justify-center gap-3">
+              <Shield className="h-8 w-8 text-blue-600" />
+              Certifications
+            </h2>
+            <p className="text-lg sm:text-xl text-gray-600 max-w-3xl mx-auto px-4">
+              We're in the process of obtaining the following industry standard certifications to ensure the highest level of security and compliance for your organization.
+            </p>
+          </div>
+          
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-8 sm:gap-12">
+            <div className="text-center">
+              <div className="bg-white border border-gray-200 rounded-2xl p-6 shadow-sm hover:shadow-lg transition-shadow">
+                <img 
+                  src="/lovable-uploads/9762866a-d8d9-4860-bf30-3ffd178885a8.png" 
+                  alt="ISO 27001 Certification" 
+                  className="h-16 w-16 mx-auto mb-3"
+                />
+                <h3 className="font-semibold text-gray-900 mb-1">ISO 27001</h3>
+                <p className="text-sm text-gray-600">Information Security Management</p>
+              </div>
+            </div>
+            
+            <div className="text-center">
+              <div className="bg-white border border-gray-200 rounded-2xl p-6 shadow-sm hover:shadow-lg transition-shadow">
+                <img 
+                  src="/lovable-uploads/70aa6ac0-c161-4167-921d-79f08f6f4b02.png" 
+                  alt="GDPR Compliant" 
+                  className="h-16 w-16 mx-auto mb-3"
+                />
+                <h3 className="font-semibold text-gray-900 mb-1">GDPR</h3>
+                <p className="text-sm text-gray-600">Data Protection Compliance</p>
+              </div>
+            </div>
+            
+            <div className="text-center">
+              <div className="bg-white border border-gray-200 rounded-2xl p-6 shadow-sm hover:shadow-lg transition-shadow">
+                <img 
+                  src="/lovable-uploads/a9716d48-ff27-4193-b51c-9b035d1692b0.png" 
+                  alt="AICPA SOC" 
+                  className="h-16 w-16 mx-auto mb-3"
+                />
+                <h3 className="font-semibold text-gray-900 mb-1">AICPA SOC</h3>
+                <p className="text-sm text-gray-600">Service Organization Controls</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
       {/* CTA Section */}
       <div className="bg-blue-600 py-12 sm:py-16">
         <div className="max-w-4xl mx-auto text-center px-4 sm:px-6 lg:px-8">
