@@ -18,6 +18,10 @@ import sterlingLogo from "@/assets/logos/sterling-logo.png";
 import apexLogo from "@/assets/logos/apex-logo.png";
 import innovateLogo from "@/assets/logos/innovate-logo.png";
 import horizonLogo from "@/assets/logos/horizon-logo.png";
+import velocityLogo from "@/assets/logos/velocity-logo.png";
+import nexusLogo from "@/assets/logos/nexus-logo.png";
+import prismLogo from "@/assets/logos/prism-logo.png";
+import atlasLogo from "@/assets/logos/atlas-logo.png";
 
 const Landing = () => {
   return (
@@ -80,25 +84,33 @@ const Landing = () => {
             
             {/* Logo Carousel */}
             <div className="relative overflow-hidden">
-              <div className="flex animate-scroll space-x-16 items-center">
+              <div className="flex animate-scroll space-x-24 items-center">
                 {/* First set of logos */}
-                <div className="flex space-x-16 items-center min-w-fit">
-                  <img src={techFlowLogo} alt="TechFlow" className="h-12 w-auto object-contain opacity-70 hover:opacity-100 transition-opacity" />
-                  <img src={greenPointLogo} alt="GreenPoint" className="h-12 w-auto object-contain opacity-70 hover:opacity-100 transition-opacity" />
-                  <img src={sterlingLogo} alt="Sterling Financial" className="h-12 w-auto object-contain opacity-70 hover:opacity-100 transition-opacity" />
-                  <img src={apexLogo} alt="Apex Solutions" className="h-12 w-auto object-contain opacity-70 hover:opacity-100 transition-opacity" />
-                  <img src={innovateLogo} alt="Innovate Industries" className="h-12 w-auto object-contain opacity-70 hover:opacity-100 transition-opacity" />
-                  <img src={horizonLogo} alt="Horizon Group" className="h-12 w-auto object-contain opacity-70 hover:opacity-100 transition-opacity" />
+                <div className="flex space-x-24 items-center min-w-fit">
+                  <img src={techFlowLogo} alt="TechFlow" className="h-16 w-auto object-contain opacity-70 hover:opacity-100 transition-opacity" />
+                  <img src={greenPointLogo} alt="GreenPoint" className="h-16 w-auto object-contain opacity-70 hover:opacity-100 transition-opacity" />
+                  <img src={sterlingLogo} alt="Sterling Financial" className="h-16 w-auto object-contain opacity-70 hover:opacity-100 transition-opacity" />
+                  <img src={apexLogo} alt="Apex Solutions" className="h-16 w-auto object-contain opacity-70 hover:opacity-100 transition-opacity" />
+                  <img src={innovateLogo} alt="Innovate Industries" className="h-16 w-auto object-contain opacity-70 hover:opacity-100 transition-opacity" />
+                  <img src={horizonLogo} alt="Horizon Group" className="h-16 w-auto object-contain opacity-70 hover:opacity-100 transition-opacity" />
+                  <img src={velocityLogo} alt="Velocity Corp" className="h-16 w-auto object-contain opacity-70 hover:opacity-100 transition-opacity" />
+                  <img src={nexusLogo} alt="Nexus Systems" className="h-16 w-auto object-contain opacity-70 hover:opacity-100 transition-opacity" />
+                  <img src={prismLogo} alt="Prism Analytics" className="h-16 w-auto object-contain opacity-70 hover:opacity-100 transition-opacity" />
+                  <img src={atlasLogo} alt="Atlas Solutions" className="h-16 w-auto object-contain opacity-70 hover:opacity-100 transition-opacity" />
                 </div>
                 
                 {/* Duplicate set for seamless loop */}
-                <div className="flex space-x-16 items-center min-w-fit">
-                  <img src={techFlowLogo} alt="TechFlow" className="h-12 w-auto object-contain opacity-70 hover:opacity-100 transition-opacity" />
-                  <img src={greenPointLogo} alt="GreenPoint" className="h-12 w-auto object-contain opacity-70 hover:opacity-100 transition-opacity" />
-                  <img src={sterlingLogo} alt="Sterling Financial" className="h-12 w-auto object-contain opacity-70 hover:opacity-100 transition-opacity" />
-                  <img src={apexLogo} alt="Apex Solutions" className="h-12 w-auto object-contain opacity-70 hover:opacity-100 transition-opacity" />
-                  <img src={innovateLogo} alt="Innovate Industries" className="h-12 w-auto object-contain opacity-70 hover:opacity-100 transition-opacity" />
-                  <img src={horizonLogo} alt="Horizon Group" className="h-12 w-auto object-contain opacity-70 hover:opacity-100 transition-opacity" />
+                <div className="flex space-x-24 items-center min-w-fit">
+                  <img src={techFlowLogo} alt="TechFlow" className="h-16 w-auto object-contain opacity-70 hover:opacity-100 transition-opacity" />
+                  <img src={greenPointLogo} alt="GreenPoint" className="h-16 w-auto object-contain opacity-70 hover:opacity-100 transition-opacity" />
+                  <img src={sterlingLogo} alt="Sterling Financial" className="h-16 w-auto object-contain opacity-70 hover:opacity-100 transition-opacity" />
+                  <img src={apexLogo} alt="Apex Solutions" className="h-16 w-auto object-contain opacity-70 hover:opacity-100 transition-opacity" />
+                  <img src={innovateLogo} alt="Innovate Industries" className="h-16 w-auto object-contain opacity-70 hover:opacity-100 transition-opacity" />
+                  <img src={horizonLogo} alt="Horizon Group" className="h-16 w-auto object-contain opacity-70 hover:opacity-100 transition-opacity" />
+                  <img src={velocityLogo} alt="Velocity Corp" className="h-16 w-auto object-contain opacity-70 hover:opacity-100 transition-opacity" />
+                  <img src={nexusLogo} alt="Nexus Systems" className="h-16 w-auto object-contain opacity-70 hover:opacity-100 transition-opacity" />
+                  <img src={prismLogo} alt="Prism Analytics" className="h-16 w-auto object-contain opacity-70 hover:opacity-100 transition-opacity" />
+                  <img src={atlasLogo} alt="Atlas Solutions" className="h-16 w-auto object-contain opacity-70 hover:opacity-100 transition-opacity" />
                 </div>
               </div>
             </div>
