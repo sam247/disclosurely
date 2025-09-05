@@ -21,7 +21,7 @@ import ScrollToTop from './components/ScrollToTop';
 import ReportStatusLookup from './components/ReportStatusLookup';
 import AdminDashboard from './pages/AdminDashboard';
 import Blog from './pages/Blog';
-import WhistleblowerMessaging from './pages/WhistleblowerMessaging';
+import WhistleblowerMessagingPage from './pages/WhistleblowerMessaging';
 
 function App() {
   return (
@@ -60,7 +60,7 @@ function App() {
             <Route path="/secure/tool/submit/:linkToken/status" element={<ReportStatusLookup />} />
             <Route path="/secure/tool/success" element={<ReportSuccess />} />
             <Route path="/secure/tool/lookup" element={<ReportStatusLookup />} />
-            <Route path="/report/status/:trackingId" element={<WhistleblowerMessaging />} />
+            <Route path="/report/status/:trackingId" element={<WhistleblowerMessagingPage />} />
             
             {/* Testing routes */}
             <Route path="/test/anonymous-submission" element={<TestAnonymousSubmission />} />
