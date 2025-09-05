@@ -19,6 +19,8 @@ import ReportSuccess from './components/ReportSuccess';
 import TestAnonymousSubmission from './pages/TestAnonymousSubmission';
 import ScrollToTop from './components/ScrollToTop';
 import ReportStatusLookup from './components/ReportStatusLookup';
+import AdminDashboard from './pages/AdminDashboard';
+import Blog from './pages/Blog';
 import WhistleblowerMessaging from './pages/WhistleblowerMessaging';
 
 function App() {
@@ -41,6 +43,17 @@ function App() {
             <Route path="/signup" element={<Signup />} />
             <Route path="/auth/login" element={<Login />} />
             <Route path="/auth/signup" element={<Signup />} />
+            
+            {/* Blog routes */}
+            <Route path="/blog" element={<Blog />} />
+            <Route path="/blog/:slug" element={<Blog />} />
+            
+            {/* Admin routes */}
+            <Route path="/admin" element={
+              <ProtectedRoute>
+                <AdminDashboard />
+              </ProtectedRoute>
+            } />
             
             {/* Anonymous report routes */}
             <Route path="/secure/tool/submit/:linkToken" element={<SubmissionFormWrapper />} />
