@@ -69,62 +69,36 @@ const Landing = () => {
               View Pricing
             </Link>
           </div>
-        </div>
-      </div>
 
-      {/* Trusted by Section */}
-      <div className="py-12 sm:py-16 bg-gray-50 border-y border-gray-100">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-8">
-            <p className="text-lg font-medium text-gray-600">
-              Trusted by hundreds of UK businesses
-            </p>
-          </div>
-          
-          {/* Logo Carousel */}
-          <div className="relative overflow-hidden">
-            <div className="flex animate-scroll space-x-12 items-center">
-              {/* First set of logos */}
-              <div className="flex space-x-12 items-center min-w-fit">
-                <div className="bg-white rounded-lg p-4 shadow-sm border border-gray-200 hover:shadow-md transition-shadow">
-                  <img src={techFlowLogo} alt="TechFlow" className="h-8 w-auto object-contain" />
+          {/* Trusted by Section - moved to hero area */}
+          <div className="mt-16 mb-8">
+            <div className="text-center mb-12">
+              <p className="text-lg font-medium text-gray-600">
+                Trusted by hundreds of UK businesses
+              </p>
+            </div>
+            
+            {/* Logo Carousel */}
+            <div className="relative overflow-hidden">
+              <div className="flex animate-scroll space-x-16 items-center">
+                {/* First set of logos */}
+                <div className="flex space-x-16 items-center min-w-fit">
+                  <img src={techFlowLogo} alt="TechFlow" className="h-12 w-auto object-contain opacity-70 hover:opacity-100 transition-opacity" />
+                  <img src={greenPointLogo} alt="GreenPoint" className="h-12 w-auto object-contain opacity-70 hover:opacity-100 transition-opacity" />
+                  <img src={sterlingLogo} alt="Sterling Financial" className="h-12 w-auto object-contain opacity-70 hover:opacity-100 transition-opacity" />
+                  <img src={apexLogo} alt="Apex Solutions" className="h-12 w-auto object-contain opacity-70 hover:opacity-100 transition-opacity" />
+                  <img src={innovateLogo} alt="Innovate Industries" className="h-12 w-auto object-contain opacity-70 hover:opacity-100 transition-opacity" />
+                  <img src={horizonLogo} alt="Horizon Group" className="h-12 w-auto object-contain opacity-70 hover:opacity-100 transition-opacity" />
                 </div>
-                <div className="bg-white rounded-lg p-4 shadow-sm border border-gray-200 hover:shadow-md transition-shadow">
-                  <img src={greenPointLogo} alt="GreenPoint" className="h-8 w-auto object-contain" />
-                </div>
-                <div className="bg-white rounded-lg p-4 shadow-sm border border-gray-200 hover:shadow-md transition-shadow">
-                  <img src={sterlingLogo} alt="Sterling Financial" className="h-8 w-auto object-contain" />
-                </div>
-                <div className="bg-white rounded-lg p-4 shadow-sm border border-gray-200 hover:shadow-md transition-shadow">
-                  <img src={apexLogo} alt="Apex Solutions" className="h-8 w-auto object-contain" />
-                </div>
-                <div className="bg-white rounded-lg p-4 shadow-sm border border-gray-200 hover:shadow-md transition-shadow">
-                  <img src={innovateLogo} alt="Innovate Industries" className="h-8 w-auto object-contain" />
-                </div>
-                <div className="bg-white rounded-lg p-4 shadow-sm border border-gray-200 hover:shadow-md transition-shadow">
-                  <img src={horizonLogo} alt="Horizon Group" className="h-8 w-auto object-contain" />
-                </div>
-              </div>
-              
-              {/* Duplicate set for seamless loop */}
-              <div className="flex space-x-12 items-center min-w-fit">
-                <div className="bg-white rounded-lg p-4 shadow-sm border border-gray-200 hover:shadow-md transition-shadow">
-                  <img src={techFlowLogo} alt="TechFlow" className="h-8 w-auto object-contain" />
-                </div>
-                <div className="bg-white rounded-lg p-4 shadow-sm border border-gray-200 hover:shadow-md transition-shadow">
-                  <img src={greenPointLogo} alt="GreenPoint" className="h-8 w-auto object-contain" />
-                </div>
-                <div className="bg-white rounded-lg p-4 shadow-sm border border-gray-200 hover:shadow-md transition-shadow">
-                  <img src={sterlingLogo} alt="Sterling Financial" className="h-8 w-auto object-contain" />
-                </div>
-                <div className="bg-white rounded-lg p-4 shadow-sm border border-gray-200 hover:shadow-md transition-shadow">
-                  <img src={apexLogo} alt="Apex Solutions" className="h-8 w-auto object-contain" />
-                </div>
-                <div className="bg-white rounded-lg p-4 shadow-sm border border-gray-200 hover:shadow-md transition-shadow">
-                  <img src={innovateLogo} alt="Innovate Industries" className="h-8 w-auto object-contain" />
-                </div>
-                <div className="bg-white rounded-lg p-4 shadow-sm border border-gray-200 hover:shadow-md transition-shadow">
-                  <img src={horizonLogo} alt="Horizon Group" className="h-8 w-auto object-contain" />
+                
+                {/* Duplicate set for seamless loop */}
+                <div className="flex space-x-16 items-center min-w-fit">
+                  <img src={techFlowLogo} alt="TechFlow" className="h-12 w-auto object-contain opacity-70 hover:opacity-100 transition-opacity" />
+                  <img src={greenPointLogo} alt="GreenPoint" className="h-12 w-auto object-contain opacity-70 hover:opacity-100 transition-opacity" />
+                  <img src={sterlingLogo} alt="Sterling Financial" className="h-12 w-auto object-contain opacity-70 hover:opacity-100 transition-opacity" />
+                  <img src={apexLogo} alt="Apex Solutions" className="h-12 w-auto object-contain opacity-70 hover:opacity-100 transition-opacity" />
+                  <img src={innovateLogo} alt="Innovate Industries" className="h-12 w-auto object-contain opacity-70 hover:opacity-100 transition-opacity" />
+                  <img src={horizonLogo} alt="Horizon Group" className="h-12 w-auto object-contain opacity-70 hover:opacity-100 transition-opacity" />
                 </div>
               </div>
             </div>
