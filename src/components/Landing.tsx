@@ -9,6 +9,15 @@ import EncryptionArt from '@/components/artwork/EncryptionArt';
 import SecureMessagingArt from '@/components/artwork/SecureMessagingArt';
 import ComplianceArt from '@/components/artwork/ComplianceArt';
 import UnlimitedScaleArt from '@/components/artwork/UnlimitedScaleArt';
+import iso27001Badge from "/lovable-uploads/9762866a-d8d9-4860-bf30-3ffd178885a8.png";
+import gdprBadge from "/lovable-uploads/70aa6ac0-c161-4167-921d-79f08f6f4b02.png";
+import aicpaBadge from "/lovable-uploads/a9716d48-ff27-4193-b51c-9b035d1692b0.png";
+import techFlowLogo from "@/assets/logos/techflow-logo.png";
+import greenPointLogo from "@/assets/logos/greenpoint-logo.png";
+import sterlingLogo from "@/assets/logos/sterling-logo.png";
+import apexLogo from "@/assets/logos/apex-logo.png";
+import innovateLogo from "@/assets/logos/innovate-logo.png";
+import horizonLogo from "@/assets/logos/horizon-logo.png";
 
 const Landing = () => {
   return (
@@ -78,44 +87,44 @@ const Landing = () => {
               {/* First set of logos */}
               <div className="flex space-x-12 items-center min-w-fit">
                 <div className="bg-white rounded-lg p-4 shadow-sm border border-gray-200 hover:shadow-md transition-shadow">
-                  <div className="text-blue-600 font-bold text-xl">Tesco</div>
+                  <img src={techFlowLogo} alt="TechFlow" className="h-8 w-auto object-contain" />
                 </div>
                 <div className="bg-white rounded-lg p-4 shadow-sm border border-gray-200 hover:shadow-md transition-shadow">
-                  <div className="text-red-500 font-bold text-xl">Virgin</div>
+                  <img src={greenPointLogo} alt="GreenPoint" className="h-8 w-auto object-contain" />
                 </div>
                 <div className="bg-white rounded-lg p-4 shadow-sm border border-gray-200 hover:shadow-md transition-shadow">
-                  <div className="text-blue-800 font-bold text-xl">Barclays</div>
+                  <img src={sterlingLogo} alt="Sterling Financial" className="h-8 w-auto object-contain" />
                 </div>
                 <div className="bg-white rounded-lg p-4 shadow-sm border border-gray-200 hover:shadow-md transition-shadow">
-                  <div className="text-green-600 font-bold text-xl">Sage</div>
+                  <img src={apexLogo} alt="Apex Solutions" className="h-8 w-auto object-contain" />
                 </div>
                 <div className="bg-white rounded-lg p-4 shadow-sm border border-gray-200 hover:shadow-md transition-shadow">
-                  <div className="text-purple-600 font-bold text-xl">BT</div>
+                  <img src={innovateLogo} alt="Innovate Industries" className="h-8 w-auto object-contain" />
                 </div>
                 <div className="bg-white rounded-lg p-4 shadow-sm border border-gray-200 hover:shadow-md transition-shadow">
-                  <div className="text-orange-600 font-bold text-xl">easyJet</div>
+                  <img src={horizonLogo} alt="Horizon Group" className="h-8 w-auto object-contain" />
                 </div>
               </div>
               
               {/* Duplicate set for seamless loop */}
               <div className="flex space-x-12 items-center min-w-fit">
                 <div className="bg-white rounded-lg p-4 shadow-sm border border-gray-200 hover:shadow-md transition-shadow">
-                  <div className="text-blue-600 font-bold text-xl">Tesco</div>
+                  <img src={techFlowLogo} alt="TechFlow" className="h-8 w-auto object-contain" />
                 </div>
                 <div className="bg-white rounded-lg p-4 shadow-sm border border-gray-200 hover:shadow-md transition-shadow">
-                  <div className="text-red-500 font-bold text-xl">Virgin</div>
+                  <img src={greenPointLogo} alt="GreenPoint" className="h-8 w-auto object-contain" />
                 </div>
                 <div className="bg-white rounded-lg p-4 shadow-sm border border-gray-200 hover:shadow-md transition-shadow">
-                  <div className="text-blue-800 font-bold text-xl">Barclays</div>
+                  <img src={sterlingLogo} alt="Sterling Financial" className="h-8 w-auto object-contain" />
                 </div>
                 <div className="bg-white rounded-lg p-4 shadow-sm border border-gray-200 hover:shadow-md transition-shadow">
-                  <div className="text-green-600 font-bold text-xl">Sage</div>
+                  <img src={apexLogo} alt="Apex Solutions" className="h-8 w-auto object-contain" />
                 </div>
                 <div className="bg-white rounded-lg p-4 shadow-sm border border-gray-200 hover:shadow-md transition-shadow">
-                  <div className="text-purple-600 font-bold text-xl">BT</div>
+                  <img src={innovateLogo} alt="Innovate Industries" className="h-8 w-auto object-contain" />
                 </div>
                 <div className="bg-white rounded-lg p-4 shadow-sm border border-gray-200 hover:shadow-md transition-shadow">
-                  <div className="text-orange-600 font-bold text-xl">easyJet</div>
+                  <img src={horizonLogo} alt="Horizon Group" className="h-8 w-auto object-contain" />
                 </div>
               </div>
             </div>
