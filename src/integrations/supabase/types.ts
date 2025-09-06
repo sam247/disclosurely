@@ -1295,6 +1295,15 @@ export type Database = {
         Args: Record<PropertyKey, never>
         Returns: string
       }
+      get_link_branding: {
+        Args: { p_link_token: string }
+        Returns: {
+          brand_color: string
+          custom_logo_url: string
+          organization_name: string
+          valid: boolean
+        }[]
+      }
       log_login_attempt: {
         Args: {
           p_email: string
