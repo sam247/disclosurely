@@ -1279,6 +1279,16 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      create_security_alert: {
+        Args: {
+          p_details?: Json
+          p_event_type: string
+          p_message: string
+          p_organization_id: string
+          p_severity?: string
+        }
+        Returns: string
+      }
       generate_domain_verification_token: {
         Args: Record<PropertyKey, never>
         Returns: string
