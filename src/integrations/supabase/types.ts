@@ -1110,6 +1110,7 @@ export type Database = {
           details: Json | null
           id: string
           message: string
+          organization_id: string | null
           resolved: boolean
           resolved_at: string | null
           resolved_by: string | null
@@ -1121,6 +1122,7 @@ export type Database = {
           details?: Json | null
           id?: string
           message: string
+          organization_id?: string | null
           resolved?: boolean
           resolved_at?: string | null
           resolved_by?: string | null
@@ -1132,6 +1134,7 @@ export type Database = {
           details?: Json | null
           id?: string
           message?: string
+          organization_id?: string | null
           resolved?: boolean
           resolved_at?: string | null
           resolved_by?: string | null
