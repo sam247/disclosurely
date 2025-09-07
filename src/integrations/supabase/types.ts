@@ -1024,6 +1024,7 @@ export type Database = {
       }
       reports: {
         Row: {
+          anonymous_access_token: string | null
           assigned_to: string | null
           created_at: string
           due_date: string | null
@@ -1043,6 +1044,7 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          anonymous_access_token?: string | null
           assigned_to?: string | null
           created_at?: string
           due_date?: string | null
@@ -1062,6 +1064,7 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          anonymous_access_token?: string | null
           assigned_to?: string | null
           created_at?: string
           due_date?: string | null
@@ -1289,6 +1292,10 @@ export type Database = {
         }
         Returns: string
       }
+      generate_anonymous_access_token: {
+        Args: Record<PropertyKey, never>
+        Returns: string
+      }
       generate_domain_verification_token: {
         Args: Record<PropertyKey, never>
         Returns: string
@@ -1394,6 +1401,14 @@ export type Database = {
           p_user_id: string
         }
         Returns: boolean
+      }
+      validate_anonymous_report_access: {
+        Args: { p_access_token: string; p_tracking_id: string }
+        Returns: {
+          reason: string
+          report_id: string
+          valid: boolean
+        }[]
       }
       validate_organization_link: {
         Args: { link_id: string }
