@@ -1276,7 +1276,54 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      audit_logs_sanitized: {
+        Row: {
+          action: string | null
+          created_at: string | null
+          details: Json | null
+          event_type: string | null
+          id: string | null
+          ip_address: unknown | null
+          resource_id: string | null
+          resource_type: string | null
+          result: string | null
+          risk_level: string | null
+          user_agent: string | null
+          user_email: string | null
+          user_id: string | null
+        }
+        Insert: {
+          action?: string | null
+          created_at?: string | null
+          details?: Json | null
+          event_type?: string | null
+          id?: string | null
+          ip_address?: unknown | null
+          resource_id?: string | null
+          resource_type?: string | null
+          result?: string | null
+          risk_level?: string | null
+          user_agent?: string | null
+          user_email?: never
+          user_id?: string | null
+        }
+        Update: {
+          action?: string | null
+          created_at?: string | null
+          details?: Json | null
+          event_type?: string | null
+          id?: string | null
+          ip_address?: unknown | null
+          resource_id?: string | null
+          resource_type?: string | null
+          result?: string | null
+          risk_level?: string | null
+          user_agent?: string | null
+          user_email?: never
+          user_id?: string | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
       create_security_alert: {
@@ -1312,6 +1359,17 @@ export type Database = {
           custom_logo_url: string
           organization_name: string
           valid: boolean
+        }[]
+      }
+      get_user_profile_safe: {
+        Args: { p_user_id: string }
+        Returns: {
+          first_name: string
+          id: string
+          is_active: boolean
+          last_name: string
+          organization_id: string
+          role: Database["public"]["Enums"]["user_role"]
         }[]
       }
       log_login_attempt: {
