@@ -1276,54 +1276,7 @@ export type Database = {
       }
     }
     Views: {
-      audit_logs_sanitized: {
-        Row: {
-          action: string | null
-          created_at: string | null
-          details: Json | null
-          event_type: string | null
-          id: string | null
-          ip_address: unknown | null
-          resource_id: string | null
-          resource_type: string | null
-          result: string | null
-          risk_level: string | null
-          user_agent: string | null
-          user_email: string | null
-          user_id: string | null
-        }
-        Insert: {
-          action?: string | null
-          created_at?: string | null
-          details?: Json | null
-          event_type?: string | null
-          id?: string | null
-          ip_address?: unknown | null
-          resource_id?: string | null
-          resource_type?: string | null
-          result?: string | null
-          risk_level?: string | null
-          user_agent?: string | null
-          user_email?: never
-          user_id?: string | null
-        }
-        Update: {
-          action?: string | null
-          created_at?: string | null
-          details?: Json | null
-          event_type?: string | null
-          id?: string | null
-          ip_address?: unknown | null
-          resource_id?: string | null
-          resource_type?: string | null
-          result?: string | null
-          risk_level?: string | null
-          user_agent?: string | null
-          user_email?: never
-          user_id?: string | null
-        }
-        Relationships: []
-      }
+      [_ in never]: never
     }
     Functions: {
       create_security_alert: {
@@ -1351,6 +1304,24 @@ export type Database = {
       generate_tracking_id: {
         Args: Record<PropertyKey, never>
         Returns: string
+      }
+      get_audit_logs_safe: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          action: string
+          created_at: string
+          details: Json
+          event_type: string
+          id: string
+          ip_address: unknown
+          resource_id: string
+          resource_type: string
+          result: string
+          risk_level: string
+          user_agent: string
+          user_email: string
+          user_id: string
+        }[]
       }
       get_link_branding: {
         Args: { p_link_token: string }
@@ -1380,6 +1351,10 @@ export type Database = {
           p_success: boolean
           p_user_agent: string
         }
+        Returns: undefined
+      }
+      log_profile_access: {
+        Args: { p_access_type: string; p_accessed_user_id: string }
         Returns: undefined
       }
       log_security_event: {
