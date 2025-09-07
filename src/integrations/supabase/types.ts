@@ -1323,6 +1323,15 @@ export type Database = {
           user_id: string
         }[]
       }
+      get_link_analytics_summary: {
+        Args: { p_link_id: string }
+        Returns: {
+          common_referrers: Json
+          link_id: string
+          total_views: number
+          unique_ips: number
+        }[]
+      }
       get_link_branding: {
         Args: { p_link_token: string }
         Returns: {
@@ -1330,6 +1339,16 @@ export type Database = {
           custom_logo_url: string
           organization_name: string
           valid: boolean
+        }[]
+      }
+      get_profile_minimal: {
+        Args: { p_user_id: string }
+        Returns: {
+          first_name: string
+          id: string
+          is_active: boolean
+          last_name: string
+          role: Database["public"]["Enums"]["user_role"]
         }[]
       }
       get_user_profile_safe: {
