@@ -1330,6 +1330,10 @@ export type Database = {
           user_id: string
         }[]
       }
+      get_current_user_organization_id: {
+        Args: Record<PropertyKey, never>
+        Returns: string
+      }
       get_link_analytics_summary: {
         Args: { p_link_id: string }
         Returns: {
@@ -1422,6 +1426,10 @@ export type Database = {
           p_role: Database["public"]["Enums"]["user_role"]
           p_user_id: string
         }
+        Returns: boolean
+      }
+      user_is_in_organization: {
+        Args: { org_id: string }
         Returns: boolean
       }
       validate_anonymous_report_access: {
