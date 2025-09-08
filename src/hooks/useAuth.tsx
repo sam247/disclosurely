@@ -55,9 +55,10 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
       return;
     }
     
-    // Skip if we already have subscription data to avoid unnecessary calls
-    if (subscriptionData.subscribed && subscriptionData.subscription_tier) {
-      console.log('Subscription data already exists, skipping check');
+    // Skip if we already have valid subscription data to avoid unnecessary calls
+    if (subscriptionData.subscribed && subscriptionData.subscription_tier && 
+        subscriptionData.subscription_end) {
+      console.log('Complete subscription data already exists, skipping check');
       return;
     }
     
@@ -120,10 +121,11 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
           setSubscriptionData({ subscribed: false });
           console.log('User signed out, clearing subscription data');
         } else if (event === 'SIGNED_IN') {
-          // Set default subscription state for new sign-ins without API call
-          // This prevents auth disruption - subscription will be checked later
-          setSubscriptionData({ subscribed: false });
-          console.log('User signed in, set default subscription state');
+          // Check subscription after successful sign-in with a delay
+          setTimeout(() => {
+            console.log('User signed in, checking subscription after delay');
+            refreshSubscription(session);
+          }, 1500);
         }
       }
     );
@@ -135,9 +137,13 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
       setUser(session?.user ?? null);
       setLoading(false);
       
-      // Don't check subscription on initial session to prevent auth disruption
-      // Only check if user has been signed in for a while (token refresh scenario)
-      console.log('Initial session found, skipping subscription check to prevent auth disruption');
+      // Check subscription for existing session after a delay
+      if (session?.user && session?.access_token) {
+        setTimeout(() => {
+          console.log('Checking subscription for existing session');
+          refreshSubscription(session);
+        }, 2000);
+      }
     });
 
     return () => subscription.unsubscribe();

@@ -39,7 +39,7 @@ const LoginForm = () => {
       } else {
         toast({
           title: "Check Your Email",
-          description: "We've sent you a magic link to sign in. Please check your email and click the link.",
+          description: "We've sent you a 6-digit verification code. Please check your email and enter the code.",
         });
         setShowOTP(true);
       }
@@ -176,7 +176,7 @@ const LoginForm = () => {
             className="w-full"
             disabled={loading}
           >
-            {loading ? 'Sending magic link...' : 'Sign in with Magic Link'}
+            {loading ? 'Sending verification code...' : 'Sign in with Email Code'}
           </Button>
         </div>
 
