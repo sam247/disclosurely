@@ -10,7 +10,6 @@ import OTPVerification from './OTPVerification';
 
 const LoginForm = () => {
   const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [googleLoading, setGoogleLoading] = useState(false);
   const [showOTP, setShowOTP] = useState(false);
@@ -22,53 +21,25 @@ const LoginForm = () => {
     setLoading(true);
 
     try {
-      // First verify password
-      const { error: signInError } = await supabase.auth.signInWithPassword({
-        email,
-        password,
-      });
-
-      if (signInError) {
-        // Handle email not confirmed specifically
-        if (signInError.message.includes('Email not confirmed')) {
-          toast({
-            title: "Email Not Confirmed",
-            description: "Please check your email and click the confirmation link before signing in. Check your spam folder if you don't see it.",
-            variant: "destructive",
-          });
-        } else {
-          toast({
-            title: "Login Failed",
-            description: signInError.message,
-            variant: "destructive",
-          });
-        }
-        setLoading(false);
-        return;
-      }
-
-      // Password verified - now sign out to prepare for OTP flow
-      // This is necessary for 2FA implementation
-      await supabase.auth.signOut();
-
-      // Send OTP for second factor
-      const { error: otpError } = await supabase.auth.signInWithOtp({
+      // Use standard OTP authentication flow
+      const { error } = await supabase.auth.signInWithOtp({
         email,
         options: {
-          shouldCreateUser: false,
+          shouldCreateUser: false, // Don't create new users on login
+          emailRedirectTo: `${window.location.origin}/dashboard`
         }
       });
 
-      if (otpError) {
+      if (error) {
         toast({
-          title: "Failed to Send Verification Code",
-          description: otpError.message,
+          title: "Login Failed", 
+          description: error.message,
           variant: "destructive",
         });
       } else {
         toast({
-          title: "Verification Code Sent",
-          description: "Please check your email for the 6-digit verification code",
+          title: "Check Your Email",
+          description: "We've sent you a magic link to sign in. Please check your email and click the link.",
         });
         setShowOTP(true);
       }
@@ -85,13 +56,16 @@ const LoginForm = () => {
 
   const handleOTPSuccess = () => {
     setShowOTP(false);
+    toast({
+      title: "Welcome!",
+      description: "You have been successfully signed in.",
+    });
     navigate('/dashboard');
   };
 
   const handleBackToLogin = () => {
     setShowOTP(false);
     setEmail('');
-    setPassword('');
   };
 
 
@@ -197,28 +171,12 @@ const LoginForm = () => {
         </div>
 
         <div>
-          <Label htmlFor="password">Password</Label>
-          <div className="mt-1">
-            <Input
-              id="password"
-              name="password"
-              type="password"
-              autoComplete="current-password"
-              required
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              placeholder="Enter your password"
-            />
-          </div>
-        </div>
-
-        <div>
           <Button
             type="submit"
             className="w-full"
             disabled={loading}
           >
-            {loading ? 'Signing in...' : 'Sign in'}
+            {loading ? 'Sending magic link...' : 'Sign in with Magic Link'}
           </Button>
         </div>
 
