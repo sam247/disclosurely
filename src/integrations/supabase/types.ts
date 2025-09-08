@@ -1369,6 +1369,16 @@ export type Database = {
           role: Database["public"]["Enums"]["user_role"]
         }[]
       }
+      log_link_validation_failure: {
+        Args: {
+          p_failure_reason: string
+          p_ip_address?: string
+          p_link_token: string
+          p_organization_id?: string
+          p_user_agent?: string
+        }
+        Returns: undefined
+      }
       log_login_attempt: {
         Args: {
           p_email: string
@@ -1376,6 +1386,18 @@ export type Database = {
           p_ip_address: string
           p_success: boolean
           p_user_agent: string
+        }
+        Returns: undefined
+      }
+      log_messaging_attempt: {
+        Args: {
+          p_failure_reason?: string
+          p_ip_address?: string
+          p_report_id: string
+          p_sender_type: string
+          p_success: boolean
+          p_user_agent?: string
+          p_user_id?: string
         }
         Returns: undefined
       }

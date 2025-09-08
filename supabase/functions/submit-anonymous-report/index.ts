@@ -38,6 +38,16 @@ serve(async (req) => {
 
     if (linkError || !linkData) {
       console.error('Invalid link:', linkError)
+      
+      // Log security event for invalid link attempt
+      await supabaseAdmin.rpc('log_link_validation_failure', {
+        p_link_token: linkToken,
+        p_failure_reason: 'Link not found or inactive',
+        p_organization_id: null,
+        p_ip_address: req.headers.get('x-forwarded-for') || req.headers.get('x-real-ip'),
+        p_user_agent: req.headers.get('user-agent')
+      })
+      
       return new Response(
         JSON.stringify({ error: 'Invalid or expired link' }),
         { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
@@ -46,6 +56,15 @@ serve(async (req) => {
 
     // Check link validity
     if (linkData.expires_at && new Date(linkData.expires_at) < new Date()) {
+      // Log security event for expired link attempt
+      await supabaseAdmin.rpc('log_link_validation_failure', {
+        p_link_token: linkToken,
+        p_failure_reason: 'Link expired',
+        p_organization_id: linkData.organization_id,
+        p_ip_address: req.headers.get('x-forwarded-for') || req.headers.get('x-real-ip'),
+        p_user_agent: req.headers.get('user-agent')
+      })
+      
       return new Response(
         JSON.stringify({ error: 'Link has expired' }),
         { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
@@ -53,6 +72,15 @@ serve(async (req) => {
     }
 
     if (linkData.usage_limit && linkData.usage_count >= linkData.usage_limit) {
+      // Log security event for usage limit exceeded
+      await supabaseAdmin.rpc('log_link_validation_failure', {
+        p_link_token: linkToken,
+        p_failure_reason: 'Usage limit exceeded',
+        p_organization_id: linkData.organization_id,
+        p_ip_address: req.headers.get('x-forwarded-for') || req.headers.get('x-real-ip'),
+        p_user_agent: req.headers.get('user-agent')
+      })
+      
       return new Response(
         JSON.stringify({ error: 'Link usage limit reached' }),
         { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
