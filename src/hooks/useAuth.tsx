@@ -107,17 +107,23 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
         setUser(session?.user ?? null);
         setLoading(false);
         
-        // Only check subscription for token refresh and sign in events, not during OTP process
-        if ((event === 'TOKEN_REFRESHED' || event === 'SIGNED_IN') && session?.user && session?.access_token) {
+        // Only check subscription for token refresh events, not during initial sign in
+        // This prevents authentication disruption if subscription service is down
+        if (event === 'TOKEN_REFRESHED' && session?.user && session?.access_token) {
           // Delay subscription check to ensure session is fully established
           setTimeout(() => {
-            console.log('Checking subscription after auth event:', event);
+            console.log('Checking subscription after token refresh:', event);
             refreshSubscription(session);
-          }, 100);
+          }, 1000);
         } else if (event === 'SIGNED_OUT') {
           // Clear subscription data on actual logout
           setSubscriptionData({ subscribed: false });
           console.log('User signed out, clearing subscription data');
+        } else if (event === 'SIGNED_IN') {
+          // Set default subscription state for new sign-ins without API call
+          // This prevents auth disruption - subscription will be checked later
+          setSubscriptionData({ subscribed: false });
+          console.log('User signed in, set default subscription state');
         }
       }
     );
@@ -129,11 +135,9 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
       setUser(session?.user ?? null);
       setLoading(false);
       
-      // Only check subscription if we have a valid session and no existing subscription data
-      if (session?.user && session?.access_token && !subscriptionData.subscribed) {
-        console.log('Initial session found, checking subscription...');
-        refreshSubscription(session);
-      }
+      // Don't check subscription on initial session to prevent auth disruption
+      // Only check if user has been signed in for a while (token refresh scenario)
+      console.log('Initial session found, skipping subscription check to prevent auth disruption');
     });
 
     return () => subscription.unsubscribe();
