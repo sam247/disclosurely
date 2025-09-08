@@ -5,3 +5,6 @@ verify_jwt = false
 
 [functions.trigger-notification-emails]
 verify_jwt = false
+
+[functions.check-subscription]
+verify_jwt = true

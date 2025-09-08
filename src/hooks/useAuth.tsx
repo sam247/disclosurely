@@ -50,6 +50,8 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
         hasSession: !!sessionToUse,
         hasAccessToken: !!sessionToUse?.access_token
       });
+      // Set default subscription state when no session
+      setSubscriptionData({ subscribed: false });
       return;
     }
     
@@ -61,6 +63,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     
     try {
       console.log('Subscription check attempt for user:', userToUse.email);
+      setSubscriptionLoading(true);
       
       const { data, error } = await supabase.functions.invoke('check-subscription', {
         headers: {
@@ -70,10 +73,8 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
 
       if (error) {
         console.error('Subscription check error:', error);
-        // Only set basic data on error if we don't have any subscription data
-        if (!subscriptionData.subscribed) {
-          setSubscriptionData({ subscribed: false });
-        }
+        // Set basic data on error - user exists but subscription check failed
+        setSubscriptionData({ subscribed: false });
         return;
       }
 
@@ -89,10 +90,10 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
       setSubscriptionData(mappedData);
     } catch (error) {
       console.error('Error refreshing subscription:', error);
-      // Only set basic data on error if we don't have any subscription data
-      if (!subscriptionData.subscribed) {
-        setSubscriptionData({ subscribed: false });
-      }
+      // Set basic data on error - user exists but subscription check failed
+      setSubscriptionData({ subscribed: false });
+    } finally {
+      setSubscriptionLoading(false);
     }
   };
 
