@@ -60,7 +60,7 @@ function App() {
             <Route path="/secure/tool/submit/:linkToken/status" element={<ReportStatusLookup />} />
             <Route path="/secure/tool/success" element={<ReportSuccess />} />
             <Route path="/secure/tool/lookup" element={<ReportStatusLookup />} />
-            <Route path="/report/status/:trackingId" element={<WhistleblowerMessagingPage />} />
+            <Route path="/secure/tool/messaging/:trackingId" element={<WhistleblowerMessagingPage />} />
             
             {/* Testing routes */}
             <Route path="/test/anonymous-submission" element={<TestAnonymousSubmission />} />

@@ -57,8 +57,13 @@ const SecureReportStatusLookup = () => {
     // Fetch organization data for branding
     await fetchOrganizationByTrackingId(data.trackingId);
     
-    // Navigate to report status page with the tracking ID
-    navigate(`/report/status/${data.trackingId}`);
+    // Navigate directly to messaging page with tracking ID in state
+    navigate(`/secure/tool/messaging/${data.trackingId}`, { 
+      state: { 
+        trackingId: data.trackingId, 
+        organizationData 
+      }
+    });
   };
 
   const handleSubmit = (e: React.FormEvent) => {
