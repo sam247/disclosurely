@@ -78,8 +78,9 @@ const SecureReportMessaging = () => {
   // Set up real-time messaging
   useEffect(() => {
     if (report?.id) {
+      const channelName = `report-messages-${report.id}`;
       const channel = supabase
-        .channel('report-messages')
+        .channel(channelName)
         .on(
           'postgres_changes',
           {
@@ -89,19 +90,25 @@ const SecureReportMessaging = () => {
             filter: `report_id=eq.${report.id}`,
           },
           (payload) => {
+            console.log('Real-time message received:', payload.new);
             const newMessage = payload.new as Message;
             setMessages(prev => {
               // Avoid duplicates
               if (prev.some(msg => msg.id === newMessage.id)) {
                 return prev;
               }
-              return [...prev, newMessage];
+              const updated = [...prev, newMessage];
+              console.log('Messages updated, count:', updated.length);
+              return updated;
             });
           }
         )
-        .subscribe();
+        .subscribe((status) => {
+          console.log('Real-time subscription status:', status);
+        });
 
       return () => {
+        console.log('Cleaning up real-time subscription');
         supabase.removeChannel(channel);
       };
     }

@@ -12,8 +12,8 @@ const AuthenticatedApp = () => {
   const { toast } = useToast();
   const [profileStatus, setProfileStatus] = useState<'loading' | 'needs_setup' | 'complete'>('loading');
   
-  // Initialize session timeout monitoring
-  useSessionTimeout();
+  // Initialize session timeout monitoring and get warning components
+  const { IdleWarningComponent, AbsoluteWarningComponent } = useSessionTimeout();
 
   useEffect(() => {
     if (user) {
@@ -131,11 +131,23 @@ const AuthenticatedApp = () => {
 
   if (profileStatus === 'needs_setup') {
     console.log('Rendering SimpleOrganizationSetup component');
-    return <SimpleOrganizationSetup onComplete={handleSetupComplete} />;
+    return (
+      <>
+        <SimpleOrganizationSetup onComplete={handleSetupComplete} />
+        <IdleWarningComponent />
+        <AbsoluteWarningComponent />
+      </>
+    );
   }
 
   console.log('Rendering Dashboard component');
-  return <Dashboard />;
+  return (
+    <>
+      <Dashboard />
+      <IdleWarningComponent />
+      <AbsoluteWarningComponent />
+    </>
+  );
 };
 
 export default AuthenticatedApp;

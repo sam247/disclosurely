@@ -37,7 +37,16 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
   const [subscriptionLoading, setSubscriptionLoading] = useState(false);
-  const [subscriptionData, setSubscriptionData] = useState<SubscriptionData>({ subscribed: false });
+  
+  // Initialize subscription data from localStorage or default
+  const [subscriptionData, setSubscriptionData] = useState<SubscriptionData>(() => {
+    try {
+      const cached = localStorage.getItem('subscription_data');
+      return cached ? JSON.parse(cached) : { subscribed: false };
+    } catch {
+      return { subscribed: false };
+    }
+  });
 
   const refreshSubscription = async (currentSession?: Session | null) => {
     // Use passed session or current session state
@@ -45,25 +54,24 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     const userToUse = currentSession?.user || user;
     
     if (!userToUse || !sessionToUse?.access_token) {
-      console.log('Skipping subscription check - no user or session', {
-        hasUser: !!userToUse,
-        hasSession: !!sessionToUse,
-        hasAccessToken: !!sessionToUse?.access_token
-      });
-      // Set default subscription state when no session
-      setSubscriptionData({ subscribed: false });
+      // Clear cached subscription data when no session
+      const defaultData = { subscribed: false };
+      setSubscriptionData(defaultData);
+      localStorage.removeItem('subscription_data');
       return;
     }
     
-    // Skip if we already have valid subscription data to avoid unnecessary calls
-    if (subscriptionData.subscribed && subscriptionData.subscription_tier && 
-        subscriptionData.subscription_end) {
-      console.log('Complete subscription data already exists, skipping check');
+    // Check cache freshness - refresh if older than 1 hour
+    const cacheKey = `subscription_check_${userToUse.id}`;
+    const lastCheck = localStorage.getItem(cacheKey);
+    const now = Date.now();
+    
+    if (lastCheck && (now - parseInt(lastCheck)) < 3600000) { // 1 hour
+      console.log('Using cached subscription data');
       return;
     }
     
     try {
-      console.log('Subscription check attempt for user:', userToUse.email);
       setSubscriptionLoading(true);
       
       const { data, error } = await supabase.functions.invoke('check-subscription', {
@@ -74,8 +82,6 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
 
       if (error) {
         console.error('Subscription check error:', error);
-        // Set basic data on error - user exists but subscription check failed
-        setSubscriptionData({ subscribed: false });
         return;
       }
 
@@ -89,6 +95,10 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
       
       console.log('Mapped subscription data:', mappedData);
       setSubscriptionData(mappedData);
+      
+      // Cache the subscription data and timestamp
+      localStorage.setItem('subscription_data', JSON.stringify(mappedData));
+      localStorage.setItem(cacheKey, now.toString());
     } catch (error) {
       console.error('Error refreshing subscription:', error);
       // Set basic data on error - user exists but subscription check failed
