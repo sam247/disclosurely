@@ -3,13 +3,14 @@ import { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
-import { AlertCircle, FileText, Users, Link } from 'lucide-react';
+import { AlertCircle, FileText, Users, Link, Clock } from 'lucide-react';
 
 interface DashboardStats {
   totalReports: number;
   activeLinks: number;
   newReports: number;
   totalUsers: number;
+  averageResponseTime: number | null;
 }
 
 const DashboardStats = () => {
@@ -17,7 +18,8 @@ const DashboardStats = () => {
     totalReports: 0,
     activeLinks: 0,
     newReports: 0,
-    totalUsers: 0
+    totalUsers: 0,
+    averageResponseTime: null
   });
   const [loading, setLoading] = useState(true);
   const { user } = useAuth();
@@ -78,11 +80,26 @@ const DashboardStats = () => {
         .eq('organization_id', orgId)
         .eq('is_active', true);
 
+      // Fetch average response time from the view
+      const { data: responseTimeData } = await supabase
+        .from('report_response_times')
+        .select('response_time_hours')
+        .eq('organization_id', orgId)
+        .not('response_time_hours', 'is', null);
+
+      // Calculate average response time in hours
+      let avgResponseTime = null;
+      if (responseTimeData && responseTimeData.length > 0) {
+        const totalHours = responseTimeData.reduce((sum, item) => sum + (item.response_time_hours || 0), 0);
+        avgResponseTime = totalHours / responseTimeData.length;
+      }
+
       setStats({
         totalReports: reportsCount || 0,
         activeLinks: linksCount || 0,
         newReports: newReportsCount || 0,
-        totalUsers: usersCount || 0
+        totalUsers: usersCount || 0,
+        averageResponseTime: avgResponseTime
       });
     } catch (error) {
       console.error('Error fetching dashboard stats:', error);
@@ -93,8 +110,8 @@ const DashboardStats = () => {
 
   if (loading) {
     return (
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        {[1, 2, 3, 4].map((i) => (
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-5">
+        {[1, 2, 3, 4, 5].map((i) => (
           <Card key={i}>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">Loading...</CardTitle>
@@ -109,7 +126,7 @@ const DashboardStats = () => {
   }
 
   return (
-    <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+    <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-5">
       <Card>
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
           <CardTitle className="text-sm font-medium">Total Reports</CardTitle>
@@ -151,6 +168,27 @@ const DashboardStats = () => {
         <CardContent>
           <div className="text-2xl font-bold">{stats.totalUsers}</div>
           <p className="text-xs text-muted-foreground">Active users</p>
+        </CardContent>
+      </Card>
+      
+      <Card>
+        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+          <CardTitle className="text-sm font-medium">Avg Response Time</CardTitle>
+          <Clock className="h-4 w-4 text-muted-foreground" />
+        </CardHeader>
+        <CardContent>
+          <div className="text-2xl font-bold">
+            {stats.averageResponseTime !== null 
+              ? `${Math.round(stats.averageResponseTime)}h` 
+              : 'N/A'
+            }
+          </div>
+          <p className="text-xs text-muted-foreground">
+            {stats.averageResponseTime !== null 
+              ? 'Rolling 30 days' 
+              : 'No responses yet'
+            }
+          </p>
         </CardContent>
       </Card>
     </div>
