@@ -22,11 +22,18 @@ import {
   AlertTriangle,
   CheckCircle,
   XCircle,
-  User
+  User,
+  Archive,
+  ArchiveRestore,
+  Trash2,
+  RotateCcw,
+  BookOpen,
+  Tags
 } from 'lucide-react';
 import ReportsStatistics from '@/components/ReportsStatistics';
+import TagEditor from '@/components/TagEditor';
 
-type ReportStatus = 'new' | 'in_review' | 'investigating' | 'resolved' | 'closed';
+type ReportStatus = 'new' | 'live' | 'in_review' | 'investigating' | 'resolved' | 'closed' | 'archived' | 'deleted';
 
 interface Report {
   id: string;
@@ -39,6 +46,12 @@ interface Report {
   updated_at: string;
   assigned_to: string | null;
   submitted_by_email: string | null;
+  tags: string[];
+  first_read_at: string | null;
+  closed_at: string | null;
+  archived_at: string | null;
+  deleted_at: string | null;
+  deleted_by: string | null;
   profiles?: {
     first_name: string | null;
     last_name: string | null;
@@ -60,6 +73,9 @@ const ReportsManagement = () => {
   const [teamMembers, setTeamMembers] = useState<any[]>([]);
   const [newNote, setNewNote] = useState('');
   const [reportNotes, setReportNotes] = useState<any[]>([]);
+  const [showDeleted, setShowDeleted] = useState(false);
+  const [editingTags, setEditingTags] = useState(false);
+  const [tempTags, setTempTags] = useState<string[]>([]);
 
   useEffect(() => {
     fetchReports();
@@ -87,6 +103,7 @@ const ReportsManagement = () => {
           )
         `)
         .eq('organization_id', profile.organization_id)
+        .filter('deleted_at', showDeleted ? 'not.is' : 'is', null)
         .order('created_at', { ascending: false });
 
       if (error) throw error;
@@ -150,13 +167,19 @@ const ReportsManagement = () => {
 
   const updateReportStatus = async (reportId: string, newStatus: ReportStatus) => {
     try {
+      const updateData: any = { 
+        status: newStatus,
+        updated_at: new Date().toISOString()
+      };
+
+      // Set resolved_at for resolved status
+      if (newStatus === 'resolved') {
+        updateData.resolved_at = new Date().toISOString();
+      }
+
       const { error } = await supabase
         .from('reports')
-        .update({ 
-          status: newStatus,
-          updated_at: new Date().toISOString(),
-          resolved_at: newStatus === 'resolved' ? new Date().toISOString() : null
-        })
+        .update(updateData)
         .eq('id', reportId);
 
       if (error) throw error;
@@ -171,6 +194,171 @@ const ReportsManagement = () => {
       toast({
         title: "Error",
         description: "Failed to update report status",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const markAsRead = async (reportId: string) => {
+    try {
+      const { error } = await supabase
+        .from('reports')
+        .update({ 
+          status: 'live',
+          first_read_at: new Date().toISOString(),
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', reportId)
+        .eq('status', 'new');
+
+      if (error) throw error;
+      
+      await fetchReports();
+      toast({
+        title: "Success",
+        description: "Report marked as read",
+      });
+    } catch (error) {
+      console.error('Error marking report as read:', error);
+      toast({
+        title: "Error",
+        description: "Failed to mark report as read",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const closeReport = async (reportId: string) => {
+    try {
+      const { error } = await supabase
+        .from('reports')
+        .update({ 
+          status: 'closed',
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', reportId);
+
+      if (error) throw error;
+      
+      await fetchReports();
+      toast({
+        title: "Success",
+        description: "Report closed successfully",
+      });
+    } catch (error) {
+      console.error('Error closing report:', error);
+      toast({
+        title: "Error",
+        description: "Failed to close report",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const archiveReport = async (reportId: string) => {
+    try {
+      const { error } = await supabase
+        .from('reports')
+        .update({ 
+          status: 'archived',
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', reportId);
+
+      if (error) throw error;
+      
+      await fetchReports();
+      toast({
+        title: "Success",
+        description: "Report archived successfully",
+      });
+    } catch (error) {
+      console.error('Error archiving report:', error);
+      toast({
+        title: "Error",
+        description: "Failed to archive report",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const deleteReport = async (reportId: string) => {
+    try {
+      const { error } = await supabase
+        .from('reports')
+        .update({ 
+          status: 'deleted',
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', reportId);
+
+      if (error) throw error;
+      
+      await fetchReports();
+      toast({
+        title: "Success",
+        description: "Report deleted successfully",
+      });
+    } catch (error) {
+      console.error('Error deleting report:', error);
+      toast({
+        title: "Error",
+        description: "Failed to delete report",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const restoreReport = async (reportId: string) => {
+    try {
+      const { error } = await supabase
+        .from('reports')
+        .update({ 
+          status: 'live',
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', reportId);
+
+      if (error) throw error;
+      
+      await fetchReports();
+      toast({
+        title: "Success",
+        description: "Report restored successfully",
+      });
+    } catch (error) {
+      console.error('Error restoring report:', error);
+      toast({
+        title: "Error",
+        description: "Failed to restore report",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const updateReportTags = async (reportId: string, tags: string[]) => {
+    try {
+      const { error } = await supabase
+        .from('reports')
+        .update({ 
+          tags,
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', reportId);
+
+      if (error) throw error;
+      
+      await fetchReports();
+      setEditingTags(false);
+      toast({
+        title: "Success",
+        description: "Tags updated successfully",
+      });
+    } catch (error) {
+      console.error('Error updating tags:', error);
+      toast({
+        title: "Error",
+        description: "Failed to update tags",
         variant: "destructive",
       });
     }
@@ -242,10 +430,13 @@ const ReportsManagement = () => {
   const getStatusColor = (status: ReportStatus) => {
     switch (status) {
       case "new": return "bg-blue-100 text-blue-800";
+      case "live": return "bg-green-100 text-green-800";
       case "in_review": return "bg-yellow-100 text-yellow-800";
       case "investigating": return "bg-orange-100 text-orange-800";
-      case "resolved": return "bg-green-100 text-green-800";
+      case "resolved": return "bg-emerald-100 text-emerald-800";
       case "closed": return "bg-gray-100 text-gray-800";
+      case "archived": return "bg-purple-100 text-purple-800";
+      case "deleted": return "bg-red-100 text-red-800";
       default: return "bg-gray-100 text-gray-800";
     }
   };
@@ -253,10 +444,13 @@ const ReportsManagement = () => {
   const getStatusIcon = (status: ReportStatus) => {
     switch (status) {
       case "new": return <AlertTriangle className="h-4 w-4" />;
+      case "live": return <BookOpen className="h-4 w-4" />;
       case "in_review": return <Clock className="h-4 w-4" />;
       case "investigating": return <Eye className="h-4 w-4" />;
       case "resolved": return <CheckCircle className="h-4 w-4" />;
       case "closed": return <XCircle className="h-4 w-4" />;
+      case "archived": return <Archive className="h-4 w-4" />;
+      case "deleted": return <Trash2 className="h-4 w-4" />;
       default: return <FileText className="h-4 w-4" />;
     }
   };
@@ -333,10 +527,13 @@ const ReportsManagement = () => {
               <SelectContent>
                 <SelectItem value="all">All Statuses</SelectItem>
                 <SelectItem value="new">New</SelectItem>
+                <SelectItem value="live">Live</SelectItem>
                 <SelectItem value="in_review">In Review</SelectItem>
                 <SelectItem value="investigating">Investigating</SelectItem>
                 <SelectItem value="resolved">Resolved</SelectItem>
                 <SelectItem value="closed">Closed</SelectItem>
+                <SelectItem value="archived">Archived</SelectItem>
+                {showDeleted && <SelectItem value="deleted">Deleted</SelectItem>}
               </SelectContent>
             </Select>
             <Select value={priorityFilter} onValueChange={setPriorityFilter}>
@@ -352,6 +549,16 @@ const ReportsManagement = () => {
                 <SelectItem value="5">Priority 5 (Low)</SelectItem>
               </SelectContent>
             </Select>
+            <Button
+              variant={showDeleted ? "default" : "outline"}
+              onClick={() => {
+                setShowDeleted(!showDeleted);
+                fetchReports();
+              }}
+              className="whitespace-nowrap"
+            >
+              {showDeleted ? "Hide Deleted" : "Show Deleted"}
+            </Button>
           </div>
 
           {/* Reports Table */}
@@ -409,7 +616,7 @@ const ReportsManagement = () => {
                         {new Date(report.created_at).toLocaleDateString()}
                       </TableCell>
                       <TableCell>
-                        <div className="flex space-x-2">
+                        <div className="flex space-x-1">
                           <Button
                             size="sm"
                             variant="outline"
@@ -417,6 +624,55 @@ const ReportsManagement = () => {
                           >
                             <Eye className="h-4 w-4" />
                           </Button>
+                          {report.status === 'new' && (
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => markAsRead(report.id)}
+                              title="Mark as Read"
+                            >
+                              <BookOpen className="h-4 w-4" />
+                            </Button>
+                          )}
+                          {report.status !== 'closed' && report.status !== 'deleted' && (
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => closeReport(report.id)}
+                              title="Close Case"
+                            >
+                              <XCircle className="h-4 w-4" />
+                            </Button>
+                          )}
+                          {report.status !== 'archived' && report.status !== 'deleted' && (
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => archiveReport(report.id)}
+                              title="Archive"
+                            >
+                              <Archive className="h-4 w-4" />
+                            </Button>
+                          )}
+                          {report.status === 'deleted' ? (
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => restoreReport(report.id)}
+                              title="Restore"
+                            >
+                              <RotateCcw className="h-4 w-4" />
+                            </Button>
+                          ) : (
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => deleteReport(report.id)}
+                              title="Delete"
+                            >
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
+                          )}
                         </div>
                       </TableCell>
                     </TableRow>
@@ -458,10 +714,15 @@ const ReportsManagement = () => {
                       </SelectTrigger>
                       <SelectContent>
                         <SelectItem value="new">New</SelectItem>
+                        <SelectItem value="live">Live</SelectItem>
                         <SelectItem value="in_review">In Review</SelectItem>
                         <SelectItem value="investigating">Investigating</SelectItem>
                         <SelectItem value="resolved">Resolved</SelectItem>
                         <SelectItem value="closed">Closed</SelectItem>
+                        <SelectItem value="archived">Archived</SelectItem>
+                        {selectedReport.status === 'deleted' && (
+                          <SelectItem value="deleted">Deleted</SelectItem>
+                        )}
                       </SelectContent>
                     </Select>
                   </div>
@@ -490,6 +751,65 @@ const ReportsManagement = () => {
                       </SelectContent>
                     </Select>
                   </div>
+                </div>
+              </div>
+
+              {/* Tags Section */}
+              <div>
+                <div className="flex items-center justify-between">
+                  <Label>Tags</Label>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={() => {
+                      setEditingTags(!editingTags);
+                      setTempTags(selectedReport.tags || []);
+                    }}
+                  >
+                    <Tags className="h-4 w-4 mr-1" />
+                    {editingTags ? 'Cancel' : 'Edit Tags'}
+                  </Button>
+                </div>
+                <div className="mt-2">
+                  {editingTags ? (
+                    <div className="space-y-2">
+                      <TagEditor
+                        tags={tempTags}
+                        onTagsChange={setTempTags}
+                        placeholder="Add tags..."
+                      />
+                      <div className="flex space-x-2">
+                        <Button
+                          size="sm"
+                          onClick={() => updateReportTags(selectedReport.id, tempTags)}
+                        >
+                          Save Tags
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => {
+                            setEditingTags(false);
+                            setTempTags(selectedReport.tags || []);
+                          }}
+                        >
+                          Cancel
+                        </Button>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="flex flex-wrap gap-1">
+                      {selectedReport.tags && selectedReport.tags.length > 0 ? (
+                        selectedReport.tags.map((tag, index) => (
+                          <Badge key={index} variant="secondary">
+                            {tag}
+                          </Badge>
+                        ))
+                      ) : (
+                        <span className="text-sm text-muted-foreground">No tags</span>
+                      )}
+                    </div>
+                  )}
                 </div>
               </div>
 

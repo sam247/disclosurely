@@ -27,12 +27,18 @@ interface Report {
   id: string;
   title: string;
   tracking_id: string;
-  status: string;
+  status: 'new' | 'live' | 'in_review' | 'investigating' | 'resolved' | 'closed' | 'archived' | 'deleted';
   created_at: string;
   encrypted_content: string;
   encryption_key_hash: string;
   priority: number;
   report_type: string;
+  tags?: string[];
+  first_read_at?: string;
+  closed_at?: string;
+  archived_at?: string;
+  deleted_at?: string;
+  deleted_by?: string;
   organizations?: {
     name: string;
   };
@@ -266,14 +272,17 @@ const Dashboard = () => {
     try {
       const { error } = await supabase
         .from('reports')
-        .update({ status: 'closed' })
+        .update({ 
+          status: 'archived',
+          updated_at: new Date().toISOString()
+        })
         .eq('id', reportId);
 
       if (error) throw error;
 
       toast({
         title: "Report archived",
-        description: "The report has been moved to closed status",
+        description: "The report has been moved to archived status",
       });
 
       if (selectedReport?.id === reportId) {
@@ -300,7 +309,10 @@ const Dashboard = () => {
     try {
       const { error } = await supabase
         .from('reports')
-        .update({ status: 'new' })
+        .update({ 
+          status: 'live',
+          updated_at: new Date().toISOString()
+        })
         .eq('id', reportId);
 
       if (error) throw error;
@@ -332,49 +344,138 @@ const Dashboard = () => {
 
   const handleDeleteReport = async (reportId: string) => {
     try {
-      setReports(prevReports => prevReports.filter(report => report.id !== reportId));
-      setArchivedReports(prevReports => prevReports.filter(report => report.id !== reportId));
+      // Soft delete - update status to 'deleted'
+      const { error } = await supabase
+        .from('reports')
+        .update({ 
+          status: 'deleted',
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', reportId);
+
+      if (error) throw error;
+
+      toast({
+        title: "Report deleted",
+        description: "The report has been moved to deleted status",
+      });
 
       if (selectedReport?.id === reportId) {
         setIsReportDialogOpen(false);
         setSelectedReport(null);
       }
 
-      await supabase.from('report_messages').delete().eq('report_id', reportId);
-      await supabase.from('report_notes').delete().eq('report_id', reportId);
-      await supabase.from('notifications').delete().eq('report_id', reportId);
-
-      const { error: reportError } = await supabase
-        .from('reports')
-        .delete()
-        .eq('id', reportId);
-
-      if (reportError) {
-        console.error('Error deleting report:', reportError);
-        throw reportError;
-      }
-
-      toast({
-        title: "Report deleted",
-        description: "The report has been permanently deleted",
-      });
-
+      // Remove from current view
+      setReports(prevReports => prevReports.filter(report => report.id !== reportId));
+      setArchivedReports(prevReports => prevReports.filter(report => report.id !== reportId));
+      
       setTimeout(() => {
         fetchData();
       }, 1000);
-      
     } catch (error) {
       console.error('Error deleting report:', error);
-      
       toast({
         title: "Error",
         description: "Failed to delete report. Please try again.",
         variant: "destructive",
       });
-      
+    }
+  };
+
+  const handleMarkAsRead = async (reportId: string) => {
+    try {
+      const { error } = await supabase
+        .from('reports')
+        .update({ 
+          status: 'live',
+          first_read_at: new Date().toISOString(),
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', reportId)
+        .eq('status', 'new');
+
+      if (error) throw error;
+
+      toast({
+        title: "Report marked as read",
+        description: "The report status has been updated to live",
+      });
+
       setTimeout(() => {
         fetchData();
       }, 500);
+    } catch (error) {
+      console.error('Error marking report as read:', error);
+      toast({
+        title: "Error",
+        description: "Failed to mark report as read. Please try again.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleCloseReport = async (reportId: string) => {
+    try {
+      const { error } = await supabase
+        .from('reports')
+        .update({ 
+          status: 'closed',
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', reportId);
+
+      if (error) throw error;
+
+      toast({
+        title: "Report closed",
+        description: "The case has been closed successfully",
+      });
+
+      if (selectedReport?.id === reportId) {
+        setIsReportDialogOpen(false);
+        setSelectedReport(null);
+      }
+
+      setTimeout(() => {
+        fetchData();
+      }, 500);
+    } catch (error) {
+      console.error('Error closing report:', error);
+      toast({
+        title: "Error",
+        description: "Failed to close report. Please try again.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleRestoreReport = async (reportId: string) => {
+    try {
+      const { error } = await supabase
+        .from('reports')
+        .update({ 
+          status: 'live',
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', reportId);
+
+      if (error) throw error;
+
+      toast({
+        title: "Report restored",
+        description: "The report has been restored successfully",
+      });
+
+      setTimeout(() => {
+        fetchData();
+      }, 500);
+    } catch (error) {
+      console.error('Error restoring report:', error);
+      toast({
+        title: "Error",
+        description: "Failed to restore report. Please try again.",
+        variant: "destructive",
+      });
     }
   };
 

@@ -1060,11 +1060,16 @@ export type Database = {
       reports: {
         Row: {
           anonymous_access_token: string | null
+          archived_at: string | null
           assigned_to: string | null
+          closed_at: string | null
           created_at: string
+          deleted_at: string | null
+          deleted_by: string | null
           due_date: string | null
           encrypted_content: string
           encryption_key_hash: string
+          first_read_at: string | null
           id: string
           organization_id: string
           priority: number | null
@@ -1080,11 +1085,16 @@ export type Database = {
         }
         Insert: {
           anonymous_access_token?: string | null
+          archived_at?: string | null
           assigned_to?: string | null
+          closed_at?: string | null
           created_at?: string
+          deleted_at?: string | null
+          deleted_by?: string | null
           due_date?: string | null
           encrypted_content: string
           encryption_key_hash: string
+          first_read_at?: string | null
           id?: string
           organization_id: string
           priority?: number | null
@@ -1100,11 +1110,16 @@ export type Database = {
         }
         Update: {
           anonymous_access_token?: string | null
+          archived_at?: string | null
           assigned_to?: string | null
+          closed_at?: string | null
           created_at?: string
+          deleted_at?: string | null
+          deleted_by?: string | null
           due_date?: string | null
           encrypted_content?: string
           encryption_key_hash?: string
+          first_read_at?: string | null
           id?: string
           organization_id?: string
           priority?: number | null
@@ -1510,6 +1525,9 @@ export type Database = {
         | "investigating"
         | "resolved"
         | "closed"
+        | "live"
+        | "archived"
+        | "deleted"
       report_type: "anonymous" | "confidential"
       user_role: "admin" | "case_handler" | "reviewer" | "org_admin"
     }
@@ -1645,6 +1663,9 @@ export const Constants = {
         "investigating",
         "resolved",
         "closed",
+        "live",
+        "archived",
+        "deleted",
       ],
       report_type: ["anonymous", "confidential"],
       user_role: ["admin", "case_handler", "reviewer", "org_admin"],
