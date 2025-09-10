@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { supabase } from '@/integrations/supabase/client';
@@ -10,7 +9,7 @@ interface DashboardStats {
   activeLinks: number;
   newReports: number;
   totalUsers: number;
-  averageResponseTime: number | null;
+  avgResponseTime: number | null;
 }
 
 const DashboardStats = () => {
@@ -19,7 +18,7 @@ const DashboardStats = () => {
     activeLinks: 0,
     newReports: 0,
     totalUsers: 0,
-    averageResponseTime: null
+    avgResponseTime: null
   });
   const [loading, setLoading] = useState(true);
   const { user } = useAuth();
@@ -91,7 +90,7 @@ const DashboardStats = () => {
       let avgResponseTime = null;
       if (responseTimeData && responseTimeData.length > 0) {
         const totalHours = responseTimeData.reduce((sum, item) => sum + (item.response_time_hours || 0), 0);
-        avgResponseTime = totalHours / responseTimeData.length;
+        avgResponseTime = Math.round(totalHours / responseTimeData.length);
       }
 
       setStats({
@@ -99,7 +98,7 @@ const DashboardStats = () => {
         activeLinks: linksCount || 0,
         newReports: newReportsCount || 0,
         totalUsers: usersCount || 0,
-        averageResponseTime: avgResponseTime
+        avgResponseTime
       });
     } catch (error) {
       console.error('Error fetching dashboard stats:', error);
@@ -178,14 +177,11 @@ const DashboardStats = () => {
         </CardHeader>
         <CardContent>
           <div className="text-2xl font-bold">
-            {stats.averageResponseTime !== null 
-              ? `${Math.round(stats.averageResponseTime)}h` 
-              : 'N/A'
-            }
+            {stats.avgResponseTime !== null ? `${stats.avgResponseTime}h` : 'N/A'}
           </div>
           <p className="text-xs text-muted-foreground">
-            {stats.averageResponseTime !== null 
-              ? 'Rolling 30 days' 
+            {stats.avgResponseTime !== null 
+              ? 'Rolling 30 days avg' 
               : 'No responses yet'
             }
           </p>
