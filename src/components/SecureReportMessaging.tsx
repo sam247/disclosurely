@@ -187,22 +187,46 @@ const SecureReportMessaging = () => {
     
     if (!newMessage.trim() || !report) return;
 
+    const messageText = newMessage.trim();
+    const tempId = `temp-${Date.now()}`;
+    
+    // Optimistic update - add message immediately to UI
+    const optimisticMessage = {
+      id: tempId,
+      sender_type: 'whistleblower' as const,
+      encrypted_message: messageText,
+      created_at: new Date().toISOString(),
+      is_read: false,
+    };
+
+    setMessages(prev => [...prev, optimisticMessage]);
+    setNewMessage('');
     setSending(true);
+
     try {
-      const { error } = await supabase
+      const { data, error } = await supabase
         .from('report_messages')
         .insert({
           report_id: report.id,
           sender_type: 'whistleblower',
-          encrypted_message: newMessage.trim(),
-        });
+          encrypted_message: messageText,
+        })
+        .select()
+        .single();
 
       if (error) {
         console.error('Message send error:', error);
+        // Remove optimistic message on error
+        setMessages(prev => prev.filter(msg => msg.id !== tempId));
+        setNewMessage(messageText); // Restore the message
         throw error;
       }
 
-      setNewMessage('');
+      // Replace optimistic message with real one
+      setMessages(prev => 
+        prev.map(msg => msg.id === tempId ? { ...data, ...optimisticMessage } : msg)
+      );
+
       toast({
         title: "Message Sent",
         description: "Your message has been sent securely.",

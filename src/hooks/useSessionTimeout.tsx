@@ -5,7 +5,7 @@ import SessionTimeoutWarning from '@/components/SessionTimeoutWarning';
 
 const IDLE_TIMEOUT = 7 * 60 * 1000; // 7 minutes
 const ABSOLUTE_TIMEOUT = 4 * 60 * 60 * 1000; // 4 hours
-const WARNING_TIME = 2 * 60 * 1000; // Show warning 2 minutes before timeout
+const WARNING_TIME = 60 * 1000; // Show warning 60 seconds before timeout
 
 export const useSessionTimeout = () => {
   const { user, session, signOut } = useAuth();
@@ -22,10 +22,11 @@ export const useSessionTimeout = () => {
   const [showAbsoluteWarning, setShowAbsoluteWarning] = useState(false);
   const [idleTimeRemaining, setIdleTimeRemaining] = useState(0);
   const [absoluteTimeRemaining, setAbsoluteTimeRemaining] = useState(0);
+  const [isTabVisible, setIsTabVisible] = useState(true);
 
   // Reset idle timer on user activity
   const resetIdleTimer = useCallback(() => {
-    if (!user || !session) return;
+    if (!user || !session || !isTabVisible) return;
 
     // Clear existing timers
     if (idleTimerRef.current) {
@@ -39,9 +40,9 @@ export const useSessionTimeout = () => {
     setShowIdleWarning(false);
     warningShownRef.current = false;
 
-    // Show warning before idle timeout
+    // Show warning before idle timeout (only when tab is visible)
     warningTimerRef.current = setTimeout(() => {
-      if (warningShownRef.current) return;
+      if (warningShownRef.current || !document.visibilityState || document.visibilityState !== 'visible') return;
       warningShownRef.current = true;
       setIdleTimeRemaining(WARNING_TIME / 1000);
       setShowIdleWarning(true);
@@ -49,7 +50,7 @@ export const useSessionTimeout = () => {
 
     // Set idle timeout
     idleTimerRef.current = setTimeout(() => {
-      if (!showIdleWarning) {
+      if (!showIdleWarning && document.visibilityState === 'visible') {
         toast({
           title: "Session Expired",
           description: "Your session has expired due to inactivity.",
@@ -58,7 +59,7 @@ export const useSessionTimeout = () => {
         signOut();
       }
     }, IDLE_TIMEOUT);
-  }, [user, session, signOut, toast, showIdleWarning]);
+  }, [user, session, signOut, toast, showIdleWarning, isTabVisible]);
 
   // Show warning before absolute timeout
   const showAbsoluteTimeoutWarning = useCallback(() => {
@@ -157,6 +158,24 @@ export const useSessionTimeout = () => {
     };
   }, [showIdleWarning, showAbsoluteWarning, idleTimeRemaining, absoluteTimeRemaining, signOut]);
 
+  // Handle tab visibility changes
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      const visible = document.visibilityState === 'visible';
+      setIsTabVisible(visible);
+      
+      // When tab becomes visible again, reset timers if user was warned
+      if (visible && showIdleWarning) {
+        warningShownRef.current = false;
+        setShowIdleWarning(false);
+        resetIdleTimer();
+      }
+    };
+
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    return () => document.removeEventListener('visibilitychange', handleVisibilityChange);
+  }, [showIdleWarning, resetIdleTimer]);
+
   // Set up activity listeners
   useEffect(() => {
     if (!user || !session) {
@@ -169,14 +188,18 @@ export const useSessionTimeout = () => {
       return;
     }
 
-    // Activity events to monitor
+    // Activity events to monitor (enhanced for mobile)
     const events = [
       'mousedown',
       'mousemove', 
       'keypress',
       'scroll',
       'touchstart',
-      'click'
+      'touchmove',
+      'touchend',
+      'click',
+      'focus',
+      'blur'
     ];
 
     // Set up timers when user logs in

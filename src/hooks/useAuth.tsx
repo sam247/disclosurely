@@ -70,6 +70,31 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
       console.log('Using cached subscription data');
       return;
     }
+
+    // First try direct database query for speed (no edge function)
+    try {
+      const { data: directData, error: directError } = await supabase
+        .from('subscribers')
+        .select('subscription_tier, subscription_end')
+        .eq('user_id', userToUse.id)
+        .maybeSingle();
+
+      if (!directError && directData) {
+        const mappedData = {
+          subscribed: true,
+          subscription_tier: directData.subscription_tier as 'basic' | 'pro',
+          subscription_end: directData.subscription_end,
+        };
+        
+        setSubscriptionData(mappedData);
+        localStorage.setItem('subscription_data', JSON.stringify(mappedData));
+        localStorage.setItem(cacheKey, now.toString());
+        console.log('Fast subscription check from database:', mappedData);
+        return;
+      }
+    } catch (error) {
+      console.log('Direct DB check failed, falling back to edge function');
+    }
     
     try {
       setSubscriptionLoading(true);

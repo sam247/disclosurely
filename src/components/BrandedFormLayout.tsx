@@ -28,25 +28,25 @@ const BrandedFormLayout = ({
           <div className="flex items-center justify-between py-4 max-w-7xl mx-auto">
             <div className="flex items-center">
               <div className="flex items-center justify-center mr-4">
-                {logoUrl ? (
-                  <img 
-                    src={logoUrl} 
-                    alt={`${organizationName || 'Organization'} logo`}
-                    className="w-10 h-10 object-contain"
-                    onError={(e) => {
-                      const target = e.target as HTMLImageElement;
-                      target.style.display = 'none';
-                      target.nextElementSibling?.classList.remove('hidden');
-                    }}
-                  />
-                ) : (
-                  <div 
-                    className="w-10 h-10 rounded-lg flex items-center justify-center"
-                    style={{ backgroundColor: brandColor }}
-                  >
-                    <Shield className="h-6 w-6 text-white" />
-                  </div>
-                )}
+                 {logoUrl ? (
+                   <img 
+                     src={logoUrl} 
+                     alt={`${organizationName || 'Organization'} logo`}
+                     className="w-10 h-10 sm:w-12 sm:h-12 object-contain"
+                     onError={(e) => {
+                       const target = e.target as HTMLImageElement;
+                       target.style.display = 'none';
+                       target.nextElementSibling?.classList.remove('hidden');
+                     }}
+                   />
+                 ) : (
+                   <div 
+                     className="w-10 h-10 sm:w-12 sm:h-12 rounded-lg flex items-center justify-center"
+                     style={{ backgroundColor: brandColor }}
+                   >
+                     <Shield className="h-6 w-6 sm:h-7 sm:w-7 text-white" />
+                   </div>
+                 )}
                 {logoUrl && (
                   <div 
                     className="w-10 h-10 rounded-lg flex items-center justify-center hidden"

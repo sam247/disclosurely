@@ -600,13 +600,13 @@ const Dashboard = () => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center py-4">
             <div className="flex items-center space-x-3 min-w-0 flex-1">
-              <img 
-                src="/lovable-uploads/c46ace0e-df58-4119-b5e3-8dcfa075ea2f.png" 
-                alt="Disclosurely" 
-                className="h-4 sm:h-8 w-auto flex-shrink-0"
-              />
+               <img 
+                 src="/lovable-uploads/c46ace0e-df58-4119-b5e3-8dcfa075ea2f.png" 
+                 alt="Disclosurely" 
+                 className="h-6 sm:h-8 w-auto flex-shrink-0"
+               />
               <div className="min-w-0 flex-1">
-                <h1 className="text-lg sm:text-2xl font-bold text-gray-900 truncate">Dashboard</h1>
+                <h1 className="text-lg sm:text-2xl font-bold text-gray-900 truncate">Secure Report Management</h1>
                 <div className="hidden sm:flex sm:flex-row sm:items-center sm:gap-4">
                   <p className="text-xs sm:text-sm text-gray-600 truncate">Welcome back, {user?.email}</p>
                   {subscriptionData.subscribed && (
