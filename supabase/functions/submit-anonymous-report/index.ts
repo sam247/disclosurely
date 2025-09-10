@@ -3,7 +3,7 @@ import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 
 const corsHeaders = {
-  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Origin': 'https://disclosurely.com, https://*.disclosurely.com, https://app.disclosurely.com',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 }
 
@@ -112,6 +112,47 @@ serve(async (req) => {
       .eq('id', linkData.id)
 
     console.log('Report created successfully:', report[0]?.id)
+
+    // Send email notifications in the background
+    try {
+      const notificationResponse = await supabaseAdmin.functions.invoke('send-notification-emails', {
+        body: { reportId: report[0].id }
+      })
+      
+      if (notificationResponse.error) {
+        console.error('Failed to send email notifications:', notificationResponse.error)
+        // Log the failure but don't fail the report creation
+        await supabaseAdmin
+          .from('email_notifications')
+          .insert({
+            organization_id: linkData.organization_id,
+            report_id: report[0].id,
+            notification_type: 'new_report_failed',
+            error_message: notificationResponse.error.message || 'Unknown error',
+            metadata: { 
+              attempted_at: new Date().toISOString(),
+              error_details: notificationResponse.error
+            }
+          })
+      } else {
+        console.log('Email notifications sent successfully:', notificationResponse.data)
+      }
+    } catch (emailError) {
+      console.error('Email notification invocation failed:', emailError)
+      // Log the failure but don't fail the report creation
+      await supabaseAdmin
+        .from('email_notifications')
+        .insert({
+          organization_id: linkData.organization_id,
+          report_id: report[0].id,
+          notification_type: 'new_report_failed',
+          error_message: emailError.message || 'Failed to invoke email service',
+          metadata: { 
+            attempted_at: new Date().toISOString(),
+            error_details: emailError.toString()
+          }
+        })
+    }
 
     return new Response(
       JSON.stringify({ success: true, report: report[0] }),
