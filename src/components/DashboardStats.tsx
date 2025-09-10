@@ -9,7 +9,7 @@ interface DashboardStats {
   activeLinks: number;
   newReports: number;
   totalUsers: number;
-  avgResponseTime: number | null;
+  averageResponseTimeHours: number | null;
 }
 
 const DashboardStats = () => {
@@ -18,7 +18,7 @@ const DashboardStats = () => {
     activeLinks: 0,
     newReports: 0,
     totalUsers: 0,
-    avgResponseTime: null
+    averageResponseTimeHours: null
   });
   const [loading, setLoading] = useState(true);
   const { user } = useAuth();
@@ -79,26 +79,23 @@ const DashboardStats = () => {
         .eq('organization_id', orgId)
         .eq('is_active', true);
 
-      // Fetch average response time from the view
+      // Fetch average response time
       const { data: responseTimeData } = await supabase
         .from('report_response_times')
         .select('response_time_hours')
         .eq('organization_id', orgId)
         .not('response_time_hours', 'is', null);
 
-      // Calculate average response time in hours
-      let avgResponseTime = null;
-      if (responseTimeData && responseTimeData.length > 0) {
-        const totalHours = responseTimeData.reduce((sum, item) => sum + (item.response_time_hours || 0), 0);
-        avgResponseTime = Math.round(totalHours / responseTimeData.length);
-      }
+      const avgResponseTime = responseTimeData?.length > 0 
+        ? responseTimeData.reduce((sum, item) => sum + (item.response_time_hours || 0), 0) / responseTimeData.length
+        : null;
 
       setStats({
         totalReports: reportsCount || 0,
         activeLinks: linksCount || 0,
         newReports: newReportsCount || 0,
         totalUsers: usersCount || 0,
-        avgResponseTime
+        averageResponseTimeHours: avgResponseTime
       });
     } catch (error) {
       console.error('Error fetching dashboard stats:', error);
@@ -150,6 +147,22 @@ const DashboardStats = () => {
       
       <Card>
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+          <CardTitle className="text-sm font-medium">Average Response Time</CardTitle>
+          <Clock className="h-4 w-4 text-muted-foreground" />
+        </CardHeader>
+        <CardContent>
+          <div className="text-2xl font-bold">
+            {stats.averageResponseTimeHours !== null 
+              ? `${Math.round(stats.averageResponseTimeHours)}h`
+              : 'No data'
+            }
+          </div>
+          <p className="text-xs text-muted-foreground">First org response (30 days)</p>
+        </CardContent>
+      </Card>
+      
+      <Card>
+        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
           <CardTitle className="text-sm font-medium">Active Links</CardTitle>
           <Link className="h-4 w-4 text-muted-foreground" />
         </CardHeader>
@@ -167,24 +180,6 @@ const DashboardStats = () => {
         <CardContent>
           <div className="text-2xl font-bold">{stats.totalUsers}</div>
           <p className="text-xs text-muted-foreground">Active users</p>
-        </CardContent>
-      </Card>
-      
-      <Card>
-        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-          <CardTitle className="text-sm font-medium">Avg Response Time</CardTitle>
-          <Clock className="h-4 w-4 text-muted-foreground" />
-        </CardHeader>
-        <CardContent>
-          <div className="text-2xl font-bold">
-            {stats.avgResponseTime !== null ? `${stats.avgResponseTime}h` : 'N/A'}
-          </div>
-          <p className="text-xs text-muted-foreground">
-            {stats.avgResponseTime !== null 
-              ? 'Rolling 30 days avg' 
-              : 'No responses yet'
-            }
-          </p>
         </CardContent>
       </Card>
     </div>
