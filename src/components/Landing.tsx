@@ -377,7 +377,13 @@ const Landing = () => {
               </ul>
             </div>
             <div>
-              <UnlimitedScaleArt />
+              <div className="bg-gradient-to-br from-blue-50 to-indigo-100 p-8 rounded-2xl">
+                <BarChart3 className="h-48 w-48 text-blue-600 mx-auto mb-4" />
+                <div className="text-center">
+                  <div className="text-sm font-medium text-blue-800 mb-2">Intelligent Analytics</div>
+                  <div className="text-xs text-blue-600">Automated case insights and patterns</div>
+                </div>
+              </div>
             </div>
           </div>
         </div>
