@@ -629,7 +629,7 @@ const Dashboard = () => {
                 <TableHead>Status</TableHead>
                 <TableHead>Assigned To</TableHead>
                 <TableHead>Submitted Date</TableHead>
-                <TableHead>Actions</TableHead>
+                <TableHead>Report Actions</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -643,7 +643,20 @@ const Dashboard = () => {
                 filtered.map((report) => (
                   <TableRow key={report.id}>
                     <TableCell className="font-mono text-sm">{report.tracking_id}</TableCell>
-                    <TableCell className="max-w-xs truncate">{report.title}</TableCell>
+                    <TableCell className="max-w-xs truncate">
+                      <div>
+                        <div className="font-medium">{report.title}</div>
+                        {report.tags && report.tags.length > 0 && (
+                          <div className="flex flex-wrap gap-1 mt-1">
+                            {report.tags.map((tag, index) => (
+                              <Badge key={index} variant="secondary" className="text-xs">
+                                {tag}
+                              </Badge>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    </TableCell>
                     <TableCell>
                       <Badge className={getStatusColor(report.status)}>
                         {formatStatus(report.status)}
@@ -656,32 +669,35 @@ const Dashboard = () => {
                       {new Date(report.created_at).toLocaleDateString()}
                     </TableCell>
                     <TableCell>
-                      <div className="flex space-x-1">
+                      <div className="flex flex-wrap gap-2">
                         <Button
                           size="sm"
                           variant="outline"
                           onClick={() => handleViewReport(report)}
-                          title="View Details"
+                          className="text-xs"
                         >
-                          <Eye className="h-4 w-4" />
+                          <Eye className="h-4 w-4 mr-1" />
+                          View
                         </Button>
                         {report.status === 'closed' ? (
                           <Button
                             size="sm"
                             variant="outline"
                             onClick={() => handleReopenReport(report.id)}
-                            title="Reopen Case"
+                            className="text-xs"
                           >
-                            <RotateCcw className="h-4 w-4" />
+                            <RotateCcw className="h-4 w-4 mr-1" />
+                            Reopen
                           </Button>
                         ) : (
                           <Button
                             size="sm"
                             variant="outline"
                             onClick={() => handleCloseReport(report.id)}
-                            title="Close Case"
+                            className="text-xs"
                           >
-                            <XCircle className="h-4 w-4" />
+                            <XCircle className="h-4 w-4 mr-1" />
+                            Close
                           </Button>
                         )}
                         {isArchived ? (
@@ -689,28 +705,52 @@ const Dashboard = () => {
                             size="sm"
                             variant="outline"
                             onClick={() => handleUnarchiveReport(report.id)}
-                            title="Unarchive"
+                            className="text-xs"
                           >
-                            <RotateCcw className="h-4 w-4" />
+                            <RotateCcw className="h-4 w-4 mr-1" />
+                            Unarchive
                           </Button>
                         ) : (
                           <Button
                             size="sm"
                             variant="outline"
                             onClick={() => handleArchiveReport(report.id)}
-                            title="Archive"
+                            className="text-xs"
                           >
-                            <Archive className="h-4 w-4" />
+                            <Archive className="h-4 w-4 mr-1" />
+                            Archive
                           </Button>
                         )}
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          onClick={() => handleDeleteReport(report.id)}
-                          title="Delete"
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
+                        <AlertDialog>
+                          <AlertDialogTrigger asChild>
+                            <Button
+                              size="sm"
+                              variant="destructive"
+                              className="text-xs"
+                            >
+                              <Trash2 className="h-4 w-4 mr-1" />
+                              Delete
+                            </Button>
+                          </AlertDialogTrigger>
+                          <AlertDialogContent>
+                            <AlertDialogHeader>
+                              <AlertDialogTitle>Are you sure you want to delete this case?</AlertDialogTitle>
+                              <AlertDialogDescription>
+                                This action cannot be undone. This will permanently delete the case 
+                                "{report.title}" and all associated messages and attachments.
+                              </AlertDialogDescription>
+                            </AlertDialogHeader>
+                            <AlertDialogFooter>
+                              <AlertDialogCancel>Cancel</AlertDialogCancel>
+                              <AlertDialogAction 
+                                onClick={() => handleDeleteReport(report.id)}
+                                className="bg-red-600 hover:bg-red-700"
+                              >
+                                Delete Case
+                              </AlertDialogAction>
+                            </AlertDialogFooter>
+                          </AlertDialogContent>
+                        </AlertDialog>
                       </div>
                     </TableCell>
                   </TableRow>
