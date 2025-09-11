@@ -90,55 +90,85 @@ const Dashboard = () => {
   // Function to decrypt and extract category from report content
   const decryptReportCategory = async (report: Report): Promise<string> => {
     try {
-      if (!user) return 'Unknown';
+      console.log('Attempting to decrypt category for report:', report.tracking_id);
       
-      // Get user's organization ID if not already available
-      if (!organizationId) {
+      if (!user) {
+        console.log('No user available for decryption');
+        return 'Unknown';
+      }
+      
+      // Get user's organization ID
+      let orgId = organizationId;
+      if (!orgId) {
+        console.log('Fetching organization ID...');
         const { data: profile } = await supabase
           .from('profiles')
           .select('organization_id')
           .eq('id', user.id)
           .single();
         
-        if (!profile?.organization_id) return 'Unknown';
+        if (!profile?.organization_id) {
+          console.log('No organization found for user');
+          return 'Unknown';
+        }
+        orgId = profile.organization_id;
+        console.log('Found organization ID:', orgId);
       }
       
-      // Import the decryption utility
+      // Import and use the decryption utility
+      console.log('Importing decryption utility...');
       const { decryptReport } = await import('@/utils/encryption');
-      const decrypted = decryptReport(report.encrypted_content, organizationId || '');
       
+      console.log('Decrypting report content...');
+      const decrypted = decryptReport(report.encrypted_content, orgId);
+      
+      console.log('Decrypted category:', decrypted.category);
       return decrypted.category || 'General';
     } catch (error) {
-      console.error('Failed to decrypt report category:', error);
-      return 'Unknown';
+      console.error('Failed to decrypt report category for', report.tracking_id, ':', error);
+      // Return a fallback based on report type or title
+      return report.report_type?.charAt(0).toUpperCase() + report.report_type?.slice(1) || 'Unknown';
     }
   };
 
   // Decrypt categories for all reports when they load
   useEffect(() => {
     const decryptCategories = async () => {
-      if (!reports.length || !user || !organizationId) return;
+      console.log('Starting category decryption process...');
+      if (!reports.length || !user) {
+        console.log('No reports or user available for decryption');
+        return;
+      }
       
       const categories: Record<string, string> = {};
       
-      for (const report of reports) {
+      // Process reports in batches to avoid overwhelming the system
+      for (let i = 0; i < reports.length; i++) {
+        const report = reports[i];
         if (!reportCategories[report.id]) {
+          console.log(`Decrypting category for report ${i + 1}/${reports.length}:`, report.tracking_id);
           categories[report.id] = await decryptReportCategory(report);
         }
       }
       
       if (Object.keys(categories).length > 0) {
+        console.log('Setting decrypted categories:', categories);
         setReportCategories(prev => ({ ...prev, ...categories }));
       }
     };
 
-    decryptCategories();
-  }, [reports, user, organizationId]);
+    // Add a small delay to ensure everything is loaded
+    const timeoutId = setTimeout(() => {
+      decryptCategories();
+    }, 1000);
+
+    return () => clearTimeout(timeoutId);
+  }, [reports, user]);
 
   // Also decrypt categories for archived reports
   useEffect(() => {
     const decryptArchivedCategories = async () => {
-      if (!archivedReports.length || !user || !organizationId) return;
+      if (!archivedReports.length || !user) return;
       
       const categories: Record<string, string> = {};
       
@@ -153,12 +183,33 @@ const Dashboard = () => {
       }
     };
 
-    decryptArchivedCategories();
-  }, [archivedReports, user, organizationId]);
+    const timeoutId = setTimeout(() => {
+      decryptArchivedCategories();
+    }, 1000);
+
+    return () => clearTimeout(timeoutId);
+  }, [archivedReports, user]);
 
   // Function to get category for display
   const getReportCategory = (report: Report): string => {
-    return reportCategories[report.id] || 'Loading...';
+    const category = reportCategories[report.id];
+    if (category) return category;
+    
+    // Show a more specific loading state or fallback
+    if (reportCategories[report.id] === undefined && reports.length > 0) {
+      // Quick fallback - try to parse from title for common keywords while decryption loads
+      const title = report.title.toLowerCase();
+      if (title.includes('corrupt')) return 'Corruption (pending verification)';
+      if (title.includes('fraud')) return 'Fraud (pending verification)';
+      if (title.includes('harassment')) return 'Harassment (pending verification)';
+      if (title.includes('discrimination')) return 'Discrimination (pending verification)';
+      if (title.includes('safety')) return 'Safety (pending verification)';
+      
+      return 'Loading...';
+    }
+    
+    // Fallback to report type if available
+    return report.report_type?.charAt(0).toUpperCase() + report.report_type?.slice(1) || 'Unknown';
   };
 
   console.log('Dashboard - Current subscription data:', subscriptionData);
