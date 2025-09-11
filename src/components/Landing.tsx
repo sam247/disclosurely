@@ -16,7 +16,6 @@ import techFlowLogo from "@/assets/logos/techflow-logo-clean.png";
 import greenPointLogo from "@/assets/logos/greenpoint-logo.png";
 import innovateLogo from "@/assets/logos/innovate-logo.png";
 import horizonLogo from "@/assets/logos/horizon-logo.png";
-import nexusLogo from "@/assets/logos/nexus-logo-clean.png";
 import metroSyncLogo from "@/assets/logos/metrosync-logo-clean.png";
 import prismLogo from "@/assets/logos/prism-logo-clean.png";
 
@@ -88,7 +87,6 @@ const Landing = () => {
                   <img src={greenPointLogo} alt="GreenPoint" className="h-24 w-auto object-contain opacity-70 hover:opacity-100 transition-opacity" />
                   <img src={innovateLogo} alt="Innovate Industries" className="h-24 w-auto object-contain opacity-70 hover:opacity-100 transition-opacity" />
                   <img src={horizonLogo} alt="Horizon Group" className="h-24 w-auto object-contain opacity-70 hover:opacity-100 transition-opacity" />
-                  <img src={nexusLogo} alt="Nexus Systems" className="h-24 w-auto object-contain opacity-70 hover:opacity-100 transition-opacity" />
                   <img src={metroSyncLogo} alt="MetroSync Technologies" className="h-24 w-auto object-contain opacity-70 hover:opacity-100 transition-opacity" />
                   <img src={prismLogo} alt="Prism Analytics" className="h-24 w-auto object-contain opacity-70 hover:opacity-100 transition-opacity" />
                 </div>
@@ -99,7 +97,6 @@ const Landing = () => {
                   <img src={greenPointLogo} alt="GreenPoint" className="h-24 w-auto object-contain opacity-70 hover:opacity-100 transition-opacity" />
                   <img src={innovateLogo} alt="Innovate Industries" className="h-24 w-auto object-contain opacity-70 hover:opacity-100 transition-opacity" />
                   <img src={horizonLogo} alt="Horizon Group" className="h-24 w-auto object-contain opacity-70 hover:opacity-100 transition-opacity" />
-                  <img src={nexusLogo} alt="Nexus Systems" className="h-24 w-auto object-contain opacity-70 hover:opacity-100 transition-opacity" />
                   <img src={metroSyncLogo} alt="MetroSync Technologies" className="h-24 w-auto object-contain opacity-70 hover:opacity-100 transition-opacity" />
                   <img src={prismLogo} alt="Prism Analytics" className="h-24 w-auto object-contain opacity-70 hover:opacity-100 transition-opacity" />
                 </div>
