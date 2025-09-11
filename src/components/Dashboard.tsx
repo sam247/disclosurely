@@ -86,6 +86,60 @@ const Dashboard = () => {
   const [sortField, setSortField] = useState<'created_at' | 'title' | 'tracking_id'>('created_at');
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('desc');
 
+  // Category mapping function based on comprehensive category list
+  const getReportCategory = (report: Report): string => {
+    const title = report.title.toLowerCase();
+    const tags = report.tags || [];
+    const tagString = tags.join(' ').toLowerCase();
+    
+    // Check tags first for explicit category matches
+    for (const tag of tags) {
+      const lowerTag = tag.toLowerCase();
+      
+      // Financial Misconduct
+      if (['fraud', 'bribery', 'corruption', 'embezzlement', 'theft', 'kickbacks', 'laundering', 'insider', 'forgery', 'collusion'].includes(lowerTag)) {
+        return lowerTag.charAt(0).toUpperCase() + lowerTag.slice(1);
+      }
+      
+      // Workplace Behaviour
+      if (['harassment', 'discrimination', 'bullying', 'retaliation', 'nepotism', 'favouritism', 'misconduct', 'exploitation', 'abuse'].includes(lowerTag)) {
+        return lowerTag.charAt(0).toUpperCase() + lowerTag.slice(1);
+      }
+      
+      // Legal & Compliance
+      if (['compliance', 'ethics', 'manipulation', 'extortion', 'coercion', 'violation'].includes(lowerTag)) {
+        return lowerTag.charAt(0).toUpperCase() + lowerTag.slice(1);
+      }
+      
+      // Safety & Risk
+      if (['safety', 'negligence', 'hazards', 'sabotage'].includes(lowerTag)) {
+        return lowerTag.charAt(0).toUpperCase() + lowerTag.slice(1);
+      }
+      
+      // Data & Security
+      if (['privacy', 'data', 'security', 'cyber'].includes(lowerTag)) {
+        return lowerTag.charAt(0).toUpperCase() + lowerTag.slice(1);
+      }
+    }
+    
+    // Check title content for keywords
+    const content = title + ' ' + tagString;
+    
+    if (content.includes('corrupt') || content.includes('bribe') || content.includes('kickback')) return 'Corruption';
+    if (content.includes('fraud') || content.includes('embezzle') || content.includes('financial')) return 'Fraud';
+    if (content.includes('harassment') || content.includes('harass')) return 'Harassment';
+    if (content.includes('discriminat') || content.includes('bias')) return 'Discrimination';
+    if (content.includes('safety') || content.includes('accident') || content.includes('injury')) return 'Safety';
+    if (content.includes('data') || content.includes('privacy') || content.includes('breach')) return 'Data';
+    if (content.includes('compliance') || content.includes('policy') || content.includes('regulation')) return 'Compliance';
+    if (content.includes('theft') || content.includes('steal') || content.includes('stolen')) return 'Theft';
+    if (content.includes('bully') || content.includes('intimidat')) return 'Bullying';
+    if (content.includes('ethics') || content.includes('ethical')) return 'Ethics';
+    
+    // Default fallback
+    return 'Misconduct';
+  };
+
   console.log('Dashboard - Current subscription data:', subscriptionData);
 
   // Check for successful subscription return from Stripe
@@ -659,14 +713,14 @@ const Dashboard = () => {
         </div>
 
         {/* Table */}
-        <div className="rounded-md border">
-          <Table>
+        <div className="rounded-md border overflow-hidden">
+          <Table className="w-full">
             <TableHeader>
               <TableRow>
-                <TableHead className="w-[110px]">
+                <TableHead className="w-[14%]">
                   <button
                     onClick={() => handleSort('tracking_id')}
-                    className="flex items-center hover:text-foreground transition-colors"
+                    className="flex items-center hover:text-foreground transition-colors whitespace-nowrap"
                   >
                     Tracking ID
                     {sortField === 'tracking_id' && (
@@ -674,10 +728,10 @@ const Dashboard = () => {
                     )}
                   </button>
                 </TableHead>
-                <TableHead className="w-[160px]">
+                <TableHead className="w-[20%]">
                   <button
                     onClick={() => handleSort('title')}
-                    className="flex items-center hover:text-foreground transition-colors"
+                    className="flex items-center hover:text-foreground transition-colors whitespace-nowrap"
                   >
                     Title
                     {sortField === 'title' && (
@@ -685,13 +739,13 @@ const Dashboard = () => {
                     )}
                   </button>
                 </TableHead>
-                <TableHead className="w-[90px]">Status</TableHead>
-                <TableHead className="w-[120px]">Category</TableHead>
-                <TableHead className="w-[110px]">Assigned To</TableHead>
-                <TableHead className="w-[120px]">
+                <TableHead className="w-[11%] whitespace-nowrap">Status</TableHead>
+                <TableHead className="w-[13%] whitespace-nowrap">Category</TableHead>
+                <TableHead className="w-[12%] whitespace-nowrap">Assigned To</TableHead>
+                <TableHead className="w-[12%]">
                   <button
                     onClick={() => handleSort('created_at')}
-                    className="flex items-center hover:text-foreground transition-colors"
+                    className="flex items-center hover:text-foreground transition-colors whitespace-nowrap"
                   >
                     Submitted Date
                     {sortField === 'created_at' && (
@@ -699,7 +753,7 @@ const Dashboard = () => {
                     )}
                   </button>
                 </TableHead>
-                <TableHead className="text-center">Report Actions</TableHead>
+                <TableHead className="w-[18%] text-center">Report Actions</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -733,14 +787,8 @@ const Dashboard = () => {
                       </Badge>
                     </TableCell>
                     <TableCell>
-                      <span className="text-sm font-medium capitalize">
-                        {report.report_type === 'anonymous' ? 'General' : 
-                         report.report_type === 'financial' ? 'Financial' :
-                         report.report_type === 'harassment' ? 'Harassment' :
-                         report.report_type === 'safety' ? 'Safety' :
-                         report.report_type === 'corruption' ? 'Corruption' :
-                         report.report_type === 'discrimination' ? 'Discrimination' :
-                         'Other'}
+                      <span className="text-sm font-medium">
+                        {getReportCategory(report)}
                       </span>
                     </TableCell>
                     <TableCell>
