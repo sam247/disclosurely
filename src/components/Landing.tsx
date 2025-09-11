@@ -17,8 +17,10 @@ import greenPointLogo from "@/assets/logos/greenpoint-logo.png";
 import innovateLogo from "@/assets/logos/innovate-logo.png";
 import horizonLogo from "@/assets/logos/horizon-logo.png";
 import nexusLogo from "@/assets/logos/nexus-logo.png";
-import dataCoreLogo from "@/assets/logos/datacore-logo.png";
 import metroSyncLogo from "@/assets/logos/metrosync-logo.png";
+import apexLogo from "@/assets/logos/apex-logo.png";
+import atlasLogo from "@/assets/logos/atlas-logo.png";
+import prismLogo from "@/assets/logos/prism-logo.png";
 
 const Landing = () => {
   return (
@@ -84,24 +86,28 @@ const Landing = () => {
               <div className="flex animate-scroll space-x-16 items-center">
                 {/* First set of logos */}
                 <div className="flex space-x-16 items-center min-w-fit">
-                  <img src={techFlowLogo} alt="TechFlow" className="h-20 w-auto object-contain opacity-70 hover:opacity-100 transition-opacity" />
-                  <img src={greenPointLogo} alt="GreenPoint" className="h-20 w-auto object-contain opacity-70 hover:opacity-100 transition-opacity" />
-                  <img src={innovateLogo} alt="Innovate Industries" className="h-20 w-auto object-contain opacity-70 hover:opacity-100 transition-opacity" />
-                  <img src={horizonLogo} alt="Horizon Group" className="h-20 w-auto object-contain opacity-70 hover:opacity-100 transition-opacity" />
-                  <img src={nexusLogo} alt="Nexus Systems" className="h-20 w-auto object-contain opacity-70 hover:opacity-100 transition-opacity" />
-                  <img src={dataCoreLogo} alt="DataCore Solutions" className="h-20 w-auto object-contain opacity-70 hover:opacity-100 transition-opacity" />
-                  <img src={metroSyncLogo} alt="MetroSync Technologies" className="h-20 w-auto object-contain opacity-70 hover:opacity-100 transition-opacity" />
+                  <img src={techFlowLogo} alt="TechFlow" className="h-24 w-auto object-contain opacity-70 hover:opacity-100 transition-opacity" />
+                  <img src={greenPointLogo} alt="GreenPoint" className="h-24 w-auto object-contain opacity-70 hover:opacity-100 transition-opacity" />
+                  <img src={innovateLogo} alt="Innovate Industries" className="h-24 w-auto object-contain opacity-70 hover:opacity-100 transition-opacity" />
+                  <img src={horizonLogo} alt="Horizon Group" className="h-24 w-auto object-contain opacity-70 hover:opacity-100 transition-opacity" />
+                  <img src={nexusLogo} alt="Nexus Systems" className="h-24 w-auto object-contain opacity-70 hover:opacity-100 transition-opacity" />
+                  <img src={metroSyncLogo} alt="MetroSync Technologies" className="h-24 w-auto object-contain opacity-70 hover:opacity-100 transition-opacity" />
+                  <img src={apexLogo} alt="Apex Solutions" className="h-24 w-auto object-contain opacity-70 hover:opacity-100 transition-opacity" />
+                  <img src={atlasLogo} alt="Atlas Technologies" className="h-24 w-auto object-contain opacity-70 hover:opacity-100 transition-opacity" />
+                  <img src={prismLogo} alt="Prism Analytics" className="h-24 w-auto object-contain opacity-70 hover:opacity-100 transition-opacity" />
                 </div>
                 
                 {/* Duplicate set for seamless loop */}
                 <div className="flex space-x-16 items-center min-w-fit">
-                  <img src={techFlowLogo} alt="TechFlow" className="h-20 w-auto object-contain opacity-70 hover:opacity-100 transition-opacity" />
-                  <img src={greenPointLogo} alt="GreenPoint" className="h-20 w-auto object-contain opacity-70 hover:opacity-100 transition-opacity" />
-                  <img src={innovateLogo} alt="Innovate Industries" className="h-20 w-auto object-contain opacity-70 hover:opacity-100 transition-opacity" />
-                  <img src={horizonLogo} alt="Horizon Group" className="h-20 w-auto object-contain opacity-70 hover:opacity-100 transition-opacity" />
-                  <img src={nexusLogo} alt="Nexus Systems" className="h-20 w-auto object-contain opacity-70 hover:opacity-100 transition-opacity" />
-                  <img src={dataCoreLogo} alt="DataCore Solutions" className="h-20 w-auto object-contain opacity-70 hover:opacity-100 transition-opacity" />
-                  <img src={metroSyncLogo} alt="MetroSync Technologies" className="h-20 w-auto object-contain opacity-70 hover:opacity-100 transition-opacity" />
+                  <img src={techFlowLogo} alt="TechFlow" className="h-24 w-auto object-contain opacity-70 hover:opacity-100 transition-opacity" />
+                  <img src={greenPointLogo} alt="GreenPoint" className="h-24 w-auto object-contain opacity-70 hover:opacity-100 transition-opacity" />
+                  <img src={innovateLogo} alt="Innovate Industries" className="h-24 w-auto object-contain opacity-70 hover:opacity-100 transition-opacity" />
+                  <img src={horizonLogo} alt="Horizon Group" className="h-24 w-auto object-contain opacity-70 hover:opacity-100 transition-opacity" />
+                  <img src={nexusLogo} alt="Nexus Systems" className="h-24 w-auto object-contain opacity-70 hover:opacity-100 transition-opacity" />
+                  <img src={metroSyncLogo} alt="MetroSync Technologies" className="h-24 w-auto object-contain opacity-70 hover:opacity-100 transition-opacity" />
+                  <img src={apexLogo} alt="Apex Solutions" className="h-24 w-auto object-contain opacity-70 hover:opacity-100 transition-opacity" />
+                  <img src={atlasLogo} alt="Atlas Technologies" className="h-24 w-auto object-contain opacity-70 hover:opacity-100 transition-opacity" />
+                  <img src={prismLogo} alt="Prism Analytics" className="h-24 w-auto object-contain opacity-70 hover:opacity-100 transition-opacity" />
                 </div>
               </div>
             </div>
