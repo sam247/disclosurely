@@ -12,13 +12,13 @@ import UnlimitedScaleArt from '@/components/artwork/UnlimitedScaleArt';
 import iso27001Badge from "/lovable-uploads/9762866a-d8d9-4860-bf30-3ffd178885a8.png";
 import gdprBadge from "/lovable-uploads/70aa6ac0-c161-4167-921d-79f08f6f4b02.png";
 import aicpaBadge from "/lovable-uploads/a9716d48-ff27-4193-b51c-9b035d1692b0.png";
-import techFlowLogo from "@/assets/logos/techflow-logo.png";
+import techFlowLogo from "@/assets/logos/techflow-logo-clean.png";
 import greenPointLogo from "@/assets/logos/greenpoint-logo.png";
 import innovateLogo from "@/assets/logos/innovate-logo.png";
 import horizonLogo from "@/assets/logos/horizon-logo.png";
-import nexusLogo from "@/assets/logos/nexus-logo.png";
-import metroSyncLogo from "@/assets/logos/metrosync-logo.png";
-import prismLogo from "@/assets/logos/prism-logo.png";
+import nexusLogo from "@/assets/logos/nexus-logo-clean.png";
+import metroSyncLogo from "@/assets/logos/metrosync-logo-clean.png";
+import prismLogo from "@/assets/logos/prism-logo-clean.png";
 
 const Landing = () => {
   return (
