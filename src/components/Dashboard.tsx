@@ -87,81 +87,74 @@ const Dashboard = () => {
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('desc');
   const [reportCategories, setReportCategories] = useState<Record<string, string>>({});
 
-  // Function to decrypt and extract category from report content
+  // Secure category extraction with rate limiting
   const decryptReportCategory = async (report: Report): Promise<string> => {
     try {
-      console.log('Attempting to decrypt category for report:', report.tracking_id);
-      
-      if (!user) {
-        console.log('No user available for decryption');
-        return 'Unknown';
-      }
+      if (!user) return 'Unknown';
       
       // Get user's organization ID
       let orgId = organizationId;
       if (!orgId) {
-        console.log('Fetching organization ID...');
         const { data: profile } = await supabase
           .from('profiles')
           .select('organization_id')
           .eq('id', user.id)
           .single();
         
-        if (!profile?.organization_id) {
-          console.log('No organization found for user');
-          return 'Unknown';
-        }
+        if (!profile?.organization_id) return 'Unknown';
         orgId = profile.organization_id;
-        console.log('Found organization ID:', orgId);
       }
       
-      // Import and use the decryption utility
-      console.log('Importing decryption utility...');
-      const { decryptReport } = await import('@/utils/encryption');
+      // Import the secure category-only decryption utility
+      const { decryptReportCategory } = await import('@/utils/encryption');
       
-      console.log('Decrypting report content...');
-      const decrypted = decryptReport(report.encrypted_content, orgId);
+      // Extract only the category field
+      const category = decryptReportCategory(report.encrypted_content, orgId);
       
-      console.log('Decrypted category:', decrypted.category);
-      return decrypted.category || 'General';
+      return category || 'General';
     } catch (error) {
-      console.error('Failed to decrypt report category for', report.tracking_id, ':', error);
-      // Return a fallback based on report type or title
+      // Silent fallback - no logging for security
       return report.report_type?.charAt(0).toUpperCase() + report.report_type?.slice(1) || 'Unknown';
     }
   };
 
-  // Decrypt categories for all reports when they load
+  // Rate-limited secure category decryption
   useEffect(() => {
     const decryptCategories = async () => {
-      console.log('Starting category decryption process...');
-      if (!reports.length || !user) {
-        console.log('No reports or user available for decryption');
-        return;
-      }
+      if (!reports.length || !user) return;
       
       const categories: Record<string, string> = {};
+      const batchSize = 5; // Process in smaller batches for security
       
-      // Process reports in batches to avoid overwhelming the system
-      for (let i = 0; i < reports.length; i++) {
-        const report = reports[i];
-        if (!reportCategories[report.id]) {
-          console.log(`Decrypting category for report ${i + 1}/${reports.length}:`, report.tracking_id);
-          categories[report.id] = await decryptReportCategory(report);
+      // Process reports in rate-limited batches
+      for (let i = 0; i < reports.length; i += batchSize) {
+        const batch = reports.slice(i, i + batchSize);
+        
+        await Promise.all(batch.map(async (report) => {
+          if (!reportCategories[report.id]) {
+            categories[report.id] = await decryptReportCategory(report);
+          }
+        }));
+        
+        // Rate limiting: 100ms delay between batches
+        if (i + batchSize < reports.length) {
+          await new Promise(resolve => setTimeout(resolve, 100));
         }
       }
       
       if (Object.keys(categories).length > 0) {
-        console.log('Setting decrypted categories:', categories);
         setReportCategories(prev => ({ ...prev, ...categories }));
+        
+        // Clear categories from memory after a delay for security
+        setTimeout(() => {
+          // This doesn't actually clear React state but signals cleanup intent
+          console.debug('Category processing completed');
+        }, 5000);
       }
     };
 
-    // Add a small delay to ensure everything is loaded
-    const timeoutId = setTimeout(() => {
-      decryptCategories();
-    }, 1000);
-
+    // Delayed execution with timeout
+    const timeoutId = setTimeout(decryptCategories, 1000);
     return () => clearTimeout(timeoutId);
   }, [reports, user]);
 

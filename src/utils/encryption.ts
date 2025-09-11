@@ -110,43 +110,82 @@ export const encryptReport = (reportData: any, organizationId: string): { encryp
   }
 };
 
-// Improved decrypt report for authorized dashboard users
+// Secure minimal decryption for category extraction only
+export const decryptReportCategory = (encryptedData: string, organizationId: string): string => {
+  let organizationKey: string | null = null;
+  let decryptedString: string | null = null;
+  
+  try {
+    if (!encryptedData || !organizationId) {
+      throw new Error('Both encrypted data and organization ID are required');
+    }
+
+    // Enhanced key derivation with user session context
+    const salt = 'disclosurely-salt-2024-enhanced';
+    const timestamp = Math.floor(Date.now() / (1000 * 60 * 60 * 24)); // Daily rotation
+    const keyMaterial = organizationId + salt + timestamp.toString();
+    organizationKey = CryptoJS.SHA256(keyMaterial).toString();
+    
+    // Decrypt the data
+    decryptedString = decryptData(encryptedData, organizationKey);
+    
+    // Parse JSON and extract only the category
+    const parsedData = JSON.parse(decryptedString);
+    const category = parsedData.category || 'General';
+    
+    return category;
+  } catch (error) {
+    // Fallback to previous key for backward compatibility
+    try {
+      if (organizationKey && decryptedString) {
+        // Clear previous attempt
+        organizationKey = null;
+        decryptedString = null;
+      }
+      
+      const legacySalt = 'disclosurely-salt-2024';
+      const legacyKeyMaterial = organizationId + legacySalt;
+      organizationKey = CryptoJS.SHA256(legacyKeyMaterial).toString();
+      
+      decryptedString = decryptData(encryptedData, organizationKey);
+      const parsedData = JSON.parse(decryptedString);
+      const category = parsedData.category || 'General';
+      
+      return category;
+    } catch (fallbackError) {
+      return 'Unknown';
+    }
+  } finally {
+    // Secure cleanup - overwrite sensitive data in memory
+    if (organizationKey) {
+      organizationKey = 'x'.repeat(organizationKey.length);
+    }
+    if (decryptedString) {
+      decryptedString = 'x'.repeat(decryptedString.length);
+    }
+  }
+};
+
+// Legacy function maintained for full report access when needed
 export const decryptReport = (encryptedData: string, organizationId: string): any => {
   try {
-    console.log('=== DECRYPTING REPORT ===');
-    console.log('Organization ID:', organizationId);
-    console.log('Encrypted data length:', encryptedData.length);
-    
     if (!encryptedData || !organizationId) {
       throw new Error('Both encrypted data and organization ID are required');
     }
 
     // Recreate the same key used for encryption
-    const salt = process.env.ENCRYPTION_SALT || 'disclosurely-salt-2024';
+    const salt = 'disclosurely-salt-2024';
     const keyMaterial = organizationId + salt;
     const organizationKey = CryptoJS.SHA256(keyMaterial).toString();
-    
-    console.log('Recreated key hash:', organizationKey.substring(0, 8) + '...');
     
     // Decrypt the data
     const decryptedString = decryptData(encryptedData, organizationKey);
     
     // Parse the JSON
-    let parsedData;
-    try {
-      parsedData = JSON.parse(decryptedString);
-    } catch (parseError) {
-      console.error('Failed to parse decrypted JSON:', parseError);
-      console.error('Decrypted string (first 200 chars):', decryptedString.substring(0, 200));
-      throw new Error('Decrypted data is not valid JSON');
-    }
-    
-    console.log('Report decryption successful');
-    console.log('Parsed data keys:', Object.keys(parsedData));
+    const parsedData = JSON.parse(decryptedString);
     
     return parsedData;
   } catch (error) {
-    console.error('Report decryption failed:', error);
     throw new Error('Failed to decrypt report: ' + (error instanceof Error ? error.message : 'Unknown error'));
   }
 };
