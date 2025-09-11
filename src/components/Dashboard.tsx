@@ -9,14 +9,16 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { Badge } from '@/components/ui/badge';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
-import { LogOut, ExternalLink, FileText, Eye, Archive, Trash2, Settings, RotateCcw, MoreVertical, Bot } from 'lucide-react';
+import { LogOut, ExternalLink, FileText, Eye, Archive, Trash2, Settings, RotateCcw, MoreVertical, Bot, Search, User, XCircle } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import ReportMessaging from '@/components/ReportMessaging';
 import ReportContentDisplay from '@/components/ReportContentDisplay';
 import ReportAttachments from '@/components/ReportAttachments';
 import OrganizationSettings from '@/components/OrganizationSettings';
-import ReportsManagement from '@/components/ReportsManagement';
 import SettingsPanel from '@/components/SettingsPanel';
+import { Input } from '@/components/ui/input';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import AICaseHelper from '@/components/AICaseHelper';
 import { useCustomDomain } from '@/hooks/useCustomDomain';
 import { useSubscriptionLimits } from '@/hooks/useSubscriptionLimits';
@@ -78,6 +80,9 @@ const Dashboard = () => {
   const [hasShownSubscriptionModal, setHasShownSubscriptionModal] = useState(false);
   const [isCheckingSubscription, setIsCheckingSubscription] = useState(false);
   const [selectedReportForAI, setSelectedReportForAI] = useState<Report | null>(null);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [statusFilter, setStatusFilter] = useState('all');
+  const [teamMembers, setTeamMembers] = useState<any[]>([]);
 
   console.log('Dashboard - Current subscription data:', subscriptionData);
 
@@ -252,10 +257,18 @@ const Dashboard = () => {
         .eq('verification_type', 'SUBDOMAIN')
         .not('verified_at', 'is', null);
 
+      // Fetch team members for assignment
+      const { data: teamData } = await supabase
+        .from('profiles')
+        .select('id, first_name, last_name, role')
+        .eq('organization_id', profile.organization_id)
+        .eq('is_active', true);
+
       setReports(reportsData || []);
       setArchivedReports(archivedData || []);
       setLinks(linksData || []);
       setSubdomains(subdomainsData || []);
+      setTeamMembers(teamData || []);
     } catch (error) {
       console.error('Error fetching dashboard data:', error);
     } finally {
@@ -449,6 +462,41 @@ const Dashboard = () => {
     }
   };
 
+  const handleReopenReport = async (reportId: string) => {
+    try {
+      const { error } = await supabase
+        .from('reports')
+        .update({ 
+          status: 'live',
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', reportId);
+
+      if (error) throw error;
+
+      toast({
+        title: "Report reopened",
+        description: "The case has been reopened successfully",
+      });
+
+      if (selectedReport?.id === reportId) {
+        setIsReportDialogOpen(false);
+        setSelectedReport(null);
+      }
+
+      setTimeout(() => {
+        fetchData();
+      }, 500);
+    } catch (error) {
+      console.error('Error reopening report:', error);
+      toast({
+        title: "Error",
+        description: "Failed to reopen report. Please try again.",
+        variant: "destructive",
+      });
+    }
+  };
+
   const handleRestoreReport = async (reportId: string) => {
     try {
       const { error } = await supabase
@@ -504,6 +552,175 @@ const Dashboard = () => {
     } catch (error) {
       console.error('Logout error:', error);
     }
+  };
+
+  // Filter reports based on search and status
+  const filteredReports = (reportsList: Report[]) => {
+    return reportsList.filter(report => {
+      const matchesSearch = searchTerm === '' || 
+        report.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        report.tracking_id.toLowerCase().includes(searchTerm.toLowerCase());
+      
+      const matchesStatus = statusFilter === 'all' || report.status === statusFilter;
+      
+      return matchesSearch && matchesStatus;
+    });
+  };
+
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case 'new': return 'bg-blue-100 text-blue-800';
+      case 'live': return 'bg-green-100 text-green-800';
+      case 'in_review': return 'bg-yellow-100 text-yellow-800';
+      case 'investigating': return 'bg-orange-100 text-orange-800';
+      case 'resolved': return 'bg-purple-100 text-purple-800';
+      case 'closed': return 'bg-gray-100 text-gray-800';
+      case 'archived': return 'bg-gray-100 text-gray-600';
+      default: return 'bg-gray-100 text-gray-800';
+    }
+  };
+
+  const formatStatus = (status: string) => {
+    return status.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase());
+  };
+
+  const renderReportsTable = (reportsList: Report[], isArchived = false) => {
+    const filtered = filteredReports(reportsList);
+    
+    return (
+      <div className="space-y-4">
+        {/* Search and Filters */}
+        <div className="flex flex-col sm:flex-row gap-4">
+          <div className="flex-1">
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+              <Input
+                placeholder="Search by title or tracking ID..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="pl-10"
+              />
+            </div>
+          </div>
+          <Select value={statusFilter} onValueChange={setStatusFilter}>
+            <SelectTrigger className="w-full sm:w-48">
+              <SelectValue placeholder="All Statuses" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All Statuses</SelectItem>
+              <SelectItem value="new">New</SelectItem>
+              <SelectItem value="live">Live</SelectItem>
+              <SelectItem value="in_review">In Review</SelectItem>
+              <SelectItem value="investigating">Investigating</SelectItem>
+              <SelectItem value="resolved">Resolved</SelectItem>
+              <SelectItem value="closed">Closed</SelectItem>
+              <SelectItem value="archived">Archived</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+
+        {/* Table */}
+        <div className="rounded-md border">
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Tracking ID</TableHead>
+                <TableHead>Title</TableHead>
+                <TableHead>Status</TableHead>
+                <TableHead>Assigned To</TableHead>
+                <TableHead>Submitted Date</TableHead>
+                <TableHead>Actions</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {filtered.length === 0 ? (
+                <TableRow>
+                  <TableCell colSpan={6} className="text-center py-8 text-gray-500">
+                    No {isArchived ? 'archived ' : ''}reports found
+                  </TableCell>
+                </TableRow>
+              ) : (
+                filtered.map((report) => (
+                  <TableRow key={report.id}>
+                    <TableCell className="font-mono text-sm">{report.tracking_id}</TableCell>
+                    <TableCell className="max-w-xs truncate">{report.title}</TableCell>
+                    <TableCell>
+                      <Badge className={getStatusColor(report.status)}>
+                        {formatStatus(report.status)}
+                      </Badge>
+                    </TableCell>
+                    <TableCell>
+                      <span className="text-gray-400 text-sm">Unassigned</span>
+                    </TableCell>
+                    <TableCell className="text-sm text-gray-500">
+                      {new Date(report.created_at).toLocaleDateString()}
+                    </TableCell>
+                    <TableCell>
+                      <div className="flex space-x-1">
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => handleViewReport(report)}
+                          title="View Details"
+                        >
+                          <Eye className="h-4 w-4" />
+                        </Button>
+                        {report.status === 'closed' ? (
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => handleReopenReport(report.id)}
+                            title="Reopen Case"
+                          >
+                            <RotateCcw className="h-4 w-4" />
+                          </Button>
+                        ) : (
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => handleCloseReport(report.id)}
+                            title="Close Case"
+                          >
+                            <XCircle className="h-4 w-4" />
+                          </Button>
+                        )}
+                        {isArchived ? (
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => handleUnarchiveReport(report.id)}
+                            title="Unarchive"
+                          >
+                            <RotateCcw className="h-4 w-4" />
+                          </Button>
+                        ) : (
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => handleArchiveReport(report.id)}
+                            title="Archive"
+                          >
+                            <Archive className="h-4 w-4" />
+                          </Button>
+                        )}
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => handleDeleteReport(report.id)}
+                          title="Delete"
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                ))
+              )}
+            </TableBody>
+          </Table>
+        </div>
+      </div>
+    );
   };
 
   if (loading) {
@@ -742,9 +959,8 @@ const Dashboard = () => {
       <main className="max-w-7xl mx-auto py-4 sm:py-6 px-4 sm:px-6 lg:px-8">
         <div className="space-y-6">
           <Tabs defaultValue="cases" className="space-y-6">
-            <TabsList className="grid w-full grid-cols-3">
+            <TabsList className="grid w-full grid-cols-2">
               <TabsTrigger value="cases" className="text-xs sm:text-sm">Cases</TabsTrigger>
-              <TabsTrigger value="reports" className="text-xs sm:text-sm">Reports</TabsTrigger>
               <TabsTrigger value="ai-help" className="text-xs sm:text-sm flex items-center gap-1">
                 <Bot className="h-3 w-3" />
                 AI Case Helper
@@ -905,7 +1121,7 @@ const Dashboard = () => {
                 </CardContent>
               </Card>
 
-              {/* Reports List with Toggle */}
+              {/* Enhanced Reports Management */}
               <Card>
                 <CardHeader className="pb-4">
                   <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
@@ -926,13 +1142,9 @@ const Dashboard = () => {
                   </div>
                 </CardHeader>
                 <CardContent>
-                  {renderReportsList(showArchived ? archivedReports : reports, showArchived)}
+                  {renderReportsTable(showArchived ? archivedReports : reports, showArchived)}
                 </CardContent>
               </Card>
-            </TabsContent>
-
-            <TabsContent value="reports">
-              <ReportsManagement />
             </TabsContent>
 
             <TabsContent value="ai-help">
