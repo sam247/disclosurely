@@ -9,7 +9,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { Badge } from '@/components/ui/badge';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
-import { LogOut, ExternalLink, FileText, Eye, Archive, Trash2, Settings, RotateCcw, MoreVertical, Bot, Search, User, XCircle } from 'lucide-react';
+import { LogOut, ExternalLink, FileText, Eye, Archive, Trash2, Settings, RotateCcw, MoreVertical, Bot, Search, User, XCircle, ChevronUp, ChevronDown } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import ReportMessaging from '@/components/ReportMessaging';
 import ReportContentDisplay from '@/components/ReportContentDisplay';
@@ -83,6 +83,8 @@ const Dashboard = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
   const [teamMembers, setTeamMembers] = useState<any[]>([]);
+  const [sortField, setSortField] = useState<'created_at' | 'title' | 'tracking_id'>('created_at');
+  const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('desc');
 
   console.log('Dashboard - Current subscription data:', subscriptionData);
 
@@ -554,9 +556,9 @@ const Dashboard = () => {
     }
   };
 
-  // Filter reports based on search and status
+  // Filter and sort reports
   const filteredReports = (reportsList: Report[]) => {
-    return reportsList.filter(report => {
+    let filtered = reportsList.filter(report => {
       const matchesSearch = searchTerm === '' || 
         report.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
         report.tracking_id.toLowerCase().includes(searchTerm.toLowerCase());
@@ -565,6 +567,43 @@ const Dashboard = () => {
       
       return matchesSearch && matchesStatus;
     });
+
+    // Sort the filtered results
+    filtered.sort((a, b) => {
+      let aValue, bValue;
+      
+      switch (sortField) {
+        case 'created_at':
+          aValue = new Date(a.created_at).getTime();
+          bValue = new Date(b.created_at).getTime();
+          break;
+        case 'title':
+          aValue = a.title.toLowerCase();
+          bValue = b.title.toLowerCase();
+          break;
+        case 'tracking_id':
+          aValue = a.tracking_id;
+          bValue = b.tracking_id;
+          break;
+        default:
+          return 0;
+      }
+      
+      if (aValue < bValue) return sortDirection === 'asc' ? -1 : 1;
+      if (aValue > bValue) return sortDirection === 'asc' ? 1 : -1;
+      return 0;
+    });
+
+    return filtered;
+  };
+
+  const handleSort = (field: typeof sortField) => {
+    if (sortField === field) {
+      setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc');
+    } else {
+      setSortField(field);
+      setSortDirection('desc');
+    }
   };
 
   const getStatusColor = (status: string) => {
@@ -624,11 +663,41 @@ const Dashboard = () => {
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Tracking ID</TableHead>
-                <TableHead>Title</TableHead>
+                <TableHead>
+                  <button
+                    onClick={() => handleSort('tracking_id')}
+                    className="flex items-center hover:text-foreground transition-colors"
+                  >
+                    Tracking ID
+                    {sortField === 'tracking_id' && (
+                      sortDirection === 'asc' ? <ChevronUp className="ml-1 h-4 w-4" /> : <ChevronDown className="ml-1 h-4 w-4" />
+                    )}
+                  </button>
+                </TableHead>
+                <TableHead>
+                  <button
+                    onClick={() => handleSort('title')}
+                    className="flex items-center hover:text-foreground transition-colors"
+                  >
+                    Title
+                    {sortField === 'title' && (
+                      sortDirection === 'asc' ? <ChevronUp className="ml-1 h-4 w-4" /> : <ChevronDown className="ml-1 h-4 w-4" />
+                    )}
+                  </button>
+                </TableHead>
                 <TableHead>Status</TableHead>
                 <TableHead>Assigned To</TableHead>
-                <TableHead>Submitted Date</TableHead>
+                <TableHead>
+                  <button
+                    onClick={() => handleSort('created_at')}
+                    className="flex items-center hover:text-foreground transition-colors"
+                  >
+                    Submitted Date
+                    {sortField === 'created_at' && (
+                      sortDirection === 'asc' ? <ChevronUp className="ml-1 h-4 w-4" /> : <ChevronDown className="ml-1 h-4 w-4" />
+                    )}
+                  </button>
+                </TableHead>
                 <TableHead>Report Actions</TableHead>
               </TableRow>
             </TableHeader>
@@ -640,7 +709,7 @@ const Dashboard = () => {
                   </TableCell>
                 </TableRow>
               ) : (
-                filtered.map((report) => (
+                filteredReports(reportsList).map((report) => (
                   <TableRow key={report.id}>
                     <TableCell className="font-mono text-sm">{report.tracking_id}</TableCell>
                     <TableCell className="max-w-xs truncate">
@@ -669,7 +738,7 @@ const Dashboard = () => {
                       {new Date(report.created_at).toLocaleDateString()}
                     </TableCell>
                     <TableCell>
-                      <div className="flex flex-wrap gap-2">
+                      <div className="flex gap-2 justify-start">
                         <Button
                           size="sm"
                           variant="outline"
