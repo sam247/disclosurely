@@ -14,11 +14,8 @@ import gdprBadge from "/lovable-uploads/70aa6ac0-c161-4167-921d-79f08f6f4b02.png
 import aicpaBadge from "/lovable-uploads/a9716d48-ff27-4193-b51c-9b035d1692b0.png";
 import techFlowLogo from "@/assets/logos/techflow-logo.png";
 import greenPointLogo from "@/assets/logos/greenpoint-logo.png";
-import sterlingLogo from "@/assets/logos/sterling-logo.png";
-
 import innovateLogo from "@/assets/logos/innovate-logo.png";
 import horizonLogo from "@/assets/logos/horizon-logo.png";
-import velocityLogo from "@/assets/logos/velocity-logo.png";
 import nexusLogo from "@/assets/logos/nexus-logo.png";
 import dataCoreLogo from "@/assets/logos/datacore-logo.png";
 import metroSyncLogo from "@/assets/logos/metrosync-logo.png";
@@ -89,10 +86,8 @@ const Landing = () => {
                 <div className="flex space-x-16 items-center min-w-fit">
                   <img src={techFlowLogo} alt="TechFlow" className="h-20 w-auto object-contain opacity-70 hover:opacity-100 transition-opacity" />
                   <img src={greenPointLogo} alt="GreenPoint" className="h-20 w-auto object-contain opacity-70 hover:opacity-100 transition-opacity" />
-                  <img src={sterlingLogo} alt="Sterling Financial" className="h-20 w-auto object-contain opacity-70 hover:opacity-100 transition-opacity" />
                   <img src={innovateLogo} alt="Innovate Industries" className="h-20 w-auto object-contain opacity-70 hover:opacity-100 transition-opacity" />
                   <img src={horizonLogo} alt="Horizon Group" className="h-20 w-auto object-contain opacity-70 hover:opacity-100 transition-opacity" />
-                  <img src={velocityLogo} alt="Velocity Corp" className="h-20 w-auto object-contain opacity-70 hover:opacity-100 transition-opacity" />
                   <img src={nexusLogo} alt="Nexus Systems" className="h-20 w-auto object-contain opacity-70 hover:opacity-100 transition-opacity" />
                   <img src={dataCoreLogo} alt="DataCore Solutions" className="h-20 w-auto object-contain opacity-70 hover:opacity-100 transition-opacity" />
                   <img src={metroSyncLogo} alt="MetroSync Technologies" className="h-20 w-auto object-contain opacity-70 hover:opacity-100 transition-opacity" />
@@ -102,10 +97,8 @@ const Landing = () => {
                 <div className="flex space-x-16 items-center min-w-fit">
                   <img src={techFlowLogo} alt="TechFlow" className="h-20 w-auto object-contain opacity-70 hover:opacity-100 transition-opacity" />
                   <img src={greenPointLogo} alt="GreenPoint" className="h-20 w-auto object-contain opacity-70 hover:opacity-100 transition-opacity" />
-                  <img src={sterlingLogo} alt="Sterling Financial" className="h-20 w-auto object-contain opacity-70 hover:opacity-100 transition-opacity" />
                   <img src={innovateLogo} alt="Innovate Industries" className="h-20 w-auto object-contain opacity-70 hover:opacity-100 transition-opacity" />
                   <img src={horizonLogo} alt="Horizon Group" className="h-20 w-auto object-contain opacity-70 hover:opacity-100 transition-opacity" />
-                  <img src={velocityLogo} alt="Velocity Corp" className="h-20 w-auto object-contain opacity-70 hover:opacity-100 transition-opacity" />
                   <img src={nexusLogo} alt="Nexus Systems" className="h-20 w-auto object-contain opacity-70 hover:opacity-100 transition-opacity" />
                   <img src={dataCoreLogo} alt="DataCore Solutions" className="h-20 w-auto object-contain opacity-70 hover:opacity-100 transition-opacity" />
                   <img src={metroSyncLogo} alt="MetroSync Technologies" className="h-20 w-auto object-contain opacity-70 hover:opacity-100 transition-opacity" />
