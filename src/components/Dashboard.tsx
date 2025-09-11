@@ -663,7 +663,7 @@ const Dashboard = () => {
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead className="w-[120px]">
+                <TableHead className="w-[110px]">
                   <button
                     onClick={() => handleSort('tracking_id')}
                     className="flex items-center hover:text-foreground transition-colors"
@@ -674,7 +674,7 @@ const Dashboard = () => {
                     )}
                   </button>
                 </TableHead>
-                <TableHead className="w-[200px]">
+                <TableHead className="w-[160px]">
                   <button
                     onClick={() => handleSort('title')}
                     className="flex items-center hover:text-foreground transition-colors"
@@ -685,9 +685,10 @@ const Dashboard = () => {
                     )}
                   </button>
                 </TableHead>
-                <TableHead className="w-[100px]">Status</TableHead>
-                <TableHead className="w-[120px]">Assigned To</TableHead>
-                <TableHead className="w-[130px]">
+                <TableHead className="w-[90px]">Status</TableHead>
+                <TableHead className="w-[120px]">Category</TableHead>
+                <TableHead className="w-[110px]">Assigned To</TableHead>
+                <TableHead className="w-[120px]">
                   <button
                     onClick={() => handleSort('created_at')}
                     className="flex items-center hover:text-foreground transition-colors"
@@ -704,7 +705,7 @@ const Dashboard = () => {
             <TableBody>
               {filtered.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={6} className="text-center py-8 text-gray-500">
+                  <TableCell colSpan={7} className="text-center py-8 text-gray-500">
                     No {isArchived ? 'archived ' : ''}reports found
                   </TableCell>
                 </TableRow>
@@ -730,6 +731,17 @@ const Dashboard = () => {
                       <Badge className={getStatusColor(report.status)}>
                         {formatStatus(report.status)}
                       </Badge>
+                    </TableCell>
+                    <TableCell>
+                      <span className="text-sm font-medium capitalize">
+                        {report.report_type === 'anonymous' ? 'General' : 
+                         report.report_type === 'financial' ? 'Financial' :
+                         report.report_type === 'harassment' ? 'Harassment' :
+                         report.report_type === 'safety' ? 'Safety' :
+                         report.report_type === 'corruption' ? 'Corruption' :
+                         report.report_type === 'discrimination' ? 'Discrimination' :
+                         'Other'}
+                      </span>
                     </TableCell>
                     <TableCell>
                       <span className="text-gray-400 text-sm">Unassigned</span>
