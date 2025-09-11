@@ -663,7 +663,7 @@ const Dashboard = () => {
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>
+                <TableHead className="w-[120px]">
                   <button
                     onClick={() => handleSort('tracking_id')}
                     className="flex items-center hover:text-foreground transition-colors"
@@ -674,7 +674,7 @@ const Dashboard = () => {
                     )}
                   </button>
                 </TableHead>
-                <TableHead>
+                <TableHead className="w-[200px]">
                   <button
                     onClick={() => handleSort('title')}
                     className="flex items-center hover:text-foreground transition-colors"
@@ -685,9 +685,9 @@ const Dashboard = () => {
                     )}
                   </button>
                 </TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead>Assigned To</TableHead>
-                <TableHead>
+                <TableHead className="w-[100px]">Status</TableHead>
+                <TableHead className="w-[120px]">Assigned To</TableHead>
+                <TableHead className="w-[130px]">
                   <button
                     onClick={() => handleSort('created_at')}
                     className="flex items-center hover:text-foreground transition-colors"
@@ -698,7 +698,7 @@ const Dashboard = () => {
                     )}
                   </button>
                 </TableHead>
-                <TableHead>Report Actions</TableHead>
+                <TableHead className="text-center">Report Actions</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -738,7 +738,7 @@ const Dashboard = () => {
                       {new Date(report.created_at).toLocaleDateString()}
                     </TableCell>
                     <TableCell>
-                      <div className="flex gap-2 justify-start">
+                      <div className="flex gap-2 justify-end">
                         <Button
                           size="sm"
                           variant="outline"
