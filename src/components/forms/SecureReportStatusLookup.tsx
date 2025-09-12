@@ -1,6 +1,6 @@
 
-import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useState, useEffect } from 'react';
+import { useNavigate, useParams } from 'react-router-dom';
 import { useOrganizationData } from '@/contexts/OrganizationContext';
 import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent } from '@/components/ui/card';
@@ -16,14 +16,15 @@ import { validateTrackingId } from '@/utils/inputValidation';
 const SecureReportStatusLookup = () => {
   const [trackingId, setTrackingId] = useState('');
   const navigate = useNavigate();
+  const { linkToken } = useParams();
   const { toast } = useToast();
-  const { organizationData, fetchOrganizationByTrackingId } = useOrganizationData();
+  const { organizationData, fetchOrganizationByTrackingId, fetchOrganizationByLinkToken } = useOrganizationData();
 
-  const { isSubmitting, secureSubmit } = useSecureForm({
-    rateLimitKey: 'status_lookup',
-    maxAttempts: 10,
-    windowMs: 5 * 60 * 1000 // 5 minutes
-  });
+  useEffect(() => {
+    if (linkToken) {
+      fetchOrganizationByLinkToken(linkToken);
+    }
+  }, [linkToken, fetchOrganizationByLinkToken]);
 
   const validateInput = (data: { trackingId: string }) => {
     if (!validateTrackingId(data.trackingId)) {

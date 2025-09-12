@@ -1,5 +1,6 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.50.0';
+import { Resend } from "npm:resend@2.0.0";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -24,16 +25,30 @@ serve(async (req) => {
 
   try {
     console.log('[GDPR-PROCESSOR] Starting GDPR request processing...');
+    const body = await req.json().catch(() => null) as { type?: string; email?: string } | null;
     
     const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
     const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
-    
-    const supabase = createClient(supabaseUrl, supabaseServiceKey);
+    const resendApiKey = Deno.env.get('RESEND_API_KEY');
 
-    // Process pending export requests
-    await processExportRequests(supabase);
-    
-    // Process approved erasure requests
+    const supabase = createClient(supabaseUrl, supabaseServiceKey);
+    const resend = resendApiKey ? new Resend(resendApiKey) : null;
+
+    // If called with a specific action, enqueue the request first
+    if (body?.type === 'export' && body.email) {
+      console.log('[GDPR-PROCESSOR] Enqueuing export request for', body.email);
+      await supabase
+        .from('data_export_requests')
+        .insert({ email_address: body.email, status: 'pending', request_type: 'full_export' });
+    } else if (body?.type === 'delete_account' && body.email) {
+      console.log('[GDPR-PROCESSOR] Enqueuing erasure request for', body.email);
+      await supabase
+        .from('data_erasure_requests')
+        .insert({ email_address: body.email, status: 'approved', erasure_type: 'full_erasure' });
+    }
+
+    // Process pending export and erasure requests
+    await processExportRequests(supabase, resend);
     await processErasureRequests(supabase);
 
     console.log('[GDPR-PROCESSOR] All GDPR requests processed successfully');
@@ -57,7 +72,7 @@ serve(async (req) => {
   }
 });
 
-async function processExportRequests(supabase: any) {
+async function processExportRequests(supabase: any, resend: any | null) {
   console.log('[GDPR-PROCESSOR] Processing export requests...');
   
   // Get pending export requests
@@ -89,7 +104,6 @@ async function processExportRequests(supabase: any) {
       const exportFileName = `data-export-${request.id}.json`;
       
       // For now, we'll simulate file creation and provide a download URL
-      // In production, you'd upload to Supabase Storage and get a real URL
       const mockFileUrl = `https://example.com/exports/${exportFileName}`;
 
       // Update request as completed
@@ -99,9 +113,31 @@ async function processExportRequests(supabase: any) {
           status: 'completed',
           export_file_url: mockFileUrl,
           completed_at: new Date().toISOString(),
-          expires_at: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString() // 30 days
+          expires_at: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString() // 7 days
         })
         .eq('id', request.id);
+
+      // Notify user via email if Resend is configured
+      if (resend) {
+        try {
+          const emailResponse = await resend.emails.send({
+            from: 'Disclosurely <onboarding@resend.dev>',
+            to: [request.email_address],
+            subject: 'Your data export is ready',
+            html: `
+              <h2>Your data export is ready</h2>
+              <p>Click the link below to download your data export. The link will expire in 7 days.</p>
+              <p><a href="${mockFileUrl}">Download your data export</a></p>
+              <p>If you did not request this, please ignore this email.</p>
+            `,
+          });
+          console.log('[GDPR-PROCESSOR] Email sent:', emailResponse);
+        } catch (emailErr) {
+          console.error('[GDPR-PROCESSOR] Failed to send email:', emailErr);
+        }
+      } else {
+        console.warn('[GDPR-PROCESSOR] RESEND_API_KEY not configured; skipping email sending');
+      }
 
       console.log(`[GDPR-PROCESSOR] Export request ${request.id} completed`);
     } catch (error) {

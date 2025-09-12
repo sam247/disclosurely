@@ -224,7 +224,7 @@ const SecureReportMessaging = () => {
 
       // Replace optimistic message with real one
       setMessages(prev => 
-        prev.map(msg => msg.id === tempId ? { ...data, ...optimisticMessage } : msg)
+        prev.map(msg => (msg.id === tempId ? data : msg))
       );
 
       toast({

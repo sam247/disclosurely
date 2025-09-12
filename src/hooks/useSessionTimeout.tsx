@@ -50,7 +50,12 @@ export const useSessionTimeout = () => {
 
     // Set idle timeout
     idleTimerRef.current = setTimeout(() => {
-      if (!showIdleWarning && document.visibilityState === 'visible') {
+      if (!showIdleWarning) {
+        if (typeof document !== 'undefined' && document.visibilityState !== 'visible') {
+          // If the tab is hidden, sign out silently to avoid background popups
+          signOut();
+          return;
+        }
         toast({
           title: "Session Expired",
           description: "Your session has expired due to inactivity.",
