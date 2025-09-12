@@ -19,6 +19,7 @@ const SecureReportStatusLookup = () => {
   const { linkToken } = useParams();
   const { toast } = useToast();
   const { organizationData, fetchOrganizationByTrackingId, fetchOrganizationByLinkToken } = useOrganizationData();
+  const { isSubmitting, secureSubmit } = useSecureForm();
 
   useEffect(() => {
     if (linkToken) {
