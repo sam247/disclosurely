@@ -1158,7 +1158,6 @@ const Dashboard = () => {
                  className="h-6 sm:h-8 w-auto flex-shrink-0"
                />
               <div className="min-w-0 flex-1">
-                <h1 className="text-lg sm:text-2xl font-bold text-gray-900 truncate">Secure Report Management</h1>
                 <div className="hidden sm:flex sm:flex-row sm:items-center sm:gap-4">
                   <p className="text-xs sm:text-sm text-gray-600 truncate">Welcome back, {user?.email}</p>
                   {subscriptionData.subscribed && (
@@ -1283,15 +1282,12 @@ const Dashboard = () => {
                 </Card>
               )}
 
-              {/* Quick Report Link Section */}
+              {/* Secure Report Link Section */}
               <Card>
                 <CardHeader className="pb-4">
-                  <CardTitle className="text-lg sm:text-xl">Quick Report Link</CardTitle>
+                  <CardTitle className="text-lg sm:text-xl">Secure Report Link</CardTitle>
                   <CardDescription>
-                    {subdomains.length > 0 
-                      ? 'Your branded submission portal' 
-                      : 'Direct link for report submissions'
-                    }
+                    Your organisation can use this link to disclose all matters to the registered email address on this account.
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
@@ -1299,10 +1295,15 @@ const Dashboard = () => {
                     subdomains.map((subdomain) => (
                       <div key={subdomain.id} className="border rounded-lg p-4 bg-green-50 border-green-200">
                         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-                          <div className="min-w-0 flex-1">
-                            <h3 className="font-medium text-sm sm:text-base text-green-800">Branded Submission Portal</h3>
-                            <p className="text-xs sm:text-sm text-green-600">Available at your custom subdomain</p>
-                          </div>
+                           <div className="min-w-0 flex-1">
+                             <h3 className="font-medium text-sm sm:text-base text-green-800">
+                               {subscriptionData.subscription_tier === 'pro' ? 'Branded Submission Portal' : 'Unbranded Submission Portal'}
+                             </h3>
+                             <p className="text-xs sm:text-sm text-green-600">
+                               Used {links.length > 0 ? links[0].usage_count : 0} times
+                               {subscriptionData.subscription_tier !== 'pro' && ' - Custom subdomain available for Pro users'}
+                             </p>
+                           </div>
                           <div className="flex flex-col sm:flex-row sm:items-center gap-2">
                             <code className="text-xs bg-white px-2 py-1 rounded break-all border">
                               https://{subdomain.domain}/secure/tool/submit
@@ -1330,10 +1331,15 @@ const Dashboard = () => {
                     links.map((link) => (
                       <div key={link.id} className="border rounded-lg p-4">
                         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-                          <div className="min-w-0 flex-1">
-                            <h3 className="font-medium text-sm sm:text-base">{link.name}</h3>
-                            <p className="text-xs sm:text-sm text-gray-600">Used {link.usage_count} times</p>
-                          </div>
+                           <div className="min-w-0 flex-1">
+                             <h3 className="font-medium text-sm sm:text-base">
+                               {subscriptionData.subscription_tier === 'pro' ? 'Branded Submission Portal' : 'Unbranded Submission Portal'}
+                             </h3>
+                             <p className="text-xs sm:text-sm text-gray-600">
+                               Used {link.usage_count} times
+                               {subscriptionData.subscription_tier !== 'pro' && ' - Custom subdomain available for Pro users'}
+                             </p>
+                           </div>
                           <div className="flex flex-col sm:flex-row sm:items-center gap-2">
                             <code className="text-xs bg-gray-100 px-2 py-1 rounded break-all">
                               /secure/tool/submit/{link.link_token}
@@ -1358,26 +1364,16 @@ const Dashboard = () => {
               {/* Enhanced Reports Management */}
               <Card>
                 <CardHeader className="pb-4">
-                  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-                    <div>
-                      <CardTitle className="text-lg sm:text-xl">{showArchived ? 'Archived Reports' : 'Active Reports'}</CardTitle>
-                      <CardDescription>
-                        {showArchived ? 'Previously archived report submissions' : 'Current active report submissions'}
-                      </CardDescription>
-                    </div>
-                    <Button 
-                      variant="outline" 
-                      onClick={() => setShowArchived(!showArchived)}
-                      size="sm"
-                      className="self-start sm:self-auto"
-                    >
-                      {showArchived ? 'Show Active' : 'Show Archived'}
-                    </Button>
-                  </div>
+                  <div>
+                     <CardTitle className="text-lg sm:text-xl">Reports Management</CardTitle>
+                     <CardDescription>
+                       Manage all report submissions (use status filter to view specific types)
+                     </CardDescription>
+                   </div>
                 </CardHeader>
-                <CardContent>
-                  {renderReportsTable(showArchived ? archivedReports : reports, showArchived)}
-                </CardContent>
+                 <CardContent>
+                   {renderReportsTable([...reports, ...archivedReports], false)}
+                 </CardContent>
               </Card>
             </TabsContent>
 
