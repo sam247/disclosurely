@@ -64,13 +64,28 @@ export const useSessionTimeout = () => {
 
   // Handle extend session
   const handleExtendSession = useCallback(() => {
+    // Close modals first
     setShowIdleWarning(false);
     setShowAbsoluteWarning(false);
+    setIdleTimeRemaining(0);
     warningShownRef.current = false;
     absoluteWarningShownRef.current = false;
-    
-    // Trigger user activity to reset timers
-    document.dispatchEvent(new Event('mousedown'));
+    pendingIdleWarningRef.current = false;
+
+    // Clear existing idle timer
+    if (idleTimerRef.current) {
+      clearTimeout(idleTimerRef.current);
+    }
+    if (warningTimerRef.current) {
+      clearTimeout(warningTimerRef.current);
+    }
+
+    // Start fresh idle timer
+    idleTimerRef.current = setTimeout(() => {
+      console.log('Idle timeout reached after extension, showing warning modal');
+      setIdleTimeRemaining(60);
+      setShowIdleWarning(true);
+    }, IDLE_TIMEOUT);
     
     toast({
       title: "Session Extended",
