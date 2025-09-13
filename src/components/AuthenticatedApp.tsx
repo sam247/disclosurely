@@ -134,8 +134,8 @@ const AuthenticatedApp = () => {
     return (
       <>
         <SimpleOrganizationSetup onComplete={handleSetupComplete} />
-        <IdleWarningComponent />
-        <AbsoluteWarningComponent />
+        {IdleWarningComponent}
+        {AbsoluteWarningComponent}
       </>
     );
   }
@@ -144,8 +144,8 @@ const AuthenticatedApp = () => {
   return (
     <>
       <Dashboard />
-      <IdleWarningComponent />
-      <AbsoluteWarningComponent />
+      {IdleWarningComponent}
+      {AbsoluteWarningComponent}
     </>
   );
 };

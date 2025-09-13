@@ -1,4 +1,4 @@
-import { useEffect, useRef, useCallback, useState } from 'react';
+import { useEffect, useRef, useCallback, useState, useMemo } from 'react';
 import { useAuth } from './useAuth';
 import { useToast } from './use-toast';
 import SessionTimeoutWarning from '@/components/SessionTimeoutWarning';
@@ -214,6 +214,25 @@ export const useSessionTimeout = () => {
     };
   }, [user, session, resetIdleTimer, setupAbsoluteTimeout]);
 
+  // Memoized warning components to prevent unnecessary re-renders
+  const IdleWarningComponent = useMemo(() => (
+    <SessionTimeoutWarning
+      open={showIdleWarning}
+      timeRemaining={idleTimeRemaining}
+      onExtendSession={handleExtendSession}
+      onSignOut={handleSignOutFromWarning}
+    />
+  ), [showIdleWarning, idleTimeRemaining, handleExtendSession, handleSignOutFromWarning]);
+
+  const AbsoluteWarningComponent = useMemo(() => (
+    <SessionTimeoutWarning
+      open={showAbsoluteWarning}
+      timeRemaining={absoluteTimeRemaining}
+      onExtendSession={handleExtendSession}
+      onSignOut={handleSignOutFromWarning}
+    />
+  ), [showAbsoluteWarning, absoluteTimeRemaining, handleExtendSession, handleSignOutFromWarning]);
+
   // Return session time information and warning components
   return {
     getIdleTimeRemaining: () => {
@@ -225,22 +244,8 @@ export const useSessionTimeout = () => {
       const elapsed = Date.now() - sessionStartRef.current;
       return Math.max(0, ABSOLUTE_TIMEOUT - elapsed);
     },
-    // Warning components
-    IdleWarningComponent: () => (
-      <SessionTimeoutWarning
-        open={showIdleWarning}
-        timeRemaining={idleTimeRemaining}
-        onExtendSession={handleExtendSession}
-        onSignOut={handleSignOutFromWarning}
-      />
-    ),
-    AbsoluteWarningComponent: () => (
-      <SessionTimeoutWarning
-        open={showAbsoluteWarning}
-        timeRemaining={absoluteTimeRemaining}
-        onExtendSession={handleExtendSession}
-        onSignOut={handleSignOutFromWarning}
-      />
-    )
+    // Memoized warning components
+    IdleWarningComponent,
+    AbsoluteWarningComponent
   };
 };

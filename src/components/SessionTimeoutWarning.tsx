@@ -9,7 +9,7 @@ interface SessionTimeoutWarningProps {
   onSignOut: () => void;
 }
 
-const SessionTimeoutWarning = ({ 
+const SessionTimeoutWarning = React.memo(({ 
   open, 
   timeRemaining, 
   onExtendSession, 
@@ -53,6 +53,8 @@ const SessionTimeoutWarning = ({
       </AlertDialogContent>
     </AlertDialog>
   );
-};
+});
+
+SessionTimeoutWarning.displayName = 'SessionTimeoutWarning';
 
 export default SessionTimeoutWarning;
