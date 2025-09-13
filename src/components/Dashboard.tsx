@@ -478,11 +478,13 @@ const Dashboard = () => {
 
   const handleDeleteReport = async (reportId: string) => {
     try {
-      // Soft delete - update status to 'deleted'
+      // Soft delete - update status to 'deleted' and set audit fields
       const { error } = await supabase
         .from('reports')
         .update({ 
           status: 'deleted',
+          deleted_at: new Date().toISOString(),
+          deleted_by: user?.id,
           updated_at: new Date().toISOString()
         })
         .eq('id', reportId);
