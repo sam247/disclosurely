@@ -28,6 +28,8 @@ export const useSessionTimeout = () => {
   // Reset idle timer on user activity
   const resetIdleTimer = useCallback(() => {
     if (!user || !session || !isTabVisible) return;
+    // Do not reset timers while a warning modal is visible
+    if (showIdleWarning || showAbsoluteWarning) return;
 
     // Clear existing timers
     if (idleTimerRef.current) {
@@ -53,7 +55,7 @@ export const useSessionTimeout = () => {
       setIdleTimeRemaining(60);
       setShowIdleWarning(true);
     }, IDLE_TIMEOUT);
-  }, [user, session, signOut, isTabVisible]);
+  }, [user, session, signOut, isTabVisible, showIdleWarning, showAbsoluteWarning]);
 
   // Show warning before absolute timeout
   const showAbsoluteTimeoutWarning = useCallback(() => {
@@ -171,12 +173,7 @@ export const useSessionTimeout = () => {
           setShowIdleWarning(true);
           return;
         }
-        // If a warning was visible before, reset timers on visibility
-        if (showIdleWarning) {
-          warningShownRef.current = false;
-          setShowIdleWarning(false);
-          resetIdleTimer();
-        }
+        // If a warning was visible before, keep it open and continue countdown; do not auto-dismiss.
       }
     };
 
