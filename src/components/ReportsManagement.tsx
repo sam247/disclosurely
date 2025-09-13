@@ -288,6 +288,8 @@ const ReportsManagement = () => {
         .from('reports')
         .update({ 
           status: 'deleted',
+          deleted_at: new Date().toISOString(),
+          deleted_by: user?.id,
           updated_at: new Date().toISOString()
         })
         .eq('id', reportId);

@@ -1297,7 +1297,7 @@ const Dashboard = () => {
                         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                            <div className="min-w-0 flex-1">
                              <h3 className="font-medium text-sm sm:text-base text-green-800">
-                               {subscriptionData.subscription_tier === 'pro' ? 'Branded Submission Portal' : 'Unbranded Submission Portal'}
+                                {'Branded Submission Portal'}
                              </h3>
                              <p className="text-xs sm:text-sm text-green-600">
                                Used {links.length > 0 ? links[0].usage_count : 0} times
@@ -1333,7 +1333,7 @@ const Dashboard = () => {
                         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                            <div className="min-w-0 flex-1">
                              <h3 className="font-medium text-sm sm:text-base">
-                               {subscriptionData.subscription_tier === 'pro' ? 'Branded Submission Portal' : 'Unbranded Submission Portal'}
+                               {'Unbranded Submission Portal'}
                              </h3>
                              <p className="text-xs sm:text-sm text-gray-600">
                                Used {link.usage_count} times

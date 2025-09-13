@@ -1,0 +1,6 @@
+/*
+  Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cxmuzperkittvibslnff.supabase.co https://o450999465063192.ingest.de.sentry.io https://api.stripe.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https:; font-src 'self' data:; connect-src 'self' https://cxmuzperkittvibslnff.supabase.co wss://cxmuzperkittvibslnff.supabase.co https://o450999465063192.ingest.de.sentry.io https://api.stripe.com; worker-src 'self' blob:; child-src 'self' blob:; frame-src 'self' https://js.stripe.com; object-src 'none'; base-uri 'self'; form-action 'self';
+  X-Frame-Options: SAMEORIGIN
+  X-Content-Type-Options: nosniff
+  X-XSS-Protection: 1; mode=block
+  Referrer-Policy: strict-origin-when-cross-origin

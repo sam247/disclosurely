@@ -195,6 +195,11 @@ const OrganizationSettings = () => {
 
       setSubdomainName('');
       await fetchDomains(); // Refresh the domains list
+      
+      // Trigger a page refresh to update dashboard data
+      setTimeout(() => {
+        window.location.reload();
+      }, 1000);
     } catch (error: any) {
       console.error('Subdomain setup error:', error);
       let errorMessage = "Failed to set up subdomain";
