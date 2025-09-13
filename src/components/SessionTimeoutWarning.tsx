@@ -16,6 +16,7 @@ const SessionTimeoutWarning = ({
   onSignOut 
 }: SessionTimeoutWarningProps) => {
   const formatTimeRemaining = (seconds: number) => {
+    if (seconds <= 60) return `${Math.max(0, seconds)} seconds`;
     const minutes = Math.ceil(seconds / 60);
     return minutes === 1 ? '1 minute' : `${minutes} minutes`;
   };

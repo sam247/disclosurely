@@ -36,35 +36,22 @@ export const useSessionTimeout = () => {
       clearTimeout(warningTimerRef.current);
     }
 
-    // Reset warning states
+    // Reset warning states and countdown
     setShowIdleWarning(false);
+    setIdleTimeRemaining(0);
     warningShownRef.current = false;
 
-    // Show warning before idle timeout (only when tab is visible)
-    warningTimerRef.current = setTimeout(() => {
-      if (warningShownRef.current || !document.visibilityState || document.visibilityState !== 'visible') return;
-      warningShownRef.current = true;
-      setIdleTimeRemaining(WARNING_TIME / 1000);
-      setShowIdleWarning(true);
-    }, IDLE_TIMEOUT - WARNING_TIME);
-
-    // Set idle timeout
+    // After 5 minutes of inactivity, show a 60s countdown popup
     idleTimerRef.current = setTimeout(() => {
-      if (!showIdleWarning) {
-        if (typeof document !== 'undefined' && document.visibilityState !== 'visible') {
-          // If the tab is hidden, sign out silently to avoid background popups
-          signOut();
-          return;
-        }
-        toast({
-          title: "Session Expired",
-          description: "Your session has expired due to inactivity.",
-          variant: "destructive",
-        });
+      if (typeof document !== 'undefined' && document.visibilityState !== 'visible') {
+        // If the tab is hidden at timeout, sign out silently
         signOut();
+        return;
       }
+      setIdleTimeRemaining(60);
+      setShowIdleWarning(true);
     }, IDLE_TIMEOUT);
-  }, [user, session, signOut, toast, showIdleWarning, isTabVisible]);
+  }, [user, session, signOut, isTabVisible]);
 
   // Show warning before absolute timeout
   const showAbsoluteTimeoutWarning = useCallback(() => {
