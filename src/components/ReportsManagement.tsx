@@ -284,17 +284,37 @@ const ReportsManagement = () => {
 
   const deleteReport = async (reportId: string) => {
     try {
-      const { error } = await supabase
+      // Ensure we have the authenticated user id for RLS WITH CHECK
+      const { data: authData } = await supabase.auth.getUser();
+      const authUserId = authData?.user?.id;
+      if (!authUserId) {
+        toast({ title: "Not authenticated", description: "Please sign in again and retry deleting the report.", variant: "destructive" });
+        return;
+      }
+
+      // 1) Set deleted_by first while deleted_at is still NULL
+      const { error: setDeleterError } = await supabase
         .from('reports')
         .update({ 
-          status: 'deleted',
-          deleted_at: new Date().toISOString(),
-          deleted_by: user?.id,
+          deleted_by: authUserId,
           updated_at: new Date().toISOString()
         })
-        .eq('id', reportId);
+        .eq('id', reportId)
+        .is('deleted_at', null);
 
-      if (error) throw error;
+      if (setDeleterError) throw setDeleterError;
+
+      // 2) Set deleted_at
+      const { error: softDeleteError } = await supabase
+        .from('reports')
+        .update({ 
+          deleted_at: new Date().toISOString(),
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', reportId)
+        .is('deleted_at', null);
+
+      if (softDeleteError) throw softDeleteError;
       
       await fetchReports();
       toast({

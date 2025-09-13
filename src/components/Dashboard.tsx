@@ -490,18 +490,30 @@ const Dashboard = () => {
         return;
       }
 
-      // Soft delete - set audit fields (RLS requires deleted_by = auth.uid())
-      const { error } = await supabase
+      // Soft delete in two steps to satisfy RLS WITH CHECK
+      // 1) Set deleted_by = auth.uid() while deleted_at is still NULL
+      const { error: setDeleterError } = await supabase
         .from('reports')
         .update({ 
-          deleted_at: new Date().toISOString(),
           deleted_by: authUserId,
           updated_at: new Date().toISOString()
         })
         .eq('id', reportId)
         .is('deleted_at', null);
 
-      if (error) throw error;
+      if (setDeleterError) throw setDeleterError;
+
+      // 2) Set deleted_at (now that deleted_by matches auth.uid())
+      const { error: softDeleteError } = await supabase
+        .from('reports')
+        .update({ 
+          deleted_at: new Date().toISOString(),
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', reportId)
+        .is('deleted_at', null);
+
+      if (softDeleteError) throw softDeleteError;
 
       toast({
         title: "Report deleted",

@@ -17,6 +17,7 @@ export const useSessionTimeout = () => {
   const sessionStartRef = useRef<number>(Date.now());
   const warningShownRef = useRef(false);
   const absoluteWarningShownRef = useRef(false);
+  const pendingIdleWarningRef = useRef(false);
   
   const [showIdleWarning, setShowIdleWarning] = useState(false);
   const [showAbsoluteWarning, setShowAbsoluteWarning] = useState(false);
@@ -44,10 +45,11 @@ export const useSessionTimeout = () => {
     // After 5 minutes of inactivity, show a 60s countdown popup
     idleTimerRef.current = setTimeout(() => {
       if (typeof document !== 'undefined' && document.visibilityState !== 'visible') {
-        // If the tab is hidden at timeout, sign out silently
-        signOut();
+        // Defer showing the modal until the tab is visible again
+        pendingIdleWarningRef.current = true;
         return;
       }
+      pendingIdleWarningRef.current = false;
       setIdleTimeRemaining(60);
       setShowIdleWarning(true);
     }, IDLE_TIMEOUT);
@@ -156,11 +158,21 @@ export const useSessionTimeout = () => {
       const visible = document.visibilityState === 'visible';
       setIsTabVisible(visible);
       
-      // When tab becomes visible again, reset timers if user was warned
-      if (visible && showIdleWarning) {
-        warningShownRef.current = false;
-        setShowIdleWarning(false);
-        resetIdleTimer();
+      // When tab becomes visible again
+      if (visible) {
+        if (pendingIdleWarningRef.current) {
+          // Show the deferred idle warning now and start 60s countdown
+          pendingIdleWarningRef.current = false;
+          setIdleTimeRemaining(60);
+          setShowIdleWarning(true);
+          return;
+        }
+        // If a warning was visible before, reset timers on visibility
+        if (showIdleWarning) {
+          warningShownRef.current = false;
+          setShowIdleWarning(false);
+          resetIdleTimer();
+        }
       }
     };
 
