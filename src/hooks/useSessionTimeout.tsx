@@ -3,7 +3,7 @@ import { useAuth } from './useAuth';
 import { useToast } from './use-toast';
 import SessionTimeoutWarning from '@/components/SessionTimeoutWarning';
 
-const IDLE_TIMEOUT = 5 * 60 * 1000; // 5 minutes
+const IDLE_TIMEOUT = 60 * 1000; // 60 seconds for testing
 const ABSOLUTE_TIMEOUT = 4 * 60 * 60 * 1000; // 4 hours
 const WARNING_TIME = 60 * 1000; // Show warning 60 seconds before timeout
 
@@ -27,7 +27,7 @@ export const useSessionTimeout = () => {
 
   // Reset idle timer on user activity
   const resetIdleTimer = useCallback(() => {
-    if (!user || !session || !isTabVisible) return;
+    if (!user || !session) return;
     // Do not reset timers while a warning modal is visible
     if (showIdleWarning || showAbsoluteWarning) return;
 
@@ -43,19 +43,15 @@ export const useSessionTimeout = () => {
     setShowIdleWarning(false);
     setIdleTimeRemaining(0);
     warningShownRef.current = false;
+    pendingIdleWarningRef.current = false;
 
-    // After 5 minutes of inactivity, show a 60s countdown popup
+    // After 60 seconds of inactivity, show a 60s countdown popup
     idleTimerRef.current = setTimeout(() => {
-      if (typeof document !== 'undefined' && document.visibilityState !== 'visible') {
-        // Defer showing the modal until the tab is visible again
-        pendingIdleWarningRef.current = true;
-        return;
-      }
-      pendingIdleWarningRef.current = false;
+      console.log('Idle timeout reached, showing warning modal');
       setIdleTimeRemaining(60);
       setShowIdleWarning(true);
     }, IDLE_TIMEOUT);
-  }, [user, session, signOut, isTabVisible, showIdleWarning, showAbsoluteWarning]);
+  }, [user, session, showIdleWarning, showAbsoluteWarning]);
 
   // Show warning before absolute timeout
   const showAbsoluteTimeoutWarning = useCallback(() => {
@@ -164,22 +160,13 @@ export const useSessionTimeout = () => {
       const visible = document.visibilityState === 'visible';
       setIsTabVisible(visible);
       
-      // When tab becomes visible again
-      if (visible) {
-        if (pendingIdleWarningRef.current) {
-          // Show the deferred idle warning now and start 60s countdown
-          pendingIdleWarningRef.current = false;
-          setIdleTimeRemaining(60);
-          setShowIdleWarning(true);
-          return;
-        }
-        // If a warning was visible before, keep it open and continue countdown; do not auto-dismiss.
-      }
+      // Simple logic: when tab becomes visible, just continue with any existing modal
+      // No complex deferred logic that might cause issues
     };
 
     document.addEventListener('visibilitychange', handleVisibilityChange);
     return () => document.removeEventListener('visibilitychange', handleVisibilityChange);
-  }, [showIdleWarning, resetIdleTimer]);
+  }, []);
 
   // Set up activity listeners
   useEffect(() => {
