@@ -87,6 +87,45 @@ serve(async (req) => {
       )
     }
 
+    // Check subscription limits for the organization
+    const { data: subscriptionData } = await supabaseAdmin
+      .from('subscribers')
+      .select('subscription_tier, subscribed')
+      .eq('user_id', linkData.organization_id)
+      .maybeSingle()
+
+    // Get current month's report count for this organization
+    const startOfMonth = new Date()
+    startOfMonth.setDate(1)
+    startOfMonth.setHours(0, 0, 0, 0)
+
+    const { count: reportsThisMonth } = await supabaseAdmin
+      .from('reports')
+      .select('*', { count: 'exact', head: true })
+      .eq('organization_id', linkData.organization_id)
+      .gte('created_at', startOfMonth.toISOString())
+
+    // Check if organization has reached their limits
+    if (!subscriptionData?.subscribed) {
+      return new Response(
+        JSON.stringify({ 
+          success: false, 
+          error: 'Case submission requires an active subscription. Please contact the organization to resolve this issue.' 
+        }),
+        { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 403 }
+      )
+    }
+
+    if (subscriptionData.subscription_tier === 'basic' && (reportsThisMonth || 0) >= 5) {
+      return new Response(
+        JSON.stringify({ 
+          success: false, 
+          error: 'This organization has reached their monthly case limit. Please try again next month or contact them directly.' 
+        }),
+        { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 403 }
+      )
+    }
+
     // Insert the report using admin privileges (bypasses RLS)
     const { data: report, error: reportError } = await supabaseAdmin
       .from('reports')

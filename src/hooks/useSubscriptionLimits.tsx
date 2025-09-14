@@ -23,8 +23,10 @@ export const useSubscriptionLimits = () => {
 
   useEffect(() => {
     const tier = subscriptionData.subscription_tier;
+    const isSubscribed = subscriptionData.subscribed;
     
-    if (tier === 'basic') {
+    // Only allow features if user has an active subscription
+    if (isSubscribed && tier === 'basic') {
       setLimits({
         maxCasesPerMonth: 5,
         maxStorageGB: 1,
@@ -32,7 +34,7 @@ export const useSubscriptionLimits = () => {
         hasAIHelper: false,
         hasCustomBranding: false,
       });
-    } else if (tier === 'pro') {
+    } else if (isSubscribed && tier === 'pro') {
       setLimits({
         maxCasesPerMonth: -1, // -1 means unlimited
         maxStorageGB: -1, // -1 means unlimited
@@ -41,20 +43,25 @@ export const useSubscriptionLimits = () => {
         hasCustomBranding: true,
       });
     } else {
-      // Free tier (no subscription or subscription_tier is 'free')
+      // No subscription - no features allowed
       setLimits({
-        maxCasesPerMonth: 0, // No usage allowed
+        maxCasesPerMonth: 0,
         maxStorageGB: 0,
         hasMessaging: false,
         hasAIHelper: false,
         hasCustomBranding: false,
       });
     }
-  }, [subscriptionData.subscription_tier]);
+  }, [subscriptionData.subscription_tier, subscriptionData.subscribed]);
 
   const isAtCaseLimit = () => {
     if (limits.maxCasesPerMonth === -1) return false; // unlimited
+    if (limits.maxCasesPerMonth === 0) return true; // no access allowed
     return stats.reportsThisMonth >= limits.maxCasesPerMonth;
+  };
+
+  const hasAnySubscription = () => {
+    return subscriptionData.subscribed;
   };
 
   const isAtStorageLimit = () => {
@@ -93,5 +100,6 @@ export const useSubscriptionLimits = () => {
     getStorageUsagePercentage,
     formatStorageLimit,
     formatCaseLimit,
+    hasAnySubscription,
   };
 };

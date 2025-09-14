@@ -23,6 +23,7 @@ import AICaseHelper from '@/components/AICaseHelper';
 import { useCustomDomain } from '@/hooks/useCustomDomain';
 import { useSubscriptionLimits } from '@/hooks/useSubscriptionLimits';
 import SubscriptionPromptModal from '@/components/SubscriptionPromptModal';
+import TrialPromptModal from '@/components/TrialPromptModal';
 import type { Report as DatabaseReport } from '@/types/database';
 
 interface Report {
@@ -64,7 +65,7 @@ interface DomainVerification {
 const Dashboard = () => {
   const { user, signOut, subscriptionData, subscriptionLoading, refreshSubscription } = useAuth();
   const { customDomain, organizationId, isCustomDomain, refreshDomainInfo } = useCustomDomain();
-  const { limits } = useSubscriptionLimits();
+  const { limits, hasAnySubscription, isAtCaseLimit } = useSubscriptionLimits();
   const navigate = useNavigate();
   const { toast } = useToast();
   const [reports, setReports] = useState<Report[]>([]);
@@ -77,6 +78,7 @@ const Dashboard = () => {
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [showArchived, setShowArchived] = useState(false);
   const [showSubscriptionModal, setShowSubscriptionModal] = useState(false);
+  const [showTrialModal, setShowTrialModal] = useState(false);
   const [hasShownSubscriptionModal, setHasShownSubscriptionModal] = useState(false);
   const [isCheckingSubscription, setIsCheckingSubscription] = useState(false);
   const [selectedReportForAI, setSelectedReportForAI] = useState<Report | null>(null);
@@ -290,11 +292,11 @@ const Dashboard = () => {
     });
     
     // Only check after both auth loading and subscription loading are complete
-    if (user && !loading && !subscriptionLoading && !hasShownSubscriptionModal && !subscriptionData.subscribed && !subscriptionStatus && !isCheckingSubscription) {
-      // Show modal after a short delay to allow dashboard to load
+    if (user && !loading && !subscriptionLoading && !hasShownSubscriptionModal && !hasAnySubscription() && !subscriptionStatus && !isCheckingSubscription) {
+      // Show trial modal after a short delay to allow dashboard to load
       const timer = setTimeout(() => {
-        console.log('Showing subscription modal for unsubscribed user');
-        setShowSubscriptionModal(true);
+        console.log('Showing trial modal for user without subscription');
+        setShowTrialModal(true);
         setHasShownSubscriptionModal(true);
       }, 1500);
       return () => clearTimeout(timer);
@@ -1267,7 +1269,7 @@ const Dashboard = () => {
                         </p>
                       </div>
                       <button 
-                        onClick={() => setShowSubscriptionModal(true)}
+                        onClick={() => setShowTrialModal(true)}
                         className="bg-orange-600 text-white px-4 py-2 rounded-lg hover:bg-orange-700 transition-colors text-sm font-medium self-start sm:self-auto"
                       >
                         Upgrade Now
@@ -1503,6 +1505,11 @@ const Dashboard = () => {
       <SubscriptionPromptModal
         open={showSubscriptionModal}
         onOpenChange={setShowSubscriptionModal}
+      />
+      
+      <TrialPromptModal
+        open={showTrialModal}
+        onOpenChange={setShowTrialModal}
       />
     </div>
   );

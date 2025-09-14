@@ -7,7 +7,10 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Trash2, Upload, Palette, CheckCircle } from 'lucide-react';
+import { Trash2, Upload, Palette, CheckCircle, Lock } from 'lucide-react';
+import { useSubscriptionLimits } from '@/hooks/useSubscriptionLimits';
+import FeatureRestriction from '@/components/FeatureRestriction';
+import TrialPromptModal from '@/components/TrialPromptModal';
 
 interface Organization {
   id: string;
@@ -33,6 +36,7 @@ const OrganizationSettings = () => {
   const { user } = useAuth();
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const { limits, hasAnySubscription } = useSubscriptionLimits();
 
   const [organization, setOrganization] = useState<Organization | null>(null);
   const [domains, setDomains] = useState<DomainVerification[]>([]);
@@ -41,6 +45,7 @@ const OrganizationSettings = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [logoFile, setLogoFile] = useState<File | null>(null);
   const [logoPreview, setLogoPreview] = useState<string | null>(null);
+  const [showTrialModal, setShowTrialModal] = useState(false);
 
   useEffect(() => {
     fetchOrganization();
@@ -420,14 +425,24 @@ const OrganizationSettings = () => {
       {/* Branding Settings */}
       <Card>
         <CardHeader>
-          <CardTitle>Branding Settings</CardTitle>
+          <CardTitle className="flex items-center gap-2">
+            Branding Settings
+            {!limits.hasCustomBranding && <Lock className="h-4 w-4 text-gray-400" />}
+          </CardTitle>
           <CardDescription>
             Customize your organization's branding for submission forms
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
+          {!limits.hasCustomBranding && (
+            <FeatureRestriction 
+              feature="Custom Branding" 
+              requiredTier="pro"
+              onUpgrade={() => setShowTrialModal(true)}
+            />
+          )}
           {/* Logo Upload */}
-          <div className="space-y-4">
+          <div className={`space-y-4 ${!limits.hasCustomBranding ? 'opacity-50' : ''}`}>
             <Label>Organization Logo</Label>
             <div className="flex items-center space-x-4">
               {logoPreview ? (
@@ -458,6 +473,7 @@ const OrganizationSettings = () => {
                   accept="image/*"
                   onChange={handleLogoUpload}
                   className="w-auto"
+                  disabled={!limits.hasCustomBranding}
                 />
                 <p className="text-xs text-gray-500">
                   Upload a logo (max 2MB, PNG/JPG recommended)
@@ -467,7 +483,7 @@ const OrganizationSettings = () => {
           </div>
 
           {/* Brand Color */}
-          <div className="space-y-4">
+          <div className={`space-y-4 ${!limits.hasCustomBranding ? 'opacity-50' : ''}`}>
             <Label>Brand Color</Label>
             <div className="flex items-center space-x-4">
               <div className="flex items-center space-x-2">
@@ -477,6 +493,7 @@ const OrganizationSettings = () => {
                   value={brandColor}
                   onChange={(e) => setBrandColor(e.target.value)}
                   className="w-16 h-10 border rounded cursor-pointer"
+                  disabled={!limits.hasCustomBranding}
                 />
                 <Input
                   type="text"
@@ -484,6 +501,7 @@ const OrganizationSettings = () => {
                   onChange={(e) => setBrandColor(e.target.value)}
                   className="w-24 font-mono text-sm"
                   placeholder="#2563eb"
+                  disabled={!limits.hasCustomBranding}
                 />
               </div>
               <div 
@@ -568,6 +586,11 @@ const OrganizationSettings = () => {
           )}
         </CardContent>
       </Card>
+
+      <TrialPromptModal 
+        open={showTrialModal} 
+        onOpenChange={setShowTrialModal}
+      />
     </div>
   );
 };
