@@ -87,12 +87,40 @@ serve(async (req) => {
       )
     }
 
-    // Check subscription limits for the organization
-    const { data: subscriptionData } = await supabaseAdmin
-      .from('subscribers')
-      .select('subscription_tier, subscribed')
-      .eq('user_id', linkData.organization_id)
-      .maybeSingle()
+    // Determine organization subscription via org admin emails
+    let orgSubscription: { subscribed: boolean; subscription_tier: string | null } = { subscribed: false, subscription_tier: null };
+
+    // Find active admins for this organization
+    const { data: orgAdmins, error: adminsError } = await supabaseAdmin
+      .from('profiles')
+      .select('email, role, is_active')
+      .eq('organization_id', linkData.organization_id)
+      .eq('is_active', true)
+      .in('role', ['admin', 'org_admin']);
+
+    if (adminsError) {
+      console.error('Failed to fetch org admins for subscription check:', adminsError);
+    }
+
+    const adminEmails = (orgAdmins || []).map(a => a.email).filter((e): e is string => Boolean(e));
+
+    if (adminEmails.length > 0) {
+      const { data: subs, error: subsError } = await supabaseAdmin
+        .from('subscribers')
+        .select('email, subscribed, subscription_tier')
+        .in('email', adminEmails);
+
+      if (subsError) {
+        console.error('Failed to fetch subscribers for org admins:', subsError);
+      }
+
+      const anyActive = subs?.some(s => s.subscribed) ?? false;
+      const tierRaw = subs?.find(s => s.subscribed)?.subscription_tier ?? subs?.[0]?.subscription_tier ?? null;
+      const normalizedTier = tierRaw === 'starter' ? 'basic' : tierRaw; // normalize historic values
+
+      orgSubscription = { subscribed: anyActive, subscription_tier: normalizedTier };
+    }
+
 
     // Get current month's report count for this organization
     const startOfMonth = new Date()
@@ -106,7 +134,7 @@ serve(async (req) => {
       .gte('created_at', startOfMonth.toISOString())
 
     // Check if organization has reached their limits
-    if (!subscriptionData?.subscribed) {
+    if (!orgSubscription.subscribed) {
       return new Response(
         JSON.stringify({ 
           success: false, 
@@ -116,7 +144,7 @@ serve(async (req) => {
       )
     }
 
-    if (subscriptionData.subscription_tier === 'basic' && (reportsThisMonth || 0) >= 5) {
+    if ((orgSubscription.subscription_tier ?? 'basic') === 'basic' && (reportsThisMonth || 0) >= 5) {
       return new Response(
         JSON.stringify({ 
           success: false, 
