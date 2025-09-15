@@ -31,7 +31,7 @@ const SecureReportStatusLookup = () => {
     if (!validateTrackingId(data.trackingId)) {
       toast({
         title: "Invalid tracking ID",
-        description: "Please enter a valid tracking ID (format: WB-XXXXXXXX).",
+        description: "Please enter a valid tracking ID (DIS-XXXXXXXX or WB-XXXXXXXX).",
         variant: "destructive",
       });
       return false;
@@ -96,11 +96,11 @@ const SecureReportStatusLookup = () => {
                 <Input
                   id="trackingId"
                   type="text"
-                  placeholder="WB-XXXXXXXX"
+                  placeholder="DIS-XXXXXXXX"
                   value={trackingId}
                   onChange={(e) => setTrackingId(e.target.value.toUpperCase())}
                   className="font-mono"
-                  maxLength={11}
+                  maxLength={12}
                 />
                 <p className="text-sm text-gray-600 mt-1">
                   Use the tracking ID provided when you submitted your report
