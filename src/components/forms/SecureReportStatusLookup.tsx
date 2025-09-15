@@ -41,30 +41,31 @@ const SecureReportStatusLookup = () => {
 
   const lookupReport = async (data: { trackingId: string }) => {
     console.log('Checking report status for tracking ID:', data.trackingId);
-    
-    // First, verify the report exists and get basic info
-    const { data: reportData, error: reportError } = await supabase
-      .from('reports')
-      .select('id, tracking_id, status, created_at, organization_id')
-      .eq('tracking_id', data.trackingId)
-      .single();
 
-    if (reportError || !reportData) {
-      console.error('Report not found:', reportError);
+    // Use secure RPC to validate existence and get branding without exposing report data
+    const { data: orgRows, error: orgError } = await supabase.rpc(
+      'get_organization_by_tracking_id',
+      { p_tracking_id: data.trackingId }
+    );
+
+    if (orgError) {
+      console.error('RPC error during status lookup:', orgError);
+      throw new Error('Unable to check status right now. Please try again.');
+    }
+
+    if (!orgRows || orgRows.length === 0) {
+      console.error('Report not found via RPC');
       throw new Error('Report not found. Please check your tracking ID and try again.');
     }
 
-    console.log('Report found:', reportData);
-    
-    // Fetch organization data for branding
-    await fetchOrganizationByTrackingId(data.trackingId);
-    
-    // Navigate directly to messaging page with tracking ID in state
-    navigate(`/secure/tool/messaging/${data.trackingId}`, { 
-      state: { 
-        trackingId: data.trackingId, 
-        organizationData 
-      }
+    const org = orgRows[0];
+
+    // Navigate to messaging with minimal org branding in state
+    navigate(`/secure/tool/messaging/${data.trackingId}`, {
+      state: {
+        trackingId: data.trackingId,
+        organizationData: org,
+      },
     });
   };
 
