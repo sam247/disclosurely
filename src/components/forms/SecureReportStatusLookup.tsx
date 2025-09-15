@@ -31,7 +31,7 @@ const SecureReportStatusLookup = () => {
     if (!validateTrackingId(data.trackingId)) {
       toast({
         title: "Invalid tracking ID",
-        description: "Please enter a valid tracking ID (DIS-XXXXXXXX or WB-XXXXXXXX).",
+        description: "Please enter a valid tracking ID (DIS-XXXXXXXX).",
         variant: "destructive",
       });
       return false;
@@ -110,7 +110,7 @@ const SecureReportStatusLookup = () => {
               <Button 
                 type="submit" 
                 className="w-full"
-                disabled={isSubmitting || !trackingId.trim()}
+                disabled={isSubmitting}
                 style={{ backgroundColor: brandColor }}
               >
                 {isSubmitting ? (

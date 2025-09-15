@@ -8,7 +8,7 @@ export const validateEmail = (email: string): boolean => {
 };
 
 export const validateTrackingId = (trackingId: string): boolean => {
-  const trackingIdRegex = /^(DIS|WB)-[A-Z0-9]{8}$/;
+  const trackingIdRegex = /^DIS-[A-Z0-9]{8}$/;
   return trackingIdRegex.test(trackingId);
 };
 
