@@ -46,7 +46,8 @@ const SubmissionForm = ({ linkToken, linkData, brandColor }: SubmissionFormProps
   const [formData, setFormData] = useState({
     title: '',
     description: '',
-    category: '',
+    mainCategory: '',
+    subCategory: '',
     customCategory: '',
     submitter_email: '',
     priority: 3
@@ -57,14 +58,17 @@ const SubmissionForm = ({ linkToken, linkData, brandColor }: SubmissionFormProps
   };
 
   const generateTrackingId = () => {
-    return 'WB-' + Math.random().toString(36).substr(2, 8).toUpperCase();
+    return 'DIS-' + Math.random().toString(36).substr(2, 8).toUpperCase();
   };
 
   const getFinalCategory = () => {
-    if (formData.category === "Other (Please Specify)" && formData.customCategory.trim()) {
-      return formData.customCategory.trim();
+    if (formData.subCategory === "Other (Please Specify)" && formData.customCategory.trim()) {
+      return `${formData.mainCategory} - ${formData.customCategory.trim()}`;
     }
-    return formData.category;
+    if (formData.mainCategory && formData.subCategory) {
+      return `${formData.mainCategory} - ${formData.subCategory}`;
+    }
+    return formData.mainCategory;
   };
 
   const validateForm = () => {
@@ -77,16 +81,25 @@ const SubmissionForm = ({ linkToken, linkData, brandColor }: SubmissionFormProps
       return false;
     }
 
-    if (!formData.category) {
+    if (!formData.mainCategory) {
       toast({
-        title: "Category required",
-        description: "Please select a category.",
+        title: "Main category required",
+        description: "Please select a main category.",
         variant: "destructive",
       });
       return false;
     }
 
-    if (formData.category === "Other (Please Specify)" && !formData.customCategory.trim()) {
+    if (!formData.subCategory) {
+      toast({
+        title: "Sub category required",
+        description: "Please select a sub category.",
+        variant: "destructive",
+      });
+      return false;
+    }
+
+    if (formData.subCategory === "Other (Please Specify)" && !formData.customCategory.trim()) {
       toast({
         title: "Category specification required",
         description: "Please specify the category.",

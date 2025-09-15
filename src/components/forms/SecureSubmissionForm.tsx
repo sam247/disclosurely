@@ -48,7 +48,8 @@ const SecureSubmissionForm = ({ linkToken, linkData, brandColor }: SecureSubmiss
   const [formData, setFormData] = useState({
     title: '',
     description: '',
-    category: '',
+    mainCategory: '',
+    subCategory: '',
     customCategory: '',
     submitter_email: '',
     priority: 3
@@ -65,14 +66,17 @@ const SecureSubmissionForm = ({ linkToken, linkData, brandColor }: SecureSubmiss
   };
 
   const generateTrackingId = () => {
-    return 'WB-' + Math.random().toString(36).substr(2, 8).toUpperCase();
+    return 'DIS-' + Math.random().toString(36).substr(2, 8).toUpperCase();
   };
 
   const getFinalCategory = () => {
-    if (formData.category === "Other (Please Specify)" && formData.customCategory.trim()) {
-      return formData.customCategory.trim();
+    if (formData.subCategory === "Other (Please Specify)" && formData.customCategory.trim()) {
+      return `${formData.mainCategory} - ${formData.customCategory.trim()}`;
     }
-    return formData.category;
+    if (formData.mainCategory && formData.subCategory) {
+      return `${formData.mainCategory} - ${formData.subCategory}`;
+    }
+    return formData.mainCategory;
   };
 
   const validateForm = (data: any) => {

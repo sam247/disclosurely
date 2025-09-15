@@ -1,23 +1,59 @@
-
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
-const PREDEFINED_CATEGORIES = [
-  "Bribery",
-  "Fraud", 
-  "GDPR",
-  "Corruption",
-  "Failure to comply with laws and regulation",
-  "Endangering the health & safety of individuals",
-  "Other (Please Specify)"
-];
+const MAIN_CATEGORIES = {
+  "Financial Misconduct": [
+    "Fraud",
+    "Bribery", 
+    "Corruption",
+    "Embezzlement",
+    "Theft",
+    "Kickbacks",
+    "Laundering",
+    "Insider",
+    "Forgery",
+    "Collusion"
+  ],
+  "Workplace Behaviour": [
+    "Harassment",
+    "Discrimination",
+    "Bullying",
+    "Retaliation", 
+    "Nepotism",
+    "Favouritism",
+    "Misconduct",
+    "Exploitation",
+    "Abuse"
+  ],
+  "Legal & Compliance": [
+    "Compliance",
+    "Ethics",
+    "Manipulation",
+    "Extortion",
+    "Coercion",
+    "Violation"
+  ],
+  "Safety & Risk": [
+    "Safety",
+    "Negligence",
+    "Hazards",
+    "Sabotage"
+  ],
+  "Data & Security": [
+    "Privacy",
+    "Data",
+    "Security",
+    "Cyber"
+  ]
+};
 
 interface FormData {
   title: string;
   description: string;
-  category: string;
+  mainCategory: string;
+  subCategory: string;
   customCategory: string;
   priority: number;
 }
@@ -28,12 +64,22 @@ interface ReportDetailsFormProps {
 }
 
 const ReportDetailsForm = ({ formData, updateFormData }: ReportDetailsFormProps) => {
-  const handleCategoryChange = (value: string) => {
+  const handleMainCategoryChange = (value: string) => {
     updateFormData({ 
-      category: value,
+      mainCategory: value,
+      subCategory: '', // Reset subcategory when main category changes
+      customCategory: ''
+    });
+  };
+
+  const handleSubCategoryChange = (value: string) => {
+    updateFormData({ 
+      subCategory: value,
       customCategory: value === "Other (Please Specify)" ? formData.customCategory : ""
     });
   };
+
+  const availableSubCategories = formData.mainCategory ? MAIN_CATEGORIES[formData.mainCategory as keyof typeof MAIN_CATEGORIES] || [] : [];
 
   return (
     <div className="space-y-4">
@@ -49,13 +95,13 @@ const ReportDetailsForm = ({ formData, updateFormData }: ReportDetailsFormProps)
       </div>
 
       <div className="space-y-2">
-        <Label htmlFor="category">Category *</Label>
-        <Select value={formData.category} onValueChange={handleCategoryChange} required>
+        <Label htmlFor="mainCategory">Main Category *</Label>
+        <Select value={formData.mainCategory} onValueChange={handleMainCategoryChange} required>
           <SelectTrigger>
-            <SelectValue placeholder="Select a category" />
+            <SelectValue placeholder="Select a main category" />
           </SelectTrigger>
           <SelectContent>
-            {PREDEFINED_CATEGORIES.map((category) => (
+            {Object.keys(MAIN_CATEGORIES).map((category) => (
               <SelectItem key={category} value={category}>
                 {category}
               </SelectItem>
@@ -64,7 +110,26 @@ const ReportDetailsForm = ({ formData, updateFormData }: ReportDetailsFormProps)
         </Select>
       </div>
 
-      {formData.category === "Other (Please Specify)" && (
+      {formData.mainCategory && (
+        <div className="space-y-2">
+          <Label htmlFor="subCategory">Sub Category *</Label>
+          <Select value={formData.subCategory} onValueChange={handleSubCategoryChange} required>
+            <SelectTrigger>
+              <SelectValue placeholder="Select a sub category" />
+            </SelectTrigger>
+            <SelectContent>
+              {availableSubCategories.map((subCategory) => (
+                <SelectItem key={subCategory} value={subCategory}>
+                  {subCategory}
+                </SelectItem>
+              ))}
+              <SelectItem value="Other (Please Specify)">Other (Please Specify)</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+      )}
+
+      {formData.subCategory === "Other (Please Specify)" && (
         <div className="space-y-2">
           <Label htmlFor="customCategory">Please Specify Category *</Label>
           <Input

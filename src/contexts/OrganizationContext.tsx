@@ -95,34 +95,24 @@ export const OrganizationProvider = ({ children }: OrganizationProviderProps) =>
     try {
       console.log('Looking up report with tracking ID:', trackingId);
       
-      const { data: reportData, error: reportError } = await supabase
-        .from('reports')
-        .select(`
-          organization_id,
-          organizations!inner(
-            id,
-            name,
-            logo_url,
-            custom_logo_url,
-            brand_color
-          )
-        `)
-        .eq('tracking_id', trackingId)
-        .single();
+      // Use the secure function to get organization data by tracking ID
+      const { data: orgData, error: orgError } = await supabase
+        .rpc('get_organization_by_tracking_id', { p_tracking_id: trackingId });
 
-      if (reportError || !reportData) {
-        console.error('Report lookup error:', reportError);
-        throw new Error('Report not found');
+      if (orgError || !orgData || orgData.length === 0) {
+        console.error('Organization lookup error:', orgError);
+        throw new Error('Organization not found for this report');
       }
 
-      console.log('Found report, setting organization data:', reportData.organizations);
+      const org = orgData[0];
+      console.log('Found organization, setting organization data:', org);
       
       setOrganizationData({
-        id: reportData.organizations.id,
-        name: reportData.organizations.name,
-        logo_url: reportData.organizations.logo_url,
-        custom_logo_url: reportData.organizations.custom_logo_url,
-        brand_color: reportData.organizations.brand_color
+        id: org.organization_id,
+        name: org.organization_name,
+        logo_url: org.logo_url,
+        custom_logo_url: org.custom_logo_url,
+        brand_color: org.brand_color
       });
     } catch (err: any) {
       console.error('Error fetching organization by tracking ID:', err);

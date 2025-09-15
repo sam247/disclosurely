@@ -1422,6 +1422,16 @@ export type Database = {
           valid: boolean
         }[]
       }
+      get_organization_by_tracking_id: {
+        Args: { p_tracking_id: string }
+        Returns: {
+          brand_color: string
+          custom_logo_url: string
+          logo_url: string
+          organization_id: string
+          organization_name: string
+        }[]
+      }
       get_profile_minimal: {
         Args: { p_user_id: string }
         Returns: {
