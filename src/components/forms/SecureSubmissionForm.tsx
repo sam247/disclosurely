@@ -98,16 +98,25 @@ const SecureSubmissionForm = ({ linkToken, linkData, brandColor }: SecureSubmiss
       return false;
     }
 
-    if (!data.category) {
+    if (!data.mainCategory) {
       toast({
-        title: "Category required",
-        description: "Please select a category.",
+        title: "Main category required",
+        description: "Please select a main category.",
         variant: "destructive",
       });
       return false;
     }
 
-    if (data.category === "Other (Please Specify)" && !data.customCategory.trim()) {
+    if (!data.subCategory) {
+      toast({
+        title: "Sub category required",
+        description: "Please select a sub category.",
+        variant: "destructive",
+      });
+      return false;
+    }
+
+    if (data.subCategory === "Other (Please Specify)" && !data.customCategory.trim()) {
       toast({
         title: "Category specification required",
         description: "Please specify the category.",
