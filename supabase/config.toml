@@ -11,3 +11,6 @@ verify_jwt = true
 
 [functions.submit-anonymous-report]
 verify_jwt = false
+
+[functions.anonymous-report-messaging]
+verify_jwt = false

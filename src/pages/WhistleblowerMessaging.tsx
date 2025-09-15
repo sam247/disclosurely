@@ -1,9 +1,9 @@
 
 import React from 'react';
-import SecureReportMessaging from '@/components/SecureReportMessaging';
+import AnonymousMessaging from '@/components/anonymous/AnonymousMessaging';
 
 const WhistleblowerMessagingPage = () => {
-  return <SecureReportMessaging />;
+  return <AnonymousMessaging />;
 };
 
 export default WhistleblowerMessagingPage;

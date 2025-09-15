@@ -72,7 +72,7 @@ const SecureReportStatusLookup = () => {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     
-    secureSubmit(lookupReport, { trackingId: trackingId.trim() }, validateInput);
+    secureSubmit(lookupReport, { trackingId: trackingId.replace(/\s+/g, '').trim() }, validateInput);
   };
 
   // Default branding if no organization data is available
@@ -99,7 +99,7 @@ const SecureReportStatusLookup = () => {
                   type="text"
                   placeholder="DIS-XXXXXXXX"
                   value={trackingId}
-                  onChange={(e) => setTrackingId(e.target.value.toUpperCase())}
+                  onChange={(e) => setTrackingId(e.target.value.toUpperCase().replace(/\s+/g, ''))}
                   className="font-mono"
                   maxLength={12}
                 />
