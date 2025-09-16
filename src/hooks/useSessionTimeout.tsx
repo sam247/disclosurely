@@ -3,8 +3,8 @@ import { useAuth } from './useAuth';
 import { useToast } from './use-toast';
 import SessionTimeoutWarning from '@/components/SessionTimeoutWarning';
 
-const IDLE_TIMEOUT = 60 * 1000; // 60 seconds for testing
-const ABSOLUTE_TIMEOUT = 4 * 60 * 60 * 1000; // 4 hours
+const IDLE_TIMEOUT = 15 * 60 * 1000; // 15 minutes - more reasonable for users
+const ABSOLUTE_TIMEOUT = 8 * 60 * 60 * 1000; // 8 hours - full work day
 const WARNING_TIME = 60 * 1000; // Show warning 60 seconds before timeout
 
 export const useSessionTimeout = () => {

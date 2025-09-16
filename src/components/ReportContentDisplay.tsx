@@ -9,6 +9,7 @@ import { decryptReport } from '@/utils/encryption';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import CompactReportAttachments from './CompactReportAttachments';
 
 interface ReportContentDisplayProps {
   encryptedContent: string;
@@ -19,6 +20,7 @@ interface ReportContentDisplayProps {
   createdAt: string;
   priority: number;
   submittedByEmail?: string;
+  reportId?: string;
 }
 
 const ReportContentDisplay = ({
@@ -29,7 +31,8 @@ const ReportContentDisplay = ({
   reportType,
   createdAt,
   priority,
-  submittedByEmail
+  submittedByEmail,
+  reportId
 }: ReportContentDisplayProps) => {
   const { user } = useAuth();
   const { toast } = useToast();
@@ -142,19 +145,9 @@ const ReportContentDisplay = ({
   return (
     <div className="space-y-4">
       {/* Header with basic info */}
-      <div className="flex items-center justify-between">
-        <div className="flex items-center space-x-3">
-          <FileText className="h-5 w-5 text-blue-600" />
-          <h3 className="text-lg font-semibold">{title}</h3>
-        </div>
-        <div className="flex items-center space-x-2">
-          <Badge className="bg-blue-100 text-blue-800">
-            {formatStatus(reportType)}
-          </Badge>
-          <Badge className={getPriorityColor(priority)}>
-            Priority {priority}
-          </Badge>
-        </div>
+      <div className="flex items-center space-x-3">
+        <FileText className="h-5 w-5 text-blue-600" />
+        <h3 className="text-lg font-semibold">{title}</h3>
       </div>
 
       {/* Meta information */}
@@ -177,18 +170,14 @@ const ReportContentDisplay = ({
         </div>
         <div className="flex items-center space-x-2">
           <FileText className="h-4 w-4 text-gray-400" />
-          <span className="text-gray-600">Type: {formatStatus(reportType)}</span>
+          <span className="text-gray-600">Type: Anonymous</span>
         </div>
-        {/* Add submitter email for confidential reports */}
-        {submittedByEmail && (
-          <div className="flex items-center space-x-2 col-span-2">
-            <User className="h-4 w-4 text-blue-400" />
-            <span className="text-blue-600 font-medium">
-              Submitter: {submittedByEmail}
-            </span>
-          </div>
-        )}
       </div>
+
+      {/* Compact attachments at top */}
+      {reportId && (
+        <CompactReportAttachments reportId={reportId} />
+      )}
 
       {/* Report Content with Scroll Area */}
       <Card>
@@ -238,7 +227,7 @@ const ReportContentDisplay = ({
               </div>
             </div>
           ) : decryptedContent ? (
-            <ScrollArea className="h-96 w-full pr-4">
+            <ScrollArea className="h-80 w-full pr-4">
               <div className="space-y-4">
                 {/* Display the actual decrypted title */}
                 {decryptedContent.title && (

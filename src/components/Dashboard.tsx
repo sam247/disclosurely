@@ -1472,6 +1472,7 @@ const Dashboard = () => {
                   createdAt={selectedReport.created_at}
                   priority={selectedReport.priority}
                   submittedByEmail={selectedReport.submitted_by_email}
+                  reportId={selectedReport.id}
                 />
                 <ReportAttachments reportId={selectedReport.id} />
               </div>

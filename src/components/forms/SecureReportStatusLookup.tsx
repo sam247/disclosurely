@@ -23,6 +23,7 @@ const SecureReportStatusLookup = () => {
 
   useEffect(() => {
     if (linkToken) {
+      // Pre-fetch organization data to avoid branding flash
       fetchOrganizationByLinkToken(linkToken);
     }
   }, [linkToken, fetchOrganizationByLinkToken]);
@@ -59,6 +60,9 @@ const SecureReportStatusLookup = () => {
     }
 
     const org = orgRows[0];
+
+    // Pre-fetch organization data to avoid flash
+    fetchOrganizationByTrackingId(data.trackingId);
 
     // Navigate to messaging with minimal org branding in state
     navigate(`/secure/tool/messaging/${data.trackingId}`, {
