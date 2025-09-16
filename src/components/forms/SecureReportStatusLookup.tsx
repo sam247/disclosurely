@@ -28,6 +28,13 @@ const SecureReportStatusLookup = () => {
     }
   }, [linkToken, fetchOrganizationByLinkToken]);
 
+  // Also pre-fetch when component mounts to avoid flash
+  useEffect(() => {
+    if (linkToken && !organizationData) {
+      fetchOrganizationByLinkToken(linkToken);
+    }
+  }, []);
+
   const validateInput = (data: { trackingId: string }) => {
     if (!validateTrackingId(data.trackingId)) {
       toast({
