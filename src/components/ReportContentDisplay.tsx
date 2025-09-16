@@ -174,11 +174,6 @@ const ReportContentDisplay = ({
         </div>
       </div>
 
-      {/* Compact attachments at top */}
-      {reportId && (
-        <CompactReportAttachments reportId={reportId} />
-      )}
-
       {/* Report Content with Scroll Area */}
       <Card>
         <CardHeader>
