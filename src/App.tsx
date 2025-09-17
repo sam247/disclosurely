@@ -3,6 +3,7 @@ import React from 'react';
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import { AuthProvider } from './hooks/useAuth';
 import { OrganizationProvider } from './contexts/OrganizationContext';
+import { useSessionTimeout } from './hooks/useSessionTimeout';
 import ProtectedRoute from './components/ProtectedRoute';
 import AuthenticatedApp from './components/AuthenticatedApp';
 import Index from './pages/Index';
@@ -24,6 +25,9 @@ import Blog from './pages/Blog';
 import WhistleblowerMessagingPage from './pages/WhistleblowerMessaging';
 
 function App() {
+  // Add session timeout monitoring to main app for mobile users
+  const { IdleWarningComponent, AbsoluteWarningComponent } = useSessionTimeout();
+
   return (
     <Router>
       <AuthProvider>
@@ -102,6 +106,9 @@ function App() {
             {/* Catch all - 404 */}
             <Route path="*" element={<NotFound />} />
           </Routes>
+          {/* Session timeout warnings for all routes */}
+          {IdleWarningComponent}
+          {AbsoluteWarningComponent}
         </OrganizationProvider>
       </AuthProvider>
     </Router>

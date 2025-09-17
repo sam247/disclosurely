@@ -217,6 +217,29 @@ const AICaseHelper: React.FC<AICaseHelperProps> = ({ reportId, reportContent }) 
 
       if (caseError) throw caseError;
 
+      // Decrypt the report content for AI analysis
+      let decryptedContent = reportContent || '[Case content not available]';
+      if (caseData.encrypted_content && caseData.organization_id) {
+        try {
+          // Import decrypt function dynamically
+          const { decryptReport } = await import('@/utils/encryption');
+          const decrypted = decryptReport(caseData.encrypted_content, caseData.organization_id);
+          decryptedContent = `
+Case Details:
+- Category: ${decrypted.category || 'Not specified'}
+- Description: ${decrypted.description || 'Not provided'}
+- Location: ${decrypted.location || 'Not specified'}
+- Date of Incident: ${decrypted.dateOfIncident || 'Not specified'}
+- Witnesses: ${decrypted.witnesses || 'None mentioned'}
+- Evidence: ${decrypted.evidence || 'No evidence provided'}
+- Additional Details: ${decrypted.additionalDetails || 'None provided'}
+          `.trim();
+        } catch (decryptError) {
+          console.error('Error decrypting case content:', decryptError);
+          decryptedContent = '[Case content is encrypted and could not be decrypted for analysis]';
+        }
+      }
+
       // Process selected documents
       const companyDocuments = [];
       for (const docId of selectedDocs) {
@@ -248,7 +271,7 @@ const AICaseHelper: React.FC<AICaseHelperProps> = ({ reportId, reportContent }) 
         }
       }
 
-      // Invoke AI analysis
+      // Invoke AI analysis with decrypted content
       const { data, error } = await supabase.functions.invoke('analyze-case-with-ai', {
         body: {
           caseData: {
@@ -256,9 +279,10 @@ const AICaseHelper: React.FC<AICaseHelperProps> = ({ reportId, reportContent }) 
             status: caseData.status,
             created_at: caseData.created_at,
             priority: caseData.priority,
-            tracking_id: caseData.tracking_id
+            tracking_id: caseData.tracking_id,
+            report_type: caseData.report_type
           },
-          caseContent: reportContent || '[Case content encrypted]',
+          caseContent: decryptedContent,
           companyDocuments,
           customPrompt: prompt
         }
