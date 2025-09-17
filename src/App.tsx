@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import { AuthProvider } from './hooks/useAuth';
@@ -24,92 +23,98 @@ import AdminDashboard from './pages/AdminDashboard';
 import Blog from './pages/Blog';
 import WhistleblowerMessagingPage from './pages/WhistleblowerMessaging';
 
-function App() {
-  // Add session timeout monitoring to main app for mobile users
+// Component to handle session timeout inside AuthProvider
+const AppWithSessionTimeout = () => {
   const { IdleWarningComponent, AbsoluteWarningComponent } = useSessionTimeout();
 
   return (
+    <OrganizationProvider>
+      <ScrollToTop />
+      <Routes>
+        {/* Public routes */}
+        <Route path="/" element={<Index />} />
+        <Route path="/pricing" element={<Pricing />} />
+        <Route path="/contact" element={<Contact />} />
+        <Route path="/vs-speakup" element={<VsSpeakUp />} />
+        <Route path="/vs-whistleblower-software" element={<VsWhistleblowerSoftware />} />
+        <Route path="/compliance-software" element={<ComplianceSoftware />} />
+        
+        {/* Authentication routes */}
+        <Route path="/login" element={<Login />} />
+        <Route path="/signup" element={<Signup />} />
+        <Route path="/auth/login" element={<Login />} />
+        <Route path="/auth/signup" element={<Signup />} />
+        
+        {/* Blog routes */}
+        <Route path="/blog" element={<Blog />} />
+        <Route path="/blog/:slug" element={<Blog />} />
+        
+        {/* Admin routes */}
+        <Route path="/admin" element={
+          <ProtectedRoute>
+            <AdminDashboard />
+          </ProtectedRoute>
+        } />
+        
+        {/* Anonymous report routes */}
+        <Route path="/secure/tool/submit/:linkToken" element={<SubmissionFormWrapper />} />
+        <Route path="/secure/tool/submit/:linkToken/status" element={<ReportStatusLookup />} />
+        <Route path="/secure/tool/success" element={<ReportSuccess />} />
+        <Route path="/secure/tool/lookup" element={<ReportStatusLookup />} />
+        <Route path="/secure/tool/messaging/:trackingId" element={<WhistleblowerMessagingPage />} />
+        
+        {/* Testing routes */}
+        <Route path="/test/anonymous-submission" element={<TestAnonymousSubmission />} />
+        
+        {/* Authenticated routes */}
+        <Route 
+          path="/app" 
+          element={
+            <ProtectedRoute>
+              <AuthenticatedApp />
+            </ProtectedRoute>
+          } 
+        />
+        <Route 
+          path="/app/*" 
+          element={
+            <ProtectedRoute>
+              <AuthenticatedApp />
+            </ProtectedRoute>
+          } 
+        />
+        <Route 
+          path="/dashboard" 
+          element={
+            <ProtectedRoute>
+              <AuthenticatedApp />
+            </ProtectedRoute>
+          } 
+        />
+        <Route 
+          path="/dashboard/*" 
+          element={
+            <ProtectedRoute>
+              <AuthenticatedApp />
+            </ProtectedRoute>
+          } 
+        />
+        
+        {/* Catch all - 404 */}
+        <Route path="*" element={<NotFound />} />
+      </Routes>
+      {/* Session timeout warnings for all routes */}
+      {IdleWarningComponent}
+      {AbsoluteWarningComponent}
+    </OrganizationProvider>
+  );
+};
+
+function App() {
+  return (
     <Router>
       <AuthProvider>
-        <OrganizationProvider>
-          <ScrollToTop />
-          <Routes>
-            {/* Public routes */}
-            <Route path="/" element={<Index />} />
-            <Route path="/pricing" element={<Pricing />} />
-            <Route path="/contact" element={<Contact />} />
-            <Route path="/vs-speakup" element={<VsSpeakUp />} />
-            <Route path="/vs-whistleblower-software" element={<VsWhistleblowerSoftware />} />
-            <Route path="/compliance-software" element={<ComplianceSoftware />} />
-            
-            {/* Authentication routes */}
-            <Route path="/login" element={<Login />} />
-            <Route path="/signup" element={<Signup />} />
-            <Route path="/auth/login" element={<Login />} />
-            <Route path="/auth/signup" element={<Signup />} />
-            
-            {/* Blog routes */}
-            <Route path="/blog" element={<Blog />} />
-            <Route path="/blog/:slug" element={<Blog />} />
-            
-            {/* Admin routes */}
-            <Route path="/admin" element={
-              <ProtectedRoute>
-                <AdminDashboard />
-              </ProtectedRoute>
-            } />
-            
-            {/* Anonymous report routes */}
-            <Route path="/secure/tool/submit/:linkToken" element={<SubmissionFormWrapper />} />
-            <Route path="/secure/tool/submit/:linkToken/status" element={<ReportStatusLookup />} />
-            <Route path="/secure/tool/success" element={<ReportSuccess />} />
-            <Route path="/secure/tool/lookup" element={<ReportStatusLookup />} />
-            <Route path="/secure/tool/messaging/:trackingId" element={<WhistleblowerMessagingPage />} />
-            
-            {/* Testing routes */}
-            <Route path="/test/anonymous-submission" element={<TestAnonymousSubmission />} />
-            
-            {/* Authenticated routes */}
-            <Route 
-              path="/app" 
-              element={
-                <ProtectedRoute>
-                  <AuthenticatedApp />
-                </ProtectedRoute>
-              } 
-            />
-            <Route 
-              path="/app/*" 
-              element={
-                <ProtectedRoute>
-                  <AuthenticatedApp />
-                </ProtectedRoute>
-              } 
-            />
-            <Route 
-              path="/dashboard" 
-              element={
-                <ProtectedRoute>
-                  <AuthenticatedApp />
-                </ProtectedRoute>
-              } 
-            />
-            <Route 
-              path="/dashboard/*" 
-              element={
-                <ProtectedRoute>
-                  <AuthenticatedApp />
-                </ProtectedRoute>
-              } 
-            />
-            
-            {/* Catch all - 404 */}
-            <Route path="*" element={<NotFound />} />
-          </Routes>
-          {/* Session timeout warnings for all routes */}
-          {IdleWarningComponent}
-          {AbsoluteWarningComponent}
-        </OrganizationProvider>
+        <AppWithSessionTimeout />
       </AuthProvider>
     </Router>
   );
