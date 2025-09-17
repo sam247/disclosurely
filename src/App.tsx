@@ -3,6 +3,7 @@ import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import { AuthProvider } from './hooks/useAuth';
 import { OrganizationProvider } from './contexts/OrganizationContext';
 import { useSessionTimeout } from './hooks/useSessionTimeout';
+import { useAuth } from './hooks/useAuth';
 import ProtectedRoute from './components/ProtectedRoute';
 import AuthenticatedApp from './components/AuthenticatedApp';
 import Index from './pages/Index';
@@ -23,10 +24,24 @@ import AdminDashboard from './pages/AdminDashboard';
 import Blog from './pages/Blog';
 import WhistleblowerMessagingPage from './pages/WhistleblowerMessaging';
 
-// Component to handle session timeout inside AuthProvider
-const AppWithSessionTimeout = () => {
+// Component to handle session timeout only for authenticated users
+const SessionTimeoutManager = () => {
+  const { user } = useAuth();
   const { IdleWarningComponent, AbsoluteWarningComponent } = useSessionTimeout();
 
+  // Only show session timeout for authenticated users
+  if (!user) return null;
+
+  return (
+    <>
+      {IdleWarningComponent}
+      {AbsoluteWarningComponent}
+    </>
+  );
+};
+
+// Component inside AuthProvider but without session timeout for all routes
+const AppContent = () => {
   return (
     <OrganizationProvider>
       <ScrollToTop />
@@ -103,9 +118,8 @@ const AppWithSessionTimeout = () => {
         {/* Catch all - 404 */}
         <Route path="*" element={<NotFound />} />
       </Routes>
-      {/* Session timeout warnings for all routes */}
-      {IdleWarningComponent}
-      {AbsoluteWarningComponent}
+      {/* Session timeout only for authenticated users */}
+      <SessionTimeoutManager />
     </OrganizationProvider>
   );
 };
@@ -114,7 +128,7 @@ function App() {
   return (
     <Router>
       <AuthProvider>
-        <AppWithSessionTimeout />
+        <AppContent />
       </AuthProvider>
     </Router>
   );
