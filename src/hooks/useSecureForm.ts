@@ -60,11 +60,6 @@ export const useSecureForm = (options: UseSecureFormOptions = {}) => {
       const sanitizedData = validateAndSanitize(data);
       
       if (validationFn && !validationFn(sanitizedData)) {
-        toast({
-          title: "Validation failed",
-          description: "Please check your input and try again.",
-          variant: "destructive",
-        });
         return;
       }
       
