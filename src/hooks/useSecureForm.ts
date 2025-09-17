@@ -50,30 +50,53 @@ export const useSecureForm = (options: UseSecureFormOptions = {}) => {
     data: any,
     validationFn?: (data: any) => boolean
   ) => {
-    if (isSubmitting) return;
+    console.log('🔵 secureSubmit called with data:', data);
     
-    if (!checkRateLimit()) return;
+    if (isSubmitting) {
+      console.log('❌ Already submitting, blocking duplicate submission');
+      return;
+    }
     
+    console.log('🔵 Checking rate limit...');
+    if (!checkRateLimit()) {
+      console.log('❌ Rate limit exceeded');
+      return;
+    }
+    
+    console.log('🔵 Setting isSubmitting to true');
     setIsSubmitting(true);
     
     try {
+      console.log('🔵 Sanitizing data...');
       const sanitizedData = validateAndSanitize(data);
+      console.log('🔵 Sanitized data:', sanitizedData);
       
-      if (validationFn && !validationFn(sanitizedData)) {
-        return;
+      if (validationFn) {
+        console.log('🔵 Running validation function...');
+        const isValid = validationFn(sanitizedData);
+        console.log('🔵 Validation result:', isValid);
+        
+        if (!isValid) {
+          console.log('❌ Validation failed, stopping submission');
+          return;
+        }
       }
       
+      console.log('🔵 Calling submit function...');
       const result = await submitFn(sanitizedData);
+      console.log('🔵 Submit function completed:', result);
+      
       clientRateLimit.reset(rateLimitKey);
       return result;
     } catch (error) {
-      console.error('Secure form submission error:', error);
+      console.error('❌ Secure form submission error:', error);
       toast({
         title: "Submission failed",
         description: "An error occurred. Please try again.",
         variant: "destructive",
       });
     } finally {
+      console.log('🔵 Setting isSubmitting to false');
       setIsSubmitting(false);
     }
   }, [isSubmitting, checkRateLimit, validateAndSanitize, rateLimitKey, toast]);

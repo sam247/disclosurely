@@ -27,11 +27,18 @@ import WhistleblowerMessagingPage from './pages/WhistleblowerMessaging';
 // Component to handle session timeout only for authenticated users
 const SessionTimeoutManager = () => {
   const { user } = useAuth();
+  console.log('🟡 SessionTimeoutManager - user:', user ? 'authenticated' : 'not authenticated');
+  
   const { IdleWarningComponent, AbsoluteWarningComponent } = useSessionTimeout();
+  console.log('🟡 SessionTimeoutManager - timeout components loaded');
 
   // Only show session timeout for authenticated users
-  if (!user) return null;
+  if (!user) {
+    console.log('🟡 SessionTimeoutManager - no user, not showing timeout components');
+    return null;
+  }
 
+  console.log('🟡 SessionTimeoutManager - showing timeout components for authenticated user');
   return (
     <>
       {IdleWarningComponent}

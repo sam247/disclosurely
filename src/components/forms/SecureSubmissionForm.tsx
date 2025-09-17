@@ -80,7 +80,11 @@ const SecureSubmissionForm = ({ linkToken, linkData, brandColor }: SecureSubmiss
   };
 
   const validateForm = (data: any) => {
+    console.log('🔵 Starting form validation...');
+    console.log('🔵 Validation data:', data);
+    
     if (!validateReportTitle(data.title)) {
+      console.log('❌ Title validation failed:', data.title);
       toast({
         title: "Invalid title",
         description: "Title must be between 3 and 200 characters.",
@@ -90,6 +94,7 @@ const SecureSubmissionForm = ({ linkToken, linkData, brandColor }: SecureSubmiss
     }
 
     if (!validateReportDescription(data.description)) {
+      console.log('❌ Description validation failed:', data.description);
       toast({
         title: "Invalid description",
         description: "Description must be between 10 and 5000 characters.",
@@ -99,6 +104,7 @@ const SecureSubmissionForm = ({ linkToken, linkData, brandColor }: SecureSubmiss
     }
 
     if (!data.mainCategory) {
+      console.log('❌ Main category validation failed:', data.mainCategory);
       toast({
         title: "Main category required",
         description: "Please select a main category.",
@@ -108,6 +114,7 @@ const SecureSubmissionForm = ({ linkToken, linkData, brandColor }: SecureSubmiss
     }
 
     if (!data.subCategory) {
+      console.log('❌ Sub category validation failed:', data.subCategory);
       toast({
         title: "Sub category required",
         description: "Please select a sub category.",
@@ -117,6 +124,7 @@ const SecureSubmissionForm = ({ linkToken, linkData, brandColor }: SecureSubmiss
     }
 
     if (data.subCategory === "Other (Please Specify)" && !data.customCategory.trim()) {
+      console.log('❌ Custom category validation failed:', data.customCategory);
       toast({
         title: "Category specification required",
         description: "Please specify the category.",
@@ -125,6 +133,7 @@ const SecureSubmissionForm = ({ linkToken, linkData, brandColor }: SecureSubmiss
       return false;
     }
 
+    console.log('✅ Form validation passed!');
     return true;
   };
 
@@ -201,8 +210,17 @@ const SecureSubmissionForm = ({ linkToken, linkData, brandColor }: SecureSubmiss
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!linkData || !linkToken) return;
+    console.log('🔵 Submit button clicked!');
+    console.log('🔵 Form data:', formData);
+    console.log('🔵 Link data exists:', !!linkData);
+    console.log('🔵 Link token exists:', !!linkToken);
+    
+    if (!linkData || !linkToken) {
+      console.log('❌ Missing linkData or linkToken, stopping submission');
+      return;
+    }
 
+    console.log('🔵 Calling secureSubmit...');
     secureSubmit(submitReport, formData, validateForm);
   };
 
