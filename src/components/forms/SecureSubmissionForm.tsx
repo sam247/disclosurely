@@ -44,6 +44,7 @@ const SecureSubmissionForm = ({ linkToken, linkData, brandColor }: SecureSubmiss
   const { toast } = useToast();
   const [isAnonymous, setIsAnonymous] = useState(true);
   const [attachedFiles, setAttachedFiles] = useState<File[]>([]);
+  const [validationErrors, setValidationErrors] = useState<Record<string, string>>({});
 
   const [formData, setFormData] = useState({
     title: '',
@@ -83,51 +84,40 @@ const SecureSubmissionForm = ({ linkToken, linkData, brandColor }: SecureSubmiss
     console.log('🔵 Starting form validation...');
     console.log('🔵 Validation data:', data);
     
+    const errors: Record<string, string> = {};
+    
     if (!validateReportTitle(data.title)) {
       console.log('❌ Title validation failed:', data.title);
-      toast({
-        title: "Invalid title",
-        description: "Title must be between 3 and 200 characters.",
-        variant: "destructive",
-      });
-      return false;
+      errors.title = "Title must be between 3 and 200 characters.";
     }
 
     if (!validateReportDescription(data.description)) {
       console.log('❌ Description validation failed:', data.description);
-      toast({
-        title: "Invalid description",
-        description: "Description must be between 10 and 5000 characters.",
-        variant: "destructive",
-      });
-      return false;
+      errors.description = "Description must be between 10 and 5000 characters.";
     }
 
     if (!data.mainCategory) {
       console.log('❌ Main category validation failed:', data.mainCategory);
-      toast({
-        title: "Main category required",
-        description: "Please select a main category.",
-        variant: "destructive",
-      });
-      return false;
+      errors.mainCategory = "Please select a main category.";
     }
 
     if (!data.subCategory) {
       console.log('❌ Sub category validation failed:', data.subCategory);
-      toast({
-        title: "Sub category required",
-        description: "Please select a sub category.",
-        variant: "destructive",
-      });
-      return false;
+      errors.subCategory = "Please select a sub category.";
     }
 
     if (data.subCategory === "Other (Please Specify)" && !data.customCategory.trim()) {
       console.log('❌ Custom category validation failed:', data.customCategory);
+      errors.customCategory = "Please specify the category.";
+    }
+
+    setValidationErrors(errors);
+
+    if (Object.keys(errors).length > 0) {
+      console.log('❌ Form validation failed with errors:', errors);
       toast({
-        title: "Category specification required",
-        description: "Please specify the category.",
+        title: "Please fix the following errors:",
+        description: Object.values(errors)[0],
         variant: "destructive",
       });
       return false;
@@ -265,6 +255,7 @@ const SecureSubmissionForm = ({ linkToken, linkData, brandColor }: SecureSubmiss
           <ReportDetailsForm
             formData={formData}
             updateFormData={updateFormData}
+            validationErrors={validationErrors}
           />
 
           {/* File Upload Section */}
