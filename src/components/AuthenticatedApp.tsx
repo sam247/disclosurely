@@ -1,7 +1,7 @@
 
 import { useEffect, useState } from 'react';
 import { useAuth } from '@/hooks/useAuth';
-import { useSessionTimeout } from '@/hooks/useSessionTimeout';
+
 import { supabase } from '@/integrations/supabase/client';
 import Dashboard from './Dashboard';
 import SimpleOrganizationSetup from './SimpleOrganizationSetup';
@@ -12,9 +12,6 @@ const AuthenticatedApp = () => {
   const { toast } = useToast();
   const [profileStatus, setProfileStatus] = useState<'loading' | 'needs_setup' | 'complete'>('loading');
   
-  // Initialize session timeout monitoring and get warning components
-  const { IdleWarningComponent, AbsoluteWarningComponent } = useSessionTimeout();
-
   useEffect(() => {
     if (user) {
       checkUserProfile();
@@ -134,8 +131,6 @@ const AuthenticatedApp = () => {
     return (
       <>
         <SimpleOrganizationSetup onComplete={handleSetupComplete} />
-        {IdleWarningComponent}
-        {AbsoluteWarningComponent}
       </>
     );
   }
@@ -144,8 +139,6 @@ const AuthenticatedApp = () => {
   return (
     <>
       <Dashboard />
-      {IdleWarningComponent}
-      {AbsoluteWarningComponent}
     </>
   );
 };
