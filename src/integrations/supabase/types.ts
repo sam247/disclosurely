@@ -482,6 +482,7 @@ export type Database = {
       }
       email_notifications: {
         Row: {
+          created_at: string
           email_address: string
           id: string
           metadata: Json | null
@@ -489,10 +490,12 @@ export type Database = {
           organization_id: string
           report_id: string | null
           sent_at: string
+          status: string
           subject: string
           user_id: string
         }
         Insert: {
+          created_at?: string
           email_address: string
           id?: string
           metadata?: Json | null
@@ -500,10 +503,12 @@ export type Database = {
           organization_id: string
           report_id?: string | null
           sent_at?: string
+          status?: string
           subject: string
           user_id: string
         }
         Update: {
+          created_at?: string
           email_address?: string
           id?: string
           metadata?: Json | null
@@ -511,6 +516,7 @@ export type Database = {
           organization_id?: string
           report_id?: string | null
           sent_at?: string
+          status?: string
           subject?: string
           user_id?: string
         }
