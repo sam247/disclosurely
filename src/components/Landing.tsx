@@ -4,17 +4,17 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Link } from 'react-router-dom';
 import { Footer } from '@/components/ui/footer';
-import AnonymousReportingArt from '@/components/artwork/AnonymousReportingArt';
-import EncryptionArt from '@/components/artwork/EncryptionArt';
-import SecureMessagingArt from '@/components/artwork/SecureMessagingArt';
-import ComplianceArt from '@/components/artwork/ComplianceArt';
-import UnlimitedScaleArt from '@/components/artwork/UnlimitedScaleArt';
 import anonymousReportingIcon from '@/assets/icons/anonymous_reporting.png';
 import secureMessagingIcon from '@/assets/icons/secure_messaging.png';
 import caseManagementIcon from '@/assets/icons/case_management.png';
 import multiUserAccessIcon from '@/assets/icons/multi-user_access.png';
 import regulatoryComplianceIcon from '@/assets/icons/regulatory_compliance.png';
 import enterpriseSecurityIcon from '@/assets/icons/enterprise_security.png';
+import anonymousReportingArtwork from '@/assets/artwork/anonymous_reporting_made_simple.png';
+import militaryGradeEncryptionArtwork from '@/assets/artwork/military_grade_encryption.png';
+import complianceMadeEasyArtwork from '@/assets/artwork/compliance_made_easy.png';
+import secureTwoWayCommArtwork from '@/assets/artwork/secure_two_way_communication.png';
+import aiPoweredCaseAnalysisArtwork from '@/assets/artwork/ai_powered_case_analysis.png';
 import iso27001Badge from "/lovable-uploads/9762866a-d8d9-4860-bf30-3ffd178885a8.png";
 import gdprBadge from "/lovable-uploads/70aa6ac0-c161-4167-921d-79f08f6f4b02.png";
 import aicpaBadge from "/lovable-uploads/a9716d48-ff27-4193-b51c-9b035d1692b0.png";
@@ -239,7 +239,9 @@ const Landing = () => {
               </ul>
             </div>
             <div>
-              <AnonymousReportingArt />
+              <div className="w-full h-64 flex items-center justify-center rounded-lg">
+                <img src={anonymousReportingArtwork} alt="Anonymous Reporting Made Simple" className="w-full h-full object-contain" />
+              </div>
             </div>
           </div>
         </div>
@@ -250,7 +252,9 @@ const Landing = () => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid lg:grid-cols-2 gap-12 items-center">
             <div className="order-2 lg:order-1">
-              <EncryptionArt />
+              <div className="w-full h-64 flex items-center justify-center rounded-lg">
+                <img src={militaryGradeEncryptionArtwork} alt="Military-Grade Encryption" className="w-full h-full object-contain" />
+              </div>
             </div>
             <div className="order-1 lg:order-2">
               <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-6">
@@ -305,7 +309,9 @@ const Landing = () => {
               </ul>
             </div>
             <div>
-              <ComplianceArt />
+              <div className="w-full h-64 flex items-center justify-center rounded-lg">
+                <img src={complianceMadeEasyArtwork} alt="Compliance Made Easy" className="w-full h-full object-contain" />
+              </div>
             </div>
           </div>
         </div>
@@ -316,7 +322,9 @@ const Landing = () => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid lg:grid-cols-2 gap-12 items-center">
             <div className="order-2 lg:order-1">
-              <SecureMessagingArt />
+              <div className="w-full h-64 flex items-center justify-center rounded-lg">
+                <img src={secureTwoWayCommArtwork} alt="Secure Two-Way Communication" className="w-full h-full object-contain" />
+              </div>
             </div>
             <div className="order-1 lg:order-2">
               <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-6">
@@ -371,12 +379,8 @@ const Landing = () => {
               </ul>
             </div>
             <div>
-              <div className="bg-gradient-to-br from-blue-50 to-indigo-100 p-8 rounded-2xl">
-                <BarChart3 className="h-48 w-48 text-blue-600 mx-auto mb-4" />
-                <div className="text-center">
-                  <div className="text-sm font-medium text-blue-800 mb-2">Intelligent Analytics</div>
-                  <div className="text-xs text-blue-600">Automated case insights and patterns</div>
-                </div>
+              <div className="w-full h-64 flex items-center justify-center rounded-lg">
+                <img src={aiPoweredCaseAnalysisArtwork} alt="AI-Powered Case Analysis" className="w-full h-full object-contain" />
               </div>
             </div>
           </div>
