@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Link } from 'react-router-dom';
 import { Footer } from '@/components/ui/footer';
+import CookieConsentBanner from '@/components/CookieConsentBanner';
 import anonymousReportingIcon from '@/assets/icons/anonymous_reporting.png';
 import secureMessagingIcon from '@/assets/icons/secure_messaging.png';
 import caseManagementIcon from '@/assets/icons/case_management.png';
@@ -658,6 +659,7 @@ const Landing = () => {
         </div>
       </div>
 
+      <CookieConsentBanner />
       <Footer />
     </div>
   );
