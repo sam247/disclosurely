@@ -1,5 +1,5 @@
 
-import { Shield, CheckCircle, MessageSquare, BarChart3, Users, Lock, X } from 'lucide-react';
+import { Shield, CheckCircle, BarChart3, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Link } from 'react-router-dom';
@@ -9,6 +9,12 @@ import EncryptionArt from '@/components/artwork/EncryptionArt';
 import SecureMessagingArt from '@/components/artwork/SecureMessagingArt';
 import ComplianceArt from '@/components/artwork/ComplianceArt';
 import UnlimitedScaleArt from '@/components/artwork/UnlimitedScaleArt';
+import anonymousReportingIcon from '@/assets/icons/anonymous_reporting.png';
+import secureMessagingIcon from '@/assets/icons/secure_messaging.png';
+import caseManagementIcon from '@/assets/icons/case_management.png';
+import multiUserAccessIcon from '@/assets/icons/multi-user_access.png';
+import regulatoryComplianceIcon from '@/assets/icons/regulatory_compliance.png';
+import enterpriseSecurityIcon from '@/assets/icons/enterprise_security.png';
 import iso27001Badge from "/lovable-uploads/9762866a-d8d9-4860-bf30-3ffd178885a8.png";
 import gdprBadge from "/lovable-uploads/70aa6ac0-c161-4167-921d-79f08f6f4b02.png";
 import aicpaBadge from "/lovable-uploads/a9716d48-ff27-4193-b51c-9b035d1692b0.png";
@@ -121,8 +127,8 @@ const Landing = () => {
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-8">
             <Card className="text-center">
               <CardHeader>
-                <div className="mx-auto mb-4 p-3 bg-blue-100 rounded-full w-fit">
-                  <Shield className="h-8 w-8 text-blue-600" />
+                <div className="mx-auto mb-4 w-16 h-16">
+                  <img src={anonymousReportingIcon} alt="Anonymous Reporting" className="w-full h-full object-contain" />
                 </div>
                 <CardTitle className="text-xl sm:text-2xl">Anonymous Reporting</CardTitle>
               </CardHeader>
@@ -135,8 +141,8 @@ const Landing = () => {
 
             <Card className="text-center">
               <CardHeader>
-                <div className="mx-auto mb-4 p-3 bg-blue-100 rounded-full w-fit">
-                  <MessageSquare className="h-8 w-8 text-blue-600" />
+                <div className="mx-auto mb-4 w-16 h-16">
+                  <img src={secureMessagingIcon} alt="Secure Messaging" className="w-full h-full object-contain" />
                 </div>
                 <CardTitle className="text-xl sm:text-2xl">Secure Messaging</CardTitle>
               </CardHeader>
@@ -149,8 +155,8 @@ const Landing = () => {
 
             <Card className="text-center">
               <CardHeader>
-                <div className="mx-auto mb-4 p-3 bg-blue-100 rounded-full w-fit">
-                  <BarChart3 className="h-8 w-8 text-blue-600" />
+                <div className="mx-auto mb-4 w-16 h-16">
+                  <img src={caseManagementIcon} alt="Case Management" className="w-full h-full object-contain" />
                 </div>
                 <CardTitle className="text-xl sm:text-2xl">Case Management</CardTitle>
               </CardHeader>
@@ -163,8 +169,8 @@ const Landing = () => {
 
             <Card className="text-center">
               <CardHeader>
-                <div className="mx-auto mb-4 p-3 bg-blue-100 rounded-full w-fit">
-                  <Users className="h-8 w-8 text-blue-600" />
+                <div className="mx-auto mb-4 w-16 h-16">
+                  <img src={multiUserAccessIcon} alt="Multi-User Access" className="w-full h-full object-contain" />
                 </div>
                 <CardTitle className="text-xl sm:text-2xl">Multi-User Access</CardTitle>
               </CardHeader>
@@ -177,8 +183,8 @@ const Landing = () => {
 
             <Card className="text-center">
               <CardHeader>
-                <div className="mx-auto mb-4 p-3 bg-blue-100 rounded-full w-fit">
-                  <CheckCircle className="h-8 w-8 text-blue-600" />
+                <div className="mx-auto mb-4 w-16 h-16">
+                  <img src={regulatoryComplianceIcon} alt="Regulatory Compliance" className="w-full h-full object-contain" />
                 </div>
                 <CardTitle className="text-xl sm:text-2xl">Regulatory Compliance</CardTitle>
               </CardHeader>
@@ -191,8 +197,8 @@ const Landing = () => {
 
             <Card className="text-center">
               <CardHeader>
-                <div className="mx-auto mb-4 p-3 bg-blue-100 rounded-full w-fit">
-                  <Lock className="h-8 w-8 text-blue-600" />
+                <div className="mx-auto mb-4 w-16 h-16">
+                  <img src={enterpriseSecurityIcon} alt="Enterprise Security" className="w-full h-full object-contain" />
                 </div>
                 <CardTitle className="text-xl sm:text-2xl">Enterprise Security</CardTitle>
               </CardHeader>
