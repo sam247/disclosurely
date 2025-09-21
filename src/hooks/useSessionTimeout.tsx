@@ -140,16 +140,13 @@ export const useSessionTimeout = () => {
     }, ABSOLUTE_TIMEOUT);
   }, [user, session, signOut, toast, showAbsoluteTimeoutWarning, showAbsoluteWarning]);
 
-  // Countdown effect for warnings (pause when tab is hidden)
+  // Countdown effect for warnings (continues counting even when tab is hidden for regulatory compliance)
   useEffect(() => {
     let interval: NodeJS.Timeout | undefined;
-
-    const isVisible = () => typeof document !== 'undefined' && document.visibilityState === 'visible';
     
     if (showIdleWarning && idleTimeRemaining > 0) {
       interval = setInterval(() => {
         setIdleTimeRemaining(prev => {
-          if (!isVisible()) return prev; // pause countdown while hidden
           if (prev <= 1) {
             setShowIdleWarning(false);
             signOut();
@@ -163,7 +160,6 @@ export const useSessionTimeout = () => {
     if (showAbsoluteWarning && absoluteTimeRemaining > 0) {
       interval = setInterval(() => {
         setAbsoluteTimeRemaining(prev => {
-          if (!isVisible()) return prev; // pause countdown while hidden
           if (prev <= 1) {
             setShowAbsoluteWarning(false);
             signOut();
