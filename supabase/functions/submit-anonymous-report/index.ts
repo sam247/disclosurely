@@ -192,13 +192,17 @@ serve(async (req) => {
         await supabaseAdmin
           .from('email_notifications')
           .insert({
+            user_id: null,
             organization_id: linkData.organization_id,
             report_id: report[0].id,
+            email_address: 'system@notifications.com',
+            subject: 'Failed to send new report notification',
             notification_type: 'new_report_failed',
-            error_message: notificationResponse.error.message || 'Unknown error',
+            status: 'failed',
             metadata: { 
               attempted_at: new Date().toISOString(),
-              error_details: notificationResponse.error
+              error_details: notificationResponse.error,
+              error_message: notificationResponse.error.message || 'Unknown error'
             }
           })
       } else {
@@ -210,13 +214,17 @@ serve(async (req) => {
       await supabaseAdmin
         .from('email_notifications')
         .insert({
+          user_id: null,
           organization_id: linkData.organization_id,
           report_id: report[0].id,
+          email_address: 'system@notifications.com',
+          subject: 'Failed to invoke email notification service',
           notification_type: 'new_report_failed',
-          error_message: emailError.message || 'Failed to invoke email service',
+          status: 'failed',
           metadata: { 
             attempted_at: new Date().toISOString(),
-            error_details: emailError.toString()
+            error_details: emailError.toString(),
+            error_message: emailError.message || 'Failed to invoke email service'
           }
         })
     }
