@@ -3,7 +3,7 @@ import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 import { Resend } from "npm:resend@2.0.0"
 
 const corsHeaders = {
-  'Access-Control-Allow-Origin': 'https://disclosurely.com, https://*.disclosurely.com, https://app.disclosurely.com',
+  'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 }
 
@@ -29,27 +29,31 @@ serve(async (req) => {
     const { reportId } = await req.json()
     console.log('Sending notification emails for report:', reportId)
 
-    // Get report details and organization
-    const { data: report, error: reportError } = await supabaseAdmin
-      .from('reports')
-      .select(`
-        id,
-        title,
-        tracking_id,
-        report_type,
-        organization_id,
-        organizations!inner(name, brand_color)
-      `)
-      .eq('id', reportId)
-      .single()
+// Get report details first (no FK join)
+const { data: report, error: reportError } = await supabaseAdmin
+  .from('reports')
+  .select('id, title, tracking_id, report_type, organization_id')
+  .eq('id', reportId)
+  .maybeSingle()
 
-    if (reportError || !report) {
-      console.error('Failed to fetch report:', reportError)
-      return new Response(JSON.stringify({ error: 'Report not found' }), {
-        status: 404,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-      })
-    }
+if (reportError || !report) {
+  console.error('Failed to fetch report:', reportError)
+  return new Response(JSON.stringify({ error: 'Report not found' }), {
+    status: 404,
+    headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+  })
+}
+
+// Fetch organization branding separately
+const { data: org, error: orgError } = await supabaseAdmin
+  .from('organizations')
+  .select('name, brand_color')
+  .eq('id', report.organization_id)
+  .maybeSingle()
+
+if (orgError) {
+  console.error('Failed to fetch organization for report:', orgError)
+}
 
     // Get users to notify
     const { data: users, error: usersError } = await supabaseAdmin
@@ -67,23 +71,31 @@ serve(async (req) => {
       })
     }
 
+    // If no recipients, short-circuit gracefully
+    if (!users || users.length === 0) {
+      console.warn('No active recipients found for organization:', report.organization_id)
+      return new Response(JSON.stringify({ success: true, sent: 0, failed: 0, reason: 'no_recipients' }), {
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+      })
+    }
+
     // Send emails to each user
     const emailPromises = users?.map(async (user) => {
       try {
         const emailResponse = await resend.emails.send({
-          from: 'Disclosurely <notifications@disclosurely.com>',
+          from: 'Disclosurely <support@disclosurely.com>',
           to: [user.email],
           subject: `New Report: ${report.title}`,
           html: `
             <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-              <div style="background-color: ${report.organizations.brand_color || '#2563eb'}; color: white; padding: 20px; text-align: center;">
+              <div style="background-color: ${org?.brand_color || '#2563eb'}; color: white; padding: 20px; text-align: center;">
                 <h1>New Report Submitted</h1>
               </div>
               <div style="padding: 30px; background-color: #f9fafb;">
                 <p>Hello ${user.first_name || 'Team Member'},</p>
-                <p>A new report has been submitted to ${report.organizations.name}:</p>
+                <p>A new report has been submitted to ${org?.name || 'your organization'}:</p>
                 
-                <div style="background-color: white; padding: 20px; border-radius: 8px; margin: 20px 0; border-left: 4px solid ${report.organizations.brand_color || '#2563eb'};">
+                <div style="background-color: white; padding: 20px; border-radius: 8px; margin: 20px 0; border-left: 4px solid ${org?.brand_color || '#2563eb'};">
                   <h3 style="margin-top: 0;">${report.title}</h3>
                   <p><strong>Tracking ID:</strong> ${report.tracking_id}</p>
                   <p><strong>Report Type:</strong> ${report.report_type}</p>
@@ -93,7 +105,7 @@ serve(async (req) => {
                 
                 <div style="text-align: center; margin: 30px 0;">
                   <a href="https://app.disclosurely.com/dashboard" 
-                     style="background-color: ${report.organizations.brand_color || '#2563eb'}; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; display: inline-block;">
+                     style="background-color: ${org?.brand_color || '#2563eb'}; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; display: inline-block;">
                     View Dashboard
                   </a>
                 </div>
