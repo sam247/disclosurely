@@ -71,20 +71,62 @@ if (orgError) {
       })
     }
 
-    // If no recipients, short-circuit gracefully
-    if (!users || users.length === 0) {
-      console.warn('No active recipients found for organization:', report.organization_id)
-      return new Response(JSON.stringify({ success: true, sent: 0, failed: 0, reason: 'no_recipients' }), {
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-      })
+    // If no primary recipients, try fallbacks
+    let recipientEmails = []
+    if (users && users.length > 0) {
+      recipientEmails = users.map(user => ({ email: user.email, name: user.first_name || 'Team Member', source: 'org_member' }))
+    } else {
+      console.warn('No active org members found, trying fallbacks for organization:', report.organization_id)
+      
+      // Fallback A: Check organization notification email
+      if (org?.settings?.notification_email) {
+        recipientEmails.push({ email: org.settings.notification_email, name: 'Admin', source: 'org_notification' })
+        console.log('Using organization notification email:', org.settings.notification_email)
+      }
+      
+      // Fallback B: Check subscribed admins  
+      if (recipientEmails.length === 0) {
+        const { data: subscribers } = await supabaseAdmin
+          .from('subscribers')
+          .select('email, user_id')
+          .eq('subscribed', true)
+          .not('user_id', 'is', null)
+        
+        if (subscribers && subscribers.length > 0) {
+          // Check which subscribers are admins for this organization
+          const { data: adminProfiles } = await supabaseAdmin
+            .from('profiles')
+            .select('id, email, first_name')
+            .eq('organization_id', report.organization_id)
+            .eq('role', 'admin')
+            .in('id', subscribers.map(s => s.user_id))
+          
+          if (adminProfiles && adminProfiles.length > 0) {
+            recipientEmails = adminProfiles.map(admin => ({ 
+              email: admin.email, 
+              name: admin.first_name || 'Admin', 
+              source: 'subscribed_admin' 
+            }))
+            console.log('Using subscribed admin emails:', recipientEmails.map(r => r.email))
+          }
+        }
+      }
+      
+      // If still no recipients, log and return
+      if (recipientEmails.length === 0) {
+        console.error('No email recipients found after all fallbacks for organization:', report.organization_id)
+        return new Response(JSON.stringify({ success: true, sent: 0, failed: 0, reason: 'no_recipients' }), {
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+        })
+      }
     }
 
-    // Send emails to each user
-    const emailPromises = users?.map(async (user) => {
+    // Send emails to each recipient
+    const emailPromises = recipientEmails.map(async (recipient) => {
       try {
         const emailResponse = await resend.emails.send({
           from: 'Disclosurely <support@disclosurely.com>',
-          to: [user.email],
+          to: [recipient.email],
           subject: `New Report: ${report.title}`,
           html: `
             <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
@@ -92,7 +134,7 @@ if (orgError) {
                 <h1>New Report Submitted</h1>
               </div>
               <div style="padding: 30px; background-color: #f9fafb;">
-                <p>Hello ${user.first_name || 'Team Member'},</p>
+                <p>Hello ${recipient.name},</p>
                 <p>A new report has been submitted to ${org?.name || 'your organization'}:</p>
                 
                 <div style="background-color: white; padding: 20px; border-radius: 8px; margin: 20px 0; border-left: 4px solid ${org?.brand_color || '#2563eb'};">
@@ -118,29 +160,34 @@ if (orgError) {
           `,
         })
 
-        // Log successful email notification
+        // Log successful email notification  
+        const relatedUserId = recipient.source === 'org_member' 
+          ? users?.find(u => u.email === recipient.email)?.id 
+          : null;
+          
         await supabaseAdmin
           .from('email_notifications')
           .insert({
-            user_id: user.id,
+            user_id: relatedUserId,
             organization_id: report.organization_id,
             report_id: reportId,
             notification_type: 'new_report',
-            email_address: user.email,
+            email_address: recipient.email,
             subject: `New Report: ${report.title}`,
             metadata: {
               resend_id: emailResponse.data?.id,
-              tracking_id: report.tracking_id
+              tracking_id: report.tracking_id,
+              recipient_source: recipient.source
             }
           })
 
-        console.log(`Email sent to ${user.email}:`, emailResponse.data?.id)
-        return { success: true, user: user.email, id: emailResponse.data?.id }
+        console.log(`Email sent to ${recipient.email} (${recipient.source}):`, emailResponse.data?.id)
+        return { success: true, user: recipient.email, id: emailResponse.data?.id, source: recipient.source }
       } catch (error) {
-        console.error(`Failed to send email to ${user.email}:`, error)
-        return { success: false, user: user.email, error: error.message }
+        console.error(`Failed to send email to ${recipient.email}:`, error)
+        return { success: false, user: recipient.email, error: error.message, source: recipient.source }
       }
-    }) || []
+    })
 
     const results = await Promise.all(emailPromises)
     const successful = results.filter(r => r.success).length
