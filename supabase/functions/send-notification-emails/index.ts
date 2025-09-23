@@ -28,6 +28,7 @@ serve(async (req) => {
 
     const { reportId } = await req.json()
     console.log('Sending notification emails for report:', reportId)
+    console.log('RESEND key present:', Boolean(Deno.env.get('RESEND_API_KEY')))
 
 // Get report details first (no FK join)
 const { data: report, error: reportError } = await supabaseAdmin
@@ -121,6 +122,8 @@ if (orgError) {
         })
       }
     }
+
+    console.log('Resolved recipients:', recipientEmails)
 
     // Send emails to each recipient
     const emailPromises = recipientEmails.map(async (recipient) => {
