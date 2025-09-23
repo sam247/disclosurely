@@ -774,6 +774,7 @@ export type Database = {
           is_active: boolean | null
           logo_url: string | null
           name: string
+          notification_email: string | null
           settings: Json | null
           updated_at: string
         }
@@ -791,6 +792,7 @@ export type Database = {
           is_active?: boolean | null
           logo_url?: string | null
           name: string
+          notification_email?: string | null
           settings?: Json | null
           updated_at?: string
         }
@@ -808,6 +810,7 @@ export type Database = {
           is_active?: boolean | null
           logo_url?: string | null
           name?: string
+          notification_email?: string | null
           settings?: Json | null
           updated_at?: string
         }

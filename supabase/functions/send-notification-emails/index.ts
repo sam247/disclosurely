@@ -47,7 +47,7 @@ if (reportError || !report) {
 // Fetch organization branding separately
 const { data: org, error: orgError } = await supabaseAdmin
   .from('organizations')
-  .select('name, brand_color')
+  .select('name, brand_color, notification_email, settings')
   .eq('id', report.organization_id)
   .maybeSingle()
 
@@ -79,9 +79,10 @@ if (orgError) {
       console.warn('No active org members found, trying fallbacks for organization:', report.organization_id)
       
       // Fallback A: Check organization notification email
-      if (org?.settings?.notification_email) {
-        recipientEmails.push({ email: org.settings.notification_email, name: 'Admin', source: 'org_notification' })
-        console.log('Using organization notification email:', org.settings.notification_email)
+      const notificationEmail = org?.notification_email || org?.settings?.notification_email;
+      if (notificationEmail) {
+        recipientEmails.push({ email: notificationEmail, name: 'Admin', source: 'org_notification' })
+        console.log('Using organization notification email:', notificationEmail)
       }
       
       // Fallback B: Check subscribed admins  
