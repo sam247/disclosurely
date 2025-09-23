@@ -161,6 +161,40 @@ if (orgError) {
           `,
         })
 
+        // Log full Resend response for debugging
+        console.log('Resend response for', recipient.email, JSON.stringify(emailResponse))
+
+        // Treat missing ID or explicit error as failure
+        if (!emailResponse?.data?.id) {
+          const errMsg = emailResponse?.error?.message || 'Resend did not return a message ID';
+          console.error('Resend send failure', { recipient: recipient.email, error: emailResponse?.error })
+
+          const relatedUserIdOnFailure = recipient.source === 'org_member'
+            ? users?.find(u => u.email === recipient.email)?.id
+            : null;
+
+          // Record failure for observability
+          await supabaseAdmin
+            .from('email_notifications')
+            .insert({
+              user_id: relatedUserIdOnFailure,
+              organization_id: report.organization_id,
+              report_id: reportId,
+              notification_type: 'new_report',
+              email_address: recipient.email,
+              subject: `New Report: ${report.title}`,
+              status: 'failed',
+              metadata: {
+                error: emailResponse?.error || errMsg,
+                tracking_id: report.tracking_id,
+                recipient_source: recipient.source
+              }
+            })
+
+          // Throw to fall into catch return format
+          throw new Error(errMsg)
+        }
+
         // Log successful email notification  
         const relatedUserId = recipient.source === 'org_member' 
           ? users?.find(u => u.email === recipient.email)?.id 
@@ -175,16 +209,17 @@ if (orgError) {
             notification_type: 'new_report',
             email_address: recipient.email,
             subject: `New Report: ${report.title}`,
+            status: 'sent',
             metadata: {
-              resend_id: emailResponse.data?.id,
+              resend_id: emailResponse.data.id,
               tracking_id: report.tracking_id,
               recipient_source: recipient.source
             }
           })
 
-        console.log(`Email sent to ${recipient.email} (${recipient.source}):`, emailResponse.data?.id)
-        return { success: true, user: recipient.email, id: emailResponse.data?.id, source: recipient.source }
-      } catch (error) {
+        console.log(`Email sent to ${recipient.email} (${recipient.source}):`, emailResponse.data.id)
+        return { success: true, user: recipient.email, id: emailResponse.data.id, source: recipient.source }
+      } catch (error: any) {
         console.error(`Failed to send email to ${recipient.email}:`, error)
         return { success: false, user: recipient.email, error: error.message, source: recipient.source }
       }
