@@ -1,18 +1,12 @@
 import { Link } from 'react-router-dom';
 import { SystemStatusIndicator } from '@/components/SystemStatusIndicator';
-
 export const Footer = () => {
-  return (
-    <footer className="bg-gray-900 text-white">
+  return <footer className="bg-gray-900 text-white">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
           <div className="col-span-1">
             <div className="flex items-center space-x-3 mb-4">
-              <img 
-                src="/lovable-uploads/416d39db-53ff-402e-a2cf-26d1a3618601.png" 
-                alt="Disclosurely" 
-                className="h-8 w-auto"
-              />
+              <img src="/lovable-uploads/416d39db-53ff-402e-a2cf-26d1a3618601.png" alt="Disclosurely" className="h-7 w-auto" />
             </div>
             <p className="text-gray-400 mb-4">
               Secure whistleblowing platform for organizations. Anonymous reporting, 
@@ -56,6 +50,5 @@ export const Footer = () => {
           <p>© 2025 Disclosurely. All rights reserved. <Link to="/compliance-software" className="hover:text-white">Compliance Software</Link>. Powered by <a href="https://betterranking.co.uk/?utm_source=footer&utm_medium=internal&utm_campaign=disclosurely&utm_id=links" target="_blank" rel="noopener noreferrer" className="hover:text-white">Better Ranking</a>.</p>
         </div>
       </div>
-    </footer>
-  );
+    </footer>;
 };
