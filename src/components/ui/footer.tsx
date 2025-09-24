@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom';
+import { SystemStatusIndicator } from '@/components/SystemStatusIndicator';
 
 export const Footer = () => {
   return (
@@ -46,6 +47,7 @@ export const Footer = () => {
               <li><a href="#" className="text-gray-400 hover:text-white">Support</a></li>
               <li><a href="#" className="text-gray-400 hover:text-white">Privacy Policy</a></li>
               <li><a href="#" className="text-gray-400 hover:text-white">Terms of Service</a></li>
+              <li><SystemStatusIndicator /></li>
             </ul>
           </div>
         </div>
