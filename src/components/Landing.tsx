@@ -1,4 +1,3 @@
-
 import { Shield, CheckCircle, BarChart3, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -25,21 +24,15 @@ import innovateLogo from "@/assets/logos/innovate-logo.png";
 import horizonLogo from "@/assets/logos/horizon-logo.png";
 import metroSyncLogo from "@/assets/logos/metrosync-logo-clean.png";
 import prismLogo from "@/assets/logos/prism-logo-clean.png";
-
 const Landing = () => {
-  return (
-    <div className="min-h-screen bg-white">
+  return <div className="min-h-screen bg-white">
       {/* Navigation */}
       <nav className="bg-white shadow-sm sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center py-4">
             <div className="flex items-center">
               <Link to="/" className="flex items-center space-x-3">
-                <img 
-                  src="/lovable-uploads/c46ace0e-df58-4119-b5e3-8dcfa075ea2f.png" 
-                  alt="Disclosurely" 
-                  className="h-6 md:h-8 w-auto"
-                />
+                <img src="/lovable-uploads/c46ace0e-df58-4119-b5e3-8dcfa075ea2f.png" alt="Disclosurely" className="h-7 md:h-8 w-auto" />
               </Link>
             </div>
             <div className="hidden md:flex items-center space-x-8">
@@ -546,9 +539,7 @@ const Landing = () => {
             <Card>
               <CardContent className="p-6">
                 <div className="flex mb-4">
-                  {[...Array(5)].map((_, i) => (
-                    <span key={i} className="text-yellow-400 text-lg">★</span>
-                  ))}
+                  {[...Array(5)].map((_, i) => <span key={i} className="text-yellow-400 text-lg">★</span>)}
                 </div>
                 <p className="text-gray-600 mb-4">
                   "Disclosurely has transformed how we handle sensitive reports. The anonymous messaging feature is particularly valuable."
@@ -561,9 +552,7 @@ const Landing = () => {
             <Card>
               <CardContent className="p-6">
                 <div className="flex mb-4">
-                  {[...Array(5)].map((_, i) => (
-                    <span key={i} className="text-yellow-400 text-lg">★</span>
-                  ))}
+                  {[...Array(5)].map((_, i) => <span key={i} className="text-yellow-400 text-lg">★</span>)}
                 </div>
                 <p className="text-gray-600 mb-4">
                   "The platform is intuitive and secure. Our employees feel confident reporting issues, and we can investigate them effectively."
@@ -576,9 +565,7 @@ const Landing = () => {
             <Card>
               <CardContent className="p-6">
                 <div className="flex mb-4">
-                  {[...Array(5)].map((_, i) => (
-                    <span key={i} className="text-yellow-400 text-lg">★</span>
-                  ))}
+                  {[...Array(5)].map((_, i) => <span key={i} className="text-yellow-400 text-lg">★</span>)}
                 </div>
                 <p className="text-gray-600 mb-4">
                   "Implementation was seamless and the support team was excellent. Highly recommend for any organization serious about compliance."
@@ -607,11 +594,7 @@ const Landing = () => {
           <div className="flex flex-col sm:flex-row items-center justify-center gap-8 sm:gap-12">
             <div className="text-center">
               <div className="bg-white border border-gray-200 rounded-2xl p-6 shadow-sm hover:shadow-lg transition-shadow">
-                <img 
-                  src="/lovable-uploads/9762866a-d8d9-4860-bf30-3ffd178885a8.png" 
-                  alt="ISO 27001 Certification" 
-                  className="h-16 w-16 mx-auto mb-3"
-                />
+                <img src="/lovable-uploads/9762866a-d8d9-4860-bf30-3ffd178885a8.png" alt="ISO 27001 Certification" className="h-16 w-16 mx-auto mb-3" />
                 <h3 className="font-semibold text-gray-900 mb-1">ISO 27001</h3>
                 <p className="text-sm text-gray-600">Information Security Management</p>
               </div>
@@ -619,11 +602,7 @@ const Landing = () => {
             
             <div className="text-center">
               <div className="bg-white border border-gray-200 rounded-2xl p-6 shadow-sm hover:shadow-lg transition-shadow">
-                <img 
-                  src="/lovable-uploads/70aa6ac0-c161-4167-921d-79f08f6f4b02.png" 
-                  alt="GDPR Compliant" 
-                  className="h-16 w-16 mx-auto mb-3"
-                />
+                <img src="/lovable-uploads/70aa6ac0-c161-4167-921d-79f08f6f4b02.png" alt="GDPR Compliant" className="h-16 w-16 mx-auto mb-3" />
                 <h3 className="font-semibold text-gray-900 mb-1">GDPR</h3>
                 <p className="text-sm text-gray-600">Data Protection Compliance</p>
               </div>
@@ -631,11 +610,7 @@ const Landing = () => {
             
             <div className="text-center">
               <div className="bg-white border border-gray-200 rounded-2xl p-6 shadow-sm hover:shadow-lg transition-shadow">
-                <img 
-                  src="/lovable-uploads/a9716d48-ff27-4193-b51c-9b035d1692b0.png" 
-                  alt="AICPA SOC" 
-                  className="h-16 w-16 mx-auto mb-3"
-                />
+                <img src="/lovable-uploads/a9716d48-ff27-4193-b51c-9b035d1692b0.png" alt="AICPA SOC" className="h-16 w-16 mx-auto mb-3" />
                 <h3 className="font-semibold text-gray-900 mb-1">AICPA SOC</h3>
                 <p className="text-sm text-gray-600">Service Organization Controls</p>
               </div>
@@ -661,8 +636,6 @@ const Landing = () => {
 
       <CookieConsentBanner />
       <Footer />
-    </div>
-  );
+    </div>;
 };
-
 export default Landing;
