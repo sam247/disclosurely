@@ -1,6 +1,6 @@
 
 import { ReactNode } from 'react';
-import { Navigate } from 'react-router-dom';
+import { Navigate, useLocation } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import AuthenticatedApp from './AuthenticatedApp';
 
@@ -10,6 +10,7 @@ interface ProtectedRouteProps {
 
 const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
   const { user, loading } = useAuth();
+  const location = useLocation();
 
   if (loading) {
     return (
@@ -23,8 +24,12 @@ const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
     return <Navigate to="/login" replace />;
   }
 
-  // For dashboard route, always use AuthenticatedApp which handles setup flow
-  return <AuthenticatedApp />;
+  // Use AuthenticatedApp for app/dashboard shells, otherwise render the requested page
+  if (location.pathname.startsWith('/app') || location.pathname.startsWith('/dashboard')) {
+    return <AuthenticatedApp />;
+  }
+
+  return <>{children}</>;
 };
 
 export default ProtectedRoute;
