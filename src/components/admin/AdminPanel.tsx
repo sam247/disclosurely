@@ -8,10 +8,22 @@ import { BlogEditor } from './BlogEditor';
 import { useOrganization } from '@/hooks/useOrganization';
 
 export const AdminPanel = () => {
-  const { profile } = useOrganization();
+  const { profile, loading } = useOrganization();
+
+  // Debug logging
+  console.log('AdminPanel - Profile:', profile);
+  console.log('AdminPanel - Loading:', loading);
 
   // Check if user has admin permissions
   const isAdmin = profile?.role === 'admin' || profile?.role === 'org_admin';
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+      </div>
+    );
+  }
 
   if (!isAdmin) {
     return (
