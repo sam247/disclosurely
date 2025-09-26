@@ -25,6 +25,9 @@ import horizonLogo from "@/assets/logos/horizon-logo.png";
 import metroSyncLogo from "@/assets/logos/metrosync-logo-clean.png";
 import prismLogo from "@/assets/logos/prism-logo-clean.png";
 const Landing = () => {
+  // For now, return static content since public landing doesn't have auth context
+  // The admin panel will manage authenticated organization content
+  
   return <div className="min-h-screen bg-white">
       {/* Navigation */}
       <nav className="bg-white shadow-sm sticky top-0 z-50">

@@ -1,5 +1,5 @@
 
-import Landing from './Landing';
+import ContentManagedLanding from './ContentManagedLanding';
 
 /**
  * PROTECTED COMPONENT - DO NOT MODIFY WITHOUT EXPLICIT USER REQUEST
@@ -10,7 +10,7 @@ import Landing from './Landing';
  * Protected by: ProtectedLanding wrapper
  */
 const ProtectedLanding = () => {
-  return <Landing />;
+  return <ContentManagedLanding />;
 };
 
 export default ProtectedLanding;
