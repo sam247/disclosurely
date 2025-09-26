@@ -12,6 +12,7 @@ import Signup from './pages/Signup';
 import NotFound from './pages/NotFound';
 import Pricing from './pages/Pricing';
 import Contact from './pages/Contact';
+import Terms from './pages/Terms';
 import VsSpeakUp from './pages/VsSpeakUp';
 import VsWhistleblowerSoftware from './pages/VsWhistleblowerSoftware';
 import ComplianceSoftware from './pages/ComplianceSoftware';
@@ -56,10 +57,11 @@ const AppContent = () => {
         {/* Public routes */}
         <Route path="/" element={<Index />} />
         <Route path="/pricing" element={<Pricing />} />
-        <Route path="/contact" element={<Contact />} />
-        <Route path="/vs-speakup" element={<VsSpeakUp />} />
-        <Route path="/vs-whistleblower-software" element={<VsWhistleblowerSoftware />} />
-        <Route path="/compliance-software" element={<ComplianceSoftware />} />
+          <Route path="/contact" element={<Contact />} />
+          <Route path="/terms" element={<Terms />} />
+          <Route path="/vs-speakup" element={<VsSpeakUp />} />
+          <Route path="/vs-whistleblower-software" element={<VsWhistleblowerSoftware />} />
+          <Route path="/compliance-software" element={<ComplianceSoftware />} />
         
         {/* Authentication routes */}
         <Route path="/login" element={<Login />} />
