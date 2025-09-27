@@ -1,6 +1,6 @@
 import { Helmet } from 'react-helmet-async';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Footer } from '@/components/ui/footer';
+import { Link } from 'react-router-dom';
 
 const Terms = () => {
   return (
@@ -10,13 +10,52 @@ const Terms = () => {
         <meta name="description" content="Terms and Conditions for Disclosurely whistleblowing platform services." />
       </Helmet>
       
-      <div className="min-h-screen bg-background">
-        <div className="container mx-auto px-4 py-12">
-          <Card className="max-w-4xl mx-auto">
-            <CardHeader>
-              <CardTitle className="text-3xl font-bold text-center">Terms and Conditions</CardTitle>
-            </CardHeader>
-            <CardContent className="prose prose-gray max-w-none space-y-6">
+      <div className="min-h-screen bg-white">
+        {/* Navigation */}
+        <nav className="bg-white shadow-sm sticky top-0 z-50">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="flex justify-between items-center py-4">
+              <div className="flex items-center">
+                <Link to="/" className="flex items-center space-x-3">
+                  <img 
+                    src="/lovable-uploads/c46ace0e-df58-4119-b5e3-8dcfa075ea2f.png" 
+                    alt="Disclosurely" 
+                    className="h-6 md:h-8 w-auto"
+                  />
+                </Link>
+              </div>
+              <div className="hidden md:flex items-center space-x-8">
+                <Link to="/pricing" className="text-gray-600 hover:text-gray-900">Pricing</Link>
+                <Link to="/contact" className="text-gray-600 hover:text-gray-900">Contact</Link>
+                <Link to="/auth/login" className="text-gray-600 hover:text-gray-900">Sign in</Link>
+                <Link to="/auth/signup" className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors">
+                  Get Started
+                </Link>
+              </div>
+              <div className="md:hidden">
+                <Link to="/auth/login" className="bg-blue-600 text-white px-3 py-2 rounded-lg hover:bg-blue-700 transition-colors text-sm">
+                  Sign In
+                </Link>
+              </div>
+            </div>
+          </div>
+        </nav>
+
+        {/* Hero Section */}
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-20 pb-16">
+          <div className="text-center">
+            <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold text-gray-900 mb-6">
+              Terms and Conditions
+            </h1>
+            <p className="text-lg sm:text-xl text-gray-600 mb-8 max-w-3xl mx-auto">
+              Please read these terms carefully before using our services.
+            </p>
+          </div>
+        </div>
+
+        {/* Content */}
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 pb-20">
+          <div className="prose prose-gray max-w-none space-y-8">
               <section>
                 <h2 className="text-xl font-semibold mb-3">1. Introduction</h2>
                 <p className="text-muted-foreground leading-relaxed">
@@ -124,11 +163,10 @@ const Terms = () => {
                 </p>
               </section>
 
-              <div className="pt-8 text-center text-sm text-muted-foreground">
-                <p>Last updated: September 2025</p>
-              </div>
-            </CardContent>
-          </Card>
+            <div className="pt-8 text-center text-sm text-gray-500">
+              <p>Last updated: September 2025</p>
+            </div>
+          </div>
         </div>
         <Footer />
       </div>
