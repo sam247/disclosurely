@@ -13,6 +13,7 @@ import NotFound from './pages/NotFound';
 import Pricing from './pages/Pricing';
 import Contact from './pages/Contact';
 import Terms from './pages/Terms';
+import Privacy from './pages/Privacy';
 import VsSpeakUp from './pages/VsSpeakUp';
 import VsWhistleblowerSoftware from './pages/VsWhistleblowerSoftware';
 import ComplianceSoftware from './pages/ComplianceSoftware';
@@ -62,6 +63,9 @@ const AppContent = () => {
           <Route path="/vs-speakup" element={<VsSpeakUp />} />
           <Route path="/vs-whistleblower-software" element={<VsWhistleblowerSoftware />} />
           <Route path="/compliance-software" element={<ComplianceSoftware />} />
+        
+        {/* Privacy route */}
+        <Route path="/privacy" element={<Privacy />} />
         
         {/* Authentication routes */}
         <Route path="/login" element={<Login />} />
