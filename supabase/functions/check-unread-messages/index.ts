@@ -107,14 +107,14 @@ serve(async (req) => {
                 <h2 style="color: #2563eb;">New Response Available</h2>
                 <p>Hello,</p>
                 // @ts-ignore
-                <p>You have received a new response regarding your report <strong>${trackingId}</strong> titled "${report.title}".</p>
+                <p>You have received a new response regarding your report <strong>${trackingId}</strong> titled "${(report as any).title}".</p>
                 <p>To view the response and continue the conversation, please visit:</p>
                 <p><a href="https://app.disclosurely.com/secure/tool/report-status" style="background-color: #2563eb; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px; display: inline-block;">View Report Status</a></p>
                 <p>You will need your tracking ID: <strong>${trackingId}</strong></p>
                 <hr style="margin: 30px 0; border: none; border-top: 1px solid #e5e7eb;">
                 <p style="font-size: 12px; color: #6b7280;">
                   // @ts-ignore
-                  This is an automated notification from ${report.organizations.name}.
+                  This is an automated notification from ${(report as any).organizations?.name || 'Your organization'}.
                   For security reasons, please do not reply to this email directly.
                 </p>
               </div>

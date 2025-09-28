@@ -104,12 +104,14 @@ serve(async (req) => {
             const emailResponse = await resend.emails.send({
               from: 'Disclosurely <notifications@disclosurely.com>',
               to: [user.email],
-              subject: `New Report Submitted - ${report.tracking_id}`,
+              // @ts-ignore
+              subject: `New Report Submitted - ${(report as any).tracking_id}`,
               html: `
                 <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
                   <div style="background: #f8f9fa; padding: 20px; border-radius: 8px; margin-bottom: 20px;">
                     <h1 style="color: #2563eb; margin: 0;">New Report Submitted</h1>
-                    <p style="color: #6b7280; margin: 10px 0 0 0;">${organization?.name || 'Your organization'} Compliance Team</p>
+                    // @ts-ignore
+                    <p style="color: #6b7280; margin: 10px 0 0 0;">${(organization as any)?.name || 'Your organization'} Compliance Team</p>
                   </div>
                   
                   <div style="padding: 20px 0;">
@@ -119,10 +121,14 @@ serve(async (req) => {
                     
                     <div style="background: #f3f4f6; padding: 15px; border-radius: 6px; margin: 20px 0;">
                       <strong>Report Details:</strong><br>
-                      <strong>Tracking ID:</strong> ${report.tracking_id}<br>
-                      <strong>Title:</strong> ${report.title}<br>
-                      <strong>Type:</strong> ${report.report_type}<br>
-                      <strong>Submitted:</strong> ${new Date(report.created_at).toLocaleDateString()}<br>
+                      // @ts-ignore
+                      <strong>Tracking ID:</strong> ${(report as any).tracking_id}<br>
+                      // @ts-ignore
+                      <strong>Title:</strong> ${(report as any).title}<br>
+                      // @ts-ignore
+                      <strong>Type:</strong> ${(report as any).report_type}<br>
+                      // @ts-ignore
+                      <strong>Submitted:</strong> ${new Date((report as any).created_at).toLocaleDateString()}<br>
                     </div>
                     
                     <p>Please log into your dashboard to review this report and take appropriate action.</p>
