@@ -1,6 +1,6 @@
 import "https://deno.land/x/xhr@0.1.0/mod.ts";
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
-import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.7.1';
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.50.0';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -67,8 +67,8 @@ serve(async (req) => {
     console.error('Error in extract-pdf-text function:', error);
     return new Response(JSON.stringify({ 
       success: false,
-      error: error.message,
-      textContent: `[PDF Document: Error accessing file - ${error.message}]`
+      error: (error as Error).message,
+      textContent: `[PDF Document: Error accessing file - ${(error as Error).message}]`
     }), {
       status: 200, // Return 200 so the frontend can handle gracefully
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },

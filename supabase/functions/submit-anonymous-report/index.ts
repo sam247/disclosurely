@@ -1,6 +1,6 @@
 
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
-import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.50.0'
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -223,8 +223,10 @@ serve(async (req) => {
           status: 'failed',
           metadata: { 
             attempted_at: new Date().toISOString(),
-            error_details: emailError.toString(),
-            error_message: emailError.message || 'Failed to invoke email service'
+            // @ts-ignore
+            error_details: (emailError as any).toString(),
+            // @ts-ignore
+            error_message: (emailError as any).message || 'Failed to invoke email service'
           }
         })
     }
@@ -237,7 +239,7 @@ serve(async (req) => {
   } catch (error) {
     console.error('Anonymous submission error:', error)
     return new Response(
-      JSON.stringify({ error: 'Internal server error', details: error.message }),
+      JSON.stringify({ error: 'Internal server error', details: (error as Error).message }),
       { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     )
   }

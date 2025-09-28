@@ -1,7 +1,7 @@
 
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import Stripe from "https://esm.sh/stripe@14.21.0";
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2.50.0";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -110,7 +110,7 @@ serve(async (req) => {
     
     logStep("All subscriptions found", { 
       count: subscriptions.data.length,
-      subscriptions: subscriptions.data.map(sub => ({
+      subscriptions: subscriptions.data.map((sub: any) => ({
         id: sub.id,
         status: sub.status,
         current_period_end: sub.current_period_end
@@ -118,7 +118,7 @@ serve(async (req) => {
     });
 
     // Look for active, trialing, or past_due subscriptions
-    const activeSubscription = subscriptions.data.find(sub => 
+    const activeSubscription = subscriptions.data.find((sub: any) => 
       ['active', 'trialing', 'past_due'].includes(sub.status)
     );
     

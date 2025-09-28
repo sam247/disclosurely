@@ -1,6 +1,6 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.50.0";
-import { Resend } from "npm:resend@4.0.0";
+import { Resend } from "https://esm.sh/resend@4.0.0";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -179,7 +179,7 @@ serve(async (req) => {
           .from('email_notifications')
           .update({ 
             status: 'failed',
-            error_message: notificationError.message
+            error_message: (notificationError as Error).message
           })
           .eq('id', notification.id);
       }
@@ -199,7 +199,7 @@ serve(async (req) => {
   } catch (error) {
     console.error('Error in process-pending-email-notifications:', error);
     return new Response(JSON.stringify({
-      error: error.message,
+      error: (error as Error).message,
       success: false
     }), {
       status: 500,

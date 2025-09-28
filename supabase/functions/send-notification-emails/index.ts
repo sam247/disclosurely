@@ -1,6 +1,6 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
-import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
-import { Resend } from "npm:resend@2.0.0"
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.50.0'
+import { Resend } from "https://esm.sh/resend@4.0.0"
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -247,7 +247,7 @@ if (orgError) {
     console.error('Email notification error:', error)
     return new Response(JSON.stringify({
       error: 'Internal server error',
-      details: error.message
+      details: (error as Error).message
     }), {
       status: 500,
       headers: { ...corsHeaders, 'Content-Type': 'application/json' }
