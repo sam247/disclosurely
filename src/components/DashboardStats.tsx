@@ -79,12 +79,9 @@ const DashboardStats = () => {
         .eq('organization_id', orgId)
         .eq('is_active', true);
 
-      // Fetch average response time
+      // Fetch average response time using the function
       const { data: responseTimeData } = await supabase
-        .from('report_response_times')
-        .select('response_time_hours')
-        .eq('organization_id', orgId)
-        .not('response_time_hours', 'is', null);
+        .rpc('get_report_response_times');
 
       const avgResponseTime = responseTimeData?.length > 0 
         ? responseTimeData.reduce((sum, item) => sum + (item.response_time_hours || 0), 0) / responseTimeData.length
