@@ -532,13 +532,6 @@ export type Database = {
             foreignKeyName: "email_notifications_report_id_fkey"
             columns: ["report_id"]
             isOneToOne: false
-            referencedRelation: "report_response_times"
-            referencedColumns: ["report_id"]
-          },
-          {
-            foreignKeyName: "email_notifications_report_id_fkey"
-            columns: ["report_id"]
-            isOneToOne: false
             referencedRelation: "reports"
             referencedColumns: ["id"]
           },
@@ -666,13 +659,6 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "organizations"
             referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "notifications_report_id_fkey"
-            columns: ["report_id"]
-            isOneToOne: false
-            referencedRelation: "report_response_times"
-            referencedColumns: ["report_id"]
           },
           {
             foreignKeyName: "notifications_report_id_fkey"
@@ -950,13 +936,6 @@ export type Database = {
             foreignKeyName: "report_attachments_report_id_fkey"
             columns: ["report_id"]
             isOneToOne: false
-            referencedRelation: "report_response_times"
-            referencedColumns: ["report_id"]
-          },
-          {
-            foreignKeyName: "report_attachments_report_id_fkey"
-            columns: ["report_id"]
-            isOneToOne: false
             referencedRelation: "reports"
             referencedColumns: ["id"]
           },
@@ -991,13 +970,6 @@ export type Database = {
           sender_type?: string
         }
         Relationships: [
-          {
-            foreignKeyName: "report_messages_report_id_fkey"
-            columns: ["report_id"]
-            isOneToOne: false
-            referencedRelation: "report_response_times"
-            referencedColumns: ["report_id"]
-          },
           {
             foreignKeyName: "report_messages_report_id_fkey"
             columns: ["report_id"]
@@ -1049,13 +1021,6 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "profiles"
             referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "report_notes_report_id_fkey"
-            columns: ["report_id"]
-            isOneToOne: false
-            referencedRelation: "report_response_times"
-            referencedColumns: ["report_id"]
           },
           {
             foreignKeyName: "report_notes_report_id_fkey"
@@ -1338,27 +1303,7 @@ export type Database = {
       }
     }
     Views: {
-      report_response_times: {
-        Row: {
-          first_org_response_at: string | null
-          organization_id: string | null
-          report_created_at: string | null
-          report_id: string | null
-          response_time_hours: number | null
-          status: Database["public"]["Enums"]["report_status"] | null
-          title: string | null
-          tracking_id: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "reports_organization_id_fkey"
-            columns: ["organization_id"]
-            isOneToOne: false
-            referencedRelation: "organizations"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
+      [_ in never]: never
     }
     Functions: {
       create_security_alert: {
@@ -1449,6 +1394,19 @@ export type Database = {
           is_active: boolean
           last_name: string
           role: Database["public"]["Enums"]["user_role"]
+        }[]
+      }
+      get_report_response_times: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          first_org_response_at: string
+          organization_id: string
+          report_created_at: string
+          report_id: string
+          response_time_hours: number
+          status: Database["public"]["Enums"]["report_status"]
+          title: string
+          tracking_id: string
         }[]
       }
       get_user_profile_safe: {
