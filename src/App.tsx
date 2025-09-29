@@ -21,6 +21,7 @@ import SubmissionFormWrapper from './components/forms/SubmissionFormWrapper';
 import ReportSuccess from './components/ReportSuccess';
 import TestAnonymousSubmission from './pages/TestAnonymousSubmission';
 import ScrollToTop from './components/ScrollToTop';
+import FeaturebaseMessenger from './components/FeaturebaseMessenger';
 import ReportStatusLookup from './components/ReportStatusLookup';
 import AdminDashboard from './pages/AdminDashboard';
 import Blog from './pages/Blog';
@@ -137,6 +138,7 @@ function App() {
     <Router>
       <AuthProvider>
         <AppContent />
+        <FeaturebaseMessenger />
       </AuthProvider>
     </Router>
   );
