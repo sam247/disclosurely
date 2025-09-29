@@ -1409,6 +1409,10 @@ export type Database = {
           tracking_id: string
         }[]
       }
+      get_user_organization_safe: {
+        Args: { p_user_id: string }
+        Returns: string
+      }
       get_user_profile_safe: {
         Args: { p_user_id: string }
         Returns: {
