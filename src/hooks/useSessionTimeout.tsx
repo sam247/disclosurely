@@ -27,14 +27,11 @@ export const useSessionTimeout = () => {
 
   // Reset idle timer on user activity
   const resetIdleTimer = useCallback(() => {
-    console.log('SessionTimeout: resetIdleTimer called');
     if (!user || !session) {
-      console.log('SessionTimeout: reset skipped - no user/session');
       return;
     }
     // Do not reset timers while a warning modal is visible
     if (showIdleWarning || showAbsoluteWarning) {
-      console.log('SessionTimeout: reset skipped - warning visible');
       return;
     }
 
@@ -54,11 +51,9 @@ export const useSessionTimeout = () => {
 
     // After 60 seconds of inactivity, show a 60s countdown popup
     idleTimerRef.current = setTimeout(() => {
-      console.log('SessionTimeout: IDLE timeout reached -> showing idle warning modal');
       setIdleTimeRemaining(60);
       setShowIdleWarning(true);
     }, IDLE_TIMEOUT);
-    console.log(`SessionTimeout: idle timer set for ${IDLE_TIMEOUT}ms`);
   }, [user, session, showIdleWarning, showAbsoluteWarning]);
 
   // Show warning before absolute timeout
@@ -90,7 +85,6 @@ export const useSessionTimeout = () => {
 
     // Start fresh idle timer
     idleTimerRef.current = setTimeout(() => {
-      console.log('Idle timeout reached after extension, showing warning modal');
       setIdleTimeRemaining(60);
       setShowIdleWarning(true);
     }, IDLE_TIMEOUT);
@@ -123,7 +117,6 @@ export const useSessionTimeout = () => {
 
     // Show warning 5 minutes before absolute timeout
     const warningTime = ABSOLUTE_TIMEOUT - (5 * 60 * 1000);
-    console.log(`SessionTimeout: scheduling absolute warning in ${warningTime}ms and absolute signout in ${ABSOLUTE_TIMEOUT}ms`);
     if (warningTimerRef.current) clearTimeout(warningTimerRef.current);
     warningTimerRef.current = setTimeout(showAbsoluteTimeoutWarning, warningTime);
 
@@ -198,7 +191,6 @@ export const useSessionTimeout = () => {
       if (warningTimerRef.current) clearTimeout(warningTimerRef.current);
       setShowIdleWarning(false);
       setShowAbsoluteWarning(false);
-      console.log('SessionTimeout: user/session missing -> cleared timers and disabled warnings');
       return;
     }
 
@@ -217,7 +209,6 @@ export const useSessionTimeout = () => {
     ];
 
     // Set up timers when user logs in
-    console.log('SessionTimeout: setting up timers and activity listeners');
     setupAbsoluteTimeout();
     resetIdleTimer();
 
@@ -234,7 +225,6 @@ export const useSessionTimeout = () => {
       if (idleTimerRef.current) clearTimeout(idleTimerRef.current);
       if (absoluteTimerRef.current) clearTimeout(absoluteTimerRef.current);
       if (warningTimerRef.current) clearTimeout(warningTimerRef.current);
-      console.log('SessionTimeout: removed activity listeners and cleared timers');
     };
   }, [user, session, resetIdleTimer, setupAbsoluteTimeout]);
 
