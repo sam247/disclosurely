@@ -26,58 +26,11 @@ export const useSystemStatus = () => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const fetchStatus = async () => {
-      try {
-        const response = await fetch('https://status.disclosurely.com/api/status');
-        
-        // Check if response is actually JSON
-        const contentType = response.headers.get('content-type');
-        if (!contentType || !contentType.includes('application/json')) {
-          // Not JSON, likely HTML error page - treat as operational
-          setStatus('operational');
-          return;
-        }
-        
-        const data: StatusResponse = await response.json();
-        
-        // Check for any ongoing incidents
-        if (data.ongoing_incidents && data.ongoing_incidents.length > 0) {
-          let worstImpact: 'partial_outage' | 'degraded_performance' | 'full_outage' = 'degraded_performance';
-          
-          for (const incident of data.ongoing_incidents) {
-            if (incident.current_worst_impact === 'full_outage') {
-              worstImpact = 'full_outage';
-              break; // Can't get worse than this
-            }
-            if (incident.current_worst_impact === 'partial_outage') {
-              worstImpact = 'partial_outage';
-            }
-          }
-          
-          setStatus(worstImpact === 'full_outage' ? 'outage' : 'degraded');
-        }
-        // Check for maintenance
-        else if (data.in_progress_maintenances && data.in_progress_maintenances.length > 0) {
-          setStatus('degraded');
-        }
-        // All good
-        else {
-          setStatus('operational');
-        }
-      } catch (error) {
-        // Silently default to operational if we can't fetch status
-        // This prevents console spam when status page isn't set up yet
-        setStatus('operational');
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchStatus();
-    // Check status every 5 minutes
-    const interval = setInterval(fetchStatus, 5 * 60 * 1000);
-    
-    return () => clearInterval(interval);
+    // Temporary: disable remote status fetch to avoid CSP errors until
+    // production headers have been fully updated and a JSON endpoint is available.
+    // We default to 'operational' and stop here to ensure zero console errors.
+    setLoading(false);
+    return;
   }, []);
 
   return { status, loading };
