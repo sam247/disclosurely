@@ -204,6 +204,10 @@ const Pricing = () => {
               <p className="text-gray-600">Yes, all plans come with a 7-day free trial so you can see how the platform works and how you can use it in your organisation. No credit card required.</p>
             </div>
             <div>
+              <h3 className="text-lg font-semibold text-gray-900 mb-2">What happens if I reach my case limit on the Starter plan??</h3>
+              <p className="text-gray-600">If you exceed your monthly case allowance, you’ll be notified in the dashboard. You can either upgrade to the Pro plan for unlimited cases or wait until the next month when your allowance resets.</p>
+            </div>
+            <div>
               <h3 className="text-lg font-semibold text-gray-900 mb-2">Can I change plans later?</h3>
               <p className="text-gray-600">Absolutely! You can upgrade or downgrade your plan at any time from your dashboard.</p>
             </div>
