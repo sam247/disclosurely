@@ -176,6 +176,9 @@ const Pricing = () => {
                     <Check className="h-5 w-5 text-green-600" />
                     <span className="text-gray-700 text-sm sm:text-base">Custom integrations</span>
                   </div>
+                  <div className="flex items-center space-x-3">
+                    <X className="h-5 w-5 text-red-500" />
+                    <span className="text-gray-500 text-sm sm:text-base">API (coming soon)</span>
                 </div>
                 <Button className="w-full mt-6" variant="outline">
                   Contact Sales
