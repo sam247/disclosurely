@@ -522,7 +522,7 @@ const Landing = () => {
                   </div>
                 </div>
                 <Button className="w-full mt-6" variant="outline">
-                  <a href="/contact">Contact Sales</a>
+                  <a href="https://disclosurely.com/contact">Contact Sales</a>
                 </Button>
               </CardContent>
             </Card>
