@@ -4,12 +4,6 @@ Allow: /
 User-agent: Bingbot
 Allow: /
 
-User-agent: Twitterbot
-Allow: /
-
-User-agent: facebookexternalhit
-Allow: /
-
 User-agent: Yandex
 Disallow: /
 
@@ -17,4 +11,11 @@ User-agent: YandexBot
 Disallow: /
 
 User-agent: *
-Disallow:
+Disallow: /auth/
+Disallow: /app/
+Disallow: /admin/
+Disallow: /secure/
+Disallow: /dashboard/
+Disallow: /test/
+
+Sitemap: https://disclosurely.com/sitemap.xml
