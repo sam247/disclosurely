@@ -181,8 +181,8 @@ const Pricing = () => {
                     <span className="text-gray-500 text-sm sm:text-base">API (coming soon)</span>
                   </div>
                 </div>
-                <Button className="w-full mt-6" variant="outline">
-                  Contact Sales
+                   <Button className="w-full mt-6" variant="outline">
+                  <a href="https://disclosurely.com/contact">Contact Sales</a>
                 </Button>
               </CardContent>
             </Card>
