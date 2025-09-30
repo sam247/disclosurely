@@ -115,27 +115,27 @@ const Pricing = () => {
               <CardContent className="space-y-4">
                 <div className="space-y-3">
                   <div className="flex items-center space-x-3">
-                    <Check className="h-5 w-5 text-green-600" />
+                    <CheckCircle className="h-5 w-5 text-green-600" />
                     <span className="text-gray-700 text-sm sm:text-base">Unlimited cases/month</span>
                   </div>
                   <div className="flex items-center space-x-3">
-                    <Check className="h-5 w-5 text-green-600" />
+                    <CheckCircle className="h-5 w-5 text-green-600" />
                     <span className="text-gray-700 text-sm sm:text-base">Unlimited storage</span>
                   </div>
                   <div className="flex items-center space-x-3">
-                    <Check className="h-5 w-5 text-green-600" />
+                    <CheckCircle className="h-5 w-5 text-green-600" />
                     <span className="text-gray-700 text-sm sm:text-base">Email Support</span>
                   </div>
                   <div className="flex items-center space-x-3">
-                    <Check className="h-5 w-5 text-green-600" />
+                    <CheckCircle className="h-5 w-5 text-green-600" />
                     <span className="text-gray-700 text-sm sm:text-base">Secure two-way Messaging</span>
                   </div>
                   <div className="flex items-center space-x-3">
-                    <Check className="h-5 w-5 text-green-600" />
+                    <CheckCircle className="h-5 w-5 text-green-600" />
                     <span className="text-gray-700 text-sm sm:text-base">AI Case Helper</span>
                   </div>
                   <div className="flex items-center space-x-3">
-                    <Check className="h-5 w-5 text-green-600" />
+                    <CheckCircle className="h-5 w-5 text-green-600" />
                     <span className="text-gray-700 text-sm sm:text-base">Custom branding</span>
                   </div>
                 </div>
@@ -157,27 +157,27 @@ const Pricing = () => {
               <CardContent className="space-y-4">
                 <div className="space-y-3">
                   <div className="flex items-center space-x-3">
-                    <Check className="h-5 w-5 text-green-600" />
+                    <CheckCircle className="h-5 w-5 text-green-600" />
                     <span className="text-gray-700 text-sm sm:text-base">Everything in Professional</span>
                   </div>
                   <div className="flex items-center space-x-3">
-                    <Check className="h-5 w-5 text-green-600" />
+                    <CheckCircle className="h-5 w-5 text-green-600" />
                     <span className="text-gray-700 text-sm sm:text-base">Custom domain</span>
                   </div>
                   <div className="flex items-center space-x-3">
-                    <Check className="h-5 w-5 text-green-600" />
+                    <CheckCircle className="h-5 w-5 text-green-600" />
                     <span className="text-gray-700 text-sm sm:text-base">Dedicated support</span>
                   </div>
                   <div className="flex items-center space-x-3">
-                    <Check className="h-5 w-5 text-green-600" />
+                    <CheckCircle className="h-5 w-5 text-green-600" />
                     <span className="text-gray-700 text-sm sm:text-base">SLA guarantee</span>
                   </div>
                   <div className="flex items-center space-x-3">
-                    <Check className="h-5 w-5 text-green-600" />
+                    <CheckCircle className="h-5 w-5 text-green-600" />
                     <span className="text-gray-700 text-sm sm:text-base">Custom integrations</span>
                   </div>
                   <div className="flex items-center space-x-3">
-                    <Check className="h-5 w-5 text-grey-600" />
+                    <CheckCircle className="h-5 w-5 text-grey-600" />
                     <span className="text-gray-500 text-sm sm:text-base">API (coming soon)</span>
                   </div>
                 </div>
