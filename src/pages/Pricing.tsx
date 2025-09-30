@@ -91,8 +91,8 @@ const Pricing = () => {
                     <span className="text-gray-500 text-sm sm:text-base">Custom branding</span>
                   </div>
                 </div>
-                <Button className="w-full mt-6" variant="outline">
-                  Start Free Trial
+                 <Button className="w-full mt-6" asChild>
+                  <a href="https://app.disclosurely.com/auth/signup">Start Free Trial</a>
                 </Button>
               </CardContent>
             </Card>
@@ -139,8 +139,8 @@ const Pricing = () => {
                     <span className="text-gray-700 text-sm sm:text-base">Custom branding</span>
                   </div>
                 </div>
-                <Button className="w-full mt-6">
-                  Start Free Trial
+                 <Button className="w-full mt-6" asChild>
+                  <a href="https://app.disclosurely.com/auth/signup">Start Free Trial</a>
                 </Button>
               </CardContent>
             </Card>
