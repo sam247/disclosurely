@@ -46,7 +46,7 @@ export const Footer = () => {
         
         <div className="border-t border-gray-800 mt-8 pt-8">
           <div className="flex justify-between items-center">
-            <p className="text-gray-400 text-sm">© 2025 Disclosurely. All rights reserved. <Link to="/compliance-software" className="hover:text-white">Compliance Software</Link>.</p>
+            <p className="text-gray-400">© 2025 Disclosurely. All rights reserved. <Link to="/compliance-software" className="hover:text-white">Compliance Software</Link>.</p>
             <SystemStatusIndicator />
           </div>
         </div>
