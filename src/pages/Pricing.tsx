@@ -67,15 +67,15 @@ const Pricing = () => {
               <CardContent className="space-y-4">
                 <div className="space-y-3">
                   <div className="flex items-center space-x-3">
-                    <Check className="h-5 w-5 text-green-600" />
+                    <CheckCircle className="h-5 w-5 text-green-600" />
                     <span className="text-gray-700 text-sm sm:text-base">5 cases/month</span>
                   </div>
                   <div className="flex items-center space-x-3">
-                    <Check className="h-5 w-5 text-green-600" />
+                    <CheckCircle className="h-5 w-5 text-green-600" />
                     <span className="text-gray-700 text-sm sm:text-base">1GB Storage</span>
                   </div>
                   <div className="flex items-center space-x-3">
-                    <Check className="h-5 w-5 text-green-600" />
+                    <CheckCircle className="h-5 w-5 text-green-600" />
                     <span className="text-gray-700 text-sm sm:text-base">Email Support</span>
                   </div>
                   <div className="flex items-center space-x-3">
