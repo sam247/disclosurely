@@ -516,9 +516,13 @@ const Landing = () => {
                     <CheckCircle className="h-5 w-5 text-green-600" />
                     <span className="text-gray-700 text-sm sm:text-base">Custom integrations</span>
                   </div>
+                  <div className="flex items-center space-x-3">
+                    <CheckCircle className="h-5 w-5 text-grey-600" />
+                    <span className="text-gray-500 text-sm sm:text-base">API (coming soon)</span>
+                  </div>
                 </div>
                 <Button className="w-full mt-6" variant="outline">
-                  Contact Sales
+                  <a href="/contact">Contact Sales</a>
                 </Button>
               </CardContent>
             </Card>
