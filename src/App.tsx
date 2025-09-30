@@ -17,6 +17,7 @@ import Privacy from './pages/Privacy';
 import VsSpeakUp from './pages/VsSpeakUp';
 import VsWhistleblowerSoftware from './pages/VsWhistleblowerSoftware';
 import ComplianceSoftware from './pages/ComplianceSoftware';
+import WhistleblowingDirective from './pages/WhistleblowingDirective';
 import SubmissionFormWrapper from './components/forms/SubmissionFormWrapper';
 import ReportSuccess from './components/ReportSuccess';
 import TestAnonymousSubmission from './pages/TestAnonymousSubmission';
@@ -62,6 +63,7 @@ const AppContent = () => {
         
         {/* Privacy route */}
         <Route path="/privacy" element={<Privacy />} />
+        <Route path="/whistleblowing-directive" element={<WhistleblowingDirective />} />
         
         {/* Authentication routes */}
         <Route path="/login" element={<Login />} />

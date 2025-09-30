@@ -19,8 +19,6 @@ export const Footer = () => {
             <ul className="space-y-2">
               <li><Link to="/pricing" className="text-gray-400 hover:text-white">Pricing</Link></li>
               <li><Link to="/compliance-software" className="text-gray-400 hover:text-white">Compliance Software</Link></li>
-              <li><Link to="/vs-whistleblower-software" className="text-gray-400 hover:text-white">Disclosurely vs Whistleblower Software</Link></li>
-              <li><Link to="/vs-speak-up" className="text-gray-400 hover:text-white">Disclosurely vs Speak Up</Link></li>
             </ul>
           </div>
           
@@ -41,13 +39,16 @@ export const Footer = () => {
               <li><a href="#" className="text-gray-400 hover:text-white">Support</a></li>
               <li><Link to="/privacy" className="text-gray-400 hover:text-white">Privacy Policy</Link></li>
               <li><Link to="/terms" className="text-gray-400 hover:text-white">Terms of Service</Link></li>
-              <li><SystemStatusIndicator /></li>
+              <li><Link to="/whistleblowing-directive" className="text-gray-400 hover:text-white">Whistleblowing Directive Summary</Link></li>
             </ul>
           </div>
         </div>
         
-        <div className="border-t border-gray-800 mt-8 pt-8 text-center text-gray-400">
-          <p>© 2025 Disclosurely. All rights reserved. <Link to="/compliance-software" className="hover:text-white">Compliance Software</Link>. Powered by <a href="https://betterranking.co.uk/?utm_source=footer&utm_medium=internal&utm_campaign=disclosurely&utm_id=links" target="_blank" rel="noopener noreferrer" className="hover:text-white">Better Ranking</a>.</p>
+        <div className="border-t border-gray-800 mt-8 pt-8">
+          <div className="flex justify-between items-center">
+            <p className="text-gray-400 text-sm">© 2025 Disclosurely. All rights reserved. <Link to="/compliance-software" className="hover:text-white">Compliance Software</Link>.</p>
+            <SystemStatusIndicator />
+          </div>
         </div>
       </div>
     </footer>;
