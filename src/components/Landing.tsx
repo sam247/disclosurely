@@ -392,7 +392,7 @@ const Landing = () => {
               Simple, Transparent Pricing
             </h2>
             <p className="text-lg sm:text-xl text-gray-600 max-w-3xl mx-auto px-4">
-              Choose the plan that fits your organization's needs. All plans include a 14-day free trial.
+              Flexible pricing designed around your organisation. Choose the plan that fits your needs, tailor the features, and get started right away with guided setup support. All plans include a 7-day free trial.
             </p>
           </div>
           
