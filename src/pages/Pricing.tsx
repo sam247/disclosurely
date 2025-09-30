@@ -45,7 +45,7 @@ const Pricing = () => {
             <span className="block text-blue-600">Pricing</span>
           </h1>
           <p className="text-lg sm:text-xl text-gray-600 mb-8 max-w-3xl mx-auto px-4">
-            Choose the plan that's right for your organization. Start with our free trial and upgrade as you grow.
+            Choose the plan that's right for your organisation. Start with our seven day free trial and upgrade as you grow.
           </p>
         </div>
       </div>
@@ -201,7 +201,7 @@ const Pricing = () => {
           <div className="space-y-8">
             <div>
               <h3 className="text-lg font-semibold text-gray-900 mb-2">Is there a free trial?</h3>
-              <p className="text-gray-600">Yes, all plans come with a 14-day free trial. No credit card required.</p>
+              <p className="text-gray-600">Yes, all plans come with a 7-day free trial so you can see how the platform works and how you can use it in your organisation. No credit card required.</p>
             </div>
             <div>
               <h3 className="text-lg font-semibold text-gray-900 mb-2">Can I change plans later?</h3>
