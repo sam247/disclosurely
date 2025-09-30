@@ -65,8 +65,8 @@ export const useSystemStatus = () => {
           setStatus('operational');
         }
       } catch (error) {
-        console.error('Failed to fetch system status:', error);
-        // Default to operational if we can't fetch status
+        // Silently default to operational if we can't fetch status
+        // This prevents console spam when status page isn't set up yet
         setStatus('operational');
       } finally {
         setLoading(false);
