@@ -35,7 +35,7 @@ export const Footer = () => {
           <div>
             <h3 className="font-semibold mb-4">Resources</h3>
             <ul className="space-y-2">
-              <li><a href="#" className="text-gray-400 hover:text-white">Documentation</a></li>
+              <li><Link to="/disclosurely.featurebase.app/help" className="text-gray-400 hover:text-white">Documentation</a></li>
               <li><a href="#" className="text-gray-400 hover:text-white">Support</a></li>
               <li><Link to="/privacy" className="text-gray-400 hover:text-white">Privacy Policy</Link></li>
               <li><Link to="/terms" className="text-gray-400 hover:text-white">Terms of Service</Link></li>
