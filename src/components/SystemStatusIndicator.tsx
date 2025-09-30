@@ -32,11 +32,11 @@ export const SystemStatusIndicator = () => {
       className="text-gray-400 hover:text-white flex items-center space-x-2 group"
       title={getStatusText()}
     >
-      <span>System Status</span>
       <Circle 
         className={`h-2 w-2 ${getStatusColor()} ${loading ? 'animate-pulse' : ''}`}
         fill="currentColor"
-      />
+        />
+      <span>System Status</span>
     </a>
   );
 };
