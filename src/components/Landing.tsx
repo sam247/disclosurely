@@ -633,7 +633,7 @@ const Landing = () => {
             Ready to Strengthen Your Compliance Program?
           </h2>
           <p className="text-lg sm:text-xl text-blue-100 mb-6 sm:mb-8 px-4">
-            Join organizations worldwide who trust Disclosurely for secure whistleblowing.
+            Not ready for a free trial or demo? Share your requirements with us, and we’ll respond quickly to discuss how Disclosurely can support your organisation.
           </p>
           <a href="https://app.disclosurely.com/auth/signup" className="bg-white hover:bg-gray-100 text-blue-600 px-6 sm:px-8 py-3 rounded-lg text-lg font-semibold inline-block">
             Start Free Trial
