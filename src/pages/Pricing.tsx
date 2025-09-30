@@ -177,7 +177,7 @@ const Pricing = () => {
                     <span className="text-gray-700 text-sm sm:text-base">Custom integrations</span>
                   </div>
                   <div className="flex items-center space-x-3">
-                    <X className="h-5 w-5 text-grey-600" />
+                    <Check className="h-5 w-5 text-grey-600" />
                     <span className="text-gray-500 text-sm sm:text-base">API (coming soon)</span>
                   </div>
                 </div>
