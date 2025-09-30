@@ -58,11 +58,11 @@ const Landing = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-[150px] pb-20">
         <div className="text-center">
           <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold text-gray-900 mb-6">
-            Secure Whistleblower
+            Secure Disclosure and Whistleblower
             <span className="block text-blue-600">Reporting Platform</span>
           </h1>
           <p className="text-lg sm:text-xl text-gray-600 mb-8 max-w-3xl mx-auto px-4">
-            Enable anonymous reporting with enterprise-grade security. Protect your organization and employees with our compliant disclosure management system.
+            Disclosurely helps compliance teams stay ahead by transforming ethics and compliance into a proactive advantage—building a culture of integrity, simplifying workflows, and reducing organisational risk.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center items-center px-4">
             <a href="https://app.disclosurely.com/auth/signup" className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-3 rounded-lg text-lg font-semibold w-full sm:w-auto text-center">
