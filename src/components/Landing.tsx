@@ -209,6 +209,61 @@ const Landing = () => {
         </div>
       </div>
 
+      {/* How It Works Section */}
+      <div className="bg-white py-16 sm:py-20">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-16">
+            <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-4">
+              How It Works
+            </h2>
+            <p className="text-lg sm:text-xl text-gray-600 max-w-3xl mx-auto px-4">
+              Get started with Disclosurely in three simple steps
+            </p>
+          </div>
+          
+          <div className="grid md:grid-cols-3 gap-8">
+            {/* Step 1 */}
+            <div className="text-center">
+              <div className="mx-auto w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mb-6">
+                <span className="text-2xl font-bold text-blue-600">1</span>
+              </div>
+              <h3 className="text-xl font-semibold text-gray-900 mb-3">
+                Set Up Your Portal
+              </h3>
+              <p className="text-gray-600">
+                Create your account and customize your reporting portal in minutes. Add your branding, set up notification preferences, and configure your team access.
+              </p>
+            </div>
+
+            {/* Step 2 */}
+            <div className="text-center">
+              <div className="mx-auto w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mb-6">
+                <span className="text-2xl font-bold text-blue-600">2</span>
+              </div>
+              <h3 className="text-xl font-semibold text-gray-900 mb-3">
+                Share with Your Team
+              </h3>
+              <p className="text-gray-600">
+                Distribute your secure reporting link to employees through email, intranet, or QR codes. Reports can be submitted 24/7 from any device, anywhere.
+              </p>
+            </div>
+
+            {/* Step 3 */}
+            <div className="text-center">
+              <div className="mx-auto w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mb-6">
+                <span className="text-2xl font-bold text-blue-600">3</span>
+              </div>
+              <h3 className="text-xl font-semibold text-gray-900 mb-3">
+                Manage & Resolve Cases
+              </h3>
+              <p className="text-gray-600">
+                Receive instant notifications of new reports. Investigate, communicate securely with whistleblowers, and track cases through resolution with complete audit trails.
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+
       {/* Anonymous Reporting Made Simple */}
       <div className="py-16 sm:py-20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -622,6 +677,88 @@ const Landing = () => {
                 <p className="text-sm text-gray-600">Service Organization Controls</p>
               </div>
             </div>
+          </div>
+        </div>
+      </div>
+
+      {/* FAQ Section */}
+      <div className="bg-white py-16 sm:py-20">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-4">
+              Frequently Asked Questions
+            </h2>
+            <p className="text-lg text-gray-600">
+              Everything you need to know about Disclosurely
+            </p>
+          </div>
+          
+          <div className="space-y-6">
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-lg">How does anonymous reporting work?</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-gray-600">
+                  Whistleblowers can submit reports through your custom portal without providing any personal information. Our system uses advanced encryption and doesn't collect IP addresses or identifying data. Reporters receive a unique access code to check their report status and communicate securely.
+                </p>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-lg">Is Disclosurely compliant with GDPR and other regulations?</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-gray-600">
+                  Yes, Disclosurely is built with compliance in mind. We're GDPR compliant and meet requirements for SOX, EU Whistleblowing Directive, and other major regulatory frameworks. All data is encrypted and stored securely in compliance with international data protection standards.
+                </p>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-lg">Can we customize the reporting portal?</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-gray-600">
+                  Absolutely. You can add your company branding, customize the reporting form fields, set up specific categories for reports, and even use your own domain (on Professional and Enterprise plans). The portal can be tailored to match your organization's needs and culture.
+                </p>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-lg">How quickly can we get started?</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-gray-600">
+                  Most organizations are up and running within 24 hours. After signing up, you can immediately customize your portal, invite team members, and start accepting reports. Our support team is available to help with setup and onboarding at no extra cost.
+                </p>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-lg">What support is included?</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-gray-600">
+                  All plans include email support and access to our comprehensive knowledge base. Professional plans include priority support with faster response times, while Enterprise customers receive dedicated support with SLA guarantees and optional on-site training.
+                </p>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-lg">Can we cancel or change our plan anytime?</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-gray-600">
+                  Yes, you can upgrade, downgrade, or cancel your subscription at any time. If you cancel, you'll retain access until the end of your billing period. We also offer a 14-day free trial so you can test all features before committing.
+                </p>
+              </CardContent>
+            </Card>
           </div>
         </div>
       </div>
