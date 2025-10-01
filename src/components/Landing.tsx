@@ -1,6 +1,7 @@
 import { Shield, CheckCircle, BarChart3, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { Link } from 'react-router-dom';
 import { Footer } from '@/components/ui/footer';
 import CookieConsentBanner from '@/components/CookieConsentBanner';
@@ -693,73 +694,61 @@ const Landing = () => {
             </p>
           </div>
           
-          <div className="space-y-6">
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-lg">How does anonymous reporting work?</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p className="text-gray-600">
-                  Whistleblowers can submit reports through your custom portal without providing any personal information. Our system uses advanced encryption and doesn't collect IP addresses or identifying data. Reporters receive a unique access code to check their report status and communicate securely.
-                </p>
-              </CardContent>
-            </Card>
+          <Accordion type="single" collapsible defaultValue="item-1" className="space-y-4">
+            <AccordionItem value="item-1" className="border rounded-lg px-6 bg-white">
+              <AccordionTrigger className="text-left text-lg font-semibold hover:no-underline">
+                How does anonymous reporting work?
+              </AccordionTrigger>
+              <AccordionContent className="text-gray-600 pt-2">
+                Whistleblowers can submit reports through your custom portal without providing any personal information. Our system uses advanced encryption and doesn't collect IP addresses or identifying data. Reporters receive a unique access code to check their report status and communicate securely.
+              </AccordionContent>
+            </AccordionItem>
 
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-lg">Is Disclosurely compliant with GDPR and other regulations?</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p className="text-gray-600">
-                  Yes, Disclosurely is built with compliance in mind. We're GDPR compliant and meet requirements for SOX, EU Whistleblowing Directive, and other major regulatory frameworks. All data is encrypted and stored securely in compliance with international data protection standards.
-                </p>
-              </CardContent>
-            </Card>
+            <AccordionItem value="item-2" className="border rounded-lg px-6 bg-white">
+              <AccordionTrigger className="text-left text-lg font-semibold hover:no-underline">
+                Is Disclosurely compliant with GDPR and other regulations?
+              </AccordionTrigger>
+              <AccordionContent className="text-gray-600 pt-2">
+                Yes, Disclosurely is built with compliance in mind. We're GDPR compliant and meet requirements for SOX, EU Whistleblowing Directive, and other major regulatory frameworks. All data is encrypted and stored securely in compliance with international data protection standards.
+              </AccordionContent>
+            </AccordionItem>
 
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-lg">Can we customize the reporting portal?</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p className="text-gray-600">
-                  Absolutely. You can add your company branding, customize the reporting form fields, set up specific categories for reports, and even use your own domain (on Professional and Enterprise plans). The portal can be tailored to match your organization's needs and culture.
-                </p>
-              </CardContent>
-            </Card>
+            <AccordionItem value="item-3" className="border rounded-lg px-6 bg-white">
+              <AccordionTrigger className="text-left text-lg font-semibold hover:no-underline">
+                Can we customize the reporting portal?
+              </AccordionTrigger>
+              <AccordionContent className="text-gray-600 pt-2">
+                Absolutely. You can add your company branding, customize the reporting form fields, set up specific categories for reports, and even use your own domain (on Professional and Enterprise plans). The portal can be tailored to match your organization's needs and culture.
+              </AccordionContent>
+            </AccordionItem>
 
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-lg">How quickly can we get started?</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p className="text-gray-600">
-                  Most organizations are up and running within 24 hours. After signing up, you can immediately customize your portal, invite team members, and start accepting reports. Our support team is available to help with setup and onboarding at no extra cost.
-                </p>
-              </CardContent>
-            </Card>
+            <AccordionItem value="item-4" className="border rounded-lg px-6 bg-white">
+              <AccordionTrigger className="text-left text-lg font-semibold hover:no-underline">
+                How quickly can we get started?
+              </AccordionTrigger>
+              <AccordionContent className="text-gray-600 pt-2">
+                Most organizations are up and running within 24 hours. After signing up, you can immediately customize your portal, invite team members, and start accepting reports. Our support team is available to help with setup and onboarding at no extra cost.
+              </AccordionContent>
+            </AccordionItem>
 
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-lg">What support is included?</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p className="text-gray-600">
-                  All plans include email support and access to our comprehensive knowledge base. Professional plans include priority support with faster response times, while Enterprise customers receive dedicated support with SLA guarantees and optional on-site training.
-                </p>
-              </CardContent>
-            </Card>
+            <AccordionItem value="item-5" className="border rounded-lg px-6 bg-white">
+              <AccordionTrigger className="text-left text-lg font-semibold hover:no-underline">
+                What support is included?
+              </AccordionTrigger>
+              <AccordionContent className="text-gray-600 pt-2">
+                All plans include email support and access to our comprehensive knowledge base. Professional plans include priority support with faster response times, while Enterprise customers receive dedicated support with SLA guarantees and optional on-site training.
+              </AccordionContent>
+            </AccordionItem>
 
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-lg">Can we cancel or change our plan anytime?</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p className="text-gray-600">
-                  Yes, you can upgrade, downgrade, or cancel your subscription at any time. If you cancel, you'll retain access until the end of your billing period. We also offer a 14-day free trial so you can test all features before committing.
-                </p>
-              </CardContent>
-            </Card>
-          </div>
+            <AccordionItem value="item-6" className="border rounded-lg px-6 bg-white">
+              <AccordionTrigger className="text-left text-lg font-semibold hover:no-underline">
+                Can we cancel or change our plan anytime?
+              </AccordionTrigger>
+              <AccordionContent className="text-gray-600 pt-2">
+                Yes, you can upgrade, downgrade, or cancel your subscription at any time. If you cancel, you'll retain access until the end of your billing period. We also offer a 14-day free trial so you can test all features before committing.
+              </AccordionContent>
+            </AccordionItem>
+          </Accordion>
         </div>
       </div>
 
