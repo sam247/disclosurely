@@ -14,3 +14,9 @@ verify_jwt = false
 
 [functions.anonymous-report-messaging]
 verify_jwt = false
+
+[functions.send-team-invitation]
+verify_jwt = true
+
+[functions.accept-team-invitation]
+verify_jwt = false

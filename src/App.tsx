@@ -9,6 +9,7 @@ import AuthenticatedApp from './components/AuthenticatedApp';
 import Index from './pages/Index';
 import Login from './pages/Login';
 import Signup from './pages/Signup';
+import AcceptInvite from './pages/AcceptInvite';
 import NotFound from './pages/NotFound';
 import Pricing from './pages/Pricing';
 import Contact from './pages/Contact';
@@ -70,6 +71,7 @@ const AppContent = () => {
         <Route path="/signup" element={<Signup />} />
         <Route path="/auth/login" element={<Login />} />
         <Route path="/auth/signup" element={<Signup />} />
+        <Route path="/invite/:token" element={<AcceptInvite />} />
         
         {/* Blog routes */}
         <Route path="/blog" element={<Blog />} />

@@ -124,7 +124,7 @@ const UserManagement = () => {
 
     try {
       // Insert invitation without token - the trigger will generate it
-      const { error } = await supabase
+      const { data: newInvitation, error } = await supabase
         .from('user_invitations')
         .insert({
           organization_id: organization.id,
@@ -132,14 +132,30 @@ const UserManagement = () => {
           role: inviteRole,
           invited_by: user.id,
           token: '', // This will be replaced by the trigger
-        });
+        })
+        .select()
+        .single();
 
       if (error) throw error;
 
-      toast({
-        title: "Invitation sent",
-        description: `Invitation sent to ${inviteEmail}`,
+      // Send invitation email via edge function
+      const { error: emailError } = await supabase.functions.invoke('send-team-invitation', {
+        body: { invitationId: newInvitation.id },
       });
+
+      if (emailError) {
+        console.error('Error sending invitation email:', emailError);
+        toast({
+          title: "Invitation created",
+          description: "Invitation created but email failed to send. Please resend manually.",
+          variant: "destructive",
+        });
+      } else {
+        toast({
+          title: "Invitation sent",
+          description: `Invitation email sent to ${inviteEmail}`,
+        });
+      }
 
       setInviteEmail('');
       setInviteRole('case_handler');
