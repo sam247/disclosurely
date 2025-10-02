@@ -120,8 +120,37 @@ const UserManagement = () => {
   };
 
   const sendInvitation = async () => {
-    if (!inviteEmail.trim() || !organization || !user?.id) return;
+    console.log('Send invitation clicked', { inviteEmail, organization: organization?.id, userId: user?.id });
+    
+    if (!inviteEmail.trim()) {
+      toast({
+        title: "Error",
+        description: "Please enter an email address",
+        variant: "destructive",
+      });
+      return;
+    }
 
+    if (!organization) {
+      toast({
+        title: "Error",
+        description: "Organization not found. Please refresh the page.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (!user?.id) {
+      toast({
+        title: "Error",
+        description: "User session not found. Please log in again.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    console.log('Proceeding with invitation insert');
+    
     try {
       // Insert invitation without token - the trigger will generate it
       const { data: newInvitation, error } = await supabase
@@ -334,7 +363,10 @@ const UserManagement = () => {
                       type="email"
                       placeholder="user@example.com"
                       value={inviteEmail}
-                      onChange={(e) => setInviteEmail(e.target.value)}
+                      onChange={(e) => {
+                        console.log('Email input changed:', e.target.value);
+                        setInviteEmail(e.target.value);
+                      }}
                     />
                   </div>
                   <div>
@@ -354,11 +386,20 @@ const UserManagement = () => {
                   <div className="flex justify-end space-x-2">
                     <Button
                       variant="outline"
-                      onClick={() => setIsInviteDialogOpen(false)}
+                      onClick={() => {
+                        console.log('Cancel button clicked');
+                        setIsInviteDialogOpen(false);
+                      }}
                     >
                       Cancel
                     </Button>
-                    <Button onClick={sendInvitation} disabled={!inviteEmail.trim()}>
+                    <Button 
+                      onClick={() => {
+                        console.log('Send invitation button clicked, disabled:', !inviteEmail.trim());
+                        sendInvitation();
+                      }} 
+                      disabled={!inviteEmail.trim()}
+                    >
                       Send Invitation
                     </Button>
                   </div>
