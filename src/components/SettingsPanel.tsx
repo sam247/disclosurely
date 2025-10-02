@@ -2,11 +2,12 @@
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { User, Building2, Shield, CreditCard } from 'lucide-react';
+import { User, Building2, Shield, CreditCard, Users } from 'lucide-react';
 import ProfileSettings from './ProfileSettings';
 import OrganizationSettings from './OrganizationSettings';
 import SimpleGDPRSettings from './SimpleGDPRSettings';
 import SubscriptionManagement from './SubscriptionManagement';
+import UserManagement from './UserManagement';
 
 interface SettingsPanelProps {
   isOpen: boolean;
@@ -20,12 +21,12 @@ const SettingsPanel = ({ isOpen, onClose }: SettingsPanelProps) => {
         <DialogHeader className="flex-shrink-0 pb-4">
           <DialogTitle className="text-lg sm:text-xl">Settings</DialogTitle>
           <DialogDescription className="text-sm sm:text-base">
-            Manage your profile, organization, subscription, and privacy settings
+            Manage your profile, organization, team members, subscription, and privacy settings
           </DialogDescription>
         </DialogHeader>
         
         <Tabs defaultValue="profile" className="flex-1 flex flex-col min-h-0">
-          <TabsList className="grid w-full grid-cols-4 flex-shrink-0 h-auto">
+          <TabsList className="grid w-full grid-cols-5 flex-shrink-0 h-auto">
             <TabsTrigger value="profile" className="flex flex-col sm:flex-row items-center gap-1 sm:gap-2 p-2 sm:p-3 text-xs sm:text-sm">
               <User className="h-3 w-3 sm:h-4 sm:w-4" />
               <span className="hidden sm:inline">Profile</span>
@@ -35,6 +36,11 @@ const SettingsPanel = ({ isOpen, onClose }: SettingsPanelProps) => {
               <Building2 className="h-3 w-3 sm:h-4 sm:w-4" />
               <span className="hidden sm:inline">Organization</span>
               <span className="sm:hidden">Org.</span>
+            </TabsTrigger>
+            <TabsTrigger value="team" className="flex flex-col sm:flex-row items-center gap-1 sm:gap-2 p-2 sm:p-3 text-xs sm:text-sm">
+              <Users className="h-3 w-3 sm:h-4 sm:w-4" />
+              <span className="hidden sm:inline">Team</span>
+              <span className="sm:hidden">Team</span>
             </TabsTrigger>
             <TabsTrigger value="subscription" className="flex flex-col sm:flex-row items-center gap-1 sm:gap-2 p-2 sm:p-3 text-xs sm:text-sm">
               <CreditCard className="h-3 w-3 sm:h-4 sm:w-4" />
@@ -56,6 +62,10 @@ const SettingsPanel = ({ isOpen, onClose }: SettingsPanelProps) => {
 
               <TabsContent value="organization" className="mt-0">
                 <OrganizationSettings />
+              </TabsContent>
+
+              <TabsContent value="team" className="mt-0">
+                <UserManagement />
               </TabsContent>
 
               <TabsContent value="subscription" className="mt-0">
