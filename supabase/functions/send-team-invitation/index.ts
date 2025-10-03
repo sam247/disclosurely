@@ -90,49 +90,90 @@ serve(async (req) => {
             <meta name="viewport" content="width=device-width, initial-scale=1.0">
             <title>Team Invitation</title>
           </head>
-          <body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px;">
-            <div style="background: linear-gradient(135deg, ${invitation.organization.brand_color || '#2563eb'} 0%, #1e40af 100%); padding: 30px; text-align: center; border-radius: 8px 8px 0 0;">
-              <h1 style="color: white; margin: 0; font-size: 24px;">You're Invited!</h1>
-            </div>
-            
-            <div style="background: #ffffff; padding: 30px; border: 1px solid #e5e7eb; border-top: none; border-radius: 0 0 8px 8px;">
-              <p style="font-size: 16px; margin-bottom: 20px;">
-                Hi there,
-              </p>
-              
-              <p style="font-size: 16px; margin-bottom: 20px;">
-                <strong>${inviterName}</strong> has invited you to join <strong>${invitation.organization.name}</strong> on Disclosurely as a <strong>${invitation.role.replace('_', ' ')}</strong>.
-              </p>
-              
-              <p style="font-size: 16px; margin-bottom: 30px;">
-                Disclosurely is a secure platform for managing whistleblower reports and compliance cases. Click the button below to accept your invitation and create your account.
-              </p>
-              
-              <div style="text-align: center; margin: 30px 0;">
-                <a href="${inviteUrl}" style="background: ${invitation.organization.brand_color || '#2563eb'}; color: white; padding: 14px 32px; text-decoration: none; border-radius: 6px; font-weight: 600; display: inline-block; font-size: 16px;">
-                  Accept Invitation
-                </a>
-              </div>
-              
-              <p style="font-size: 14px; color: #6b7280; margin-top: 30px;">
-                Or copy and paste this link into your browser:<br>
-                <a href="${inviteUrl}" style="color: #2563eb; word-break: break-all;">${inviteUrl}</a>
-              </p>
-              
-              <p style="font-size: 14px; color: #6b7280; margin-top: 20px;">
-                This invitation will expire on ${new Date(invitation.expires_at).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}.
-              </p>
-              
-              <hr style="border: none; border-top: 1px solid #e5e7eb; margin: 30px 0;">
-              
-              <p style="font-size: 12px; color: #9ca3af; margin: 0;">
-                If you didn't expect this invitation, you can safely ignore this email.
-              </p>
-            </div>
-            
-            <div style="text-align: center; padding: 20px; font-size: 12px; color: #9ca3af;">
-              <p style="margin: 0;">© ${new Date().getFullYear()} Disclosurely. All rights reserved.</p>
-            </div>
+          <body style="margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; background-color: #f9fafb;">
+            <table role="presentation" style="width: 100%; border-collapse: collapse;">
+              <tr>
+                <td align="center" style="padding: 40px 0;">
+                  <table role="presentation" style="width: 600px; border-collapse: collapse; background: white; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); border-radius: 8px; overflow: hidden;">
+                    <!-- Header with branding -->
+                    <tr>
+                      <td style="background: linear-gradient(135deg, ${invitation.organization.brand_color || '#2563eb'} 0%, #1e40af 100%); padding: 40px 30px; text-align: center;">
+                        <h1 style="color: white; margin: 0 0 10px 0; font-size: 28px; font-weight: 700; letter-spacing: -0.5px;">DISCLOSURELY</h1>
+                        <p style="color: rgba(255, 255, 255, 0.9); margin: 0; font-size: 14px;">Secure Whistleblowing Platform</p>
+                      </td>
+                    </tr>
+                    
+                    <!-- Main content -->
+                    <tr>
+                      <td style="padding: 40px 30px;">
+                        <div style="text-align: center; margin-bottom: 30px;">
+                          <div style="display: inline-block; background: #eff6ff; border-radius: 50%; padding: 16px; margin-bottom: 20px;">
+                            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                              <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" stroke="${invitation.organization.brand_color || '#2563eb'}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                              <circle cx="9" cy="7" r="4" stroke="${invitation.organization.brand_color || '#2563eb'}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                              <path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75" stroke="${invitation.organization.brand_color || '#2563eb'}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                            </svg>
+                          </div>
+                          <h2 style="color: #111827; margin: 0 0 10px 0; font-size: 24px; font-weight: 700;">You're Invited!</h2>
+                          <p style="color: #6b7280; margin: 0; font-size: 14px;">Join ${invitation.organization.name} on Disclosurely</p>
+                        </div>
+                        
+                        <p style="font-size: 16px; line-height: 1.6; color: #374151; margin-bottom: 20px;">
+                          Hi there,
+                        </p>
+                        
+                        <p style="font-size: 16px; line-height: 1.6; color: #374151; margin-bottom: 20px;">
+                          <strong style="color: #111827;">${inviterName}</strong> has invited you to join <strong style="color: #111827;">${invitation.organization.name}</strong> as a <strong style="color: #111827;">${invitation.role.replace('_', ' ')}</strong>.
+                        </p>
+                        
+                        <div style="background: #f9fafb; border-left: 4px solid ${invitation.organization.brand_color || '#2563eb'}; padding: 16px; margin: 24px 0; border-radius: 4px;">
+                          <p style="font-size: 14px; line-height: 1.6; color: #4b5563; margin: 0;">
+                            Disclosurely is a secure platform for managing whistleblower reports and compliance cases. You'll be able to review reports, communicate securely, and help maintain organizational integrity.
+                          </p>
+                        </div>
+                        
+                        <div style="text-align: center; margin: 32px 0;">
+                          <a href="${inviteUrl}" style="background: ${invitation.organization.brand_color || '#2563eb'}; color: white; padding: 14px 40px; text-decoration: none; border-radius: 6px; font-weight: 600; display: inline-block; font-size: 16px; box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);">
+                            Accept Invitation
+                          </a>
+                        </div>
+                        
+                        <div style="background: #f9fafb; padding: 16px; border-radius: 6px; margin: 24px 0;">
+                          <p style="font-size: 13px; color: #6b7280; margin: 0 0 8px 0; font-weight: 600;">Or copy and paste this link:</p>
+                          <p style="font-size: 12px; color: #2563eb; margin: 0; word-break: break-all;">
+                            <a href="${inviteUrl}" style="color: #2563eb; text-decoration: none;">${inviteUrl}</a>
+                          </p>
+                        </div>
+                        
+                        <div style="background: #fef3c7; border-left: 4px solid #f59e0b; padding: 12px 16px; margin: 24px 0; border-radius: 4px;">
+                          <p style="font-size: 13px; color: #92400e; margin: 0;">
+                            ⏱️ This invitation expires on <strong>${new Date(invitation.expires_at).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}</strong>
+                          </p>
+                        </div>
+                        
+                        <hr style="border: none; border-top: 1px solid #e5e7eb; margin: 30px 0;">
+                        
+                        <p style="font-size: 12px; color: #9ca3af; margin: 0; text-align: center;">
+                          If you didn't expect this invitation, you can safely ignore this email.
+                        </p>
+                      </td>
+                    </tr>
+                    
+                    <!-- Footer -->
+                    <tr>
+                      <td style="background: #f9fafb; padding: 24px 30px; text-align: center; border-top: 1px solid #e5e7eb;">
+                        <p style="font-size: 12px; color: #6b7280; margin: 0 0 8px 0;">
+                          © ${new Date().getFullYear()} Disclosurely. All rights reserved.
+                        </p>
+                        <p style="font-size: 11px; color: #9ca3af; margin: 0;">
+                          Secure whistleblowing and compliance management platform
+                        </p>
+                      </td>
+                    </tr>
+                  </table>
+                </td>
+              </tr>
+            </table>
           </body>
         </html>
       `,

@@ -26,6 +26,21 @@ const AcceptInvite = () => {
     }
   }, [token]);
 
+  // Check if user is already logged in and redirect to dashboard if so
+  useEffect(() => {
+    const checkSession = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (session) {
+        toast({
+          title: "Already Logged In",
+          description: "You're already logged in. Please log out first to accept a new invitation.",
+        });
+        navigate('/dashboard');
+      }
+    };
+    checkSession();
+  }, [navigate, toast]);
+
   const validateInvitation = async () => {
     try {
       const { data, error } = await supabase
