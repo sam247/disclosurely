@@ -526,7 +526,11 @@ const UserManagement = () => {
                       </TableCell>
                       <TableCell>
                         {invitation.invited_by_profile 
-                          ? `${invitation.invited_by_profile.first_name} ${invitation.invited_by_profile.last_name}`
+                          ? (
+                              (invitation.invited_by_profile.first_name || invitation.invited_by_profile.last_name)
+                                ? `${invitation.invited_by_profile.first_name ?? ''} ${invitation.invited_by_profile.last_name ?? ''}`.trim()
+                                : invitation.invited_by_profile.email
+                            )
                           : 'Unknown'
                         }
                       </TableCell>

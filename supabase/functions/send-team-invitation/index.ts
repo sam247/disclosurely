@@ -69,17 +69,19 @@ serve(async (req) => {
       );
     }
 
-    const inviterName = invitation.invited_by_profile?.first_name && invitation.invited_by_profile?.last_name
-      ? `${invitation.invited_by_profile.first_name} ${invitation.invited_by_profile.last_name}`
-      : 'Your team';
+    const inviterName = (invitation.invited_by_profile?.first_name || invitation.invited_by_profile?.last_name)
+      ? `${invitation.invited_by_profile?.first_name ?? ''} ${invitation.invited_by_profile?.last_name ?? ''}`.trim()
+      : (invitation.invited_by_profile?.email ?? 'Your team');
 
     const inviteUrl = `https://app.disclosurely.com/invite/${invitation.token}`;
 
-    // Send email via Resend
-    const { error: emailError } = await resend.emails.send({
+    const subject = `You've been invited to join ${invitation.organization.name} on Disclosurely`;
+
+    // Send email via Resend and log to email_notifications (same pattern as new-report notifications)
+    const { data: emailData, error: emailError } = await resend.emails.send({
       from: 'Disclosurely <notifications@disclosurely.com>',
       to: [invitation.email],
-      subject: `You've been invited to join ${invitation.organization.name} on Disclosurely`,
+      subject,
       html: `
         <!DOCTYPE html>
         <html>
@@ -135,6 +137,30 @@ serve(async (req) => {
         </html>
       `,
     });
+
+    // Log outcome to email_notifications for observability
+    try {
+      await supabaseClient
+        .from('email_notifications')
+        .insert({
+          user_id: invitation.invited_by ?? null,
+          organization_id: invitation.organization_id,
+          report_id: null,
+          notification_type: 'team_invitation',
+          email_address: invitation.email,
+          subject,
+          status: emailError ? 'failed' : 'sent',
+          metadata: {
+            resend_id: emailData?.id ?? null,
+            invitation_id: invitation.id,
+            token: invitation.token,
+            invite_url: inviteUrl,
+            inviter_name: inviterName
+          }
+        })
+    } catch (logError) {
+      console.error('Failed to log email notification:', logError)
+    }
 
     if (emailError) {
       console.error('Error sending email:', emailError);
