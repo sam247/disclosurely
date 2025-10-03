@@ -19,6 +19,9 @@ const AcceptInvite = () => {
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [submitting, setSubmitting] = useState(false);
+  const [showOtpInput, setShowOtpInput] = useState(false);
+  const [otp, setOtp] = useState('');
+  const [userId, setUserId] = useState<string | null>(null);
 
   useEffect(() => {
     if (token) {
@@ -98,16 +101,16 @@ const AcceptInvite = () => {
     setSubmitting(true);
 
     try {
-      // Sign up the user
+      // Sign up the user with OTP (not email confirmation link)
       const { data: authData, error: signupError } = await supabase.auth.signUp({
         email: invitation.email,
         password,
         options: {
-          emailRedirectTo: 'https://app.disclosurely.com/dashboard',
           data: {
             first_name: firstName,
             last_name: lastName,
           },
+          emailRedirectTo: `${window.location.origin}/dashboard`,
         },
       });
 
@@ -131,32 +134,15 @@ const AcceptInvite = () => {
         return;
       }
 
-      // Accept the invitation via edge function
-      const { error: acceptError } = await supabase.functions.invoke('accept-team-invitation', {
-        body: {
-          token,
-          userId: authData.user.id,
-        },
+      // Store userId for OTP verification
+      setUserId(authData.user.id);
+      setShowOtpInput(true);
+      setSubmitting(false);
+
+      toast({
+        title: "Check Your Email",
+        description: "We've sent you a 6-digit verification code.",
       });
-
-      if (acceptError) {
-        console.error('Error accepting invitation:', acceptError);
-        toast({
-          title: "Warning",
-          description: "Account created but failed to link to organization. Please contact support.",
-          variant: "destructive",
-        });
-      } else {
-        toast({
-          title: "Success!",
-          description: `Welcome to ${invitation.organization.name}! Please check your email to verify your account.`,
-        });
-      }
-
-      // Redirect to login
-      setTimeout(() => {
-        navigate('/login');
-      }, 2000);
 
     } catch (error) {
       console.error('Error accepting invitation:', error);
@@ -165,7 +151,71 @@ const AcceptInvite = () => {
         description: "An unexpected error occurred",
         variant: "destructive",
       });
-    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  const handleVerifyOtp = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (!userId || !token || !invitation) return;
+    
+    setSubmitting(true);
+
+    try {
+      // Verify OTP
+      const { error: verifyError } = await supabase.auth.verifyOtp({
+        email: invitation.email,
+        token: otp,
+        type: 'email',
+      });
+
+      if (verifyError) {
+        toast({
+          title: "Verification Failed",
+          description: verifyError.message,
+          variant: "destructive",
+        });
+        setSubmitting(false);
+        return;
+      }
+
+      // Accept the invitation via edge function
+      const { error: acceptError } = await supabase.functions.invoke('accept-team-invitation', {
+        body: {
+          token,
+          userId,
+        },
+      });
+
+      if (acceptError) {
+        console.error('Error accepting invitation:', acceptError);
+        toast({
+          title: "Warning",
+          description: "Account verified but failed to link to organization. Please contact support.",
+          variant: "destructive",
+        });
+        setSubmitting(false);
+        return;
+      }
+
+      toast({
+        title: "Success!",
+        description: `Welcome to ${invitation.organization.name}! Redirecting to dashboard...`,
+      });
+
+      // Redirect to dashboard after successful setup
+      setTimeout(() => {
+        navigate('/dashboard');
+      }, 1500);
+
+    } catch (error) {
+      console.error('Error verifying OTP:', error);
+      toast({
+        title: "Error",
+        description: "An unexpected error occurred",
+        variant: "destructive",
+      });
       setSubmitting(false);
     }
   };
@@ -199,81 +249,130 @@ const AcceptInvite = () => {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <form onSubmit={handleAcceptInvitation} className="space-y-4">
-            <div className="bg-blue-50 border border-blue-200 rounded-md p-3 mb-4">
-              <p className="text-sm text-blue-800">
-                <strong>Email:</strong> {invitation.email}
+          {!showOtpInput ? (
+            <form onSubmit={handleAcceptInvitation} className="space-y-4">
+              <div className="bg-blue-50 border border-blue-200 rounded-md p-3 mb-4">
+                <p className="text-sm text-blue-800">
+                  <strong>Email:</strong> {invitation.email}
+                </p>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label htmlFor="firstName">First name</Label>
+                  <Input
+                    id="firstName"
+                    type="text"
+                    required
+                    value={firstName}
+                    onChange={(e) => setFirstName(e.target.value)}
+                    placeholder="First name"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="lastName">Last name</Label>
+                  <Input
+                    id="lastName"
+                    type="text"
+                    required
+                    value={lastName}
+                    onChange={(e) => setLastName(e.target.value)}
+                    placeholder="Last name"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <Label htmlFor="password">Password</Label>
+                <Input
+                  id="password"
+                  type="password"
+                  required
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  placeholder="Create a password"
+                />
+              </div>
+
+              <div>
+                <Label htmlFor="confirmPassword">Confirm password</Label>
+                <Input
+                  id="confirmPassword"
+                  type="password"
+                  required
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  placeholder="Confirm your password"
+                />
+              </div>
+
+              <Button
+                type="submit"
+                className="w-full"
+                disabled={submitting}
+              >
+                {submitting ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Creating account...
+                  </>
+                ) : (
+                  'Accept & Create Account'
+                )}
+              </Button>
+
+              <p className="text-xs text-center text-gray-500 mt-4">
+                By creating an account, you agree to our Terms of Service and Privacy Policy
               </p>
-            </div>
+            </form>
+          ) : (
+            <form onSubmit={handleVerifyOtp} className="space-y-4">
+              <div className="bg-blue-50 border border-blue-200 rounded-md p-3 mb-4">
+                <p className="text-sm text-blue-800">
+                  We've sent a 6-digit verification code to <strong>{invitation.email}</strong>
+                </p>
+              </div>
 
-            <div className="grid grid-cols-2 gap-4">
               <div>
-                <Label htmlFor="firstName">First name</Label>
+                <Label htmlFor="otp">Verification Code</Label>
                 <Input
-                  id="firstName"
+                  id="otp"
                   type="text"
                   required
-                  value={firstName}
-                  onChange={(e) => setFirstName(e.target.value)}
-                  placeholder="First name"
+                  value={otp}
+                  onChange={(e) => setOtp(e.target.value)}
+                  placeholder="Enter 6-digit code"
+                  maxLength={6}
+                  className="text-center text-2xl tracking-widest"
                 />
               </div>
-              <div>
-                <Label htmlFor="lastName">Last name</Label>
-                <Input
-                  id="lastName"
-                  type="text"
-                  required
-                  value={lastName}
-                  onChange={(e) => setLastName(e.target.value)}
-                  placeholder="Last name"
-                />
-              </div>
-            </div>
 
-            <div>
-              <Label htmlFor="password">Password</Label>
-              <Input
-                id="password"
-                type="password"
-                required
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                placeholder="Create a password"
-              />
-            </div>
+              <Button
+                type="submit"
+                className="w-full"
+                disabled={submitting}
+              >
+                {submitting ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Verifying...
+                  </>
+                ) : (
+                  'Verify & Join Organization'
+                )}
+              </Button>
 
-            <div>
-              <Label htmlFor="confirmPassword">Confirm password</Label>
-              <Input
-                id="confirmPassword"
-                type="password"
-                required
-                value={confirmPassword}
-                onChange={(e) => setConfirmPassword(e.target.value)}
-                placeholder="Confirm your password"
-              />
-            </div>
-
-            <Button
-              type="submit"
-              className="w-full"
-              disabled={submitting}
-            >
-              {submitting ? (
-                <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Creating account...
-                </>
-              ) : (
-                'Accept & Create Account'
-              )}
-            </Button>
-
-            <p className="text-xs text-center text-gray-500 mt-4">
-              By creating an account, you agree to our Terms of Service and Privacy Policy
-            </p>
-          </form>
+              <Button
+                type="button"
+                variant="ghost"
+                className="w-full"
+                onClick={() => setShowOtpInput(false)}
+                disabled={submitting}
+              >
+                Back to signup
+              </Button>
+            </form>
+          )}
         </CardContent>
       </Card>
     </div>
