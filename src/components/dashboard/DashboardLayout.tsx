@@ -1,4 +1,4 @@
-import { ReactNode, useState } from 'react';
+import { ReactNode, useState, useEffect } from 'react';
 import { SidebarProvider, SidebarTrigger } from '@/components/ui/sidebar';
 import DashboardSidebar from './DashboardSidebar';
 import { Button } from '@/components/ui/button';
@@ -7,16 +7,40 @@ import { useAuth } from '@/hooks/useAuth';
 import { useNavigate } from 'react-router-dom';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import SubscriptionManagement from '@/components/SubscriptionManagement';
+import { supabase } from '@/integrations/supabase/client';
 
 interface DashboardLayoutProps {
   children: ReactNode;
 }
 
 const DashboardLayout = ({ children }: DashboardLayoutProps) => {
-  const { signOut } = useAuth();
+  const { signOut, user } = useAuth();
   const navigate = useNavigate();
   const [showUpgradeModal, setShowUpgradeModal] = useState(false);
   const [lockedFeature, setLockedFeature] = useState('');
+  const [firstName, setFirstName] = useState('');
+
+  useEffect(() => {
+    const fetchUserProfile = async () => {
+      if (!user) return;
+      
+      try {
+        const { data, error } = await supabase
+          .from('profiles')
+          .select('first_name')
+          .eq('id', user.id)
+          .single();
+        
+        if (data && !error) {
+          setFirstName(data.first_name || '');
+        }
+      } catch (error) {
+        console.error('Error fetching profile:', error);
+      }
+    };
+
+    fetchUserProfile();
+  }, [user]);
 
   const handleLogout = async () => {
     await signOut();
@@ -35,10 +59,12 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
         
         <div className="flex-1 flex flex-col">
           {/* Header */}
-          <header className="h-16 border-b bg-background flex items-center justify-between px-4 sticky top-0 z-10">
-            <div className="flex items-center gap-2">
+          <header className="h-16 border-b bg-background flex items-center justify-between px-6 sticky top-0 z-10">
+            <div className="flex items-center gap-3">
               <SidebarTrigger />
-              <h1 className="text-lg font-semibold">Dashboard</h1>
+              <h1 className="text-lg font-semibold">
+                Welcome Back{firstName && `, ${firstName}`}
+              </h1>
             </div>
             <Button
               variant="ghost"

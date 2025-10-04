@@ -1,10 +1,12 @@
-import { Home, Bot, Settings, Users, Palette, Lock } from 'lucide-react';
+import { Home, Bot, Users, Palette, Lock, User } from 'lucide-react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import {
   Sidebar,
   SidebarContent,
+  SidebarFooter,
   SidebarGroup,
   SidebarGroupContent,
+  SidebarHeader,
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
@@ -38,12 +40,6 @@ const DashboardSidebar = ({ onLockedFeatureClick }: DashboardSidebarProps) => {
       locked: !limits.hasAIHelper,
     },
     {
-      title: 'Settings',
-      icon: Settings,
-      path: '/dashboard/settings',
-      locked: false,
-    },
-    {
       title: 'Team',
       icon: Users,
       path: '/dashboard/team',
@@ -66,7 +62,24 @@ const DashboardSidebar = ({ onLockedFeatureClick }: DashboardSidebarProps) => {
   };
 
   return (
-    <Sidebar className={cn("border-r", collapsed ? "w-14" : "w-60")}>
+    <Sidebar className={cn("border-r", collapsed ? "w-16" : "w-60")}>
+      <SidebarHeader className="p-4 border-b">
+        <div className={cn("flex items-center", collapsed ? "justify-center" : "gap-3")}>
+          {!collapsed ? (
+            <>
+              <div className="h-8 w-8 rounded-lg bg-primary flex items-center justify-center text-primary-foreground font-bold">
+                D
+              </div>
+              <span className="font-semibold text-lg">Disclosurely</span>
+            </>
+          ) : (
+            <div className="h-8 w-8 rounded-lg bg-primary flex items-center justify-center text-primary-foreground font-bold">
+              D
+            </div>
+          )}
+        </div>
+      </SidebarHeader>
+
       <SidebarContent>
         <SidebarGroup>
           <SidebarGroupContent>
@@ -81,17 +94,23 @@ const DashboardSidebar = ({ onLockedFeatureClick }: DashboardSidebarProps) => {
                       onClick={() => handleNavigation(item)}
                       className={cn(
                         "w-full justify-start transition-colors",
-                        isActive && "bg-accent text-accent-foreground font-medium",
-                        item.locked && "opacity-60 hover:opacity-80"
+                        isActive && "bg-primary/10 text-primary font-medium",
+                        item.locked && "opacity-60 hover:opacity-80",
+                        !collapsed && "px-4"
                       )}
                     >
                       <div className="flex items-center gap-3 w-full">
-                        <Icon className="h-4 w-4 flex-shrink-0" />
+                        <Icon className={cn(
+                          "flex-shrink-0 text-primary",
+                          collapsed ? "h-5 w-5" : "h-5 w-5"
+                        )} />
                         {!collapsed && (
-                          <span className="flex-1">{item.title}</span>
-                        )}
-                        {item.locked && !collapsed && (
-                          <Lock className="h-3 w-3 opacity-60" />
+                          <>
+                            <span className="flex-1">{item.title}</span>
+                            {item.locked && (
+                              <Lock className="h-3 w-3 opacity-40" />
+                            )}
+                          </>
                         )}
                       </div>
                     </SidebarMenuButton>
@@ -102,6 +121,29 @@ const DashboardSidebar = ({ onLockedFeatureClick }: DashboardSidebarProps) => {
           </SidebarGroupContent>
         </SidebarGroup>
       </SidebarContent>
+
+      <SidebarFooter className="p-2 border-t">
+        <SidebarMenu>
+          <SidebarMenuItem>
+            <SidebarMenuButton
+              onClick={() => navigate('/dashboard/settings')}
+              className={cn(
+                "w-full justify-start transition-colors",
+                location.pathname === '/dashboard/settings' && "bg-primary/10 text-primary font-medium",
+                !collapsed && "px-4"
+              )}
+            >
+              <div className="flex items-center gap-3 w-full">
+                <User className={cn(
+                  "flex-shrink-0 text-primary",
+                  collapsed ? "h-5 w-5" : "h-5 w-5"
+                )} />
+                {!collapsed && <span className="flex-1">Profile</span>}
+              </div>
+            </SidebarMenuButton>
+          </SidebarMenuItem>
+        </SidebarMenu>
+      </SidebarFooter>
     </Sidebar>
   );
 };

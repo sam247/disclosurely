@@ -14,7 +14,7 @@ import ReportAttachments from '@/components/ReportAttachments';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useCustomDomain } from '@/hooks/useCustomDomain';
 
@@ -29,6 +29,7 @@ interface Report {
   priority: number;
   report_type: string;
   tags?: string[];
+  assigned_to?: string;
   first_read_at?: string;
   closed_at?: string;
   archived_at?: string;
@@ -79,7 +80,7 @@ const DashboardView = () => {
 
       const { data: reportsData } = await supabase
         .from('reports')
-        .select('id, title, tracking_id, status, created_at, encrypted_content, encryption_key_hash, priority, report_type, submitted_by_email')
+        .select('id, title, tracking_id, status, created_at, encrypted_content, encryption_key_hash, priority, report_type, submitted_by_email, tags, assigned_to')
         .eq('organization_id', profile.organization_id)
         .neq('status', 'closed')
         .order('created_at', { ascending: false })
@@ -87,7 +88,7 @@ const DashboardView = () => {
 
       const { data: archivedData } = await supabase
         .from('reports')
-        .select('id, title, tracking_id, status, created_at, encrypted_content, encryption_key_hash, priority, report_type, submitted_by_email')
+        .select('id, title, tracking_id, status, created_at, encrypted_content, encryption_key_hash, priority, report_type, submitted_by_email, tags, assigned_to')
         .eq('organization_id', profile.organization_id)
         .eq('status', 'closed')
         .order('created_at', { ascending: false })
@@ -235,12 +236,14 @@ const DashboardView = () => {
                   No reports found
                 </div>
               ) : (
-                <Table>
+                  <Table>
                   <TableHeader>
                     <TableRow>
                       <TableHead>Tracking ID</TableHead>
                       <TableHead>Title</TableHead>
                       <TableHead>Status</TableHead>
+                      <TableHead>Category</TableHead>
+                      <TableHead>Assigned To</TableHead>
                       <TableHead>Date</TableHead>
                       <TableHead className="text-right">Actions</TableHead>
                     </TableRow>
@@ -249,11 +252,40 @@ const DashboardView = () => {
                     {filteredReports.map((report) => (
                       <TableRow key={report.id}>
                         <TableCell className="font-mono text-sm">{report.tracking_id}</TableCell>
-                        <TableCell>{report.title}</TableCell>
+                        <TableCell className="font-medium">{report.title}</TableCell>
                         <TableCell>
-                          <Badge variant="secondary">{report.status}</Badge>
+                          <Badge variant={report.status === 'live' ? 'default' : 'secondary'}>
+                            {report.status}
+                          </Badge>
                         </TableCell>
-                        <TableCell>{new Date(report.created_at).toLocaleDateString()}</TableCell>
+                        <TableCell>
+                          {report.tags && report.tags.length > 0 ? (
+                            <div className="flex flex-wrap gap-1">
+                              {report.tags.slice(0, 2).map((tag: string, idx: number) => (
+                                <Badge key={idx} variant="outline" className="text-xs">
+                                  {tag}
+                                </Badge>
+                              ))}
+                              {report.tags.length > 2 && (
+                                <Badge variant="outline" className="text-xs">
+                                  +{report.tags.length - 2}
+                                </Badge>
+                              )}
+                            </div>
+                          ) : (
+                            <span className="text-sm text-muted-foreground">-</span>
+                          )}
+                        </TableCell>
+                        <TableCell>
+                          {report.assigned_to ? (
+                            <span className="text-sm">Assigned</span>
+                          ) : (
+                            <span className="text-sm text-muted-foreground">Unassigned</span>
+                          )}
+                        </TableCell>
+                        <TableCell className="text-sm text-muted-foreground">
+                          {new Date(report.created_at).toLocaleDateString()}
+                        </TableCell>
                         <TableCell className="text-right">
                           <DropdownMenu>
                             <DropdownMenuTrigger asChild>
@@ -261,14 +293,65 @@ const DashboardView = () => {
                                 <MoreVertical className="h-4 w-4" />
                               </Button>
                             </DropdownMenuTrigger>
-                            <DropdownMenuContent align="end">
+                            <DropdownMenuContent align="end" className="w-40">
                               <DropdownMenuItem onClick={() => handleViewReport(report)}>
                                 <Eye className="h-4 w-4 mr-2" />
                                 View Details
                               </DropdownMenuItem>
+                              <DropdownMenuItem 
+                                onClick={async () => {
+                                  try {
+                                    const { error } = await supabase
+                                      .from('reports')
+                                      .update({ status: 'closed' })
+                                      .eq('id', report.id);
+                                    
+                                    if (error) throw error;
+                                    toast({ title: 'Report closed successfully' });
+                                    fetchData();
+                                  } catch (error) {
+                                    console.error('Error closing report:', error);
+                                    toast({ 
+                                      title: 'Error closing report',
+                                      variant: 'destructive'
+                                    });
+                                  }
+                                }}
+                              >
+                                <XCircle className="h-4 w-4 mr-2" />
+                                Close
+                              </DropdownMenuItem>
                               <DropdownMenuItem onClick={() => handleArchiveReport(report.id)}>
                                 <Archive className="h-4 w-4 mr-2" />
                                 Archive
+                              </DropdownMenuItem>
+                              <DropdownMenuSeparator />
+                              <DropdownMenuItem 
+                                className="text-destructive"
+                                onClick={async () => {
+                                  try {
+                                    const { error } = await supabase
+                                      .from('reports')
+                                      .update({ 
+                                        deleted_at: new Date().toISOString(),
+                                        deleted_by: (await supabase.auth.getUser()).data.user?.id 
+                                      })
+                                      .eq('id', report.id);
+                                    
+                                    if (error) throw error;
+                                    toast({ title: 'Report deleted successfully' });
+                                    fetchData();
+                                  } catch (error) {
+                                    console.error('Error deleting report:', error);
+                                    toast({ 
+                                      title: 'Error deleting report',
+                                      variant: 'destructive'
+                                    });
+                                  }
+                                }}
+                              >
+                                <Trash2 className="h-4 w-4 mr-2" />
+                                Delete
                               </DropdownMenuItem>
                             </DropdownMenuContent>
                           </DropdownMenu>
@@ -299,6 +382,8 @@ const DashboardView = () => {
                     <TableRow>
                       <TableHead>Tracking ID</TableHead>
                       <TableHead>Title</TableHead>
+                      <TableHead>Status</TableHead>
+                      <TableHead>Category</TableHead>
                       <TableHead>Archived Date</TableHead>
                       <TableHead className="text-right">Actions</TableHead>
                     </TableRow>
@@ -307,17 +392,50 @@ const DashboardView = () => {
                     {archivedReports.map((report) => (
                       <TableRow key={report.id}>
                         <TableCell className="font-mono text-sm">{report.tracking_id}</TableCell>
-                        <TableCell>{report.title}</TableCell>
-                        <TableCell>{new Date(report.created_at).toLocaleDateString()}</TableCell>
+                        <TableCell className="font-medium">{report.title}</TableCell>
+                        <TableCell>
+                          <Badge variant="secondary">{report.status}</Badge>
+                        </TableCell>
+                        <TableCell>
+                          {report.tags && report.tags.length > 0 ? (
+                            <div className="flex flex-wrap gap-1">
+                              {report.tags.slice(0, 2).map((tag: string, idx: number) => (
+                                <Badge key={idx} variant="outline" className="text-xs">
+                                  {tag}
+                                </Badge>
+                              ))}
+                              {report.tags.length > 2 && (
+                                <Badge variant="outline" className="text-xs">
+                                  +{report.tags.length - 2}
+                                </Badge>
+                              )}
+                            </div>
+                          ) : (
+                            <span className="text-sm text-muted-foreground">-</span>
+                          )}
+                        </TableCell>
+                        <TableCell className="text-sm text-muted-foreground">
+                          {new Date(report.created_at).toLocaleDateString()}
+                        </TableCell>
                         <TableCell className="text-right">
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => handleUnarchiveReport(report.id)}
-                          >
-                            <RotateCcw className="h-4 w-4 mr-2" />
-                            Unarchive
-                          </Button>
+                          <div className="flex items-center justify-end gap-2">
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => handleViewReport(report)}
+                            >
+                              <Eye className="h-4 w-4 mr-2" />
+                              View
+                            </Button>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => handleUnarchiveReport(report.id)}
+                            >
+                              <RotateCcw className="h-4 w-4 mr-2" />
+                              Unarchive
+                            </Button>
+                          </div>
                         </TableCell>
                       </TableRow>
                     ))}
