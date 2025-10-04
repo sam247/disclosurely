@@ -59,10 +59,10 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
       <div className="min-h-screen flex w-full">
         <DashboardSidebar onLockedFeatureClick={handleLockedFeatureClick} />
         
-        <div className="flex-1 flex flex-col">
+        <div className="flex-1 flex flex-col min-w-0">
           {/* Header */}
-          <header className="h-16 border-b bg-background flex items-center justify-between px-6 sticky top-0 z-10">
-            <h1 className="text-lg font-semibold">
+          <header className="h-16 border-b bg-background flex items-center justify-between px-4 md:px-6 sticky top-0 z-10">
+            <h1 className="text-base md:text-lg font-semibold truncate">
               Welcome Back{firstName && `, ${firstName}`}
             </h1>
             <div className="flex items-center gap-2">
@@ -88,7 +88,7 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
           </header>
 
           {/* Main Content */}
-          <main className="flex-1 overflow-auto">
+          <main className="flex-1 overflow-auto p-4 md:p-6">
             {children}
           </main>
         </div>
