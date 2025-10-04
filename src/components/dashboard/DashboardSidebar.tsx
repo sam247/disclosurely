@@ -99,7 +99,7 @@ const DashboardSidebar = ({ onLockedFeatureClick }: DashboardSidebarProps) => {
             <img 
               src={disclosurelyIcon} 
               alt="Disclosurely" 
-              className="h-12 w-12 object-contain"
+              className="h-16 w-16 object-contain"
             />
           )}
         </button>
