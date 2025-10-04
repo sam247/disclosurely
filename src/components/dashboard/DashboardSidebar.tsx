@@ -16,7 +16,7 @@ import {
 import { useSubscriptionLimits } from '@/hooks/useSubscriptionLimits';
 import { cn } from '@/lib/utils';
 import disclosurelyFullLogo from '@/assets/logos/disclosurely-full-logo.png';
-import disclosurelyIcon from '@/assets/logos/disclosurely-icon.png';
+import disclosurelyIcon from '@/assets/logos/disclosurely-icon.svg';
 
 interface DashboardSidebarProps {
   onLockedFeatureClick: (feature: string) => void;
@@ -75,13 +75,13 @@ const DashboardSidebar = ({ onLockedFeatureClick }: DashboardSidebarProps) => {
             <img 
               src={disclosurelyFullLogo} 
               alt="Disclosurely" 
-              className="h-8 w-auto"
+              className="h-6 w-auto"
             />
           ) : (
             <img 
               src={disclosurelyIcon} 
               alt="Disclosurely" 
-              className="h-8 w-8"
+              className="h-6 w-6"
             />
           )}
         </div>

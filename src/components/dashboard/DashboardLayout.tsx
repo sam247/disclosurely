@@ -31,7 +31,9 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
           .eq('id', user.id)
           .single();
         
-        if (data && !error) {
+        if (error) {
+          console.error('Error fetching profile:', error);
+        } else if (data) {
           setFirstName(data.first_name || '');
         }
       } catch (error) {
