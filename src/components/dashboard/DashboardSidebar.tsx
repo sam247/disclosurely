@@ -1,4 +1,4 @@
-import { Home, Bot, Users, Palette, Lock } from 'lucide-react';
+import { Home, Bot, Users, Palette, Lock, BarChart3, ScrollText } from 'lucide-react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import {
   Sidebar,
@@ -16,7 +16,7 @@ import {
 import { useSubscriptionLimits } from '@/hooks/useSubscriptionLimits';
 import { cn } from '@/lib/utils';
 import disclosurelyFullLogo from '@/assets/logos/disclosurely-full-logo.png';
-import disclosurelyIcon from '@/assets/logos/disclosurely-icon.svg';
+import disclosurelyIcon from '@/assets/logos/disclosurely-icon-square.png';
 
 interface DashboardSidebarProps {
   onLockedFeatureClick: (feature: string) => void;
@@ -41,6 +41,18 @@ const DashboardSidebar = ({ onLockedFeatureClick }: DashboardSidebarProps) => {
       icon: Bot,
       path: '/dashboard/ai-helper',
       locked: !limits.hasAIHelper,
+    },
+    {
+      title: 'Analytics',
+      icon: BarChart3,
+      path: '/dashboard/analytics',
+      locked: false,
+    },
+    {
+      title: 'Audit',
+      icon: ScrollText,
+      path: '/dashboard/audit',
+      locked: false,
     },
     {
       title: 'Team',
@@ -70,7 +82,13 @@ const DashboardSidebar = ({ onLockedFeatureClick }: DashboardSidebarProps) => {
       collapsible="icon"
     >
       <SidebarHeader className="p-4 border-b">
-        <div className={cn("flex items-center", collapsed ? "justify-center" : "gap-3")}>
+        <button 
+          onClick={() => navigate('/dashboard')}
+          className={cn(
+            "flex items-center w-full hover:opacity-80 transition-opacity",
+            collapsed ? "justify-center" : "gap-3"
+          )}
+        >
           {!collapsed ? (
             <img 
               src={disclosurelyFullLogo} 
@@ -81,10 +99,10 @@ const DashboardSidebar = ({ onLockedFeatureClick }: DashboardSidebarProps) => {
             <img 
               src={disclosurelyIcon} 
               alt="Disclosurely" 
-              className="h-6 w-6"
+              className="h-10 w-10 object-contain"
             />
           )}
-        </div>
+        </button>
       </SidebarHeader>
 
       <SidebarContent>
@@ -130,7 +148,7 @@ const DashboardSidebar = ({ onLockedFeatureClick }: DashboardSidebarProps) => {
       </SidebarContent>
 
       <SidebarFooter className="p-2 border-t">
-        <SidebarTrigger className="w-full" />
+        <SidebarTrigger className={cn("w-full", !collapsed && "justify-start")} />
       </SidebarFooter>
     </Sidebar>
   );

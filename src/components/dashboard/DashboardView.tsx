@@ -11,6 +11,7 @@ import { supabase } from '@/integrations/supabase/client';
 import ReportMessaging from '@/components/ReportMessaging';
 import ReportContentDisplay from '@/components/ReportContentDisplay';
 import ReportAttachments from '@/components/ReportAttachments';
+import LinkGenerator from '@/components/LinkGenerator';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
@@ -191,6 +192,9 @@ const DashboardView = () => {
 
   return (
     <div className="p-6 space-y-6">
+      {/* Secure Link Section */}
+      <LinkGenerator />
+
       <div>
         <h2 className="text-2xl font-bold">Reports Overview</h2>
         <p className="text-muted-foreground">Manage and review all submitted reports</p>
