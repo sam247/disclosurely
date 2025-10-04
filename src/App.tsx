@@ -1,4 +1,3 @@
-import React from 'react';
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import { AuthProvider } from './hooks/useAuth';
 import { OrganizationProvider } from './contexts/OrganizationContext';
@@ -6,6 +5,12 @@ import { useSessionTimeout } from './hooks/useSessionTimeout';
 import { useAuth } from './hooks/useAuth';
 import ProtectedRoute from './components/ProtectedRoute';
 import AuthenticatedApp from './components/AuthenticatedApp';
+import DashboardLayout from './components/dashboard/DashboardLayout';
+import DashboardView from './components/dashboard/DashboardView';
+import AIHelperView from './components/dashboard/AIHelperView';
+import SettingsView from './components/dashboard/SettingsView';
+import TeamView from './components/dashboard/TeamView';
+import BrandingView from './components/dashboard/BrandingView';
 import Index from './pages/Index';
 import Login from './pages/Login';
 import Signup from './pages/Signup';
@@ -115,15 +120,49 @@ const AppContent = () => {
           path="/dashboard" 
           element={
             <ProtectedRoute>
-              <AuthenticatedApp />
+              <DashboardLayout>
+                <DashboardView />
+              </DashboardLayout>
             </ProtectedRoute>
           } 
         />
         <Route 
-          path="/dashboard/*" 
+          path="/dashboard/ai-helper" 
           element={
             <ProtectedRoute>
-              <AuthenticatedApp />
+              <DashboardLayout>
+                <AIHelperView />
+              </DashboardLayout>
+            </ProtectedRoute>
+          } 
+        />
+        <Route 
+          path="/dashboard/settings" 
+          element={
+            <ProtectedRoute>
+              <DashboardLayout>
+                <SettingsView />
+              </DashboardLayout>
+            </ProtectedRoute>
+          } 
+        />
+        <Route 
+          path="/dashboard/team" 
+          element={
+            <ProtectedRoute>
+              <DashboardLayout>
+                <TeamView />
+              </DashboardLayout>
+            </ProtectedRoute>
+          } 
+        />
+        <Route 
+          path="/dashboard/branding" 
+          element={
+            <ProtectedRoute>
+              <DashboardLayout>
+                <BrandingView />
+              </DashboardLayout>
             </ProtectedRoute>
           } 
         />

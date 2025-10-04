@@ -1,0 +1,372 @@
+import { useState, useEffect } from 'react';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
+import { Badge } from '@/components/ui/badge';
+import { useAuth } from '@/hooks/useAuth';
+import { useToast } from '@/hooks/use-toast';
+import { FileText, Eye, Archive, Trash2, RotateCcw, MoreVertical, XCircle, ChevronUp, ChevronDown } from 'lucide-react';
+import { supabase } from '@/integrations/supabase/client';
+import ReportMessaging from '@/components/ReportMessaging';
+import ReportContentDisplay from '@/components/ReportContentDisplay';
+import ReportAttachments from '@/components/ReportAttachments';
+import { Input } from '@/components/ui/input';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { useCustomDomain } from '@/hooks/useCustomDomain';
+
+interface Report {
+  id: string;
+  title: string;
+  tracking_id: string;
+  status: 'new' | 'live' | 'in_review' | 'investigating' | 'resolved' | 'closed' | 'archived' | 'deleted';
+  created_at: string;
+  encrypted_content: string;
+  encryption_key_hash: string;
+  priority: number;
+  report_type: string;
+  tags?: string[];
+  first_read_at?: string;
+  closed_at?: string;
+  archived_at?: string;
+  deleted_at?: string;
+  deleted_by?: string;
+  organizations?: {
+    name: string;
+  };
+  submitted_by_email?: string;
+}
+
+const DashboardView = () => {
+  const { user } = useAuth();
+  const { customDomain, organizationId } = useCustomDomain();
+  const { toast } = useToast();
+  const [reports, setReports] = useState<Report[]>([]);
+  const [archivedReports, setArchivedReports] = useState<Report[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [selectedReport, setSelectedReport] = useState<Report | null>(null);
+  const [isReportDialogOpen, setIsReportDialogOpen] = useState(false);
+  const [showArchived, setShowArchived] = useState(false);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [statusFilter, setStatusFilter] = useState('all');
+  const [sortField, setSortField] = useState<'created_at' | 'title' | 'tracking_id'>('created_at');
+  const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('desc');
+  const [reportCategories, setReportCategories] = useState<Record<string, string>>({});
+
+  useEffect(() => {
+    if (user) {
+      fetchData();
+    }
+  }, [user]);
+
+  const fetchData = async () => {
+    if (!user) return;
+    
+    try {
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('organization_id')
+        .eq('id', user.id)
+        .single();
+
+      if (!profile?.organization_id) {
+        setLoading(false);
+        return;
+      }
+
+      const { data: reportsData } = await supabase
+        .from('reports')
+        .select('id, title, tracking_id, status, created_at, encrypted_content, encryption_key_hash, priority, report_type, submitted_by_email')
+        .eq('organization_id', profile.organization_id)
+        .neq('status', 'closed')
+        .order('created_at', { ascending: false })
+        .limit(20);
+
+      const { data: archivedData } = await supabase
+        .from('reports')
+        .select('id, title, tracking_id, status, created_at, encrypted_content, encryption_key_hash, priority, report_type, submitted_by_email')
+        .eq('organization_id', profile.organization_id)
+        .eq('status', 'closed')
+        .order('created_at', { ascending: false })
+        .limit(20);
+
+      setReports(reportsData || []);
+      setArchivedReports(archivedData || []);
+    } catch (error) {
+      console.error('Error fetching dashboard data:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleViewReport = async (report: Report) => {
+    setSelectedReport(report);
+    setIsReportDialogOpen(true);
+  };
+
+  const handleArchiveReport = async (reportId: string) => {
+    try {
+      const { error } = await supabase
+        .from('reports')
+        .update({ 
+          status: 'archived',
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', reportId);
+
+      if (error) throw error;
+
+      toast({
+        title: "Report archived",
+        description: "The report has been moved to archived status",
+      });
+
+      if (selectedReport?.id === reportId) {
+        setIsReportDialogOpen(false);
+        setSelectedReport(null);
+      }
+
+      setReports(prevReports => prevReports.filter(report => report.id !== reportId));
+      setTimeout(() => fetchData(), 1000);
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to archive report. Please try again.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleUnarchiveReport = async (reportId: string) => {
+    try {
+      const { error } = await supabase
+        .from('reports')
+        .update({ 
+          status: 'live',
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', reportId);
+
+      if (error) throw error;
+
+      toast({
+        title: "Report unarchived",
+        description: "The report has been moved back to active status",
+      });
+
+      setArchivedReports(prevReports => prevReports.filter(report => report.id !== reportId));
+      setTimeout(() => fetchData(), 1000);
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to unarchive report. Please try again.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const filteredReports = reports.filter(report => {
+    const matchesSearch = report.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         report.tracking_id.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesStatus = statusFilter === 'all' || report.status === statusFilter;
+    return matchesSearch && matchesStatus;
+  }).sort((a, b) => {
+    const aValue = a[sortField];
+    const bValue = b[sortField];
+    const comparison = aValue < bValue ? -1 : aValue > bValue ? 1 : 0;
+    return sortDirection === 'asc' ? comparison : -comparison;
+  });
+
+  if (loading) {
+    return (
+      <div className="p-8 flex items-center justify-center">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="p-6 space-y-6">
+      <div>
+        <h2 className="text-2xl font-bold">Reports Overview</h2>
+        <p className="text-muted-foreground">Manage and review all submitted reports</p>
+      </div>
+
+      <div className="flex flex-col sm:flex-row gap-4">
+        <Input
+          placeholder="Search reports..."
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+          className="flex-1"
+        />
+        <Select value={statusFilter} onValueChange={setStatusFilter}>
+          <SelectTrigger className="w-full sm:w-48">
+            <SelectValue placeholder="Filter by status" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">All Statuses</SelectItem>
+            <SelectItem value="new">New</SelectItem>
+            <SelectItem value="live">Live</SelectItem>
+            <SelectItem value="in_review">In Review</SelectItem>
+            <SelectItem value="investigating">Investigating</SelectItem>
+            <SelectItem value="resolved">Resolved</SelectItem>
+          </SelectContent>
+        </Select>
+      </div>
+
+      <Tabs defaultValue="active" className="space-y-4">
+        <TabsList>
+          <TabsTrigger value="active">Active Reports ({reports.length})</TabsTrigger>
+          <TabsTrigger value="archived">Archived ({archivedReports.length})</TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="active">
+          <Card>
+            <CardHeader>
+              <CardTitle>Active Reports</CardTitle>
+              <CardDescription>All active and ongoing reports</CardDescription>
+            </CardHeader>
+            <CardContent>
+              {filteredReports.length === 0 ? (
+                <div className="text-center py-8 text-muted-foreground">
+                  No reports found
+                </div>
+              ) : (
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Tracking ID</TableHead>
+                      <TableHead>Title</TableHead>
+                      <TableHead>Status</TableHead>
+                      <TableHead>Date</TableHead>
+                      <TableHead className="text-right">Actions</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {filteredReports.map((report) => (
+                      <TableRow key={report.id}>
+                        <TableCell className="font-mono text-sm">{report.tracking_id}</TableCell>
+                        <TableCell>{report.title}</TableCell>
+                        <TableCell>
+                          <Badge variant="secondary">{report.status}</Badge>
+                        </TableCell>
+                        <TableCell>{new Date(report.created_at).toLocaleDateString()}</TableCell>
+                        <TableCell className="text-right">
+                          <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                              <Button variant="ghost" size="sm">
+                                <MoreVertical className="h-4 w-4" />
+                              </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end">
+                              <DropdownMenuItem onClick={() => handleViewReport(report)}>
+                                <Eye className="h-4 w-4 mr-2" />
+                                View Details
+                              </DropdownMenuItem>
+                              <DropdownMenuItem onClick={() => handleArchiveReport(report.id)}>
+                                <Archive className="h-4 w-4 mr-2" />
+                                Archive
+                              </DropdownMenuItem>
+                            </DropdownMenuContent>
+                          </DropdownMenu>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              )}
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="archived">
+          <Card>
+            <CardHeader>
+              <CardTitle>Archived Reports</CardTitle>
+              <CardDescription>Closed and archived reports</CardDescription>
+            </CardHeader>
+            <CardContent>
+              {archivedReports.length === 0 ? (
+                <div className="text-center py-8 text-muted-foreground">
+                  No archived reports
+                </div>
+              ) : (
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Tracking ID</TableHead>
+                      <TableHead>Title</TableHead>
+                      <TableHead>Archived Date</TableHead>
+                      <TableHead className="text-right">Actions</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {archivedReports.map((report) => (
+                      <TableRow key={report.id}>
+                        <TableCell className="font-mono text-sm">{report.tracking_id}</TableCell>
+                        <TableCell>{report.title}</TableCell>
+                        <TableCell>{new Date(report.created_at).toLocaleDateString()}</TableCell>
+                        <TableCell className="text-right">
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => handleUnarchiveReport(report.id)}
+                          >
+                            <RotateCcw className="h-4 w-4 mr-2" />
+                            Unarchive
+                          </Button>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              )}
+            </CardContent>
+          </Card>
+        </TabsContent>
+      </Tabs>
+
+      {/* Report Details Dialog */}
+      <Dialog open={isReportDialogOpen} onOpenChange={setIsReportDialogOpen}>
+        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+          {selectedReport && (
+            <>
+              <DialogHeader>
+                <DialogTitle>Report Details</DialogTitle>
+                <DialogDescription>
+                  Tracking ID: {selectedReport.tracking_id}
+                </DialogDescription>
+              </DialogHeader>
+              <div className="space-y-6">
+                <ReportContentDisplay 
+                  encryptedContent={selectedReport.encrypted_content}
+                  title={selectedReport.title}
+                  status={selectedReport.status}
+                  trackingId={selectedReport.tracking_id}
+                  reportType={selectedReport.report_type}
+                  createdAt={selectedReport.created_at}
+                  priority={selectedReport.priority}
+                  submittedByEmail={selectedReport.submitted_by_email}
+                  reportId={selectedReport.id}
+                />
+                <ReportAttachments reportId={selectedReport.id} />
+                <ReportMessaging 
+                  report={{
+                    ...selectedReport,
+                    organizations: { name: '' }
+                  }} 
+                  onClose={() => setIsReportDialogOpen(false)}
+                />
+              </div>
+            </>
+          )}
+        </DialogContent>
+      </Dialog>
+    </div>
+  );
+};
+
+export default DashboardView;
