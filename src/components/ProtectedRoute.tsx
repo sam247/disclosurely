@@ -24,8 +24,8 @@ const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
     return <Navigate to="/login" replace />;
   }
 
-  // Use AuthenticatedApp for app/dashboard shells, otherwise render the requested page
-  if (location.pathname.startsWith('/app') || location.pathname.startsWith('/dashboard')) {
+  // Use AuthenticatedApp only for /app routes
+  if (location.pathname.startsWith('/app')) {
     return <AuthenticatedApp />;
   }
 
