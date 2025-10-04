@@ -28,7 +28,7 @@ import prismLogo from "@/assets/logos/prism-logo-clean.png";
 const Landing = () => {
   // For now, return static content since public landing doesn't have auth context
   // The admin panel will manage authenticated organization content
-  
+
   return <div className="min-h-screen bg-white">
       {/* Navigation */}
       <nav className="bg-white shadow-sm sticky top-0 z-50">
@@ -646,7 +646,7 @@ const Landing = () => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">
             <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-4 flex items-center justify-center gap-3">
-              <Shield className="h-8 w-8 text-blue-600" />
+              
               Certifications
             </h2>
             <p className="text-lg sm:text-xl text-gray-600 max-w-3xl mx-auto px-4">
