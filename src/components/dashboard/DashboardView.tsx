@@ -6,7 +6,7 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { Badge } from '@/components/ui/badge';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
-import { FileText, Eye, Archive, Trash2, RotateCcw, MoreVertical, XCircle, ChevronUp, ChevronDown } from 'lucide-react';
+import { FileText, Eye, Archive, Trash2, RotateCcw, MoreVertical, XCircle, ChevronUp, ChevronDown, CheckCircle } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import ReportMessaging from '@/components/ReportMessaging';
 import ReportContentDisplay from '@/components/ReportContentDisplay';
@@ -192,6 +192,51 @@ const DashboardView = () => {
 
   return (
     <div className="space-y-6">
+      {/* Summary Cards */}
+      <div className="grid gap-4 md:grid-cols-3">
+        <Card>
+          <CardContent className="pt-6">
+            <div className="flex items-center gap-4">
+              <div className="p-3 rounded-lg bg-primary/10">
+                <FileText className="h-6 w-6 text-primary" />
+              </div>
+              <div>
+                <p className="text-sm text-muted-foreground">Active Reports</p>
+                <p className="text-2xl font-bold">{reports.length}</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+        
+        <Card>
+          <CardContent className="pt-6">
+            <div className="flex items-center gap-4">
+              <div className="p-3 rounded-lg bg-muted">
+                <Archive className="h-6 w-6 text-muted-foreground" />
+              </div>
+              <div>
+                <p className="text-sm text-muted-foreground">Archived Reports</p>
+                <p className="text-2xl font-bold">{archivedReports.length}</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+        
+        <Card>
+          <CardContent className="pt-6">
+            <div className="flex items-center gap-4">
+              <div className="p-3 rounded-lg bg-green-500/10">
+                <CheckCircle className="h-6 w-6 text-green-500" />
+              </div>
+              <div>
+                <p className="text-sm text-muted-foreground">Quick Report</p>
+                <p className="text-2xl font-bold">Active</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
       {/* Secure Link Section */}
       <LinkGenerator />
 

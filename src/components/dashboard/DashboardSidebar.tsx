@@ -96,11 +96,13 @@ const DashboardSidebar = ({ onLockedFeatureClick }: DashboardSidebarProps) => {
               className="h-6 w-auto"
             />
           ) : (
-            <img 
-              src={disclosurelyIcon} 
-              alt="Disclosurely" 
-              className="h-16 w-16 object-contain"
-            />
+            <div className="w-full h-full flex items-center justify-center py-2">
+              <img 
+                src={disclosurelyIcon} 
+                alt="Disclosurely" 
+                className="h-10 w-10 object-contain"
+              />
+            </div>
           )}
         </button>
       </SidebarHeader>
