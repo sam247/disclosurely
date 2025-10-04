@@ -1,4 +1,4 @@
-import { Home, Bot, Users, Palette, Lock, User } from 'lucide-react';
+import { Home, Bot, Users, Palette, Lock } from 'lucide-react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import {
   Sidebar,
@@ -10,10 +10,13 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
+  SidebarTrigger,
   useSidebar,
 } from '@/components/ui/sidebar';
 import { useSubscriptionLimits } from '@/hooks/useSubscriptionLimits';
 import { cn } from '@/lib/utils';
+import disclosurelyFullLogo from '@/assets/logos/disclosurely-full-logo.png';
+import disclosurelyIcon from '@/assets/logos/disclosurely-icon.png';
 
 interface DashboardSidebarProps {
   onLockedFeatureClick: (feature: string) => void;
@@ -62,20 +65,24 @@ const DashboardSidebar = ({ onLockedFeatureClick }: DashboardSidebarProps) => {
   };
 
   return (
-    <Sidebar className={cn("border-r", collapsed ? "w-16" : "w-60")}>
+    <Sidebar 
+      className="border-r"
+      collapsible="icon"
+    >
       <SidebarHeader className="p-4 border-b">
         <div className={cn("flex items-center", collapsed ? "justify-center" : "gap-3")}>
           {!collapsed ? (
-            <>
-              <div className="h-8 w-8 rounded-lg bg-primary flex items-center justify-center text-primary-foreground font-bold">
-                D
-              </div>
-              <span className="font-semibold text-lg">Disclosurely</span>
-            </>
+            <img 
+              src={disclosurelyFullLogo} 
+              alt="Disclosurely" 
+              className="h-8 w-auto"
+            />
           ) : (
-            <div className="h-8 w-8 rounded-lg bg-primary flex items-center justify-center text-primary-foreground font-bold">
-              D
-            </div>
+            <img 
+              src={disclosurelyIcon} 
+              alt="Disclosurely" 
+              className="h-8 w-8"
+            />
           )}
         </div>
       </SidebarHeader>
@@ -123,26 +130,7 @@ const DashboardSidebar = ({ onLockedFeatureClick }: DashboardSidebarProps) => {
       </SidebarContent>
 
       <SidebarFooter className="p-2 border-t">
-        <SidebarMenu>
-          <SidebarMenuItem>
-            <SidebarMenuButton
-              onClick={() => navigate('/dashboard/settings')}
-              className={cn(
-                "w-full justify-start transition-colors",
-                location.pathname === '/dashboard/settings' && "bg-primary/10 text-primary font-medium",
-                !collapsed && "px-4"
-              )}
-            >
-              <div className="flex items-center gap-3 w-full">
-                <User className={cn(
-                  "flex-shrink-0 text-primary",
-                  collapsed ? "h-5 w-5" : "h-5 w-5"
-                )} />
-                {!collapsed && <span className="flex-1">Profile</span>}
-              </div>
-            </SidebarMenuButton>
-          </SidebarMenuItem>
-        </SidebarMenu>
+        <SidebarTrigger className="w-full" />
       </SidebarFooter>
     </Sidebar>
   );
