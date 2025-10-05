@@ -1,5 +1,5 @@
 import { ReactNode, useState, useEffect } from 'react';
-import { SidebarProvider } from '@/components/ui/sidebar';
+import { SidebarProvider, SidebarTrigger } from '@/components/ui/sidebar';
 import DashboardSidebar from './DashboardSidebar';
 import { Button } from '@/components/ui/button';
 import { LogOut, User } from 'lucide-react';
@@ -62,9 +62,12 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
         <div className="flex-1 flex flex-col min-w-0">
           {/* Header */}
           <header className="h-16 border-b bg-background flex items-center justify-between px-4 md:px-6 sticky top-0 z-10">
-            <h1 className="text-base md:text-lg font-semibold truncate">
-              Welcome Back{firstName && `, ${firstName}`}
-            </h1>
+            <div className="flex items-center gap-3">
+              <SidebarTrigger className="md:hidden" />
+              <h1 className="text-base md:text-lg font-semibold truncate">
+                Welcome Back{firstName && `, ${firstName}`}
+              </h1>
+            </div>
             <div className="flex items-center gap-2">
               <Button
                 variant="ghost"
