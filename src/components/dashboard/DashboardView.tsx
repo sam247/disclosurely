@@ -107,6 +107,33 @@ const DashboardView = () => {
   const handleViewReport = async (report: Report) => {
     setSelectedReport(report);
     setIsReportDialogOpen(true);
+    
+    // Automatically change status from "new" to "live" when first viewed
+    if (report.status === 'new') {
+      try {
+        const { error } = await supabase
+          .from('reports')
+          .update({ 
+            status: 'live',
+            first_read_at: new Date().toISOString(),
+            updated_at: new Date().toISOString()
+          })
+          .eq('id', report.id);
+
+        if (error) throw error;
+
+        // Update local state
+        setReports(prevReports => 
+          prevReports.map(r => 
+            r.id === report.id 
+              ? { ...r, status: 'live' as const, first_read_at: new Date().toISOString() }
+              : r
+          )
+        );
+      } catch (error) {
+        console.error('Error updating report status:', error);
+      }
+    }
   };
 
   const handleArchiveReport = async (reportId: string) => {
@@ -336,74 +363,80 @@ const DashboardView = () => {
                           {new Date(report.created_at).toLocaleDateString()}
                         </TableCell>
                         <TableCell className="text-right">
-                          <DropdownMenu>
-                            <DropdownMenuTrigger asChild>
-                              <Button variant="ghost" size="sm">
-                                <MoreVertical className="h-4 w-4" />
-                              </Button>
-                            </DropdownMenuTrigger>
-                            <DropdownMenuContent align="end" className="w-40">
-                              <DropdownMenuItem onClick={() => handleViewReport(report)}>
-                                <Eye className="h-4 w-4 mr-2" />
-                                View Details
-                              </DropdownMenuItem>
-                              <DropdownMenuItem 
-                                onClick={async () => {
-                                  try {
-                                    const { error } = await supabase
-                                      .from('reports')
-                                      .update({ status: 'closed' })
-                                      .eq('id', report.id);
-                                    
-                                    if (error) throw error;
-                                    toast({ title: 'Report closed successfully' });
-                                    fetchData();
-                                  } catch (error) {
-                                    console.error('Error closing report:', error);
-                                    toast({ 
-                                      title: 'Error closing report',
-                                      variant: 'destructive'
-                                    });
-                                  }
-                                }}
-                              >
-                                <XCircle className="h-4 w-4 mr-2" />
-                                Close
-                              </DropdownMenuItem>
-                              <DropdownMenuItem onClick={() => handleArchiveReport(report.id)}>
-                                <Archive className="h-4 w-4 mr-2" />
-                                Archive
-                              </DropdownMenuItem>
-                              <DropdownMenuSeparator />
-                              <DropdownMenuItem 
-                                className="text-destructive"
-                                onClick={async () => {
-                                  try {
-                                    const { error } = await supabase
-                                      .from('reports')
-                                      .update({ 
-                                        deleted_at: new Date().toISOString(),
-                                        deleted_by: (await supabase.auth.getUser()).data.user?.id 
-                                      })
-                                      .eq('id', report.id);
-                                    
-                                    if (error) throw error;
-                                    toast({ title: 'Report deleted successfully' });
-                                    fetchData();
-                                  } catch (error) {
-                                    console.error('Error deleting report:', error);
-                                    toast({ 
-                                      title: 'Error deleting report',
-                                      variant: 'destructive'
-                                    });
-                                  }
-                                }}
-                              >
-                                <Trash2 className="h-4 w-4 mr-2" />
-                                Delete
-                              </DropdownMenuItem>
-                            </DropdownMenuContent>
-                          </DropdownMenu>
+                          <div className="flex items-center justify-end gap-2">
+                            <Button 
+                              variant="ghost" 
+                              size="sm"
+                              onClick={() => handleViewReport(report)}
+                              className="text-primary hover:text-primary"
+                            >
+                              View
+                            </Button>
+                            <DropdownMenu>
+                              <DropdownMenuTrigger asChild>
+                                <Button variant="ghost" size="sm">
+                                  <MoreVertical className="h-4 w-4" />
+                                </Button>
+                              </DropdownMenuTrigger>
+                              <DropdownMenuContent align="end" className="w-40">
+                                <DropdownMenuItem 
+                                  onClick={async () => {
+                                    try {
+                                      const { error } = await supabase
+                                        .from('reports')
+                                        .update({ status: 'closed' })
+                                        .eq('id', report.id);
+                                      
+                                      if (error) throw error;
+                                      toast({ title: 'Report closed successfully' });
+                                      fetchData();
+                                    } catch (error) {
+                                      console.error('Error closing report:', error);
+                                      toast({ 
+                                        title: 'Error closing report',
+                                        variant: 'destructive'
+                                      });
+                                    }
+                                  }}
+                                >
+                                  <XCircle className="h-4 w-4 mr-2" />
+                                  Close
+                                </DropdownMenuItem>
+                                <DropdownMenuItem onClick={() => handleArchiveReport(report.id)}>
+                                  <Archive className="h-4 w-4 mr-2" />
+                                  Archive
+                                </DropdownMenuItem>
+                                <DropdownMenuSeparator />
+                                <DropdownMenuItem 
+                                  className="text-destructive"
+                                  onClick={async () => {
+                                    try {
+                                      const { error } = await supabase
+                                        .from('reports')
+                                        .update({ 
+                                          deleted_at: new Date().toISOString(),
+                                          deleted_by: (await supabase.auth.getUser()).data.user?.id 
+                                        })
+                                        .eq('id', report.id);
+                                      
+                                      if (error) throw error;
+                                      toast({ title: 'Report deleted successfully' });
+                                      fetchData();
+                                    } catch (error) {
+                                      console.error('Error deleting report:', error);
+                                      toast({ 
+                                        title: 'Error deleting report',
+                                        variant: 'destructive'
+                                      });
+                                    }
+                                  }}
+                                >
+                                  <Trash2 className="h-4 w-4 mr-2" />
+                                  Delete
+                                </DropdownMenuItem>
+                              </DropdownMenuContent>
+                            </DropdownMenu>
+                          </div>
                         </TableCell>
                       </TableRow>
                     ))}
@@ -468,22 +501,27 @@ const DashboardView = () => {
                         </TableCell>
                         <TableCell className="text-right">
                           <div className="flex items-center justify-end gap-2">
-                            <Button
-                              variant="ghost"
+                            <Button 
+                              variant="ghost" 
                               size="sm"
                               onClick={() => handleViewReport(report)}
+                              className="text-primary hover:text-primary"
                             >
-                              <Eye className="h-4 w-4 mr-2" />
                               View
                             </Button>
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              onClick={() => handleUnarchiveReport(report.id)}
-                            >
-                              <RotateCcw className="h-4 w-4 mr-2" />
-                              Unarchive
-                            </Button>
+                            <DropdownMenu>
+                              <DropdownMenuTrigger asChild>
+                                <Button variant="ghost" size="sm">
+                                  <MoreVertical className="h-4 w-4" />
+                                </Button>
+                              </DropdownMenuTrigger>
+                              <DropdownMenuContent align="end" className="w-40">
+                                <DropdownMenuItem onClick={() => handleUnarchiveReport(report.id)}>
+                                  <RotateCcw className="h-4 w-4 mr-2" />
+                                  Unarchive
+                                </DropdownMenuItem>
+                              </DropdownMenuContent>
+                            </DropdownMenu>
                           </div>
                         </TableCell>
                       </TableRow>
