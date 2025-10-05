@@ -147,7 +147,7 @@ const NotificationSystem = () => {
         <Button variant="ghost" size="sm" className="relative">
           <Bell className="h-4 w-4" />
           {unreadCount > 0 && (
-            <span className="absolute -top-1 -right-1 h-2 w-2 bg-red-500 rounded-full" />
+            <span className="absolute top-0 right-0 h-2 w-2 bg-red-500 rounded-full animate-pulse" />
           )}
         </Button>
       </PopoverTrigger>
