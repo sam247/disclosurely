@@ -8,6 +8,7 @@ import { useNavigate } from 'react-router-dom';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import SubscriptionManagement from '@/components/SubscriptionManagement';
 import { supabase } from '@/integrations/supabase/client';
+import NotificationSystem from '@/components/NotificationSystem';
 
 interface DashboardLayoutProps {
   children: ReactNode;
@@ -69,6 +70,7 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
               </h1>
             </div>
             <div className="flex items-center gap-2">
+              <NotificationSystem />
               <Button
                 variant="ghost"
                 size="sm"
