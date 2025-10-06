@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { useSubscriptionLimits } from '@/hooks/useSubscriptionLimits';
+import { useTranslation } from 'react-i18next';
 
 interface OrganizationLink {
   id: string;
@@ -19,6 +20,7 @@ interface OrganizationLink {
 const LinkGenerator = () => {
   const { user } = useAuth();
   const { toast } = useToast();
+  const { t } = useTranslation();
   const queryClient = useQueryClient();
   const limits = useSubscriptionLimits();
 
@@ -90,8 +92,8 @@ const LinkGenerator = () => {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['primary-link'] });
       toast({
-        title: "Success",
-        description: "Link status updated successfully",
+        title: t('linkCopied'),
+        description: t('linkCopiedDescription'),
       });
     },
     onError: (error: any) => {
@@ -113,8 +115,8 @@ const LinkGenerator = () => {
   const copyToClipboard = (text: string) => {
     navigator.clipboard.writeText(text);
     toast({
-      title: "Link copied!",
-      description: "The link has been copied to your clipboard.",
+      title: t('linkCopied'),
+      description: t('linkCopiedDescription'),
     });
   };
 
@@ -133,20 +135,20 @@ const LinkGenerator = () => {
 
   const linkUrl = generateLinkUrl(primaryLink.link_token);
   const isBranded = !!primaryDomain;
-  const portalType = isBranded ? 'Branded Submission Portal' : 'Unbranded Submission Portal';
+  const portalType = isBranded ? t('brandedSubmissionPortal') : t('unbrandedSubmissionPortal');
 
   return (
     <Card>
       <CardHeader>
         <div className="flex items-center justify-between">
           <div>
-            <CardTitle className="text-lg">Secure Report Link</CardTitle>
+            <CardTitle className="text-lg">{t('secureReportLink')}</CardTitle>
             <CardDescription className="text-sm mt-1">
-              Your organisation can use this link to disclose all matters to the registered email address on this account.
+              {t('yourOrganisationCanUse')}
             </CardDescription>
           </div>
           <Badge variant={primaryLink.is_active ? "default" : "secondary"}>
-            {primaryLink.is_active ? "Active" : "Inactive"}
+            {primaryLink.is_active ? t('active') : t('inactive')}
           </Badge>
         </div>
       </CardHeader>
@@ -155,7 +157,7 @@ const LinkGenerator = () => {
           <div className="flex-1 min-w-0">
             <p className="text-sm font-medium mb-1">{portalType}</p>
             <p className="text-xs text-muted-foreground">
-              Used {primaryLink.usage_count || 0} times
+              {t('usedTimes', { count: primaryLink.usage_count || 0 })}
             </p>
           </div>
           <div className="flex items-center gap-2 ml-4">
@@ -167,7 +169,7 @@ const LinkGenerator = () => {
               onClick={() => copyToClipboard(linkUrl)}
               className="whitespace-nowrap"
             >
-              Copy Link
+              {t('copyLink')}
             </Button>
           </div>
         </div>

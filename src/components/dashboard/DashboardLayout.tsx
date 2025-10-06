@@ -9,6 +9,7 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } f
 import SubscriptionManagement from '@/components/SubscriptionManagement';
 import { supabase } from '@/integrations/supabase/client';
 import NotificationSystem from '@/components/NotificationSystem';
+import { useTranslation } from 'react-i18next';
 
 interface DashboardLayoutProps {
   children: ReactNode;
@@ -17,6 +18,7 @@ interface DashboardLayoutProps {
 const DashboardLayout = ({ children }: DashboardLayoutProps) => {
   const { signOut, user } = useAuth();
   const navigate = useNavigate();
+  const { t } = useTranslation();
   const [showUpgradeModal, setShowUpgradeModal] = useState(false);
   const [lockedFeature, setLockedFeature] = useState('');
   const [firstName, setFirstName] = useState('');
@@ -66,7 +68,7 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
             <div className="flex items-center gap-3">
               <SidebarTrigger className="md:hidden" />
               <h1 className="text-base md:text-lg font-semibold truncate">
-                Welcome Back{firstName && `, ${firstName}`}
+                {t('welcomeBack')}{firstName && `, ${firstName}`}
               </h1>
             </div>
             <div className="flex items-center gap-2">
@@ -78,7 +80,7 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
                 className="gap-2"
               >
                 <User className="h-4 w-4" />
-                <span className="hidden sm:inline">Profile</span>
+                <span className="hidden sm:inline">{t('profile')}</span>
               </Button>
               <Button
                 variant="ghost"
@@ -87,7 +89,7 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
                 className="gap-2"
               >
                 <LogOut className="h-4 w-4" />
-                <span className="hidden sm:inline">Logout</span>
+                <span className="hidden sm:inline">{t('logout')}</span>
               </Button>
             </div>
           </header>
@@ -103,9 +105,9 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
       <Dialog open={showUpgradeModal} onOpenChange={setShowUpgradeModal}>
         <DialogContent className="max-w-3xl">
           <DialogHeader>
-            <DialogTitle>Upgrade Required</DialogTitle>
+            <DialogTitle>{t('upgradeRequired')}</DialogTitle>
             <DialogDescription>
-              {lockedFeature} is available on our Pro plan. Upgrade now to unlock this feature.
+              {t('upgradeDescription', { feature: lockedFeature })}
             </DialogDescription>
           </DialogHeader>
           <SubscriptionManagement />

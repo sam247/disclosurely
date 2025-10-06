@@ -3,6 +3,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { AlertCircle, FileText, Users, Link, Clock } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 interface DashboardStats {
   totalReports: number;
@@ -13,6 +14,7 @@ interface DashboardStats {
 }
 
 const DashboardStats = () => {
+  const { t } = useTranslation();
   const [stats, setStats] = useState<DashboardStats>({
     totalReports: 0,
     activeLinks: 0,
@@ -107,7 +109,7 @@ const DashboardStats = () => {
         {[1, 2, 3, 4, 5].map((i) => (
           <Card key={i}>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Loading...</CardTitle>
+              <CardTitle className="text-sm font-medium">{t('loading')}</CardTitle>
             </CardHeader>
             <CardContent>
               <div className="h-6 bg-gray-200 rounded animate-pulse"></div>
@@ -122,61 +124,61 @@ const DashboardStats = () => {
     <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-5">
       <Card>
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-          <CardTitle className="text-sm font-medium">Total Reports</CardTitle>
+          <CardTitle className="text-sm font-medium">{t('totalReports')}</CardTitle>
           <FileText className="h-4 w-4 text-muted-foreground" />
         </CardHeader>
         <CardContent>
           <div className="text-2xl font-bold">{stats.totalReports}</div>
-          <p className="text-xs text-muted-foreground">All time submissions</p>
+          <p className="text-xs text-muted-foreground">{t('allTimeSubmissions')}</p>
         </CardContent>
       </Card>
       
       <Card>
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-          <CardTitle className="text-sm font-medium">New Reports</CardTitle>
+          <CardTitle className="text-sm font-medium">{t('newReports')}</CardTitle>
           <AlertCircle className="h-4 w-4 text-muted-foreground" />
         </CardHeader>
         <CardContent>
           <div className="text-2xl font-bold">{stats.newReports}</div>
-          <p className="text-xs text-muted-foreground">Last 7 days</p>
+          <p className="text-xs text-muted-foreground">{t('last7Days')}</p>
         </CardContent>
       </Card>
       
       <Card>
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-          <CardTitle className="text-sm font-medium">Average Response Time</CardTitle>
+          <CardTitle className="text-sm font-medium">{t('averageResponseTime')}</CardTitle>
           <Clock className="h-4 w-4 text-muted-foreground" />
         </CardHeader>
         <CardContent>
           <div className="text-2xl font-bold">
             {stats.averageResponseTimeHours !== null 
               ? `${Math.round(stats.averageResponseTimeHours)}h`
-              : 'No data'
+              : t('noData')
             }
           </div>
-          <p className="text-xs text-muted-foreground">First org response (30 days)</p>
+          <p className="text-xs text-muted-foreground">{t('firstOrgResponse')}</p>
         </CardContent>
       </Card>
       
       <Card>
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-          <CardTitle className="text-sm font-medium">Active Links</CardTitle>
+          <CardTitle className="text-sm font-medium">{t('activeLinks')}</CardTitle>
           <Link className="h-4 w-4 text-muted-foreground" />
         </CardHeader>
         <CardContent>
           <div className="text-2xl font-bold">{stats.activeLinks}</div>
-          <p className="text-xs text-muted-foreground">Submission portals</p>
+          <p className="text-xs text-muted-foreground">{t('submissionPortals')}</p>
         </CardContent>
       </Card>
       
       <Card>
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-          <CardTitle className="text-sm font-medium">Team Members</CardTitle>
+          <CardTitle className="text-sm font-medium">{t('teamMembers')}</CardTitle>
           <Users className="h-4 w-4 text-muted-foreground" />
         </CardHeader>
         <CardContent>
           <div className="text-2xl font-bold">{stats.totalUsers}</div>
-          <p className="text-xs text-muted-foreground">Active users</p>
+          <p className="text-xs text-muted-foreground">{t('activeUsers')}</p>
         </CardContent>
       </Card>
     </div>
