@@ -6,9 +6,11 @@ import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { MessageSquare, Send, Lock } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { useTranslation } from 'react-i18next';
 import { supabase } from '@/integrations/supabase/client';
 import { useSecureForm } from '@/hooks/useSecureForm';
 import { sanitizeHtml } from '@/utils/inputValidation';
+import TranslateButton from '@/components/TranslateButton';
 
 interface Report {
   id: string;
@@ -39,10 +41,12 @@ interface SecureMessagingProps {
 
 const SecureMessaging = ({ report, onClose }: SecureMessagingProps) => {
   const { toast } = useToast();
+  const { t } = useTranslation();
   const [messages, setMessages] = useState<Message[]>([]);
   const [newMessage, setNewMessage] = useState('');
   const [isLoading, setIsLoading] = useState(true);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const [translatedMessages, setTranslatedMessages] = useState<Record<string, string>>({});
 
   const { isSubmitting, secureSubmit } = useSecureForm({
     rateLimitKey: `messaging_${report.id}`,
@@ -218,10 +222,10 @@ const SecureMessaging = ({ report, onClose }: SecureMessagingProps) => {
           <div>
             <CardTitle className="flex items-center gap-2">
               <MessageSquare className="h-5 w-5" />
-              Secure Communication
+              {t('secureMessaging')}
             </CardTitle>
             <CardDescription>
-              End-to-end encrypted communication with the whistleblower
+              {t('messagesEncrypted')}
             </CardDescription>
           </div>
           <Button variant="outline" onClick={onClose}>
@@ -252,14 +256,35 @@ const SecureMessaging = ({ report, onClose }: SecureMessagingProps) => {
                     <span className="text-sm font-medium">
                       {message.sender_type === 'organization' ? 'You' : 'Whistleblower'}
                     </span>
-                    <span className="text-xs text-gray-500">
-                      {new Date(message.created_at).toLocaleString()}
-                    </span>
+                    <div className="flex items-center gap-2">
+                      <TranslateButton
+                        text={message.encrypted_message}
+                        onTranslated={(translated) => {
+                          setTranslatedMessages(prev => ({
+                            ...prev,
+                            [message.id]: translated
+                          }));
+                        }}
+                        onShowOriginal={() => {
+                          setTranslatedMessages(prev => {
+                            const newState = { ...prev };
+                            delete newState[message.id];
+                            return newState;
+                          });
+                        }}
+                        isTranslated={!!translatedMessages[message.id]}
+                        size="sm"
+                        variant="ghost"
+                      />
+                      <span className="text-xs text-gray-500">
+                        {new Date(message.created_at).toLocaleString()}
+                      </span>
+                    </div>
                   </div>
                   <div 
                     className="text-sm whitespace-pre-wrap"
                     dangerouslySetInnerHTML={{ 
-                      __html: sanitizeHtml(message.encrypted_message)
+                      __html: sanitizeHtml(translatedMessages[message.id] || message.encrypted_message)
                     }}
                   />
                 </div>
@@ -271,13 +296,13 @@ const SecureMessaging = ({ report, onClose }: SecureMessagingProps) => {
 
         {/* Message Input */}
         <form onSubmit={handleSubmit} className="space-y-2">
-          <Label htmlFor="newMessage">Send a secure message</Label>
+          <Label htmlFor="newMessage">{t('sendMessage')}</Label>
           <Textarea
             id="newMessage"
             value={newMessage}
             onChange={(e) => setNewMessage(e.target.value)}
             onKeyPress={handleKeyPress}
-            placeholder="Type your message to the whistleblower... (Press Enter to send, Shift+Enter for new line)"
+            placeholder={t('typeYourMessage')}
             rows={3}
             disabled={isSubmitting}
             maxLength={5000}
@@ -285,7 +310,7 @@ const SecureMessaging = ({ report, onClose }: SecureMessagingProps) => {
           <div className="flex items-center justify-between">
             <div className="flex items-center text-sm text-gray-500">
               <Lock className="h-4 w-4 mr-1" />
-              Messages are encrypted end-to-end
+              {t('messagesEncrypted')}
             </div>
             <Button 
               type="submit"
@@ -293,7 +318,7 @@ const SecureMessaging = ({ report, onClose }: SecureMessagingProps) => {
               className="flex items-center gap-2"
             >
               <Send className="h-4 w-4" />
-              {isSubmitting ? 'Sending...' : 'Send Message'}
+              {isSubmitting ? 'Sending...' : t('sendMessage')}
             </Button>
           </div>
         </form>

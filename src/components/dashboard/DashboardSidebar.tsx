@@ -3,8 +3,10 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import { Sidebar, SidebarContent, SidebarFooter, SidebarGroup, SidebarGroupContent, SidebarHeader, SidebarMenu, SidebarMenuButton, SidebarMenuItem, SidebarTrigger, useSidebar } from '@/components/ui/sidebar';
 import { useSubscriptionLimits } from '@/hooks/useSubscriptionLimits';
 import { cn } from '@/lib/utils';
+import { useTranslation } from 'react-i18next';
 import disclosurelyFullLogo from '@/assets/logos/disclosurely-full-logo.png';
 import disclosurelyIcon from '@/assets/logos/disclosurely-icon-square.png';
+import LanguageSelector from '@/components/LanguageSelector';
 interface DashboardSidebarProps {
   onLockedFeatureClick: (feature: string) => void;
 }
@@ -13,6 +15,7 @@ const DashboardSidebar = ({
 }: DashboardSidebarProps) => {
   const navigate = useNavigate();
   const location = useLocation();
+  const { t } = useTranslation();
   const {
     state
   } = useSidebar();
@@ -21,32 +24,32 @@ const DashboardSidebar = ({
   } = useSubscriptionLimits();
   const collapsed = state === 'collapsed';
   const menuItems = [{
-    title: 'Dashboard',
+    title: t('dashboard'),
     icon: Home,
     path: '/dashboard',
     locked: false
   }, {
-    title: 'AI Case Helper',
+    title: t('aiCaseHelper'),
     icon: Bot,
     path: '/dashboard/ai-helper',
     locked: !limits.hasAIHelper
   }, {
-    title: 'Analytics',
+    title: t('analytics'),
     icon: BarChart3,
     path: '/dashboard/analytics',
     locked: false
   }, {
-    title: 'Audit',
+    title: t('audit'),
     icon: ScrollText,
     path: '/dashboard/audit',
     locked: false
   }, {
-    title: 'Team',
+    title: t('team'),
     icon: Users,
     path: '/dashboard/team',
     locked: false
   }, {
-    title: 'Branding',
+    title: t('branding'),
     icon: Palette,
     path: '/dashboard/branding',
     locked: !limits.hasCustomBranding
@@ -91,7 +94,8 @@ const DashboardSidebar = ({
         </SidebarGroup>
       </SidebarContent>
 
-      <SidebarFooter className="p-2 border-t">
+      <SidebarFooter className="p-2 border-t space-y-2">
+        <LanguageSelector collapsed={collapsed} />
         <SidebarTrigger className={cn("w-full", !collapsed && "justify-start")} />
       </SidebarFooter>
     </Sidebar>;

@@ -9,7 +9,9 @@ import { decryptReport } from '@/utils/encryption';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import { useTranslation } from 'react-i18next';
 import CompactReportAttachments from './CompactReportAttachments';
+import TranslateButton from './TranslateButton';
 
 interface ReportContentDisplayProps {
   encryptedContent: string;
@@ -36,11 +38,14 @@ const ReportContentDisplay = ({
 }: ReportContentDisplayProps) => {
   const { user } = useAuth();
   const { toast } = useToast();
+  const { t } = useTranslation();
   const [decryptedContent, setDecryptedContent] = useState<any | null>(null);
   const [isDecrypting, setIsDecrypting] = useState(false);
   const [decryptionError, setDecryptionError] = useState<string | null>(null);
   const [organizationId, setOrganizationId] = useState<string | null>(null);
   const [retryCount, setRetryCount] = useState(0);
+  const [translatedContent, setTranslatedContent] = useState<string | null>(null);
+  const [isTranslated, setIsTranslated] = useState(false);
 
   const attemptDecryption = async () => {
     if (!encryptedContent || !user) {
@@ -180,19 +185,35 @@ const ReportContentDisplay = ({
           <CardTitle className="flex items-center justify-between">
             <div className="flex items-center space-x-2">
               <Lock className="h-4 w-4 text-green-600" />
-              <span>Report Content</span>
+              <span>{t('reportContent')}</span>
             </div>
-            {decryptionError && (
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={handleRetry}
-                disabled={isDecrypting}
-              >
-                <RefreshCw className={`h-4 w-4 mr-2 ${isDecrypting ? 'animate-spin' : ''}`} />
-                Retry ({retryCount})
-              </Button>
-            )}
+            <div className="flex items-center gap-2">
+              {decryptedContent && (
+                <TranslateButton
+                  text={decryptedContent.description || decryptedContent.content || ''}
+                  onTranslated={(translated) => {
+                    setTranslatedContent(translated);
+                    setIsTranslated(true);
+                  }}
+                  onShowOriginal={() => {
+                    setTranslatedContent(null);
+                    setIsTranslated(false);
+                  }}
+                  isTranslated={isTranslated}
+                />
+              )}
+              {decryptionError && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={handleRetry}
+                  disabled={isDecrypting}
+                >
+                  <RefreshCw className={`h-4 w-4 mr-2 ${isDecrypting ? 'animate-spin' : ''}`} />
+                  Retry ({retryCount})
+                </Button>
+              )}
+            </div>
           </CardTitle>
         </CardHeader>
         <CardContent>
@@ -237,7 +258,7 @@ const ReportContentDisplay = ({
                   <div>
                     <h4 className="font-medium text-gray-900 mb-2">Description:</h4>
                     <div className="text-gray-700 whitespace-pre-wrap">
-                      {decryptedContent.description}
+                      {isTranslated && translatedContent ? translatedContent : decryptedContent.description}
                     </div>
                   </div>
                 )}
@@ -247,7 +268,7 @@ const ReportContentDisplay = ({
                   <div>
                     <h4 className="font-medium text-gray-900 mb-2">Content:</h4>
                     <div className="text-gray-700 whitespace-pre-wrap">
-                      {decryptedContent.content}
+                      {isTranslated && translatedContent ? translatedContent : decryptedContent.content}
                     </div>
                   </div>
                 )}
