@@ -61,7 +61,7 @@ const DashboardSidebar = ({
   return <Sidebar className="border-r" collapsible="icon">
       <SidebarHeader className="p-4 border-b">
         <button onClick={() => navigate('/dashboard')} className={cn("flex items-center w-full hover:opacity-80 transition-opacity", collapsed ? "justify-center" : "gap-3")}>
-          {!collapsed ? <img src={disclosurelyFullLogo} alt="Disclosurely" className="h-7.5 w-auto" /> : <div className="w-full h-full flex items-center justify-center py-2">
+          {!collapsed ? <img src={disclosurelyFullLogo} alt="Disclosurely" className="h-7 w-auto " /> : <div className="w-full h-full flex items-center justify-center py-2">
               <img src={disclosurelyIcon} alt="Disclosurely" className="h-10 w-10 object-contain" />
             </div>}
         </button>
