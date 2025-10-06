@@ -1,4 +1,4 @@
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { Routes, Route } from 'react-router-dom';
 import { AuthProvider } from './hooks/useAuth';
 import { OrganizationProvider } from './contexts/OrganizationContext';
 import { useSessionTimeout } from './hooks/useSessionTimeout';
@@ -178,12 +178,10 @@ const AppContent = () => {
 
 function App() {
   return (
-    <BrowserRouter>
-      <AuthProvider>
-        <AppContent />
-        <FeaturebaseMessenger />
-      </AuthProvider>
-    </BrowserRouter>
+    <AuthProvider>
+      <AppContent />
+      <FeaturebaseMessenger />
+    </AuthProvider>
   );
 }
 
