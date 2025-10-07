@@ -28,9 +28,9 @@ const Terms = () => {
                 </Link>
               </div>
               <div className="hidden md:flex items-center space-x-4">
+                <PublicLanguageSelector />
                 <Link to="/pricing" className="text-gray-600 hover:text-gray-900">Pricing</Link>
                 <Link to="/contact" className="text-gray-600 hover:text-gray-900">Contact</Link>
-                <PublicLanguageSelector />
                 <Link to="/auth/login" className="text-gray-600 hover:text-gray-900">Sign in</Link>
                 <Link to="/auth/signup" className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors">
                   Get Started
