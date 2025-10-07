@@ -4,8 +4,11 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Link } from 'react-router-dom';
 import { Footer } from '@/components/ui/footer';
+import PublicLanguageSelector from '@/components/PublicLanguageSelector';
+import { useLanguageFromUrl } from '@/hooks/useLanguageFromUrl';
 
 const Pricing = () => {
+  useLanguageFromUrl();
   return (
     <div className="min-h-screen bg-white">
       {/* Navigation */}
@@ -21,8 +24,9 @@ const Pricing = () => {
                 />
               </Link>
             </div>
-            <div className="hidden md:flex items-center space-x-8">
+            <div className="hidden md:flex items-center space-x-4">
               <Link to="/pricing" className="text-blue-600 font-medium">Pricing</Link>
+              <PublicLanguageSelector />
               <Link to="/auth/login" className="text-gray-600 hover:text-gray-900">Sign in</Link>
               <Link to="/auth/signup" className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors">
                 Get Started

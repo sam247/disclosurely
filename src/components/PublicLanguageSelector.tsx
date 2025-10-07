@@ -1,5 +1,6 @@
 import { Globe } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
+import { useNavigate, useLocation } from 'react-router-dom';
 import {
   Select,
   SelectContent,
@@ -20,50 +21,45 @@ const languages = [
   { code: 'ja', name: '日本語', flag: '🇯🇵' },
 ];
 
-interface LanguageSelectorProps {
-  collapsed?: boolean;
-}
-
-const LanguageSelector = ({ collapsed = false }: LanguageSelectorProps) => {
-  const { i18n, t } = useTranslation();
+const PublicLanguageSelector = () => {
+  const { i18n } = useTranslation();
+  const navigate = useNavigate();
+  const location = useLocation();
 
   const handleLanguageChange = (languageCode: string) => {
     i18n.changeLanguage(languageCode);
+    
+    // Update URL to include language code
+    const currentPath = location.pathname;
+    const pathSegments = currentPath.split('/').filter(Boolean);
+    
+    // Remove existing language code if present
+    const languageCodes = languages.map(lang => lang.code);
+    if (languageCodes.includes(pathSegments[0])) {
+      pathSegments.shift();
+    }
+    
+    // Add new language code (except for English which is default)
+    const newPath = languageCode === 'en' 
+      ? `/${pathSegments.join('/')}`
+      : `/${languageCode}/${pathSegments.join('/')}`;
+    
+    navigate(newPath);
   };
 
   const currentLanguage = languages.find(lang => lang.code === i18n.language) || languages[0];
 
-  if (collapsed) {
-    return (
-      <Select value={i18n.language} onValueChange={handleLanguageChange}>
-        <SelectTrigger className="w-full h-10 border-0 bg-transparent hover:bg-accent">
-          <Globe className="h-4 w-4 text-primary" />
-        </SelectTrigger>
-        <SelectContent>
-          {languages.map((lang) => (
-            <SelectItem key={lang.code} value={lang.code}>
-              <div className="flex items-center gap-2">
-                <span>{lang.flag}</span>
-                <span>{lang.name}</span>
-              </div>
-            </SelectItem>
-          ))}
-        </SelectContent>
-      </Select>
-    );
-  }
-
   return (
     <Select value={i18n.language} onValueChange={handleLanguageChange}>
-      <SelectTrigger className="w-full h-10 border-0 bg-transparent hover:bg-accent">
+      <SelectTrigger className="w-[140px] h-9 border-gray-300 bg-white hover:bg-gray-50">
         <SelectValue>
           <div className="flex items-center gap-2">
-            <Globe className="h-4 w-4 text-primary" />
-            <span className="text-sm">{currentLanguage.flag} {currentLanguage.name}</span>
+            <Globe className="h-4 w-4" />
+            <span className="text-sm">{currentLanguage.flag}</span>
           </div>
         </SelectValue>
       </SelectTrigger>
-      <SelectContent>
+      <SelectContent className="bg-white border-gray-200 z-[100]">
         {languages.map((lang) => (
           <SelectItem key={lang.code} value={lang.code}>
             <div className="flex items-center gap-2">
@@ -77,4 +73,4 @@ const LanguageSelector = ({ collapsed = false }: LanguageSelectorProps) => {
   );
 };
 
-export default LanguageSelector;
+export default PublicLanguageSelector;

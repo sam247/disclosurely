@@ -1,8 +1,11 @@
 import { Helmet } from 'react-helmet-async';
 import { Footer } from '@/components/ui/footer';
 import { Link } from 'react-router-dom';
+import PublicLanguageSelector from '@/components/PublicLanguageSelector';
+import { useLanguageFromUrl } from '@/hooks/useLanguageFromUrl';
 
 const Terms = () => {
+  useLanguageFromUrl();
   return (
     <>
       <Helmet>
@@ -24,9 +27,10 @@ const Terms = () => {
                   />
                 </Link>
               </div>
-              <div className="hidden md:flex items-center space-x-8">
+              <div className="hidden md:flex items-center space-x-4">
                 <Link to="/pricing" className="text-gray-600 hover:text-gray-900">Pricing</Link>
                 <Link to="/contact" className="text-gray-600 hover:text-gray-900">Contact</Link>
+                <PublicLanguageSelector />
                 <Link to="/auth/login" className="text-gray-600 hover:text-gray-900">Sign in</Link>
                 <Link to="/auth/signup" className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors">
                   Get Started

@@ -58,14 +58,23 @@ const AppContent = () => {
     <OrganizationProvider>
       <ScrollToTop />
       <Routes>
-        {/* Public routes */}
+        {/* Public routes - English (default) */}
         <Route path="/" element={<Index />} />
         <Route path="/pricing" element={<Pricing />} />
-          <Route path="/contact" element={<Contact />} />
-          <Route path="/terms" element={<Terms />} />
-          <Route path="/vs-speakup" element={<VsSpeakUp />} />
-          <Route path="/vs-whistleblower-software" element={<VsWhistleblowerSoftware />} />
-          <Route path="/compliance-software" element={<ComplianceSoftware />} />
+        <Route path="/contact" element={<Contact />} />
+        <Route path="/terms" element={<Terms />} />
+        <Route path="/vs-speakup" element={<VsSpeakUp />} />
+        <Route path="/vs-whistleblower-software" element={<VsWhistleblowerSoftware />} />
+        <Route path="/compliance-software" element={<ComplianceSoftware />} />
+        
+        {/* Multilingual public routes */}
+        <Route path="/:lang" element={<Index />} />
+        <Route path="/:lang/pricing" element={<Pricing />} />
+        <Route path="/:lang/contact" element={<Contact />} />
+        <Route path="/:lang/terms" element={<Terms />} />
+        <Route path="/:lang/vs-speakup" element={<VsSpeakUp />} />
+        <Route path="/:lang/vs-whistleblower-software" element={<VsWhistleblowerSoftware />} />
+        <Route path="/:lang/compliance-software" element={<ComplianceSoftware />} />
         
         {/* Privacy route */}
         <Route path="/privacy" element={<Privacy />} />

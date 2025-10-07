@@ -5,6 +5,7 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/
 import { Link } from 'react-router-dom';
 import { Footer } from '@/components/ui/footer';
 import CookieConsentBanner from '@/components/CookieConsentBanner';
+import PublicLanguageSelector from '@/components/PublicLanguageSelector';
 import anonymousReportingIcon from '@/assets/icons/anonymous_reporting.png';
 import secureMessagingIcon from '@/assets/icons/secure_messaging.png';
 import caseManagementIcon from '@/assets/icons/case_management.png';
@@ -39,8 +40,9 @@ const Landing = () => {
                 <img src="/lovable-uploads/c46ace0e-df58-4119-b5e3-8dcfa075ea2f.png" alt="Disclosurely" className="h-7 md:h-8 w-auto" />
               </Link>
             </div>
-            <div className="hidden md:flex items-center space-x-8">
+            <div className="hidden md:flex items-center space-x-4">
               <Link to="/pricing" className="text-gray-600 hover:text-gray-900">Pricing</Link>
+              <PublicLanguageSelector />
               <a href="https://app.disclosurely.com/auth/login" className="text-gray-600 hover:text-gray-900">Sign in</a>
               <a href="https://app.disclosurely.com/auth/signup" className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors">
                 Get Started

@@ -4,8 +4,11 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Link } from 'react-router-dom';
 import { Footer } from '@/components/ui/footer';
+import PublicLanguageSelector from '@/components/PublicLanguageSelector';
+import { useLanguageFromUrl } from '@/hooks/useLanguageFromUrl';
 
 const ComplianceSoftware = () => {
+  useLanguageFromUrl();
   return (
     <div className="min-h-screen bg-white">
       {/* Navigation - Updated to match other pages */}
@@ -21,8 +24,9 @@ const ComplianceSoftware = () => {
                 />
               </Link>
             </div>
-            <div className="hidden md:flex items-center space-x-8">
+            <div className="hidden md:flex items-center space-x-4">
               <Link to="/pricing" className="text-gray-600 hover:text-gray-900">Pricing</Link>
+              <PublicLanguageSelector />
               <a href="https://app.disclosurely.com/auth/login" className="text-gray-600 hover:text-gray-900">Sign in</a>
               <a href="https://app.disclosurely.com/auth/signup" className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors">
                 Get Started
