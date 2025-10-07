@@ -32,6 +32,7 @@ import {
 } from 'lucide-react';
 import ReportsStatistics from '@/components/ReportsStatistics';
 import TagEditor from '@/components/TagEditor';
+import { useTranslation } from 'react-i18next';
 
 type ReportStatus = 'new' | 'live' | 'in_review' | 'investigating' | 'resolved' | 'closed' | 'archived' | 'deleted';
 
@@ -62,6 +63,7 @@ interface Report {
 const ReportsManagement = () => {
   const { user } = useAuth();
   const { toast } = useToast();
+  const { t } = useTranslation();
   
   const [reports, setReports] = useState<Report[]>([]);
   const [selectedReport, setSelectedReport] = useState<Report | null>(null);
@@ -496,10 +498,10 @@ const ReportsManagement = () => {
         <CardHeader>
           <CardTitle className="flex items-center space-x-2">
             <FileText className="h-5 w-5 text-blue-600" />
-            <span>Report Management</span>
+            <span>{t('reportManagement')}</span>
           </CardTitle>
           <CardDescription>
-            View, manage, and track all submitted reports
+            {t('viewManageTrackReports')}
           </CardDescription>
         </CardHeader>
         <CardContent>
