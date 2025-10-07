@@ -51,13 +51,13 @@ const PublicLanguageSelector = () => {
 
   return (
     <Select value={i18n.language} onValueChange={handleLanguageChange}>
-      <SelectTrigger className="w-[70px] h-9 border-gray-300 bg-white hover:bg-gray-50 [&>svg]:h-5 [&>svg]:w-5">
-        <SelectValue className="flex items-center justify-center">
-          <div className="flex items-center justify-center gap-1.5">
-            <Globe className="h-4 w-4" />
+      <SelectTrigger className="w-[80px] h-9 border-gray-300 bg-white hover:bg-gray-50 [&>svg]:h-5 [&>svg]:w-5">
+        <div className="flex items-center gap-1.5">
+          <Globe className="h-4 w-4" />
+          <SelectValue>
             <span className="text-sm">{currentLanguage.flag}</span>
-          </div>
-        </SelectValue>
+          </SelectValue>
+        </div>
       </SelectTrigger>
       <SelectContent className="bg-white border-gray-200 z-[100]">
         {languages.map((lang) => (
