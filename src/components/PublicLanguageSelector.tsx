@@ -51,7 +51,7 @@ const PublicLanguageSelector = () => {
 
   return (
     <Select value={i18n.language} onValueChange={handleLanguageChange}>
-      <SelectTrigger className="w-[60px] h-9 border-gray-300 bg-white hover:bg-gray-50">
+      <SelectTrigger className="w-[70px] h-9 border-gray-300 bg-white hover:bg-gray-50 [&>svg]:h-5 [&>svg]:w-5">
         <SelectValue className="flex items-center justify-center">
           <div className="flex items-center justify-center gap-1.5">
             <Globe className="h-4 w-4" />
