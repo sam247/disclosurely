@@ -59,5 +59,12 @@
   "linkCopied": "লিঙ্ক কপি হয়েছে!",
   "linkCopiedDescription": "লিঙ্কটি আপনার ক্লিপবোর্ডে কপি করা হয়েছে।",
   "upgradeRequired": "আপগ্রেড প্রয়োজন",
-  "upgradeDescription": "{{feature}} আমাদের প্রো প্ল্যানে উপলব্ধ। এই বৈশিষ্ট্যটি আনলক করতে এখনই আপগ্রেড করুন।"
+  "upgradeDescription": "{{feature}} আমাদের প্রো প্ল্যানে উপলব্ধ। এই বৈশিষ্ট্যটি আনলক করতে এখনই আপগ্রেড করুন।",
+  "reportManagement": "রিপোর্ট ব্যবস্থাপনা",
+  "viewManageTrackReports": "সমস্ত জমা দেওয়া রিপোর্ট দেখুন, পরিচালনা এবং ট্র্যাক করুন",
+  "searchByTitleOrId": "শিরোনাম বা ট্র্যাকিং আইডি দ্বারা অনুসন্ধান করুন...",
+  "aiCaseHelperTitle": "এআই কেস সহায়ক",
+  "teamManagementTitle": "দল ব্যবস্থাপনা",
+  "profileSettingsTitle": "প্রোফাইল সেটিংস",
+  "customBrandingTitle": "কাস্টম ব্র্যান্ডিং"
 }
