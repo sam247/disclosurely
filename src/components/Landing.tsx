@@ -48,7 +48,8 @@ const Landing = () => {
                 Get Started
               </a>
             </div>
-            <div className="md:hidden">
+            <div className="md:hidden flex items-center gap-2">
+              <PublicLanguageSelector />
               <a href="https://app.disclosurely.com/auth/login" className="bg-blue-600 text-white px-3 py-2 rounded-lg hover:bg-blue-700 transition-colors text-sm">
                 Sign In
               </a>
