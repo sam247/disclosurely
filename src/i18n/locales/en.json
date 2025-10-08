@@ -149,5 +149,415 @@
   "uploadLogo": "Upload a logo (max 2MB, PNG/JPG recommended)",
   "brandColor": "Brand Color",
   "saveChanges": "Save Changes",
-  "saving": "Saving..."
+  "saving": "Saving...",
+  "nav": {
+    "pricing": "Pricing",
+    "contact": "Contact",
+    "signIn": "Sign in",
+    "getStarted": "Get Started"
+  },
+  "landing": {
+    "hero": {
+      "title1": "Whistleblowing and Disclosure",
+      "title2": "Reporting Platform",
+      "subtitle": "Disclosurely helps compliance teams stay ahead by transforming ethics and compliance into a proactive advantage—building a culture of integrity, simplifying workflows, and reducing organisational risk.",
+      "startFreeTrial": "Start Free Trial",
+      "viewPricing": "View Pricing"
+    },
+    "trusted": "Trusted by hundreds of UK businesses",
+    "features": {
+      "title": "Everything you need for secure reporting",
+      "subtitle": "Our platform provides comprehensive tools to manage whistleblower reports with complete confidentiality and compliance.",
+      "anonymousReporting": {
+        "title": "Anonymous Reporting",
+        "description": "Complete anonymity for whistleblowers with encrypted submissions and secure identity protection."
+      },
+      "secureMessaging": {
+        "title": "Secure Messaging",
+        "description": "Two-way encrypted communication between whistleblowers and investigators while maintaining anonymity."
+      },
+      "caseManagement": {
+        "title": "Case Management",
+        "description": "Comprehensive dashboard to track, investigate, and resolve cases with full audit trails."
+      },
+      "multiUserAccess": {
+        "title": "Multi-User Access",
+        "description": "Role-based permissions for legal, HR, and compliance teams with controlled access levels."
+      },
+      "regulatoryCompliance": {
+        "title": "Regulatory Compliance",
+        "description": "Built-in compliance with GDPR, SOX, and other regulatory requirements across industries."
+      },
+      "enterpriseSecurity": {
+        "title": "Enterprise Security",
+        "description": "Bank-level encryption, secure hosting, and comprehensive data protection measures."
+      }
+    },
+    "howItWorks": {
+      "title": "How It Works",
+      "subtitle": "Get started with Disclosurely in three simple steps",
+      "step1": {
+        "title": "Set Up Your Portal",
+        "description": "Create your account and customize your reporting portal in minutes. Add your branding, set up notification preferences, and configure your team access."
+      },
+      "step2": {
+        "title": "Share with Your Team",
+        "description": "Distribute your secure reporting link to employees through email, intranet, or QR codes. Reports can be submitted 24/7 from any device, anywhere."
+      },
+      "step3": {
+        "title": "Manage & Resolve Cases",
+        "description": "Receive instant notifications of new reports. Investigate, communicate securely with whistleblowers, and track cases through resolution with complete audit trails."
+      }
+    },
+    "anonymousReporting": {
+      "title": "Anonymous Reporting Made Simple",
+      "description": "Enable employees to report misconduct, ethics violations, or other concerns completely anonymously. Our advanced encryption ensures whistleblower identity protection while maintaining full compliance with regulatory requirements.",
+      "benefit1": "Zero data collection on reporters",
+      "benefit2": "Anonymous follow-up messaging",
+      "benefit3": "Multiple language support"
+    },
+    "encryption": {
+      "title": "Military-Grade Encryption",
+      "description": "Every report is protected with AES-256 encryption, the same standard used by banks and government agencies. Your sensitive data is secure from submission to resolution.",
+      "benefit1": "AES-256 end-to-end encryption",
+      "benefit2": "Encrypted file attachments",
+      "benefit3": "Secure data storage"
+    },
+    "compliance": {
+      "title": "Compliance Made Easy",
+      "description": "Stay compliant with UK and EU whistleblowing regulations, including the EU Whistleblowing Directive and UK Employment Rights Act. Built-in audit trails and reporting tools ensure regulatory adherence.",
+      "benefit1": "EU Whistleblowing Directive compliant",
+      "benefit2": "GDPR ready",
+      "benefit3": "Automated compliance reports"
+    },
+    "messaging": {
+      "title": "Secure Two-Way Communication",
+      "description": "Maintain anonymous dialogue with whistleblowers throughout investigations. Request additional information, provide updates, and ensure transparency while protecting identities.",
+      "benefit1": "Encrypted messaging",
+      "benefit2": "Maintain anonymity",
+      "benefit3": "Real-time notifications"
+    },
+    "aiPowered": {
+      "title": "AI-Powered Case Analysis",
+      "description": "Leverage artificial intelligence to analyze case patterns, identify risks, and prioritize investigations. Our AI assistant helps compliance teams work smarter and more efficiently.",
+      "benefit1": "Automated risk assessment",
+      "benefit2": "Pattern detection",
+      "benefit3": "Intelligent case prioritization"
+    },
+    "certifications": {
+      "title": "Security & Compliance Certifications",
+      "subtitle": "Trusted by organizations worldwide with industry-leading security standards"
+    },
+    "cta": {
+      "title": "Ready to get started?",
+      "subtitle": "Join hundreds of organizations using Disclosurely to build a culture of integrity.",
+      "button": "Start Free Trial"
+    }
+  },
+  "auth": {
+    "signIn": {
+      "title": "Sign in to your account",
+      "subtitle": "Access your secure dashboard"
+    },
+    "signUp": {
+      "title": "Create your account",
+      "subtitle": "Join the secure disclosure platform"
+    }
+  },
+  "pricing": {
+    "hero": {
+      "title1": "Simple, Transparent",
+      "title2": "Pricing",
+      "subtitle": "Choose the plan that's right for your organisation. Start with our seven day free trial and upgrade as you grow."
+    },
+    "starter": {
+      "name": "Starter",
+      "price": "£9.99",
+      "period": "/month",
+      "description": "Perfect for small organizations",
+      "feature1": "5 cases/month",
+      "feature2": "1GB Storage",
+      "feature3": "Email Support",
+      "feature4": "Secure two-way Messaging",
+      "feature5": "AI Case Helper",
+      "feature6": "Custom branding",
+      "button": "Start Free Trial"
+    },
+    "pro": {
+      "name": "Pro",
+      "badge": "Most Popular",
+      "price": "£19.99",
+      "period": "/month",
+      "description": "For growing organizations",
+      "feature1": "Unlimited cases/month",
+      "feature2": "Unlimited storage",
+      "feature3": "Email Support",
+      "feature4": "Secure two-way Messaging",
+      "feature5": "AI Case Helper",
+      "feature6": "Custom branding",
+      "button": "Start Free Trial"
+    },
+    "enterprise": {
+      "name": "Enterprise",
+      "price": "Custom",
+      "description": "For large organizations",
+      "feature1": "Everything in Professional",
+      "feature2": "Custom domain",
+      "feature3": "Dedicated support",
+      "feature4": "SLA guarantee",
+      "feature5": "Custom integrations",
+      "feature6": "API (coming soon)",
+      "button": "Contact Sales"
+    },
+    "faq": {
+      "title": "Frequently Asked Questions",
+      "q1": {
+        "question": "Is there a free trial?",
+        "answer": "Yes, all plans come with a 7-day free trial so you can see how the platform works and how you can use it in your organisation. No credit card required."
+      },
+      "q2": {
+        "question": "What happens if I reach my case limit on the Starter plan?",
+        "answer": "If you exceed your monthly case allowance, you'll be notified in the dashboard. You can either upgrade to the Pro plan for unlimited cases or wait until the next month when your allowance resets."
+      },
+      "q3": {
+        "question": "Can I change plans later?",
+        "answer": "Absolutely! You can upgrade or downgrade your plan at any time from your dashboard."
+      },
+      "q4": {
+        "question": "What security certifications do you have?",
+        "answer": "We're ISO 27001 certified, SOC 2 Type II compliant, and GDPR ready."
+      }
+    },
+    "cta": {
+      "title": "Ready to Get Started?",
+      "subtitle": "Join organizations worldwide who trust Disclosurely for secure whistleblowing.",
+      "button": "Start Free Trial"
+    }
+  },
+  "contact": {
+    "hero": {
+      "title": "Contact Our Sales Team",
+      "subtitle": "Ready to transform your organization's reporting capabilities? Get in touch with our team to discuss how Disclosurely can meet your specific needs."
+    },
+    "getInTouch": {
+      "title": "Get in Touch",
+      "description": "Our enterprise team is here to help you implement a secure whistleblowing solution tailored to your organization's requirements.",
+      "email": {
+        "title": "Email Us",
+        "value": "sales@disclosurely.com",
+        "subtext": "We'll respond within 24 hours"
+      },
+      "phone": {
+        "title": "Call Us",
+        "value": "+44 20 7946 0958",
+        "subtext": "Monday - Friday, 9AM - 6PM GMT"
+      },
+      "address": {
+        "title": "Visit Us",
+        "line1": "123 Business Street",
+        "line2": "London, EC1A 1BB",
+        "line3": "United Kingdom"
+      },
+      "enterpriseSupport": {
+        "title": "Enterprise Support",
+        "description": "All enterprise customers receive dedicated account management, 24/7 phone support, and custom integration assistance."
+      }
+    },
+    "form": {
+      "title": "Request a Demo",
+      "description": "Fill out the form below and our team will get back to you within 24 hours to schedule a personalized demo.",
+      "fullName": "Full Name *",
+      "workEmail": "Work Email *",
+      "companyName": "Company Name *",
+      "message": "Message",
+      "fullNamePlaceholder": "Your full name",
+      "emailPlaceholder": "your.name@company.com",
+      "companyPlaceholder": "Your company name",
+      "messagePlaceholder": "Tell us about your requirements, team size, and any specific needs...",
+      "submitButton": "Request Demo",
+      "disclaimer": "By submitting this form, you agree to our privacy policy and terms of service."
+    }
+  },
+  "privacy": {
+    "title": "Privacy Policy",
+    "subtitle": "Learn how we protect your personal data and respect your privacy.",
+    "effectiveDate": "Effective Date:",
+    "company": "Company:",
+    "website": "Website:",
+    "contact": "Contact:",
+    "registeredOffice": "Registered Office:",
+    "section1": {
+      "title": "1. Introduction",
+      "p1": "Disclosurely Limited (\"Disclosurely\", \"we\", \"us\" or \"our\") is committed to protecting your personal data and respecting your privacy. This Privacy Policy explains how we collect, use, store and protect your personal data when you use our whistleblowing platform at disclosurely.com (the \"Service\").",
+      "p2": "We comply with the General Data Protection Regulation (EU 2016/679), the UK GDPR (as enacted in the Data Protection Act 2018), and other applicable data protection laws."
+    },
+    "section2": {
+      "title": "2. Data Controller and Data Processor",
+      "p1": "When we provide the Service to organisations (the \"Customer\"), that organisation acts as the Data Controller for whistleblower reports and any personal data it collects.",
+      "p2": "Disclosurely acts as the Data Processor, processing personal data only on the Customer's documented instructions.",
+      "p3": "For data related to your own use of disclosurely.com (e.g. your account, billing), Disclosurely is the Data Controller."
+    },
+    "section3": {
+      "title": "3. Personal Data We Collect",
+      "intro": "We may collect and process the following categories of data:",
+      "subsectionA": {
+        "title": "a) From Customers (Account Holders)",
+        "item1": "Name, company details, contact information",
+        "item2": "Billing and payment details",
+        "item3": "Login credentials (username, email, password – encrypted)"
+      },
+      "subsectionB": {
+        "title": "b) From Whistleblowers (Reporters)",
+        "item1": "Information you choose to submit in a report (which may include personal data, sensitive data, or special category data)",
+        "item2": "Optional contact details if you choose to provide them",
+        "item3": "Metadata such as IP address, browser type, device information (unless anonymised reporting is enabled)"
+      },
+      "subsectionC": {
+        "title": "c) Technical Data",
+        "item1": "Log files, usage statistics, and cookies (essential for site functionality)",
+        "item2": "Security and access data for auditing and fraud prevention"
+      }
+    },
+    "section4": {
+      "title": "4. How We Use Personal Data",
+      "intro": "We use personal data for the following purposes:",
+      "item1": "To provide, maintain and improve the Service",
+      "item2": "To authenticate and manage user accounts",
+      "item3": "To process subscription payments",
+      "item4": "To ensure the security and integrity of reports and communications",
+      "item5": "To comply with legal obligations and cooperate with regulatory authorities",
+      "item6": "For internal analytics (in anonymised and aggregated form only)"
+    },
+    "section5": {
+      "title": "5. Legal Bases for Processing",
+      "intro": "We process personal data on the following legal bases:",
+      "item1": "Contractual necessity – to provide the Service you subscribe to",
+      "item2": "Legitimate interests – to improve the Service, maintain security, and prevent fraud",
+      "item3": "Legal obligations – to comply with applicable laws and regulations",
+      "item4": "Consent – when you voluntarily provide sensitive or optional data"
+    },
+    "section6": {
+      "title": "6. Data Hosting and Transfers",
+      "p1": "All data is hosted in Western EU (Ireland) on secure Supabase infrastructure.",
+      "p2": "Data is not transferred outside the European Economic Area (EEA) or the UK, unless adequate safeguards are in place (such as Standard Contractual Clauses).",
+      "p3": "Encryption is applied to protect data both in transit and at rest."
+    },
+    "section7": {
+      "title": "7. Data Retention",
+      "p1": "Customer account data is retained for the duration of the subscription and for up to six years afterwards for accounting and legal purposes.",
+      "p2": "Whistleblower reports are retained for as long as determined by the Customer (as Data Controller). Upon account termination, we will either delete or return all Customer Data within three months, unless law requires longer retention.",
+      "p3": "Technical logs are kept for security monitoring for up to 12 months."
+    },
+    "section8": {
+      "title": "8. Disclosure of Personal Data",
+      "intro": "We do not sell or rent personal data. We may disclose data only to:",
+      "item1": "The Customer (for whistleblower reports)",
+      "item2": "Trusted service providers (e.g. hosting, payment processing) under strict confidentiality agreements",
+      "item3": "Regulatory or law enforcement bodies if required by law",
+      "item4": "Professional advisors (lawyers, auditors) where necessary"
+    },
+    "section9": {
+      "title": "9. Security",
+      "intro": "We implement technical and organisational measures to protect personal data, including:",
+      "item1": "Encryption (at rest and in transit)",
+      "item2": "Secure access controls and authentication",
+      "item3": "Regular audits and monitoring",
+      "item4": "Incident response procedures"
+    },
+    "section10": {
+      "title": "10. Your Rights",
+      "intro": "Depending on your role (Customer or Whistleblower) and applicable law, you may have rights to:",
+      "item1": "Access your data",
+      "item2": "Correct inaccurate or incomplete data",
+      "item3": "Request deletion of your data",
+      "item4": "Restrict or object to processing",
+      "item5": "Port your data to another provider",
+      "item6": "Lodge a complaint with your supervisory authority (e.g. the ICO in the UK)",
+      "note": "If you are a whistleblower, you should contact the Customer (your organisation) to exercise your rights, as they are the Data Controller."
+    },
+    "section11": {
+      "title": "11. Cookies",
+      "p1": "Disclosurely uses only essential cookies required for functionality and security. We do not use advertising or tracking cookies."
+    },
+    "section12": {
+      "title": "12. Changes to this Policy",
+      "p1": "We may update this Privacy Policy from time to time. Material changes will be notified to Customers by email or via the Service."
+    },
+    "section13": {
+      "title": "13. Contact Us",
+      "intro": "If you have questions or concerns about this Privacy Policy, please contact:",
+      "companyName": "Disclosurely Limited",
+      "address": "London, EC1V 2NX, United Kingdom",
+      "email": "Email:"
+    },
+    "lastUpdated": "Last updated: May 2025"
+  },
+  "terms": {
+    "title": "Terms and Conditions",
+    "subtitle": "Please read these terms carefully before using our services.",
+    "section1": {
+      "title": "1. Introduction",
+      "content": "Disclosurely Limited (London EC1V 2NX) provides a secure, online whistleblowing platform at disclosurely.com (the \"Service\"). By registering for and using the Service, you agree to these Terms. The Service enables whistleblowers to submit confidential reports of misconduct within their organisation. Disclosurely is committed to GDPR compliance and maintains strict privacy, security and legal standards. Contact for support is support@disclosurely.com."
+    },
+    "section2": {
+      "title": "2. Services Provided",
+      "content": "Disclosurely offers a software-as-a-service whistleblowing platform that allows organisations (the Customer) to receive, manage and investigate internal reports of wrongdoing. The Service includes secure report submission, case management and communication tools. Disclosurely hosts all Service data in Supabase's Western EU (Ireland) region to ensure GDPR compliance. The Service is provided on a subscription basis as described below."
+    },
+    "section3": {
+      "title": "3. Account Registration and Use",
+      "content": "To use the Service, the Customer must register for an account and provide accurate, complete information. The registered account holder must be a natural person of legal age. The Customer is responsible for all use of the Service under its account and for any of its authorised users. The Customer must keep usernames, passwords and security credentials confidential and must promptly notify Disclosurely of any suspected account compromise. The Customer remains responsible for any activity by its authorised users (including breaches of these Terms). Disclosurely may suspend or terminate an account for breach of these Terms or any unlawful use of the Service."
+    },
+    "section4": {
+      "title": "4. Fees and Payment Terms",
+      "intro": "Disclosurely offers two subscription tiers, billed monthly in advance:",
+      "starter": "Starter: £9.99 per month",
+      "pro": "Pro: £19.99 per month",
+      "content": "Prices are exclusive of VAT. The Customer selects its tier upon signup and may upgrade or downgrade by agreement with Disclosurely. Invoices are issued in British Pounds and are payable within 30 days of invoice date. Payment is made by credit or debit card or other methods as agreed, and will automatically recur each month unless the Customer cancels. Unpaid fees may accrue interest and late-payment charges according to law. Subscription fees are non-refundable once paid, except as required by mandatory law."
+    },
+    "section5": {
+      "title": "5. Customer Obligations",
+      "intro": "The Customer agrees to use the Service only for lawful purposes and in accordance with these Terms. In particular:",
+      "item1": "The Customer shall not reverse engineer, decompile or otherwise attempt to derive the source code of the Service, or use the Service to build a competing product.",
+      "item2": "The Customer shall not introduce any viruses, malware or malicious code into the Service.",
+      "item3": "The Customer shall not violate the rights of any third party (including intellectual property or privacy rights).",
+      "item4": "The Customer must ensure it has the necessary rights and consents for any data or content it uploads or submits; it is responsible for the accuracy and lawfulness of all Customer Data.",
+      "item5": "The Customer shall keep its account credentials confidential and shall be responsible for any use of the Service under its account.",
+      "item6": "The Customer will comply with all applicable laws and regulations (including data protection laws) in its use of the Service."
+    },
+    "section6": {
+      "title": "6. Intellectual Property",
+      "content": "Disclosurely (or its licensors) retains all intellectual property rights in the Service, including the software, platform, trademarks and documentation. No ownership in the Service is transferred to the Customer. The Customer is granted only a limited, revocable licence to use the Service during its subscription term. Nothing in these Terms confers any right to use Disclosurely's trademarks or other proprietary rights, nor any right to the underlying source code."
+    },
+    "section7": {
+      "title": "7. Confidentiality",
+      "content": "Both parties shall keep confidential all non-public information received from the other that is marked or otherwise clearly identified as confidential. The receiving party must use at least the same degree of care to protect the other's Confidential Information as it uses to protect its own confidential information of like kind (no less than reasonable care). Confidential Information may be disclosed only to employees or agents who need to know it for the purposes of this Agreement and who are bound by confidentiality obligations. Neither party will disclose the other's Confidential Information except to the extent required by law or court order; in such case, prior notice will be given where legally permitted. The confidentiality obligations survive termination of the Agreement."
+    },
+    "section8": {
+      "title": "8. Data Protection and GDPR",
+      "content": "Disclosurely processes personal data in compliance with GDPR (EU 2016/679), the UK GDPR (Data Protection Act 2018) and other applicable privacy laws. Disclosurely will process personal data only on the Customer's instructions and will implement appropriate technical and organisational measures to safeguard it. These include encryption, pseudonymisation, resilient storage, backups and restricted access. Hosting in an EU region (Ireland) ensures data remains within the European Economic Area. The Customer is the data controller of any personal data collected through the Service; Disclosurely acts as a data processor. The Customer must ensure that all data subjects (e.g. whistleblowers) have been provided any required notices and consents. At the end of a subscription, Disclosurely will, at the Customer's choice, return or securely delete Customer Data."
+    },
+    "section9": {
+      "title": "9. Term and Termination",
+      "intro": "The subscription term is monthly. By default, the agreement renews automatically for successive months until terminated. Either party may terminate the subscription by giving at least 30 days' prior written notice, effective at the end of a billing period. If either party materially breaches these Terms and fails to remedy the breach within 30 days of written notice, the other party may terminate immediately. The Customer's failure to pay fees when due is a material breach.",
+      "uponTermination": "Upon termination or expiration:",
+      "item1": "All licences under these Terms immediately cease and the Customer must stop using the Service.",
+      "item2": "Disclosurely will make the Customer's data available for export in a common format.",
+      "item3": "Disclosurely will securely delete the Customer's data no later than three months after termination, unless otherwise required by law.",
+      "finalNote": "Disclosurely reserves the right to anonymise and aggregate usage data for internal research and development after deletion of identifiable data."
+    },
+    "section10": {
+      "title": "10. Liability and Indemnification",
+      "liability": "Liability: Disclosurely's liability for losses is limited to the direct, proven loss suffered by the Customer, up to an amount equal to the total subscription fees paid for the preceding 12 months. Disclosurely is not liable for any indirect or consequential losses (including loss of profit, data or goodwill). This liability cap does not apply to loss resulting from gross negligence or wilful misconduct, and neither party's liability for death or personal injury (to the extent not excluded by law) or for fraud is limited.",
+      "indemnification": "Indemnification: Each party agrees to indemnify and hold the other harmless from third-party claims arising from its breach of these Terms or its misconduct. The Customer will indemnify Disclosurely against any claim arising from Customer's use of the Service or any content provided by the Customer. Disclosurely will indemnify the Customer against any claim that using the Service (as permitted by these Terms) infringes the intellectual property rights of a third party."
+    },
+    "section11": {
+      "title": "11. Changes to these Terms",
+      "content": "Disclosurely may revise these Terms from time to time, for example to reflect changes in the Service, legal requirements or pricing. We will provide reasonable advance notice of any material amendments, and the updated terms will take effect upon renewal of the Customer's subscription or as required by law. Continued use of the Service after such changes constitutes acceptance of the new terms."
+    },
+    "section12": {
+      "title": "12. Governing Law and Dispute Resolution",
+      "content": "These Terms are governed by the laws applicable to Disclosurely. The parties submit to the non-exclusive jurisdiction of the courts having jurisdiction over the matter. Any dispute arising under these Terms will first be addressed by good-faith negotiation between senior representatives of the parties. If unresolved, disputes may be resolved in a court of competent jurisdiction in the United Kingdom or as otherwise agreed by the parties."
+    },
+    "lastUpdated": "Last updated: September 2025"
+  }
 }
