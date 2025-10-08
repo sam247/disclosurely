@@ -23,11 +23,6 @@ export const Footer = () => {
             <h3 className="font-semibold mb-4">Product</h3>
             <ul className="space-y-2">
               <li>
-                <Link to="/" className="text-gray-400 hover:text-white">
-                  Features
-                </Link>
-              </li>
-              <li>
                 <Link to="/pricing" className="text-gray-400 hover:text-white">
                   Pricing
                 </Link>
@@ -49,23 +44,23 @@ export const Footer = () => {
             <h3 className="font-semibold mb-4">Company</h3>
             <ul className="space-y-2">
               <li>
-                <Link to="/" className="text-gray-400 hover:text-white">
-                  About Us
+                <Link to="/auth/login" className="text-gray-400 hover:text-white">
+                  Sign In
                 </Link>
               </li>
               <li>
-                <Link to="/" className="text-gray-400 hover:text-white">
-                  Careers
+                <Link to="/auth/signup" className="text-gray-400 hover:text-white">
+                  Get Started
                 </Link>
               </li>
               <li>
                 <Link to="/blog" className="text-gray-400 hover:text-white">
-                  Disclosurely Blog
+                  News
                 </Link>
               </li>
               <li>
                 <Link to="/contact" className="text-gray-400 hover:text-white">
-                  Contact
+                  Contact Us
                 </Link>
               </li>
             </ul>
