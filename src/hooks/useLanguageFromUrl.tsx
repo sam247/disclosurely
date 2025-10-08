@@ -2,7 +2,7 @@ import { useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 
-const supportedLanguages = ['en', 'es', 'fr', 'de', 'pl', 'ko', 'ja'];
+const supportedLanguages = ['en', 'es', 'fr', 'de', 'pl'];
 
 export const useLanguageFromUrl = () => {
   const { lang } = useParams<{ lang: string }>();

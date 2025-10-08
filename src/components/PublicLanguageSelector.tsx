@@ -15,10 +15,6 @@ const languages = [
   { code: 'fr', name: 'Français', flag: '🇫🇷' },
   { code: 'de', name: 'Deutsch', flag: '🇩🇪' },
   { code: 'pl', name: 'Polski', flag: '🇵🇱' },
-  { code: 'zh', name: '中文', flag: '🇨🇳' },
-  { code: 'hi', name: 'हिन्दी', flag: '🇮🇳' },
-  { code: 'ko', name: '한국어', flag: '🇰🇷' },
-  { code: 'ja', name: '日本語', flag: '🇯🇵' },
 ];
 
 const PublicLanguageSelector = () => {
