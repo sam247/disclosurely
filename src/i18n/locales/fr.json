@@ -4,10 +4,10 @@
   "analytics": "Analytique",
   "audit": "Audit",
   "team": "Équipe",
-  "branding": "Marque",
+  "branding": "Image de Marque",
   "profile": "Profil",
   "logout": "Déconnexion",
-  "welcomeBack": "Bon Retour",
+  "welcomeBack": "Bienvenue",
   "notifications": "Notifications",
   "clearAll": "Tout Effacer",
   "markAsRead": "Marquer comme Lu",
@@ -26,7 +26,7 @@
   "actions": "Actions",
   "reportContent": "Contenu du Rapport",
   "translate": "Traduire",
-  "translating": "Traduction en cours...",
+  "translating": "Traduction...",
   "showOriginal": "Afficher l'Original",
   "secureMessaging": "Messagerie Sécurisée",
   "sendMessage": "Envoyer un Message",
@@ -35,7 +35,7 @@
   "loading": "Chargement...",
   "selectLanguage": "Sélectionner la Langue",
   "totalReports": "Total des Rapports",
-  "allTimeSubmissions": "Toutes les soumissions",
+  "allTimeSubmissions": "Soumissions totales",
   "newReports": "Nouveaux Rapports",
   "last7Days": "7 derniers jours",
   "averageResponseTime": "Temps de Réponse Moyen",
@@ -59,9 +59,9 @@
   "linkCopied": "Lien copié!",
   "linkCopiedDescription": "Le lien a été copié dans votre presse-papiers.",
   "upgradeRequired": "Mise à Niveau Requise",
-  "upgradeDescription": "{{feature}} est disponible sur notre plan Pro. Mettez à niveau maintenant pour débloquer cette fonctionnalité.",
+  "upgradeDescription": "{{feature}} est disponible dans notre plan Pro. Mettez à niveau maintenant pour débloquer cette fonctionnalité.",
   "reportManagement": "Gestion des Rapports",
-  "viewManageTrackReports": "Afficher, gérer et suivre tous les rapports soumis",
+  "viewManageTrackReports": "Voir, gérer et suivre tous les rapports soumis",
   "searchByTitleOrId": "Rechercher par titre ou ID de suivi...",
   "filterByStatus": "Filtrer par statut",
   "filterByPriority": "Filtrer par priorité",
@@ -72,50 +72,50 @@
   "newIssue": "Nouveau problème",
   "live": "En direct",
   "inReview": "En Révision",
-  "investigating": "Enquête en cours",
+  "investigating": "En Investigation",
   "resolved": "Résolu",
   "closed": "Fermé",
   "archived": "Archivé",
   "deleted": "Supprimé",
   "unassigned": "Non assigné",
-  "showDeleted": "Afficher Supprimés",
-  "hideDeleted": "Masquer Supprimés",
+  "showDeleted": "Afficher les Supprimés",
+  "hideDeleted": "Masquer les Supprimés",
   "reportDetails": "Détails du Rapport",
-  "viewManageReportInfo": "Afficher et gérer les informations du rapport",
+  "viewManageReportInfo": "Voir et gérer les informations du rapport",
   "tags": "Étiquettes",
-  "editTags": "Modifier Étiquettes",
-  "saveTags": "Enregistrer Étiquettes",
+  "editTags": "Modifier les Étiquettes",
+  "saveTags": "Enregistrer les Étiquettes",
   "cancel": "Annuler",
   "noTags": "Aucune étiquette",
   "internalNotes": "Notes Internes",
   "addInternalNote": "Ajouter une note interne...",
-  "addNote": "Ajouter Note",
+  "addNote": "Ajouter une Note",
   "aiCaseHelperTitle": "Assistant IA de Cas",
-  "aiCaseHelperDescription": "Analyser les cas avec des informations alimentées par l'IA",
-  "teamManagementTitle": "Gestion d'Équipe",
+  "aiCaseHelperDescription": "Analyser les cas avec des informations basées sur l'IA",
+  "teamManagementTitle": "Gestion de l'Équipe",
   "teamManagementDescription": "Inviter et gérer les membres de l'équipe",
   "profileSettingsTitle": "Paramètres du Profil",
   "profileSettingsDescription": "Gérer votre profil, abonnement et paramètres de confidentialité",
   "account": "Compte",
   "subscription": "Abonnement",
   "privacyData": "Confidentialité et Données",
-  "customBrandingTitle": "Marque Personnalisée",
-  "customBrandingDescription": "Personnaliser la marque et l'apparence de votre organisation",
-  "inviteUser": "Inviter Utilisateur",
-  "inviteTeamMember": "Inviter un Membre d'Équipe",
+  "customBrandingTitle": "Image de Marque Personnalisée",
+  "customBrandingDescription": "Personnaliser l'image de marque et l'apparence de votre organisation",
+  "inviteUser": "Inviter un Utilisateur",
+  "inviteTeamMember": "Inviter un Membre de l'Équipe",
   "sendInvitationToJoin": "Envoyer une invitation pour rejoindre votre organisation",
   "emailAddress": "Adresse E-mail",
   "role": "Rôle",
-  "sendInvitation": "Envoyer Invitation",
+  "sendInvitation": "Envoyer l'Invitation",
   "name": "Nom",
   "email": "E-mail",
   "lastLogin": "Dernière Connexion",
-  "noTeamMembersFound": "Aucun membre d'équipe trouvé",
+  "noTeamMembersFound": "Aucun membre de l'équipe trouvé",
   "never": "Jamais",
   "caseHandler": "Gestionnaire de Cas",
   "reviewer": "Réviseur",
   "admin": "Administrateur",
-  "orgAdmin": "Admin d'Organisation",
+  "orgAdmin": "Admin de l'Organisation",
   "pendingInvitations": "Invitations en Attente",
   "invitedBy": "Invité par",
   "expiresAt": "Expire le",
@@ -129,25 +129,380 @@
   "updating": "Mise à jour...",
   "accountSettings": "Paramètres du Compte",
   "manageAccountPreferences": "Gérer les préférences de votre compte",
-  "emailChangeRequiresConfirmation": "Le changement d'e-mail nécessite une confirmation des deux adresses",
+  "emailChangeRequiresConfirmation": "Le changement d'e-mail nécessite la confirmation des deux adresses",
   "updateEmail": "Mettre à Jour l'E-mail",
   "security": "Sécurité",
   "manageAccountSecurity": "Gérer la sécurité de votre compte",
   "password": "Mot de Passe",
-  "passwordResetInstructions": "Pour changer votre mot de passe, vous devrez utiliser la fonction de réinitialisation",
-  "sendPasswordResetEmail": "Envoyer E-mail de Réinitialisation",
-  "organizationSettings": "Paramètres d'Organisation",
+  "passwordResetInstructions": "Pour changer votre mot de passe, vous devrez utiliser la fonction de réinitialisation du mot de passe",
+  "sendPasswordResetEmail": "Envoyer l'E-mail de Réinitialisation du Mot de Passe",
+  "organizationSettings": "Paramètres de l'Organisation",
   "manageOrgProfileDomains": "Gérer le profil de votre organisation et les paramètres de domaine",
   "basicInformation": "Informations de Base",
   "updateOrgBasicInfo": "Mettre à jour les informations de base de votre organisation",
   "description": "Description",
   "createdAt": "Créé le",
-  "brandingSettings": "Paramètres de Marque",
-  "customizeBrandingForms": "Personnaliser la marque de votre organisation pour les formulaires de soumission",
-  "customBranding": "Marque Personnalisée",
-  "organizationLogo": "Logo d'Organisation",
-  "uploadLogo": "Télécharger un logo (max 2MB, PNG/JPG recommandé)",
+  "brandingSettings": "Paramètres de l'Image de Marque",
+  "customizeBrandingForms": "Personnaliser l'image de marque de votre organisation pour les formulaires de soumission",
+  "customBranding": "Image de Marque Personnalisée",
+  "organizationLogo": "Logo de l'Organisation",
+  "uploadLogo": "Télécharger un logo (max. 2MB, PNG/JPG recommandé)",
   "brandColor": "Couleur de Marque",
   "saveChanges": "Enregistrer les Modifications",
-  "saving": "Enregistrement..."
+  "saving": "Enregistrement...",
+  "landing": {
+    "nav": {
+      "features": "Fonctionnalités",
+      "pricing": "Tarifs",
+      "contact": "Contact",
+      "signIn": "Se Connecter",
+      "getStarted": "Commencer"
+    },
+    "hero": {
+      "title": "Rapports Confidentiels Sécurisés",
+      "subtitle": "La plateforme de dénonciation anonyme la plus sûre du marché. Chiffrement de bout en bout, conformité RGPD et facile à utiliser.",
+      "cta": "Commencer Gratuitement",
+      "ctaSecondary": "Voir la Démo",
+      "trustedBy": "Approuvé par les principales organisations du monde entier"
+    },
+    "features": {
+      "title": "Tout ce dont vous avez besoin pour des rapports sécurisés",
+      "subtitle": "Protection complète des lanceurs d'alerte avec des outils avancés de gestion de cas",
+      "anonymous": {
+        "title": "Rapports Anonymes",
+        "description": "Protection complète de l'identité avec navigation sans trace et soumission sans compte"
+      },
+      "caseManagement": {
+        "title": "Gestion de Cas",
+        "description": "Tableau de bord professionnel avec affectation de cas, suivi et collaboration d'équipe"
+      },
+      "enterpriseSecurity": {
+        "title": "Sécurité d'Entreprise",
+        "description": "Chiffrement de niveau militaire, conformité SOC 2 Type II et stockage sécurisé des données"
+      },
+      "secureMessaging": {
+        "title": "Messagerie Sécurisée",
+        "description": "Communication bidirectionnelle chiffrée de bout en bout avec des lanceurs d'alerte anonymes"
+      },
+      "multiUser": {
+        "title": "Accès Multi-Utilisateurs",
+        "description": "Contrôle d'accès basé sur les rôles avec gestion d'équipe et permissions granulaires"
+      },
+      "compliance": {
+        "title": "Conformité Réglementaire",
+        "description": "Conforme à la Directive UE sur les lanceurs d'alerte, RGPD, SOX et autres exigences réglementaires"
+      }
+    },
+    "security": {
+      "title": "Sécurité de Niveau Entreprise",
+      "subtitle": "Votre confiance est notre priorité. Construit avec les meilleures pratiques de sécurité de l'industrie.",
+      "encryption": {
+        "title": "Chiffrement de Niveau Militaire",
+        "description": "Chiffrement AES-256 pour toutes les données au repos et TLS 1.3 pour les données en transit"
+      },
+      "anonymity": {
+        "title": "Véritable Anonymat",
+        "description": "Aucun suivi d'IP, aucun cookie, aucune collecte de métadonnées. Confidentialité totale garantie."
+      },
+      "compliance": {
+        "title": "Conformité RGPD",
+        "description": "Entièrement conforme au RGPD avec stockage des données dans l'UE et contrôles de confidentialité complets"
+      },
+      "scale": {
+        "title": "Échelle Illimitée",
+        "description": "Architecture cloud robuste qui évolue des startups aux entreprises du Fortune 500"
+      }
+    },
+    "cta": {
+      "title": "Prêt à protéger vos lanceurs d'alerte?",
+      "subtitle": "Rejoignez des centaines d'organisations qui font confiance à Disclosurely pour des rapports confidentiels sécurisés",
+      "button": "Commencer Gratuitement"
+    }
+  },
+  "auth": {
+    "signIn": {
+      "title": "Connectez-vous à votre compte",
+      "subtitle": "Accédez à votre tableau de bord sécurisé",
+      "emailLabel": "E-mail",
+      "emailPlaceholder": "votre@email.com",
+      "passwordLabel": "Mot de passe",
+      "passwordPlaceholder": "Entrez votre mot de passe",
+      "forgotPassword": "Mot de passe oublié?",
+      "signInButton": "Se Connecter",
+      "signingIn": "Connexion...",
+      "noAccount": "Vous n'avez pas de compte?",
+      "signUpLink": "S'inscrire",
+      "orContinueWith": "Ou continuer avec",
+      "google": "Google"
+    },
+    "signUp": {
+      "title": "Créez votre compte",
+      "subtitle": "Rejoignez la plateforme de divulgation sécurisée",
+      "firstNameLabel": "Prénom",
+      "firstNamePlaceholder": "Jean",
+      "lastNameLabel": "Nom",
+      "lastNamePlaceholder": "Dupont",
+      "emailLabel": "E-mail",
+      "emailPlaceholder": "votre@email.com",
+      "passwordLabel": "Mot de passe",
+      "passwordPlaceholder": "Créez un mot de passe sécurisé",
+      "confirmPasswordLabel": "Confirmer le Mot de Passe",
+      "confirmPasswordPlaceholder": "Confirmez votre mot de passe",
+      "agreeToTerms": "J'accepte les",
+      "termsLink": "Conditions d'Utilisation",
+      "and": "et la",
+      "privacyLink": "Politique de Confidentialité",
+      "signUpButton": "Créer un Compte",
+      "creatingAccount": "Création du compte...",
+      "haveAccount": "Vous avez déjà un compte?",
+      "signInLink": "Se Connecter",
+      "orContinueWith": "Ou continuer avec",
+      "google": "Google"
+    }
+  },
+  "pricing": {
+    "title": "Tarifs simples et transparents",
+    "subtitle": "Choisissez le plan qui convient le mieux à votre organisation. Mettez à niveau, rétrogradez ou annulez à tout moment.",
+    "monthly": "Mensuel",
+    "annually": "Annuel",
+    "saveWithAnnual": "Économisez 20% avec la facturation annuelle",
+    "free": {
+      "name": "Gratuit",
+      "price": "0€",
+      "description": "Parfait pour les petites organisations qui débutent",
+      "cta": "Commencer Gratuitement",
+      "features": [
+        "Jusqu'à 10 rapports par mois",
+        "1 utilisateur",
+        "Chiffrement de base",
+        "Support par e-mail",
+        "Stockage de 1GB",
+        "Rétention des données de 30 jours"
+      ]
+    },
+    "pro": {
+      "name": "Pro",
+      "price": "49€",
+      "description": "Pour les organisations en croissance avec des besoins avancés",
+      "cta": "Commencer l'Essai Gratuit",
+      "popular": "Le Plus Populaire",
+      "features": [
+        "Rapports illimités",
+        "Jusqu'à 10 utilisateurs",
+        "Chiffrement avancé",
+        "Support prioritaire",
+        "Stockage de 100GB",
+        "Rétention des données d'1 an",
+        "Image de marque personnalisée",
+        "Analyses avancées",
+        "Intégration API",
+        "Exportation de données"
+      ]
+    },
+    "enterprise": {
+      "name": "Entreprise",
+      "price": "Personnalisé",
+      "description": "Pour les grandes organisations avec des exigences spécifiques",
+      "cta": "Contacter les Ventes",
+      "features": [
+        "Tout de Pro, plus:",
+        "Utilisateurs illimités",
+        "Stockage illimité",
+        "Gestionnaire de compte dédié",
+        "SLA garanti",
+        "Audits de sécurité",
+        "Formation personnalisée",
+        "Intégration personnalisée",
+        "Conformité avancée",
+        "Hébergement sur site disponible"
+      ]
+    },
+    "faq": {
+      "title": "Questions Fréquemment Posées",
+      "q1": {
+        "question": "Puis-je changer de plan plus tard?",
+        "answer": "Oui, vous pouvez mettre à niveau, rétrograder ou annuler votre plan à tout moment. Les modifications prennent effet immédiatement."
+      },
+      "q2": {
+        "question": "Quels modes de paiement acceptez-vous?",
+        "answer": "Nous acceptons toutes les principales cartes de crédit (Visa, MasterCard, American Express) et les virements bancaires pour les clients entreprise."
+      },
+      "q3": {
+        "question": "Y a-t-il un contrat à long terme?",
+        "answer": "Non, tous nos plans sont mensuels sans engagement à long terme. Les plans annuels offrent une réduction mais restent flexibles."
+      },
+      "q4": {
+        "question": "Que se passe-t-il si je dépasse ma limite de rapports?",
+        "answer": "Nous vous préviendrons lorsque vous approchez de votre limite. Vous pouvez mettre à niveau votre plan à tout moment pour augmenter votre allocation."
+      }
+    }
+  },
+  "contact": {
+    "title": "Contactez-nous",
+    "subtitle": "Vous avez des questions? Nous serions ravis d'avoir de vos nouvelles. Envoyez-nous un message et nous vous répondrons dans les plus brefs délais.",
+    "info": {
+      "title": "Informations de Contact",
+      "email": "contact@disclosurely.com",
+      "phone": "+1 (555) 123-4567",
+      "address": "123 Rue de la Sécurité, Suite 100, San Francisco, CA 94105",
+      "hours": "Lundi - Vendredi: 9h00 - 18h00 PST"
+    },
+    "form": {
+      "title": "Demander une Démo",
+      "name": "Nom",
+      "namePlaceholder": "Votre nom",
+      "email": "E-mail",
+      "emailPlaceholder": "votre@entreprise.com",
+      "company": "Entreprise",
+      "companyPlaceholder": "Votre entreprise",
+      "message": "Message",
+      "messagePlaceholder": "Parlez-nous de vos besoins...",
+      "submit": "Envoyer le Message",
+      "submitting": "Envoi..."
+    },
+    "enterprise": {
+      "title": "Support Entreprise",
+      "description": "Les clients entreprise bénéficient d'un support dédié avec des temps de réponse garantis et un gestionnaire de compte personnel."
+    }
+  },
+  "privacy": {
+    "title": "Politique de Confidentialité",
+    "lastUpdated": "Dernière mise à jour: 8 octobre 2025",
+    "intro": {
+      "title": "Introduction",
+      "content": "Chez Disclosurely, nous prenons votre vie privée très au sérieux. Cette Politique de Confidentialité explique comment nous collectons, utilisons, divulguons et protégeons vos informations lorsque vous utilisez notre service."
+    },
+    "collection": {
+      "title": "Informations que Nous Collectons",
+      "personal": {
+        "title": "Informations Personnelles",
+        "content": "Nous collectons les informations que vous nous fournissez directement, y compris le nom, l'adresse e-mail, les informations sur l'entreprise et d'autres informations de contact lorsque vous créez un compte."
+      },
+      "usage": {
+        "title": "Données d'Utilisation",
+        "content": "Nous collectons automatiquement certaines informations lorsque vous utilisez notre service, notamment l'adresse IP, le type de navigateur, les pages visitées et les horodatages."
+      },
+      "reports": {
+        "title": "Contenu des Rapports",
+        "content": "Pour les rapports anonymes, nous ne collectons aucune information personnellement identifiable. Tout le contenu est chiffré de bout en bout."
+      }
+    },
+    "usage": {
+      "title": "Comment Nous Utilisons Vos Informations",
+      "purposes": [
+        "Fournir, maintenir et améliorer notre service",
+        "Traiter les transactions et envoyer des informations connexes",
+        "Envoyer des notifications techniques et des mises à jour",
+        "Répondre aux commentaires, questions et demandes",
+        "Surveiller et analyser les tendances d'utilisation",
+        "Détecter, prévenir et résoudre les problèmes techniques"
+      ]
+    },
+    "sharing": {
+      "title": "Comment Nous Partageons Vos Informations",
+      "content": "Nous ne vendons pas vos informations personnelles. Nous partageons vos informations uniquement dans les circonstances suivantes:",
+      "circumstances": [
+        "Avec votre consentement",
+        "Avec des prestataires de services qui nous aident à exploiter notre entreprise",
+        "Pour se conformer aux obligations légales",
+        "Pour protéger nos droits et notre propriété",
+        "En relation avec une fusion, une vente ou une acquisition d'actifs"
+      ]
+    },
+    "security": {
+      "title": "Sécurité des Données",
+      "content": "Nous mettons en œuvre des mesures de sécurité techniques et organisationnelles appropriées pour protéger vos informations personnelles contre l'accès non autorisé, l'altération, la divulgation ou la destruction."
+    },
+    "rights": {
+      "title": "Vos Droits",
+      "content": "En vertu du RGPD et d'autres lois sur la confidentialité, vous avez le droit de:",
+      "list": [
+        "Accéder à vos informations personnelles",
+        "Corriger les informations inexactes",
+        "Demander la suppression de vos informations",
+        "Vous opposer ou restreindre certains types de traitement",
+        "Portabilité des données",
+        "Retirer votre consentement à tout moment"
+      ]
+    },
+    "contact": {
+      "title": "Contactez-nous",
+      "content": "Si vous avez des questions concernant cette Politique de Confidentialité, contactez-nous à: confidentialite@disclosurely.com"
+    }
+  },
+  "terms": {
+    "title": "Conditions d'Utilisation",
+    "lastUpdated": "Dernière mise à jour: 8 octobre 2025",
+    "acceptance": {
+      "title": "Acceptation des Conditions",
+      "content": "En accédant et en utilisant Disclosurely, vous acceptez d'être lié par ces Conditions d'Utilisation et toutes les lois et réglementations applicables. Si vous n'êtes pas d'accord avec l'une de ces conditions, vous ne pouvez pas utiliser ce service."
+    },
+    "license": {
+      "title": "Licence d'Utilisation",
+      "content": "Une licence limitée, non exclusive, non transférable et révocable vous est accordée pour accéder et utiliser Disclosurely pour vos besoins commerciaux internes conformément à ces conditions."
+    },
+    "accounts": {
+      "title": "Comptes Utilisateur",
+      "responsibilities": {
+        "title": "Responsabilités",
+        "content": "Vous êtes responsable de maintenir la confidentialité de votre compte et de votre mot de passe. Vous acceptez d'assumer la responsabilité de toutes les activités qui se produisent sous votre compte."
+      },
+      "requirements": {
+        "title": "Exigences du Compte",
+        "list": [
+          "Vous devez fournir des informations précises et complètes",
+          "Vous devez maintenir et mettre à jour rapidement vos informations",
+          "Vous ne devez pas partager les identifiants de compte avec d'autres",
+          "Vous devez nous informer immédiatement de toute utilisation non autorisée"
+        ]
+      }
+    },
+    "acceptable": {
+      "title": "Utilisation Acceptable",
+      "content": "Vous acceptez de ne pas utiliser Disclosurely pour:",
+      "prohibited": [
+        "Tout but illégal ou non autorisé",
+        "Violer toute loi locale, étatique, nationale ou internationale",
+        "Transmettre du contenu nuisible, menaçant ou abusif",
+        "Interférer avec la sécurité du service",
+        "Tenter d'obtenir un accès non autorisé à toute partie du service",
+        "Utiliser le service pour transmettre des virus ou du code malveillant"
+      ]
+    },
+    "data": {
+      "title": "Propriété et Rétention des Données",
+      "ownership": {
+        "title": "Propriété",
+        "content": "Vous conservez tous les droits sur les données que vous soumettez à Disclosurely. Vous nous accordez une licence pour stocker, traiter et afficher vos données selon les besoins pour fournir le service."
+      },
+      "retention": {
+        "title": "Rétention",
+        "content": "Nous conserverons vos données conformément à votre plan d'abonnement et aux lois applicables. Vous pouvez demander la suppression des données à tout moment."
+      }
+    },
+    "payment": {
+      "title": "Paiement et Facturation",
+      "content": "Les plans payants sont facturés à l'avance mensuellement ou annuellement. Tous les paiements ne sont pas remboursables sauf si la loi l'exige. Nous nous réservons le droit de modifier les prix avec un préavis de 30 jours."
+    },
+    "termination": {
+      "title": "Résiliation",
+      "content": "Nous pouvons résilier ou suspendre votre accès immédiatement, sans préavis, pour quelque raison que ce soit, y compris la violation de ces Conditions. Toutes les dispositions qui doivent survivre à la résiliation le feront."
+    },
+    "warranties": {
+      "title": "Exclusion de Garanties",
+      "content": "Le service est fourni \"tel quel\" sans garantie d'aucune sorte, expresse ou implicite. Nous ne garantissons pas que le service sera ininterrompu, sécurisé ou exempt d'erreurs."
+    },
+    "liability": {
+      "title": "Limitation de Responsabilité",
+      "content": "Dans la mesure maximale permise par la loi, Disclosurely ne sera pas responsable des dommages indirects, accessoires, spéciaux, consécutifs ou punitifs, ou de toute perte de profits ou de revenus."
+    },
+    "changes": {
+      "title": "Modifications des Conditions",
+      "content": "Nous nous réservons le droit de modifier ces conditions à tout moment. Nous vous informerons des modifications importantes. L'utilisation continue après les modifications constitue une acceptation des nouvelles conditions."
+    },
+    "contact": {
+      "title": "Contactez-nous",
+      "content": "Si vous avez des questions concernant ces Conditions, contactez-nous à: legal@disclosurely.com"
+    }
+  }
 }
