@@ -6,6 +6,7 @@ import { Link } from 'react-router-dom';
 import { Footer } from '@/components/ui/footer';
 import CookieConsentBanner from '@/components/CookieConsentBanner';
 import PublicLanguageSelector from '@/components/PublicLanguageSelector';
+import { useTranslation } from 'react-i18next';
 import anonymousReportingIcon from '@/assets/icons/anonymous_reporting.png';
 import secureMessagingIcon from '@/assets/icons/secure_messaging.png';
 import caseManagementIcon from '@/assets/icons/case_management.png';
@@ -27,8 +28,7 @@ import horizonLogo from "@/assets/logos/horizon-logo.png";
 import metroSyncLogo from "@/assets/logos/metrosync-logo-clean.png";
 import prismLogo from "@/assets/logos/prism-logo-clean.png";
 const Landing = () => {
-  // For now, return static content since public landing doesn't have auth context
-  // The admin panel will manage authenticated organization content
+  const { t } = useTranslation();
 
   return <div className="min-h-screen bg-white">
       {/* Navigation */}
@@ -42,16 +42,16 @@ const Landing = () => {
             </div>
             <div className="hidden md:flex items-center space-x-4">
               <PublicLanguageSelector />
-              <Link to="/pricing" className="text-gray-600 hover:text-gray-900">Pricing</Link>
-              <a href="https://app.disclosurely.com/auth/login" className="text-gray-600 hover:text-gray-900">Sign in</a>
+              <Link to="/pricing" className="text-gray-600 hover:text-gray-900">{t('nav.pricing')}</Link>
+              <a href="https://app.disclosurely.com/auth/login" className="text-gray-600 hover:text-gray-900">{t('nav.signin')}</a>
               <a href="https://app.disclosurely.com/auth/signup" className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors">
-                Get Started
+                {t('nav.getStarted')}
               </a>
             </div>
             <div className="md:hidden flex items-center gap-2">
               <PublicLanguageSelector />
               <a href="https://app.disclosurely.com/auth/login" className="bg-blue-600 text-white px-3 py-2 rounded-lg hover:bg-blue-700 transition-colors text-sm">
-                Sign In
+                {t('nav.signin')}
               </a>
             </div>
           </div>
@@ -62,18 +62,18 @@ const Landing = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-[150px] pb-20">
         <div className="text-center">
           <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold text-gray-900 mb-6">
-            Whistleblowing and Disclosure
-            <span className="block text-blue-600">Reporting Platform</span>
+            {t('landing.hero.title')}
+            <span className="block text-blue-600">{t('landing.hero.subtitle')}</span>
           </h1>
           <p className="text-lg sm:text-xl text-gray-600 mb-8 max-w-3xl mx-auto px-4">
-            Disclosurely helps compliance teams stay ahead by transforming ethics and compliance into a proactive advantage—building a culture of integrity, simplifying workflows, and reducing organisational risk.
+            {t('landing.hero.description')}
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center items-center px-4">
             <a href="https://app.disclosurely.com/auth/signup" className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-3 rounded-lg text-lg font-semibold w-full sm:w-auto text-center">
-              Start Free Trial
+              {t('landing.hero.cta.trial')}
             </a>
             <Link to="/pricing" className="border border-gray-300 hover:border-gray-400 text-gray-700 px-8 py-3 rounded-lg text-lg font-semibold w-full sm:w-auto text-center">
-              View Pricing
+              {t('landing.hero.cta.pricing')}
             </Link>
           </div>
 
@@ -81,7 +81,7 @@ const Landing = () => {
           <div className="mt-16 mb-8">
             <div className="text-center mb-12">
               <p className="text-lg font-medium text-gray-600">
-                Trusted by hundreds of UK businesses
+                {t('landing.trusted.title')}
               </p>
             </div>
             

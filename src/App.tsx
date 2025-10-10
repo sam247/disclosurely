@@ -72,6 +72,7 @@ const AppContent = () => {
         <Route path="/:lang/pricing" element={<Pricing />} />
         <Route path="/:lang/contact" element={<Contact />} />
         <Route path="/:lang/terms" element={<Terms />} />
+        <Route path="/:lang/privacy" element={<Privacy />} />
         <Route path="/:lang/vs-speakup" element={<VsSpeakUp />} />
         <Route path="/:lang/vs-whistleblower-software" element={<VsWhistleblowerSoftware />} />
         <Route path="/:lang/compliance-software" element={<ComplianceSoftware />} />

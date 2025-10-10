@@ -1,14 +1,16 @@
-
-import { Shield, Check, CheckCircle, Star, X } from 'lucide-react';
+import { CheckCircle, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Link } from 'react-router-dom';
 import { Footer } from '@/components/ui/footer';
 import PublicLanguageSelector from '@/components/PublicLanguageSelector';
 import { useLanguageFromUrl } from '@/hooks/useLanguageFromUrl';
+import { useTranslation } from 'react-i18next';
 
 const Pricing = () => {
   useLanguageFromUrl();
+  const { t } = useTranslation();
+  
   return (
     <div className="min-h-screen bg-white">
       {/* Navigation */}
@@ -26,15 +28,15 @@ const Pricing = () => {
             </div>
             <div className="hidden md:flex items-center space-x-4">
               <PublicLanguageSelector />
-              <Link to="/pricing" className="text-blue-600 font-medium">Pricing</Link>
-              <Link to="/auth/login" className="text-gray-600 hover:text-gray-900">Sign in</Link>
+              <Link to="/pricing" className="text-blue-600 font-medium">{t('nav.pricing')}</Link>
+              <Link to="/auth/login" className="text-gray-600 hover:text-gray-900">{t('nav.signin')}</Link>
               <Link to="/auth/signup" className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors">
-                Get Started
+                {t('nav.getStarted')}
               </Link>
             </div>
             <div className="md:hidden">
               <a href="https://app.disclosurely.com/auth/login" className="bg-blue-600 text-white px-3 py-2 rounded-lg hover:bg-blue-700 transition-colors text-sm">
-                Sign In
+                {t('nav.signin')}
               </a>
             </div>
           </div>
@@ -45,11 +47,11 @@ const Pricing = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-[150px] pb-20">
         <div className="text-center">
           <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold text-gray-900 mb-6">
-            Simple, Transparent
-            <span className="block text-blue-600">Pricing</span>
+            {t('pricing.hero.title')}
+            <span className="block text-blue-600">{t('pricing.hero.subtitle')}</span>
           </h1>
           <p className="text-lg sm:text-xl text-gray-600 mb-8 max-w-3xl mx-auto px-4">
-            Choose the plan that's right for your organisation. Start with our seven day free trial and upgrade as you grow.
+            {t('pricing.hero.description')}
           </p>
         </div>
       </div>
@@ -61,42 +63,42 @@ const Pricing = () => {
             {/* Starter Plan */}
             <Card className="relative">
               <CardHeader className="text-center pb-6">
-                <CardTitle className="text-xl sm:text-2xl font-bold">Starter</CardTitle>
+                <CardTitle className="text-xl sm:text-2xl font-bold">{t('pricing.plans.starter.name')}</CardTitle>
                 <div className="mt-4">
-                  <span className="text-3xl sm:text-4xl font-bold">£9.99</span>
-                  <span className="text-gray-600 text-sm sm:text-base">/month</span>
+                  <span className="text-3xl sm:text-4xl font-bold">{t('pricing.plans.starter.price')}</span>
+                  <span className="text-gray-600 text-sm sm:text-base">{t('pricing.plans.perMonth')}</span>
                 </div>
-                <CardDescription className="text-sm sm:text-base">Perfect for small organizations</CardDescription>
+                <CardDescription className="text-sm sm:text-base">{t('pricing.plans.starter.description')}</CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="space-y-3">
                   <div className="flex items-center space-x-3">
                     <CheckCircle className="h-5 w-5 text-green-600" />
-                    <span className="text-gray-700 text-sm sm:text-base">5 cases/month</span>
+                    <span className="text-gray-700 text-sm sm:text-base">{t('pricing.features.casesLimit')}</span>
                   </div>
                   <div className="flex items-center space-x-3">
                     <CheckCircle className="h-5 w-5 text-green-600" />
-                    <span className="text-gray-700 text-sm sm:text-base">1GB Storage</span>
+                    <span className="text-gray-700 text-sm sm:text-base">{t('pricing.features.storage')}</span>
                   </div>
                   <div className="flex items-center space-x-3">
                     <CheckCircle className="h-5 w-5 text-green-600" />
-                    <span className="text-gray-700 text-sm sm:text-base">Email Support</span>
+                    <span className="text-gray-700 text-sm sm:text-base">{t('pricing.features.emailSupport')}</span>
                   </div>
                   <div className="flex items-center space-x-3">
                     <X className="h-5 w-5 text-red-500" />
-                    <span className="text-gray-500 text-sm sm:text-base">Secure two-way Messaging</span>
+                    <span className="text-gray-500 text-sm sm:text-base">{t('pricing.features.messaging')}</span>
                   </div>
                   <div className="flex items-center space-x-3">
                     <X className="h-5 w-5 text-red-500" />
-                    <span className="text-gray-500 text-sm sm:text-base">AI Case Helper</span>
+                    <span className="text-gray-500 text-sm sm:text-base">{t('pricing.features.aiHelper')}</span>
                   </div>
                   <div className="flex items-center space-x-3">
                     <X className="h-5 w-5 text-red-500" />
-                    <span className="text-gray-500 text-sm sm:text-base">Custom branding</span>
+                    <span className="text-gray-500 text-sm sm:text-base">{t('pricing.features.customBranding')}</span>
                   </div>
                 </div>
                  <Button className="w-full mt-6" asChild>
-                  <a href="https://app.disclosurely.com/auth/signup">Start Free Trial</a>
+                  <a href="https://app.disclosurely.com/auth/signup">{t('pricing.cta.startTrial')}</a>
                 </Button>
               </CardContent>
             </Card>
@@ -105,46 +107,46 @@ const Pricing = () => {
             <Card className="relative border-blue-200 shadow-lg">
               <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
                 <span className="bg-blue-600 text-white px-4 py-1 rounded-full text-xs sm:text-sm font-medium">
-                  Most Popular
+                  {t('pricing.plans.mostPopular')}
                 </span>
               </div>
               <CardHeader className="text-center pb-6">
-                <CardTitle className="text-xl sm:text-2xl font-bold">Pro</CardTitle>
+                <CardTitle className="text-xl sm:text-2xl font-bold">{t('pricing.plans.pro.name')}</CardTitle>
                 <div className="mt-4">
-                  <span className="text-3xl sm:text-4xl font-bold">£19.99</span>
-                  <span className="text-gray-600 text-sm sm:text-base">/month</span>
+                  <span className="text-3xl sm:text-4xl font-bold">{t('pricing.plans.pro.price')}</span>
+                  <span className="text-gray-600 text-sm sm:text-base">{t('pricing.plans.perMonth')}</span>
                 </div>
-                <CardDescription className="text-sm sm:text-base">For growing organizations</CardDescription>
+                <CardDescription className="text-sm sm:text-base">{t('pricing.plans.pro.description')}</CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="space-y-3">
                   <div className="flex items-center space-x-3">
                     <CheckCircle className="h-5 w-5 text-green-600" />
-                    <span className="text-gray-700 text-sm sm:text-base">Unlimited cases/month</span>
+                    <span className="text-gray-700 text-sm sm:text-base">{t('pricing.features.unlimitedCases')}</span>
                   </div>
                   <div className="flex items-center space-x-3">
                     <CheckCircle className="h-5 w-5 text-green-600" />
-                    <span className="text-gray-700 text-sm sm:text-base">Unlimited storage</span>
+                    <span className="text-gray-700 text-sm sm:text-base">{t('pricing.features.unlimitedStorage')}</span>
                   </div>
                   <div className="flex items-center space-x-3">
                     <CheckCircle className="h-5 w-5 text-green-600" />
-                    <span className="text-gray-700 text-sm sm:text-base">Email Support</span>
+                    <span className="text-gray-700 text-sm sm:text-base">{t('pricing.features.emailSupport')}</span>
                   </div>
                   <div className="flex items-center space-x-3">
                     <CheckCircle className="h-5 w-5 text-green-600" />
-                    <span className="text-gray-700 text-sm sm:text-base">Secure two-way Messaging</span>
+                    <span className="text-gray-700 text-sm sm:text-base">{t('pricing.features.messaging')}</span>
                   </div>
                   <div className="flex items-center space-x-3">
                     <CheckCircle className="h-5 w-5 text-green-600" />
-                    <span className="text-gray-700 text-sm sm:text-base">AI Case Helper</span>
+                    <span className="text-gray-700 text-sm sm:text-base">{t('pricing.features.aiHelper')}</span>
                   </div>
                   <div className="flex items-center space-x-3">
                     <CheckCircle className="h-5 w-5 text-green-600" />
-                    <span className="text-gray-700 text-sm sm:text-base">Custom branding</span>
+                    <span className="text-gray-700 text-sm sm:text-base">{t('pricing.features.customBranding')}</span>
                   </div>
                 </div>
                  <Button className="w-full mt-6" asChild>
-                  <a href="https://app.disclosurely.com/auth/signup">Start Free Trial</a>
+                  <a href="https://app.disclosurely.com/auth/signup">{t('pricing.cta.startTrial')}</a>
                 </Button>
               </CardContent>
             </Card>
@@ -152,41 +154,41 @@ const Pricing = () => {
             {/* Enterprise Plan */}
             <Card className="relative sm:col-span-2 lg:col-span-1">
               <CardHeader className="text-center pb-6">
-                <CardTitle className="text-xl sm:text-2xl font-bold">Enterprise</CardTitle>
+                <CardTitle className="text-xl sm:text-2xl font-bold">{t('pricing.plans.enterprise.name')}</CardTitle>
                 <div className="mt-4">
-                  <span className="text-3xl sm:text-4xl font-bold">Custom</span>
+                  <span className="text-3xl sm:text-4xl font-bold">{t('pricing.plans.enterprise.price')}</span>
                 </div>
-                <CardDescription className="text-sm sm:text-base">For large organizations</CardDescription>
+                <CardDescription className="text-sm sm:text-base">{t('pricing.plans.enterprise.description')}</CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="space-y-3">
                   <div className="flex items-center space-x-3">
                     <CheckCircle className="h-5 w-5 text-green-600" />
-                    <span className="text-gray-700 text-sm sm:text-base">Everything in Professional</span>
+                    <span className="text-gray-700 text-sm sm:text-base">{t('pricing.features.everythingPro')}</span>
                   </div>
                   <div className="flex items-center space-x-3">
                     <CheckCircle className="h-5 w-5 text-green-600" />
-                    <span className="text-gray-700 text-sm sm:text-base">Custom domain</span>
+                    <span className="text-gray-700 text-sm sm:text-base">{t('pricing.features.customDomain')}</span>
                   </div>
                   <div className="flex items-center space-x-3">
                     <CheckCircle className="h-5 w-5 text-green-600" />
-                    <span className="text-gray-700 text-sm sm:text-base">Dedicated support</span>
+                    <span className="text-gray-700 text-sm sm:text-base">{t('pricing.features.dedicatedSupport')}</span>
                   </div>
                   <div className="flex items-center space-x-3">
                     <CheckCircle className="h-5 w-5 text-green-600" />
-                    <span className="text-gray-700 text-sm sm:text-base">SLA guarantee</span>
+                    <span className="text-gray-700 text-sm sm:text-base">{t('pricing.features.slaGuarantee')}</span>
                   </div>
                   <div className="flex items-center space-x-3">
                     <CheckCircle className="h-5 w-5 text-green-600" />
-                    <span className="text-gray-700 text-sm sm:text-base">Custom integrations</span>
+                    <span className="text-gray-700 text-sm sm:text-base">{t('pricing.features.customIntegrations')}</span>
                   </div>
                   <div className="flex items-center space-x-3">
                     <CheckCircle className="h-5 w-5 text-grey-600" />
-                    <span className="text-gray-500 text-sm sm:text-base">API (coming soon)</span>
+                    <span className="text-gray-500 text-sm sm:text-base">{t('pricing.features.api')}</span>
                   </div>
                 </div>
                    <Button className="w-full mt-6" variant="outline">
-                  <a href="https://disclosurely.com/contact">Contact Sales</a>
+                  <a href="https://disclosurely.com/contact">{t('pricing.cta.contactSales')}</a>
                 </Button>
               </CardContent>
             </Card>
@@ -199,25 +201,25 @@ const Pricing = () => {
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">
             <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-4">
-              Frequently Asked Questions
+              {t('pricing.faq.title')}
             </h2>
           </div>
           <div className="space-y-8">
             <div>
-              <h3 className="text-lg font-semibold text-gray-900 mb-2">Is there a free trial?</h3>
-              <p className="text-gray-600">Yes, all plans come with a 7-day free trial so you can see how the platform works and how you can use it in your organisation. No credit card required.</p>
+              <h3 className="text-lg font-semibold text-gray-900 mb-2">{t('pricing.faq.trial.question')}</h3>
+              <p className="text-gray-600">{t('pricing.faq.trial.answer')}</p>
             </div>
             <div>
-              <h3 className="text-lg font-semibold text-gray-900 mb-2">What happens if I reach my case limit on the Starter plan??</h3>
-              <p className="text-gray-600">If you exceed your monthly case allowance, you’ll be notified in the dashboard. You can either upgrade to the Pro plan for unlimited cases or wait until the next month when your allowance resets.</p>
+              <h3 className="text-lg font-semibold text-gray-900 mb-2">{t('pricing.faq.limit.question')}</h3>
+              <p className="text-gray-600">{t('pricing.faq.limit.answer')}</p>
             </div>
             <div>
-              <h3 className="text-lg font-semibold text-gray-900 mb-2">Can I change plans later?</h3>
-              <p className="text-gray-600">Absolutely! You can upgrade or downgrade your plan at any time from your dashboard.</p>
+              <h3 className="text-lg font-semibold text-gray-900 mb-2">{t('pricing.faq.change.question')}</h3>
+              <p className="text-gray-600">{t('pricing.faq.change.answer')}</p>
             </div>
             <div>
-              <h3 className="text-lg font-semibold text-gray-900 mb-2">What security certifications do you have?</h3>
-              <p className="text-gray-600">We're ISO 27001 certified, SOC 2 Type II compliant, and GDPR ready.</p>
+              <h3 className="text-lg font-semibold text-gray-900 mb-2">{t('pricing.faq.security.question')}</h3>
+              <p className="text-gray-600">{t('pricing.faq.security.answer')}</p>
             </div>
           </div>
         </div>
@@ -227,13 +229,13 @@ const Pricing = () => {
       <div className="bg-blue-600 py-12 sm:py-16">
         <div className="max-w-4xl mx-auto text-center px-4 sm:px-6 lg:px-8">
           <h2 className="text-2xl sm:text-3xl font-bold text-white mb-4">
-            Ready to Get Started?
+            {t('pricing.cta.ready')}
           </h2>
           <p className="text-lg sm:text-xl text-blue-100 mb-6 sm:mb-8 px-4">
-            Join organizations worldwide who trust Disclosurely for secure whistleblowing.
+            {t('pricing.cta.join')}
           </p>
           <a href="https://app.disclosurely.com/auth/signup" className="bg-white hover:bg-gray-100 text-blue-600 px-6 sm:px-8 py-3 rounded-lg text-lg font-semibold inline-block">
-            Start Free Trial
+            {t('pricing.cta.startTrial')}
           </a>
         </div>
       </div>
