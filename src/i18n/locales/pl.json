@@ -180,6 +180,45 @@
     "section12Title": "12. Prawo właściwe i rozstrzyganie sporów",
     "lastUpdated": "Ostatnia aktualizacja: Wrzesień 2025"
   },
+  "nav": {
+    "pricing": "Cennik",
+    "contact": "Kontakt",
+    "signin": "Zaloguj się",
+    "getStarted": "Rozpocznij"
+  },
+  "landing": {
+    "hero": {
+      "title1": "Platforma Zgłaszania",
+      "title2": "Naruszeń",
+      "subtitle": "Disclosurely pomaga zespołom compliance zachować przewagę, przekształcając etykę i zgodność w proaktywną korzyść.",
+      "startFreeTrial": "Rozpocznij Darmowy Test",
+      "viewPricing": "Zobacz Cennik"
+    },
+    "trusted": "Zaufane przez setki brytyjskich firm"
+  },
+  "pricing": {
+    "starter": {
+      "name": "Starter",
+      "price": "£9.99",
+      "period": "/miesiąc",
+      "description": "Idealny dla małych organizacji",
+      "button": "Rozpocznij Darmowy Test"
+    },
+    "pro": {
+      "name": "Pro",
+      "badge": "Najpopularniejszy",
+      "price": "£19.99",
+      "period": "/miesiąc",
+      "description": "Dla rozwijających się organizacji",
+      "button": "Rozpocznij Darmowy Test"
+    },
+    "enterprise": {
+      "name": "Enterprise",
+      "price": "Niestandardowe",
+      "description": "Dla dużych organizacji",
+      "button": "Skontaktuj się z Działem Sprzedaży"
+    }
+  },
   "auth": {
     "signInTitle": "Zaloguj się do swojego konta",
     "signInDescription": "Uzyskaj dostęp do bezpiecznego panelu",

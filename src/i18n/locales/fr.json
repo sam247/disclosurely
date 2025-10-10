@@ -150,21 +150,21 @@
   "brandColor": "Couleur de Marque",
   "saveChanges": "Enregistrer les Modifications",
   "saving": "Enregistrement...",
+  "nav": {
+    "pricing": "Tarifs",
+    "contact": "Contact",
+    "signin": "Se Connecter",
+    "getStarted": "Commencer"
+  },
   "landing": {
-    "nav": {
-      "features": "Fonctionnalités",
-      "pricing": "Tarifs",
-      "contact": "Contact",
-      "signIn": "Se Connecter",
-      "getStarted": "Commencer"
-    },
     "hero": {
-      "title": "Rapports Confidentiels Sécurisés",
-      "subtitle": "La plateforme de dénonciation anonyme la plus sûre du marché. Chiffrement de bout en bout, conformité RGPD et facile à utiliser.",
-      "cta": "Commencer Gratuitement",
-      "ctaSecondary": "Voir la Démo",
-      "trustedBy": "Approuvé par les principales organisations du monde entier"
+      "title1": "Plateforme de Dénonciation",
+      "title2": "et de Divulgation",
+      "subtitle": "Disclosurely aide les équipes de conformité à garder une longueur d'avance en transformant l'éthique et la conformité en un avantage proactif.",
+      "startFreeTrial": "Essai Gratuit",
+      "viewPricing": "Voir les Tarifs"
     },
+    "trusted": "Approuvé par des centaines d'entreprises britanniques",
     "features": {
       "title": "Tout ce dont vous avez besoin pour des rapports sécurisés",
       "subtitle": "Protection complète des lanceurs d'alerte avec des outils avancés de gestion de cas",

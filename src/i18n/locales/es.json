@@ -150,73 +150,159 @@
   "brandColor": "Color de Marca",
   "saveChanges": "Guardar Cambios",
   "saving": "Guardando...",
+  "nav": {
+    "pricing": "Precios",
+    "contact": "Contacto",
+    "signin": "Iniciar Sesión",
+    "getStarted": "Comenzar"
+  },
   "landing": {
-    "nav": {
-      "features": "Características",
-      "pricing": "Precios",
-      "contact": "Contacto",
-      "signIn": "Iniciar Sesión",
-      "getStarted": "Comenzar"
-    },
     "hero": {
-      "title": "Informes Confidenciales Seguros",
-      "subtitle": "La plataforma de denuncias anónimas más segura del mercado. Cifrado de extremo a extremo, cumplimiento con la RGPD y fácil de usar.",
-      "cta": "Comenzar Gratis",
-      "ctaSecondary": "Ver Demo",
-      "trustedBy": "Confiado por organizaciones líderes en todo el mundo"
+      "title1": "Plataforma de Denuncias y",
+      "title2": "Divulgaciones",
+      "subtitle": "Disclosurely ayuda a los equipos de cumplimiento a mantenerse a la vanguardia transformando la ética y el cumplimiento en una ventaja proactiva: construyendo una cultura de integridad, simplificando flujos de trabajo y reduciendo el riesgo organizacional.",
+      "startFreeTrial": "Iniciar Prueba Gratuita",
+      "viewPricing": "Ver Precios"
     },
+    "trusted": "Confiado por cientos de empresas del Reino Unido",
     "features": {
       "title": "Todo lo que necesita para informes seguros",
-      "subtitle": "Protección integral para denunciantes con herramientas avanzadas de gestión de casos",
-      "anonymous": {
+      "subtitle": "Nuestra plataforma proporciona herramientas integrales para gestionar informes de denunciantes con total confidencialidad y cumplimiento.",
+      "anonymousReporting": {
         "title": "Informes Anónimos",
-        "description": "Protección total de la identidad con navegación sin rastro y envío sin cuenta"
-      },
-      "caseManagement": {
-        "title": "Gestión de Casos",
-        "description": "Panel de control profesional con asignación de casos, seguimiento y colaboración en equipo"
-      },
-      "enterpriseSecurity": {
-        "title": "Seguridad Empresarial",
-        "description": "Cifrado de grado militar, cumplimiento con SOC 2 Tipo II y almacenamiento seguro de datos"
+        "description": "Total anonimato para denunciantes con envíos cifrados y protección segura de identidad."
       },
       "secureMessaging": {
         "title": "Mensajería Segura",
-        "description": "Comunicación bidireccional cifrada de extremo a extremo con denunciantes anónimos"
+        "description": "Comunicación cifrada bidireccional entre denunciantes e investigadores manteniendo el anonimato."
       },
-      "multiUser": {
+      "caseManagement": {
+        "title": "Gestión de Casos",
+        "description": "Panel integral para rastrear, investigar y resolver casos con pistas de auditoría completas."
+      },
+      "multiUserAccess": {
         "title": "Acceso Multiusuario",
-        "description": "Control de acceso basado en roles con gestión de equipo y permisos granulares"
+        "description": "Permisos basados en roles para equipos legales, RRHH y cumplimiento con niveles de acceso controlados."
       },
-      "compliance": {
+      "regulatoryCompliance": {
         "title": "Cumplimiento Normativo",
-        "description": "Cumple con la Directiva UE de Denuncias, RGPD, SOX y otros requisitos regulatorios"
+        "description": "Cumplimiento integrado con RGPD, SOX y otros requisitos regulatorios en todas las industrias."
+      },
+      "enterpriseSecurity": {
+        "title": "Seguridad Empresarial",
+        "description": "Cifrado de nivel bancario, alojamiento seguro y medidas integrales de protección de datos."
       }
     },
-    "security": {
-      "title": "Seguridad de Nivel Empresarial",
-      "subtitle": "Su confianza es nuestra prioridad. Construido con las prácticas de seguridad más altas de la industria.",
-      "encryption": {
-        "title": "Cifrado de Grado Militar",
-        "description": "Cifrado AES-256 para todos los datos en reposo y TLS 1.3 para datos en tránsito"
+    "howItWorks": {
+      "title": "Cómo Funciona",
+      "subtitle": "Comience con Disclosurely en tres simples pasos",
+      "step1": {
+        "title": "Configure Su Portal",
+        "description": "Cree su cuenta y personalice su portal de informes en minutos. Agregue su marca, configure preferencias de notificación y configure el acceso de su equipo."
       },
-      "anonymity": {
-        "title": "Verdadero Anonimato",
-        "description": "Sin rastreo de IP, sin cookies, sin recopilación de metadatos. Privacidad completa garantizada."
+      "step2": {
+        "title": "Comparta con Su Equipo",
+        "description": "Distribuya su enlace de informes seguro a los empleados por correo electrónico, intranet o códigos QR. Los informes se pueden enviar 24/7 desde cualquier dispositivo, en cualquier lugar."
       },
-      "compliance": {
-        "title": "Cumplimiento RGPD",
-        "description": "Totalmente compatible con el RGPD con almacenamiento de datos en la UE y controles de privacidad integrales"
+      "step3": {
+        "title": "Gestione y Resuelva Casos",
+        "description": "Reciba notificaciones instantáneas de nuevos informes. Investigue, comuníquese de forma segura con los denunciantes y rastree casos hasta su resolución con pistas de auditoría completas."
+      }
+    },
+    "anonymousReporting": {
+      "title": "Informes Anónimos Simplificados",
+      "description": "Permita que los empleados informen mala conducta, violaciones éticas u otras preocupaciones de forma completamente anónima. Nuestro cifrado avanzado garantiza la protección de la identidad del denunciante mientras mantiene el pleno cumplimiento de los requisitos regulatorios.",
+      "benefit1": "Cero recopilación de datos sobre informantes",
+      "benefit2": "Mensajería de seguimiento anónima",
+      "benefit3": "Soporte en múltiples idiomas"
+    },
+    "encryption": {
+      "title": "Cifrado de Grado Militar",
+      "description": "Cada informe está protegido con cifrado AES-256, el mismo estándar utilizado por bancos y agencias gubernamentales. Sus datos sensibles están seguros desde el envío hasta la resolución.",
+      "benefit1": "Cifrado de extremo a extremo AES-256",
+      "benefit2": "Archivos adjuntos cifrados",
+      "benefit3": "Almacenamiento seguro de datos"
+    },
+    "compliance": {
+      "title": "Cumplimiento Simplificado",
+      "description": "Manténgase en cumplimiento con las regulaciones de denuncias del Reino Unido y la UE, incluyendo la Directiva de Denuncias de la UE y la Ley de Derechos Laborales del Reino Unido. Pistas de auditoría integradas y herramientas de informes garantizan el cumplimiento normativo.",
+      "benefit1": "Cumple con la Directiva de Denuncias de la UE",
+      "benefit2": "Listo para RGPD",
+      "benefit3": "Informes de cumplimiento automatizados"
+    },
+    "messaging": {
+      "title": "Comunicación Bidireccional Segura",
+      "description": "Mantenga un diálogo anónimo con los denunciantes durante las investigaciones. Solicite información adicional, proporcione actualizaciones y garantice transparencia mientras protege las identidades.",
+      "benefit1": "Mensajería cifrada",
+      "benefit2": "Mantener el anonimato",
+      "benefit3": "Notificaciones en tiempo real"
+    },
+    "aiPowered": {
+      "title": "Análisis de Casos con IA",
+      "description": "Aproveche la inteligencia artificial para analizar patrones de casos, identificar riesgos y priorizar investigaciones. Nuestro asistente de IA ayuda a los equipos de cumplimiento a trabajar de manera más inteligente y eficiente.",
+      "benefit1": "Evaluación automatizada de riesgos",
+      "benefit2": "Detección de patrones",
+      "benefit3": "Priorización inteligente de casos"
+    },
+    "certifications": {
+      "title": "Certificaciones de Seguridad y Cumplimiento",
+      "subtitle": "Confiado por organizaciones en todo el mundo con estándares de seguridad líderes en la industria"
+    },
+    "pricing": {
+      "title": "Precios Simples y Transparentes",
+      "description": "Precios flexibles diseñados para su organización. Elija el plan que se ajuste a sus necesidades, adapte las características y comience de inmediato con soporte de configuración guiada. Todos los planes incluyen una prueba gratuita de 7 días."
+    },
+    "testimonials": {
+      "title": "Confiado por Organizaciones en Todo el Mundo",
+      "subtitle": "Vea lo que nuestros clientes dicen sobre su experiencia con Disclosurely",
+      "testimonial1": {
+        "quote": "Disclosurely ha transformado la forma en que manejamos informes sensibles. La función de mensajería anónima es particularmente valiosa.",
+        "name": "Sarah Johnson",
+        "role": "Directora de Cumplimiento"
       },
-      "scale": {
-        "title": "Escala Ilimitada",
-        "description": "Arquitectura de nube robusta que escala desde una startup hasta empresas del Fortune 500"
+      "testimonial2": {
+        "quote": "La plataforma es intuitiva y segura. Nuestros empleados se sienten seguros al informar problemas y podemos investigarlos de manera efectiva.",
+        "name": "Michael Chen",
+        "role": "Director de RRHH"
+      },
+      "testimonial3": {
+        "quote": "La implementación fue perfecta y el equipo de soporte fue excelente. Lo recomiendo mucho para cualquier organización seria sobre el cumplimiento.",
+        "name": "Emily Rodríguez",
+        "role": "Asesora Legal"
+      }
+    },
+    "faq": {
+      "title": "Preguntas Frecuentes",
+      "subtitle": "Todo lo que necesita saber sobre Disclosurely",
+      "question1": {
+        "question": "¿Cómo funcionan los informes anónimos?",
+        "answer": "Los denunciantes pueden enviar informes a través de su portal personalizado sin proporcionar información personal. Nuestro sistema utiliza cifrado avanzado y no recopila direcciones IP ni datos identificativos. Los informantes reciben un código de acceso único para verificar el estado de su informe y comunicarse de forma segura."
+      },
+      "question2": {
+        "question": "¿Disclosurely cumple con RGPD y otras regulaciones?",
+        "answer": "Sí, Disclosurely está diseñado pensando en el cumplimiento. Cumplimos con RGPD y los requisitos de SOX, la Directiva de Denuncias de la UE y otros marcos regulatorios importantes. Todos los datos están cifrados y almacenados de forma segura cumpliendo con los estándares internacionales de protección de datos."
+      },
+      "question3": {
+        "question": "¿Podemos personalizar el portal de informes?",
+        "answer": "Absolutamente. Puede agregar la marca de su empresa, personalizar los campos del formulario de informes, configurar categorías específicas para los informes e incluso usar su propio dominio (en planes Professional y Enterprise). El portal se puede adaptar para que coincida con las necesidades y la cultura de su organización."
+      },
+      "question4": {
+        "question": "¿Qué tan rápido podemos comenzar?",
+        "answer": "La mayoría de las organizaciones están en funcionamiento en 24 horas. Después de registrarse, puede personalizar inmediatamente su portal, invitar a miembros del equipo y comenzar a aceptar informes. Nuestro equipo de soporte está disponible para ayudar con la configuración e incorporación sin costo adicional."
+      },
+      "question5": {
+        "question": "¿Qué soporte está incluido?",
+        "answer": "Todos los planes incluyen soporte por correo electrónico y acceso a nuestra completa base de conocimientos. Los planes Professional incluyen soporte prioritario con tiempos de respuesta más rápidos, mientras que los clientes Enterprise reciben soporte dedicado con garantías de SLA y capacitación opcional en el sitio."
+      },
+      "question6": {
+        "question": "¿Podemos cancelar o cambiar nuestro plan en cualquier momento?",
+        "answer": "Sí, puede actualizar, degradar o cancelar su suscripción en cualquier momento. Si cancela, conservará el acceso hasta el final de su período de facturación. También ofrecemos una prueba gratuita de 14 días para que pueda probar todas las funciones antes de comprometerse."
       }
     },
     "cta": {
-      "title": "¿Listo para proteger a sus denunciantes?",
-      "subtitle": "Únase a cientos de organizaciones que confían en Disclosurely para informes confidenciales seguros",
-      "button": "Comenzar Gratis"
+      "title": "¿Listo para Fortalecer Su Programa de Cumplimiento?",
+      "description": "¿No está listo para una prueba gratuita o demostración? Comparta sus requisitos con nosotros y responderemos rápidamente para discutir cómo Disclosurely puede apoyar a su organización.",
+      "button": "Iniciar Prueba Gratuita"
     }
   },
   "auth": {
@@ -261,6 +347,50 @@
     }
   },
   "pricing": {
+    "hero": {
+      "title1": "Simple, Transparente",
+      "title2": "Precios",
+      "subtitle": "Elija el plan adecuado para su organización. Comience con nuestra prueba gratuita de siete días y actualice a medida que crece."
+    },
+    "starter": {
+      "name": "Starter",
+      "price": "£9.99",
+      "period": "/mes",
+      "description": "Perfecto para organizaciones pequeñas",
+      "feature1": "5 casos/mes",
+      "feature2": "1GB de Almacenamiento",
+      "feature3": "Soporte por Correo",
+      "feature4": "Mensajería Segura Bidireccional",
+      "feature5": "Asistente de Casos con IA",
+      "feature6": "Marca Personalizada",
+      "button": "Iniciar Prueba Gratuita"
+    },
+    "pro": {
+      "name": "Pro",
+      "badge": "Más Popular",
+      "price": "£19.99",
+      "period": "/mes",
+      "description": "Para organizaciones en crecimiento",
+      "feature1": "Casos ilimitados/mes",
+      "feature2": "Almacenamiento ilimitado",
+      "feature3": "Soporte por Correo",
+      "feature4": "Mensajería Segura Bidireccional",
+      "feature5": "Asistente de Casos con IA",
+      "feature6": "Marca Personalizada",
+      "button": "Iniciar Prueba Gratuita"
+    },
+    "enterprise": {
+      "name": "Enterprise",
+      "price": "Personalizado",
+      "description": "Para grandes organizaciones",
+      "feature1": "Todo en Professional",
+      "feature2": "Dominio personalizado",
+      "feature3": "Soporte dedicado",
+      "feature4": "Garantía de SLA",
+      "feature5": "Integraciones personalizadas",
+      "feature6": "API (próximamente)",
+      "button": "Contactar Ventas"
+    },
     "title": "Precios simples y transparentes",
     "subtitle": "Elija el plan que mejor se adapte a su organización. Actualice, reduzca o cancele en cualquier momento.",
     "monthly": "Mensual",

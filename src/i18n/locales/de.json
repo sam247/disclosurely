@@ -150,12 +150,21 @@
   "brandColor": "Markenfarbe",
   "saveChanges": "Änderungen Speichern",
   "saving": "Speichern...",
+  "nav": {
+    "pricing": "Preise",
+    "contact": "Kontakt",
+    "signin": "Anmelden",
+    "getStarted": "Loslegen"
+  },
   "landing": {
-    "heroTitle": "Sichere, anonyme Whistleblowing-Meldungen",
-    "heroSubtitle": "Ermöglichen Sie Ihrem Team, Bedenken sicher und vertraulich mit einer verschlüsselten Plattform zu melden, die den Schutz der Identität in den Vordergrund stellt",
-    "getStartedFree": "Kostenlos Starten",
-    "viewPricing": "Preise Ansehen",
-    "trustedBy": "Vertraut von führenden Organisationen weltweit",
+    "hero": {
+      "title1": "Whistleblowing und Meldeplattform",
+      "title2": "für Hinweisgeber",
+      "subtitle": "Disclosurely hilft Compliance-Teams, durch proaktive Ethik und Compliance einen Wettbewerbsvorteil zu schaffen.",
+      "startFreeTrial": "Kostenlos Testen",
+      "viewPricing": "Preise Ansehen"
+    },
+    "trusted": "Vertraut von hunderten britischen Unternehmen",
     "featuresTitle": "Alles, was Sie für sicheres Whistleblowing benötigen",
     "featuresSubtitle": "Schützen Sie Informanten und verwalten Sie Berichte mit militärischer Verschlüsselung",
     "feature1Title": "Anonyme Meldungen",
