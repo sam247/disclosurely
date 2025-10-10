@@ -391,62 +391,6 @@
       "feature6": "API (próximamente)",
       "button": "Contactar Ventas"
     },
-    "title": "Precios simples y transparentes",
-    "subtitle": "Elija el plan que mejor se adapte a su organización. Actualice, reduzca o cancele en cualquier momento.",
-    "monthly": "Mensual",
-    "annually": "Anual",
-    "saveWithAnnual": "Ahorre 20% con facturación anual",
-    "free": {
-      "name": "Gratis",
-      "price": "€0",
-      "description": "Perfecto para organizaciones pequeñas que comienzan",
-      "cta": "Comenzar Gratis",
-      "features": [
-        "Hasta 10 informes al mes",
-        "1 usuario",
-        "Cifrado básico",
-        "Soporte por correo electrónico",
-        "Almacenamiento de 1GB",
-        "Retención de datos de 30 días"
-      ]
-    },
-    "pro": {
-      "name": "Pro",
-      "price": "€49",
-      "description": "Para organizaciones en crecimiento con necesidades avanzadas",
-      "cta": "Comenzar Prueba Gratuita",
-      "popular": "Más Popular",
-      "features": [
-        "Informes ilimitados",
-        "Hasta 10 usuarios",
-        "Cifrado avanzado",
-        "Soporte prioritario",
-        "Almacenamiento de 100GB",
-        "Retención de datos de 1 año",
-        "Marca personalizada",
-        "Análisis avanzados",
-        "Integración API",
-        "Exportación de datos"
-      ]
-    },
-    "enterprise": {
-      "name": "Empresa",
-      "price": "Personalizado",
-      "description": "Para grandes organizaciones con requisitos específicos",
-      "cta": "Contactar Ventas",
-      "features": [
-        "Todo en Pro, más:",
-        "Usuarios ilimitados",
-        "Almacenamiento ilimitado",
-        "Gerente de cuenta dedicado",
-        "SLA garantizado",
-        "Auditorías de seguridad",
-        "Formación personalizada",
-        "Integración personalizada",
-        "Cumplimiento avanzado",
-        "Alojamiento en su ubicación disponible"
-      ]
-    },
     "faq": {
       "title": "Preguntas Frecuentes",
       "q1": {
