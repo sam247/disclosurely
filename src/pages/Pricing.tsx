@@ -8,9 +8,11 @@ import { useLanguageFromUrl } from '@/hooks/useLanguageFromUrl';
 import { useTranslation } from 'react-i18next';
 
 const Pricing = () => {
-  useLanguageFromUrl();
+  const { currentLanguage } = useLanguageFromUrl();
   const { t } = useTranslation();
+  const langPrefix = currentLanguage && currentLanguage !== 'en' ? `/${currentLanguage}` : '';
   
+
   return (
     <div className="min-h-screen bg-white">
       {/* Navigation */}
