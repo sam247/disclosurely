@@ -1,8 +1,10 @@
 import AuthLayout from '@/components/auth/AuthLayout';
 import SignupForm from '@/components/auth/SignupForm';
 import { useTranslation } from 'react-i18next';
+import { useLanguageFromUrl } from '@/hooks/useLanguageFromUrl';
 
 const Signup = () => {
+  useLanguageFromUrl();
   const { t } = useTranslation();
   
   return (

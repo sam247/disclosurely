@@ -30,16 +30,16 @@ const Pricing = () => {
             </div>
             <div className="hidden md:flex items-center space-x-4">
               <PublicLanguageSelector />
-              <Link to="/pricing" className="text-blue-600 font-medium">{t('nav.pricing')}</Link>
-              <Link to="/auth/login" className="text-gray-600 hover:text-gray-900">{t('nav.signin')}</Link>
-              <Link to="/auth/signup" className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors">
+              <Link to={`${langPrefix}/pricing`} className="text-blue-600 font-medium">{t('nav.pricing')}</Link>
+              <Link to={`${langPrefix}/auth/login`} className="text-gray-600 hover:text-gray-900">{t('nav.signin')}</Link>
+              <Link to={`${langPrefix}/auth/signup`} className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors">
                 {t('nav.getStarted')}
               </Link>
             </div>
             <div className="md:hidden">
-              <a href="https://app.disclosurely.com/auth/login" className="bg-blue-600 text-white px-3 py-2 rounded-lg hover:bg-blue-700 transition-colors text-sm">
+              <Link to={`${langPrefix}/auth/login`} className="bg-blue-600 text-white px-3 py-2 rounded-lg hover:bg-blue-700 transition-colors text-sm">
                 {t('nav.signin')}
-              </a>
+              </Link>
             </div>
           </div>
         </div>
@@ -50,10 +50,9 @@ const Pricing = () => {
         <div className="text-center">
           <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold text-gray-900 mb-6">
             {t('pricing.hero.title')}
-            <span className="block text-blue-600">{t('pricing.hero.subtitle')}</span>
           </h1>
           <p className="text-lg sm:text-xl text-gray-600 mb-8 max-w-3xl mx-auto px-4">
-            {t('pricing.hero.description')}
+            {t('pricing.hero.subtitle')}
           </p>
         </div>
       </div>

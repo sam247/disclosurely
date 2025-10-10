@@ -348,67 +348,68 @@
   },
   "pricing": {
     "hero": {
-      "title1": "Simple, Transparente",
-      "title2": "Precios",
+      "title": "Precios Simples y Transparentes",
       "subtitle": "Elija el plan adecuado para su organización. Comience con nuestra prueba gratuita de siete días y actualice a medida que crece."
     },
-    "starter": {
-      "name": "Starter",
-      "price": "£9.99",
-      "period": "/mes",
-      "description": "Perfecto para organizaciones pequeñas",
-      "feature1": "5 casos/mes",
-      "feature2": "1GB de Almacenamiento",
-      "feature3": "Soporte por Correo",
-      "feature4": "Mensajería Segura Bidireccional",
-      "feature5": "Asistente de Casos con IA",
-      "feature6": "Marca Personalizada",
-      "button": "Iniciar Prueba Gratuita"
+    "plans": {
+      "mostPopular": "Más Popular",
+      "perMonth": "/mes",
+      "starter": {
+        "name": "Starter",
+        "price": "£9.99",
+        "description": "Perfecto para organizaciones pequeñas"
+      },
+      "pro": {
+        "name": "Pro",
+        "price": "£19.99",
+        "description": "Para organizaciones en crecimiento"
+      },
+      "enterprise": {
+        "name": "Enterprise",
+        "price": "Personalizado",
+        "description": "Para grandes organizaciones"
+      }
     },
-    "pro": {
-      "name": "Pro",
-      "badge": "Más Popular",
-      "price": "£19.99",
-      "period": "/mes",
-      "description": "Para organizaciones en crecimiento",
-      "feature1": "Casos ilimitados/mes",
-      "feature2": "Almacenamiento ilimitado",
-      "feature3": "Soporte por Correo",
-      "feature4": "Mensajería Segura Bidireccional",
-      "feature5": "Asistente de Casos con IA",
-      "feature6": "Marca Personalizada",
-      "button": "Iniciar Prueba Gratuita"
-    },
-    "enterprise": {
-      "name": "Enterprise",
-      "price": "Personalizado",
-      "description": "Para grandes organizaciones",
-      "feature1": "Todo en Professional",
-      "feature2": "Dominio personalizado",
-      "feature3": "Soporte dedicado",
-      "feature4": "Garantía de SLA",
-      "feature5": "Integraciones personalizadas",
-      "feature6": "API (próximamente)",
-      "button": "Contactar Ventas"
+    "features": {
+      "casesLimit": "5 casos/mes",
+      "storage": "1GB de Almacenamiento",
+      "emailSupport": "Soporte por Correo",
+      "messaging": "Mensajería Segura Bidireccional",
+      "aiHelper": "Asistente de Casos con IA",
+      "customBranding": "Marca Personalizada",
+      "unlimitedCases": "Casos ilimitados/mes",
+      "unlimitedStorage": "Almacenamiento ilimitado",
+      "everythingPro": "Todo en Professional",
+      "customDomain": "Dominio personalizado",
+      "dedicatedSupport": "Soporte dedicado",
+      "slaGuarantee": "Garantía de SLA",
+      "customIntegrations": "Integraciones personalizadas",
+      "api": "API (próximamente)"
     },
     "faq": {
       "title": "Preguntas Frecuentes",
-      "q1": {
+      "trial": {
+        "question": "¿Hay una prueba gratuita?",
+        "answer": "Sí, todos los planes vienen con una prueba gratuita de 7 días para que pueda ver cómo funciona la plataforma. No se requiere tarjeta de crédito."
+      },
+      "limit": {
+        "question": "¿Qué sucede si alcanzo mi límite de casos en el plan Starter?",
+        "answer": "Si excede su asignación mensual de casos, se le notificará en el panel. Puede actualizar al plan Pro para casos ilimitados o esperar hasta el próximo mes."
+      },
+      "change": {
         "question": "¿Puedo cambiar de plan más tarde?",
-        "answer": "Sí, puede actualizar, reducir o cancelar su plan en cualquier momento. Los cambios se aplican de inmediato."
+        "answer": "¡Absolutamente! Puede actualizar o reducir su plan en cualquier momento desde su panel."
       },
-      "q2": {
-        "question": "¿Qué métodos de pago aceptan?",
-        "answer": "Aceptamos todas las principales tarjetas de crédito (Visa, MasterCard, American Express) y transferencias bancarias para clientes empresariales."
-      },
-      "q3": {
-        "question": "¿Hay un contrato a largo plazo?",
-        "answer": "No, todos nuestros planes son mensuales sin compromiso a largo plazo. Los planes anuales ofrecen un descuento pero siguen siendo flexibles."
-      },
-      "q4": {
-        "question": "¿Qué sucede si excedo mi límite de informes?",
-        "answer": "Le notificaremos cuando se acerque a su límite. Puede actualizar su plan en cualquier momento para aumentar su asignación."
+      "security": {
+        "question": "¿Qué certificaciones de seguridad tienen?",
+        "answer": "Estamos certificados ISO 27001, cumplimos con SOC 2 Tipo II y estamos listos para RGPD."
       }
+    },
+    "cta": {
+      "ready": "¿Listo para Comenzar?",
+      "join": "Únase a organizaciones de todo el mundo que confían en Disclosurely para denuncias seguras.",
+      "startTrial": "Iniciar Prueba Gratuita",
+      "contactSales": "Contactar Ventas"
     }
   },
   "contact": {

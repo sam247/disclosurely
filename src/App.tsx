@@ -86,6 +86,8 @@ const AppContent = () => {
         <Route path="/signup" element={<Signup />} />
         <Route path="/auth/login" element={<Login />} />
         <Route path="/auth/signup" element={<Signup />} />
+        <Route path="/:lang/auth/login" element={<Login />} />
+        <Route path="/:lang/auth/signup" element={<Signup />} />
         <Route path="/invite/:token" element={<AcceptInvite />} />
         
         {/* Blog routes */}

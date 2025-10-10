@@ -6,8 +6,9 @@ import { useLanguageFromUrl } from '@/hooks/useLanguageFromUrl';
 import { useTranslation } from 'react-i18next';
 
 const Terms = () => {
-  useLanguageFromUrl();
+  const { currentLanguage } = useLanguageFromUrl();
   const { t } = useTranslation();
+  const langPrefix = currentLanguage && currentLanguage !== 'en' ? `/${currentLanguage}` : '';
   
   return (
     <>
@@ -32,15 +33,15 @@ const Terms = () => {
               </div>
               <div className="hidden md:flex items-center space-x-4">
                 <PublicLanguageSelector />
-                <Link to="/pricing" className="text-gray-600 hover:text-gray-900">{t('nav.pricing')}</Link>
-                <Link to="/contact" className="text-gray-600 hover:text-gray-900">{t('nav.contact')}</Link>
-                <Link to="/auth/login" className="text-gray-600 hover:text-gray-900">{t('nav.signin')}</Link>
-                <Link to="/auth/signup" className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors">
+                <Link to={`${langPrefix}/pricing`} className="text-gray-600 hover:text-gray-900">{t('nav.pricing')}</Link>
+                <Link to={`${langPrefix}/contact`} className="text-gray-600 hover:text-gray-900">{t('nav.contact')}</Link>
+                <Link to={`${langPrefix}/auth/login`} className="text-gray-600 hover:text-gray-900">{t('nav.signin')}</Link>
+                <Link to={`${langPrefix}/auth/signup`} className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors">
                   {t('nav.getStarted')}
                 </Link>
               </div>
               <div className="md:hidden">
-                <Link to="/auth/login" className="bg-blue-600 text-white px-3 py-2 rounded-lg hover:bg-blue-700 transition-colors text-sm">
+                <Link to={`${langPrefix}/auth/login`} className="bg-blue-600 text-white px-3 py-2 rounded-lg hover:bg-blue-700 transition-colors text-sm">
                   {t('nav.signin')}
                 </Link>
               </div>
