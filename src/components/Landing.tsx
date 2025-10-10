@@ -62,18 +62,18 @@ const Landing = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-[150px] pb-20">
         <div className="text-center">
           <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold text-gray-900 mb-6">
-            {t('landing.hero.title')}
-            <span className="block text-blue-600">{t('landing.hero.subtitle')}</span>
+            {t('landing.hero.title1')}
+            <span className="block text-blue-600">{t('landing.hero.title2')}</span>
           </h1>
           <p className="text-lg sm:text-xl text-gray-600 mb-8 max-w-3xl mx-auto px-4">
-            {t('landing.hero.description')}
+            {t('landing.hero.subtitle')}
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center items-center px-4">
             <a href="https://app.disclosurely.com/auth/signup" className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-3 rounded-lg text-lg font-semibold w-full sm:w-auto text-center">
-              {t('landing.hero.cta.trial')}
+              {t('landing.hero.startFreeTrial')}
             </a>
             <Link to="/pricing" className="border border-gray-300 hover:border-gray-400 text-gray-700 px-8 py-3 rounded-lg text-lg font-semibold w-full sm:w-auto text-center">
-              {t('landing.hero.cta.pricing')}
+              {t('landing.hero.viewPricing')}
             </Link>
           </div>
 
@@ -81,7 +81,7 @@ const Landing = () => {
           <div className="mt-16 mb-8">
             <div className="text-center mb-12">
               <p className="text-lg font-medium text-gray-600">
-                {t('landing.trusted.title')}
+                {t('landing.trusted')}
               </p>
             </div>
             
@@ -121,7 +121,7 @@ const Landing = () => {
               {t('landing.features.title')}
             </h2>
             <p className="text-lg sm:text-xl text-gray-600 max-w-3xl mx-auto px-4">
-              {t('landing.features.description')}
+              {t('landing.features.subtitle')}
             </p>
           </div>
           
@@ -131,11 +131,11 @@ const Landing = () => {
                 <div className="mx-auto mb-4 w-16 h-16">
                   <img src={anonymousReportingIcon} alt="Anonymous Reporting" className="w-full h-full object-contain" />
                 </div>
-                <CardTitle className="text-xl sm:text-2xl">{t('landing.features.feature1.title')}</CardTitle>
+                <CardTitle className="text-xl sm:text-2xl">{t('landing.features.anonymousReporting.title')}</CardTitle>
               </CardHeader>
               <CardContent>
                 <CardDescription className="text-base">
-                  {t('landing.features.feature1.description')}
+                  {t('landing.features.anonymousReporting.description')}
                 </CardDescription>
               </CardContent>
             </Card>
@@ -145,11 +145,11 @@ const Landing = () => {
                 <div className="mx-auto mb-4 w-16 h-16">
                   <img src={secureMessagingIcon} alt="Secure Messaging" className="w-full h-full object-contain" />
                 </div>
-                <CardTitle className="text-xl sm:text-2xl">{t('landing.features.feature2.title')}</CardTitle>
+                <CardTitle className="text-xl sm:text-2xl">{t('landing.features.secureMessaging.title')}</CardTitle>
               </CardHeader>
               <CardContent>
                 <CardDescription className="text-base">
-                  {t('landing.features.feature2.description')}
+                  {t('landing.features.secureMessaging.description')}
                 </CardDescription>
               </CardContent>
             </Card>
@@ -159,11 +159,11 @@ const Landing = () => {
                 <div className="mx-auto mb-4 w-16 h-16">
                   <img src={caseManagementIcon} alt="Case Management" className="w-full h-full object-contain" />
                 </div>
-                <CardTitle className="text-xl sm:text-2xl">{t('landing.features.feature3.title')}</CardTitle>
+                <CardTitle className="text-xl sm:text-2xl">{t('landing.features.caseManagement.title')}</CardTitle>
               </CardHeader>
               <CardContent>
                 <CardDescription className="text-base">
-                  {t('landing.features.feature3.description')}
+                  {t('landing.features.caseManagement.description')}
                 </CardDescription>
               </CardContent>
             </Card>
@@ -173,11 +173,11 @@ const Landing = () => {
                 <div className="mx-auto mb-4 w-16 h-16">
                   <img src={multiUserAccessIcon} alt="Multi-User Access" className="w-full h-full object-contain" />
                 </div>
-                <CardTitle className="text-xl sm:text-2xl">{t('landing.features.feature4.title')}</CardTitle>
+                <CardTitle className="text-xl sm:text-2xl">{t('landing.features.multiUserAccess.title')}</CardTitle>
               </CardHeader>
               <CardContent>
                 <CardDescription className="text-base">
-                  {t('landing.features.feature4.description')}
+                  {t('landing.features.multiUserAccess.description')}
                 </CardDescription>
               </CardContent>
             </Card>
@@ -187,11 +187,11 @@ const Landing = () => {
                 <div className="mx-auto mb-4 w-16 h-16">
                   <img src={regulatoryComplianceIcon} alt="Regulatory Compliance" className="w-full h-full object-contain" />
                 </div>
-                <CardTitle className="text-xl sm:text-2xl">{t('landing.features.feature5.title')}</CardTitle>
+                <CardTitle className="text-xl sm:text-2xl">{t('landing.features.regulatoryCompliance.title')}</CardTitle>
               </CardHeader>
               <CardContent>
                 <CardDescription className="text-base">
-                  {t('landing.features.feature5.description')}
+                  {t('landing.features.regulatoryCompliance.description')}
                 </CardDescription>
               </CardContent>
             </Card>
@@ -201,11 +201,11 @@ const Landing = () => {
                 <div className="mx-auto mb-4 w-16 h-16">
                   <img src={enterpriseSecurityIcon} alt="Enterprise Security" className="w-full h-full object-contain" />
                 </div>
-                <CardTitle className="text-xl sm:text-2xl">{t('landing.features.feature6.title')}</CardTitle>
+                <CardTitle className="text-xl sm:text-2xl">{t('landing.features.enterpriseSecurity.title')}</CardTitle>
               </CardHeader>
               <CardContent>
                 <CardDescription className="text-base">
-                  {t('landing.features.feature6.description')}
+                  {t('landing.features.enterpriseSecurity.description')}
                 </CardDescription>
               </CardContent>
             </Card>
@@ -221,7 +221,7 @@ const Landing = () => {
               {t('landing.howItWorks.title')}
             </h2>
             <p className="text-lg sm:text-xl text-gray-600 max-w-3xl mx-auto px-4">
-              {t('landing.howItWorks.description')}
+              {t('landing.howItWorks.subtitle')}
             </p>
           </div>
           
@@ -282,15 +282,15 @@ const Landing = () => {
               <ul className="space-y-3">
                 <li className="flex items-center">
                   <CheckCircle className="h-5 w-5 text-blue-600 mr-3" />
-                  <span>{t('landing.anonymousReporting.bullet1')}</span>
+                  <span>{t('landing.anonymousReporting.benefit1')}</span>
                 </li>
                 <li className="flex items-center">
                   <CheckCircle className="h-5 w-5 text-blue-600 mr-3" />
-                  <span>{t('landing.anonymousReporting.bullet2')}</span>
+                  <span>{t('landing.anonymousReporting.benefit2')}</span>
                 </li>
                 <li className="flex items-center">
                   <CheckCircle className="h-5 w-5 text-blue-600 mr-3" />
-                  <span>{t('landing.anonymousReporting.bullet3')}</span>
+                  <span>{t('landing.anonymousReporting.benefit3')}</span>
                 </li>
               </ul>
             </div>
@@ -322,15 +322,15 @@ const Landing = () => {
               <ul className="space-y-3">
                 <li className="flex items-center">
                   <CheckCircle className="h-5 w-5 text-blue-600 mr-3" />
-                  <span>{t('landing.encryption.bullet1')}</span>
+                  <span>{t('landing.encryption.benefit1')}</span>
                 </li>
                 <li className="flex items-center">
                   <CheckCircle className="h-5 w-5 text-blue-600 mr-3" />
-                  <span>{t('landing.encryption.bullet2')}</span>
+                  <span>{t('landing.encryption.benefit2')}</span>
                 </li>
                 <li className="flex items-center">
                   <CheckCircle className="h-5 w-5 text-blue-600 mr-3" />
-                  <span>{t('landing.encryption.bullet3')}</span>
+                  <span>{t('landing.encryption.benefit3')}</span>
                 </li>
               </ul>
             </div>
@@ -352,15 +352,15 @@ const Landing = () => {
               <ul className="space-y-3">
                 <li className="flex items-center">
                   <CheckCircle className="h-5 w-5 text-blue-600 mr-3" />
-                  <span>{t('landing.compliance.bullet1')}</span>
+                  <span>{t('landing.compliance.benefit1')}</span>
                 </li>
                 <li className="flex items-center">
                   <CheckCircle className="h-5 w-5 text-blue-600 mr-3" />
-                  <span>{t('landing.compliance.bullet2')}</span>
+                  <span>{t('landing.compliance.benefit2')}</span>
                 </li>
                 <li className="flex items-center">
                   <CheckCircle className="h-5 w-5 text-blue-600 mr-3" />
-                  <span>{t('landing.compliance.bullet3')}</span>
+                  <span>{t('landing.compliance.benefit3')}</span>
                 </li>
               </ul>
             </div>
@@ -384,23 +384,23 @@ const Landing = () => {
             </div>
             <div className="order-1 lg:order-2">
               <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-6">
-                {t('landing.communication.title')}
+                {t('landing.messaging.title')}
               </h2>
               <p className="text-lg text-gray-600 mb-6">
-                {t('landing.communication.description')}
+                {t('landing.messaging.description')}
               </p>
               <ul className="space-y-3">
                 <li className="flex items-center">
                   <CheckCircle className="h-5 w-5 text-blue-600 mr-3" />
-                  <span>{t('landing.communication.bullet1')}</span>
+                  <span>{t('landing.messaging.benefit1')}</span>
                 </li>
                 <li className="flex items-center">
                   <CheckCircle className="h-5 w-5 text-blue-600 mr-3" />
-                  <span>{t('landing.communication.bullet2')}</span>
+                  <span>{t('landing.messaging.benefit2')}</span>
                 </li>
                 <li className="flex items-center">
                   <CheckCircle className="h-5 w-5 text-blue-600 mr-3" />
-                  <span>{t('landing.communication.bullet3')}</span>
+                  <span>{t('landing.messaging.benefit3')}</span>
                 </li>
               </ul>
             </div>
@@ -422,15 +422,15 @@ const Landing = () => {
               <ul className="space-y-3">
                 <li className="flex items-center">
                   <CheckCircle className="h-5 w-5 text-blue-600 mr-3" />
-                  <span>{t('landing.aiPowered.bullet1')}</span>
+                  <span>{t('landing.aiPowered.benefit1')}</span>
                 </li>
                 <li className="flex items-center">
                   <CheckCircle className="h-5 w-5 text-blue-600 mr-3" />
-                  <span>{t('landing.aiPowered.bullet2')}</span>
+                  <span>{t('landing.aiPowered.benefit2')}</span>
                 </li>
                 <li className="flex items-center">
                   <CheckCircle className="h-5 w-5 text-blue-600 mr-3" />
-                  <span>{t('landing.aiPowered.bullet3')}</span>
+                  <span>{t('landing.aiPowered.benefit3')}</span>
                 </li>
               </ul>
             </div>
@@ -653,7 +653,7 @@ const Landing = () => {
               {t('landing.certifications.title')}
             </h2>
             <p className="text-lg sm:text-xl text-gray-600 max-w-3xl mx-auto px-4">
-              {t('landing.certifications.description')}
+              {t('landing.certifications.subtitle')}
             </p>
           </div>
           

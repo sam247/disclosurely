@@ -248,9 +248,60 @@
       "title": "Security & Compliance Certifications",
       "subtitle": "Trusted by organizations worldwide with industry-leading security standards"
     },
+    "pricing": {
+      "title": "Simple, Transparent Pricing",
+      "subtitle": "Flexible pricing designed around your organisation. Choose the plan that fits your needs, tailor the features, and get started right away with guided setup support. All plans include a 7-day free trial."
+    },
+    "testimonials": {
+      "title": "Trusted by Organizations Worldwide",
+      "subtitle": "See what our customers say about their experience with Disclosurely",
+      "testimonial1": {
+        "quote": "Disclosurely has transformed how we handle sensitive reports. The anonymous messaging feature is particularly valuable.",
+        "name": "Sarah Johnson",
+        "role": "Chief Compliance Officer"
+      },
+      "testimonial2": {
+        "quote": "The platform is intuitive and secure. Our employees feel confident reporting issues, and we can investigate them effectively.",
+        "name": "Michael Chen",
+        "role": "HR Director"
+      },
+      "testimonial3": {
+        "quote": "Implementation was seamless and the support team was excellent. Highly recommend for any organization serious about compliance.",
+        "name": "Emily Rodriguez",
+        "role": "Legal Counsel"
+      }
+    },
+    "faq": {
+      "title": "Frequently Asked Questions",
+      "subtitle": "Everything you need to know about Disclosurely",
+      "question1": {
+        "question": "How does anonymous reporting work?",
+        "answer": "Whistleblowers can submit reports through your custom portal without providing any personal information. Our system uses advanced encryption and doesn't collect IP addresses or identifying data. Reporters receive a unique access code to check their report status and communicate securely."
+      },
+      "question2": {
+        "question": "Is Disclosurely compliant with GDPR and other regulations?",
+        "answer": "Yes, Disclosurely is built with compliance in mind. We're GDPR compliant and meet requirements for SOX, EU Whistleblowing Directive, and other major regulatory frameworks. All data is encrypted and stored securely in compliance with international data protection standards."
+      },
+      "question3": {
+        "question": "Can we customize the reporting portal?",
+        "answer": "Absolutely. You can add your company branding, customize the reporting form fields, set up specific categories for reports, and even use your own domain (on Professional and Enterprise plans). The portal can be tailored to match your organization's needs and culture."
+      },
+      "question4": {
+        "question": "How quickly can we get started?",
+        "answer": "Most organizations are up and running within 24 hours. After signing up, you can immediately customize your portal, invite team members, and start accepting reports. Our support team is available to help with setup and onboarding at no extra cost."
+      },
+      "question5": {
+        "question": "What support is included?",
+        "answer": "All plans include email support and access to our comprehensive knowledge base. Professional plans include priority support with faster response times, while Enterprise customers receive dedicated support with SLA guarantees and optional on-site training."
+      },
+      "question6": {
+        "question": "Can we cancel or change our plan anytime?",
+        "answer": "Yes, you can upgrade, downgrade, or cancel your subscription at any time. If you cancel, you'll retain access until the end of your billing period. We also offer a 14-day free trial so you can test all features before committing."
+      }
+    },
     "cta": {
-      "title": "Ready to get started?",
-      "subtitle": "Join hundreds of organizations using Disclosurely to build a culture of integrity.",
+      "title": "Ready to Strengthen Your Compliance Program?",
+      "description": "Not ready for a free trial or demo? Share your requirements with us, and we'll respond quickly to discuss how Disclosurely can support your organisation.",
       "button": "Start Free Trial"
     }
   },
