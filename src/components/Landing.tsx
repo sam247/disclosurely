@@ -118,10 +118,10 @@ const Landing = () => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">
             <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-4">
-              Everything you need for secure reporting
+              {t('landing.features.title')}
             </h2>
             <p className="text-lg sm:text-xl text-gray-600 max-w-3xl mx-auto px-4">
-              Our platform provides comprehensive tools to manage whistleblower reports with complete confidentiality and compliance.
+              {t('landing.features.description')}
             </p>
           </div>
           
@@ -131,11 +131,11 @@ const Landing = () => {
                 <div className="mx-auto mb-4 w-16 h-16">
                   <img src={anonymousReportingIcon} alt="Anonymous Reporting" className="w-full h-full object-contain" />
                 </div>
-                <CardTitle className="text-xl sm:text-2xl">Anonymous Reporting</CardTitle>
+                <CardTitle className="text-xl sm:text-2xl">{t('landing.features.feature1.title')}</CardTitle>
               </CardHeader>
               <CardContent>
                 <CardDescription className="text-base">
-                  Complete anonymity for whistleblowers with encrypted submissions and secure identity protection.
+                  {t('landing.features.feature1.description')}
                 </CardDescription>
               </CardContent>
             </Card>
@@ -145,11 +145,11 @@ const Landing = () => {
                 <div className="mx-auto mb-4 w-16 h-16">
                   <img src={secureMessagingIcon} alt="Secure Messaging" className="w-full h-full object-contain" />
                 </div>
-                <CardTitle className="text-xl sm:text-2xl">Secure Messaging</CardTitle>
+                <CardTitle className="text-xl sm:text-2xl">{t('landing.features.feature2.title')}</CardTitle>
               </CardHeader>
               <CardContent>
                 <CardDescription className="text-base">
-                  Two-way encrypted communication between whistleblowers and investigators while maintaining anonymity.
+                  {t('landing.features.feature2.description')}
                 </CardDescription>
               </CardContent>
             </Card>
@@ -159,11 +159,11 @@ const Landing = () => {
                 <div className="mx-auto mb-4 w-16 h-16">
                   <img src={caseManagementIcon} alt="Case Management" className="w-full h-full object-contain" />
                 </div>
-                <CardTitle className="text-xl sm:text-2xl">Case Management</CardTitle>
+                <CardTitle className="text-xl sm:text-2xl">{t('landing.features.feature3.title')}</CardTitle>
               </CardHeader>
               <CardContent>
                 <CardDescription className="text-base">
-                  Comprehensive dashboard to track, investigate, and resolve cases with full audit trails.
+                  {t('landing.features.feature3.description')}
                 </CardDescription>
               </CardContent>
             </Card>
@@ -173,11 +173,11 @@ const Landing = () => {
                 <div className="mx-auto mb-4 w-16 h-16">
                   <img src={multiUserAccessIcon} alt="Multi-User Access" className="w-full h-full object-contain" />
                 </div>
-                <CardTitle className="text-xl sm:text-2xl">Multi-User Access</CardTitle>
+                <CardTitle className="text-xl sm:text-2xl">{t('landing.features.feature4.title')}</CardTitle>
               </CardHeader>
               <CardContent>
                 <CardDescription className="text-base">
-                  Role-based permissions for legal, HR, and compliance teams with controlled access levels.
+                  {t('landing.features.feature4.description')}
                 </CardDescription>
               </CardContent>
             </Card>
@@ -187,11 +187,11 @@ const Landing = () => {
                 <div className="mx-auto mb-4 w-16 h-16">
                   <img src={regulatoryComplianceIcon} alt="Regulatory Compliance" className="w-full h-full object-contain" />
                 </div>
-                <CardTitle className="text-xl sm:text-2xl">Regulatory Compliance</CardTitle>
+                <CardTitle className="text-xl sm:text-2xl">{t('landing.features.feature5.title')}</CardTitle>
               </CardHeader>
               <CardContent>
                 <CardDescription className="text-base">
-                  Built-in compliance with GDPR, SOX, and other regulatory requirements across industries.
+                  {t('landing.features.feature5.description')}
                 </CardDescription>
               </CardContent>
             </Card>
@@ -201,11 +201,11 @@ const Landing = () => {
                 <div className="mx-auto mb-4 w-16 h-16">
                   <img src={enterpriseSecurityIcon} alt="Enterprise Security" className="w-full h-full object-contain" />
                 </div>
-                <CardTitle className="text-xl sm:text-2xl">Enterprise Security</CardTitle>
+                <CardTitle className="text-xl sm:text-2xl">{t('landing.features.feature6.title')}</CardTitle>
               </CardHeader>
               <CardContent>
                 <CardDescription className="text-base">
-                  Bank-level encryption, secure hosting, and comprehensive data protection measures.
+                  {t('landing.features.feature6.description')}
                 </CardDescription>
               </CardContent>
             </Card>
@@ -218,10 +218,10 @@ const Landing = () => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
             <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-4">
-              How It Works
+              {t('landing.howItWorks.title')}
             </h2>
             <p className="text-lg sm:text-xl text-gray-600 max-w-3xl mx-auto px-4">
-              Get started with Disclosurely in three simple steps
+              {t('landing.howItWorks.description')}
             </p>
           </div>
           
@@ -232,10 +232,10 @@ const Landing = () => {
                 <span className="text-2xl font-bold text-blue-600">1</span>
               </div>
               <h3 className="text-xl font-semibold text-gray-900 mb-3">
-                Set Up Your Portal
+                {t('landing.howItWorks.step1.title')}
               </h3>
               <p className="text-gray-600">
-                Create your account and customize your reporting portal in minutes. Add your branding, set up notification preferences, and configure your team access.
+                {t('landing.howItWorks.step1.description')}
               </p>
             </div>
 
@@ -245,10 +245,10 @@ const Landing = () => {
                 <span className="text-2xl font-bold text-blue-600">2</span>
               </div>
               <h3 className="text-xl font-semibold text-gray-900 mb-3">
-                Share with Your Team
+                {t('landing.howItWorks.step2.title')}
               </h3>
               <p className="text-gray-600">
-                Distribute your secure reporting link to employees through email, intranet, or QR codes. Reports can be submitted 24/7 from any device, anywhere.
+                {t('landing.howItWorks.step2.description')}
               </p>
             </div>
 
@@ -258,10 +258,10 @@ const Landing = () => {
                 <span className="text-2xl font-bold text-blue-600">3</span>
               </div>
               <h3 className="text-xl font-semibold text-gray-900 mb-3">
-                Manage & Resolve Cases
+                {t('landing.howItWorks.step3.title')}
               </h3>
               <p className="text-gray-600">
-                Receive instant notifications of new reports. Investigate, communicate securely with whistleblowers, and track cases through resolution with complete audit trails.
+                {t('landing.howItWorks.step3.description')}
               </p>
             </div>
           </div>
@@ -274,23 +274,23 @@ const Landing = () => {
           <div className="grid lg:grid-cols-2 gap-12 items-center">
             <div>
               <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-6">
-                Anonymous Reporting Made Simple
+                {t('landing.anonymousReporting.title')}
               </h2>
               <p className="text-lg text-gray-600 mb-6">
-                Enable employees to report misconduct, ethics violations, or other concerns completely anonymously. Our advanced encryption ensures whistleblower identity protection while maintaining full compliance with regulatory requirements.
+                {t('landing.anonymousReporting.description')}
               </p>
               <ul className="space-y-3">
                 <li className="flex items-center">
                   <CheckCircle className="h-5 w-5 text-blue-600 mr-3" />
-                  <span>Zero data collection on reporters</span>
+                  <span>{t('landing.anonymousReporting.bullet1')}</span>
                 </li>
                 <li className="flex items-center">
                   <CheckCircle className="h-5 w-5 text-blue-600 mr-3" />
-                  <span>Anonymous follow-up messaging</span>
+                  <span>{t('landing.anonymousReporting.bullet2')}</span>
                 </li>
                 <li className="flex items-center">
                   <CheckCircle className="h-5 w-5 text-blue-600 mr-3" />
-                  <span>Multiple language support</span>
+                  <span>{t('landing.anonymousReporting.bullet3')}</span>
                 </li>
               </ul>
             </div>
@@ -314,23 +314,23 @@ const Landing = () => {
             </div>
             <div className="order-1 lg:order-2">
               <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-6">
-                Military-Grade Encryption
+                {t('landing.encryption.title')}
               </h2>
               <p className="text-lg text-gray-600 mb-6">
-                Every report is protected with AES-256 encryption, the same standard used by banks and government agencies. Your sensitive data is secure from submission to resolution.
+                {t('landing.encryption.description')}
               </p>
               <ul className="space-y-3">
                 <li className="flex items-center">
                   <CheckCircle className="h-5 w-5 text-blue-600 mr-3" />
-                  <span>AES-256 end-to-end encryption</span>
+                  <span>{t('landing.encryption.bullet1')}</span>
                 </li>
                 <li className="flex items-center">
                   <CheckCircle className="h-5 w-5 text-blue-600 mr-3" />
-                  <span>Encrypted file attachments</span>
+                  <span>{t('landing.encryption.bullet2')}</span>
                 </li>
                 <li className="flex items-center">
                   <CheckCircle className="h-5 w-5 text-blue-600 mr-3" />
-                  <span>SOC 2 Type II compliant infrastructure</span>
+                  <span>{t('landing.encryption.bullet3')}</span>
                 </li>
               </ul>
             </div>
@@ -344,23 +344,23 @@ const Landing = () => {
           <div className="grid lg:grid-cols-2 gap-12 items-center">
             <div>
               <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-6">
-                Compliance Made Easy
+                {t('landing.compliance.title')}
               </h2>
               <p className="text-lg text-gray-600 mb-6">
-                Built-in compliance with major regulations including GDPR, SOX, and industry-specific requirements. Automated documentation and audit trails keep you compliant without extra effort.
+                {t('landing.compliance.description')}
               </p>
               <ul className="space-y-3">
                 <li className="flex items-center">
                   <CheckCircle className="h-5 w-5 text-blue-600 mr-3" />
-                  <span>GDPR & SOX compliant</span>
+                  <span>{t('landing.compliance.bullet1')}</span>
                 </li>
                 <li className="flex items-center">
                   <CheckCircle className="h-5 w-5 text-blue-600 mr-3" />
-                  <span>Automated audit trails</span>
+                  <span>{t('landing.compliance.bullet2')}</span>
                 </li>
                 <li className="flex items-center">
                   <CheckCircle className="h-5 w-5 text-blue-600 mr-3" />
-                  <span>Legal-ready documentation</span>
+                  <span>{t('landing.compliance.bullet3')}</span>
                 </li>
               </ul>
             </div>
@@ -384,23 +384,23 @@ const Landing = () => {
             </div>
             <div className="order-1 lg:order-2">
               <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-6">
-                Secure Two-Way Communication
+                {t('landing.communication.title')}
               </h2>
               <p className="text-lg text-gray-600 mb-6">
-                Enable follow-up conversations between investigators and whistleblowers while maintaining complete anonymity. Request additional information and provide updates securely.
+                {t('landing.communication.description')}
               </p>
               <ul className="space-y-3">
                 <li className="flex items-center">
                   <CheckCircle className="h-5 w-5 text-blue-600 mr-3" />
-                  <span>Anonymous messaging system</span>
+                  <span>{t('landing.communication.bullet1')}</span>
                 </li>
                 <li className="flex items-center">
                   <CheckCircle className="h-5 w-5 text-blue-600 mr-3" />
-                  <span>File sharing capabilities</span>
+                  <span>{t('landing.communication.bullet2')}</span>
                 </li>
                 <li className="flex items-center">
                   <CheckCircle className="h-5 w-5 text-blue-600 mr-3" />
-                  <span>Real-time notifications</span>
+                  <span>{t('landing.communication.bullet3')}</span>
                 </li>
               </ul>
             </div>
@@ -414,23 +414,23 @@ const Landing = () => {
           <div className="grid lg:grid-cols-2 gap-12 items-center">
             <div>
               <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-6">
-                AI-Powered Case Analysis
+                {t('landing.aiPowered.title')}
               </h2>
               <p className="text-lg text-gray-600 mb-6">
-                Our AI case helper automatically analyzes reports, identifies key information, and suggests next steps. Streamline your investigation process while ensuring nothing important is overlooked.
+                {t('landing.aiPowered.description')}
               </p>
               <ul className="space-y-3">
                 <li className="flex items-center">
                   <CheckCircle className="h-5 w-5 text-blue-600 mr-3" />
-                  <span>Intelligent case categorization</span>
+                  <span>{t('landing.aiPowered.bullet1')}</span>
                 </li>
                 <li className="flex items-center">
                   <CheckCircle className="h-5 w-5 text-blue-600 mr-3" />
-                  <span>Risk assessment automation</span>
+                  <span>{t('landing.aiPowered.bullet2')}</span>
                 </li>
                 <li className="flex items-center">
                   <CheckCircle className="h-5 w-5 text-blue-600 mr-3" />
-                  <span>Investigation recommendations</span>
+                  <span>{t('landing.aiPowered.bullet3')}</span>
                 </li>
               </ul>
             </div>
@@ -448,10 +448,10 @@ const Landing = () => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">
             <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-4">
-              Simple, Transparent Pricing
+              {t('landing.pricing.title')}
             </h2>
             <p className="text-lg sm:text-xl text-gray-600 max-w-3xl mx-auto px-4">
-              Flexible pricing designed around your organisation. Choose the plan that fits your needs, tailor the features, and get started right away with guided setup support. All plans include a 7-day free trial.
+              {t('landing.pricing.description')}
             </p>
           </div>
           
@@ -594,10 +594,10 @@ const Landing = () => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">
             <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-4">
-              Trusted by Organizations Worldwide
+              {t('landing.testimonials.title')}
             </h2>
             <p className="text-lg sm:text-xl text-gray-600 px-4">
-              See what our customers say about their experience with Disclosurely
+              {t('landing.testimonials.subtitle')}
             </p>
           </div>
           
@@ -608,10 +608,10 @@ const Landing = () => {
                   {[...Array(5)].map((_, i) => <span key={i} className="text-yellow-400 text-lg">★</span>)}
                 </div>
                 <p className="text-gray-600 mb-4">
-                  "Disclosurely has transformed how we handle sensitive reports. The anonymous messaging feature is particularly valuable."
+                  {t('landing.testimonials.testimonial1.quote')}
                 </p>
-                <div className="font-medium text-gray-900">Sarah Johnson</div>
-                <div className="text-sm text-gray-500">Chief Compliance Officer</div>
+                <div className="font-medium text-gray-900">{t('landing.testimonials.testimonial1.name')}</div>
+                <div className="text-sm text-gray-500">{t('landing.testimonials.testimonial1.role')}</div>
               </CardContent>
             </Card>
 
@@ -621,10 +621,10 @@ const Landing = () => {
                   {[...Array(5)].map((_, i) => <span key={i} className="text-yellow-400 text-lg">★</span>)}
                 </div>
                 <p className="text-gray-600 mb-4">
-                  "The platform is intuitive and secure. Our employees feel confident reporting issues, and we can investigate them effectively."
+                  {t('landing.testimonials.testimonial2.quote')}
                 </p>
-                <div className="font-medium text-gray-900">Michael Chen</div>
-                <div className="text-sm text-gray-500">HR Director</div>
+                <div className="font-medium text-gray-900">{t('landing.testimonials.testimonial2.name')}</div>
+                <div className="text-sm text-gray-500">{t('landing.testimonials.testimonial2.role')}</div>
               </CardContent>
             </Card>
 
@@ -634,10 +634,10 @@ const Landing = () => {
                   {[...Array(5)].map((_, i) => <span key={i} className="text-yellow-400 text-lg">★</span>)}
                 </div>
                 <p className="text-gray-600 mb-4">
-                  "Implementation was seamless and the support team was excellent. Highly recommend for any organization serious about compliance."
+                  {t('landing.testimonials.testimonial3.quote')}
                 </p>
-                <div className="font-medium text-gray-900">Emily Rodriguez</div>
-                <div className="text-sm text-gray-500">Legal Counsel</div>
+                <div className="font-medium text-gray-900">{t('landing.testimonials.testimonial3.name')}</div>
+                <div className="text-sm text-gray-500">{t('landing.testimonials.testimonial3.role')}</div>
               </CardContent>
             </Card>
           </div>
@@ -650,10 +650,10 @@ const Landing = () => {
           <div className="text-center mb-12">
             <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-4 flex items-center justify-center gap-3">
               
-              Certifications
+              {t('landing.certifications.title')}
             </h2>
             <p className="text-lg sm:text-xl text-gray-600 max-w-3xl mx-auto px-4">
-              We're in the process of obtaining the following industry standard certifications to ensure the highest level of security and compliance for your organization.
+              {t('landing.certifications.description')}
             </p>
           </div>
           
@@ -690,65 +690,65 @@ const Landing = () => {
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">
             <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-4">
-              Frequently Asked Questions
+              {t('landing.faq.title')}
             </h2>
             <p className="text-lg text-gray-600">
-              Everything you need to know about Disclosurely
+              {t('landing.faq.subtitle')}
             </p>
           </div>
           
           <Accordion type="single" collapsible defaultValue="item-1" className="space-y-4">
             <AccordionItem value="item-1" className="border rounded-lg px-6 bg-white">
               <AccordionTrigger className="text-left text-lg font-semibold hover:no-underline">
-                How does anonymous reporting work?
+                {t('landing.faq.question1.question')}
               </AccordionTrigger>
               <AccordionContent className="text-gray-600 pt-2">
-                Whistleblowers can submit reports through your custom portal without providing any personal information. Our system uses advanced encryption and doesn't collect IP addresses or identifying data. Reporters receive a unique access code to check their report status and communicate securely.
+                {t('landing.faq.question1.answer')}
               </AccordionContent>
             </AccordionItem>
 
             <AccordionItem value="item-2" className="border rounded-lg px-6 bg-white">
               <AccordionTrigger className="text-left text-lg font-semibold hover:no-underline">
-                Is Disclosurely compliant with GDPR and other regulations?
+                {t('landing.faq.question2.question')}
               </AccordionTrigger>
               <AccordionContent className="text-gray-600 pt-2">
-                Yes, Disclosurely is built with compliance in mind. We're GDPR compliant and meet requirements for SOX, EU Whistleblowing Directive, and other major regulatory frameworks. All data is encrypted and stored securely in compliance with international data protection standards.
+                {t('landing.faq.question2.answer')}
               </AccordionContent>
             </AccordionItem>
 
             <AccordionItem value="item-3" className="border rounded-lg px-6 bg-white">
               <AccordionTrigger className="text-left text-lg font-semibold hover:no-underline">
-                Can we customize the reporting portal?
+                {t('landing.faq.question3.question')}
               </AccordionTrigger>
               <AccordionContent className="text-gray-600 pt-2">
-                Absolutely. You can add your company branding, customize the reporting form fields, set up specific categories for reports, and even use your own domain (on Professional and Enterprise plans). The portal can be tailored to match your organization's needs and culture.
+                {t('landing.faq.question3.answer')}
               </AccordionContent>
             </AccordionItem>
 
             <AccordionItem value="item-4" className="border rounded-lg px-6 bg-white">
               <AccordionTrigger className="text-left text-lg font-semibold hover:no-underline">
-                How quickly can we get started?
+                {t('landing.faq.question4.question')}
               </AccordionTrigger>
               <AccordionContent className="text-gray-600 pt-2">
-                Most organizations are up and running within 24 hours. After signing up, you can immediately customize your portal, invite team members, and start accepting reports. Our support team is available to help with setup and onboarding at no extra cost.
+                {t('landing.faq.question4.answer')}
               </AccordionContent>
             </AccordionItem>
 
             <AccordionItem value="item-5" className="border rounded-lg px-6 bg-white">
               <AccordionTrigger className="text-left text-lg font-semibold hover:no-underline">
-                What support is included?
+                {t('landing.faq.question5.question')}
               </AccordionTrigger>
               <AccordionContent className="text-gray-600 pt-2">
-                All plans include email support and access to our comprehensive knowledge base. Professional plans include priority support with faster response times, while Enterprise customers receive dedicated support with SLA guarantees and optional on-site training.
+                {t('landing.faq.question5.answer')}
               </AccordionContent>
             </AccordionItem>
 
             <AccordionItem value="item-6" className="border rounded-lg px-6 bg-white">
               <AccordionTrigger className="text-left text-lg font-semibold hover:no-underline">
-                Can we cancel or change our plan anytime?
+                {t('landing.faq.question6.question')}
               </AccordionTrigger>
               <AccordionContent className="text-gray-600 pt-2">
-                Yes, you can upgrade, downgrade, or cancel your subscription at any time. If you cancel, you'll retain access until the end of your billing period. We also offer a 14-day free trial so you can test all features before committing.
+                {t('landing.faq.question6.answer')}
               </AccordionContent>
             </AccordionItem>
           </Accordion>
@@ -759,13 +759,13 @@ const Landing = () => {
       <div className="bg-blue-600 py-12 sm:py-16">
         <div className="max-w-4xl mx-auto text-center px-4 sm:px-6 lg:px-8">
           <h2 className="text-2xl sm:text-3xl font-bold text-white mb-4">
-            Ready to Strengthen Your Compliance Program?
+            {t('landing.cta.title')}
           </h2>
           <p className="text-lg sm:text-xl text-blue-100 mb-6 sm:mb-8 px-4">
-            Not ready for a free trial or demo? Share your requirements with us, and we’ll respond quickly to discuss how Disclosurely can support your organisation.
+            {t('landing.cta.description')}
           </p>
           <a href="https://app.disclosurely.com/auth/signup" className="bg-white hover:bg-gray-100 text-blue-600 px-6 sm:px-8 py-3 rounded-lg text-lg font-semibold inline-block">
-            Start Free Trial
+            {t('landing.cta.button')}
           </a>
         </div>
       </div>
