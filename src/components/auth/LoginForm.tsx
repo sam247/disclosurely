@@ -1,14 +1,19 @@
 
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import { useTranslation } from 'react-i18next';
 import OTPVerification from './OTPVerification';
 
 const LoginForm = () => {
+  const { t, i18n } = useTranslation();
+  const currentLanguage = i18n.language;
+  const langPrefix = currentLanguage && currentLanguage !== 'en' ? `/${currentLanguage}` : '';
   const [email, setEmail] = useState('');
   const [loading, setLoading] = useState(false);
   const [googleLoading, setGoogleLoading] = useState(false);
@@ -118,7 +123,7 @@ const LoginForm = () => {
         disabled={googleLoading}
       >
         {googleLoading ? (
-          'Signing in with Google...'
+          t('auth.signin.signingInWithGoogle')
         ) : (
           <>
             <svg className="w-4 h-4 mr-2" viewBox="0 0 24 24">
@@ -139,7 +144,7 @@ const LoginForm = () => {
                 d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
               />
             </svg>
-            Continue with Google
+            {t('auth.signin.continueWithGoogle')}
           </>
         )}
       </Button>
@@ -149,13 +154,13 @@ const LoginForm = () => {
           <span className="w-full border-t" />
         </div>
         <div className="relative flex justify-center text-xs uppercase">
-          <span className="bg-white px-2 text-muted-foreground">Or continue with</span>
+          <span className="bg-white px-2 text-muted-foreground">{t('auth.signin.orContinueWith')}</span>
         </div>
       </div>
 
       <form onSubmit={handleLogin} className="space-y-4">
         <div>
-          <Label htmlFor="email">Email address</Label>
+          <Label htmlFor="email">{t('auth.signin.emailLabel')}</Label>
           <div className="mt-1">
             <Input
               id="email"
@@ -165,7 +170,7 @@ const LoginForm = () => {
               required
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              placeholder="Enter your email"
+              placeholder={t('auth.signin.emailPlaceholder')}
             />
           </div>
         </div>
@@ -176,16 +181,16 @@ const LoginForm = () => {
             className="w-full"
             disabled={loading}
           >
-            {loading ? 'Sending verification code...' : 'Sign in with Email Code'}
+            {loading ? t('auth.signin.sendingCode') : t('auth.signin.signInButton')}
           </Button>
         </div>
 
         <div className="text-center">
           <p className="text-sm text-gray-600">
-            Don't have an account?{' '}
-            <a href="/signup" className="font-medium text-blue-600 hover:text-blue-500">
-              Sign up
-            </a>
+            {t('auth.signin.noAccount')}{' '}
+            <Link to={`${langPrefix}/auth/signup`} className="font-medium text-blue-600 hover:text-blue-500">
+              {t('auth.signin.signUpLink')}
+            </Link>
           </p>
         </div>
       </form>

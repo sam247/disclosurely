@@ -306,44 +306,22 @@
     }
   },
   "auth": {
-    "signIn": {
+    "signin": {
       "title": "Iniciar sesión en su cuenta",
       "subtitle": "Acceda a su panel de control seguro",
       "emailLabel": "Correo electrónico",
-      "emailPlaceholder": "su@correo.com",
-      "passwordLabel": "Contraseña",
-      "passwordPlaceholder": "Ingrese su contraseña",
-      "forgotPassword": "¿Olvidó su contraseña?",
-      "signInButton": "Iniciar Sesión",
-      "signingIn": "Iniciando sesión...",
+      "emailPlaceholder": "Ingrese su correo",
+      "signInButton": "Iniciar sesión con Código de Email",
+      "sendingCode": "Enviando código de verificación...",
+      "signingInWithGoogle": "Iniciando sesión con Google...",
+      "continueWithGoogle": "Continuar con Google",
+      "orContinueWith": "O continuar con",
       "noAccount": "¿No tiene una cuenta?",
-      "signUpLink": "Registrarse",
-      "orContinueWith": "O continuar con",
-      "google": "Google"
+      "signUpLink": "Registrarse"
     },
-    "signUp": {
+    "signup": {
       "title": "Cree su cuenta",
-      "subtitle": "Únase a la plataforma de divulgación segura",
-      "firstNameLabel": "Nombre",
-      "firstNamePlaceholder": "Juan",
-      "lastNameLabel": "Apellido",
-      "lastNamePlaceholder": "Pérez",
-      "emailLabel": "Correo electrónico",
-      "emailPlaceholder": "su@correo.com",
-      "passwordLabel": "Contraseña",
-      "passwordPlaceholder": "Cree una contraseña segura",
-      "confirmPasswordLabel": "Confirmar Contraseña",
-      "confirmPasswordPlaceholder": "Confirme su contraseña",
-      "agreeToTerms": "Acepto los",
-      "termsLink": "Términos de Servicio",
-      "and": "y",
-      "privacyLink": "Política de Privacidad",
-      "signUpButton": "Crear Cuenta",
-      "creatingAccount": "Creando cuenta...",
-      "haveAccount": "¿Ya tiene una cuenta?",
-      "signInLink": "Iniciar Sesión",
-      "orContinueWith": "O continuar con",
-      "google": "Google"
+      "subtitle": "Únase a la plataforma de divulgación segura"
     }
   },
   "pricing": {

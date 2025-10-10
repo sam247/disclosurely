@@ -46,7 +46,16 @@
   "auth": {
     "signin": {
       "title": "Zaloguj się do swojego konta",
-      "subtitle": "Uzyskaj dostęp do bezpiecznego panelu"
+      "subtitle": "Uzyskaj dostęp do bezpiecznego panelu",
+      "emailLabel": "Adres e-mail",
+      "emailPlaceholder": "Wprowadź swój e-mail",
+      "signInButton": "Zaloguj się z Kodem E-mail",
+      "sendingCode": "Wysyłanie kodu weryfikacyjnego...",
+      "signingInWithGoogle": "Logowanie przez Google...",
+      "continueWithGoogle": "Kontynuuj z Google",
+      "orContinueWith": "Lub kontynuuj z",
+      "noAccount": "Nie masz konta?",
+      "signUpLink": "Zarejestruj się"
     },
     "signup": {
       "title": "Utwórz swoje konto",

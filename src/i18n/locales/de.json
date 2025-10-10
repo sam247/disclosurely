@@ -54,7 +54,16 @@
   "auth": {
     "signin": {
       "title": "Bei Ihrem Konto anmelden",
-      "subtitle": "Greifen Sie auf Ihr sicheres Dashboard zu"
+      "subtitle": "Greifen Sie auf Ihr sicheres Dashboard zu",
+      "emailLabel": "E-Mail-Adresse",
+      "emailPlaceholder": "Geben Sie Ihre E-Mail ein",
+      "signInButton": "Mit E-Mail-Code anmelden",
+      "sendingCode": "Verifizierungscode wird gesendet...",
+      "signingInWithGoogle": "Anmeldung mit Google...",
+      "continueWithGoogle": "Mit Google fortfahren",
+      "orContinueWith": "Oder fortfahren mit",
+      "noAccount": "Sie haben noch kein Konto?",
+      "signUpLink": "Registrieren"
     },
     "signup": {
       "title": "Erstellen Sie Ihr Konto",

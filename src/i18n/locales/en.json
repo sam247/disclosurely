@@ -308,7 +308,16 @@
   "auth": {
     "signin": {
       "title": "Sign in to your account",
-      "subtitle": "Access your secure dashboard"
+      "subtitle": "Access your secure dashboard",
+      "emailLabel": "Email address",
+      "emailPlaceholder": "Enter your email",
+      "signInButton": "Sign in with Email Code",
+      "sendingCode": "Sending verification code...",
+      "signingInWithGoogle": "Signing in with Google...",
+      "continueWithGoogle": "Continue with Google",
+      "orContinueWith": "Or continue with",
+      "noAccount": "Don't have an account?",
+      "signUpLink": "Sign up"
     },
     "signup": {
       "title": "Create your account",

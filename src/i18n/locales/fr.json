@@ -308,7 +308,16 @@
   "auth": {
     "signin": {
       "title": "Connectez-vous à votre compte",
-      "subtitle": "Accédez à votre tableau de bord sécurisé"
+      "subtitle": "Accédez à votre tableau de bord sécurisé",
+      "emailLabel": "Adresse e-mail",
+      "emailPlaceholder": "Entrez votre e-mail",
+      "signInButton": "Se connecter avec Code Email",
+      "sendingCode": "Envoi du code de vérification...",
+      "signingInWithGoogle": "Connexion avec Google...",
+      "continueWithGoogle": "Continuer avec Google",
+      "orContinueWith": "Ou continuer avec",
+      "noAccount": "Vous n'avez pas de compte?",
+      "signUpLink": "S'inscrire"
     },
     "signup": {
       "title": "Créez votre compte",
