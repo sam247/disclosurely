@@ -8,6 +8,7 @@ import fr from './locales/fr.json';
 import de from './locales/de.json';
 import pl from './locales/pl.json';
 
+// Initialize i18next
 i18n
   .use(LanguageDetector)
   .use(initReactI18next)
@@ -20,6 +21,7 @@ i18n
       pl: { translation: pl },
     },
     fallbackLng: 'en',
+    lng: 'en',
     interpolation: {
       escapeValue: false,
     },
@@ -27,6 +29,7 @@ i18n
       order: ['localStorage', 'navigator'],
       caches: ['localStorage'],
     },
+    debug: false,
   });
 
 export default i18n;
