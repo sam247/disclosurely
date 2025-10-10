@@ -28,7 +28,9 @@ import horizonLogo from "@/assets/logos/horizon-logo.png";
 import metroSyncLogo from "@/assets/logos/metrosync-logo-clean.png";
 import prismLogo from "@/assets/logos/prism-logo-clean.png";
 const Landing = () => {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const currentLanguage = i18n.language;
+  const langPrefix = currentLanguage && currentLanguage !== 'en' ? `/${currentLanguage}` : '';
 
   return <div className="min-h-screen bg-white">
       {/* Navigation */}
@@ -42,17 +44,17 @@ const Landing = () => {
             </div>
             <div className="hidden md:flex items-center space-x-4">
               <PublicLanguageSelector />
-              <Link to="/pricing" className="text-gray-600 hover:text-gray-900">{t('nav.pricing')}</Link>
-              <a href="https://app.disclosurely.com/auth/login" className="text-gray-600 hover:text-gray-900">{t('nav.signin')}</a>
-              <a href="https://app.disclosurely.com/auth/signup" className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors">
+              <Link to={`${langPrefix}/pricing`} className="text-gray-600 hover:text-gray-900">{t('nav.pricing')}</Link>
+              <Link to={`${langPrefix}/auth/login`} className="text-gray-600 hover:text-gray-900">{t('nav.signin')}</Link>
+              <Link to={`${langPrefix}/auth/signup`} className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors">
                 {t('nav.getStarted')}
-              </a>
+              </Link>
             </div>
             <div className="md:hidden flex items-center gap-2">
               <PublicLanguageSelector />
-              <a href="https://app.disclosurely.com/auth/login" className="bg-blue-600 text-white px-3 py-2 rounded-lg hover:bg-blue-700 transition-colors text-sm">
+              <Link to={`${langPrefix}/auth/login`} className="bg-blue-600 text-white px-3 py-2 rounded-lg hover:bg-blue-700 transition-colors text-sm">
                 {t('nav.signin')}
-              </a>
+              </Link>
             </div>
           </div>
         </div>
@@ -69,10 +71,10 @@ const Landing = () => {
             {t('landing.hero.subtitle')}
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center items-center px-4">
-            <a href="https://app.disclosurely.com/auth/signup" className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-3 rounded-lg text-lg font-semibold w-full sm:w-auto text-center">
+            <Link to={`${langPrefix}/auth/signup`} className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-3 rounded-lg text-lg font-semibold w-full sm:w-auto text-center">
               {t('landing.hero.startFreeTrial')}
-            </a>
-            <Link to="/pricing" className="border border-gray-300 hover:border-gray-400 text-gray-700 px-8 py-3 rounded-lg text-lg font-semibold w-full sm:w-auto text-center">
+            </Link>
+            <Link to={`${langPrefix}/pricing`} className="border border-gray-300 hover:border-gray-400 text-gray-700 px-8 py-3 rounded-lg text-lg font-semibold w-full sm:w-auto text-center">
               {t('landing.hero.viewPricing')}
             </Link>
           </div>

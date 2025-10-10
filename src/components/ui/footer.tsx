@@ -1,6 +1,12 @@
 import { Link } from "react-router-dom";
 import { SystemStatusIndicator } from "@/components/SystemStatusIndicator";
+import { useTranslation } from 'react-i18next';
+
 export const Footer = () => {
+  const { i18n } = useTranslation();
+  const currentLanguage = i18n.language;
+  const langPrefix = currentLanguage && currentLanguage !== 'en' ? `/${currentLanguage}` : '';
+  
   return (
     <footer className="bg-gray-900 text-white">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
@@ -23,22 +29,22 @@ export const Footer = () => {
             <h3 className="font-semibold mb-4">Product</h3>
             <ul className="space-y-2">
               <li>
-                <Link to="/" className="text-gray-400 hover:text-white">
+                <Link to={`${langPrefix}/`} className="text-gray-400 hover:text-white">
                   Features
                 </Link>
               </li>
               <li>
-                <Link to="/pricing" className="text-gray-400 hover:text-white">
+                <Link to={`${langPrefix}/pricing`} className="text-gray-400 hover:text-white">
                   Pricing
                 </Link>
               </li>
               <li>
-                <Link to="/compliance-software" className="text-gray-400 hover:text-white">
+                <Link to={`${langPrefix}/compliance-software`} className="text-gray-400 hover:text-white">
                   Compliance Software
                 </Link>
               </li>
               <li>
-                <Link to="/whistleblowing-directive" className="text-gray-400 hover:text-white">
+                <Link to={`${langPrefix}/whistleblowing-directive`} className="text-gray-400 hover:text-white">
                   Whistleblowing Directive
                 </Link>
               </li>
@@ -49,22 +55,22 @@ export const Footer = () => {
             <h3 className="font-semibold mb-4">Company</h3>
             <ul className="space-y-2">
               <li>
-                <Link to="/" className="text-gray-400 hover:text-white">
+                <Link to={`${langPrefix}/`} className="text-gray-400 hover:text-white">
                   About Us
                 </Link>
               </li>
               <li>
-                <Link to="/" className="text-gray-400 hover:text-white">
+                <Link to={`${langPrefix}/`} className="text-gray-400 hover:text-white">
                   Careers
                 </Link>
               </li>
               <li>
-                <Link to="/blog" className="text-gray-400 hover:text-white">
+                <Link to={`${langPrefix}/blog`} className="text-gray-400 hover:text-white">
                   Disclosurely Blog
                 </Link>
               </li>
               <li>
-                <Link to="/contact" className="text-gray-400 hover:text-white">
+                <Link to={`${langPrefix}/contact`} className="text-gray-400 hover:text-white">
                   Contact Us
                 </Link>
               </li>
@@ -85,12 +91,12 @@ export const Footer = () => {
                 </a>
               </li>
               <li>
-                <Link to="/privacy" className="text-gray-400 hover:text-white">
+                <Link to={`${langPrefix}/privacy`} className="text-gray-400 hover:text-white">
                   Privacy Policy
                 </Link>
               </li>
               <li>
-                <Link to="/terms" className="text-gray-400 hover:text-white">
+                <Link to={`${langPrefix}/terms`} className="text-gray-400 hover:text-white">
                   Terms of Service
                 </Link>
               </li>
@@ -102,7 +108,7 @@ export const Footer = () => {
           <div className="flex justify-between items-center">
             <p className="text-gray-400 text-sm">
               © 2025 Disclosurely. All rights reserved.{" "}
-              <Link to="/compliance-software" className="hover:text-white">
+              <Link to={`${langPrefix}/compliance-software`} className="hover:text-white">
                 Compliance Software
               </Link>
               .

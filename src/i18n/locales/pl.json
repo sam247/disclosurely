@@ -2,187 +2,6 @@
   "nav": {
     "pricing": "Cennik",
     "contact": "Kontakt",
-    "signIn": "Zaloguj się",
-    "getStarted": "Rozpocznij"
-  },
-  "landing": {
-    "heroTitle": "Zgłaszanie naruszeń i ujawnianie",
-    "heroTitleHighlight": "Platforma zgłoszeń",
-    "heroDescription": "Disclosurely pomaga zespołom ds. zgodności wyprzedzać zdarzenia, przekształcając etykę i zgodność w proaktywną przewagę — budując kulturę uczciwości, upraszczając przepływy pracy i redukując ryzyko organizacyjne.",
-    "startFreeTrial": "Rozpocznij bezpłatny okres próbny",
-    "viewPricing": "Zobacz cennik",
-    "trustedBy": "Zaufane przez setki firm z Wielkiej Brytanii",
-    "featuresTitle": "Wszystko, czego potrzebujesz do bezpiecznego zgłaszania",
-    "featuresDescription": "Nasza platforma zapewnia kompleksowe narzędzia do zarządzania zgłoszeniami sygnalistów z pełną poufnością i zgodnością.",
-    "anonymousReporting": "Anonimowe zgłoszenia",
-    "anonymousReportingDesc": "Całkowita anonimowość dla sygnalistów z zaszyfrowanymi zgłoszeniami i bezpieczną ochroną tożsamości.",
-    "secureMessaging": "Bezpieczna wymiana wiadomości",
-    "secureMessagingDesc": "Dwukierunkowa zaszyfrowana komunikacja między sygnalistami a osobami prowadzącymi dochodzenie przy zachowaniu anonimowości.",
-    "caseManagement": "Zarządzanie sprawami",
-    "caseManagementDesc": "Kompleksowy pulpit do śledzenia, badania i rozwiązywania spraw z pełnymi ścieżkami audytu.",
-    "multiUserAccess": "Dostęp wieloużytkownikowy",
-    "multiUserAccessDesc": "Uprawnienia oparte na rolach dla zespołów prawnych, HR i zgodności z kontrolowanymi poziomami dostępu.",
-    "regulatoryCompliance": "Zgodność regulacyjna",
-    "regulatoryComplianceDesc": "Wbudowana zgodność z RODO, SOX i innymi wymogami regulacyjnymi we wszystkich branżach.",
-    "enterpriseSecurity": "Bezpieczeństwo korporacyjne",
-    "enterpriseSecurityDesc": "Szyfrowanie na poziomie bankowym, bezpieczny hosting i kompleksowe środki ochrony danych.",
-    "howItWorksTitle": "Jak to działa",
-    "howItWorksDescription": "Zacznij korzystać z Disclosurely w trzech prostych krokach",
-    "step1Title": "Skonfiguruj swój portal",
-    "step1Description": "Utwórz swoje konto i dostosuj portal zgłoszeń w kilka minut. Dodaj branding, skonfiguruj preferencje powiadomień i skonfiguruj dostęp dla swojego zespołu.",
-    "step2Title": "Udostępnij swojemu zespołowi",
-    "step2Description": "Rozpowszechnij bezpieczny link do zgłoszeń wśród pracowników za pośrednictwem poczty e-mail, intranetu lub kodów QR. Zgłoszenia można składać 24/7 z dowolnego urządzenia, w dowolnym miejscu.",
-    "step3Title": "Zarządzaj i rozwiązuj sprawy",
-    "step3Description": "Otrzymuj natychmiastowe powiadomienia o nowych zgłoszeniach. Prowadź dochodzenia, komunikuj się bezpiecznie z sygnalistami i śledź sprawy do rozwiązania z pełnymi ścieżkami audytu.",
-    "anonymousReportingTitle": "Anonimowe zgłaszanie uproszczone",
-    "anonymousReportingFullDesc": "Umożliw pracownikom zgłaszanie nadużyć, naruszeń etycznych lub innych obaw w sposób całkowicie anonimowy. Nasze zaawansowane szyfrowanie zapewnia ochronę tożsamości sygnalisty przy jednoczesnym zachowaniu pełnej zgodności z wymogami regulacyjnymi.",
-    "zeroDataCollection": "Zerowe gromadzenie danych o osobach zgłaszających",
-    "anonymousFollowUp": "Anonimowa wymiana wiadomości uzupełniających",
-    "multiLanguageSupport": "Wsparcie wielojęzyczne",
-    "militaryGradeTitle": "Szyfrowanie klasy wojskowej",
-    "militaryGradeDesc": "Każde zgłoszenie jest chronione szyfrowaniem AES-256, tym samym standardem używanym przez banki i agencje rządowe. Twoje poufne dane są bezpieczne od przesłania do rozwiązania.",
-    "aes256Encryption": "Szyfrowanie end-to-end AES-256",
-    "encryptedAttachments": "Zaszyfrowane załączniki",
-    "secureStorage": "Bezpieczne przechowywanie w chmurze",
-    "complianceTitle": "Wbudowana zgodność",
-    "complianceDesc": "Zbudowany zgodnie z RODO, SOX, dyrektywą UE w sprawie sygnalistów i innymi ramami regulacyjnymi. Bądź na bieżąco ze zmianami regulacyjnymi bez dodatkowej pracy.",
-    "gdprCompliant": "Zgodne z RODO",
-    "euDirective": "Dyrektywa UE w sprawie sygnalistów",
-    "soxCompliant": "Zgodność SOX",
-    "secureTwoWayTitle": "Bezpieczna dwukierunkowa komunikacja",
-    "secureTwoWayDesc": "Prowadź poufne rozmowy z sygnalistami zachowując ich anonimowość. Zadawaj pytania uzupełniające, dostarczaj aktualizacje i zbieraj dodatkowe informacje w bezpieczny sposób.",
-    "encryptedMessaging": "Zaszyfrowana wymiana wiadomości",
-    "anonymityPreserved": "Zachowana anonimowość",
-    "fileSharing": "Bezpieczne udostępnianie plików",
-    "aiPoweredTitle": "Analiza spraw oparta na AI",
-    "aiPoweredDesc": "Wykorzystaj sztuczną inteligencję do analizowania zgłoszeń, identyfikowania wzorców i priorytetyzowania przypadków wysokiego ryzyka. Uzyskaj praktyczne spostrzeżenia i rekomendacje oparte na danych historycznych.",
-    "patternDetection": "Wykrywanie wzorców",
-    "riskAssessment": "Ocena ryzyka",
-    "actionableInsights": "Praktyczne spostrzeżenia",
-    "certifiedSecureTitle": "Certyfikowane i bezpieczne",
-    "certifiedSecureDesc": "Disclosurely spełnia najwyższe standardy bezpieczeństwa i zgodności w branży.",
-    "iso27001": "Certyfikat ISO 27001",
-    "gdprReady": "Gotowe na RODO",
-    "soc2": "SOC 2 Typ II",
-    "ctaTitle": "Gotowy do rozpoczęcia?",
-    "ctaDescription": "Dołącz do organizacji na całym świecie, które ufają Disclosurely w bezpiecznym zgłaszaniu naruszeń."
-  },
-  "pricing": {
-    "title": "Proste, przejrzyste",
-    "titleHighlight": "Ceny",
-    "description": "Wybierz plan odpowiedni dla Twojej organizacji. Zacznij od naszego siedmiodniowego bezpłatnego okresu próbnego i skaluj wraz z rozwojem.",
-    "starter": "Starter",
-    "starterPrice": "39,99 zł",
-    "starterDesc": "Idealny dla małych organizacji",
-    "pro": "Professional",
-    "proPrice": "79,99 zł",
-    "proDesc": "Dla rozwijających się organizacji",
-    "enterprise": "Enterprise",
-    "enterprisePrice": "Indywidualnie",
-    "enterpriseDesc": "Dla dużych organizacji",
-    "mostPopular": "Najpopularniejszy",
-    "perMonth": "/miesiąc",
-    "casesPerMonth": "{{count}} spraw/miesiąc",
-    "unlimitedCases": "Nieograniczona liczba spraw/miesiąc",
-    "storage": "{{amount}} pamięci",
-    "unlimitedStorage": "Nieograniczona pamięć",
-    "emailSupport": "Wsparcie e-mailowe",
-    "secureTwoWayMessaging": "Bezpieczna dwukierunkowa wymiana wiadomości",
-    "aiCaseHelper": "Asystent spraw AI",
-    "customBranding": "Niestandardowy branding",
-    "everythingInPro": "Wszystko w Professional",
-    "customDomain": "Niestandardowa domena",
-    "dedicatedSupport": "Dedykowane wsparcie",
-    "slaGuarantee": "Gwarancja SLA",
-    "customIntegrations": "Niestandardowe integracje",
-    "apiComingSoon": "API (wkrótce)",
-    "contactSales": "Skontaktuj się z działem sprzedaży",
-    "faqTitle": "Często zadawane pytania",
-    "faq1Question": "Czy jest bezpłatny okres próbny?",
-    "faq1Answer": "Tak, wszystkie plany zawierają 7-dniowy bezpłatny okres próbny, abyś mógł zobaczyć, jak działa platforma i jak możesz ją wykorzystać w swojej organizacji. Karta kredytowa nie jest wymagana.",
-    "faq2Question": "Co się stanie, jeśli osiągnę limit spraw w planie Starter?",
-    "faq2Answer": "Jeśli przekroczysz swój miesięczny limit spraw, zostaniesz powiadomiony w panelu. Możesz albo przejść na plan Professional, aby uzyskać nieograniczoną liczbę spraw, albo poczekać do następnego miesiąca, kiedy Twój limit zostanie zresetowany.",
-    "faq3Question": "Czy mogę zmienić plan później?",
-    "faq3Answer": "Absolutnie! Możesz podwyższyć lub obniżyć swój plan w dowolnym momencie z panelu.",
-    "faq4Question": "Jakie certyfikaty bezpieczeństwa posiadacie?",
-    "faq4Answer": "Jesteśmy certyfikowani ISO 27001, zgodni z SOC 2 Typ II i gotowi na RODO."
-  },
-  "contact": {
-    "title": "Skontaktuj się z naszym działem sprzedaży",
-    "description": "Gotowy do przekształcenia możliwości raportowania swojej organizacji? Skontaktuj się z naszym zespołem, aby omówić, jak Disclosurely może spełnić Twoje specyficzne potrzeby.",
-    "getInTouch": "Skontaktuj się",
-    "getInTouchDesc": "Nasz zespół korporacyjny jest tutaj, aby pomóc Ci wdrożyć bezpieczne rozwiązanie do zgłaszania naruszeń dostosowane do wymagań Twojej organizacji.",
-    "emailUs": "Wyślij do nas e-mail",
-    "emailAddress": "sales@disclosurely.com",
-    "emailResponse": "Odpowiemy w ciągu 24 godzin",
-    "callUs": "Zadzwoń do nas",
-    "phoneNumber": "+44 20 7946 0958",
-    "phoneHours": "Poniedziałek - Piątek, 9:00 - 18:00 GMT",
-    "visitUs": "Odwiedź nas",
-    "address": "123 Business Street\nLondyn, EC1A 1BB\nWielka Brytania",
-    "enterpriseSupport": "Wsparcie korporacyjne",
-    "enterpriseSupportDesc": "Wszyscy klienci korporacyjni otrzymują dedykowane zarządzanie kontem, całodobowe wsparcie telefoniczne i indywidualną pomoc w zakresie integracji.",
-    "requestDemo": "Poproś o demo",
-    "requestDemoDesc": "Wypełnij poniższy formularz, a nasz zespół skontaktuje się z Tobą w ciągu 24 godzin, aby umówić się na spersonalizowane demo.",
-    "fullName": "Imię i nazwisko",
-    "workEmail": "E-mail służbowy",
-    "companyName": "Nazwa firmy",
-    "message": "Wiadomość",
-    "namePlaceholder": "Twoje imię i nazwisko",
-    "emailPlaceholder": "twoje.imie@firma.com",
-    "companyPlaceholder": "Nazwa Twojej firmy",
-    "messagePlaceholder": "Opowiedz nam o swoich wymaganiach, wielkości zespołu i wszelkich konkretnych potrzebach...",
-    "submitDisclaimer": "Przesyłając ten formularz, wyrażasz zgodę na naszą politykę prywatności i warunki korzystania z usług.",
-    "required": "*"
-  },
-  "privacy": {
-    "title": "Polityka prywatności",
-    "description": "Dowiedz się, jak chronimy Twoje dane osobowe i szanujemy Twoją prywatność.",
-    "effectiveDate": "Data wejścia w życie:",
-    "company": "Firma:",
-    "website": "Strona internetowa:",
-    "contactEmail": "Kontakt:",
-    "registeredOffice": "Siedziba:",
-    "section1Title": "1. Wprowadzenie",
-    "section1Content": "Disclosurely Limited (\"Disclosurely\", \"my\" lub \"nasze\") zobowiązuje się do ochrony Twoich danych osobowych i szanowania Twojej prywatności. Niniejsza Polityka prywatności wyjaśnia, w jaki sposób gromadzimy, wykorzystujemy, przechowujemy i chronimy Twoje dane osobowe podczas korzystania z naszej platformy do zgłaszania naruszeń na stronie disclosurely.com (\"Usługa\"). Przestrzegamy ogólnego rozporządzenia o ochronie danych (UE 2016/679), brytyjskiego RODO (zgodnie z ustawą o ochronie danych z 2018 r.) oraz innych obowiązujących przepisów o ochronie danych.",
-    "section2Title": "2. Administrator danych i Procesor danych",
-    "section2Content": "Kiedy świadczymy Usługę organizacjom (\"Klient\"), organizacja ta działa jako Administrator danych w odniesieniu do zgłoszeń sygnalistów i wszelkich gromadzonych przez nią danych osobowych. Disclosurely działa jako Procesor danych, przetwarzając dane osobowe wyłącznie na udokumentowane polecenie Klienta. W przypadku danych związanych z własnym korzystaniem z disclosurely.com (np. Twoje konto, rozliczenia), Disclosurely jest Administratorem danych.",
-    "section3Title": "3. Dane osobowe, które gromadzimy",
-    "section4Title": "4. Jak wykorzystujemy dane osobowe",
-    "section5Title": "5. Podstawy prawne przetwarzania",
-    "section6Title": "6. Hosting i przekazywanie danych",
-    "section7Title": "7. Przechowywanie danych",
-    "section8Title": "8. Ujawnianie danych osobowych",
-    "section9Title": "9. Bezpieczeństwo",
-    "section10Title": "10. Twoje prawa",
-    "section11Title": "11. Pliki cookie",
-    "section11Content": "Disclosurely używa tylko niezbędnych plików cookie wymaganych do funkcjonowania i bezpieczeństwa. Nie używamy plików cookie reklamowych ani śledzących.",
-    "section12Title": "12. Zmiany w tej polityce",
-    "section12Content": "Możemy od czasu do czasu aktualizować tę Politykę prywatności. Istotne zmiany będą powiadamiane Klientom za pośrednictwem poczty e-mail lub Usługi.",
-    "section13Title": "13. Skontaktuj się z nami",
-    "lastUpdated": "Ostatnia aktualizacja: Maj 2025"
-  },
-  "terms": {
-    "title": "Regulamin",
-    "description": "Prosimy o uważne przeczytanie niniejszych warunków przed skorzystaniem z naszych usług.",
-    "section1Title": "1. Wprowadzenie",
-    "section1Content": "Disclosurely Limited (Londyn EC1V 2NX) zapewnia bezpieczną platformę online do zgłaszania naruszeń pod adresem disclosurely.com (\"Usługa\"). Rejestrując się i korzystając z Usługi, akceptujesz niniejsze Warunki. Usługa umożliwia sygnalistom przesyłanie poufnych zgłoszeń o nadużyciach w ich organizacji. Disclosurely zobowiązuje się do zgodności z RODO i utrzymuje ścisłe standardy prywatności, bezpieczeństwa i prawa. Kontakt w sprawie wsparcia to support@disclosurely.com.",
-    "section2Title": "2. Świadczone usługi",
-    "section3Title": "3. Rejestracja i korzystanie z konta",
-    "section4Title": "4. Opłaty i warunki płatności",
-    "section5Title": "5. Obowiązki klienta",
-    "section6Title": "6. Własność intelektualna",
-    "section7Title": "7. Poufność",
-    "section8Title": "8. Ochrona danych i RODO",
-    "section9Title": "9. Okres obowiązywania i rozwiązanie",
-    "section10Title": "10. Odpowiedzialność i odszkodowanie",
-    "section11Title": "11. Zmiany w niniejszych warunkach",
-    "section12Title": "12. Prawo właściwe i rozstrzyganie sporów",
-    "lastUpdated": "Ostatnia aktualizacja: Wrzesień 2025"
-  },
-  "nav": {
-    "pricing": "Cennik",
-    "contact": "Kontakt",
     "signin": "Zaloguj się",
     "getStarted": "Rozpocznij"
   },
@@ -194,35 +13,136 @@
       "startFreeTrial": "Rozpocznij Darmowy Test",
       "viewPricing": "Zobacz Cennik"
     },
-    "trusted": "Zaufane przez setki brytyjskich firm"
-  },
-  "pricing": {
-    "starter": {
-      "name": "Starter",
-      "price": "£9.99",
-      "period": "/miesiąc",
-      "description": "Idealny dla małych organizacji",
-      "button": "Rozpocznij Darmowy Test"
-    },
-    "pro": {
-      "name": "Pro",
-      "badge": "Najpopularniejszy",
-      "price": "£19.99",
-      "period": "/miesiąc",
-      "description": "Dla rozwijających się organizacji",
-      "button": "Rozpocznij Darmowy Test"
-    },
-    "enterprise": {
-      "name": "Enterprise",
-      "price": "Niestandardowe",
-      "description": "Dla dużych organizacji",
-      "button": "Skontaktuj się z Działem Sprzedaży"
+    "trusted": "Zaufane przez setki brytyjskich firm",
+    "features": {
+      "title": "Wszystko czego potrzebujesz do bezpiecznego raportowania",
+      "subtitle": "Nasza platforma zapewnia kompleksowe narzędzia do zarządzania zgłoszeniami sygnalistów z pełną poufnością i zgodnością.",
+      "anonymousReporting": {
+        "title": "Anonimowe Zgłoszenia",
+        "description": "Całkowita anonimowość dla sygnalistów z zaszyfrowanymi zgłoszeniami i bezpieczną ochroną tożsamości."
+      },
+      "secureMessaging": {
+        "title": "Bezpieczna Wymiana Wiadomości",
+        "description": "Dwukierunkowa zaszyfrowana komunikacja między sygnalistami a śledczymi przy zachowaniu anonimowości."
+      },
+      "caseManagement": {
+        "title": "Zarządzanie Sprawami",
+        "description": "Kompleksowy panel do śledzenia, badania i rozwiązywania spraw z pełnymi ścieżkami audytu."
+      },
+      "multiUserAccess": {
+        "title": "Dostęp Wieloużytkownikowy",
+        "description": "Uprawnienia oparte na rolach dla zespołów prawnych, HR i zgodności z kontrolowanymi poziomami dostępu."
+      },
+      "regulatoryCompliance": {
+        "title": "Zgodność Regulacyjna",
+        "description": "Wbudowana zgodność z RODO, SOX i innymi wymogami regulacyjnymi we wszystkich branżach."
+      },
+      "enterpriseSecurity": {
+        "title": "Bezpieczeństwo Korporacyjne",
+        "description": "Szyfrowanie na poziomie bankowym, bezpieczny hosting i kompleksowe środki ochrony danych."
+      }
     }
   },
   "auth": {
-    "signInTitle": "Zaloguj się do swojego konta",
-    "signInDescription": "Uzyskaj dostęp do bezpiecznego panelu",
-    "createAccountTitle": "Utwórz swoje konto",
-    "createAccountDescription": "Dołącz do bezpiecznej platformy ujawniania"
+    "signin": {
+      "title": "Zaloguj się do swojego konta",
+      "subtitle": "Uzyskaj dostęp do bezpiecznego panelu"
+    },
+    "signup": {
+      "title": "Utwórz swoje konto",
+      "subtitle": "Dołącz do bezpiecznej platformy ujawniania"
+    }
+  },
+  "pricing": {
+    "hero": {
+      "title": "Proste, Przejrzyste Ceny",
+      "subtitle": "Wybierz plan odpowiedni dla Twojej organizacji. Zacznij od naszego siedmiodniowego darmowego okresu próbnego i skaluj wraz z rozwojem."
+    },
+    "plans": {
+      "mostPopular": "Najpopularniejszy",
+      "perMonth": "/miesiąc",
+      "starter": {
+        "name": "Starter",
+        "price": "39,99 zł",
+        "description": "Idealny dla małych organizacji"
+      },
+      "pro": {
+        "name": "Pro",
+        "price": "79,99 zł",
+        "description": "Dla rozwijających się organizacji"
+      },
+      "enterprise": {
+        "name": "Enterprise",
+        "price": "Indywidualnie",
+        "description": "Dla dużych organizacji"
+      }
+    },
+    "features": {
+      "casesLimit": "5 spraw/miesiąc",
+      "storage": "1 GB pamięci",
+      "emailSupport": "Wsparcie e-mailowe",
+      "messaging": "Bezpieczna dwukierunkowa wymiana wiadomości",
+      "aiHelper": "Asystent spraw AI",
+      "customBranding": "Niestandardowy branding",
+      "unlimitedCases": "Nieograniczona liczba spraw/miesiąc",
+      "unlimitedStorage": "Nieograniczona pamięć",
+      "everythingPro": "Wszystko w Professional",
+      "customDomain": "Niestandardowa domena",
+      "dedicatedSupport": "Dedykowane wsparcie",
+      "slaGuarantee": "Gwarancja SLA",
+      "customIntegrations": "Niestandardowe integracje",
+      "api": "API (wkrótce)"
+    },
+    "faq": {
+      "title": "Często Zadawane Pytania",
+      "trial": {
+        "question": "Czy jest bezpłatny okres próbny?",
+        "answer": "Tak, wszystkie plany zawierają 7-dniowy bezpłatny okres próbny, abyś mógł zobaczyć, jak działa platforma. Karta kredytowa nie jest wymagana."
+      },
+      "limit": {
+        "question": "Co się stanie, jeśli osiągnę limit spraw?",
+        "answer": "Jeśli przekroczysz swój miesięczny limit spraw, zostaniesz powiadomiony w panelu. Możesz przejść na plan Pro lub poczekać do następnego miesiąca."
+      },
+      "change": {
+        "question": "Czy mogę zmienić plan później?",
+        "answer": "Absolutnie! Możesz podwyższyć lub obniżyć swój plan w dowolnym momencie z panelu."
+      },
+      "security": {
+        "question": "Jakie certyfikaty bezpieczeństwa posiadacie?",
+        "answer": "Jesteśmy certyfikowani ISO 27001, zgodni z SOC 2 Typ II i gotowi na RODO."
+      }
+    },
+    "cta": {
+      "ready": "Gotowy do Rozpoczęcia?",
+      "join": "Dołącz do organizacji na całym świecie, które ufają Disclosurely.",
+      "startTrial": "Rozpocznij Darmowy Test",
+      "contactSales": "Skontaktuj się z Działem Sprzedaży"
+    }
+  },
+  "privacy": {
+    "meta": {
+      "title": "Polityka Prywatności - Disclosurely",
+      "description": "Dowiedz się, jak chronimy Twoje dane osobowe i szanujemy Twoją prywatność."
+    },
+    "hero": {
+      "title": "Polityka Prywatności",
+      "description": "Dowiedz się, jak chronimy Twoje dane osobowe i szanujemy Twoją prywatność."
+    }
+  },
+  "terms": {
+    "meta": {
+      "title": "Regulamin - Disclosurely",
+      "description": "Prosimy o uważne przeczytanie niniejszych warunków przed skorzystaniem z naszych usług."
+    },
+    "hero": {
+      "title": "Regulamin",
+      "description": "Prosimy o uważne przeczytanie niniejszych warunków przed skorzystaniem z naszych usług."
+    }
+  },
+  "contact": {
+    "hero": {
+      "title": "Skontaktuj się z Naszym Działem Sprzedaży",
+      "subtitle": "Gotowy do przekształcenia możliwości raportowania swojej organizacji? Skontaktuj się z naszym zespołem."
+    }
   }
 }
