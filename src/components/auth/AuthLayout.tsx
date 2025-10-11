@@ -13,14 +13,14 @@ const AuthLayout = ({ children }: AuthLayoutProps) => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8 relative">
+    <div className="min-h-screen bg-gray-50 flex flex-col justify-center py-12 px-4 sm:px-6 lg:px-8 relative">
       {/* Home icon in top left of the page */}
       <button 
         onClick={handleHomeClick}
-        className="absolute top-6 left-6 p-2 text-gray-400 hover:text-gray-600 transition-colors bg-white rounded-lg shadow-sm z-10"
+        className="absolute top-4 left-4 sm:top-6 sm:left-6 p-2 text-gray-400 hover:text-gray-600 transition-colors bg-white rounded-lg shadow-sm z-10"
         title="Back to Home"
       >
-        <Home className="h-6 w-6" />
+        <Home className="h-5 w-5 sm:h-6 sm:w-6" />
       </button>
 
       <div className="sm:mx-auto sm:w-full sm:max-w-md">
@@ -29,7 +29,7 @@ const AuthLayout = ({ children }: AuthLayoutProps) => {
             <img 
               src="/lovable-uploads/c46ace0e-df58-4119-b5e3-8dcfa075ea2f.png" 
               alt="Disclosurely" 
-              className="h-6 sm:h-12 w-auto"
+              className="h-8 sm:h-12 w-auto"
             />
           </div>
           <p className="mt-2 text-sm text-gray-600">Secure Whistleblowing Platform</p>
