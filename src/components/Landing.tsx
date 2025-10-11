@@ -453,137 +453,140 @@ const Landing = () => {
               {t('landing.pricing.title')}
             </h2>
             <p className="text-lg sm:text-xl text-gray-600 max-w-3xl mx-auto px-4">
-              {t('landing.pricing.description')}
+              {t('landing.pricing.subtitle')}
             </p>
           </div>
           
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8 max-w-5xl mx-auto">
+            {/* Starter */}
             <Card>
               <CardHeader className="text-center pb-6">
-                <CardTitle className="text-xl sm:text-2xl font-bold">{t('pricing.starter.name')}</CardTitle>
+                <CardTitle className="text-xl sm:text-2xl font-bold">{t('pricing.plans.starter.name')}</CardTitle>
                 <div className="mt-4">
-                  <span className="text-3xl sm:text-4xl font-bold">{t('pricing.starter.price')}</span>
-                  <span className="text-gray-600 text-sm sm:text-base">{t('pricing.starter.period')}</span>
+                  <span className="text-3xl sm:text-4xl font-bold">{t('pricing.plans.starter.price')}</span>
+                  <span className="text-gray-600 text-sm sm:text-base">{t('pricing.plans.perMonth')}</span>
                 </div>
-                <CardDescription className="text-sm sm:text-base">{t('pricing.starter.description')}</CardDescription>
+                <CardDescription className="text-sm sm:text-base">{t('pricing.plans.starter.description')}</CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="space-y-3">
                   <div className="flex items-center space-x-3">
                     <CheckCircle className="h-5 w-5 text-green-600" />
-                    <span className="text-gray-700 text-sm sm:text-base">{t('pricing.starter.feature1')}</span>
+                    <span className="text-gray-700 text-sm sm:text-base">{t('pricing.features.casesLimit')}</span>
                   </div>
                   <div className="flex items-center space-x-3">
                     <CheckCircle className="h-5 w-5 text-green-600" />
-                    <span className="text-gray-700 text-sm sm:text-base">{t('pricing.starter.feature2')}</span>
+                    <span className="text-gray-700 text-sm sm:text-base">{t('pricing.features.storage')}</span>
+                  </div>
+                  <div className="flex items-center space-x-3">
+                    <CheckCircle className="h-5 w-5 text-green-600" />
+                    <span className="text-gray-700 text-sm sm:text-base">{t('pricing.features.emailSupport')}</span>
                   </div>
                   <div className="flex items-center space-x-3">
                     <X className="h-5 w-5 text-red-500" />
-                    <span className="text-gray-500 text-sm sm:text-base">{t('pricing.starter.feature4')}</span>
+                    <span className="text-gray-500 text-sm sm:text-base">{t('pricing.features.messaging')}</span>
                   </div>
                   <div className="flex items-center space-x-3">
                     <X className="h-5 w-5 text-red-500" />
-                    <span className="text-gray-500 text-sm sm:text-base">{t('pricing.starter.feature5')}</span>
+                    <span className="text-gray-500 text-sm sm:text-base">{t('pricing.features.aiHelper')}</span>
                   </div>
                   <div className="flex items-center space-x-3">
                     <X className="h-5 w-5 text-red-500" />
-                    <span className="text-gray-500 text-sm sm:text-base">{t('pricing.starter.feature6')}</span>
-                  </div>
-                  <div className="flex items-center space-x-3">
-                    <X className="h-5 w-5 text-red-500" />
-                    <span className="text-gray-500 text-sm sm:text-base">{t('pricing.starter.feature3')}</span>
+                    <span className="text-gray-500 text-sm sm:text-base">{t('pricing.features.customBranding')}</span>
                   </div>
                 </div>
                 <Button className="w-full mt-6" variant="outline" asChild>
-                  <a href="https://app.disclosurely.com/auth/signup">{t('pricing.starter.button')}</a>
+                  <a href="https://app.disclosurely.com/auth/signup">{t('pricing.cta.startTrial')}</a>
                 </Button>
               </CardContent>
             </Card>
 
+            {/* Pro */}
             <Card className="border-blue-200 shadow-lg relative">
               <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
                 <span className="bg-blue-600 text-white px-4 py-1 rounded-full text-xs sm:text-sm font-medium">
-                  {t('pricing.pro.badge')}
+                  {t('pricing.plans.mostPopular')}
                 </span>
               </div>
               <CardHeader className="text-center pb-6">
-                <CardTitle className="text-xl sm:text-2xl font-bold">{t('pricing.pro.name')}</CardTitle>
+                <CardTitle className="text-xl sm:text-2xl font-bold">{t('pricing.plans.pro.name')}</CardTitle>
                 <div className="mt-4">
-                  <span className="text-3xl sm:text-4xl font-bold">{t('pricing.pro.price')}</span>
-                  <span className="text-gray-600 text-sm sm:text-base">{t('pricing.pro.period')}</span>
+                  <span className="text-3xl sm:text-4xl font-bold">{t('pricing.plans.pro.price')}</span>
+                  <span className="text-gray-600 text-sm sm:text-base">{t('pricing.plans.perMonth')}</span>
                 </div>
-                <CardDescription className="text-sm sm:text-base">{t('pricing.pro.description')}</CardDescription>
+                <CardDescription className="text-sm sm:text-base">{t('pricing.plans.pro.description')}</CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="space-y-3">
                   <div className="flex items-center space-x-3">
                     <CheckCircle className="h-5 w-5 text-green-600" />
-                    <span className="text-gray-700 text-sm sm:text-base">{t('pricing.pro.feature1')}</span>
+                    <span className="text-gray-700 text-sm sm:text-base">{t('pricing.features.unlimitedCases')}</span>
                   </div>
                   <div className="flex items-center space-x-3">
                     <CheckCircle className="h-5 w-5 text-green-600" />
-                    <span className="text-gray-700 text-sm sm:text-base">{t('pricing.pro.feature2')}</span>
+                    <span className="text-gray-700 text-sm sm:text-base">{t('pricing.features.unlimitedStorage')}</span>
                   </div>
                   <div className="flex items-center space-x-3">
                     <CheckCircle className="h-5 w-5 text-green-600" />
-                    <span className="text-gray-700 text-sm sm:text-base">{t('pricing.pro.feature4')}</span>
+                    <span className="text-gray-700 text-sm sm:text-base">{t('pricing.features.emailSupport')}</span>
                   </div>
                   <div className="flex items-center space-x-3">
                     <CheckCircle className="h-5 w-5 text-green-600" />
-                    <span className="text-gray-700 text-sm sm:text-base">{t('pricing.pro.feature5')}</span>
+                    <span className="text-gray-700 text-sm sm:text-base">{t('pricing.features.messaging')}</span>
                   </div>
                   <div className="flex items-center space-x-3">
                     <CheckCircle className="h-5 w-5 text-green-600" />
-                    <span className="text-gray-700 text-sm sm:text-base">{t('pricing.pro.feature6')}</span>
+                    <span className="text-gray-700 text-sm sm:text-base">{t('pricing.features.aiHelper')}</span>
                   </div>
                   <div className="flex items-center space-x-3">
                     <CheckCircle className="h-5 w-5 text-green-600" />
-                    <span className="text-gray-700 text-sm sm:text-base">{t('pricing.pro.feature3')}</span>
+                    <span className="text-gray-700 text-sm sm:text-base">{t('pricing.features.customBranding')}</span>
                   </div>
                 </div>
                 <Button className="w-full mt-6" asChild>
-                  <a href="https://app.disclosurely.com/auth/signup">{t('pricing.pro.button')}</a>
+                  <a href="https://app.disclosurely.com/auth/signup">{t('pricing.cta.startTrial')}</a>
                 </Button>
               </CardContent>
             </Card>
 
+            {/* Enterprise */}
             <Card className="sm:col-span-2 lg:col-span-1">
               <CardHeader className="text-center pb-6">
-                <CardTitle className="text-xl sm:text-2xl font-bold">{t('pricing.enterprise.name')}</CardTitle>
+                <CardTitle className="text-xl sm:text-2xl font-bold">{t('pricing.plans.enterprise.name')}</CardTitle>
                 <div className="mt-4">
-                  <span className="text-3xl sm:text-4xl font-bold">{t('pricing.enterprise.price')}</span>
+                  <span className="text-3xl sm:text-4xl font-bold">{t('pricing.plans.enterprise.price')}</span>
                 </div>
-                <CardDescription className="text-sm sm:text-base">{t('pricing.enterprise.description')}</CardDescription>
+                <CardDescription className="text-sm sm:text-base">{t('pricing.plans.enterprise.description')}</CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="space-y-3">
                   <div className="flex items-center space-x-3">
                     <CheckCircle className="h-5 w-5 text-green-600" />
-                    <span className="text-gray-700 text-sm sm:text-base">{t('pricing.enterprise.feature1')}</span>
+                    <span className="text-gray-700 text-sm sm:text-base">{t('pricing.features.everythingPro')}</span>
                   </div>
                   <div className="flex items-center space-x-3">
                     <CheckCircle className="h-5 w-5 text-green-600" />
-                    <span className="text-gray-700 text-sm sm:text-base">{t('pricing.enterprise.feature2')}</span>
+                    <span className="text-gray-700 text-sm sm:text-base">{t('pricing.features.customDomain')}</span>
                   </div>
                   <div className="flex items-center space-x-3">
                     <CheckCircle className="h-5 w-5 text-green-600" />
-                    <span className="text-gray-700 text-sm sm:text-base">{t('pricing.enterprise.feature3')}</span>
+                    <span className="text-gray-700 text-sm sm:text-base">{t('pricing.features.dedicatedSupport')}</span>
                   </div>
                   <div className="flex items-center space-x-3">
                     <CheckCircle className="h-5 w-5 text-green-600" />
-                    <span className="text-gray-700 text-sm sm:text-base">{t('pricing.enterprise.feature4')}</span>
+                    <span className="text-gray-700 text-sm sm:text-base">{t('pricing.features.slaGuarantee')}</span>
                   </div>
                   <div className="flex items-center space-x-3">
                     <CheckCircle className="h-5 w-5 text-green-600" />
-                    <span className="text-gray-700 text-sm sm:text-base">{t('pricing.enterprise.feature5')}</span>
+                    <span className="text-gray-700 text-sm sm:text-base">{t('pricing.features.customIntegrations')}</span>
                   </div>
                   <div className="flex items-center space-x-3">
                     <CheckCircle className="h-5 w-5 text-grey-600" />
-                    <span className="text-gray-500 text-sm sm:text-base">{t('pricing.enterprise.feature6')}</span>
+                    <span className="text-gray-500 text-sm sm:text-base">{t('pricing.features.api')}</span>
                   </div>
                 </div>
                 <Button className="w-full mt-6" variant="outline">
-                  <a href="https://disclosurely.com/contact">{t('pricing.enterprise.button')}</a>
+                  <a href="https://disclosurely.com/contact">{t('pricing.cta.contactSales')}</a>
                 </Button>
               </CardContent>
             </Card>
