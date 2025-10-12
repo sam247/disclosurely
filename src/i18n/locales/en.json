@@ -393,45 +393,53 @@
   "contact": {
     "hero": {
       "title": "Contact Our Sales Team",
-      "subtitle": "Ready to transform your organization's reporting capabilities? Get in touch with our team to discuss how Disclosurely can meet your specific needs."
+      "subtitle": "Ready to transform your organization's reporting capabilities? Get in touch with our team."
     },
-    "getInTouch": {
-      "title": "Get in Touch",
-      "description": "Our enterprise team is here to help you implement a secure whistleblowing solution tailored to your organization's requirements.",
+    "info": {
+      "title": "Contact Information",
+      "description": "Get in touch with us and we'll be happy to help answer any questions about Disclosurely.",
       "email": {
-        "title": "Email Us",
-        "value": "sales@disclosurely.com",
-        "subtext": "We'll respond within 24 hours"
+        "title": "Email",
+        "address": "sales@disclosurely.com",
+        "response": "We respond within 24 hours"
       },
       "phone": {
-        "title": "Call Us",
-        "value": "+44 20 7946 0958",
-        "subtext": "Monday - Friday, 9AM - 6PM GMT"
+        "title": "Phone",
+        "number": "+44 20 1234 5678",
+        "hours": "Mon-Fri, 9AM-5PM GMT"
       },
       "address": {
-        "title": "Visit Us",
+        "title": "Address",
         "line1": "123 Business Street",
         "line2": "London, EC1A 1BB",
         "line3": "United Kingdom"
       },
-      "enterpriseSupport": {
-        "title": "Enterprise Support",
-        "description": "All enterprise customers receive dedicated account management, 24/7 phone support, and custom integration assistance."
+      "enterprise": {
+        "title": "Enterprise Solutions",
+        "description": "Need a custom solution? Contact our Enterprise team for tailored pricing and implementation support."
       }
     },
     "form": {
       "title": "Request a Demo",
       "description": "Fill out the form below and our team will get back to you within 24 hours to schedule a personalized demo.",
-      "fullName": "Full Name *",
-      "workEmail": "Work Email *",
-      "companyName": "Company Name *",
-      "message": "Message",
-      "fullNamePlaceholder": "Your full name",
-      "emailPlaceholder": "your.name@company.com",
-      "companyPlaceholder": "Your company name",
-      "messagePlaceholder": "Tell us about your requirements, team size, and any specific needs...",
-      "submitButton": "Request Demo",
-      "disclaimer": "By submitting this form, you agree to our privacy policy and terms of service."
+      "name": {
+        "label": "Name",
+        "placeholder": "Your full name"
+      },
+      "email": {
+        "label": "Email",
+        "placeholder": "your@email.com"
+      },
+      "company": {
+        "label": "Company",
+        "placeholder": "Your company name"
+      },
+      "message": {
+        "label": "Message",
+        "placeholder": "Tell us about your requirements..."
+      },
+      "submit": "Send Inquiry",
+      "privacy": "By submitting this form, you agree to our Privacy Policy."
     }
   },
   "privacy": {

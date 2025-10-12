@@ -391,31 +391,55 @@
     }
   },
   "contact": {
-    "title": "Póngase en contacto",
-    "subtitle": "¿Tiene preguntas? Nos encantaría saber de usted. Envíenos un mensaje y le responderemos lo antes posible.",
+    "hero": {
+      "title": "Contacte a Nuestro Equipo de Ventas",
+      "subtitle": "¿Listo para transformar las capacidades de informes de su organización? Póngase en contacto con nuestro equipo."
+    },
     "info": {
       "title": "Información de Contacto",
-      "email": "correo@disclosurely.com",
-      "phone": "+1 (555) 123-4567",
-      "address": "123 Calle de la Seguridad, Suite 100, San Francisco, CA 94105",
-      "hours": "Lunes - Viernes: 9:00 - 18:00 PST"
+      "description": "Póngase en contacto con nosotros y estaremos encantados de ayudarle a responder cualquier pregunta sobre Disclosurely.",
+      "email": {
+        "title": "Correo Electrónico",
+        "address": "sales@disclosurely.com",
+        "response": "Respondemos en 24 horas"
+      },
+      "phone": {
+        "title": "Teléfono",
+        "number": "+44 20 1234 5678",
+        "hours": "Lun-Vie, 9-17 GMT"
+      },
+      "address": {
+        "title": "Dirección",
+        "line1": "123 Business Street",
+        "line2": "Londres, EC1A 1BB",
+        "line3": "Reino Unido"
+      },
+      "enterprise": {
+        "title": "Soluciones Empresariales",
+        "description": "¿Necesita una solución personalizada? Contacte con nuestro equipo Enterprise para precios personalizados y soporte de implementación."
+      }
     },
     "form": {
       "title": "Solicitar una Demo",
-      "name": "Nombre",
-      "namePlaceholder": "Su nombre",
-      "email": "Correo electrónico",
-      "emailPlaceholder": "su@empresa.com",
-      "company": "Empresa",
-      "companyPlaceholder": "Su empresa",
-      "message": "Mensaje",
-      "messagePlaceholder": "Cuéntenos sobre sus necesidades...",
-      "submit": "Enviar Mensaje",
-      "submitting": "Enviando..."
-    },
-    "enterprise": {
-      "title": "Soporte Empresarial",
-      "description": "Los clientes empresariales reciben soporte dedicado con tiempos de respuesta garantizados y un gerente de cuenta personal."
+      "description": "Complete el formulario a continuación y nuestro equipo se pondrá en contacto con usted en 24 horas para programar una demostración personalizada.",
+      "name": {
+        "label": "Nombre",
+        "placeholder": "Su nombre completo"
+      },
+      "email": {
+        "label": "Correo Electrónico",
+        "placeholder": "su@email.com"
+      },
+      "company": {
+        "label": "Empresa",
+        "placeholder": "Nombre de su empresa"
+      },
+      "message": {
+        "label": "Mensaje",
+        "placeholder": "Cuéntenos sobre sus requisitos..."
+      },
+      "submit": "Enviar Consulta",
+      "privacy": "Al enviar este formulario, acepta nuestra Política de Privacidad."
     }
   },
   "privacy": {

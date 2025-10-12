@@ -41,6 +41,117 @@
         "title": "Bezpieczeństwo Korporacyjne",
         "description": "Szyfrowanie na poziomie bankowym, bezpieczny hosting i kompleksowe środki ochrony danych."
       }
+    },
+    "howItWorks": {
+      "title": "Jak To Działa",
+      "subtitle": "Rozpocznij pracę z Disclosurely w trzech prostych krokach",
+      "step1": {
+        "title": "Skonfiguruj Swój Portal",
+        "description": "Utwórz swoje konto i dostosuj portal zgłoszeń w kilka minut. Dodaj swój branding, ustaw preferencje powiadomień i skonfiguruj dostęp zespołu."
+      },
+      "step2": {
+        "title": "Udostępnij Swojemu Zespołowi",
+        "description": "Rozpowszechnij bezpieczny link do zgłoszeń wśród pracowników za pomocą e-maila, intranetu lub kodów QR. Raporty mogą być przesyłane 24/7 z dowolnego urządzenia, w dowolnym miejscu."
+      },
+      "step3": {
+        "title": "Zarządzaj i Rozwiązuj Sprawy",
+        "description": "Otrzymuj natychmiastowe powiadomienia o nowych raportach. Prowadź śledztwa, komunikuj się bezpiecznie z sygnalistami i śledź sprawy aż do rozwiązania z pełnymi ścieżkami audytu."
+      }
+    },
+    "anonymousReporting": {
+      "title": "Anonimowe Zgłaszanie Uproszczone",
+      "description": "Umożliw pracownikom zgłaszanie nadużyć, naruszeń etyki lub innych obaw w pełni anonimowo. Nasze zaawansowane szyfrowanie zapewnia ochronę tożsamości sygnalistów przy jednoczesnym zachowaniu pełnej zgodności z wymogami regulacyjnymi.",
+      "benefit1": "Brak gromadzenia danych o osobach zgłaszających",
+      "benefit2": "Anonimowe wiadomości następcze",
+      "benefit3": "Obsługa wielu języków"
+    },
+    "encryption": {
+      "title": "Szyfrowanie Klasy Wojskowej",
+      "description": "Każdy raport jest chroniony szyfrowaniem AES-256, tym samym standardem stosowanym przez banki i agencje rządowe. Twoje wrażliwe dane są bezpieczne od zgłoszenia do rozwiązania.",
+      "benefit1": "Szyfrowanie end-to-end AES-256",
+      "benefit2": "Zaszyfrowane załączniki",
+      "benefit3": "Bezpieczne przechowywanie danych"
+    },
+    "compliance": {
+      "title": "Zgodność Uproszczona",
+      "description": "Zachowaj zgodność z brytyjskimi i unijnymi przepisami dotyczącymi sygnalistów, w tym Dyrektywą UE w sprawie sygnalistów i UK Employment Rights Act. Wbudowane ścieżki audytu i narzędzia raportowania zapewniają przestrzeganie przepisów.",
+      "benefit1": "Zgodność z Dyrektywą UE w sprawie sygnalistów",
+      "benefit2": "Gotowość RODO",
+      "benefit3": "Zautomatyzowane raporty zgodności"
+    },
+    "messaging": {
+      "title": "Bezpieczna Komunikacja Dwukierunkowa",
+      "description": "Utrzymuj anonimowy dialog z sygnalistami przez cały okres śledztwa. Żądaj dodatkowych informacji, dostarczaj aktualizacje i zapewniaj przejrzystość, chroniąc tożsamość.",
+      "benefit1": "Zaszyfrowana wymiana wiadomości",
+      "benefit2": "Zachowanie anonimowości",
+      "benefit3": "Powiadomienia w czasie rzeczywistym"
+    },
+    "aiPowered": {
+      "title": "Analiza Spraw Wspomagana AI",
+      "description": "Wykorzystaj sztuczną inteligencję do analizy wzorców spraw, identyfikacji ryzyka i priorytetyzacji śledztw. Nasz asystent AI pomaga zespołom zgodności pracować mądrzej i wydajniej.",
+      "benefit1": "Automatyczna ocena ryzyka",
+      "benefit2": "Wykrywanie wzorców",
+      "benefit3": "Inteligentna priorytetyzacja spraw"
+    },
+    "certifications": {
+      "title": "Certyfikaty Bezpieczeństwa i Zgodności",
+      "subtitle": "Zaufane przez organizacje na całym świecie dzięki wiodącym w branży standardom bezpieczeństwa"
+    },
+    "pricing": {
+      "title": "Proste, Przejrzyste Ceny",
+      "subtitle": "Elastyczne ceny dostosowane do Twojej organizacji. Wybierz plan odpowiadający Twoim potrzebom, dostosuj funkcje i rozpocznij od razu z pomocą w konfiguracji. Wszystkie plany obejmują 7-dniowy darmowy okres próbny."
+    },
+    "testimonials": {
+      "title": "Zaufane Przez Organizacje Na Całym Świecie",
+      "subtitle": "Zobacz, co nasi klienci mówią o swoich doświadczeniach z Disclosurely",
+      "testimonial1": {
+        "quote": "Disclosurely zmieniło sposób, w jaki obsługujemy wrażliwe raporty. Funkcja anonimowych wiadomości jest szczególnie cenna.",
+        "name": "Sarah Johnson",
+        "role": "Chief Compliance Officer"
+      },
+      "testimonial2": {
+        "quote": "Platforma jest intuicyjna i bezpieczna. Nasi pracownicy czują się pewnie zgłaszając problemy, a my możemy je skutecznie badać.",
+        "name": "Michael Chen",
+        "role": "HR Director"
+      },
+      "testimonial3": {
+        "quote": "Wdrożenie było bezproblemowe, a zespół wsparcia był doskonały. Gorąco polecam każdej organizacji poważnie myślącej o zgodności.",
+        "name": "Emily Rodriguez",
+        "role": "Legal Counsel"
+      }
+    },
+    "faq": {
+      "title": "Często Zadawane Pytania",
+      "subtitle": "Wszystko, co musisz wiedzieć o Disclosurely",
+      "question1": {
+        "question": "Jak działa anonimowe zgłaszanie?",
+        "answer": "Sygnaliści mogą przesyłać raporty przez Twój niestandardowy portal bez podawania jakichkolwiek danych osobowych. Nasz system wykorzystuje zaawansowane szyfrowanie i nie zbiera adresów IP ani danych identyfikujących. Osoby zgłaszające otrzymują unikalny kod dostępu do sprawdzania statusu zgłoszenia i bezpiecznej komunikacji."
+      },
+      "question2": {
+        "question": "Czy Disclosurely jest zgodne z RODO i innymi przepisami?",
+        "answer": "Tak, Disclosurely zostało zbudowane z myślą o zgodności. Jesteśmy zgodni z RODO i spełniamy wymagania dla SOX, Dyrektywy UE w sprawie sygnalistów i innych głównych ram regulacyjnych. Wszystkie dane są szyfrowane i przechowywane bezpiecznie zgodnie z międzynarodowymi standardami ochrony danych."
+      },
+      "question3": {
+        "question": "Czy możemy dostosować portal zgłoszeń?",
+        "answer": "Oczywiście. Możesz dodać branding swojej firmy, dostosować pola formularza zgłoszeń, ustawić określone kategorie raportów, a nawet używać własnej domeny (w planach Professional i Enterprise). Portal może być dostosowany do potrzeb i kultury Twojej organizacji."
+      },
+      "question4": {
+        "question": "Jak szybko możemy zacząć?",
+        "answer": "Większość organizacji jest gotowa do działania w ciągu 24 godzin. Po rejestracji możesz natychmiast dostosować swój portal, zaprosić członków zespołu i zacząć przyjmować zgłoszenia. Nasz zespół wsparcia jest dostępny, aby pomóc w konfiguracji i wdrożeniu bez dodatkowych kosztów."
+      },
+      "question5": {
+        "question": "Jakie wsparcie jest wliczone?",
+        "answer": "Wszystkie plany obejmują wsparcie e-mailowe i dostęp do naszej obszernej bazy wiedzy. Plany Professional obejmują priorytetowe wsparcie z szybszymi czasami odpowiedzi, podczas gdy klienci Enterprise otrzymują dedykowane wsparcie z gwarancjami SLA i opcjonalnym szkoleniem na miejscu."
+      },
+      "question6": {
+        "question": "Czy możemy anulować lub zmienić nasz plan w dowolnym momencie?",
+        "answer": "Tak, możesz ulepszyć, obniżyć lub anulować swoją subskrypcję w dowolnym momencie. Jeśli anulujesz, zachowasz dostęp do końca okresu rozliczeniowego. Oferujemy również 14-dniowy darmowy okres próbny, dzięki czemu możesz przetestować wszystkie funkcje przed podjęciem zobowiązania."
+      }
+    },
+    "cta": {
+      "title": "Gotowy Wzmocnić Swój Program Zgodności?",
+      "description": "Nie jesteś jeszcze gotowy na darmowy okres próbny lub demo? Podziel się z nami swoimi wymaganiami, a szybko odpowiemy, aby omówić, jak Disclosurely może wspierać Twoją organizację.",
+      "button": "Rozpocznij Darmowy Test"
     }
   },
   "auth": {
@@ -152,6 +263,52 @@
     "hero": {
       "title": "Skontaktuj się z Naszym Działem Sprzedaży",
       "subtitle": "Gotowy do przekształcenia możliwości raportowania swojej organizacji? Skontaktuj się z naszym zespołem."
+    },
+    "info": {
+      "title": "Informacje Kontaktowe",
+      "description": "Skontaktuj się z nami, a chętnie pomożemy odpowiedzieć na wszelkie pytania dotyczące Disclosurely.",
+      "email": {
+        "title": "E-mail",
+        "address": "sales@disclosurely.com",
+        "response": "Odpowiadamy w ciągu 24 godzin"
+      },
+      "phone": {
+        "title": "Telefon",
+        "number": "+44 20 1234 5678",
+        "hours": "Pn-Pt, 9-17 GMT"
+      },
+      "address": {
+        "title": "Adres",
+        "line1": "123 Business Street",
+        "line2": "Londyn, EC1A 1BB",
+        "line3": "Wielka Brytania"
+      },
+      "enterprise": {
+        "title": "Rozwiązania Korporacyjne",
+        "description": "Potrzebujesz rozwiązania na miarę? Skontaktuj się z naszym zespołem Enterprise w sprawie niestandardowych cen i wsparcia w implementacji."
+      }
+    },
+    "form": {
+      "title": "Poproś o Demo",
+      "description": "Wypełnij formularz poniżej, a nasz zespół skontaktuje się z Tobą w ciągu 24 godzin, aby zaplanować spersonalizowane demo.",
+      "name": {
+        "label": "Imię i Nazwisko",
+        "placeholder": "Twoje pełne imię i nazwisko"
+      },
+      "email": {
+        "label": "E-mail",
+        "placeholder": "twoj@email.pl"
+      },
+      "company": {
+        "label": "Firma",
+        "placeholder": "Nazwa Twojej firmy"
+      },
+      "message": {
+        "label": "Wiadomość",
+        "placeholder": "Opowiedz nam o swoich wymaganiach..."
+      },
+      "submit": "Wyślij Zapytanie",
+      "privacy": "Przesyłając ten formularz, zgadzasz się z naszą Polityką Prywatności."
     }
   }
 }

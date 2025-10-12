@@ -49,6 +49,117 @@
         "title": "Unternehmenssicherheit",
         "description": "Verschlüsselung auf Bankniveau, sicheres Hosting und umfassende Datenschutzmaßnahmen."
       }
+    },
+    "howItWorks": {
+      "title": "Wie Es Funktioniert",
+      "subtitle": "Starten Sie mit Disclosurely in drei einfachen Schritten",
+      "step1": {
+        "title": "Richten Sie Ihr Portal Ein",
+        "description": "Erstellen Sie Ihr Konto und passen Sie Ihr Meldeportal in Minuten an. Fügen Sie Ihr Branding hinzu, richten Sie Benachrichtigungseinstellungen ein und konfigurieren Sie den Teamzugriff."
+      },
+      "step2": {
+        "title": "Teilen Sie Mit Ihrem Team",
+        "description": "Verteilen Sie Ihren sicheren Meldelink an Mitarbeiter per E-Mail, Intranet oder QR-Codes. Berichte können rund um die Uhr von jedem Gerät und überall eingereicht werden."
+      },
+      "step3": {
+        "title": "Verwalten & Lösen Sie Fälle",
+        "description": "Erhalten Sie sofortige Benachrichtigungen über neue Berichte. Untersuchen Sie, kommunizieren Sie sicher mit Hinweisgebern und verfolgen Sie Fälle bis zur Lösung mit vollständigen Audit-Trails."
+      }
+    },
+    "anonymousReporting": {
+      "title": "Anonyme Meldungen Leicht Gemacht",
+      "description": "Ermöglichen Sie Mitarbeitern, Fehlverhalten, Ethikverstöße oder andere Bedenken vollständig anonym zu melden. Unsere fortschrittliche Verschlüsselung gewährleistet den Schutz der Hinweisgeberidentität bei voller Einhaltung der regulatorischen Anforderungen.",
+      "benefit1": "Keine Datenerfassung von Meldern",
+      "benefit2": "Anonyme Folgenachrichten",
+      "benefit3": "Mehrsprachige Unterstützung"
+    },
+    "encryption": {
+      "title": "Militärische Verschlüsselung",
+      "description": "Jeder Bericht ist mit AES-256-Verschlüsselung geschützt, dem gleichen Standard, der von Banken und Regierungsbehörden verwendet wird. Ihre sensiblen Daten sind von der Einreichung bis zur Lösung sicher.",
+      "benefit1": "AES-256 Ende-zu-Ende-Verschlüsselung",
+      "benefit2": "Verschlüsselte Dateianhänge",
+      "benefit3": "Sichere Datenspeicherung"
+    },
+    "compliance": {
+      "title": "Compliance Leicht Gemacht",
+      "description": "Bleiben Sie konform mit britischen und EU-Whistleblowing-Vorschriften, einschließlich der EU-Whistleblowing-Richtlinie und des UK Employment Rights Act. Integrierte Audit-Trails und Berichtstools gewährleisten die Einhaltung von Vorschriften.",
+      "benefit1": "EU-Whistleblowing-Richtlinie konform",
+      "benefit2": "DSGVO-bereit",
+      "benefit3": "Automatisierte Compliance-Berichte"
+    },
+    "messaging": {
+      "title": "Sichere Bidirektionale Kommunikation",
+      "description": "Pflegen Sie einen anonymen Dialog mit Hinweisgebern während der gesamten Untersuchung. Fordern Sie zusätzliche Informationen an, geben Sie Updates und gewährleisten Sie Transparenz, während Sie Identitäten schützen.",
+      "benefit1": "Verschlüsselte Nachrichtenübermittlung",
+      "benefit2": "Anonymität wahren",
+      "benefit3": "Echtzeit-Benachrichtigungen"
+    },
+    "aiPowered": {
+      "title": "KI-Gestützte Fallanalyse",
+      "description": "Nutzen Sie künstliche Intelligenz, um Fallmuster zu analysieren, Risiken zu identifizieren und Untersuchungen zu priorisieren. Unser KI-Assistent hilft Compliance-Teams, intelligenter und effizienter zu arbeiten.",
+      "benefit1": "Automatisierte Risikobewertung",
+      "benefit2": "Mustererkennung",
+      "benefit3": "Intelligente Fallpriorisierung"
+    },
+    "certifications": {
+      "title": "Sicherheits- & Compliance-Zertifizierungen",
+      "subtitle": "Vertraut von Organisationen weltweit mit branchenführenden Sicherheitsstandards"
+    },
+    "pricing": {
+      "title": "Einfache, Transparente Preise",
+      "subtitle": "Flexible Preise rund um Ihre Organisation. Wählen Sie den Plan, der Ihren Anforderungen entspricht, passen Sie die Funktionen an und beginnen Sie sofort mit geführter Einrichtungsunterstützung. Alle Pläne beinhalten eine 7-tägige kostenlose Testversion."
+    },
+    "testimonials": {
+      "title": "Vertraut von Organisationen Weltweit",
+      "subtitle": "Sehen Sie, was unsere Kunden über ihre Erfahrungen mit Disclosurely sagen",
+      "testimonial1": {
+        "quote": "Disclosurely hat die Art und Weise verändert, wie wir mit sensiblen Berichten umgehen. Die anonyme Nachrichtenfunktion ist besonders wertvoll.",
+        "name": "Sarah Johnson",
+        "role": "Chief Compliance Officer"
+      },
+      "testimonial2": {
+        "quote": "Die Plattform ist intuitiv und sicher. Unsere Mitarbeiter fühlen sich sicher bei der Meldung von Problemen, und wir können sie effektiv untersuchen.",
+        "name": "Michael Chen",
+        "role": "HR Director"
+      },
+      "testimonial3": {
+        "quote": "Die Implementierung war nahtlos und das Support-Team war ausgezeichnet. Sehr empfehlenswert für jede Organisation, die es mit Compliance ernst meint.",
+        "name": "Emily Rodriguez",
+        "role": "Legal Counsel"
+      }
+    },
+    "faq": {
+      "title": "Häufig Gestellte Fragen",
+      "subtitle": "Alles, was Sie über Disclosurely wissen müssen",
+      "question1": {
+        "question": "Wie funktioniert anonymes Melden?",
+        "answer": "Hinweisgeber können Berichte über Ihr benutzerdefiniertes Portal einreichen, ohne persönliche Informationen anzugeben. Unser System verwendet fortschrittliche Verschlüsselung und erfasst keine IP-Adressen oder identifizierenden Daten. Melder erhalten einen eindeutigen Zugangscode, um ihren Berichtsstatus zu überprüfen und sicher zu kommunizieren."
+      },
+      "question2": {
+        "question": "Ist Disclosurely DSGVO und anderen Vorschriften konform?",
+        "answer": "Ja, Disclosurely wurde mit Compliance im Hinterkopf entwickelt. Wir sind DSGVO-konform und erfüllen die Anforderungen für SOX, EU-Whistleblowing-Richtlinie und andere wichtige regulatorische Rahmenbedingungen. Alle Daten werden verschlüsselt und sicher gemäß internationalen Datenschutzstandards gespeichert."
+      },
+      "question3": {
+        "question": "Können wir das Meldeportal anpassen?",
+        "answer": "Absolut. Sie können Ihr Unternehmensbranding hinzufügen, die Formularfelder anpassen, spezifische Kategorien für Berichte einrichten und sogar Ihre eigene Domain verwenden (bei Professional- und Enterprise-Plänen). Das Portal kann an die Bedürfnisse und Kultur Ihrer Organisation angepasst werden."
+      },
+      "question4": {
+        "question": "Wie schnell können wir beginnen?",
+        "answer": "Die meisten Organisationen sind innerhalb von 24 Stunden einsatzbereit. Nach der Anmeldung können Sie sofort Ihr Portal anpassen, Teammitglieder einladen und Berichte annehmen. Unser Support-Team steht Ihnen kostenlos bei der Einrichtung und Einarbeitung zur Verfügung."
+      },
+      "question5": {
+        "question": "Welche Unterstützung ist enthalten?",
+        "answer": "Alle Pläne beinhalten E-Mail-Support und Zugang zu unserer umfassenden Wissensdatenbank. Professional-Pläne beinhalten Priority-Support mit schnelleren Reaktionszeiten, während Enterprise-Kunden dedizierten Support mit SLA-Garantien und optionaler Vor-Ort-Schulung erhalten."
+      },
+      "question6": {
+        "question": "Können wir unseren Plan jederzeit kündigen oder ändern?",
+        "answer": "Ja, Sie können Ihr Abonnement jederzeit upgraden, downgraden oder kündigen. Wenn Sie kündigen, behalten Sie den Zugriff bis zum Ende Ihres Abrechnungszeitraums. Wir bieten auch eine 14-tägige kostenlose Testversion, damit Sie alle Funktionen vor der Verpflichtung testen können."
+      }
+    },
+    "cta": {
+      "title": "Bereit, Ihr Compliance-Programm Zu Stärken?",
+      "description": "Noch nicht bereit für eine kostenlose Testversion oder Demo? Teilen Sie uns Ihre Anforderungen mit und wir werden uns schnell melden, um zu besprechen, wie Disclosurely Ihre Organisation unterstützen kann.",
+      "button": "Kostenlose Testversion Starten"
     }
   },
   "auth": {
@@ -159,7 +270,53 @@
   "contact": {
     "hero": {
       "title": "Kontaktieren Sie Unser Vertriebsteam",
-      "subtitle": "Bereit, die Berichtsfunktionen Ihrer Organisation zu transformieren? Nehmen Sie Kontakt mit unserem Team auf, um zu besprechen, wie Disclosurely Ihre spezifischen Anforderungen erfüllen kann."
+      "subtitle": "Bereit, die Berichtsfunktionen Ihrer Organisation zu transformieren? Nehmen Sie Kontakt mit unserem Team auf."
+    },
+    "info": {
+      "title": "Kontaktinformationen",
+      "description": "Nehmen Sie Kontakt mit uns auf und wir helfen Ihnen gerne bei allen Fragen zu Disclosurely.",
+      "email": {
+        "title": "E-Mail",
+        "address": "sales@disclosurely.com",
+        "response": "Wir antworten innerhalb von 24 Stunden"
+      },
+      "phone": {
+        "title": "Telefon",
+        "number": "+44 20 1234 5678",
+        "hours": "Mo-Fr, 9-17 Uhr GMT"
+      },
+      "address": {
+        "title": "Adresse",
+        "line1": "123 Business Street",
+        "line2": "London, EC1A 1BB",
+        "line3": "Vereinigtes Königreich"
+      },
+      "enterprise": {
+        "title": "Unternehmenslösungen",
+        "description": "Benötigen Sie eine maßgeschneiderte Lösung? Kontaktieren Sie unser Enterprise-Team für individuelle Preise und Implementierungsunterstützung."
+      }
+    },
+    "form": {
+      "title": "Demo Anfordern",
+      "description": "Füllen Sie das Formular aus und unser Team wird sich innerhalb von 24 Stunden bei Ihnen melden, um eine personalisierte Demo zu vereinbaren.",
+      "name": {
+        "label": "Name",
+        "placeholder": "Ihr vollständiger Name"
+      },
+      "email": {
+        "label": "E-Mail",
+        "placeholder": "ihre@email.de"
+      },
+      "company": {
+        "label": "Firma",
+        "placeholder": "Ihr Firmenname"
+      },
+      "message": {
+        "label": "Nachricht",
+        "placeholder": "Erzählen Sie uns von Ihren Anforderungen..."
+      },
+      "submit": "Anfrage Senden",
+      "privacy": "Durch das Absenden dieses Formulars stimmen Sie unserer Datenschutzerklärung zu."
     }
   }
 }

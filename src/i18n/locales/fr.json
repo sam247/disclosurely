@@ -393,45 +393,53 @@
   "contact": {
     "hero": {
       "title": "Contactez Notre Équipe de Vente",
-      "subtitle": "Prêt à transformer les capacités de signalement de votre organisation? Contactez notre équipe pour discuter de la façon dont Disclosurely peut répondre à vos besoins spécifiques."
+      "subtitle": "Prêt à transformer les capacités de signalement de votre organisation? Contactez notre équipe."
     },
-    "getInTouch": {
-      "title": "Prenez Contact",
-      "description": "Notre équipe d'entreprise est là pour vous aider à mettre en œuvre une solution de signalement sécurisée adaptée aux exigences de votre organisation.",
+    "info": {
+      "title": "Informations de Contact",
+      "description": "Contactez-nous et nous serons heureux de répondre à vos questions sur Disclosurely.",
       "email": {
-        "title": "Envoyez-nous un e-mail",
-        "value": "sales@disclosurely.com",
-        "subtext": "Nous répondrons dans les 24 heures"
+        "title": "E-mail",
+        "address": "sales@disclosurely.com",
+        "response": "Nous répondons sous 24 heures"
       },
       "phone": {
-        "title": "Appelez-nous",
-        "value": "+44 20 7946 0958",
-        "subtext": "Lundi - Vendredi, 9h - 18h GMT"
+        "title": "Téléphone",
+        "number": "+44 20 1234 5678",
+        "hours": "Lun-Ven, 9h-17h GMT"
       },
       "address": {
-        "title": "Visitez-nous",
+        "title": "Adresse",
         "line1": "123 Business Street",
         "line2": "Londres, EC1A 1BB",
         "line3": "Royaume-Uni"
       },
-      "enterpriseSupport": {
-        "title": "Support d'Entreprise",
-        "description": "Tous les clients d'entreprise reçoivent une gestion de compte dédiée, un support téléphonique 24h/24 et 7j/7 et une assistance d'intégration personnalisée."
+      "enterprise": {
+        "title": "Solutions d'Entreprise",
+        "description": "Besoin d'une solution personnalisée? Contactez notre équipe Enterprise pour des tarifs sur mesure et un support d'implémentation."
       }
     },
     "form": {
       "title": "Demander une Démo",
       "description": "Remplissez le formulaire ci-dessous et notre équipe vous contactera dans les 24 heures pour planifier une démo personnalisée.",
-      "fullName": "Nom complet *",
-      "workEmail": "E-mail professionnel *",
-      "companyName": "Nom de l'entreprise *",
-      "message": "Message",
-      "fullNamePlaceholder": "Votre nom complet",
-      "emailPlaceholder": "votre.nom@entreprise.com",
-      "companyPlaceholder": "Le nom de votre entreprise",
-      "messagePlaceholder": "Parlez-nous de vos besoins, de la taille de votre équipe et de tout besoin spécifique...",
-      "submitButton": "Demander une Démo",
-      "disclaimer": "En soumettant ce formulaire, vous acceptez notre politique de confidentialité et nos conditions d'utilisation."
+      "name": {
+        "label": "Nom",
+        "placeholder": "Votre nom complet"
+      },
+      "email": {
+        "label": "E-mail",
+        "placeholder": "votre@email.com"
+      },
+      "company": {
+        "label": "Entreprise",
+        "placeholder": "Nom de votre entreprise"
+      },
+      "message": {
+        "label": "Message",
+        "placeholder": "Parlez-nous de vos exigences..."
+      },
+      "submit": "Envoyer la Demande",
+      "privacy": "En soumettant ce formulaire, vous acceptez notre Politique de Confidentialité."
     }
   },
   "privacy": {
