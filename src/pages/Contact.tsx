@@ -31,7 +31,7 @@ const Contact = () => {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          to: "sampettiford@googlemail.com",
+          to: "team@disclsourely.com",
           ...formData,
         }),
       });
