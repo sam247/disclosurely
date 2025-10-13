@@ -3,17 +3,12 @@ import { Footer } from "@/components/ui/footer";
 import { Link } from "react-router-dom";
 import PublicLanguageSelector from "@/components/PublicLanguageSelector";
 import { useLanguageFromUrl } from "@/hooks/useLanguageFromUrl";
-
 const WhistleblowingDirective = () => {
   useLanguageFromUrl();
-  return (
-    <>
+  return <>
       <Helmet>
         <title>Whistleblowing Directive Summary - Disclosurely</title>
-        <meta
-          name="description"
-          content="Complete guide to the EU Whistleblowing Directive 2023 and what it means for organizations and employees across Europe."
-        />
+        <meta name="description" content="Complete guide to the EU Whistleblowing Directive 2023 and what it means for organizations and employees across Europe." />
       </Helmet>
 
       <div className="min-h-screen bg-white">
@@ -23,11 +18,7 @@ const WhistleblowingDirective = () => {
             <div className="flex justify-between items-center py-4">
               <div className="flex items-center">
                 <Link to="/" className="flex items-center space-x-3">
-                  <img
-                    src="/lovable-uploads/c46ace0e-df58-4119-b5e3-8dcfa075ea2f.png"
-                    alt="Disclosurely"
-                    className="h-6 md:h-8 w-auto"
-                  />
+                  <img src="/lovable-uploads/c46ace0e-df58-4119-b5e3-8dcfa075ea2f.png" alt="Disclosurely" className="h-6 md:h-8 w-auto" />
                 </Link>
               </div>
               <div className="hidden md:flex items-center space-x-4">
@@ -35,18 +26,12 @@ const WhistleblowingDirective = () => {
                 <Link to="/pricing" className="text-gray-600 hover:text-gray-900">
                   Pricing
                 </Link>
-                <Link
-                  to="/auth/signup"
-                  className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors"
-                >
+                <Link to="/auth/signup" className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors">
                   Get Started
                 </Link>
               </div>
               <div className="md:hidden">
-                <Link
-                  to="/auth/login"
-                  className="bg-blue-600 text-white px-3 py-2 rounded-lg hover:bg-blue-700 transition-colors text-sm"
-                >
+                <Link to="/auth/login" className="bg-blue-600 text-white px-3 py-2 rounded-lg hover:bg-blue-700 transition-colors text-sm">
                   Sign In
                 </Link>
               </div>
@@ -57,9 +42,10 @@ const WhistleblowingDirective = () => {
         {/* Hero Section */}
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-20 pb-16">
           <div className="text-center">
-            <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold text-gray-900 mb-6">
-              Whistleblowing Directive 2023 – What You Need to Know
-            </h1>
+            <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold text-gray-900 mb-6">Whistleblowing Directive 2023: 
+What You Need to Know
+
+          </h1>
             <p className="text-lg sm:text-xl text-gray-600 mb-8 max-w-3xl mx-auto">
               Whistleblowing is an essential tool for transparency and accountability across both public and private
               sectors in Europe. It allows individuals to report wrongdoing, corruption, or unethical practices, helping
@@ -281,8 +267,6 @@ const WhistleblowingDirective = () => {
         </div>
         <Footer />
       </div>
-    </>
-  );
+    </>;
 };
-
 export default WhistleblowingDirective;
