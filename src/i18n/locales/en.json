@@ -393,6 +393,7 @@
   "contact": {
     "hero": {
       "title": "Contact Our Sales Team",
+      "description": "Get in touch with us and we'll be happy to help answer any questions about Disclosurely.",
       "subtitle": "Ready to transform your organization's reporting capabilities? Get in touch with our team."
     },
     "info": {
@@ -400,19 +401,19 @@
       "description": "Get in touch with us and we'll be happy to help answer any questions about Disclosurely.",
       "email": {
         "title": "Email",
-        "address": "sales@disclosurely.com",
+        "address": "sampettiford@googlemail.com",
         "response": "We respond within 24 hours"
       },
       "phone": {
         "title": "Phone",
-        "number": "+44 20 1234 5678",
+        "number": "+44 7123 456789",
         "hours": "Mon-Fri, 9AM-5PM GMT"
       },
       "address": {
         "title": "Address",
-        "line1": "123 Business Street",
-        "line2": "London, EC1A 1BB",
-        "line3": "United Kingdom"
+        "line1": "London",
+        "line2": "United Kingdom",
+        "line3": ""
       },
       "enterprise": {
         "title": "Enterprise Solutions",

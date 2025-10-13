@@ -83,7 +83,8 @@ const DashboardView = () => {
         .from('reports')
         .select('id, title, tracking_id, status, created_at, encrypted_content, encryption_key_hash, priority, report_type, submitted_by_email, tags, assigned_to')
         .eq('organization_id', profile.organization_id)
-        .neq('status', 'closed')
+        .neq('status', 'archived')
+        .is('deleted_at', null)
         .order('created_at', { ascending: false })
         .limit(20);
 
@@ -91,7 +92,8 @@ const DashboardView = () => {
         .from('reports')
         .select('id, title, tracking_id, status, created_at, encrypted_content, encryption_key_hash, priority, report_type, submitted_by_email, tags, assigned_to')
         .eq('organization_id', profile.organization_id)
-        .eq('status', 'closed')
+        .eq('status', 'archived')
+        .is('deleted_at', null)
         .order('created_at', { ascending: false })
         .limit(20);
 
@@ -264,8 +266,6 @@ const DashboardView = () => {
         </Card>
       </div>
 
-      {/* Secure Link Section */}
-      <LinkGenerator />
 
       <div>
         <h2 className="text-2xl font-bold">Reports Overview</h2>
@@ -363,12 +363,11 @@ const DashboardView = () => {
                           {new Date(report.created_at).toLocaleDateString()}
                         </TableCell>
                         <TableCell className="text-right">
-                          <div className="flex items-center justify-end gap-2">
+                           <div className="flex items-center justify-end gap-2">
                             <Button 
-                              variant="ghost" 
+                              variant="default" 
                               size="sm"
                               onClick={() => handleViewReport(report)}
-                              className="text-primary hover:text-primary"
                             >
                               View
                             </Button>
@@ -382,9 +381,18 @@ const DashboardView = () => {
                                 <DropdownMenuItem 
                                   onClick={async () => {
                                     try {
+                                      // Get current tags and add "closed" tag
+                                      const currentTags = report.tags || [];
+                                      const updatedTags = currentTags.includes('closed') 
+                                        ? currentTags 
+                                        : [...currentTags, 'closed'];
+                                      
                                       const { error } = await supabase
                                         .from('reports')
-                                        .update({ status: 'closed' })
+                                        .update({ 
+                                          tags: updatedTags,
+                                          closed_at: new Date().toISOString()
+                                        })
                                         .eq('id', report.id);
                                       
                                       if (error) throw error;
@@ -411,21 +419,33 @@ const DashboardView = () => {
                                   className="text-destructive"
                                   onClick={async () => {
                                     try {
-                                      const { error } = await supabase
-                                        .from('reports')
-                                        .update({ 
-                                          deleted_at: new Date().toISOString(),
-                                          deleted_by: (await supabase.auth.getUser()).data.user?.id 
-                                        })
-                                        .eq('id', report.id);
+                                      // Use edge function for soft delete
+                                      const { data: { session } } = await supabase.auth.getSession();
                                       
-                                      if (error) throw error;
+                                      const response = await fetch(
+                                        `https://cxmuzperkittvibslnff.supabase.co/functions/v1/soft-delete-report`,
+                                        {
+                                          method: 'POST',
+                                          headers: {
+                                            'Content-Type': 'application/json',
+                                            'Authorization': `Bearer ${session?.access_token}`
+                                          },
+                                          body: JSON.stringify({ reportId: report.id })
+                                        }
+                                      );
+
+                                      if (!response.ok) {
+                                        const errorData = await response.json();
+                                        throw new Error(errorData.error || 'Failed to delete report');
+                                      }
+                                      
                                       toast({ title: 'Report deleted successfully' });
                                       fetchData();
-                                    } catch (error) {
+                                    } catch (error: any) {
                                       console.error('Error deleting report:', error);
                                       toast({ 
                                         title: 'Error deleting report',
+                                        description: error.message,
                                         variant: 'destructive'
                                       });
                                     }

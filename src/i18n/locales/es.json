@@ -393,26 +393,26 @@
   "contact": {
     "hero": {
       "title": "Contacte a Nuestro Equipo de Ventas",
-      "subtitle": "¿Listo para transformar las capacidades de informes de su organización? Póngase en contacto con nuestro equipo."
+      "description": "Póngase en contacto con nosotros y estaremos encantados de ayudarle a responder cualquier pregunta sobre Disclosurely."
     },
     "info": {
       "title": "Información de Contacto",
       "description": "Póngase en contacto con nosotros y estaremos encantados de ayudarle a responder cualquier pregunta sobre Disclosurely.",
       "email": {
         "title": "Correo Electrónico",
-        "address": "sales@disclosurely.com",
+        "address": "sampettiford@googlemail.com",
         "response": "Respondemos en 24 horas"
       },
       "phone": {
         "title": "Teléfono",
-        "number": "+44 20 1234 5678",
+        "number": "+44 7123 456789",
         "hours": "Lun-Vie, 9-17 GMT"
       },
       "address": {
         "title": "Dirección",
-        "line1": "123 Business Street",
-        "line2": "Londres, EC1A 1BB",
-        "line3": "Reino Unido"
+        "line1": "Londres",
+        "line2": "Reino Unido",
+        "line3": ""
       },
       "enterprise": {
         "title": "Soluciones Empresariales",

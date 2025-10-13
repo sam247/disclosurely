@@ -20,9 +20,32 @@ const Contact = () => {
     message: ''
   });
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log('Form submitted:', formData);
+    
+    try {
+      // Send email via edge function or email service
+      const response = await fetch('https://cxmuzperkittvibslnff.supabase.co/functions/v1/send-contact-email', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          to: 'sampettiford@googlemail.com',
+          ...formData
+        })
+      });
+
+      if (response.ok) {
+        alert(t('contact.form.success') || 'Thank you for your message! We will get back to you within 24 hours.');
+        setFormData({ name: '', email: '', company: '', message: '' });
+      } else {
+        alert(t('contact.form.error') || 'There was an error sending your message. Please try again or email us directly.');
+      }
+    } catch (error) {
+      console.error('Contact form error:', error);
+      alert(t('contact.form.error') || 'There was an error sending your message. Please email us at sampettiford@googlemail.com');
+    }
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {

@@ -11,6 +11,7 @@ import AIHelperView from './components/dashboard/AIHelperView';
 import SettingsView from './components/dashboard/SettingsView';
 import TeamView from './components/dashboard/TeamView';
 import BrandingView from './components/dashboard/BrandingView';
+import SecureLinkView from './components/dashboard/SecureLinkView';
 import Index from './pages/Index';
 import Login from './pages/Login';
 import Signup from './pages/Signup';
@@ -174,6 +175,16 @@ const AppContent = () => {
             <ProtectedRoute>
               <DashboardLayout>
                 <BrandingView />
+              </DashboardLayout>
+            </ProtectedRoute>
+          } 
+        />
+        <Route 
+          path="/dashboard/secure-link" 
+          element={
+            <ProtectedRoute>
+              <DashboardLayout>
+                <SecureLinkView />
               </DashboardLayout>
             </ProtectedRoute>
           } 

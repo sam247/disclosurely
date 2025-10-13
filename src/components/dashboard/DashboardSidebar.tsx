@@ -1,4 +1,4 @@
-import { Home, Bot, Users, Palette, Lock, BarChart3, ScrollText } from 'lucide-react';
+import { Home, Bot, Users, Palette, Lock, BarChart3, ScrollText, Link as LinkIcon } from 'lucide-react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { Sidebar, SidebarContent, SidebarFooter, SidebarGroup, SidebarGroupContent, SidebarHeader, SidebarMenu, SidebarMenuButton, SidebarMenuItem, SidebarTrigger, useSidebar } from '@/components/ui/sidebar';
 import { useSubscriptionLimits } from '@/hooks/useSubscriptionLimits';
@@ -42,6 +42,11 @@ const DashboardSidebar = ({
     title: t('audit'),
     icon: ScrollText,
     path: '/dashboard/audit',
+    locked: false
+  }, {
+    title: 'Secure Link',
+    icon: LinkIcon,
+    path: '/dashboard/secure-link',
     locked: false
   }, {
     title: t('team'),
