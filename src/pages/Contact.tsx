@@ -31,7 +31,7 @@ const Contact = () => {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          to: "team@disclosurely.com",
+          to: "sampettiford@googlemail.com",
           ...formData,
         }),
       });
@@ -47,8 +47,7 @@ const Contact = () => {
     } catch (error) {
       console.error("Contact form error:", error);
       alert(
-        t("contact.form.error") ||
-          "There was an error sending your message. Please email us at sampettiford@googlemail.com",
+        t("contact.form.error") || "There was an error sending your message. Please email us at team@disclosurely.com",
       );
     }
   };
