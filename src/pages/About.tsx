@@ -5,6 +5,7 @@ import DynamicHelmet from '@/components/DynamicHelmet';
 import { Card, CardContent } from '@/components/ui/card';
 import { Shield, Eye, CheckCircle, Headphones } from 'lucide-react';
 import { StandardHeader } from '@/components/StandardHeader';
+import { StandardHero } from '@/components/StandardHero';
 import { Footer } from '@/components/ui/footer';
 import { useLanguageFromUrl } from '@/hooks/useLanguageFromUrl';
 
@@ -21,23 +22,15 @@ const About: React.FC = () => {
       />
       
       <StandardHeader currentLanguage={currentLanguage} />
+      
+      <StandardHero
+        title={t('about.hero.title')}
+        subtitle={t('about.hero.subtitle')}
+        highlightText={t('about.hero.description')}
+        className="bg-gradient-to-br from-blue-50 to-indigo-100"
+      />
+      
       <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
-        {/* Hero Section */}
-        <section className="relative py-20 px-4 sm:px-6 lg:px-8">
-          <div className="max-w-7xl mx-auto">
-            <div className="text-center">
-              <h1 className="text-4xl md:text-6xl font-bold text-gray-900 mb-6">
-                {t('about.hero.title')}
-              </h1>
-              <p className="text-xl md:text-2xl text-blue-600 font-semibold mb-8">
-                {t('about.hero.subtitle')}
-              </p>
-              <p className="text-lg md:text-xl text-gray-600 max-w-4xl mx-auto leading-relaxed">
-                {t('about.hero.description')}
-              </p>
-            </div>
-          </div>
-        </section>
 
         {/* Mission Section */}
         <section className="py-16 px-4 sm:px-6 lg:px-8 bg-white">
