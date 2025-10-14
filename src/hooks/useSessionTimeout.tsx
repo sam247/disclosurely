@@ -14,10 +14,12 @@ export const useSessionTimeout = () => {
   const idleTimerRef = useRef<NodeJS.Timeout>();
   const absoluteTimerRef = useRef<NodeJS.Timeout>();
   const warningTimerRef = useRef<NodeJS.Timeout>();
+  const idleCountdownIntervalRef = useRef<NodeJS.Timeout>();
+  const absoluteCountdownIntervalRef = useRef<NodeJS.Timeout>();
   const sessionStartRef = useRef<number>(Date.now());
+  const lastActivityRef = useRef<number>(Date.now());
   const warningShownRef = useRef(false);
   const absoluteWarningShownRef = useRef(false);
-  const pendingIdleWarningRef = useRef(false);
   
   const [showIdleWarning, setShowIdleWarning] = useState(false);
   const [showAbsoluteWarning, setShowAbsoluteWarning] = useState(false);
@@ -25,120 +27,181 @@ export const useSessionTimeout = () => {
   const [absoluteTimeRemaining, setAbsoluteTimeRemaining] = useState(0);
   const [isTabVisible, setIsTabVisible] = useState(true);
 
+  // Clear all timers and intervals
+  const clearAllTimers = useCallback(() => {
+    try {
+      if (idleTimerRef.current) {
+        clearTimeout(idleTimerRef.current);
+        idleTimerRef.current = undefined;
+      }
+      if (absoluteTimerRef.current) {
+        clearTimeout(absoluteTimerRef.current);
+        absoluteTimerRef.current = undefined;
+      }
+      if (warningTimerRef.current) {
+        clearTimeout(warningTimerRef.current);
+        warningTimerRef.current = undefined;
+      }
+      if (idleCountdownIntervalRef.current) {
+        clearInterval(idleCountdownIntervalRef.current);
+        idleCountdownIntervalRef.current = undefined;
+      }
+      if (absoluteCountdownIntervalRef.current) {
+        clearInterval(absoluteCountdownIntervalRef.current);
+        absoluteCountdownIntervalRef.current = undefined;
+      }
+    } catch (error) {
+      console.error('Error clearing timers:', error);
+    }
+  }, []);
+
   // Reset idle timer on user activity
   const resetIdleTimer = useCallback(() => {
     if (!user || !session) {
       return;
     }
+    
     // Do not reset timers while a warning modal is visible
     if (showIdleWarning || showAbsoluteWarning) {
       return;
     }
 
-    // Clear existing timers
-    if (idleTimerRef.current) {
-      clearTimeout(idleTimerRef.current);
-    }
-    if (warningTimerRef.current) {
-      clearTimeout(warningTimerRef.current);
-    }
+    try {
+      // Update last activity time
+      lastActivityRef.current = Date.now();
+      
+      // Clear existing timers
+      clearAllTimers();
 
-    // Reset warning states and countdown
-    setShowIdleWarning(false);
-    setIdleTimeRemaining(0);
-    warningShownRef.current = false;
-    pendingIdleWarningRef.current = false;
+      // Reset warning states
+      setShowIdleWarning(false);
+      setIdleTimeRemaining(0);
+      warningShownRef.current = false;
 
-    // After 60 seconds of inactivity, show a 60s countdown popup
-    idleTimerRef.current = setTimeout(() => {
-      setIdleTimeRemaining(60);
-      setShowIdleWarning(true);
-    }, IDLE_TIMEOUT);
-  }, [user, session, showIdleWarning, showAbsoluteWarning]);
+      // Set new idle timer
+      idleTimerRef.current = setTimeout(() => {
+        setIdleTimeRemaining(60);
+        setShowIdleWarning(true);
+      }, IDLE_TIMEOUT);
+      
+      console.log('Idle timer reset - new timeout in', IDLE_TIMEOUT / 1000, 'seconds');
+    } catch (error) {
+      console.error('Error resetting idle timer:', error);
+    }
+  }, [user, session, showIdleWarning, showAbsoluteWarning, clearAllTimers]);
 
   // Show warning before absolute timeout
   const showAbsoluteTimeoutWarning = useCallback(() => {
     if (absoluteWarningShownRef.current) return;
     
-    absoluteWarningShownRef.current = true;
-    setAbsoluteTimeRemaining(5 * 60); // 5 minutes in seconds
-    setShowAbsoluteWarning(true);
+    try {
+      absoluteWarningShownRef.current = true;
+      setAbsoluteTimeRemaining(5 * 60); // 5 minutes in seconds
+      setShowAbsoluteWarning(true);
+      console.log('Absolute timeout warning shown');
+    } catch (error) {
+      console.error('Error showing absolute timeout warning:', error);
+    }
   }, []);
 
   // Handle extend session
   const handleExtendSession = useCallback(() => {
-    // Close modals first
-    setShowIdleWarning(false);
-    setShowAbsoluteWarning(false);
-    setIdleTimeRemaining(0);
-    warningShownRef.current = false;
-    absoluteWarningShownRef.current = false;
-    pendingIdleWarningRef.current = false;
+    try {
+      // Close modals first
+      setShowIdleWarning(false);
+      setShowAbsoluteWarning(false);
+      setIdleTimeRemaining(0);
+      setAbsoluteTimeRemaining(0);
+      warningShownRef.current = false;
+      absoluteWarningShownRef.current = false;
 
-    // Clear existing idle timer
-    if (idleTimerRef.current) {
-      clearTimeout(idleTimerRef.current);
-    }
-    if (warningTimerRef.current) {
-      clearTimeout(warningTimerRef.current);
-    }
+      // Clear all timers
+      clearAllTimers();
 
-    // Start fresh idle timer
-    idleTimerRef.current = setTimeout(() => {
-      setIdleTimeRemaining(60);
-      setShowIdleWarning(true);
-    }, IDLE_TIMEOUT);
-    
-    toast({
-      title: "Session Extended",
-      description: "Your session has been extended.",
-    });
-  }, [toast]);
+      // Update last activity time
+      lastActivityRef.current = Date.now();
+
+      // Start fresh idle timer
+      idleTimerRef.current = setTimeout(() => {
+        setIdleTimeRemaining(60);
+        setShowIdleWarning(true);
+      }, IDLE_TIMEOUT);
+      
+      toast({
+        title: "Session Extended",
+        description: "Your session has been extended.",
+      });
+      
+      console.log('Session extended - new idle timeout in', IDLE_TIMEOUT / 1000, 'seconds');
+    } catch (error) {
+      console.error('Error extending session:', error);
+    }
+  }, [toast, clearAllTimers]);
 
   // Handle sign out from warning
   const handleSignOutFromWarning = useCallback(() => {
-    setShowIdleWarning(false);
-    setShowAbsoluteWarning(false);
-    signOut();
-  }, [signOut]);
+    try {
+      setShowIdleWarning(false);
+      setShowAbsoluteWarning(false);
+      clearAllTimers();
+      signOut();
+      console.log('User signed out from warning');
+    } catch (error) {
+      console.error('Error signing out from warning:', error);
+    }
+  }, [signOut, clearAllTimers]);
 
   // Set up absolute timeout
   const setupAbsoluteTimeout = useCallback(() => {
     if (!user || !session) return;
 
-    // Clear existing absolute timer
-    if (absoluteTimerRef.current) {
-      clearTimeout(absoluteTimerRef.current);
-    }
-
-    // Reset session start time
-    sessionStartRef.current = Date.now();
-    absoluteWarningShownRef.current = false;
-
-    // Show warning 5 minutes before absolute timeout
-    const warningTime = ABSOLUTE_TIMEOUT - (5 * 60 * 1000);
-    if (warningTimerRef.current) clearTimeout(warningTimerRef.current);
-    warningTimerRef.current = setTimeout(showAbsoluteTimeoutWarning, warningTime);
-
-    // Set absolute timeout
-    absoluteTimerRef.current = setTimeout(() => {
-      if (!showAbsoluteWarning) {
-        toast({
-          title: "Session Expired",
-          description: "Your session has reached the maximum allowed time and has been terminated.",
-          variant: "destructive",
-        });
-        signOut();
+    try {
+      // Clear existing absolute timer
+      if (absoluteTimerRef.current) {
+        clearTimeout(absoluteTimerRef.current);
       }
-    }, ABSOLUTE_TIMEOUT);
+
+      // Reset session start time
+      sessionStartRef.current = Date.now();
+      absoluteWarningShownRef.current = false;
+
+      // Show warning 5 minutes before absolute timeout
+      const warningTime = ABSOLUTE_TIMEOUT - (5 * 60 * 1000);
+      if (warningTimerRef.current) clearTimeout(warningTimerRef.current);
+      warningTimerRef.current = setTimeout(showAbsoluteTimeoutWarning, warningTime);
+
+      // Set absolute timeout
+      absoluteTimerRef.current = setTimeout(() => {
+        if (!showAbsoluteWarning) {
+          toast({
+            title: "Session Expired",
+            description: "Your session has reached the maximum allowed time and has been terminated.",
+            variant: "destructive",
+          });
+          signOut();
+        }
+      }, ABSOLUTE_TIMEOUT);
+      
+      console.log('Absolute timeout set - warning in', warningTime / 1000, 'seconds, logout in', ABSOLUTE_TIMEOUT / 1000, 'seconds');
+    } catch (error) {
+      console.error('Error setting up absolute timeout:', error);
+    }
   }, [user, session, signOut, toast, showAbsoluteTimeoutWarning, showAbsoluteWarning]);
 
   // Countdown effect for warnings (continues counting even when tab is hidden for regulatory compliance)
   useEffect(() => {
-    let interval: NodeJS.Timeout | undefined;
+    // Clear any existing intervals first
+    if (idleCountdownIntervalRef.current) {
+      clearInterval(idleCountdownIntervalRef.current);
+      idleCountdownIntervalRef.current = undefined;
+    }
+    if (absoluteCountdownIntervalRef.current) {
+      clearInterval(absoluteCountdownIntervalRef.current);
+      absoluteCountdownIntervalRef.current = undefined;
+    }
     
     if (showIdleWarning && idleTimeRemaining > 0) {
-      interval = setInterval(() => {
+      idleCountdownIntervalRef.current = setInterval(() => {
         setIdleTimeRemaining(prev => {
           if (prev <= 1) {
             setShowIdleWarning(false);
@@ -151,7 +214,7 @@ export const useSessionTimeout = () => {
     }
     
     if (showAbsoluteWarning && absoluteTimeRemaining > 0) {
-      interval = setInterval(() => {
+      absoluteCountdownIntervalRef.current = setInterval(() => {
         setAbsoluteTimeRemaining(prev => {
           if (prev <= 1) {
             setShowAbsoluteWarning(false);
@@ -164,7 +227,14 @@ export const useSessionTimeout = () => {
     }
     
     return () => {
-      if (interval) clearInterval(interval);
+      if (idleCountdownIntervalRef.current) {
+        clearInterval(idleCountdownIntervalRef.current);
+        idleCountdownIntervalRef.current = undefined;
+      }
+      if (absoluteCountdownIntervalRef.current) {
+        clearInterval(absoluteCountdownIntervalRef.current);
+        absoluteCountdownIntervalRef.current = undefined;
+      }
     };
   }, [showIdleWarning, showAbsoluteWarning, idleTimeRemaining, absoluteTimeRemaining, signOut]);
 
@@ -176,6 +246,7 @@ export const useSessionTimeout = () => {
       
       // Simple logic: when tab becomes visible, just continue with any existing modal
       // No complex deferred logic that might cause issues
+      console.log('Tab visibility changed:', visible);
     };
 
     document.addEventListener('visibilitychange', handleVisibilityChange);
@@ -186,9 +257,7 @@ export const useSessionTimeout = () => {
   useEffect(() => {
     if (!user || !session) {
       // Clear timers when user is logged out
-      if (idleTimerRef.current) clearTimeout(idleTimerRef.current);
-      if (absoluteTimerRef.current) clearTimeout(absoluteTimerRef.current);
-      if (warningTimerRef.current) clearTimeout(warningTimerRef.current);
+      clearAllTimers();
       setShowIdleWarning(false);
       setShowAbsoluteWarning(false);
       return;
@@ -222,11 +291,9 @@ export const useSessionTimeout = () => {
       events.forEach(event => {
         document.removeEventListener(event, resetIdleTimer, true);
       });
-      if (idleTimerRef.current) clearTimeout(idleTimerRef.current);
-      if (absoluteTimerRef.current) clearTimeout(absoluteTimerRef.current);
-      if (warningTimerRef.current) clearTimeout(warningTimerRef.current);
+      clearAllTimers();
     };
-  }, [user, session, resetIdleTimer, setupAbsoluteTimeout]);
+  }, [user, session, resetIdleTimer, setupAbsoluteTimeout, clearAllTimers]);
 
   // Memoized warning components to prevent unnecessary re-renders
   const IdleWarningComponent = useMemo(() => (
@@ -251,7 +318,8 @@ export const useSessionTimeout = () => {
   return {
     getIdleTimeRemaining: () => {
       if (!user) return 0;
-      return IDLE_TIMEOUT;
+      const elapsed = Date.now() - lastActivityRef.current;
+      return Math.max(0, IDLE_TIMEOUT - elapsed);
     },
     getAbsoluteTimeRemaining: () => {
       if (!user) return 0;
