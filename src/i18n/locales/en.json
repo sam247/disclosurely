@@ -654,5 +654,182 @@
       }
     },
     "lastUpdated": "Last updated: September 2025"
-  }
-}
+  },
+  "about": {
+    "meta": {
+      "title": "About Us - Disclosurely",
+      "description": "Learn about Disclosurely's mission to create safer workplaces through secure whistleblowing technology."
+    },
+    "hero": {
+      "title": "About Disclosurely",
+      "subtitle": "Building Trust Through Transparency",
+      "description": "We're on a mission to create safer, more ethical workplaces by providing secure, anonymous reporting channels that protect whistleblowers while helping organizations address misconduct quickly and effectively."
+    },
+    "mission": {
+      "title": "Our Mission",
+      "content": "To empower organizations to build cultures of integrity by providing secure, user-friendly whistleblowing solutions that protect both reporters and organizations."
+    },
+    "values": {
+      "title": "Our Values",
+      "items": {
+        "security": {
+          "title": "Security First",
+          "description": "End-to-end encryption and anonymous reporting to protect whistleblowers"
+        },
+        "transparency": {
+          "title": "Transparency",
+          "description": "Clear processes and regular updates on case progress"
+        },
+        "compliance": {
+          "title": "Compliance",
+          "description": "GDPR-compliant solutions meeting international standards"
+        },
+        "support": {
+          "title": "Support",
+          "description": "24/7 support and comprehensive training for all users"
+        }
+      }
+    },
+    "team": {
+      "title": "Our Team",
+      "description": "Experienced professionals dedicated to workplace safety and compliance"
+    },
+    "story": {
+      "title": "Our Story",
+      "content": "Founded in 2024, Disclosurely was created by compliance professionals who saw the need for better whistleblowing solutions. We combine cutting-edge technology with deep industry expertise to deliver solutions that actually work."
+    }
+  },
+  "features": {
+    "meta": {
+      "title": "Features - Disclosurely",
+      "description": "Discover all the powerful features that make Disclosurely the leading whistleblowing platform."
+    },
+    "hero": {
+      "title": "Powerful Features",
+      "subtitle": "Everything You Need for Secure Reporting",
+      "description": "Our comprehensive platform provides all the tools you need to manage whistleblowing effectively while maintaining the highest security standards."
+    },
+    "core": {
+      "title": "Core Features",
+      "items": {
+        "anonymous": {
+          "title": "Anonymous Reporting",
+          "description": "Secure, encrypted channels that protect whistleblower identity"
+        },
+        "ai": {
+          "title": "AI-Powered Analysis",
+          "description": "Intelligent case categorization and risk assessment"
+        },
+        "dashboard": {
+          "title": "Comprehensive Dashboard",
+          "description": "Real-time case management and analytics"
+        },
+        "compliance": {
+          "title": "Compliance Ready",
+          "description": "GDPR, SOX, and other regulatory compliance built-in"
+        },
+        "mobile": {
+          "title": "Mobile Optimized",
+          "description": "Access and manage cases from any device"
+        },
+        "integration": {
+          "title": "Easy Integration",
+          "description": "Seamless integration with existing HR and compliance systems"
+        }
+      }
+    },
+    "security": {
+      "title": "Security Features",
+      "items": {
+        "encryption": {
+          "title": "End-to-End Encryption",
+          "description": "Military-grade encryption protects all communications"
+        },
+        "audit": {
+          "title": "Audit Trails",
+          "description": "Complete audit logs for compliance and transparency"
+        },
+        "access": {
+          "title": "Role-Based Access",
+          "description": "Granular permissions ensure only authorized access"
+        },
+        "backup": {
+          "title": "Secure Backup",
+          "description": "Automated backups with geographic redundancy"
+        }
+      }
+    },
+    "analytics": {
+      "title": "Analytics & Reporting",
+      "items": {
+        "dashboard": {
+          "title": "Real-Time Dashboard",
+          "description": "Live insights into case status and trends"
+        },
+        "reports": {
+          "title": "Custom Reports",
+          "description": "Generate detailed reports for stakeholders"
+        },
+        "metrics": {
+          "title": "Key Metrics",
+          "description": "Track response times, resolution rates, and more"
+        },
+        "export": {
+          "title": "Data Export",
+          "description": "Export data in multiple formats for analysis"
+        }
+      }
+    }
+  },
+  "careers": {
+    "meta": {
+      "title": "Careers - Disclosurely",
+      "description": "Join our team and help us build safer workplaces. Explore career opportunities at Disclosurely."
+    },
+    "hero": {
+      "title": "Join Our Team",
+      "subtitle": "Building the Future of Workplace Safety",
+      "description": "We're looking for passionate individuals who want to make a difference in workplace safety and compliance. Join us in creating a world where every voice matters."
+    },
+    "why": {
+      "title": "Why Work With Us",
+      "items": {
+        "mission": {
+          "title": "Meaningful Mission",
+          "description": "Help organizations create safer, more ethical workplaces"
+        },
+        "growth": {
+          "title": "Growth Opportunities",
+          "description": "Fast-growing company with opportunities for advancement"
+        },
+        "flexibility": {
+          "title": "Flexible Work",
+          "description": "Remote-first culture with flexible working arrangements"
+        },
+        "benefits": {
+          "title": "Great Benefits",
+          "description": "Competitive salary, health insurance, and professional development"
+        }
+      }
+    },
+    "openings": {
+      "title": "Open Positions",
+      "description": "We're always looking for talented individuals to join our team.",
+      "noOpenings": "No open positions at the moment, but we're always interested in hearing from talented individuals.",
+      "apply": "Apply Now"
+    },
+    "culture": {
+      "title": "Our Culture",
+      "description": "We believe in creating an inclusive, supportive environment where everyone can thrive.",
+      "values": {
+        "innovation": "Innovation and continuous improvement",
+        "collaboration": "Collaboration and teamwork",
+        "integrity": "Integrity in everything we do",
+        "diversity": "Diversity and inclusion"
+      }
+    },
+    "contact": {
+      "title": "Get in Touch",
+      "description": "Don't see a position that fits? We'd still love to hear from you.",
+      "email": "careers@disclosurely.com"
+    }

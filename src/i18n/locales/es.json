@@ -581,5 +581,182 @@
       "title": "Contáctenos",
       "content": "Si tiene preguntas sobre estos Términos, contáctenos en: legal@disclosurely.com"
     }
-  }
-}
+  },
+  "about": {
+    "meta": {
+      "title": "Acerca de Nosotros - Disclosurely",
+      "description": "Conoce la misión de Disclosurely para crear lugares de trabajo más seguros a través de tecnología de denuncias segura."
+    },
+    "hero": {
+      "title": "Acerca de Disclosurely",
+      "subtitle": "Construyendo Confianza a Través de la Transparencia",
+      "description": "Nuestra misión es crear lugares de trabajo más seguros y éticos proporcionando canales de denuncia seguros y anónimos que protejan a los denunciantes mientras ayudan a las organizaciones a abordar el mal comportamiento de manera rápida y efectiva."
+    },
+    "mission": {
+      "title": "Nuestra Misión",
+      "content": "Empoderar a las organizaciones para construir culturas de integridad proporcionando soluciones de denuncia seguras y fáciles de usar que protejan tanto a los denunciantes como a las organizaciones."
+    },
+    "values": {
+      "title": "Nuestros Valores",
+      "items": {
+        "security": {
+          "title": "Seguridad Primero",
+          "description": "Cifrado de extremo a extremo y denuncias anónimas para proteger a los denunciantes"
+        },
+        "transparency": {
+          "title": "Transparencia",
+          "description": "Procesos claros y actualizaciones regulares sobre el progreso de los casos"
+        },
+        "compliance": {
+          "title": "Cumplimiento",
+          "description": "Soluciones compatibles con GDPR que cumplen estándares internacionales"
+        },
+        "support": {
+          "title": "Soporte",
+          "description": "Soporte 24/7 y capacitación integral para todos los usuarios"
+        }
+      }
+    },
+    "team": {
+      "title": "Nuestro Equipo",
+      "description": "Profesionales experimentados dedicados a la seguridad laboral y el cumplimiento"
+    },
+    "story": {
+      "title": "Nuestra Historia",
+      "content": "Fundada en 2024, Disclosurely fue creada por profesionales de cumplimiento que vieron la necesidad de mejores soluciones de denuncia. Combinamos tecnología de vanguardia con experiencia profunda en la industria para entregar soluciones que realmente funcionan."
+    }
+  },
+  "features": {
+    "meta": {
+      "title": "Características - Disclosurely",
+      "description": "Descubre todas las características poderosas que hacen de Disclosurely la plataforma líder de denuncias."
+    },
+    "hero": {
+      "title": "Características Poderosas",
+      "subtitle": "Todo lo que Necesitas para Denuncias Seguras",
+      "description": "Nuestra plataforma integral proporciona todas las herramientas que necesitas para gestionar denuncias efectivamente mientras mantienes los más altos estándares de seguridad."
+    },
+    "core": {
+      "title": "Características Principales",
+      "items": {
+        "anonymous": {
+          "title": "Denuncias Anónimas",
+          "description": "Canales seguros y cifrados que protegen la identidad del denunciante"
+        },
+        "ai": {
+          "title": "Análisis con IA",
+          "description": "Categorización inteligente de casos y evaluación de riesgos"
+        },
+        "dashboard": {
+          "title": "Panel Integral",
+          "description": "Gestión de casos y análisis en tiempo real"
+        },
+        "compliance": {
+          "title": "Listo para Cumplimiento",
+          "description": "Cumplimiento GDPR, SOX y otras regulaciones integrado"
+        },
+        "mobile": {
+          "title": "Optimizado para Móvil",
+          "description": "Accede y gestiona casos desde cualquier dispositivo"
+        },
+        "integration": {
+          "title": "Integración Fácil",
+          "description": "Integración perfecta con sistemas HR y de cumplimiento existentes"
+        }
+      }
+    },
+    "security": {
+      "title": "Características de Seguridad",
+      "items": {
+        "encryption": {
+          "title": "Cifrado de Extremo a Extremo",
+          "description": "Cifrado de grado militar protege todas las comunicaciones"
+        },
+        "audit": {
+          "title": "Rastros de Auditoría",
+          "description": "Registros de auditoría completos para cumplimiento y transparencia"
+        },
+        "access": {
+          "title": "Acceso Basado en Roles",
+          "description": "Permisos granulares aseguran solo acceso autorizado"
+        },
+        "backup": {
+          "title": "Respaldo Seguro",
+          "description": "Respaldos automatizados con redundancia geográfica"
+        }
+      }
+    },
+    "analytics": {
+      "title": "Análisis e Informes",
+      "items": {
+        "dashboard": {
+          "title": "Panel en Tiempo Real",
+          "description": "Perspectivas en vivo sobre el estado de casos y tendencias"
+        },
+        "reports": {
+          "title": "Informes Personalizados",
+          "description": "Genera informes detallados para partes interesadas"
+        },
+        "metrics": {
+          "title": "Métricas Clave",
+          "description": "Rastrea tiempos de respuesta, tasas de resolución y más"
+        },
+        "export": {
+          "title": "Exportación de Datos",
+          "description": "Exporta datos en múltiples formatos para análisis"
+        }
+      }
+    }
+  },
+  "careers": {
+    "meta": {
+      "title": "Carreras - Disclosurely",
+      "description": "Únete a nuestro equipo y ayúdanos a construir lugares de trabajo más seguros. Explora oportunidades de carrera en Disclosurely."
+    },
+    "hero": {
+      "title": "Únete a Nuestro Equipo",
+      "subtitle": "Construyendo el Futuro de la Seguridad Laboral",
+      "description": "Buscamos individuos apasionados que quieran hacer una diferencia en la seguridad laboral y el cumplimiento. Únete a nosotros para crear un mundo donde cada voz importe."
+    },
+    "why": {
+      "title": "Por Qué Trabajar Con Nosotros",
+      "items": {
+        "mission": {
+          "title": "Misión Significativa",
+          "description": "Ayuda a las organizaciones a crear lugares de trabajo más seguros y éticos"
+        },
+        "growth": {
+          "title": "Oportunidades de Crecimiento",
+          "description": "Empresa de rápido crecimiento con oportunidades de avance"
+        },
+        "flexibility": {
+          "title": "Trabajo Flexible",
+          "description": "Cultura primero remota con arreglos de trabajo flexibles"
+        },
+        "benefits": {
+          "title": "Excelentes Beneficios",
+          "description": "Salario competitivo, seguro de salud y desarrollo profesional"
+        }
+      }
+    },
+    "openings": {
+      "title": "Posiciones Abiertas",
+      "description": "Siempre buscamos individuos talentosos para unirse a nuestro equipo.",
+      "noOpenings": "No hay posiciones abiertas en este momento, pero siempre estamos interesados en escuchar de individuos talentosos.",
+      "apply": "Aplicar Ahora"
+    },
+    "culture": {
+      "title": "Nuestra Cultura",
+      "description": "Creemos en crear un ambiente inclusivo y de apoyo donde todos puedan prosperar.",
+      "values": {
+        "innovation": "Innovación y mejora continua",
+        "collaboration": "Colaboración y trabajo en equipo",
+        "integrity": "Integridad en todo lo que hacemos",
+        "diversity": "Diversidad e inclusión"
+      }
+    },
+    "contact": {
+      "title": "Ponte en Contacto",
+      "description": "¿No ves una posición que encaje? Aún nos encantaría escuchar de ti.",
+      "email": "careers@disclosurely.com"
+    }
