@@ -107,7 +107,24 @@ export const AnnouncementBarManager: React.FC = () => {
   };
 
   const handleSave = async () => {
-    if (!profile?.organization_id) return;
+    if (!profile?.organization_id) {
+      toast({
+        title: 'Error',
+        description: 'Organization not found. Cannot save announcement.',
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    // Validate required fields
+    if (!formData.title.trim() || !formData.content.trim()) {
+      toast({
+        title: 'Error',
+        description: 'Please fill in both title and content fields.',
+        variant: 'destructive',
+      });
+      return;
+    }
 
     try {
       setSaving(true);
@@ -120,6 +137,8 @@ export const AnnouncementBarManager: React.FC = () => {
         start_date: formData.start_date || null,
         end_date: formData.end_date || null,
       };
+
+      console.log('Saving announcement:', announcementData);
 
       if (editingAnnouncement) {
         const { error } = await supabase
@@ -152,7 +171,7 @@ export const AnnouncementBarManager: React.FC = () => {
       console.error('Error saving announcement:', error);
       toast({
         title: 'Error',
-        description: 'Failed to save announcement. Please try again.',
+        description: `Failed to save announcement: ${error.message || 'Please try again.'}`,
         variant: 'destructive',
       });
     } finally {

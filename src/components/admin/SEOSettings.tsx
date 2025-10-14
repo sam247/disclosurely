@@ -95,7 +95,10 @@ export const SEOSettings = () => {
   }, [selectedPage, selectedLang]);
 
   const loadGlobalSettings = async () => {
-    if (!profile?.organization_id) return;
+    if (!profile?.organization_id) {
+      setLoading(false);
+      return;
+    }
 
     try {
       const { data, error } = await supabase
@@ -106,12 +109,15 @@ export const SEOSettings = () => {
 
       if (error) {
         console.error('Error loading global SEO settings:', error);
+        setLoading(false);
         return;
       }
 
       setGlobalSettings(data || {});
     } catch (error) {
       console.error('Error loading global SEO settings:', error);
+    } finally {
+      setLoading(false);
     }
   };
 

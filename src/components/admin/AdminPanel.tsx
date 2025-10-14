@@ -44,7 +44,6 @@ export const AdminPanel = () => {
   const { profile, loading } = useOrganization();
   const { t } = useTranslation();
   const [activeSection, setActiveSection] = useState<AdminSection>('blog');
-  const [seoLoading, setSeoLoading] = useState(false);
 
   // Debug logging
   console.log('AdminPanel - Profile:', profile);
@@ -52,18 +51,6 @@ export const AdminPanel = () => {
 
   // Check if user has admin permissions
   const isAdmin = profile?.role === 'admin' || profile?.role === 'org_admin';
-
-  useEffect(() => {
-    // Set loading state for SEO when switching to SEO section
-    if (activeSection === 'seo') {
-      setSeoLoading(true);
-      // Simulate loading delay to prevent hanging
-      const timer = setTimeout(() => {
-        setSeoLoading(false);
-      }, 1000);
-      return () => clearTimeout(timer);
-    }
-  }, [activeSection]);
 
   if (loading) {
     return (
@@ -100,13 +87,7 @@ export const AdminPanel = () => {
       case 'blog':
         return <BlogEditor />;
       case 'seo':
-        return seoLoading ? (
-          <div className="flex items-center justify-center h-64">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-          </div>
-        ) : (
-          <SEOSettings />
-        );
+        return <SEOSettings />;
       case 'announcements':
         return <AnnouncementBarManager />;
       default:

@@ -272,6 +272,43 @@ export const useContentManagement = () => {
     }
   };
 
+  // Delete blog post
+  const deleteBlogPost = async (id: string) => {
+    if (!isAdmin) {
+      toast({
+        title: "Access Denied",
+        description: "You don't have permission to delete blog posts",
+        variant: "destructive",
+      });
+      return false;
+    }
+
+    try {
+      const { error } = await supabase
+        .from('blog_posts')
+        .delete()
+        .eq('id', id);
+
+      if (error) throw error;
+
+      toast({
+        title: "Success",
+        description: "Blog post deleted successfully",
+      });
+
+      await fetchBlogPosts();
+      return true;
+    } catch (error) {
+      console.error('Error deleting blog post:', error);
+      toast({
+        title: "Error",
+        description: "Failed to delete blog post",
+        variant: "destructive",
+      });
+      return false;
+    }
+  };
+
   // Get content by page and section
   const getContent = (pageIdentifier: string, sectionKey: string, defaultContent = '') => {
     const content = pageContents.find(
@@ -296,6 +333,7 @@ export const useContentManagement = () => {
     upsertPageContent,
     createBlogPost,
     updateBlogPost,
+    deleteBlogPost,
     getContent,
     refetch: () => {
       fetchPageContent();
