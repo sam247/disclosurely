@@ -1,4 +1,5 @@
 import { Home, Bot, Users, Palette, Lock, BarChart3, ScrollText, Link as LinkIcon, MessageSquare, Info, FileText } from 'lucide-react';
+import { Separator } from '@/components/ui/separator';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { Sidebar, SidebarContent, SidebarFooter, SidebarGroup, SidebarGroupContent, SidebarHeader, SidebarMenu, SidebarMenuButton, SidebarMenuItem } from '@/components/ui/sidebar';
 import { useSubscriptionLimits } from '@/hooks/useSubscriptionLimits';
@@ -127,7 +128,10 @@ const DashboardSidebar = ({
           <LanguageSelector collapsed={false} />
         </div>
         
-        {/* Privacy and Terms below the line */}
+        {/* Separator line */}
+        <Separator />
+        
+        {/* Privacy and Terms below the separator */}
         <div className="flex items-center gap-2 px-3 py-2 text-sm text-muted-foreground">
           <FileText className="h-4 w-4" />
           <div className="flex gap-2">
