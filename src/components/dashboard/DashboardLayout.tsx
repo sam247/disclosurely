@@ -10,7 +10,6 @@ import SubscriptionManagement from '@/components/SubscriptionManagement';
 import { supabase } from '@/integrations/supabase/client';
 import NotificationSystem from '@/components/NotificationSystem';
 import { useTranslation } from 'react-i18next';
-import PageWithAnnouncement from '@/components/PageWithAnnouncement';
 
 interface DashboardLayoutProps {
   children: ReactNode;
@@ -60,61 +59,59 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
 
   return (
     <SidebarProvider defaultOpen={true}>
-      <PageWithAnnouncement showOnFrontend={false} showOnBackend={true}>
-        <div className="min-h-screen flex w-full">
-          <DashboardSidebar onLockedFeatureClick={handleLockedFeatureClick} />
-          
-          <div className="flex-1 flex flex-col min-w-0">
-            {/* Header */}
-            <header className="h-16 border-b bg-background flex items-center justify-between px-4 md:px-6 sticky top-0 z-10">
-              <div className="flex items-center gap-3">
-                <h1 className="text-base md:text-lg font-semibold truncate">
-                  {t('welcomeBack')}{firstName && `, ${firstName}`}
-                </h1>
-              </div>
-              <div className="flex items-center gap-2">
-                <NotificationSystem />
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => navigate('/dashboard/settings')}
-                  className="gap-2"
-                >
-                  <User className="h-4 w-4" />
-                  <span className="hidden sm:inline">{t('profile')}</span>
-                </Button>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={handleLogout}
-                  className="gap-2"
-                >
-                  <LogOut className="h-4 w-4" />
-                  <span className="hidden sm:inline">{t('logout')}</span>
-                </Button>
-              </div>
-            </header>
+      <div className="min-h-screen flex w-full">
+        <DashboardSidebar onLockedFeatureClick={handleLockedFeatureClick} />
+        
+        <div className="flex-1 flex flex-col min-w-0">
+          {/* Header */}
+          <header className="h-16 border-b bg-background flex items-center justify-between px-4 md:px-6 sticky top-0 z-10">
+            <div className="flex items-center gap-3">
+              <h1 className="text-base md:text-lg font-semibold truncate">
+                {t('welcomeBack')}{firstName && `, ${firstName}`}
+              </h1>
+            </div>
+            <div className="flex items-center gap-2">
+              <NotificationSystem />
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => navigate('/dashboard/settings')}
+                className="gap-2"
+              >
+                <User className="h-4 w-4" />
+                <span className="hidden sm:inline">{t('profile')}</span>
+              </Button>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={handleLogout}
+                className="gap-2"
+              >
+                <LogOut className="h-4 w-4" />
+                <span className="hidden sm:inline">{t('logout')}</span>
+              </Button>
+            </div>
+          </header>
 
-            {/* Main Content */}
-            <main className="flex-1 overflow-auto p-4 md:p-6">
-              {children}
-            </main>
-          </div>
+          {/* Main Content */}
+          <main className="flex-1 overflow-auto p-4 md:p-6">
+            {children}
+          </main>
         </div>
+      </div>
 
-        {/* Upgrade Modal */}
-        <Dialog open={showUpgradeModal} onOpenChange={setShowUpgradeModal}>
-          <DialogContent className="max-w-3xl">
-            <DialogHeader>
-              <DialogTitle>{t('upgradeRequired')}</DialogTitle>
-              <DialogDescription>
-                {t('upgradeDescription', { feature: lockedFeature })}
-              </DialogDescription>
-            </DialogHeader>
-            <SubscriptionManagement />
-          </DialogContent>
-        </Dialog>
-      </PageWithAnnouncement>
+      {/* Upgrade Modal */}
+      <Dialog open={showUpgradeModal} onOpenChange={setShowUpgradeModal}>
+        <DialogContent className="max-w-3xl">
+          <DialogHeader>
+            <DialogTitle>{t('upgradeRequired')}</DialogTitle>
+            <DialogDescription>
+              {t('upgradeDescription', { feature: lockedFeature })}
+            </DialogDescription>
+          </DialogHeader>
+          <SubscriptionManagement />
+        </DialogContent>
+      </Dialog>
     </SidebarProvider>
   );
 };

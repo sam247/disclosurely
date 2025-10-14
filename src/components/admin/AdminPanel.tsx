@@ -2,15 +2,14 @@ import { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Settings, FileText, Globe, Users, Megaphone, ChevronRight } from 'lucide-react';
+import { Settings, FileText, Globe, Users, ChevronRight } from 'lucide-react';
 import { BlogEditor } from './BlogEditor';
 import { SEOSettings } from './SEOSettings';
-import { AnnouncementBarManager } from './AnnouncementBarManager';
 import { useOrganization } from '@/hooks/useOrganization';
 import { useTranslation } from 'react-i18next';
 import { cn } from '@/lib/utils';
 
-type AdminSection = 'blog' | 'seo' | 'announcements';
+type AdminSection = 'blog' | 'seo';
 
 interface AdminMenuItem {
   id: AdminSection;
@@ -31,12 +30,6 @@ const adminMenuItems: AdminMenuItem[] = [
     label: 'SEO Settings',
     icon: Globe,
     description: 'Configure SEO and meta settings'
-  },
-  {
-    id: 'announcements',
-    label: 'Announcement Bar',
-    icon: Megaphone,
-    description: 'Manage site-wide announcements'
   }
 ];
 
@@ -88,8 +81,6 @@ export const AdminPanel = () => {
         return <BlogEditor />;
       case 'seo':
         return <SEOSettings />;
-      case 'announcements':
-        return <AnnouncementBarManager />;
       default:
         return <BlogEditor />;
     }
