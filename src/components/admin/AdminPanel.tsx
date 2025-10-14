@@ -1,16 +1,50 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
-import { Settings, FileText, Globe, Users } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Settings, FileText, Globe, Users, Megaphone, ChevronRight } from 'lucide-react';
 import { BlogEditor } from './BlogEditor';
 import { SEOSettings } from './SEOSettings';
+import { AnnouncementBarManager } from './AnnouncementBarManager';
 import { useOrganization } from '@/hooks/useOrganization';
 import { useTranslation } from 'react-i18next';
+import { cn } from '@/lib/utils';
+
+type AdminSection = 'blog' | 'seo' | 'announcements';
+
+interface AdminMenuItem {
+  id: AdminSection;
+  label: string;
+  icon: React.ComponentType<{ className?: string }>;
+  description: string;
+}
+
+const adminMenuItems: AdminMenuItem[] = [
+  {
+    id: 'blog',
+    label: 'Blog Management',
+    icon: FileText,
+    description: 'Create and manage blog posts'
+  },
+  {
+    id: 'seo',
+    label: 'SEO Settings',
+    icon: Globe,
+    description: 'Configure SEO and meta settings'
+  },
+  {
+    id: 'announcements',
+    label: 'Announcement Bar',
+    icon: Megaphone,
+    description: 'Manage site-wide announcements'
+  }
+];
 
 export const AdminPanel = () => {
   const { profile, loading } = useOrganization();
   const { t } = useTranslation();
+  const [activeSection, setActiveSection] = useState<AdminSection>('blog');
+  const [seoLoading, setSeoLoading] = useState(false);
 
   // Debug logging
   console.log('AdminPanel - Profile:', profile);
@@ -18,6 +52,18 @@ export const AdminPanel = () => {
 
   // Check if user has admin permissions
   const isAdmin = profile?.role === 'admin' || profile?.role === 'org_admin';
+
+  useEffect(() => {
+    // Set loading state for SEO when switching to SEO section
+    if (activeSection === 'seo') {
+      setSeoLoading(true);
+      // Simulate loading delay to prevent hanging
+      const timer = setTimeout(() => {
+        setSeoLoading(false);
+      }, 1000);
+      return () => clearTimeout(timer);
+    }
+  }, [activeSection]);
 
   if (loading) {
     return (
@@ -49,6 +95,25 @@ export const AdminPanel = () => {
     );
   }
 
+  const renderContent = () => {
+    switch (activeSection) {
+      case 'blog':
+        return <BlogEditor />;
+      case 'seo':
+        return seoLoading ? (
+          <div className="flex items-center justify-center h-64">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+          </div>
+        ) : (
+          <SEOSettings />
+        );
+      case 'announcements':
+        return <AnnouncementBarManager />;
+      default:
+        return <BlogEditor />;
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
@@ -70,28 +135,85 @@ export const AdminPanel = () => {
         </div>
       </div>
 
-      {/* Main Content */}
       <div className="max-w-7xl mx-auto p-8">
-        <Tabs defaultValue="blog" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-2">
-            <TabsTrigger value="blog" className="flex items-center gap-2">
-              <FileText className="h-4 w-4" />
-              {t('admin.blogManagement')}
-            </TabsTrigger>
-            <TabsTrigger value="seo" className="flex items-center gap-2">
-              <Globe className="h-4 w-4" />
-              {t('admin.seoSettings')}
-            </TabsTrigger>
-          </TabsList>
+        <div className="flex gap-8">
+          {/* Sidebar Navigation */}
+          <div className="w-80 flex-shrink-0">
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-lg">Admin Sections</CardTitle>
+                <CardDescription>
+                  Choose a section to manage
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="p-0">
+                <nav className="space-y-1">
+                  {adminMenuItems.map((item) => {
+                    const Icon = item.icon;
+                    const isActive = activeSection === item.id;
+                    
+                    return (
+                      <button
+                        key={item.id}
+                        onClick={() => setActiveSection(item.id)}
+                        className={cn(
+                          "w-full flex items-center gap-3 px-4 py-3 text-left transition-colors hover:bg-gray-50",
+                          isActive && "bg-blue-50 border-r-2 border-blue-600"
+                        )}
+                      >
+                        <Icon className={cn(
+                          "h-5 w-5",
+                          isActive ? "text-blue-600" : "text-gray-500"
+                        )} />
+                        <div className="flex-1">
+                          <div className={cn(
+                            "font-medium",
+                            isActive ? "text-blue-900" : "text-gray-900"
+                          )}>
+                            {item.label}
+                          </div>
+                          <div className="text-sm text-gray-600">
+                            {item.description}
+                          </div>
+                        </div>
+                        <ChevronRight className={cn(
+                          "h-4 w-4",
+                          isActive ? "text-blue-600" : "text-gray-400"
+                        )} />
+                      </button>
+                    );
+                  })}
+                </nav>
+              </CardContent>
+            </Card>
+          </div>
 
-          <TabsContent value="blog" className="space-y-6">
-            <BlogEditor />
-          </TabsContent>
-
-          <TabsContent value="seo" className="space-y-6">
-            <SEOSettings />
-          </TabsContent>
-        </Tabs>
+          {/* Main Content */}
+          <div className="flex-1 min-w-0">
+            <Card>
+              <CardHeader>
+                <div className="flex items-center gap-3">
+                  {(() => {
+                    const activeItem = adminMenuItems.find(item => item.id === activeSection);
+                    const Icon = activeItem?.icon || FileText;
+                    return <Icon className="h-6 w-6 text-primary" />;
+                  })()}
+                  <div>
+                    <CardTitle className="text-xl">
+                      {adminMenuItems.find(item => item.id === activeSection)?.label}
+                    </CardTitle>
+                    <CardDescription>
+                      {adminMenuItems.find(item => item.id === activeSection)?.description}
+                    </CardDescription>
+                  </div>
+                </div>
+              </CardHeader>
+              <CardContent>
+                {renderContent()}
+              </CardContent>
+            </Card>
+          </div>
+        </div>
       </div>
     </div>
   );
