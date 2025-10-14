@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Link } from "react-router-dom";
 import { Footer } from "@/components/ui/footer";
-import PublicLanguageSelector from "@/components/PublicLanguageSelector";
+import { StandardHeader } from "@/components/StandardHeader";
 import { useLanguageFromUrl } from "@/hooks/useLanguageFromUrl";
 import { useTranslation } from "react-i18next";
 
@@ -14,42 +14,7 @@ const Pricing = () => {
 
   return (
     <div className="min-h-screen bg-white">
-      {/* Navigation */}
-      <nav className="bg-white shadow-sm sticky top-0 z-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center py-4">
-            <div className="flex items-center">
-              <Link to="/" className="flex items-center space-x-3">
-                <img
-                  src="/lovable-uploads/c46ace0e-df58-4119-b5e3-8dcfa075ea2f.png"
-                  alt="Disclosurely"
-                  className="h-6 md:h-8 w-auto"
-                />
-              </Link>
-            </div>
-            <div className="hidden md:flex items-center space-x-4">
-              <PublicLanguageSelector />
-              <Link to={`${langPrefix}/pricing`} className="text-blue-600 font-medium">
-                {t("nav.pricing")}
-              </Link>
-              <Link
-                to={`${langPrefix}/auth/signup`}
-                className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors"
-              >
-                {t("nav.getStarted")}
-              </Link>
-            </div>
-            <div className="md:hidden">
-              <Link
-                to={`${langPrefix}/auth/login`}
-                className="bg-blue-600 text-white px-3 py-2 rounded-lg hover:bg-blue-700 transition-colors text-sm"
-              >
-                {t("nav.signin")}
-              </Link>
-            </div>
-          </div>
-        </div>
-      </nav>
+      <StandardHeader currentLanguage={currentLanguage} />
 
       {/* Hero Section */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-[150px] pb-20">

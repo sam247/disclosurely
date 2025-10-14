@@ -4,9 +4,13 @@ import { Helmet } from 'react-helmet-async';
 import DynamicHelmet from '@/components/DynamicHelmet';
 import { Card, CardContent } from '@/components/ui/card';
 import { Shield, Eye, CheckCircle, Headphones } from 'lucide-react';
+import { StandardHeader } from '@/components/StandardHeader';
+import { Footer } from '@/components/ui/footer';
+import { useLanguageFromUrl } from '@/hooks/useLanguageFromUrl';
 
 const About: React.FC = () => {
   const { t } = useTranslation();
+  const { currentLanguage } = useLanguageFromUrl();
 
   return (
     <>
@@ -16,6 +20,7 @@ const About: React.FC = () => {
         fallbackDescription={t('about.meta.description')}
       />
       
+      <StandardHeader currentLanguage={currentLanguage} />
       <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
         {/* Hero Section */}
         <section className="relative py-20 px-4 sm:px-6 lg:px-8">
@@ -145,6 +150,7 @@ const About: React.FC = () => {
           </div>
         </section>
       </div>
+      <Footer />
     </>
   );
 };

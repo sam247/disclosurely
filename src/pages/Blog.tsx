@@ -7,7 +7,9 @@ import { supabase } from '@/integrations/supabase/client';
 import { formatDistanceToNow } from 'date-fns';
 import { Link, useParams, useSearchParams } from 'react-router-dom';
 import { Footer } from '@/components/ui/footer';
+import { StandardHeader } from '@/components/StandardHeader';
 import { formatMarkdownToHtml } from '@/utils/markdownFormatter';
+import { useLanguageFromUrl } from '@/hooks/useLanguageFromUrl';
 
 interface BlogPost {
   id: string;
@@ -146,6 +148,7 @@ const Blog = () => {
   const [currentPost, setCurrentPost] = useState<BlogPost | null>(null);
   const [loading, setLoading] = useState(true);
   const selectedCategory = searchParams.get('category');
+  const { currentLanguage } = useLanguageFromUrl();
 
   useEffect(() => {
     if (slug) {
@@ -282,21 +285,8 @@ const Blog = () => {
   // Blog listing view
   return (
     <>
+      <StandardHeader currentLanguage={currentLanguage} />
       <div className="min-h-screen bg-background">
-        {/* Header Section */}
-        <div className="bg-gradient-to-br from-blue-50 to-indigo-100 border-b">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
-            <div className="text-center">
-              <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">
-                Disclosurely Blog
-              </h1>
-              <p className="text-lg md:text-xl text-gray-600 max-w-3xl mx-auto">
-                Insights, best practices, and updates on whistleblowing, compliance, and workplace transparency
-              </p>
-            </div>
-          </div>
-        </div>
-
         {/* Content with sidebar */}
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
           <div className="flex gap-12">

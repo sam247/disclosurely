@@ -18,9 +18,13 @@ import {
   TrendingUp,
   Download
 } from 'lucide-react';
+import { StandardHeader } from '@/components/StandardHeader';
+import { Footer } from '@/components/ui/footer';
+import { useLanguageFromUrl } from '@/hooks/useLanguageFromUrl';
 
 const Features: React.FC = () => {
   const { t } = useTranslation();
+  const { currentLanguage } = useLanguageFromUrl();
 
   return (
     <>
@@ -29,6 +33,8 @@ const Features: React.FC = () => {
         fallbackTitle={t('features.meta.title')}
         fallbackDescription={t('features.meta.description')}
       />
+      
+      <StandardHeader currentLanguage={currentLanguage} />
       
       <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
         {/* Hero Section */}
@@ -283,6 +289,7 @@ const Features: React.FC = () => {
           </div>
         </section>
       </div>
+      <Footer />
     </>
   );
 };

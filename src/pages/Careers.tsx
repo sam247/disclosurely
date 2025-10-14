@@ -14,9 +14,13 @@ import {
   Award,
   Mail
 } from 'lucide-react';
+import { StandardHeader } from '@/components/StandardHeader';
+import { Footer } from '@/components/ui/footer';
+import { useLanguageFromUrl } from '@/hooks/useLanguageFromUrl';
 
 const Careers: React.FC = () => {
   const { t } = useTranslation();
+  const { currentLanguage } = useLanguageFromUrl();
 
   return (
     <>
@@ -25,6 +29,8 @@ const Careers: React.FC = () => {
         fallbackTitle={t('careers.meta.title')}
         fallbackDescription={t('careers.meta.description')}
       />
+      
+      <StandardHeader currentLanguage={currentLanguage} />
       
       <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
         {/* Hero Section */}
@@ -236,6 +242,7 @@ const Careers: React.FC = () => {
           </div>
         </section>
       </div>
+      <Footer />
     </>
   );
 };

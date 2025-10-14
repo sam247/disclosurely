@@ -44,16 +44,6 @@ export const Footer = () => {
                   Compliance Software
                 </Link>
               </li>
-              <li>
-                <Link to={`${langPrefix}/vs-speakup`} className="text-gray-400 hover:text-white">
-                  vs SpeakUp
-                </Link>
-              </li>
-              <li>
-                <Link to={`${langPrefix}/vs-whistleblower-software`} className="text-gray-400 hover:text-white">
-                  vs Whistleblower Software
-                </Link>
-              </li>
               <li className="pt-2">
                 <SystemStatusIndicator />
               </li>
