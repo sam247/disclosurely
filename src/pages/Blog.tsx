@@ -30,6 +30,7 @@ const SAMPLE_POSTS: BlogPost[] = [
     title: 'Understanding the EU Whistleblowing Directive',
     slug: 'understanding-eu-whistleblowing-directive',
     excerpt: 'A comprehensive guide to compliance with the EU Whistleblowing Directive and how it affects your organization.',
+    featured_image_url: 'https://images.unsplash.com/photo-1589829545856-d10d557cf95f?w=800&h=400&fit=crop&crop=center',
     content: `# Understanding the EU Whistleblowing Directive
 
 The EU Whistleblowing Directive (Directive (EU) 2019/1937) represents a significant step forward in protecting individuals who report breaches of EU law.
@@ -54,6 +55,7 @@ Implementing a compliant whistleblowing system is not just about meeting legal r
     title: 'Best Practices for Anonymous Reporting',
     slug: 'best-practices-anonymous-reporting',
     excerpt: 'Learn how to implement effective anonymous reporting channels while maintaining trust and security.',
+    featured_image_url: 'https://images.unsplash.com/photo-1555949963-aa79dcee981c?w=800&h=400&fit=crop&crop=center',
     content: `# Best Practices for Anonymous Reporting
 
 Anonymous reporting is a critical component of any effective whistleblowing system. Here's how to get it right.
@@ -78,6 +80,7 @@ Even anonymous reports deserve acknowledgment and follow-up. Implement two-way m
     title: 'Case Study: Implementing Secure Whistleblowing in Healthcare',
     slug: 'case-study-healthcare-whistleblowing',
     excerpt: 'How a major healthcare provider transformed their compliance program with secure digital reporting.',
+    featured_image_url: 'https://images.unsplash.com/photo-1576091160399-112ba8d25d1f?w=800&h=400&fit=crop&crop=center',
     content: `# Case Study: Healthcare Compliance Transformation
 
 When a 500-bed hospital network needed to modernize their whistleblowing procedures, they faced unique challenges in the healthcare sector.
@@ -105,6 +108,7 @@ Within six months, the hospital identified and resolved several critical safety 
     title: 'The Future of Workplace Transparency',
     slug: 'future-workplace-transparency',
     excerpt: 'Exploring emerging trends in organizational transparency and how technology is reshaping corporate accountability.',
+    featured_image_url: 'https://images.unsplash.com/photo-1451187580459-43490279c0fa?w=800&h=400&fit=crop&crop=center',
     content: `# The Future of Workplace Transparency
 
 As we move further into 2025, workplace transparency is no longer optional—it's expected by employees, regulators, and stakeholders alike.
@@ -279,15 +283,29 @@ const Blog = () => {
   return (
     <>
       <div className="min-h-screen bg-background">
+        {/* Header Section */}
+        <div className="bg-gradient-to-br from-blue-50 to-indigo-100 border-b">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+            <div className="text-center">
+              <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">
+                Disclosurely Blog
+              </h1>
+              <p className="text-lg md:text-xl text-gray-600 max-w-3xl mx-auto">
+                Insights, best practices, and updates on whistleblowing, compliance, and workplace transparency
+              </p>
+            </div>
+          </div>
+        </div>
+
         {/* Content with sidebar */}
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
           <div className="flex gap-12">
             {/* Left Sidebar - Categories */}
             <aside className="w-64 flex-shrink-0">
               <div className="sticky top-8">
-                <h1 className="text-3xl font-bold mb-2">Blog</h1>
+                <h2 className="text-xl font-semibold mb-2">Categories</h2>
                 <p className="text-sm text-muted-foreground mb-8">
-                  Compiled notes from the Disclosurely team
+                  Filter posts by topic
                 </p>
                 
                 <nav className="space-y-1">

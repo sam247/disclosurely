@@ -1,6 +1,7 @@
 import { Link } from "react-router-dom";
 import { SystemStatusIndicator } from "@/components/SystemStatusIndicator";
 import { useTranslation } from 'react-i18next';
+import { Linkedin, Facebook, Instagram } from 'lucide-react';
 
 export const Footer = () => {
   const { i18n } = useTranslation();
@@ -29,7 +30,7 @@ export const Footer = () => {
             <h3 className="font-semibold mb-4">Product</h3>
             <ul className="space-y-2">
               <li>
-                <Link to={`${langPrefix}/`} className="text-gray-400 hover:text-white">
+                <Link to={`${langPrefix}/features`} className="text-gray-400 hover:text-white">
                   Features
                 </Link>
               </li>
@@ -44,9 +45,17 @@ export const Footer = () => {
                 </Link>
               </li>
               <li>
-                <Link to={`${langPrefix}/whistleblowing-directive`} className="text-gray-400 hover:text-white">
-                  Whistleblowing Directive
+                <Link to={`${langPrefix}/vs-speakup`} className="text-gray-400 hover:text-white">
+                  vs SpeakUp
                 </Link>
+              </li>
+              <li>
+                <Link to={`${langPrefix}/vs-whistleblower-software`} className="text-gray-400 hover:text-white">
+                  vs Whistleblower Software
+                </Link>
+              </li>
+              <li className="pt-2">
+                <SystemStatusIndicator />
               </li>
             </ul>
           </div>
@@ -55,23 +64,23 @@ export const Footer = () => {
             <h3 className="font-semibold mb-4">Company</h3>
             <ul className="space-y-2">
               <li>
-                <Link to={`${langPrefix}/`} className="text-gray-400 hover:text-white">
+                <Link to={`${langPrefix}/about`} className="text-gray-400 hover:text-white">
                   About Us
                 </Link>
               </li>
               <li>
-                <Link to={`${langPrefix}/`} className="text-gray-400 hover:text-white">
+                <Link to={`${langPrefix}/careers`} className="text-gray-400 hover:text-white">
                   Careers
                 </Link>
               </li>
               <li>
                 <Link to={`${langPrefix}/blog`} className="text-gray-400 hover:text-white">
-                  Disclosurely Blog
+                  Blog
                 </Link>
               </li>
               <li>
                 <Link to={`${langPrefix}/contact`} className="text-gray-400 hover:text-white">
-                  Contact Us
+                  Contact
                 </Link>
               </li>
             </ul>
@@ -107,13 +116,36 @@ export const Footer = () => {
         <div className="border-t border-gray-800 mt-8 pt-8">
           <div className="flex justify-between items-center">
             <p className="text-gray-400 text-sm">
-              © 2025 Disclosurely. All rights reserved.{" "}
-              <Link to={`${langPrefix}/compliance-software`} className="hover:text-white">
-                Compliance Software
-              </Link>
-              .
+              © 2025 Disclosurely. All rights reserved.
             </p>
-            <SystemStatusIndicator />
+            <div className="flex items-center gap-4">
+              <div className="flex items-center gap-3">
+                <a 
+                  href="https://linkedin.com/company/disclosurely" 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="text-gray-400 hover:text-white transition-colors"
+                >
+                  <Linkedin className="h-5 w-5" />
+                </a>
+                <a 
+                  href="https://facebook.com/disclosurely" 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="text-gray-400 hover:text-white transition-colors"
+                >
+                  <Facebook className="h-5 w-5" />
+                </a>
+                <a 
+                  href="https://instagram.com/disclosurely" 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="text-gray-400 hover:text-white transition-colors"
+                >
+                  <Instagram className="h-5 w-5" />
+                </a>
+              </div>
+            </div>
           </div>
         </div>
       </div>
