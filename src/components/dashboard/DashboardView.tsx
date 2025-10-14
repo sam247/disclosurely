@@ -381,16 +381,10 @@ const DashboardView = () => {
                                 <DropdownMenuItem 
                                   onClick={async () => {
                                     try {
-                                      // Get current tags and add "closed" tag
-                                      const currentTags = report.tags || [];
-                                      const updatedTags = currentTags.includes('closed') 
-                                        ? currentTags 
-                                        : [...currentTags, 'closed'];
-                                      
                                       const { error } = await supabase
                                         .from('reports')
                                         .update({ 
-                                          tags: updatedTags,
+                                          status: 'closed',
                                           closed_at: new Date().toISOString()
                                         })
                                         .eq('id', report.id);

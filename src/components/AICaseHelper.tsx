@@ -36,6 +36,14 @@ interface AICaseHelperProps {
   reportContent?: string;
 }
 
+interface SavedAnalysis {
+  id: string;
+  case_title: string;
+  tracking_id: string;
+  analysis_content: string;
+  created_at: string;
+}
+
 const AICaseHelper: React.FC<AICaseHelperProps> = ({ reportId, reportContent }) => {
   const [analysis, setAnalysis] = useState<string>('');
   const [isAnalyzing, setIsAnalyzing] = useState(false);
@@ -47,6 +55,9 @@ const AICaseHelper: React.FC<AICaseHelperProps> = ({ reportId, reportContent }) 
   const [isUploading, setIsUploading] = useState(false);
   const [isLoadingCases, setIsLoadingCases] = useState(false);
   const [isLoadingDocs, setIsLoadingDocs] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
+  const [analysisProgress, setAnalysisProgress] = useState(0);
+  const [currentAnalysisData, setCurrentAnalysisData] = useState<any>(null);
   const { user } = useAuth();
   const { organization } = useOrganization();
   const { toast } = useToast();
@@ -207,8 +218,10 @@ const AICaseHelper: React.FC<AICaseHelperProps> = ({ reportId, reportContent }) 
     }
 
     setIsAnalyzing(true);
+    setAnalysisProgress(10);
     try {
       // Get selected case data
+      setAnalysisProgress(20);
       const { data: caseData, error: caseError } = await supabase
         .from('reports')
         .select('*')
@@ -216,6 +229,7 @@ const AICaseHelper: React.FC<AICaseHelperProps> = ({ reportId, reportContent }) 
         .single();
 
       if (caseError) throw caseError;
+      setAnalysisProgress(30);
 
       // Decrypt the report content for AI analysis
       let decryptedContent = reportContent || '[Case content not available]';
@@ -241,6 +255,7 @@ Case Details:
       }
 
       // Process selected documents
+      setAnalysisProgress(50);
       const companyDocuments = [];
       for (const docId of selectedDocs) {
         const doc = documents.find(d => d.id === docId);
@@ -270,8 +285,10 @@ Case Details:
           });
         }
       }
+      setAnalysisProgress(70);
 
       // Invoke AI analysis with decrypted content
+      setAnalysisProgress(80);
       const { data, error } = await supabase.functions.invoke('analyze-case-with-ai', {
         body: {
           caseData: {
@@ -290,7 +307,17 @@ Case Details:
 
       if (error) throw error;
 
+      setAnalysisProgress(100);
       setAnalysis(data.analysis);
+      
+      // Store current analysis data for saving
+      setCurrentAnalysisData({
+        caseData,
+        customPrompt: prompt,
+        companyDocuments,
+        analysis: data.analysis
+      });
+
       toast({
         title: "Analysis Complete",
         description: "AI analysis has been generated for this case."
@@ -302,6 +329,7 @@ Case Details:
         description: "Failed to generate AI analysis. Please try again.",
         variant: "destructive"
       });
+      setAnalysisProgress(0);
     } finally {
       setIsAnalyzing(false);
     }
@@ -321,12 +349,60 @@ Case Details:
     );
   };
 
+  const saveAnalysis = async () => {
+    if (!currentAnalysisData || !organization?.id) {
+      toast({
+        title: "Cannot Save",
+        description: "No analysis available to save.",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    setIsSaving(true);
+    try {
+      const { error } = await supabase
+        .from('ai_case_analyses')
+        .insert({
+          case_id: selectedCaseId,
+          organization_id: organization.id,
+          case_title: currentAnalysisData.caseData.title,
+          tracking_id: currentAnalysisData.caseData.tracking_id,
+          analysis_content: currentAnalysisData.analysis,
+          document_count: currentAnalysisData.companyDocuments?.length || 0,
+          created_by: user?.id
+        });
+
+      if (error) throw error;
+
+      toast({
+        title: "Success",
+        description: "AI analysis has been saved successfully."
+      });
+    } catch (error) {
+      console.error('Error saving analysis:', error);
+      toast({
+        title: "Save Failed",
+        description: "Failed to save analysis. Please try again.",
+        variant: "destructive"
+      });
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-          <Brain className="h-5 w-5" />
-          AI Case Analysis
+        <CardTitle className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <Brain className="h-5 w-5" />
+            AI Case Analysis
+          </div>
+          <div className="flex items-center gap-2 text-sm font-normal">
+            <span className="text-muted-foreground">AI Credits:</span>
+            <span className="font-mono text-lg">∞</span>
+          </div>
         </CardTitle>
         <CardDescription>
           Select a live case and upload company documents for AI-powered analysis
@@ -426,6 +502,22 @@ Case Details:
           )}
         </div>
 
+        {/* Analysis Progress */}
+        {isAnalyzing && (
+          <div className="space-y-2">
+            <div className="flex items-center justify-between text-sm">
+              <span className="text-muted-foreground">Analysis Progress</span>
+              <span className="font-medium">{analysisProgress}%</span>
+            </div>
+            <div className="h-2 bg-secondary rounded-full overflow-hidden">
+              <div 
+                className="h-full bg-primary transition-all duration-500 ease-out"
+                style={{ width: `${analysisProgress}%` }}
+              />
+            </div>
+          </div>
+        )}
+
         {/* Analysis Controls */}
         <div className="space-y-4">
           <div className="flex gap-2">
@@ -472,14 +564,33 @@ Case Details:
 
         {/* Analysis Results */}
         {analysis && (
-          <div className="mt-6 p-4 bg-muted rounded-lg">
-            <h4 className="font-semibold mb-2">AI Analysis Results:</h4>
-            <div 
-              className="prose prose-sm max-w-none"
-              dangerouslySetInnerHTML={{ 
-                __html: sanitizeHtml(formatMarkdownToHtml(analysis))
-              }}
-            />
+          <div className="mt-6 space-y-4">
+            <div className="flex items-center justify-between">
+              <h4 className="font-semibold">AI Analysis Results:</h4>
+              <Button
+                onClick={saveAnalysis}
+                disabled={isSaving}
+                size="sm"
+                variant="outline"
+              >
+                {isSaving ? (
+                  <>
+                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                    Saving...
+                  </>
+                ) : (
+                  'Save Analysis'
+                )}
+              </Button>
+            </div>
+            <div className="p-4 bg-muted rounded-lg">
+              <div 
+                className="prose prose-sm max-w-none"
+                dangerouslySetInnerHTML={{ 
+                  __html: sanitizeHtml(formatMarkdownToHtml(analysis))
+                }}
+              />
+            </div>
           </div>
         )}
       </CardContent>
