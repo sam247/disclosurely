@@ -2,11 +2,10 @@ import { useEffect, useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Calendar, Clock, ArrowRight, Search } from 'lucide-react';
-import { Input } from '@/components/ui/input';
+import { Calendar, ArrowRight } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { formatDistanceToNow } from 'date-fns';
-import { Link, useParams } from 'react-router-dom';
+import { Link, useParams, useSearchParams } from 'react-router-dom';
 import { Footer } from '@/components/ui/footer';
 
 interface BlogPost {
@@ -23,20 +22,70 @@ interface BlogPost {
   organization_id: string;
 }
 
+interface Category {
+  name: string;
+  slug: string;
+  count: number;
+}
+
 const Blog = () => {
   const { slug } = useParams();
+  const [searchParams] = useSearchParams();
+  const categoryParam = searchParams.get('category');
+  
   const [posts, setPosts] = useState<BlogPost[]>([]);
   const [currentPost, setCurrentPost] = useState<BlogPost | null>(null);
   const [loading, setLoading] = useState(true);
-  const [searchTerm, setSearchTerm] = useState('');
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [selectedCategory, setSelectedCategory] = useState<string | null>(categoryParam);
 
   useEffect(() => {
     if (slug) {
       fetchSinglePost();
     } else {
       fetchPosts();
+      fetchCategories();
     }
   }, [slug]);
+
+  useEffect(() => {
+    if (categoryParam) {
+      setSelectedCategory(categoryParam);
+    }
+  }, [categoryParam]);
+
+  const fetchCategories = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('blog_posts')
+        .select('tags')
+        .eq('status', 'published')
+        .lte('published_at', new Date().toISOString());
+
+      if (error) throw error;
+
+      // Extract all unique tags and count them
+      const tagCounts: Record<string, number> = {};
+      data?.forEach(post => {
+        post.tags?.forEach((tag: string) => {
+          tagCounts[tag] = (tagCounts[tag] || 0) + 1;
+        });
+      });
+
+      const categoryList: Category[] = Object.entries(tagCounts).map(([tag, count]) => ({
+        name: tag.charAt(0).toUpperCase() + tag.slice(1).replace(/-/g, ' '),
+        slug: tag,
+        count
+      }));
+
+      setCategories([
+        { name: 'Latest', slug: 'latest', count: data?.length || 0 },
+        ...categoryList.sort((a, b) => a.name.localeCompare(b.name))
+      ]);
+    } catch (error) {
+      console.error('Error fetching categories:', error);
+    }
+  };
 
   const fetchPosts = async () => {
     try {
@@ -75,11 +124,10 @@ const Blog = () => {
     }
   };
 
-  const filteredPosts = posts.filter(post =>
-    post.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    post.excerpt?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    post.tags.some(tag => tag.toLowerCase().includes(searchTerm.toLowerCase()))
-  );
+  const filteredPosts = posts.filter(post => {
+    if (!selectedCategory || selectedCategory === 'latest') return true;
+    return post.tags?.includes(selectedCategory);
+  });
 
   if (loading) {
     return (
@@ -110,10 +158,6 @@ const Blog = () => {
               <div className="flex items-center gap-4 text-gray-600 mb-6">
                 <div className="flex items-center gap-1">
                   <Calendar className="h-4 w-4" />
-                  {new Date(currentPost.published_at).toLocaleDateString()}
-                </div>
-                <div className="flex items-center gap-1">
-                  <Clock className="h-4 w-4" />
                   {formatDistanceToNow(new Date(currentPost.published_at), { addSuffix: true })}
                 </div>
               </div>
@@ -149,103 +193,115 @@ const Blog = () => {
   // Blog listing view
   return (
     <>
-      <div className="min-h-screen bg-gray-50">
-        {/* Header */}
-        <div className="bg-white border-b">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
-            <div className="text-center">
-              <h1 className="text-4xl font-bold text-gray-900 mb-4">Blog</h1>
-              <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-                Insights, updates, and expertise in compliance and secure reporting
-              </p>
-            </div>
-          </div>
-        </div>
+      <div className="min-h-screen bg-background">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+          <div className="flex gap-12">
+            {/* Left Sidebar - Categories */}
+            <aside className="w-64 flex-shrink-0">
+              <div className="sticky top-8">
+                <div className="mb-8">
+                  <h1 className="text-3xl font-bold mb-2">Blog</h1>
+                  <p className="text-sm text-muted-foreground">
+                    Compiled notes from the Disclosurely team
+                  </p>
+                </div>
 
-        {/* Content */}
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
-          {/* Search */}
-          <div className="max-w-md mx-auto mb-12">
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5" />
-              <Input
-                type="text"
-                placeholder="Search posts..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-10"
-              />
-            </div>
-          </div>
+                <nav className="space-y-1">
+                  {categories.map((category) => (
+                    <Link
+                      key={category.slug}
+                      to={`/blog?category=${category.slug}`}
+                      onClick={() => setSelectedCategory(category.slug)}
+                      className={`block px-3 py-2 rounded-md text-sm transition-colors ${
+                        selectedCategory === category.slug
+                          ? 'bg-muted text-foreground font-medium'
+                          : 'text-muted-foreground hover:bg-muted/50 hover:text-foreground'
+                      }`}
+                    >
+                      {category.name}
+                    </Link>
+                  ))}
+                </nav>
+              </div>
+            </aside>
 
-          {/* Posts grid */}
-          {filteredPosts.length === 0 ? (
-            <div className="text-center py-16">
-              <p className="text-gray-600 text-lg">
-                {posts.length === 0 
-                  ? "No blog posts published yet. Check back soon!"
-                  : "No posts found matching your search."
-                }
-              </p>
-            </div>
-          ) : (
-            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-              {filteredPosts.map((post) => (
-                <Card key={post.id} className="h-full flex flex-col">
-                  {post.featured_image_url && (
-                    <div className="aspect-video overflow-hidden rounded-t-lg">
-                      <img
-                        src={post.featured_image_url}
-                        alt={post.title}
-                        className="w-full h-full object-cover"
-                      />
-                    </div>
-                  )}
-                  
-                  <CardHeader className="flex-1">
-                    <div className="flex items-center gap-2 text-sm text-gray-600 mb-2">
-                      <Calendar className="h-4 w-4" />
-                      {new Date(post.published_at).toLocaleDateString()}
-                    </div>
-                    
-                    <CardTitle className="text-xl mb-2 line-clamp-2">
-                      {post.title}
-                    </CardTitle>
-                    
-                    {post.excerpt && (
-                      <CardDescription className="line-clamp-3">
-                        {post.excerpt}
-                      </CardDescription>
-                    )}
+            {/* Main Content */}
+            <main className="flex-1">
+              {/* Category Header */}
+              {selectedCategory && (
+                <div className="mb-8">
+                  <h2 className="text-2xl font-bold mb-2 capitalize">
+                    {categories.find(c => c.slug === selectedCategory)?.name || 'Latest'}
+                  </h2>
+                  <p className="text-muted-foreground">
+                    {selectedCategory === 'latest' 
+                      ? 'Our latest insights and updates'
+                      : `Articles about ${categories.find(c => c.slug === selectedCategory)?.name.toLowerCase()}`
+                    }
+                  </p>
+                </div>
+              )}
 
-                    {post.tags.length > 0 && (
-                      <div className="flex flex-wrap gap-1 mt-3">
-                        {post.tags.slice(0, 3).map((tag, index) => (
-                          <Badge key={index} variant="outline" className="text-xs">
-                            {tag}
-                          </Badge>
-                        ))}
-                        {post.tags.length > 3 && (
-                          <Badge variant="outline" className="text-xs">
-                            +{post.tags.length - 3} more
-                          </Badge>
+              {/* Posts Grid */}
+              {filteredPosts.length === 0 ? (
+                <div className="text-center py-16">
+                  <p className="text-muted-foreground">
+                    {posts.length === 0 
+                      ? "No blog posts published yet. Check back soon!"
+                      : "No posts found in this category."
+                    }
+                  </p>
+                </div>
+              ) : (
+                <div className="grid md:grid-cols-2 gap-6">
+                  {filteredPosts.map((post) => (
+                    <Link 
+                      key={post.id} 
+                      to={`/blog/${post.slug}`}
+                      className="group"
+                    >
+                      <Card className="h-full flex flex-col overflow-hidden hover:shadow-lg transition-shadow">
+                        {post.featured_image_url && (
+                          <div className="aspect-video overflow-hidden bg-muted">
+                            <img
+                              src={post.featured_image_url}
+                              alt={post.title}
+                              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                            />
+                          </div>
                         )}
-                      </div>
-                    )}
-                  </CardHeader>
-                  
-                  <CardContent className="pt-0">
-                    <Button asChild variant="outline" className="w-full">
-                      <Link to={`/blog/${post.slug}`} className="flex items-center justify-center gap-2">
-                        Read More
-                        <ArrowRight className="h-4 w-4" />
-                      </Link>
-                    </Button>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-          )}
+                        
+                        <CardHeader className="flex-1">
+                          {post.tags.length > 0 && (
+                            <Badge variant="secondary" className="w-fit text-xs mb-2">
+                              {post.tags[0]}
+                            </Badge>
+                          )}
+                          
+                          <CardTitle className="text-xl mb-2 line-clamp-2 group-hover:text-primary transition-colors">
+                            {post.title}
+                          </CardTitle>
+                          
+                          {post.excerpt && (
+                            <CardDescription className="line-clamp-3">
+                              {post.excerpt}
+                            </CardDescription>
+                          )}
+                        </CardHeader>
+                        
+                        <CardContent className="pt-0">
+                          <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                            <Calendar className="h-4 w-4" />
+                            <time>{formatDistanceToNow(new Date(post.published_at), { addSuffix: true })}</time>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    </Link>
+                  ))}
+                </div>
+              )}
+            </main>
+          </div>
         </div>
       </div>
       <Footer />
