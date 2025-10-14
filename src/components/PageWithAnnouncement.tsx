@@ -13,7 +13,13 @@ const PageWithAnnouncement: React.FC<PageWithAnnouncementProps> = ({
   showOnFrontend = true,
   showOnBackend = false
 }) => {
-  const { announcements, loading } = useAnnouncements(showOnFrontend);
+  // Determine which announcements to show based on the flags
+  const shouldShowFrontend = showOnFrontend;
+  const shouldShowBackend = showOnBackend;
+  
+  console.log('PageWithAnnouncement props:', { showOnFrontend, showOnBackend, shouldShowFrontend, shouldShowBackend });
+  
+  const { announcements, loading } = useAnnouncements(shouldShowFrontend, shouldShowBackend);
   const [dismissedAnnouncements, setDismissedAnnouncements] = useState<Set<string>>(new Set());
 
   // Filter out dismissed announcements
