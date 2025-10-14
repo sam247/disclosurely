@@ -34,6 +34,9 @@ import ReportStatusLookup from './components/ReportStatusLookup';
 import AdminDashboard from './pages/AdminDashboard';
 import Blog from './pages/Blog';
 import WhistleblowerMessagingPage from './pages/WhistleblowerMessaging';
+import About from './pages/About';
+import Features from './pages/Features';
+import Careers from './pages/Careers';
 
 // Component to handle session timeout only for authenticated users
 const SessionTimeoutManager = () => {
@@ -64,6 +67,9 @@ const AppContent = () => {
         <Route path="/pricing" element={<Pricing />} />
         <Route path="/contact" element={<Contact />} />
         <Route path="/terms" element={<Terms />} />
+        <Route path="/about" element={<About />} />
+        <Route path="/features" element={<Features />} />
+        <Route path="/careers" element={<Careers />} />
         <Route path="/vs-speakup" element={<VsSpeakUp />} />
         <Route path="/vs-whistleblower-software" element={<VsWhistleblowerSoftware />} />
         <Route path="/compliance-software" element={<ComplianceSoftware />} />
@@ -74,6 +80,9 @@ const AppContent = () => {
         <Route path="/:lang/contact" element={<Contact />} />
         <Route path="/:lang/terms" element={<Terms />} />
         <Route path="/:lang/privacy" element={<Privacy />} />
+        <Route path="/:lang/about" element={<About />} />
+        <Route path="/:lang/features" element={<Features />} />
+        <Route path="/:lang/careers" element={<Careers />} />
         <Route path="/:lang/vs-speakup" element={<VsSpeakUp />} />
         <Route path="/:lang/vs-whistleblower-software" element={<VsWhistleblowerSoftware />} />
         <Route path="/:lang/compliance-software" element={<ComplianceSoftware />} />
