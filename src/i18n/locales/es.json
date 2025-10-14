@@ -769,6 +769,9 @@
     "superAdmin": "Super Administrador",
     "orgAdmin": "Administrador de Organización",
     "blogManagement": "Gestión de Blog",
-    "seoSettings": "Configuración SEO"
+    "seoSettings": "Configuración SEO",
+    "allActiveAndOngoingReports": "Todos los informes activos y en curso",
+    "assigned": "Asignado",
+    "filterByStatus": "Filtrar por estado"
   }
 }

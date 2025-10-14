@@ -104,9 +104,7 @@ const DashboardSidebar = ({
       </SidebarContent>
 
       <SidebarFooter className="p-2 border-t space-y-2">
-        <LanguageSelector collapsed={false} />
-        
-        {/* New footer links */}
+        {/* Footer links */}
         <div className="space-y-1">
           <a 
             href="https://disclosurely.featurebase.app" 
@@ -145,6 +143,8 @@ const DashboardSidebar = ({
             </div>
           </div>
         </div>
+        
+        <LanguageSelector collapsed={false} />
       </SidebarFooter>
     </Sidebar>
   );

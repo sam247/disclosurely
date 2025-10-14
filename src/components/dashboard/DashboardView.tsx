@@ -18,6 +18,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useCustomDomain } from '@/hooks/useCustomDomain';
+import { useTranslation } from 'react-i18next';
 
 interface Report {
   id: string;
@@ -46,6 +47,7 @@ const DashboardView = () => {
   const { user } = useAuth();
   const { customDomain, organizationId } = useCustomDomain();
   const { toast } = useToast();
+  const { t } = useTranslation();
   const [reports, setReports] = useState<Report[]>([]);
   const [archivedReports, setArchivedReports] = useState<Report[]>([]);
   const [loading, setLoading] = useState(true);
@@ -230,7 +232,7 @@ const DashboardView = () => {
                 <FileText className="h-6 w-6 text-primary" />
               </div>
               <div>
-                <p className="text-sm text-muted-foreground">Active Reports</p>
+                <p className="text-sm text-muted-foreground">{t('activeReports')}</p>
                 <p className="text-2xl font-bold">{reports.length}</p>
               </div>
             </div>
@@ -244,7 +246,7 @@ const DashboardView = () => {
                 <Archive className="h-6 w-6 text-muted-foreground" />
               </div>
               <div>
-                <p className="text-sm text-muted-foreground">Archived Reports</p>
+                <p className="text-sm text-muted-foreground">{t('archivedReports')}</p>
                 <p className="text-2xl font-bold">{archivedReports.length}</p>
               </div>
             </div>
@@ -258,8 +260,8 @@ const DashboardView = () => {
                 <CheckCircle className="h-6 w-6 text-green-500" />
               </div>
               <div>
-                <p className="text-sm text-muted-foreground">Quick Report</p>
-                <p className="text-2xl font-bold">Active</p>
+                <p className="text-sm text-muted-foreground">{t('quickReport')}</p>
+                <p className="text-2xl font-bold">{t('active')}</p>
               </div>
             </div>
           </CardContent>
@@ -268,60 +270,60 @@ const DashboardView = () => {
 
 
       <div>
-        <h2 className="text-2xl font-bold">Reports Overview</h2>
-        <p className="text-muted-foreground">Manage and review all submitted reports</p>
+        <h2 className="text-2xl font-bold">{t('reportsOverview')}</h2>
+        <p className="text-muted-foreground">{t('manageAndReviewReports')}</p>
       </div>
 
       <div className="flex flex-col sm:flex-row gap-4">
         <Input
-          placeholder="Search reports..."
+          placeholder={t('searchReports')}
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
           className="flex-1"
         />
         <Select value={statusFilter} onValueChange={setStatusFilter}>
           <SelectTrigger className="w-full sm:w-48">
-            <SelectValue placeholder="Filter by status" />
+            <SelectValue placeholder={t('filterByStatus')} />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="all">All Statuses</SelectItem>
-            <SelectItem value="new">New</SelectItem>
-            <SelectItem value="live">Live</SelectItem>
-            <SelectItem value="in_review">In Review</SelectItem>
-            <SelectItem value="investigating">Investigating</SelectItem>
-            <SelectItem value="resolved">Resolved</SelectItem>
+            <SelectItem value="all">{t('allStatuses')}</SelectItem>
+            <SelectItem value="new">{t('newIssue')}</SelectItem>
+            <SelectItem value="live">{t('live')}</SelectItem>
+            <SelectItem value="in_review">{t('inReview')}</SelectItem>
+            <SelectItem value="investigating">{t('investigating')}</SelectItem>
+            <SelectItem value="resolved">{t('resolved')}</SelectItem>
           </SelectContent>
         </Select>
       </div>
 
       <Tabs defaultValue="active" className="space-y-4">
         <TabsList>
-          <TabsTrigger value="active">Active Reports ({reports.length})</TabsTrigger>
-          <TabsTrigger value="archived">Archived ({archivedReports.length})</TabsTrigger>
+          <TabsTrigger value="active">{t('activeReports')} ({reports.length})</TabsTrigger>
+          <TabsTrigger value="archived">{t('archived')} ({archivedReports.length})</TabsTrigger>
         </TabsList>
 
         <TabsContent value="active">
           <Card>
             <CardHeader>
-              <CardTitle>Active Reports</CardTitle>
-              <CardDescription>All active and ongoing reports</CardDescription>
+              <CardTitle>{t('activeReports')}</CardTitle>
+              <CardDescription>{t('allActiveAndOngoingReports')}</CardDescription>
             </CardHeader>
             <CardContent>
               {filteredReports.length === 0 ? (
                 <div className="text-center py-8 text-muted-foreground">
-                  No reports found
+                  {t('noReportsFound')}
                 </div>
               ) : (
                   <Table>
                   <TableHeader>
                     <TableRow>
-                      <TableHead>Tracking ID</TableHead>
-                      <TableHead>Title</TableHead>
-                      <TableHead>Status</TableHead>
-                      <TableHead>Category</TableHead>
-                      <TableHead>Assigned To</TableHead>
-                      <TableHead>Date</TableHead>
-                      <TableHead className="text-right">Actions</TableHead>
+                      <TableHead>{t('trackingId')}</TableHead>
+                      <TableHead>{t('title')}</TableHead>
+                      <TableHead>{t('status')}</TableHead>
+                      <TableHead>{t('category')}</TableHead>
+                      <TableHead>{t('assignedTo')}</TableHead>
+                      <TableHead>{t('date')}</TableHead>
+                      <TableHead className="text-right">{t('actions')}</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -354,9 +356,9 @@ const DashboardView = () => {
                         </TableCell>
                         <TableCell>
                           {report.assigned_to ? (
-                            <span className="text-sm">Assigned</span>
+                            <span className="text-sm">{t('assigned')}</span>
                           ) : (
-                            <span className="text-sm text-muted-foreground">Unassigned</span>
+                            <span className="text-sm text-muted-foreground">{t('unassigned')}</span>
                           )}
                         </TableCell>
                         <TableCell className="text-sm text-muted-foreground">
@@ -369,7 +371,7 @@ const DashboardView = () => {
                               size="sm"
                               onClick={() => handleViewReport(report)}
                             >
-                              View
+                              {t('viewReport')}
                             </Button>
                             <DropdownMenu>
                               <DropdownMenuTrigger asChild>
