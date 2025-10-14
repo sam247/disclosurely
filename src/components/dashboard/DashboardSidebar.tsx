@@ -104,7 +104,7 @@ const DashboardSidebar = ({
       </SidebarContent>
 
       <SidebarFooter className="p-2 border-t space-y-2">
-        {/* Footer links */}
+        {/* Footer links above the line */}
         <div className="space-y-1">
           <a 
             href="https://disclosurely.featurebase.app" 
@@ -124,27 +124,28 @@ const DashboardSidebar = ({
             About Disclosurely
           </button>
           
-          <div className="flex items-center gap-2 px-3 py-2 text-sm text-muted-foreground">
-            <FileText className="h-4 w-4" />
-            <div className="flex gap-2">
-              <button 
-                onClick={() => navigate('/privacy')}
-                className="hover:text-foreground transition-colors"
-              >
-                Privacy
-              </button>
-              <span>•</span>
-              <button 
-                onClick={() => navigate('/terms')}
-                className="hover:text-foreground transition-colors"
-              >
-                Terms
-              </button>
-            </div>
-          </div>
+          <LanguageSelector collapsed={false} />
         </div>
         
-        <LanguageSelector collapsed={false} />
+        {/* Privacy and Terms below the line */}
+        <div className="flex items-center gap-2 px-3 py-2 text-sm text-muted-foreground">
+          <FileText className="h-4 w-4" />
+          <div className="flex gap-2">
+            <button 
+              onClick={() => navigate('/privacy')}
+              className="hover:text-foreground transition-colors"
+            >
+              Privacy
+            </button>
+            <span>•</span>
+            <button 
+              onClick={() => navigate('/terms')}
+              className="hover:text-foreground transition-colors"
+            >
+              Terms
+            </button>
+          </div>
+        </div>
       </SidebarFooter>
     </Sidebar>
   );

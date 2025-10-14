@@ -107,7 +107,12 @@ export const AnnouncementBarManager: React.FC = () => {
   };
 
   const handleSave = async () => {
+    console.log('handleSave called');
+    console.log('Profile:', profile);
+    console.log('Form data:', formData);
+    
     if (!profile?.organization_id) {
+      console.log('No organization_id found');
       toast({
         title: 'Error',
         description: 'Organization not found. Cannot save announcement.',
@@ -118,6 +123,7 @@ export const AnnouncementBarManager: React.FC = () => {
 
     // Validate required fields
     if (!formData.title.trim() || !formData.content.trim()) {
+      console.log('Validation failed - missing title or content');
       toast({
         title: 'Error',
         description: 'Please fill in both title and content fields.',
@@ -152,11 +158,17 @@ export const AnnouncementBarManager: React.FC = () => {
           description: 'The announcement has been updated successfully.',
         });
       } else {
-        const { error } = await supabase
+        console.log('Creating new announcement...');
+        const { data, error } = await supabase
           .from('announcement_bar')
-          .insert(announcementData);
+          .insert(announcementData)
+          .select();
 
-        if (error) throw error;
+        console.log('Insert result:', { data, error });
+        if (error) {
+          console.error('Supabase error:', error);
+          throw error;
+        }
         toast({
           title: 'Announcement Created',
           description: 'The announcement has been created successfully.',
