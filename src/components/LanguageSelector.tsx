@@ -42,7 +42,7 @@ const LanguageSelector = ({ collapsed = false }: LanguageSelectorProps) => {
         <SelectTrigger className="w-full h-10 border-0 bg-transparent hover:bg-accent">
           <Globe className="h-4 w-4 text-primary" />
         </SelectTrigger>
-        <SelectContent>
+        <SelectContent className="max-h-[28rem]">
           {languages.map((lang) => (
             <SelectItem key={lang.code} value={lang.code}>
               <div className="flex items-center gap-2">
@@ -66,7 +66,7 @@ const LanguageSelector = ({ collapsed = false }: LanguageSelectorProps) => {
           </div>
         </SelectValue>
       </SelectTrigger>
-      <SelectContent>
+      <SelectContent className="max-h-[28rem]">
         {languages.map((lang) => (
           <SelectItem key={lang.code} value={lang.code}>
             <div className="flex items-center gap-2">

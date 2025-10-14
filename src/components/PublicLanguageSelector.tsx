@@ -62,7 +62,7 @@ const PublicLanguageSelector = () => {
           </SelectValue>
         </div>
       </SelectTrigger>
-      <SelectContent className="bg-white border-gray-200 z-[100]">
+      <SelectContent className="bg-white border-gray-200 z-[100] max-h-[28rem]">
         {languages.map((lang) => (
           <SelectItem key={lang.code} value={lang.code}>
             <div className="flex items-center gap-2">
