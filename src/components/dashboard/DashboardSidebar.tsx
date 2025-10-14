@@ -1,28 +1,24 @@
-import { Home, Bot, Users, Palette, Lock, BarChart3, ScrollText, Link as LinkIcon } from 'lucide-react';
+import { Home, Bot, Users, Palette, Lock, BarChart3, ScrollText, Link as LinkIcon, MessageSquare, Info, FileText } from 'lucide-react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { Sidebar, SidebarContent, SidebarFooter, SidebarGroup, SidebarGroupContent, SidebarHeader, SidebarMenu, SidebarMenuButton, SidebarMenuItem, SidebarTrigger, useSidebar } from '@/components/ui/sidebar';
+import { Sidebar, SidebarContent, SidebarFooter, SidebarGroup, SidebarGroupContent, SidebarHeader, SidebarMenu, SidebarMenuButton, SidebarMenuItem } from '@/components/ui/sidebar';
 import { useSubscriptionLimits } from '@/hooks/useSubscriptionLimits';
 import { cn } from '@/lib/utils';
 import { useTranslation } from 'react-i18next';
 import disclosurelyFullLogo from '@/assets/logos/disclosurely-full-logo.png';
-import disclosurelyIcon from '@/assets/logos/disclosurely-icon-square.png';
 import LanguageSelector from '@/components/LanguageSelector';
+
 interface DashboardSidebarProps {
   onLockedFeatureClick: (feature: string) => void;
 }
+
 const DashboardSidebar = ({
   onLockedFeatureClick
 }: DashboardSidebarProps) => {
   const navigate = useNavigate();
   const location = useLocation();
   const { t } = useTranslation();
-  const {
-    state
-  } = useSidebar();
-  const {
-    limits
-  } = useSubscriptionLimits();
-  const collapsed = state === 'collapsed';
+  const { limits } = useSubscriptionLimits();
+
   const menuItems = [{
     title: t('dashboard'),
     icon: Home,
@@ -59,6 +55,7 @@ const DashboardSidebar = ({
     path: '/dashboard/branding',
     locked: !limits.hasCustomBranding
   }];
+
   const handleNavigation = (item: typeof menuItems[0]) => {
     if (item.locked) {
       onLockedFeatureClick(item.title);
@@ -66,12 +63,12 @@ const DashboardSidebar = ({
       navigate(item.path);
     }
   };
-  return <Sidebar className="border-r" collapsible="icon">
+
+  return (
+    <Sidebar className="border-r">
       <SidebarHeader className="p-4 border-b">
-        <button onClick={() => navigate('/dashboard')} className={cn("flex items-center w-full hover:opacity-80 transition-opacity", collapsed ? "justify-center" : "gap-3")}>
-          {!collapsed ? <img src={disclosurelyFullLogo} alt="Disclosurely" className="h-7 w-auto " /> : <div className="w-full h-full flex items-center justify-center py-2">
-              <img src={disclosurelyIcon} alt="Disclosurely" className="h-10 w-10 object-contain" />
-            </div>}
+        <button onClick={() => navigate('/dashboard')} className="flex items-center w-full hover:opacity-80 transition-opacity gap-3">
+          <img src={disclosurelyFullLogo} alt="Disclosurely" className="h-7 w-auto" />
         </button>
       </SidebarHeader>
 
@@ -80,29 +77,77 @@ const DashboardSidebar = ({
           <SidebarGroupContent>
             <SidebarMenu>
               {menuItems.map(item => {
-              const isActive = location.pathname === item.path;
-              const Icon = item.icon;
-              return <SidebarMenuItem key={item.path}>
-                    <SidebarMenuButton onClick={() => handleNavigation(item)} className={cn("w-full justify-start transition-colors", isActive && "bg-primary/10 text-primary font-medium", item.locked && "opacity-60 hover:opacity-80", !collapsed && "px-4")}>
+                const isActive = location.pathname === item.path;
+                const Icon = item.icon;
+                return (
+                  <SidebarMenuItem key={item.path}>
+                    <SidebarMenuButton 
+                      onClick={() => handleNavigation(item)} 
+                      className={cn(
+                        "w-full justify-start transition-colors px-4", 
+                        isActive && "bg-primary/10 text-primary font-medium", 
+                        item.locked && "opacity-60 hover:opacity-80"
+                      )}
+                    >
                       <div className="flex items-center gap-3 w-full">
-                        <Icon className={cn("flex-shrink-0 text-primary", collapsed ? "h-5 w-5" : "h-5 w-5")} />
-                        {!collapsed && <>
-                            <span className="flex-1">{item.title}</span>
-                            {item.locked && <Lock className="h-3 w-3 opacity-40" />}
-                          </>}
+                        <Icon className="flex-shrink-0 text-primary h-5 w-5" />
+                        <span className="flex-1">{item.title}</span>
+                        {item.locked && <Lock className="h-3 w-3 opacity-40" />}
                       </div>
                     </SidebarMenuButton>
-                  </SidebarMenuItem>;
-            })}
+                  </SidebarMenuItem>
+                );
+              })}
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
       </SidebarContent>
 
       <SidebarFooter className="p-2 border-t space-y-2">
-        <LanguageSelector collapsed={collapsed} />
-        <SidebarTrigger className={cn("w-full", !collapsed && "justify-start")} />
+        <LanguageSelector collapsed={false} />
+        
+        {/* New footer links */}
+        <div className="space-y-1">
+          <a 
+            href="https://disclosurely.featurebase.app" 
+            target="_blank" 
+            rel="noopener noreferrer"
+            className="flex items-center gap-2 px-3 py-2 text-sm text-muted-foreground hover:text-foreground transition-colors rounded-md"
+          >
+            <MessageSquare className="h-4 w-4" />
+            Feedback
+          </a>
+          
+          <button 
+            onClick={() => navigate('/about')}
+            className="flex items-center gap-2 px-3 py-2 text-sm text-muted-foreground hover:text-foreground transition-colors rounded-md w-full text-left"
+          >
+            <Info className="h-4 w-4" />
+            About Disclosurely
+          </button>
+          
+          <div className="flex items-center gap-2 px-3 py-2 text-sm text-muted-foreground">
+            <FileText className="h-4 w-4" />
+            <div className="flex gap-2">
+              <button 
+                onClick={() => navigate('/privacy')}
+                className="hover:text-foreground transition-colors"
+              >
+                Privacy
+              </button>
+              <span>•</span>
+              <button 
+                onClick={() => navigate('/terms')}
+                className="hover:text-foreground transition-colors"
+              >
+                Terms
+              </button>
+            </div>
+          </div>
+        </div>
       </SidebarFooter>
-    </Sidebar>;
+    </Sidebar>
+  );
 };
+
 export default DashboardSidebar;
