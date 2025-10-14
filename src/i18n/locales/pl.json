@@ -310,5 +310,118 @@
       "submit": "Wyślij Zapytanie",
       "privacy": "Przesyłając ten formularz, zgadzasz się z naszą Polityką Prywatności."
     }
+  },
+  "privacy": {
+    "meta": {
+      "title": "Polityka Prywatności - Disclosurely",
+      "description": "Dowiedz się, jak chronimy Twoje dane osobowe i szanujemy Twoją prywatność."
+    },
+    "hero": {
+      "title": "Polityka Prywatności",
+      "description": "Dowiedz się, jak chronimy Twoje dane osobowe i szanujemy Twoją prywatność."
+    },
+    "sections": {
+      "introduction": {
+        "title": "1. Wprowadzenie",
+        "content": "Disclosurely Limited (Londyn EC1V 2NX) prowadzi bezpieczną, internetową platformę sygnalistów pod adresem disclosurely.com (\"Usługa\"). Ta Polityka Prywatności opisuje, jak zbieramy, używamy i chronimy informacje podczas korzystania z naszej usługi."
+      },
+      "dataCollection": {
+        "title": "2. Zbieranie Danych",
+        "content": "Zbieramy informacje, które przekazujesz nam bezpośrednio, oraz informacje zbierane automatycznie podczas korzystania z naszej usługi."
+      },
+      "dataUsage": {
+        "title": "3. Używanie Danych",
+        "content": "Używamy Twoich informacji do prowadzenia, poprawy i świadczenia wsparcia dla naszej usługi."
+      },
+      "dataSharing": {
+        "title": "4. Udostępnianie Danych",
+        "content": "Nie udostępniamy Twoich informacji stronom trzecim, z wyjątkiem przypadków opisanych w tej Polityce Prywatności."
+      },
+      "dataSecurity": {
+        "title": "5. Bezpieczeństwo Danych",
+        "content": "Wdrażamy odpowiednie środki bezpieczeństwa w celu ochrony Twoich informacji."
+      },
+      "yourRights": {
+        "title": "6. Twoje Prawa",
+        "content": "Masz określone prawa dotyczące swoich danych osobowych zgodnie z RODO."
+      },
+      "cookies": {
+        "title": "7. Pliki Cookie",
+        "content": "Używamy plików cookie i podobnych technologii w celu poprawy naszej usługi."
+      },
+      "thirdParty": {
+        "title": "8. Usługi Stron Trzecich",
+        "content": "Nasza usługa może zawierać linki do innych stron internetowych, które nie są przez nas prowadzone."
+      },
+      "international": {
+        "title": "9. Międzynarodowe Transfery Danych",
+        "content": "Twoje informacje mogą być przekazywane do krajów poza Europejskim Obszarem Gospodarczym."
+      },
+      "retention": {
+        "title": "10. Przechowywanie Danych",
+        "content": "Przechowujemy Twoje dane tylko tak długo, jak jest to konieczne do celów opisanych w tej Polityce Prywatności."
+      },
+      "children": {
+        "title": "11. Dzieci",
+        "content": "Nasza usługa nie jest skierowana do osób poniżej 16 roku życia."
+      },
+      "changes": {
+        "title": "12. Zmiany w Polityce",
+        "content": "Możemy aktualizować tę Politykę Prywatności od czasu do czasu. Znaczące zmiany będą powiadamiane klientom pocztą elektroniczną lub za pośrednictwem usługi."
+      },
+      "contact": {
+        "title": "13. Kontakt",
+        "content1": "Jeśli masz pytania lub obawy dotyczące tej Polityki Prywatności, skontaktuj się z nami:",
+        "company": "Disclosurely Limited",
+        "address": "Londyn, EC1V 2NX, Zjednoczone Królestwo"
+      }
+    },
+    "lastUpdated": "Ostatnia aktualizacja: Maj 2025"
+  },
+  "terms": {
+    "meta": {
+      "title": "Warunki Użytkowania - Disclosurely",
+      "description": "Przeczytaj uważnie te warunki przed korzystaniem z naszych usług."
+    },
+    "hero": {
+      "title": "Warunki Użytkowania",
+      "description": "Przeczytaj uważnie te warunki przed korzystaniem z naszych usług."
+    },
+    "sections": {
+      "introduction": {
+        "title": "1. Wprowadzenie",
+        "content": "Disclosurely Limited (Londyn EC1V 2NX) zapewnia bezpieczną, internetową platformę sygnalistów pod adresem disclosurely.com (\"Usługa\"). Rejestrując się i korzystając z usługi, zgadzasz się na te warunki. Usługa umożliwia sygnalistom składanie poufnych zgłoszeń o nieprawidłowościach w ich organizacji. Disclosurely zobowiązuje się do zgodności z RODO i utrzymuje surowe standardy prywatności, bezpieczeństwa i prawne. Kontakt wsparcia to support@disclosurely.com."
+      },
+      "accounts": {
+        "title": "3. Rejestracja i Użytkowanie Konta",
+        "content1": "Aby korzystać z usługi, klient musi zarejestrować konto i podać dokładne, kompletne informacje.",
+        "content2": "Klient jest odpowiedzialny za całe korzystanie z usługi pod swoim kontem i musi zachować poufność nazw użytkowników i haseł."
+      },
+      "acceptableUse": {
+        "title": "Dopuszczalne Użytkowanie",
+        "content": "Klient zgadza się korzystać z usługi tylko w celach zgodnych z prawem i zgodnie z tymi warunkami."
+      },
+      "intellectualProperty": {
+        "title": "Własność Intelektualna",
+        "content": "Disclosurely zachowuje wszystkie prawa własności intelektualnej do usługi. Żadna własność nie jest przenoszona na klienta."
+      },
+      "disclaimer": {
+        "title": "Zastrzeżenie",
+        "content": "Usługa jest świadczona \"jak jest\" bez gwarancji jakiegokolwiek rodzaju."
+      },
+      "limitationOfLiability": {
+        "title": "Ograniczenie Odpowiedzialności",
+        "content": "Odpowiedzialność Disclosurely jest ograniczona do całkowitych opłat za subskrypcję za poprzednie 12 miesięcy."
+      },
+      "governingLaw": {
+        "title": "Prawo Właściwe",
+        "content": "Te warunki są regulowane prawami Zjednoczonego Królestwa."
+      },
+      "changes": {
+        "title": "Zmiany w Warunkach",
+        "content": "Disclosurely może od czasu do czasu rewidować te warunki. Kontynuowane korzystanie z usługi po zmianach stanowi akceptację."
+      }
+    },
+    "lastUpdated": "Ostatnia aktualizacja: Wrzesień 2025"
   }
 }

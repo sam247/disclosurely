@@ -15,6 +15,13 @@ const languages = [
   { code: 'fr', name: 'Français', flag: '🇫🇷' },
   { code: 'de', name: 'Deutsch', flag: '🇩🇪' },
   { code: 'pl', name: 'Polski', flag: '🇵🇱' },
+  { code: 'sv', name: 'Svenska', flag: '🇸🇪' },
+  { code: 'no', name: 'Norsk', flag: '🇳🇴' },
+  { code: 'pt', name: 'Português', flag: '🇵🇹' },
+  { code: 'it', name: 'Italiano', flag: '🇮🇹' },
+  { code: 'nl', name: 'Nederlands', flag: '🇳🇱' },
+  { code: 'da', name: 'Dansk', flag: '🇩🇰' },
+  { code: 'el', name: 'Ελληνικά', flag: '🇬🇷' },
 ];
 
 const PublicLanguageSelector = () => {

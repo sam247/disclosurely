@@ -18,6 +18,15 @@ const countryToLanguageMap: Record<string, string> = {
   AT: 'de', // Austria
   LU: 'de', // Luxembourg (also French)
   PL: 'pl', // Poland
+  SE: 'sv', // Sweden
+  NO: 'no', // Norway
+  PT: 'pt', // Portugal
+  BR: 'pt', // Brazil
+  IT: 'it', // Italy
+  NL: 'nl', // Netherlands
+  DK: 'da', // Denmark
+  GR: 'el', // Greece
+  CY: 'el', // Cyprus
 };
 
 export const useGeographicalLanguage = () => {
@@ -27,7 +36,7 @@ export const useGeographicalLanguage = () => {
 
   useEffect(() => {
     // Only run on first load and if not already on a language-specific path
-    const hasLanguageInPath = /^\/(es|fr|de|pl)(\/|$)/.test(location.pathname);
+    const hasLanguageInPath = /^\/(es|fr|de|pl|sv|no|pt|it|nl|da|el)(\/|$)/.test(location.pathname);
     
     if (hasLanguageInPath || sessionStorage.getItem('language-detected')) {
       return;

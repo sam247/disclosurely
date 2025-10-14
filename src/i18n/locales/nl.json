@@ -1,0 +1,559 @@
+{
+  "dashboard": "Dashboard",
+  "aiCaseHelper": "AI-casushulp",
+  "analytics": "Analyse",
+  "audit": "Audit",
+  "team": "Team",
+  "branding": "Branding",
+  "profile": "Profiel",
+  "logout": "Uitloggen",
+  "welcomeBack": "Welkom terug",
+  "notifications": "Meldingen",
+  "clearAll": "Alles wissen",
+  "markAsRead": "Markeer als gelezen",
+  "noNotifications": "Geen meldingen",
+  "secureReportLink": "Veilige rapportlink",
+  "reportsOverview": "Rapportenoverzicht",
+  "activeReports": "Actieve rapporten",
+  "archivedReports": "Gearchiveerde rapporten",
+  "viewReport": "Bekijk",
+  "trackingId": "Tracking-ID",
+  "title": "Titel",
+  "status": "Status",
+  "category": "Categorie",
+  "assignedTo": "Toegewezen aan",
+  "date": "Datum",
+  "actions": "Acties",
+  "reportContent": "Rapportinhoud",
+  "translate": "Vertaal",
+  "translating": "Aan het vertalen...",
+  "showOriginal": "Toon origineel",
+  "secureMessaging": "Veilige berichten",
+  "sendMessage": "Verstuur bericht",
+  "typeYourMessage": "Typ je bericht...",
+  "messagesEncrypted": "Berichten zijn end-to-end versleuteld",
+  "loading": "Laden...",
+  "selectLanguage": "Selecteer taal",
+  "totalReports": "Totaal rapporten",
+  "allTimeSubmissions": "Alle tijd inzendingen",
+  "newReports": "Nieuwe rapporten",
+  "last7Days": "Laatste 7 dagen",
+  "averageResponseTime": "Gemiddelde responstijd",
+  "firstOrgResponse": "Eerste org-reactie (30 dagen)",
+  "noData": "Geen data",
+  "activeLinks": "Actieve links",
+  "submissionPortals": "Inzendingsportalen",
+  "teamMembers": "Teamleden",
+  "activeUsers": "Actieve gebruikers",
+  "active": "Actief",
+  "inactive": "Inactief",
+  "usedTimes": "{{count}} keer gebruikt",
+  "copyLink": "Kopieer link",
+  "yourOrganisationCanUse": "Uw organisatie kan deze link gebruiken om alle zaken te melden aan het geregistreerde e-mailadres op dit account.",
+  "brandedSubmissionPortal": "Gebrandmerkt inzendingsportaal",
+  "unbrandedSubmissionPortal": "Ongemarkeerd inzendingsportaal",
+  "manageAndReviewReports": "Beheer en beoordeel alle ingediende rapporten",
+  "searchReports": "Zoek rapporten...",
+  "allStatuses": "Alle statussen",
+  "quickReport": "Snel rapport",
+  "linkCopied": "Link gekopieerd!",
+  "linkCopiedDescription": "De link is gekopieerd naar uw klembord.",
+  "upgradeRequired": "Upgrade vereist",
+  "upgradeDescription": "{{feature}} is beschikbaar in ons Pro-plan. Upgrade nu om deze functie te ontgrendelen.",
+  "reportManagement": "Rapportbeheer",
+  "viewManageTrackReports": "Bekijk, beheer en volg alle ingediende rapporten",
+  "searchByTitleOrId": "Zoek op titel of tracking-ID...",
+  "filterByStatus": "Filter op status",
+  "filterByPriority": "Filter op prioriteit",
+  "allPriorities": "Alle prioriteiten",
+  "priority": "Prioriteit",
+  "submitted": "Ingediend",
+  "noReportsFound": "Geen rapporten gevonden",
+  "newIssue": "Nieuw probleem",
+  "live": "Live",
+  "inReview": "In beoordeling",
+  "investigating": "Onderzoeken",
+  "resolved": "Opgelost",
+  "closed": "Gesloten",
+  "archived": "Gearchiveerd",
+  "deleted": "Verwijderd",
+  "unassigned": "Niet toegewezen",
+  "showDeleted": "Toon verwijderde",
+  "hideDeleted": "Verberg verwijderde",
+  "reportDetails": "Rapportdetails",
+  "viewManageReportInfo": "Bekijk en beheer rapportinformatie",
+  "tags": "Tags",
+  "editTags": "Bewerk tags",
+  "saveTags": "Bewaar tags",
+  "cancel": "Annuleren",
+  "noTags": "Geen tags",
+  "internalNotes": "Interne notities",
+  "addInternalNote": "Voeg een interne notitie toe...",
+  "addNote": "Voeg notitie toe",
+  "aiCaseHelperTitle": "AI-casushulp",
+  "aiCaseHelperDescription": "Analyseer zaken met AI-gestuurde inzichten",
+  "teamManagementTitle": "Teambeheer",
+  "teamManagementDescription": "Nodig uit en beheer teamleden",
+  "profileSettingsTitle": "Profielinstellingen",
+  "profileSettingsDescription": "Beheer uw profiel, abonnement en privacy-instellingen",
+  "account": "Account",
+  "subscription": "Abonnement",
+  "privacyData": "Privacy en data",
+  "customBrandingTitle": "Aangepaste branding",
+  "customBrandingDescription": "Personaliseer uw organisatie branding en uiterlijk",
+  "inviteUser": "Nodig gebruiker uit",
+  "inviteTeamMember": "Nodig teamlid uit",
+  "sendInvitationToJoin": "Stuur een uitnodiging om lid te worden van uw organisatie",
+  "emailAddress": "E-mailadres",
+  "role": "Rol",
+  "sendInvitation": "Verstuur uitnodiging",
+  "name": "Naam",
+  "email": "E-mail",
+  "lastLogin": "Laatste login",
+  "noTeamMembersFound": "Geen teamleden gevonden",
+  "never": "Nooit",
+  "caseHandler": "Casusbehandelaar",
+  "reviewer": "Beoordelaar",
+  "admin": "Beheerder",
+  "orgAdmin": "Org-beheerder",
+  "pendingInvitations": "Wachtende uitnodigingen",
+  "invitedBy": "Uitgenodigd door",
+  "expiresAt": "Verloopt op",
+  "personalInformation": "Persoonlijke informatie",
+  "updatePersonalDetails": "Werk uw persoonlijke gegevens bij",
+  "firstName": "Voornaam",
+  "lastName": "Achternaam",
+  "enterFirstName": "Voer uw voornaam in",
+  "enterLastName": "Voer uw achternaam in",
+  "updateProfile": "Profiel bijwerken",
+  "updating": "Bijwerken...",
+  "accountSettings": "Accountinstellingen",
+  "manageAccountPreferences": "Beheer uw accountvoorkeuren",
+  "emailChangeRequiresConfirmation": "E-mailwijziging vereist bevestiging van beide adressen",
+  "updateEmail": "E-mail bijwerken",
+  "security": "Beveiliging",
+  "manageAccountSecurity": "Beheer uw accountbeveiliging",
+  "password": "Wachtwoord",
+  "passwordResetInstructions": "Om uw wachtwoord te wijzigen, moet u de wachtwoordresetfunctie gebruiken",
+  "sendPasswordResetEmail": "Verstuur wachtwoordreset-e-mail",
+  "organizationSettings": "Organisatie-instellingen",
+  "manageOrgProfileDomains": "Beheer uw organisatieprofiel en domeininstellingen",
+  "basicInformation": "Basisinformatie",
+  "updateOrgBasicInfo": "Werk de basisinformatie van uw organisatie bij",
+  "description": "Beschrijving",
+  "createdAt": "Aangemaakt op",
+  "brandingSettings": "Branding-instellingen",
+  "customizeBrandingForms": "Personaliseer uw organisatie branding voor inzendingsformulieren",
+  "customBranding": "Aangepaste branding",
+  "organizationLogo": "Organisatielogo",
+  "uploadLogo": "Upload een logo (max 2MB, PNG/JPG aanbevolen)",
+  "brandColor": "Brandkleur",
+  "saveChanges": "Wijzigingen opslaan",
+  "saving": "Opslaan...",
+  "nav": {
+    "pricing": "Prijzen",
+    "contact": "Contact",
+    "signin": "Inloggen",
+    "getStarted": "Aan de slag"
+  },
+  "landing": {
+    "hero": {
+      "title1": "Klokkenluider en",
+      "title2": "openbaarmakingsplatform",
+      "subtitle": "Disclosurely helpt compliance-teams voorop te blijven door ethiek en compliance te transformeren in een proactief voordeel: het bouwen van een cultuur van integriteit, het vereenvoudigen van workflows en het verminderen van organisatierisico.",
+      "startFreeTrial": "Start gratis proefperiode",
+      "viewPricing": "Bekijk prijzen"
+    },
+    "trusted": "Vertrouwd door honderden Britse bedrijven",
+    "features": {
+      "title": "Alles wat u nodig heeft voor veilige rapportage",
+      "subtitle": "Ons platform biedt uitgebreide tools voor het beheren van klokkenluiderrapporten met volledige vertrouwelijkheid en compliance.",
+      "anonymousReporting": {
+        "title": "Anonieme rapportage",
+        "description": "Totale anonimiteit voor klokkenluiders met versleutelde inzendingen en veilige identiteitsbescherming."
+      },
+      "secureMessaging": {
+        "title": "Veilige berichten",
+        "description": "Twee-weg versleutelde communicatie tussen klokkenluiders en onderzoekers met behoud van anonimiteit."
+      },
+      "caseManagement": {
+        "title": "Casusbeheer",
+        "description": "Uitgebreide dashboard voor het volgen, onderzoeken en oplossen van zaken met volledige audittrails."
+      },
+      "multiUserAccess": {
+        "title": "Multi-gebruiker toegang",
+        "description": "Rol-gebaseerde machtigingen voor juridische, HR- en compliance-teams met gecontroleerde toegangsniveaus."
+      },
+      "regulatoryCompliance": {
+        "title": "Regelgevingscompliance",
+        "description": "Geïntegreerde compliance met GDPR, SOX en andere regelgevingsvereisten in alle sectoren."
+      },
+      "enterpriseSecurity": {
+        "title": "Enterprise beveiliging",
+        "description": "Bank-niveau versleuteling, veilige hosting en uitgebreide databeschermingsmaatregelen."
+      }
+    },
+    "howItWorks": {
+      "title": "Hoe het werkt",
+      "subtitle": "Begin met Disclosurely in drie eenvoudige stappen",
+      "step1": {
+        "title": "Configureer uw portaal",
+        "description": "Maak uw account aan en personaliseer uw rapportageportaal in minuten. Voeg uw branding toe, configureer meldingsvoorkeuren en stel teamtoegang in."
+      },
+      "step2": {
+        "title": "Deel met uw team",
+        "description": "Distribueer uw veilige rapportagelink naar werknemers via e-mail, intranet of QR-codes. Rapporten kunnen 24/7 worden ingediend vanaf elk apparaat, overal."
+      },
+      "step3": {
+        "title": "Beheer en los zaken op",
+        "description": "Ontvang onmiddellijke meldingen voor nieuwe rapporten. Onderzoek, communiceer veilig met klokkenluiders en volg zaken tot oplossing met volledige audittrails."
+      }
+    },
+    "anonymousReporting": {
+      "title": "Anonieme rapportage vereenvoudigd",
+      "description": "Laat werknemers misbruik, ethische schendingen of andere zorgen volledig anoniem melden. Onze geavanceerde versleuteling zorgt voor klokkenluider identiteitsbescherming terwijl volledige compliance met regelgevingsvereisten behouden blijft.",
+      "benefit1": "Nul gegevensverzameling over melders",
+      "benefit2": "Anonieme follow-up berichten",
+      "benefit3": "Meertalige ondersteuning"
+    },
+    "encryption": {
+      "title": "Militaire graad versleuteling",
+      "description": "Elk rapport is beschermd met AES-256 versleuteling, dezelfde standaard gebruikt door banken en overheidsinstanties. Uw gevoelige gegevens zijn veilig van inzending tot oplossing.",
+      "benefit1": "AES-256 end-to-end versleuteling",
+      "benefit2": "Versleutelde bijlagen",
+      "benefit3": "Veilige gegevensopslag"
+    },
+    "compliance": {
+      "title": "Compliance vereenvoudigd",
+      "description": "Blijf compliant met Britse en EU klokkenluiderregelgeving, inclusief de EU Whistleblower Richtlijn en UK Employment Rights Act. Geïntegreerde audittrails en rapportagetools zorgen voor regelgevingscompliance.",
+      "benefit1": "EU Whistleblower Richtlijn compliant",
+      "benefit2": "GDPR-ready",
+      "benefit3": "Geautomatiseerde compliance rapporten"
+    },
+    "messaging": {
+      "title": "Veilige twee-weg communicatie",
+      "description": "Handhaaf anonieme dialoog met klokkenluiders tijdens onderzoeken. Vraag om aanvullende informatie, geef updates en zorg voor transparantie terwijl identiteiten beschermd blijven.",
+      "benefit1": "Versleutelde berichten",
+      "benefit2": "Behoud anonimiteit",
+      "benefit3": "Realtime meldingen"
+    },
+    "aiPowered": {
+      "title": "AI-gestuurde casusanalyse",
+      "description": "Benut kunstmatige intelligentie om casuspatronen te analyseren, risico's te identificeren en onderzoeken te prioriteren. Onze AI-assistent helpt compliance-teams slimmer en efficiënter te werken.",
+      "benefit1": "Geautomatiseerde risicobeoordeling",
+      "benefit2": "Patroonherkenning",
+      "benefit3": "Intelligente casusprioritering"
+    },
+    "certifications": {
+      "title": "Beveiligings- en compliance certificeringen",
+      "subtitle": "Vertrouwd door organisaties wereldwijd met industrie-leidende beveiligingsstandaarden"
+    },
+    "pricing": {
+      "title": "Eenvoudige, transparante prijzen",
+      "description": "Flexibele prijzen afgestemd op uw organisatie. Kies het plan dat bij uw behoeften past, pas functies aan en begin direct met begeleide configuratieondersteuning. Alle plannen bevatten een 7-daagse gratis proefperiode."
+    },
+    "testimonials": {
+      "title": "Vertrouwd door organisaties wereldwijd",
+      "subtitle": "Zie wat onze klanten zeggen over hun ervaringen met Disclosurely",
+      "testimonial1": {
+        "quote": "Disclosurely heeft getransformeerd hoe we gevoelige rapporten behandelen. De anonieme berichtfunctie is bijzonder waardevol.",
+        "name": "Sarah Johnson",
+        "role": "Chief Compliance Officer"
+      },
+      "testimonial2": {
+        "quote": "Het platform is intuïtief en veilig. Onze werknemers voelen zich veilig om problemen te melden en we kunnen ze effectief onderzoeken.",
+        "name": "Michael Chen",
+        "role": "HR Director"
+      },
+      "testimonial3": {
+        "quote": "De implementatie was naadloos en het supportteam was uitstekend. Beveel het sterk aan voor elke organisatie die compliance serieus neemt.",
+        "name": "Emily Rodriguez",
+        "role": "Legal Counsel"
+      }
+    },
+    "faq": {
+      "title": "Veelgestelde vragen",
+      "subtitle": "Alles wat u moet weten over Disclosurely",
+      "question1": {
+        "question": "Hoe werkt anonieme rapportage?",
+        "answer": "Klokkenluiders kunnen rapporten indienen via uw aangepaste portaal zonder persoonlijke informatie te verstrekken. Ons systeem gebruikt geavanceerde versleuteling en verzamelt geen IP-adressen of identificerende gegevens. Melders ontvangen een unieke toegangscode om de status van hun rapport te controleren en veilig te communiceren."
+      },
+      "question2": {
+        "question": "Is Disclosurely GDPR en andere regelgeving compliant?",
+        "answer": "Ja, Disclosurely is gebouwd met compliance in gedachten. We zijn GDPR-compliant en voldoen aan de vereisten voor SOX, EU Whistleblower Richtlijn en andere belangrijke regelgevingskaders. Alle gegevens zijn versleuteld en veilig opgeslagen volgens internationale gegevensbeschermingsstandaarden."
+      },
+      "question3": {
+        "question": "Kunnen we het rapportageportaal aanpassen?",
+        "answer": "Absoluut. U kunt uw bedrijfsbranding toevoegen, rapportageformuliervelden aanpassen, specifieke categorieën voor rapporten instellen en zelfs uw eigen domein gebruiken (op Professional- en Enterprise-plannen). Het portaal kan worden aangepast om te passen bij de behoeften en cultuur van uw organisatie."
+      },
+      "question4": {
+        "question": "Hoe snel kunnen we beginnen?",
+        "answer": "De meeste organisaties zijn binnen 24 uur operationeel. Na registratie kunt u onmiddellijk uw portaal aanpassen, teamleden uitnodigen en rapporten accepteren. Ons supportteam is beschikbaar om te helpen met configuratie en onboarding zonder extra kosten."
+      },
+      "question5": {
+        "question": "Welke ondersteuning is inbegrepen?",
+        "answer": "Alle plannen bevatten e-mailondersteuning en toegang tot onze uitgebreide kennisbank. Professional-plannen bevatten prioritaire ondersteuning met snellere responstijden, terwijl Enterprise-klanten toegewijde ondersteuning krijgen met SLA-garanties en optionele on-site training."
+      },
+      "question6": {
+        "question": "Kunnen we ons plan op elk moment annuleren of wijzigen?",
+        "answer": "Ja, u kunt uw abonnement op elk moment upgraden, downgraden of annuleren. Als u annuleert, behoudt u toegang tot het einde van uw factureringsperiode. We bieden ook een 14-daagse gratis proefperiode zodat u alle functies kunt testen voordat u zich vastlegt."
+      }
+    },
+    "cta": {
+      "title": "Klaar om uw compliance-programma te versterken?",
+      "description": "Nog niet klaar voor een gratis proefperiode of demo? Deel uw vereisten met ons en we reageren snel om te bespreken hoe Disclosurely uw organisatie kan ondersteunen.",
+      "button": "Start gratis proefperiode"
+    }
+  },
+  "auth": {
+    "signin": {
+      "title": "Log in op uw account",
+      "subtitle": "Toegang tot uw veilige dashboard",
+      "emailLabel": "E-mail",
+      "emailPlaceholder": "Voer uw e-mail in",
+      "signInButton": "Log in met e-mailcode",
+      "sendingCode": "Verificatiecode verzenden...",
+      "signingInWithGoogle": "Inloggen met Google...",
+      "continueWithGoogle": "Doorgaan met Google",
+      "orContinueWith": "Of doorgaan met",
+      "noAccount": "Heeft u geen account?",
+      "signUpLink": "Registreren"
+    },
+    "signup": {
+      "title": "Maak uw account aan",
+      "subtitle": "Word lid van het veilige openbaarmakingsplatform"
+    }
+  },
+  "pricing": {
+    "hero": {
+      "title": "Eenvoudige, transparante prijzen",
+      "subtitle": "Kies het juiste plan voor uw organisatie. Begin met onze zeven-daagse gratis proefperiode en upgrade naarmate u groeit."
+    },
+    "plans": {
+      "mostPopular": "Meest populair",
+      "perMonth": "/maand",
+      "starter": {
+        "name": "Starter",
+        "price": "£9.99",
+        "description": "Perfect voor kleine organisaties"
+      },
+      "pro": {
+        "name": "Pro",
+        "price": "£19.99",
+        "description": "Voor groeiende organisaties"
+      },
+      "enterprise": {
+        "name": "Enterprise",
+        "price": "Aangepast",
+        "description": "Voor grote organisaties"
+      }
+    },
+    "features": {
+      "casesLimit": "5 zaken/maand",
+      "storage": "1GB opslag",
+      "emailSupport": "E-mailondersteuning",
+      "messaging": "Veilige twee-weg berichten",
+      "aiHelper": "AI-casushulp",
+      "customBranding": "Aangepaste branding",
+      "unlimitedCases": "Onbeperkte zaken/maand",
+      "unlimitedStorage": "Onbeperkte opslag",
+      "everythingPro": "Alles in Professional",
+      "customDomain": "Aangepast domein",
+      "dedicatedSupport": "Toegewijde ondersteuning",
+      "slaGuarantee": "SLA-garantie",
+      "customIntegrations": "Aangepaste integraties",
+      "api": "API (binnenkort)"
+    },
+    "faq": {
+      "title": "Veelgestelde vragen",
+      "trial": {
+        "question": "Is er een gratis proefperiode?",
+        "answer": "Ja, alle plannen komen met een 7-daagse gratis proefperiode zodat u kunt zien hoe het platform werkt. Geen creditcard vereist."
+      },
+      "limit": {
+        "question": "Wat gebeurt er als ik mijn casuslimiet bereik op het Starter-plan?",
+        "answer": "Als u uw maandelijkse casustoewijzing overschrijdt, wordt u op de hoogte gesteld in het dashboard. U kunt upgraden naar het Pro-plan voor onbeperkte zaken of wachten tot volgende maand."
+      },
+      "change": {
+        "question": "Kan ik later van plan veranderen?",
+        "answer": "Absoluut! U kunt uw plan op elk moment upgraden of downgraden vanuit uw dashboard."
+      },
+      "security": {
+        "question": "Welke beveiligingscertificeringen heeft u?",
+        "answer": "We zijn ISO 27001 gecertificeerd, voldoen aan SOC 2 Type II en zijn GDPR-ready."
+      }
+    },
+    "cta": {
+      "ready": "Klaar om te beginnen?",
+      "join": "Word lid van organisaties wereldwijd die Disclosurely vertrouwen voor veilige rapportage.",
+      "startTrial": "Start gratis proefperiode",
+      "contactSales": "Contact opnemen met verkoop"
+    }
+  },
+  "contact": {
+    "hero": {
+      "title": "Neem contact op met ons verkoopteam",
+      "description": "Neem contact met ons op en we helpen u graag bij het beantwoorden van vragen over Disclosurely.",
+      "subtitle": "Klaar om de rapportagecapaciteiten van uw organisatie te transformeren? Neem contact op met ons team."
+    },
+    "info": {
+      "title": "Contactinformatie",
+      "description": "Neem contact met ons op en we helpen u graag bij het beantwoorden van vragen over Disclosurely.",
+      "email": {
+        "title": "E-mail",
+        "address": "sampettiford@googlemail.com",
+        "response": "We reageren binnen 24 uur"
+      },
+      "phone": {
+        "title": "Telefoon",
+        "number": "+44 7123 456789",
+        "hours": "Ma-vr, 9-17 GMT"
+      },
+      "address": {
+        "title": "Adres",
+        "line1": "Londen",
+        "line2": "Verenigd Koninkrijk",
+        "line3": ""
+      },
+      "enterprise": {
+        "title": "Enterprise oplossingen",
+        "description": "Heeft u een aangepaste oplossing nodig? Neem contact op met ons Enterprise-team voor aangepaste prijzen en implementatieondersteuning."
+      }
+    },
+    "form": {
+      "title": "Vraag een demo aan",
+      "description": "Vul het onderstaande formulier in en ons team neemt binnen 24 uur contact met u op om een aangepaste demonstratie in te plannen.",
+      "name": {
+        "label": "Naam",
+        "placeholder": "Uw volledige naam"
+      },
+      "email": {
+        "label": "E-mail",
+        "placeholder": "uw@email.nl"
+      },
+      "company": {
+        "label": "Bedrijf",
+        "placeholder": "Uw bedrijfsnaam"
+      },
+      "message": {
+        "label": "Bericht",
+        "placeholder": "Vertel ons over uw vereisten..."
+      },
+      "submit": "Verstuur aanvraag",
+      "privacy": "Door dit formulier in te dienen, gaat u akkoord met ons Privacybeleid."
+    }
+  },
+  "privacy": {
+    "meta": {
+      "title": "Privacybeleid - Disclosurely",
+      "description": "Leer hoe we uw persoonlijke gegevens beschermen en uw privacy respecteren."
+    },
+    "hero": {
+      "title": "Privacybeleid",
+      "description": "Leer hoe we uw persoonlijke gegevens beschermen en uw privacy respecteren."
+    },
+    "sections": {
+      "introduction": {
+        "title": "1. Inleiding",
+        "content": "Disclosurely Limited (Londen EC1V 2NX) beheert een veilig, online klokkenluiderplatform op disclosurely.com (de \"Service\"). Dit Privacybeleid beschrijft hoe we informatie verzamelen, gebruiken en beschermen wanneer u onze service gebruikt."
+      },
+      "dataCollection": {
+        "title": "2. Gegevensverzameling",
+        "content": "We verzamelen informatie die u ons direct verstrekt, evenals informatie die automatisch wordt verzameld wanneer u onze service gebruikt."
+      },
+      "dataUsage": {
+        "title": "3. Gegevensgebruik",
+        "content": "We gebruiken uw informatie om onze service te beheren, te verbeteren en ondersteuning te bieden."
+      },
+      "dataSharing": {
+        "title": "4. Gegevensdeling",
+        "content": "We delen uw informatie niet met derden, behalve zoals beschreven in dit Privacybeleid."
+      },
+      "dataSecurity": {
+        "title": "5. Gegevensbeveiliging",
+        "content": "We implementeren passende beveiligingsmaatregelen om uw informatie te beschermen."
+      },
+      "yourRights": {
+        "title": "6. Uw rechten",
+        "content": "U heeft bepaalde rechten met betrekking tot uw persoonlijke gegevens onder de GDPR."
+      },
+      "cookies": {
+        "title": "7. Cookies",
+        "content": "We gebruiken cookies en vergelijkbare technologieën om onze service te verbeteren."
+      },
+      "thirdParty": {
+        "title": "8. Dienstverleners van derden",
+        "content": "Onze service kan links bevatten naar andere websites die niet door ons worden beheerd."
+      },
+      "international": {
+        "title": "9. Internationale gegevensoverdrachten",
+        "content": "Uw informatie kan worden overgedragen naar landen buiten de Europese Economische Ruimte."
+      },
+      "retention": {
+        "title": "10. Gegevensbewaring",
+        "content": "We bewaren uw gegevens alleen zolang als nodig voor de doeleinden beschreven in dit Privacybeleid."
+      },
+      "children": {
+        "title": "11. Kinderen",
+        "content": "Onze service is niet bedoeld voor personen onder de 16 jaar."
+      },
+      "changes": {
+        "title": "12. Wijzigingen aan dit beleid",
+        "content": "We kunnen dit Privacybeleid van tijd tot tijd bijwerken. Materiële wijzigingen worden aan klanten gemeld via e-mail of via de service."
+      },
+      "contact": {
+        "title": "13. Contact",
+        "content1": "Als u vragen of zorgen heeft over dit Privacybeleid, neem dan contact met ons op:",
+        "company": "Disclosurely Limited",
+        "address": "Londen, EC1V 2NX, Verenigd Koninkrijk"
+      }
+    },
+    "lastUpdated": "Laatst bijgewerkt: Mei 2025"
+  },
+  "terms": {
+    "meta": {
+      "title": "Algemene Voorwaarden - Disclosurely",
+      "description": "Lees deze voorwaarden zorgvuldig door voordat u onze services gebruikt."
+    },
+    "hero": {
+      "title": "Algemene Voorwaarden",
+      "description": "Lees deze voorwaarden zorgvuldig door voordat u onze services gebruikt."
+    },
+    "sections": {
+      "introduction": {
+        "title": "1. Inleiding",
+        "content": "Disclosurely Limited (Londen EC1V 2NX) biedt een veilig, online klokkenluiderplatform op disclosurely.com (de \"Service\"). Door u te registreren voor en de Service te gebruiken, gaat u akkoord met deze Voorwaarden. De Service stelt klokkenluiders in staat om vertrouwelijke rapporten van wangedrag binnen hun organisatie in te dienen. Disclosurely is toegewijd aan GDPR-compliance en handhaaft strenge privacy-, beveiligings- en juridische standaarden. Supportcontact is support@disclosurely.com."
+      },
+      "accounts": {
+        "title": "3. Accountregistratie en gebruik",
+        "content1": "Om de Service te gebruiken, moet de Klant een account registreren en nauwkeurige, volledige informatie verstrekken.",
+        "content2": "De Klant is verantwoordelijk voor al het gebruik van de Service onder hun account en moet gebruikersnamen en wachtwoorden vertrouwelijk houden."
+      },
+      "acceptableUse": {
+        "title": "Aanvaardbaar gebruik",
+        "content": "De Klant gaat akkoord om de Service alleen te gebruiken voor wettige doeleinden en in overeenstemming met deze Voorwaarden."
+      },
+      "intellectualProperty": {
+        "title": "Intellectueel eigendom",
+        "content": "Disclosurely behoudt alle intellectuele eigendomsrechten in de Service. Geen eigendom wordt overgedragen aan de Klant."
+      },
+      "disclaimer": {
+        "title": "Disclaimer",
+        "content": "De Service wordt geleverd \"zoals deze is\" zonder garanties van welke aard dan ook."
+      },
+      "limitationOfLiability": {
+        "title": "Aansprakelijkheidsbeperking",
+        "content": "De aansprakelijkheid van Disclosurely is beperkt tot de totale abonnementskosten betaald voor de voorgaande 12 maanden."
+      },
+      "governingLaw": {
+        "title": "Toepasselijk recht",
+        "content": "Deze Voorwaarden worden beheerst door de wetten van het Verenigd Koninkrijk."
+      },
+      "changes": {
+        "title": "Wijzigingen aan deze Voorwaarden",
+        "content": "Disclosurely kan deze Voorwaarden van tijd tot tijd herzien. Voortdurend gebruik van de Service na wijzigingen vormt acceptatie."
+      }
+    },
+    "lastUpdated": "Laatst bijgewerkt: September 2025"
+  }
+}

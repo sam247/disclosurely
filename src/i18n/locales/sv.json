@@ -1,0 +1,559 @@
+{
+  "dashboard": "Instrumentpanel",
+  "aiCaseHelper": "AI-fallhjälpare",
+  "analytics": "Analys",
+  "audit": "Revision",
+  "team": "Team",
+  "branding": "Varumärke",
+  "profile": "Profil",
+  "logout": "Logga ut",
+  "welcomeBack": "Välkommen tillbaka",
+  "notifications": "Aviseringar",
+  "clearAll": "Rensa alla",
+  "markAsRead": "Markera som läst",
+  "noNotifications": "Inga aviseringar",
+  "secureReportLink": "Säker rapportlänk",
+  "reportsOverview": "Rapportöversikt",
+  "activeReports": "Aktiva rapporter",
+  "archivedReports": "Arkiverade rapporter",
+  "viewReport": "Visa",
+  "trackingId": "Spårnings-ID",
+  "title": "Titel",
+  "status": "Status",
+  "category": "Kategori",
+  "assignedTo": "Tilldelad till",
+  "date": "Datum",
+  "actions": "Åtgärder",
+  "reportContent": "Rapportinnehåll",
+  "translate": "Översätt",
+  "translating": "Översätter...",
+  "showOriginal": "Visa original",
+  "secureMessaging": "Säker meddelandehantering",
+  "sendMessage": "Skicka meddelande",
+  "typeYourMessage": "Skriv ditt meddelande...",
+  "messagesEncrypted": "Meddelanden är krypterade från slutpunkt till slutpunkt",
+  "loading": "Laddar...",
+  "selectLanguage": "Välj språk",
+  "totalReports": "Totalt antal rapporter",
+  "allTimeSubmissions": "Alla tids inlämningar",
+  "newReports": "Nya rapporter",
+  "last7Days": "Senaste 7 dagarna",
+  "averageResponseTime": "Genomsnittlig svarstid",
+  "firstOrgResponse": "Första org-svar (30 dagar)",
+  "noData": "Inga data",
+  "activeLinks": "Aktiva länkar",
+  "submissionPortals": "Inlämningsportaler",
+  "teamMembers": "Teammedlemmar",
+  "activeUsers": "Aktiva användare",
+  "active": "Aktiv",
+  "inactive": "Inaktiv",
+  "usedTimes": "Använd {{count}} gånger",
+  "copyLink": "Kopiera länk",
+  "yourOrganisationCanUse": "Din organisation kan använda denna länk för att avslöja alla frågor till den registrerade e-postadressen på detta konto.",
+  "brandedSubmissionPortal": "Märkt inlämningsportal",
+  "unbrandedSubmissionPortal": "Omärkt inlämningsportal",
+  "manageAndReviewReports": "Hantera och granska alla inlämnade rapporter",
+  "searchReports": "Sök rapporter...",
+  "allStatuses": "Alla statusar",
+  "quickReport": "Snabb rapport",
+  "linkCopied": "Länk kopierad!",
+  "linkCopiedDescription": "Länken har kopierats till ditt urklipp.",
+  "upgradeRequired": "Uppgradering krävs",
+  "upgradeDescription": "{{feature}} är tillgängligt på vår Pro-plan. Uppgradera nu för att låsa upp denna funktion.",
+  "reportManagement": "Rapporthantering",
+  "viewManageTrackReports": "Visa, hantera och spåra alla inlämnade rapporter",
+  "searchByTitleOrId": "Sök efter titel eller spårnings-ID...",
+  "filterByStatus": "Filtrera efter status",
+  "filterByPriority": "Filtrera efter prioritet",
+  "allPriorities": "Alla prioriteter",
+  "priority": "Prioritet",
+  "submitted": "Inlämnad",
+  "noReportsFound": "Inga rapporter hittades",
+  "newIssue": "Nytt problem",
+  "live": "Live",
+  "inReview": "Under granskning",
+  "investigating": "Undersöker",
+  "resolved": "Löst",
+  "closed": "Stängd",
+  "archived": "Arkiverad",
+  "deleted": "Borttagen",
+  "unassigned": "Ej tilldelad",
+  "showDeleted": "Visa borttagna",
+  "hideDeleted": "Dölj borttagna",
+  "reportDetails": "Rapportdetaljer",
+  "viewManageReportInfo": "Visa och hantera rapportinformation",
+  "tags": "Taggar",
+  "editTags": "Redigera taggar",
+  "saveTags": "Spara taggar",
+  "cancel": "Avbryt",
+  "noTags": "Inga taggar",
+  "internalNotes": "Interna anteckningar",
+  "addInternalNote": "Lägg till en intern anteckning...",
+  "addNote": "Lägg till anteckning",
+  "aiCaseHelperTitle": "AI-fallhjälpare",
+  "aiCaseHelperDescription": "Analysera fall med AI-drivna insikter",
+  "teamManagementTitle": "Teamhantering",
+  "teamManagementDescription": "Bjud in och hantera teammedlemmar",
+  "profileSettingsTitle": "Profilinställningar",
+  "profileSettingsDescription": "Hantera din profil, prenumeration och integritetsinställningar",
+  "account": "Konto",
+  "subscription": "Prenumeration",
+  "privacyData": "Integritet och data",
+  "customBrandingTitle": "Anpassat varumärke",
+  "customBrandingDescription": "Anpassa din organisations varumärke och utseende",
+  "inviteUser": "Bjud in användare",
+  "inviteTeamMember": "Bjud in teammedlem",
+  "sendInvitationToJoin": "Skicka en inbjudan för att gå med i din organisation",
+  "emailAddress": "E-postadress",
+  "role": "Roll",
+  "sendInvitation": "Skicka inbjudan",
+  "name": "Namn",
+  "email": "E-post",
+  "lastLogin": "Senaste inloggning",
+  "noTeamMembersFound": "Inga teammedlemmar hittades",
+  "never": "Aldrig",
+  "caseHandler": "Fallhanterare",
+  "reviewer": "Granskare",
+  "admin": "Administratör",
+  "orgAdmin": "Org-administratör",
+  "pendingInvitations": "Väntande inbjudningar",
+  "invitedBy": "Inbjuden av",
+  "expiresAt": "Upphör den",
+  "personalInformation": "Personlig information",
+  "updatePersonalDetails": "Uppdatera dina personliga uppgifter",
+  "firstName": "Förnamn",
+  "lastName": "Efternamn",
+  "enterFirstName": "Ange ditt förnamn",
+  "enterLastName": "Ange ditt efternamn",
+  "updateProfile": "Uppdatera profil",
+  "updating": "Uppdaterar...",
+  "accountSettings": "Kontoinställningar",
+  "manageAccountPreferences": "Hantera dina kontoinställningar",
+  "emailChangeRequiresConfirmation": "E-poständring kräver bekräftelse från båda adresserna",
+  "updateEmail": "Uppdatera e-post",
+  "security": "Säkerhet",
+  "manageAccountSecurity": "Hantera din kontosäkerhet",
+  "password": "Lösenord",
+  "passwordResetInstructions": "För att ändra ditt lösenord måste du använda funktionen för lösenordsåterställning",
+  "sendPasswordResetEmail": "Skicka e-post för lösenordsåterställning",
+  "organizationSettings": "Organisationsinställningar",
+  "manageOrgProfileDomains": "Hantera din organisations profil och domäninställningar",
+  "basicInformation": "Grundläggande information",
+  "updateOrgBasicInfo": "Uppdatera din organisations grundläggande information",
+  "description": "Beskrivning",
+  "createdAt": "Skapad den",
+  "brandingSettings": "Varumärkesinställningar",
+  "customizeBrandingForms": "Anpassa din organisations varumärke för inlämningsformulär",
+  "customBranding": "Anpassat varumärke",
+  "organizationLogo": "Organisationslogotyp",
+  "uploadLogo": "Ladda upp en logotyp (max 2MB, PNG/JPG rekommenderas)",
+  "brandColor": "Varumärkesfärg",
+  "saveChanges": "Spara ändringar",
+  "saving": "Sparar...",
+  "nav": {
+    "pricing": "Priser",
+    "contact": "Kontakt",
+    "signin": "Logga in",
+    "getStarted": "Kom igång"
+  },
+  "landing": {
+    "hero": {
+      "title1": "Visselblåsare och",
+      "title2": "Avslöjandeplattform",
+      "subtitle": "Disclosurely hjälper compliance-team att hålla sig i framkant genom att förvandla etik och compliance till en proaktiv fördel: bygga en kultur av integritet, förenkla arbetsflöden och minska organisationsrisk.",
+      "startFreeTrial": "Starta gratis provperiod",
+      "viewPricing": "Visa priser"
+    },
+    "trusted": "Betrodd av hundratals brittiska företag",
+    "features": {
+      "title": "Allt du behöver för säker rapportering",
+      "subtitle": "Vår plattform ger omfattande verktyg för att hantera visselblåsarrapporter med fullständig konfidentialitet och compliance.",
+      "anonymousReporting": {
+        "title": "Anonym rapportering",
+        "description": "Fullständig anonymitet för visselblåsare med krypterade inlämningar och säker identitetsskydd."
+      },
+      "secureMessaging": {
+        "title": "Säker meddelandehantering",
+        "description": "Tvåvägskrypterad kommunikation mellan visselblåsare och utredare med bibehållen anonymitet."
+      },
+      "caseManagement": {
+        "title": "Fallhantering",
+        "description": "Omfattande instrumentpanel för att spåra, undersöka och lösa fall med fullständiga revisionsspår."
+      },
+      "multiUserAccess": {
+        "title": "Flervägsåtkomst",
+        "description": "Rollbaserade behörigheter för juridiska, HR- och compliance-team med kontrollerade åtkomstnivåer."
+      },
+      "regulatoryCompliance": {
+        "title": "Regelverkscompliance",
+        "description": "Integrerad compliance med GDPR, SOX och andra regulatoriska krav över alla branscher."
+      },
+      "enterpriseSecurity": {
+        "title": "Företagssäkerhet",
+        "description": "Banknivåkryptering, säker hosting och omfattande dataskyddsåtgärder."
+      }
+    },
+    "howItWorks": {
+      "title": "Så fungerar det",
+      "subtitle": "Kom igång med Disclosurely i tre enkla steg",
+      "step1": {
+        "title": "Konfigurera din portal",
+        "description": "Skapa ditt konto och anpassa din rapporteringsportal på minuter. Lägg till ditt varumärke, ställ in aviseringsinställningar och konfigurera teamåtkomst."
+      },
+      "step2": {
+        "title": "Dela med ditt team",
+        "description": "Distribuera din säkra rapporteringslänk till anställda via e-post, intranät eller QR-koder. Rapporter kan lämnas in 24/7 från vilken enhet som helst, var som helst."
+      },
+      "step3": {
+        "title": "Hantera och lösa fall",
+        "description": "Få omedelbara aviseringar om nya rapporter. Undersök, kommunicera säkert med visselblåsare och spåra fall till lösning med fullständiga revisionsspår."
+      }
+    },
+    "anonymousReporting": {
+      "title": "Anonym rapportering förenklad",
+      "description": "Låt anställda rapportera missbruk, etiköverträdelser eller andra problem helt anonymt. Vår avancerade kryptering säkerställer visselblåsaridentitetsskydd samtidigt som fullständig compliance med regulatoriska krav bibehålls.",
+      "benefit1": "Noll datainsamling om rapporterare",
+      "benefit2": "Anonym uppföljningsmeddelandehantering",
+      "benefit3": "Flerspråksstöd"
+    },
+    "encryption": {
+      "title": "Militärgradskryptering",
+      "description": "Varje rapport är skyddad med AES-256-kryptering, samma standard som används av banker och statliga myndigheter. Dina känsliga data är säkra från inlämning till lösning.",
+      "benefit1": "AES-256 slutpunkt-till-slutpunkt-kryptering",
+      "benefit2": "Krypterade bilagor",
+      "benefit3": "Säker datalagring"
+    },
+    "compliance": {
+      "title": "Compliance förenklad",
+      "description": "Håll dig compliant med brittiska och EU-visselblåsarförordningar, inklusive EU-visselblåsardirektivet och UK Employment Rights Act. Integrerade revisionsspår och rapporteringsverktyg säkerställer regelverkscompliance.",
+      "benefit1": "EU-visselblåsardirektiv compliant",
+      "benefit2": "GDPR-redo",
+      "benefit3": "Automatiserade compliance-rapporter"
+    },
+    "messaging": {
+      "title": "Säker tvåvägskommunikation",
+      "description": "Upprätthåll anonym dialog med visselblåsare under utredningar. Begär ytterligare information, ge uppdateringar och säkerställ transparens medan identiteter skyddas.",
+      "benefit1": "Krypterad meddelandehantering",
+      "benefit2": "Bibehåll anonymitet",
+      "benefit3": "Realtidsaviseringar"
+    },
+    "aiPowered": {
+      "title": "AI-driven fallanalys",
+      "description": "Utnyttja artificiell intelligens för att analysera fallmönster, identifiera risker och prioritera utredningar. Vår AI-assistent hjälper compliance-team att arbeta smartare och mer effektivt.",
+      "benefit1": "Automatiserad riskbedömning",
+      "benefit2": "Mönsterigenkänning",
+      "benefit3": "Intelligent fallprioritering"
+    },
+    "certifications": {
+      "title": "Säkerhets- och compliance-certifieringar",
+      "subtitle": "Betrodd av organisationer världen över med branschledande säkerhetsstandarder"
+    },
+    "pricing": {
+      "title": "Enkla, transparenta priser",
+      "description": "Flexibla priser skräddarsydda för din organisation. Välj den plan som passar dina behov, anpassa funktioner och kom igång direkt med guidad konfigurationssupport. Alla planer inkluderar en 7-dagars gratis provperiod."
+    },
+    "testimonials": {
+      "title": "Betrodd av organisationer världen över",
+      "subtitle": "Se vad våra kunder säger om sina upplevelser med Disclosurely",
+      "testimonial1": {
+        "quote": "Disclosurely har förvandlat hur vi hanterar känsliga rapporter. Den anonyma meddelandefunktionen är särskilt värdefull.",
+        "name": "Sarah Johnson",
+        "role": "Chief Compliance Officer"
+      },
+      "testimonial2": {
+        "quote": "Plattformen är intuitiv och säker. Våra anställda känner sig säkra på att rapportera problem och vi kan undersöka dem effektivt.",
+        "name": "Michael Chen",
+        "role": "HR Director"
+      },
+      "testimonial3": {
+        "quote": "Implementeringen var smidig och supportteamet var utmärkt. Rekommenderar starkt för alla organisationer som tar compliance på allvar.",
+        "name": "Emily Rodriguez",
+        "role": "Legal Counsel"
+      }
+    },
+    "faq": {
+      "title": "Vanliga frågor",
+      "subtitle": "Allt du behöver veta om Disclosurely",
+      "question1": {
+        "question": "Hur fungerar anonym rapportering?",
+        "answer": "Visselblåsare kan lämna in rapporter via din anpassade portal utan att tillhandahålla personlig information. Vårt system använder avancerad kryptering och samlar inte in IP-adresser eller identifierande data. Rapporterare får en unik åtkomstkod för att kontrollera statusen på sin rapport och kommunicera säkert."
+      },
+      "question2": {
+        "question": "Är Disclosurely GDPR och andra förordningar compliant?",
+        "answer": "Ja, Disclosurely är byggt med compliance i åtanke. Vi är GDPR-compliant och uppfyller kraven för SOX, EU-visselblåsardirektivet och andra viktiga regulatoriska ramverk. All data är krypterad och lagrad säkert i enlighet med internationella dataskyddsstandarder."
+      },
+      "question3": {
+        "question": "Kan vi anpassa rapporteringsportalen?",
+        "answer": "Absolut. Du kan lägga till ditt företags varumärke, anpassa rapporteringsformulärfält, ställa in specifika kategorier för rapporter och till och med använda din egen domän (på Professional- och Enterprise-planer). Portalen kan anpassas för att matcha din organisations behov och kultur."
+      },
+      "question4": {
+        "question": "Hur snabbt kan vi komma igång?",
+        "answer": "De flesta organisationer är igång inom 24 timmar. Efter registrering kan du omedelbart anpassa din portal, bjuda in teammedlemmar och börja ta emot rapporter. Vårt supportteam är tillgängligt för att hjälpa med konfiguration och onboarding utan extra kostnad."
+      },
+      "question5": {
+        "question": "Vilket stöd ingår?",
+        "answer": "Alla planer inkluderar e-poststöd och tillgång till vår omfattande kunskapsbas. Professional-planer inkluderar prioriterat stöd med snabbare svarstider, medan Enterprise-kunder får dedikerat stöd med SLA-garantier och valfri på-plats-utbildning."
+      },
+      "question6": {
+        "question": "Kan vi avbryta eller ändra vår plan när som helst?",
+        "answer": "Ja, du kan uppgradera, nedgradera eller avbryta din prenumeration när som helst. Om du avbryter behåller du åtkomst till slutet av din faktureringsperiod. Vi erbjuder också en 14-dagars gratis provperiod så att du kan testa alla funktioner innan du förbinder dig."
+      }
+    },
+    "cta": {
+      "title": "Redo att stärka ditt compliance-program?",
+      "description": "Inte redo för en gratis provperiod eller demo? Dela dina krav med oss och vi svarar snabbt för att diskutera hur Disclosurely kan stödja din organisation.",
+      "button": "Starta gratis provperiod"
+    }
+  },
+  "auth": {
+    "signin": {
+      "title": "Logga in på ditt konto",
+      "subtitle": "Få tillgång till din säkra instrumentpanel",
+      "emailLabel": "E-post",
+      "emailPlaceholder": "Ange din e-post",
+      "signInButton": "Logga in med e-postkod",
+      "sendingCode": "Skickar verifieringskod...",
+      "signingInWithGoogle": "Loggar in med Google...",
+      "continueWithGoogle": "Fortsätt med Google",
+      "orContinueWith": "Eller fortsätt med",
+      "noAccount": "Har du inget konto?",
+      "signUpLink": "Registrera dig"
+    },
+    "signup": {
+      "title": "Skapa ditt konto",
+      "subtitle": "Gå med i den säkra avslöjandeplattformen"
+    }
+  },
+  "pricing": {
+    "hero": {
+      "title": "Enkla, transparenta priser",
+      "subtitle": "Välj rätt plan för din organisation. Börja med vår sjudagars gratis provperiod och uppgradera när du växer."
+    },
+    "plans": {
+      "mostPopular": "Mest populär",
+      "perMonth": "/månad",
+      "starter": {
+        "name": "Starter",
+        "price": "£9.99",
+        "description": "Perfekt för små organisationer"
+      },
+      "pro": {
+        "name": "Pro",
+        "price": "£19.99",
+        "description": "För växande organisationer"
+      },
+      "enterprise": {
+        "name": "Enterprise",
+        "price": "Anpassat",
+        "description": "För stora organisationer"
+      }
+    },
+    "features": {
+      "casesLimit": "5 fall/månad",
+      "storage": "1GB lagring",
+      "emailSupport": "E-poststöd",
+      "messaging": "Säker tvåvägsmeddelandehantering",
+      "aiHelper": "AI-fallhjälpare",
+      "customBranding": "Anpassat varumärke",
+      "unlimitedCases": "Obegränsade fall/månad",
+      "unlimitedStorage": "Obegränsad lagring",
+      "everythingPro": "Allt i Professional",
+      "customDomain": "Anpassad domän",
+      "dedicatedSupport": "Dedikerat stöd",
+      "slaGuarantee": "SLA-garanti",
+      "customIntegrations": "Anpassade integrationer",
+      "api": "API (kommer snart)"
+    },
+    "faq": {
+      "title": "Vanliga frågor",
+      "trial": {
+        "question": "Finns det en gratis provperiod?",
+        "answer": "Ja, alla planer kommer med en 7-dagars gratis provperiod så att du kan se hur plattformen fungerar. Inget kreditkort krävs."
+      },
+      "limit": {
+        "question": "Vad händer om jag når min fallgräns på Starter-planen?",
+        "answer": "Om du överskrider din månatliga fallallokering kommer du att meddelas i instrumentpanelen. Du kan uppgradera till Pro-planen för obegränsade fall eller vänta till nästa månad."
+      },
+      "change": {
+        "question": "Kan jag ändra plan senare?",
+        "answer": "Absolut! Du kan uppgradera eller nedgradera din plan när som helst från din instrumentpanel."
+      },
+      "security": {
+        "question": "Vilka säkerhetscertifieringar har ni?",
+        "answer": "Vi är ISO 27001-certifierade, uppfyller SOC 2 Type II och är GDPR-redo."
+      }
+    },
+    "cta": {
+      "ready": "Redo att komma igång?",
+      "join": "Gå med organisationer världen över som litar på Disclosurely för säker rapportering.",
+      "startTrial": "Starta gratis provperiod",
+      "contactSales": "Kontakta försäljning"
+    }
+  },
+  "contact": {
+    "hero": {
+      "title": "Kontakta vårt säljteam",
+      "description": "Kontakta oss så hjälper vi gärna till att svara på alla frågor om Disclosurely.",
+      "subtitle": "Redo att förvandla din organisations rapporteringsförmåga? Kontakta vårt team."
+    },
+    "info": {
+      "title": "Kontaktinformation",
+      "description": "Kontakta oss så hjälper vi gärna till att svara på alla frågor om Disclosurely.",
+      "email": {
+        "title": "E-post",
+        "address": "sampettiford@googlemail.com",
+        "response": "Vi svarar inom 24 timmar"
+      },
+      "phone": {
+        "title": "Telefon",
+        "number": "+44 7123 456789",
+        "hours": "Mån-fre, 9-17 GMT"
+      },
+      "address": {
+        "title": "Adress",
+        "line1": "London",
+        "line2": "Storbritannien",
+        "line3": ""
+      },
+      "enterprise": {
+        "title": "Enterprise-lösningar",
+        "description": "Behöver du en anpassad lösning? Kontakta vårt Enterprise-team för anpassade priser och implementeringsstöd."
+      }
+    },
+    "form": {
+      "title": "Begär en demo",
+      "description": "Fyll i formuläret nedan så kontaktar vårt team dig inom 24 timmar för att schemalägga en anpassad demonstration.",
+      "name": {
+        "label": "Namn",
+        "placeholder": "Ditt fullständiga namn"
+      },
+      "email": {
+        "label": "E-post",
+        "placeholder": "din@email.se"
+      },
+      "company": {
+        "label": "Företag",
+        "placeholder": "Ditt företagsnamn"
+      },
+      "message": {
+        "label": "Meddelande",
+        "placeholder": "Berätta om dina krav..."
+      },
+      "submit": "Skicka förfrågan",
+      "privacy": "Genom att skicka detta formulär godkänner du vår integritetspolicy."
+    }
+  },
+  "privacy": {
+    "meta": {
+      "title": "Integritetspolicy - Disclosurely",
+      "description": "Lär dig hur vi skyddar dina personuppgifter och respekterar din integritet."
+    },
+    "hero": {
+      "title": "Integritetspolicy",
+      "description": "Lär dig hur vi skyddar dina personuppgifter och respekterar din integritet."
+    },
+    "sections": {
+      "introduction": {
+        "title": "1. Introduktion",
+        "content": "Disclosurely Limited (London EC1V 2NX) driver en säker, online visselblåsarplattform på disclosurely.com (\"Tjänsten\"). Denna integritetspolicy beskriver hur vi samlar in, använder och skyddar information när du använder vår tjänst."
+      },
+      "dataCollection": {
+        "title": "2. Datainsamling",
+        "content": "Vi samlar in information som du tillhandahåller oss direkt, samt information som samlas in automatiskt när du använder vår tjänst."
+      },
+      "dataUsage": {
+        "title": "3. Användning av data",
+        "content": "Vi använder dina uppgifter för att driva, förbättra och tillhandahålla stöd för vår tjänst."
+      },
+      "dataSharing": {
+        "title": "4. Datadelning",
+        "content": "Vi delar inte dina uppgifter med tredje parter, förutom som beskrivet i denna integritetspolicy."
+      },
+      "dataSecurity": {
+        "title": "5. Datasäkerhet",
+        "content": "Vi implementerar lämpliga säkerhetsåtgärder för att skydda dina uppgifter."
+      },
+      "yourRights": {
+        "title": "6. Dina rättigheter",
+        "content": "Du har vissa rättigheter gällande dina personuppgifter under GDPR."
+      },
+      "cookies": {
+        "title": "7. Cookies",
+        "content": "Vi använder cookies och liknande teknologier för att förbättra vår tjänst."
+      },
+      "thirdParty": {
+        "title": "8. Tredjepartstjänster",
+        "content": "Vår tjänst kan innehålla länkar till andra webbplatser som inte drivs av oss."
+      },
+      "international": {
+        "title": "9. Internationella dataöverföringar",
+        "content": "Dina uppgifter kan överföras till länder utanför Europeiska ekonomiska samarbetsområdet."
+      },
+      "retention": {
+        "title": "10. Datalagring",
+        "content": "Vi behåller dina uppgifter endast så länge som det är nödvändigt för de ändamål som beskrivs i denna integritetspolicy."
+      },
+      "children": {
+        "title": "11. Barn",
+        "content": "Vår tjänst riktar sig inte till personer under 16 år."
+      },
+      "changes": {
+        "title": "12. Ändringar av denna policy",
+        "content": "Vi kan uppdatera denna integritetspolicy från tid till annan. Betydande ändringar kommer att meddelas kunder via e-post eller via tjänsten."
+      },
+      "contact": {
+        "title": "13. Kontakt",
+        "content1": "Om du har frågor eller funderingar om denna integritetspolicy, kontakta oss:",
+        "company": "Disclosurely Limited",
+        "address": "London, EC1V 2NX, Storbritannien"
+      }
+    },
+    "lastUpdated": "Senast uppdaterad: Maj 2025"
+  },
+  "terms": {
+    "meta": {
+      "title": "Användarvillkor - Disclosurely",
+      "description": "Läs dessa villkor noggrant innan du använder våra tjänster."
+    },
+    "hero": {
+      "title": "Användarvillkor",
+      "description": "Läs dessa villkor noggrant innan du använder våra tjänster."
+    },
+    "sections": {
+      "introduction": {
+        "title": "1. Introduktion",
+        "content": "Disclosurely Limited (London EC1V 2NX) tillhandahåller en säker, online visselblåsarplattform på disclosurely.com (\"Tjänsten\"). Genom att registrera dig för och använda tjänsten godkänner du dessa villkor. Tjänsten gör det möjligt för visselblåsare att lämna in konfidentiella rapporter om missbruk inom deras organisation. Disclosurely är engagerat i GDPR-compliance och upprätthåller strikta integritets-, säkerhets- och rättsstandarder. Supportkontakt är support@disclosurely.com."
+      },
+      "accounts": {
+        "title": "3. Kontoregistrering och användning",
+        "content1": "För att använda tjänsten måste kunden registrera ett konto och tillhandahålla korrekt, fullständig information.",
+        "content2": "Kunden är ansvarig för all användning av tjänsten under sitt konto och måste hålla användarnamn och lösenord konfidentiella."
+      },
+      "acceptableUse": {
+        "title": "Acceptabel användning",
+        "content": "Kunden godkänner att använda tjänsten endast för lagliga ändamål och i enlighet med dessa villkor."
+      },
+      "intellectualProperty": {
+        "title": "Immateriell egendom",
+        "content": "Disclosurely behåller alla immateriella rättigheter i tjänsten. Ingen äganderätt överförs till kunden."
+      },
+      "disclaimer": {
+        "title": "Ansvarsfriskrivning",
+        "content": "Tjänsten tillhandahålls \"som den är\" utan garantier av något slag."
+      },
+      "limitationOfLiability": {
+        "title": "Ansvarsbegränsning",
+        "content": "Disclosurelys ansvar är begränsat till de totala prenumerationsavgifterna som betalats för de föregående 12 månaderna."
+      },
+      "governingLaw": {
+        "title": "Tillämplig lag",
+        "content": "Dessa villkor regleras av Storbritanniens lagar."
+      },
+      "changes": {
+        "title": "Ändringar av dessa villkor",
+        "content": "Disclosurely kan revidera dessa villkor från tid till annan. Fortsatt användning av tjänsten efter ändringar utgör godkännande."
+      }
+    },
+    "lastUpdated": "Senast uppdaterad: September 2025"
+  }
+}

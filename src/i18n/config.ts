@@ -7,6 +7,13 @@ import es from './locales/es.json';
 import fr from './locales/fr.json';
 import de from './locales/de.json';
 import pl from './locales/pl.json';
+import sv from './locales/sv.json';
+import no from './locales/no.json';
+import pt from './locales/pt.json';
+import it from './locales/it.json';
+import nl from './locales/nl.json';
+import da from './locales/da.json';
+import el from './locales/el.json';
 
 // Initialize i18next
 i18n
@@ -19,6 +26,13 @@ i18n
       fr: { translation: fr },
       de: { translation: de },
       pl: { translation: pl },
+      sv: { translation: sv },
+      no: { translation: no },
+      pt: { translation: pt },
+      it: { translation: it },
+      nl: { translation: nl },
+      da: { translation: da },
+      el: { translation: el },
     },
     fallbackLng: 'en',
     lng: 'en',

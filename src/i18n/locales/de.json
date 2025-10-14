@@ -318,5 +318,118 @@
       "submit": "Anfrage Senden",
       "privacy": "Durch das Absenden dieses Formulars stimmen Sie unserer Datenschutzerklärung zu."
     }
+  },
+  "privacy": {
+    "meta": {
+      "title": "Datenschutzerklärung - Disclosurely",
+      "description": "Erfahren Sie, wie wir Ihre persönlichen Daten schützen und Ihre Privatsphäre respektieren."
+    },
+    "hero": {
+      "title": "Datenschutzerklärung",
+      "description": "Erfahren Sie, wie wir Ihre persönlichen Daten schützen und Ihre Privatsphäre respektieren."
+    },
+    "sections": {
+      "introduction": {
+        "title": "1. Einführung",
+        "content": "Disclosurely Limited (London EC1V 2NX) betreibt eine sichere, online Whistleblowing-Plattform unter disclosurely.com (der \"Service\"). Diese Datenschutzerklärung beschreibt, wie wir Informationen sammeln, verwenden und schützen, wenn Sie unseren Service nutzen."
+      },
+      "dataCollection": {
+        "title": "2. Datensammlung",
+        "content": "Wir sammeln Informationen, die Sie uns direkt zur Verfügung stellen, sowie Informationen, die automatisch gesammelt werden, wenn Sie unseren Service nutzen."
+      },
+      "dataUsage": {
+        "title": "3. Verwendung von Daten",
+        "content": "Wir verwenden Ihre Informationen, um unseren Service zu betreiben, zu verbessern und Ihnen Support zu bieten."
+      },
+      "dataSharing": {
+        "title": "4. Datenweitergabe",
+        "content": "Wir teilen Ihre Informationen nicht mit Dritten, außer wie in dieser Datenschutzerklärung beschrieben."
+      },
+      "dataSecurity": {
+        "title": "5. Datensicherheit",
+        "content": "Wir implementieren angemessene Sicherheitsmaßnahmen, um Ihre Informationen zu schützen."
+      },
+      "yourRights": {
+        "title": "6. Ihre Rechte",
+        "content": "Sie haben bestimmte Rechte bezüglich Ihrer persönlichen Daten unter der DSGVO."
+      },
+      "cookies": {
+        "title": "7. Cookies",
+        "content": "Wir verwenden Cookies und ähnliche Technologien, um unseren Service zu verbessern."
+      },
+      "thirdParty": {
+        "title": "8. Drittanbieter-Services",
+        "content": "Unser Service kann Links zu anderen Websites enthalten, die nicht von uns betrieben werden."
+      },
+      "international": {
+        "title": "9. Internationale Datenübertragungen",
+        "content": "Ihre Informationen können in Länder außerhalb des Europäischen Wirtschaftsraums übertragen werden."
+      },
+      "retention": {
+        "title": "10. Datenaufbewahrung",
+        "content": "Wir bewahren Ihre Daten nur so lange auf, wie es für die in dieser Datenschutzerklärung beschriebenen Zwecke erforderlich ist."
+      },
+      "children": {
+        "title": "11. Kinder",
+        "content": "Unser Service richtet sich nicht an Personen unter 16 Jahren."
+      },
+      "changes": {
+        "title": "12. Änderungen an dieser Richtlinie",
+        "content": "Wir können diese Datenschutzerklärung von Zeit zu Zeit aktualisieren. Wesentliche Änderungen werden den Kunden per E-Mail oder über den Service mitgeteilt."
+      },
+      "contact": {
+        "title": "13. Kontakt",
+        "content1": "Wenn Sie Fragen oder Bedenken zu dieser Datenschutzerklärung haben, wenden Sie sich bitte an:",
+        "company": "Disclosurely Limited",
+        "address": "London, EC1V 2NX, Vereinigtes Königreich"
+      }
+    },
+    "lastUpdated": "Zuletzt aktualisiert: Mai 2025"
+  },
+  "terms": {
+    "meta": {
+      "title": "Allgemeine Geschäftsbedingungen - Disclosurely",
+      "description": "Bitte lesen Sie diese Bedingungen sorgfältig durch, bevor Sie unsere Services nutzen."
+    },
+    "hero": {
+      "title": "Allgemeine Geschäftsbedingungen",
+      "description": "Bitte lesen Sie diese Bedingungen sorgfältig durch, bevor Sie unsere Services nutzen."
+    },
+    "sections": {
+      "introduction": {
+        "title": "1. Einführung",
+        "content": "Disclosurely Limited (London EC1V 2NX) bietet eine sichere, online Whistleblowing-Plattform unter disclosurely.com (der \"Service\") an. Durch die Registrierung und Nutzung des Services stimmen Sie diesen Bedingungen zu. Der Service ermöglicht es Whistleblowern, vertrauliche Berichte über Fehlverhalten in ihrer Organisation einzureichen. Disclosurely verpflichtet sich zur DSGVO-Konformität und unterhält strenge Datenschutz-, Sicherheits- und Rechtsstandards. Support-Kontakt ist support@disclosurely.com."
+      },
+      "accounts": {
+        "title": "3. Kontoregistrierung und -nutzung",
+        "content1": "Um den Service zu nutzen, muss der Kunde ein Konto registrieren und genaue, vollständige Informationen bereitstellen.",
+        "content2": "Der Kunde ist verantwortlich für die gesamte Nutzung des Services unter seinem Konto und muss Benutzernamen und Passwörter vertraulich halten."
+      },
+      "acceptableUse": {
+        "title": "Zulässige Nutzung",
+        "content": "Der Kunde stimmt zu, den Service nur für rechtmäßige Zwecke und in Übereinstimmung mit diesen Bedingungen zu nutzen."
+      },
+      "intellectualProperty": {
+        "title": "Geistiges Eigentum",
+        "content": "Disclosurely behält alle Rechte am geistigen Eigentum am Service. Kein Eigentum wird auf den Kunden übertragen."
+      },
+      "disclaimer": {
+        "title": "Haftungsausschluss",
+        "content": "Der Service wird \"wie besehen\" ohne Gewährleistungen jeglicher Art bereitgestellt."
+      },
+      "limitationOfLiability": {
+        "title": "Haftungsbeschränkung",
+        "content": "Die Haftung von Disclosurely ist auf die Gesamtsubskriptionsgebühren für die vorangegangenen 12 Monate beschränkt."
+      },
+      "governingLaw": {
+        "title": "Anwendbares Recht",
+        "content": "Diese Bedingungen unterliegen den Gesetzen des Vereinigten Königreichs."
+      },
+      "changes": {
+        "title": "Änderungen an diesen Bedingungen",
+        "content": "Disclosurely kann diese Bedingungen von Zeit zu Zeit überarbeiten. Die fortgesetzte Nutzung des Services nach Änderungen stellt eine Annahme dar."
+      }
+    },
+    "lastUpdated": "Zuletzt aktualisiert: September 2025"
   }
 }
