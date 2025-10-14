@@ -8,8 +8,10 @@ import { formatDistanceToNow } from 'date-fns';
 import { Link, useParams, useSearchParams } from 'react-router-dom';
 import { Footer } from '@/components/ui/footer';
 import { StandardHeader } from '@/components/StandardHeader';
+import DynamicHelmet from '@/components/DynamicHelmet';
 import { formatMarkdownToHtml } from '@/utils/markdownFormatter';
 import { useLanguageFromUrl } from '@/hooks/useLanguageFromUrl';
+import { useTranslation } from 'react-i18next';
 
 interface BlogPost {
   id: string;
@@ -149,6 +151,7 @@ const Blog = () => {
   const [loading, setLoading] = useState(true);
   const selectedCategory = searchParams.get('category');
   const { currentLanguage } = useLanguageFromUrl();
+  const { t } = useTranslation();
 
   useEffect(() => {
     if (slug) {
@@ -234,6 +237,11 @@ const Blog = () => {
   if (slug && currentPost) {
     return (
       <>
+        <DynamicHelmet
+          pageIdentifier={`blog_post_${currentPost.slug}`}
+          fallbackTitle={currentPost.meta_title || currentPost.title}
+          fallbackDescription={currentPost.meta_description || currentPost.excerpt}
+        />
         <StandardHeader currentLanguage={currentLanguage} />
         <div className="min-h-screen bg-background">
           <div className="max-w-4xl mx-auto px-4 py-16">
@@ -286,6 +294,11 @@ const Blog = () => {
   // Blog listing view
   return (
     <>
+      <DynamicHelmet
+        pageIdentifier="blog"
+        fallbackTitle={t("blog.meta.title")}
+        fallbackDescription={t("blog.meta.description")}
+      />
       <StandardHeader currentLanguage={currentLanguage} />
       <div className="min-h-screen bg-background">
         {/* Content with sidebar */}

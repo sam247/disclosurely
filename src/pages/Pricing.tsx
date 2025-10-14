@@ -5,6 +5,7 @@ import { Link } from "react-router-dom";
 import { Footer } from "@/components/ui/footer";
 import { StandardHeader } from "@/components/StandardHeader";
 import { StandardHero } from "@/components/StandardHero";
+import DynamicHelmet from "@/components/DynamicHelmet";
 import { useLanguageFromUrl } from "@/hooks/useLanguageFromUrl";
 import { useTranslation } from "react-i18next";
 
@@ -14,13 +15,20 @@ const Pricing = () => {
   const langPrefix = currentLanguage && currentLanguage !== "en" ? `/${currentLanguage}` : "";
 
   return (
-    <div className="min-h-screen bg-white">
-      <StandardHeader currentLanguage={currentLanguage} />
-
-      <StandardHero
-        title={t("pricing.hero.title")}
-        subtitle={t("pricing.hero.subtitle")}
+    <>
+      <DynamicHelmet
+        pageIdentifier="pricing"
+        fallbackTitle={t("pricing.meta.title")}
+        fallbackDescription={t("pricing.meta.description")}
       />
+      
+      <div className="min-h-screen bg-white">
+        <StandardHeader currentLanguage={currentLanguage} />
+
+        <StandardHero
+          title={t("pricing.hero.title")}
+          subtitle={t("pricing.hero.subtitle")}
+        />
 
       {/* Pricing Section */}
       <div className="bg-white py-16 sm:py-20">

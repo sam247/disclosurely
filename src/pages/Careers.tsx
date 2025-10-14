@@ -37,10 +37,9 @@ const Careers: React.FC = () => {
         title={t('careers.hero.title')}
         subtitle={t('careers.hero.subtitle')}
         highlightText={t('careers.hero.description')}
-        className="bg-gradient-to-br from-blue-50 to-indigo-100"
       />
       
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
+      <div className="min-h-screen bg-white">
 
         {/* Why Work With Us Section */}
         <section className="py-16 px-4 sm:px-6 lg:px-8 bg-white">

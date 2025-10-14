@@ -1,7 +1,7 @@
-import { Helmet } from "react-helmet-async";
 import { Footer } from "@/components/ui/footer";
 import { Link } from "react-router-dom";
 import PublicLanguageSelector from "@/components/PublicLanguageSelector";
+import DynamicHelmet from "@/components/DynamicHelmet";
 import { useLanguageFromUrl } from "@/hooks/useLanguageFromUrl";
 import { useTranslation } from "react-i18next";
 
@@ -12,10 +12,11 @@ const Privacy = () => {
 
   return (
     <>
-      <Helmet>
-        <title>{t("privacy.meta.title")}</title>
-        <meta name="description" content={t("privacy.meta.description")} />
-      </Helmet>
+      <DynamicHelmet
+        pageIdentifier="privacy"
+        fallbackTitle={t("privacy.meta.title")}
+        fallbackDescription={t("privacy.meta.description")}
+      />
 
       <div className="min-h-screen bg-white">
         {/* Navigation */}

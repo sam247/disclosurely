@@ -1,7 +1,7 @@
-import { Helmet } from "react-helmet-async";
 import { Footer } from "@/components/ui/footer";
 import { Link } from "react-router-dom";
 import PublicLanguageSelector from "@/components/PublicLanguageSelector";
+import DynamicHelmet from "@/components/DynamicHelmet";
 import { useLanguageFromUrl } from "@/hooks/useLanguageFromUrl";
 import { useTranslation } from "react-i18next";
 
@@ -12,10 +12,11 @@ const Terms = () => {
 
   return (
     <>
-      <Helmet>
-        <title>{t("terms.meta.title")}</title>
-        <meta name="description" content={t("terms.meta.description")} />
-      </Helmet>
+      <DynamicHelmet
+        pageIdentifier="terms"
+        fallbackTitle={t("terms.meta.title")}
+        fallbackDescription={t("terms.meta.description")}
+      />
 
       <div className="min-h-screen bg-white">
         {/* Navigation */}

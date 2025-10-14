@@ -653,5 +653,15 @@
       }
     },
     "lastUpdated": "Dernière mise à jour: Septembre 2025"
+  },
+  "admin": {
+    "title": "Panneau d'Administration",
+    "description": "Gérez le contenu et les paramètres de votre organisation",
+    "accessDenied": "Accès Refusé",
+    "accessDeniedDescription": "Vous n'avez pas l'autorisation d'accéder au panneau d'administration. Veuillez contacter l'administrateur de votre organisation.",
+    "superAdmin": "Super Administrateur",
+    "orgAdmin": "Administrateur d'Organisation",
+    "blogManagement": "Gestion du Blog",
+    "seoSettings": "Paramètres SEO"
   }
 }

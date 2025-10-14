@@ -41,10 +41,9 @@ const Features: React.FC = () => {
         title={t('features.hero.title')}
         subtitle={t('features.hero.subtitle')}
         highlightText={t('features.hero.description')}
-        className="bg-gradient-to-br from-blue-50 to-indigo-100"
       />
       
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
+      <div className="min-h-screen bg-white">
 
         {/* Core Features Section */}
         <section className="py-16 px-4 sm:px-6 lg:px-8 bg-white">

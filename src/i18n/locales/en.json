@@ -833,5 +833,15 @@
       "description": "Don't see a position that fits? We'd still love to hear from you.",
       "email": "careers@disclosurely.com"
     }
+  },
+  "admin": {
+    "title": "Admin Panel",
+    "description": "Manage your organization's content and settings",
+    "accessDenied": "Access Denied",
+    "accessDeniedDescription": "You don't have permission to access the admin panel. Please contact your organization administrator.",
+    "superAdmin": "Super Admin",
+    "orgAdmin": "Organization Admin",
+    "blogManagement": "Blog Management",
+    "seoSettings": "SEO Settings"
   }
 }

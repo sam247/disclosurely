@@ -555,5 +555,15 @@
       }
     },
     "lastUpdated": "Laatst bijgewerkt: September 2025"
+  },
+  "admin": {
+    "title": "Beheerpaneel",
+    "description": "Beheer de inhoud en instellingen van uw organisatie",
+    "accessDenied": "Toegang Geweigerd",
+    "accessDeniedDescription": "U heeft geen toestemming om toegang te krijgen tot het beheerpaneel. Neem contact op met uw organisatiebeheerder.",
+    "superAdmin": "Superbeheerder",
+    "orgAdmin": "Organisatiebeheerder",
+    "blogManagement": "Blogbeheer",
+    "seoSettings": "SEO-instellingen"
   }
 }

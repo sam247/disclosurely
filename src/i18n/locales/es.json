@@ -760,5 +760,15 @@
       "description": "¿No ves una posición que encaje? Aún nos encantaría escuchar de ti.",
       "email": "careers@disclosurely.com"
     }
+  },
+  "admin": {
+    "title": "Panel de Administración",
+    "description": "Gestiona el contenido y configuraciones de tu organización",
+    "accessDenied": "Acceso Denegado",
+    "accessDeniedDescription": "No tienes permisos para acceder al panel de administración. Por favor contacta al administrador de tu organización.",
+    "superAdmin": "Super Administrador",
+    "orgAdmin": "Administrador de Organización",
+    "blogManagement": "Gestión de Blog",
+    "seoSettings": "Configuración SEO"
   }
 }

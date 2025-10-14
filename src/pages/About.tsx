@@ -27,10 +27,9 @@ const About: React.FC = () => {
         title={t('about.hero.title')}
         subtitle={t('about.hero.subtitle')}
         highlightText={t('about.hero.description')}
-        className="bg-gradient-to-br from-blue-50 to-indigo-100"
       />
       
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
+      <div className="min-h-screen bg-white">
 
         {/* Mission Section */}
         <section className="py-16 px-4 sm:px-6 lg:px-8 bg-white">

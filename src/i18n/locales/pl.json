@@ -423,5 +423,15 @@
       }
     },
     "lastUpdated": "Ostatnia aktualizacja: Wrzesień 2025"
+  },
+  "admin": {
+    "title": "Panel Administracyjny",
+    "description": "Zarządzaj treścią i ustawieniami swojej organizacji",
+    "accessDenied": "Dostęp Odmówiony",
+    "accessDeniedDescription": "Nie masz uprawnień do dostępu do panelu administracyjnego. Skontaktuj się z administratorem swojej organizacji.",
+    "superAdmin": "Super Administrator",
+    "orgAdmin": "Administrator Organizacji",
+    "blogManagement": "Zarządzanie Blogiem",
+    "seoSettings": "Ustawienia SEO"
   }
 }

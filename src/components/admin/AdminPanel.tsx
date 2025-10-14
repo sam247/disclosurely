@@ -6,9 +6,11 @@ import { Settings, FileText, Globe, Users } from 'lucide-react';
 import { BlogEditor } from './BlogEditor';
 import { SEOSettings } from './SEOSettings';
 import { useOrganization } from '@/hooks/useOrganization';
+import { useTranslation } from 'react-i18next';
 
 export const AdminPanel = () => {
   const { profile, loading } = useOrganization();
+  const { t } = useTranslation();
 
   // Debug logging
   console.log('AdminPanel - Profile:', profile);
@@ -34,10 +36,9 @@ export const AdminPanel = () => {
               <div className="flex items-center gap-3">
                 <Settings className="h-6 w-6 text-destructive" />
                 <div>
-                  <CardTitle className="text-destructive">Access Denied</CardTitle>
+                  <CardTitle className="text-destructive">{t('admin.accessDenied')}</CardTitle>
                   <CardDescription>
-                    You don't have permission to access the admin panel. 
-                    Please contact your organization administrator.
+                    {t('admin.accessDeniedDescription')}
                   </CardDescription>
                 </div>
               </div>
@@ -57,13 +58,13 @@ export const AdminPanel = () => {
             <div className="flex items-center gap-3">
               <Settings className="h-8 w-8 text-primary" />
               <div>
-                <h1 className="text-2xl font-bold text-gray-900">Admin Panel</h1>
-                <p className="text-gray-600">Manage your organization's content and settings</p>
+                <h1 className="text-2xl font-bold text-gray-900">{t('admin.title')}</h1>
+                <p className="text-gray-600">{t('admin.description')}</p>
               </div>
             </div>
             <Badge variant="secondary" className="flex items-center gap-1">
               <Users className="h-3 w-3" />
-              {profile?.role === 'admin' ? 'Super Admin' : 'Organization Admin'}
+              {profile?.role === 'admin' ? t('admin.superAdmin') : t('admin.orgAdmin')}
             </Badge>
           </div>
         </div>
@@ -75,11 +76,11 @@ export const AdminPanel = () => {
           <TabsList className="grid w-full grid-cols-2">
             <TabsTrigger value="blog" className="flex items-center gap-2">
               <FileText className="h-4 w-4" />
-              Blog Management
+              {t('admin.blogManagement')}
             </TabsTrigger>
             <TabsTrigger value="seo" className="flex items-center gap-2">
               <Globe className="h-4 w-4" />
-              SEO Settings
+              {t('admin.seoSettings')}
             </TabsTrigger>
           </TabsList>
 

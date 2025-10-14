@@ -555,5 +555,15 @@
       }
     },
     "lastUpdated": "Senast uppdaterad: September 2025"
+  },
+  "admin": {
+    "title": "Adminpanel",
+    "description": "Hantera din organisations innehåll och inställningar",
+    "accessDenied": "Åtkomst Nekad",
+    "accessDeniedDescription": "Du har inte behörighet att komma åt adminpanelen. Vänligen kontakta din organisationsadministratör.",
+    "superAdmin": "Superadministratör",
+    "orgAdmin": "Organisationsadministratör",
+    "blogManagement": "Blogghantering",
+    "seoSettings": "SEO-inställningar"
   }
 }

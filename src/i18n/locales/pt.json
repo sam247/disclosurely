@@ -555,5 +555,15 @@
       }
     },
     "lastUpdated": "Última atualização: Setembro 2025"
+  },
+  "admin": {
+    "title": "Painel de Administração",
+    "description": "Gerencie o conteúdo e configurações da sua organização",
+    "accessDenied": "Acesso Negado",
+    "accessDeniedDescription": "Você não tem permissão para acessar o painel de administração. Entre em contato com o administrador da sua organização.",
+    "superAdmin": "Super Administrador",
+    "orgAdmin": "Administrador da Organização",
+    "blogManagement": "Gerenciamento de Blog",
+    "seoSettings": "Configurações SEO"
   }
 }
