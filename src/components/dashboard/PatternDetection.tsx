@@ -49,7 +49,8 @@ const PatternDetection = () => {
         .from('reports')
         .select('id, title, tracking_id, status, created_at, priority, report_type, tags')
         .eq('organization_id', user.user_metadata?.organization_id)
-        .eq('is_deleted', false)
+        .neq('status', 'archived')
+        .is('deleted_at', null)
         .order('created_at', { ascending: false });
 
       if (error) {
