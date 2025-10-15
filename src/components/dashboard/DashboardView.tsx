@@ -19,6 +19,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSepara
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useCustomDomain } from '@/hooks/useCustomDomain';
 import { useTranslation } from 'react-i18next';
+import PatternDetection from './PatternDetection';
 
 interface Report {
   id: string;
@@ -41,6 +42,12 @@ interface Report {
     name: string;
   };
   submitted_by_email?: string;
+  ai_risk_score?: number;
+  ai_risk_level?: string;
+  ai_likelihood_score?: number;
+  ai_impact_score?: number;
+  ai_risk_assessment?: any;
+  ai_assessed_at?: string;
 }
 
 const DashboardView = () => {
@@ -56,9 +63,10 @@ const DashboardView = () => {
   const [showArchived, setShowArchived] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
-  const [sortField, setSortField] = useState<'created_at' | 'title' | 'tracking_id'>('created_at');
+  const [sortField, setSortField] = useState<'created_at' | 'title' | 'tracking_id' | 'ai_risk_score'>('ai_risk_score');
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('desc');
   const [reportCategories, setReportCategories] = useState<Record<string, string>>({});
+  const [isAssessingRisk, setIsAssessingRisk] = useState<string | null>(null);
 
   useEffect(() => {
     if (user) {
@@ -83,11 +91,11 @@ const DashboardView = () => {
 
       const { data: reportsData } = await supabase
         .from('reports')
-        .select('id, title, tracking_id, status, created_at, encrypted_content, encryption_key_hash, priority, report_type, submitted_by_email, tags, assigned_to')
+        .select('id, title, tracking_id, status, created_at, encrypted_content, encryption_key_hash, priority, report_type, submitted_by_email, tags, assigned_to, ai_risk_score, ai_risk_level, ai_likelihood_score, ai_impact_score, ai_risk_assessment, ai_assessed_at')
         .eq('organization_id', profile.organization_id)
         .neq('status', 'archived')
         .is('deleted_at', null)
-        .order('created_at', { ascending: false })
+        .order('ai_risk_score', { ascending: false, nullsLast: true })
         .limit(20);
 
       const { data: archivedData } = await supabase
@@ -201,14 +209,105 @@ const DashboardView = () => {
     }
   };
 
+  const assessRisk = async (reportId: string) => {
+    setIsAssessingRisk(reportId);
+    try {
+      // Get the report data
+      const report = reports.find(r => r.id === reportId);
+      if (!report) throw new Error('Report not found');
+
+      // Get user's organization ID
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('organization_id')
+        .eq('id', user?.id)
+        .single();
+
+      if (!profile?.organization_id) throw new Error('User organization not found');
+
+      // Decrypt the report content
+      const { decryptReport } = await import('@/utils/encryption');
+      const decryptedContent = decryptReport(report.encrypted_content, profile.organization_id);
+      
+      // Format content for AI analysis
+      const formattedContent = `
+Category: ${decryptedContent.category || 'Not specified'}
+Description: ${decryptedContent.description || 'Not provided'}
+Location: ${decryptedContent.location || 'Not specified'}
+Date of Incident: ${decryptedContent.dateOfIncident || 'Not specified'}
+Witnesses: ${decryptedContent.witnesses || 'None mentioned'}
+Evidence: ${decryptedContent.evidence || 'No evidence provided'}
+Additional Details: ${decryptedContent.additionalDetails || 'None provided'}
+      `.trim();
+
+      // Call the AI risk assessment function
+      const { data, error } = await supabase.functions.invoke('assess-risk-with-ai', {
+        body: {
+          reportData: {
+            title: report.title,
+            tracking_id: report.tracking_id,
+            status: report.status,
+            report_type: report.report_type,
+            created_at: report.created_at
+          },
+          reportContent: formattedContent
+        }
+      });
+
+      if (error) throw error;
+
+      // Update the report with AI risk assessment
+      const { error: updateError } = await supabase
+        .from('reports')
+        .update({
+          ai_risk_score: data.riskAssessment.risk_score,
+          ai_likelihood_score: data.riskAssessment.likelihood_score,
+          ai_impact_score: data.riskAssessment.impact_score,
+          ai_risk_level: data.riskAssessment.risk_level,
+          ai_risk_assessment: data.riskAssessment,
+          ai_assessed_at: new Date().toISOString(),
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', reportId);
+
+      if (updateError) throw updateError;
+
+      toast({
+        title: "Risk Assessment Complete",
+        description: `Risk Score: ${data.riskAssessment.risk_score} (${data.riskAssessment.risk_level})`,
+      });
+
+      // Refresh the data
+      fetchData();
+    } catch (error) {
+      console.error('Error assessing risk:', error);
+      toast({
+        title: "Error",
+        description: "Failed to assess risk. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsAssessingRisk(null);
+    }
+  };
+
   const filteredReports = reports.filter(report => {
     const matchesSearch = report.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          report.tracking_id.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesStatus = statusFilter === 'all' || report.status === statusFilter;
     return matchesSearch && matchesStatus;
   }).sort((a, b) => {
-    const aValue = a[sortField];
-    const bValue = b[sortField];
+    let aValue, bValue;
+    
+    if (sortField === 'ai_risk_score') {
+      // Handle AI risk score sorting (nulls last)
+      aValue = a.ai_risk_score ?? -1;
+      bValue = b.ai_risk_score ?? -1;
+    } else {
+      aValue = a[sortField];
+      bValue = b[sortField];
+    }
+    
     const comparison = aValue < bValue ? -1 : aValue > bValue ? 1 : 0;
     return sortDirection === 'asc' ? comparison : -comparison;
   });
@@ -268,6 +367,8 @@ const DashboardView = () => {
         </Card>
       </div>
 
+      {/* Pattern Detection */}
+      <PatternDetection />
 
       <div>
         <h2 className="text-2xl font-bold">{t('reportsOverview')}</h2>
@@ -321,6 +422,7 @@ const DashboardView = () => {
                       <TableHead>{t('title')}</TableHead>
                       <TableHead>{t('status')}</TableHead>
                       <TableHead>{t('category')}</TableHead>
+                      <TableHead>AI Risk</TableHead>
                       <TableHead>{t('assignedTo')}</TableHead>
                       <TableHead>{t('date')}</TableHead>
                       <TableHead className="text-right">{t('actions')}</TableHead>
@@ -352,6 +454,36 @@ const DashboardView = () => {
                             </div>
                           ) : (
                             <span className="text-sm text-muted-foreground">-</span>
+                          )}
+                        </TableCell>
+                        <TableCell>
+                          {report.ai_risk_score ? (
+                            <div className="flex items-center gap-2">
+                              <Badge 
+                                variant={
+                                  report.ai_risk_level === 'Critical' ? 'destructive' :
+                                  report.ai_risk_level === 'High' ? 'destructive' :
+                                  report.ai_risk_level === 'Medium' ? 'secondary' :
+                                  'outline'
+                                }
+                                className="text-xs"
+                              >
+                                {report.ai_risk_score}
+                              </Badge>
+                              <span className="text-xs text-muted-foreground">
+                                {report.ai_risk_level}
+                              </span>
+                            </div>
+                          ) : (
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => assessRisk(report.id)}
+                              className="text-xs"
+                              disabled={isAssessingRisk === report.id}
+                            >
+                              {isAssessingRisk === report.id ? 'Assessing...' : 'Assess'}
+                            </Button>
                           )}
                         </TableCell>
                         <TableCell>
