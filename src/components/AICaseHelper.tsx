@@ -211,7 +211,7 @@ const AICaseHelper: React.FC<AICaseHelperProps> = ({ reportId, reportContent }) 
     }
   };
 
-  const analyzeCase = async (prompt?: string) => {
+  const analyzeCase = async () => {
     if (!selectedCaseId) {
       toast({
         title: "No Case Selected",
@@ -223,6 +223,18 @@ const AICaseHelper: React.FC<AICaseHelperProps> = ({ reportId, reportContent }) 
 
     setIsAnalyzing(true);
     setAnalysisProgress(10);
+
+    // Add user message to chat if there's a custom prompt
+    const userMessage = customPrompt.trim();
+    if (userMessage) {
+      setChatMessages(prev => [...prev, {
+        role: 'user',
+        content: userMessage,
+        timestamp: new Date()
+      }]);
+      setCustomPrompt(''); // Clear the input
+    }
+
     try {
       // Get selected case data
       setAnalysisProgress(20);
@@ -291,6 +303,10 @@ Case Details:
       }
       setAnalysisProgress(70);
 
+      // Prepare chat context for follow-up questions
+      const chatContext = chatMessages.map(msg => `${msg.role}: ${msg.content}`).join('\n');
+      const isFollowUp = chatMessages.length > 0 || userMessage;
+
       // Invoke AI analysis with decrypted content
       setAnalysisProgress(80);
       const { data, error } = await supabase.functions.invoke('analyze-case-with-ai', {
@@ -305,22 +321,35 @@ Case Details:
           },
           caseContent: decryptedContent,
           companyDocuments,
-          customPrompt: prompt
+          customPrompt: isFollowUp ? 
+            `This is ${userMessage ? 'a new question' : 'a follow-up'} about the case. Previous conversation:\n${chatContext}\n\n${userMessage ? `User's question: ${userMessage}` : 'Please provide additional analysis or clarification.'}\n\nPlease provide a helpful response, keeping the same conversational tone.` :
+            undefined
         }
       });
 
       if (error) throw error;
 
       setAnalysisProgress(100);
-      setAnalysis(data.analysis);
       
+      // Add AI response to chat
+      setChatMessages(prev => [...prev, {
+        role: 'assistant',
+        content: data.analysis,
+        timestamp: new Date()
+      }]);
+
       // Store current analysis data for saving
       setCurrentAnalysisData({
         caseData,
-        customPrompt: prompt,
+        customPrompt: userMessage,
         companyDocuments,
         analysis: data.analysis
       });
+
+      // Set the main analysis for the first time
+      if (!analysis) {
+        setAnalysis(data.analysis);
+      }
 
       toast({
         title: "Analysis Complete",
@@ -336,12 +365,6 @@ Case Details:
       setAnalysisProgress(0);
     } finally {
       setIsAnalyzing(false);
-    }
-  };
-
-  const handleCustomAnalysis = () => {
-    if (customPrompt.trim()) {
-      analyzeCase(customPrompt);
     }
   };
 
@@ -396,95 +419,21 @@ Case Details:
   };
 
   const sendChatMessage = async () => {
-    if (!chatInput.trim() || !selectedCaseId || !analysis) {
+    if (!chatInput.trim() || !selectedCaseId) {
       toast({
         title: "Cannot Send Message",
-        description: "Please select a case and run an initial analysis first.",
+        description: "Please select a case first.",
         variant: "destructive",
       });
       return;
     }
 
-    setIsChatting(true);
-    const userMessage = chatInput.trim();
+    // Set the custom prompt and trigger analysis
+    setCustomPrompt(chatInput.trim());
     setChatInput('');
     
-    // Add user message to chat
-    setChatMessages(prev => [...prev, {
-      role: 'user',
-      content: userMessage,
-      timestamp: new Date()
-    }]);
-
-    try {
-      // Get the case data for context
-      const { data: caseData, error: caseError } = await supabase
-        .from('reports')
-        .select('*')
-        .eq('id', selectedCaseId)
-        .single();
-
-      if (caseError) throw caseError;
-
-      // Decrypt content for context
-      let decryptedContent = '';
-      if (caseData.encrypted_content && caseData.organization_id) {
-        try {
-          const { decryptReport } = await import('@/utils/encryption');
-          const decrypted = decryptReport(caseData.encrypted_content, caseData.organization_id);
-          decryptedContent = `
-Category: ${decrypted.category || 'Not specified'}
-Description: ${decrypted.description || 'Not provided'}
-Location: ${decrypted.location || 'Not specified'}
-Date of Incident: ${decrypted.dateOfIncident || 'Not specified'}
-Witnesses: ${decrypted.witnesses || 'None mentioned'}
-Evidence: ${decrypted.evidence || 'No evidence provided'}
-Additional Details: ${decrypted.additionalDetails || 'None provided'}
-          `.trim();
-        } catch (decryptError) {
-          console.error('Decryption error:', decryptError);
-          decryptedContent = '[Case content is encrypted and could not be decrypted for analysis]';
-        }
-      }
-
-      // Prepare chat context
-      const chatContext = chatMessages.map(msg => `${msg.role}: ${msg.content}`).join('\n');
-      
-      const { data, error } = await supabase.functions.invoke('analyze-case-with-ai', {
-        body: {
-          caseData: {
-            title: caseData.title,
-            status: caseData.status,
-            created_at: caseData.created_at,
-            priority: caseData.priority,
-            tracking_id: caseData.tracking_id,
-            report_type: caseData.report_type
-          },
-          caseContent: decryptedContent,
-          companyDocuments: [],
-          customPrompt: `This is a follow-up question about the case. Previous analysis: ${analysis}\n\nPrevious conversation:\n${chatContext}\n\nUser's new question: ${userMessage}\n\nPlease provide a helpful response to this follow-up question, keeping the same conversational tone.`
-        }
-      });
-
-      if (error) throw error;
-
-      // Add AI response to chat
-      setChatMessages(prev => [...prev, {
-        role: 'assistant',
-        content: data.analysis,
-        timestamp: new Date()
-      }]);
-
-    } catch (error) {
-      console.error('Chat error:', error);
-      toast({
-        title: "Chat Error",
-        description: "Failed to send message. Please try again.",
-        variant: "destructive",
-      });
-    } finally {
-      setIsChatting(false);
-    }
+    // Trigger the analyzeCase function which will handle the chat
+    await analyzeCase();
   };
 
   return (
@@ -627,11 +576,18 @@ Additional Details: ${decrypted.additionalDetails || 'None provided'}
 
             {/* Analysis Controls */}
             <div className="space-y-4">
-              <div className="flex gap-2">
+              <div className="space-y-2">
+                <Textarea
+                  placeholder="Ask a specific question about this case or leave blank for general analysis..."
+                  value={customPrompt}
+                  onChange={(e) => setCustomPrompt(e.target.value)}
+                  disabled={isAnalyzing}
+                  className="min-h-[80px]"
+                />
                 <Button
                   onClick={() => analyzeCase()}
                   disabled={isAnalyzing || !selectedCaseId}
-                  className="flex-1"
+                  className="w-full"
                 >
                   {isAnalyzing ? (
                     <>
@@ -643,158 +599,108 @@ Additional Details: ${decrypted.additionalDetails || 'None provided'}
                   )}
                 </Button>
               </div>
+            </div>
+          </div>
 
-              <div className="space-y-2">
-                <Textarea
-                  placeholder="Ask a specific question about this case..."
-                  value={customPrompt}
-                  onChange={(e) => setCustomPrompt(e.target.value)}
-                  disabled={isAnalyzing}
-                />
+          {/* Right Column - Chat Interface */}
+          <div className="flex flex-col h-[600px]">
+            {/* Chat Header */}
+            <div className="flex items-center justify-between p-4 border-b bg-gray-50 rounded-t-lg">
+              <h4 className="font-semibold flex items-center gap-2">
+                💬 AI Case Analysis
+              </h4>
+              {analysis && (
                 <Button
-                  onClick={handleCustomAnalysis}
-                  disabled={isAnalyzing || !customPrompt.trim() || !selectedCaseId}
+                  onClick={saveAnalysis}
+                  disabled={isSaving}
+                  size="sm"
                   variant="outline"
-                  className="w-full"
                 >
-                  {isAnalyzing ? (
+                  {isSaving ? (
                     <>
                       <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                      Analyzing...
+                      Saving...
                     </>
                   ) : (
-                    'Custom Analysis'
+                    'Save Analysis'
+                  )}
+                </Button>
+              )}
+            </div>
+            
+            {/* Chat Messages - Scrolling Area */}
+            <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-white">
+              {chatMessages.length === 0 ? (
+                <div className="text-center text-muted-foreground py-12">
+                  <Brain className="h-12 w-12 mx-auto mb-4 text-gray-400" />
+                  <h3 className="text-lg font-semibold mb-2">No Analysis Yet</h3>
+                  <p className="mb-4">Select a case and click "Analyze Case" to get started.</p>
+                  <p className="text-sm">You can ask specific questions or leave blank for general analysis.</p>
+                </div>
+              ) : (
+                chatMessages.map((message, index) => (
+                  <div key={index} className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}>
+                    <div className={`max-w-[85%] p-4 rounded-lg ${
+                      message.role === 'user' 
+                        ? 'bg-primary text-primary-foreground' 
+                        : 'bg-gray-100 border'
+                    }`}>
+                      <div 
+                        className="prose prose-sm max-w-none"
+                        dangerouslySetInnerHTML={{ 
+                          __html: sanitizeHtml(formatMarkdownToHtml(message.content))
+                        }}
+                      />
+                      <div className={`text-xs mt-2 ${
+                        message.role === 'user' ? 'text-primary-foreground/70' : 'text-muted-foreground'
+                      }`}>
+                        {message.timestamp.toLocaleTimeString()}
+                      </div>
+                    </div>
+                  </div>
+                ))
+              )}
+              {isAnalyzing && (
+                <div className="flex justify-start">
+                  <div className="bg-gray-100 border p-4 rounded-lg">
+                    <div className="flex items-center gap-2">
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                      <span className="text-sm text-muted-foreground">AI is analyzing...</span>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+            
+            {/* Chat Input */}
+            <div className="p-4 border-t bg-gray-50 rounded-b-lg">
+              <div className="flex gap-2">
+                <Textarea
+                  placeholder="Ask a follow-up question or leave blank for general analysis..."
+                  value={chatInput}
+                  onChange={(e) => setChatInput(e.target.value)}
+                  disabled={isAnalyzing}
+                  className="flex-1 min-h-[60px]"
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' && !e.shiftKey) {
+                      e.preventDefault();
+                      sendChatMessage();
+                    }
+                  }}
+                />
+                <Button
+                  onClick={sendChatMessage}
+                  disabled={isAnalyzing || !chatInput.trim()}
+                  className="self-end"
+                >
+                  {isAnalyzing ? (
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                  ) : (
+                    'Send'
                   )}
                 </Button>
               </div>
             </div>
-          </div>
-
-          {/* Right Column - Analysis & Chat */}
-          <div className="space-y-4">
-            {analysis ? (
-              <>
-                {/* Analysis Header */}
-                <div className="flex items-center justify-between">
-                  <h4 className="font-semibold">AI Analysis Results</h4>
-                  <Button
-                    onClick={saveAnalysis}
-                    disabled={isSaving}
-                    size="sm"
-                    variant="outline"
-                  >
-                    {isSaving ? (
-                      <>
-                        <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                        Saving...
-                      </>
-                    ) : (
-                      'Save Analysis'
-                    )}
-                  </Button>
-                </div>
-
-                {/* Initial Analysis */}
-                <div className="p-4 bg-muted rounded-lg">
-                  <div 
-                    className="prose prose-sm max-w-none"
-                    dangerouslySetInnerHTML={{ 
-                      __html: sanitizeHtml(formatMarkdownToHtml(analysis))
-                    }}
-                  />
-                </div>
-
-                {/* Chat Interface */}
-                <div className="border rounded-lg">
-                  <div className="p-4 border-b bg-gray-50">
-                    <h5 className="font-semibold flex items-center gap-2">
-                      💬 Continue the Conversation
-                    </h5>
-                    <p className="text-sm text-muted-foreground mt-1">
-                      Ask follow-up questions about this case
-                    </p>
-                  </div>
-                  
-                  {/* Chat Messages */}
-                  <div className="h-64 overflow-y-auto p-4 space-y-4">
-                    {chatMessages.length === 0 ? (
-                      <div className="text-center text-muted-foreground py-8">
-                        <p>No conversation yet. Ask a follow-up question below!</p>
-                      </div>
-                    ) : (
-                      chatMessages.map((message, index) => (
-                        <div key={index} className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}>
-                          <div className={`max-w-[80%] p-3 rounded-lg ${
-                            message.role === 'user' 
-                              ? 'bg-primary text-primary-foreground' 
-                              : 'bg-muted'
-                          }`}>
-                            <div 
-                              className="prose prose-sm max-w-none"
-                              dangerouslySetInnerHTML={{ 
-                                __html: sanitizeHtml(formatMarkdownToHtml(message.content))
-                              }}
-                            />
-                            <div className={`text-xs mt-2 ${
-                              message.role === 'user' ? 'text-primary-foreground/70' : 'text-muted-foreground'
-                            }`}>
-                              {message.timestamp.toLocaleTimeString()}
-                            </div>
-                          </div>
-                        </div>
-                      ))
-                    )}
-                    {isChatting && (
-                      <div className="flex justify-start">
-                        <div className="bg-muted p-3 rounded-lg">
-                          <div className="flex items-center gap-2">
-                            <Loader2 className="h-4 w-4 animate-spin" />
-                            <span className="text-sm text-muted-foreground">AI is thinking...</span>
-                          </div>
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                  
-                  {/* Chat Input */}
-                  <div className="p-4 border-t">
-                    <div className="flex gap-2">
-                      <Textarea
-                        placeholder="Ask a follow-up question..."
-                        value={chatInput}
-                        onChange={(e) => setChatInput(e.target.value)}
-                        disabled={isChatting}
-                        className="flex-1 min-h-[60px]"
-                        onKeyDown={(e) => {
-                          if (e.key === 'Enter' && !e.shiftKey) {
-                            e.preventDefault();
-                            sendChatMessage();
-                          }
-                        }}
-                      />
-                      <Button
-                        onClick={sendChatMessage}
-                        disabled={isChatting || !chatInput.trim()}
-                        className="self-end"
-                      >
-                        {isChatting ? (
-                          <Loader2 className="h-4 w-4 animate-spin" />
-                        ) : (
-                          'Send'
-                        )}
-                      </Button>
-                    </div>
-                  </div>
-                </div>
-              </>
-            ) : (
-              <div className="text-center py-12 text-muted-foreground">
-                <Brain className="h-12 w-12 mx-auto mb-4 text-gray-400" />
-                <h3 className="text-lg font-semibold mb-2">No Analysis Yet</h3>
-                <p className="mb-4">Select a case and click "Analyze Case" to get started.</p>
-                <p className="text-sm">You'll be able to chat with the AI about the analysis once it's complete.</p>
-              </div>
-            )}
           </div>
         </div>
       </CardContent>
