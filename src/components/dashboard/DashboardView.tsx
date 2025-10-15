@@ -672,7 +672,7 @@ Additional Details: ${decryptedContent.additionalDetails || 'None provided'}
                             )}
                             
                             {/* Legacy Priority (if no manual risk level) */}
-                            {!report.manual_risk_level && report.priority && (
+                            {!report.manual_risk_level && report.priority && report.ai_risk_level && (
                               <Badge 
                                 variant={
                                   report.priority >= 4 ? 'destructive' :
