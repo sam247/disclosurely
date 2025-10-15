@@ -49,6 +49,7 @@ const AICaseHelper: React.FC<AICaseHelperProps> = ({ reportId, reportContent }) 
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [customPrompt, setCustomPrompt] = useState('');
   const [selectedCaseId, setSelectedCaseId] = useState<string>('');
+  const [selectedCaseData, setSelectedCaseData] = useState<any>(null);
   const [liveCases, setLiveCases] = useState<LiveCase[]>([]);
   const [documents, setDocuments] = useState<CompanyDocument[]>([]);
   const [selectedDocs, setSelectedDocs] = useState<string[]>([]);
@@ -412,7 +413,11 @@ Case Details:
         {/* Case Selection */}
         <div className="space-y-2">
           <label className="text-sm font-medium">Select Live Case</label>
-          <Select value={selectedCaseId} onValueChange={setSelectedCaseId} disabled={isLoadingCases}>
+          <Select value={selectedCaseId} onValueChange={(value) => {
+            setSelectedCaseId(value);
+            const selectedCase = liveCases.find(c => c.id === value);
+            setSelectedCaseData(selectedCase || null);
+          }} disabled={isLoadingCases}>
             <SelectTrigger>
               <SelectValue placeholder={isLoadingCases ? "Loading cases..." : "Choose a live case"} />
             </SelectTrigger>
@@ -583,13 +588,85 @@ Case Details:
                 )}
               </Button>
             </div>
-            <div className="p-4 bg-muted rounded-lg">
-              <div 
-                className="prose prose-sm max-w-none"
-                dangerouslySetInnerHTML={{ 
-                  __html: sanitizeHtml(formatMarkdownToHtml(analysis))
-                }}
-              />
+            
+            {/* Two Column Layout */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              {/* Left Column - Case Info */}
+              <div className="space-y-4">
+                <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                  <h5 className="font-semibold text-blue-900 mb-3 flex items-center gap-2">
+                    📋 Case Summary
+                  </h5>
+                  {selectedCaseData ? (
+                    <div className="space-y-2">
+                      <div className="text-sm">
+                        <span className="font-medium text-blue-800">Tracking ID:</span>
+                        <span className="ml-2 text-blue-700">{selectedCaseData.tracking_id}</span>
+                      </div>
+                      <div className="text-sm">
+                        <span className="font-medium text-blue-800">Title:</span>
+                        <span className="ml-2 text-blue-700">{selectedCaseData.title}</span>
+                      </div>
+                      <div className="text-sm">
+                        <span className="font-medium text-blue-800">Status:</span>
+                        <span className="ml-2 text-blue-700">{selectedCaseData.status}</span>
+                      </div>
+                      <div className="text-sm">
+                        <span className="font-medium text-blue-800">Priority:</span>
+                        <span className="ml-2 text-blue-700">{selectedCaseData.priority}/5</span>
+                      </div>
+                      <div className="text-sm">
+                        <span className="font-medium text-blue-800">Created:</span>
+                        <span className="ml-2 text-blue-700">
+                          {new Date(selectedCaseData.created_at).toLocaleDateString()}
+                        </span>
+                      </div>
+                    </div>
+                  ) : (
+                    <p className="text-sm text-blue-700">No case selected</p>
+                  )}
+                </div>
+                
+                {/* Key Points */}
+                <div className="p-4 bg-green-50 border border-green-200 rounded-lg">
+                  <h5 className="font-semibold text-green-900 mb-3 flex items-center gap-2">
+                    🔍 Key Points
+                  </h5>
+                  <div className="space-y-2 text-sm text-green-800">
+                    <div className="flex items-start gap-2">
+                      <span className="text-green-600 mt-1">•</span>
+                      <span>Physical contact occurred after verbal objections</span>
+                    </div>
+                    <div className="flex items-start gap-2">
+                      <span className="text-green-600 mt-1">•</span>
+                      <span>Manager-subordinate power dynamic</span>
+                    </div>
+                    <div className="flex items-start gap-2">
+                      <span className="text-green-600 mt-1">•</span>
+                      <span>Clear impact on employee's work environment and mental state</span>
+                    </div>
+                    <div className="flex items-start gap-2">
+                      <span className="text-green-600 mt-1">•</span>
+                      <span>Potential for escalation if not addressed</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              
+              {/* Right Column - AI Analysis */}
+              <div className="space-y-4">
+                <div className="p-4 bg-muted rounded-lg">
+                  <h5 className="font-semibold mb-3 flex items-center gap-2">
+                    🤖 AI Analysis
+                  </h5>
+                  <div 
+                    className="prose prose-sm max-w-none"
+                    dangerouslySetInnerHTML={{ 
+                      __html: sanitizeHtml(formatMarkdownToHtml(analysis))
+                    }}
+                  />
+                </div>
+              </div>
             </div>
           </div>
         )}

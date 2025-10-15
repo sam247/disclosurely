@@ -69,7 +69,9 @@ Please provide your analysis in this helpful format:
 • [Strategic recommendation 2]
 • [Strategic recommendation 3]
 
-Keep it conversational, practical, and focused on what the compliance team needs to do next. Use bullet points and be direct about actions needed.`;
+Keep it conversational, practical, and focused on what the compliance team needs to do next. Use bullet points and be direct about actions needed.
+
+IMPORTANT: End your analysis with 1-2 conversational questions that help the compliance team think through next steps or get clarification on specific aspects of the case. Make these questions helpful and practical, like a colleague asking for guidance.`;
 
     const response = await fetch('https://api.deepseek.com/chat/completions', {
       method: 'POST',
@@ -82,7 +84,7 @@ Keep it conversational, practical, and focused on what the compliance team needs
         messages: [
           { 
             role: 'system', 
-            content: 'You are a helpful AI assistant for compliance teams. You provide practical, actionable guidance in a conversational tone. Focus on what compliance teams need to do next, use bullet points, and be direct about actions needed. Avoid formal report language - be more like a helpful colleague.' 
+            content: 'You are a helpful AI assistant for compliance teams. You provide practical, actionable guidance in a conversational tone. Focus on what compliance teams need to do next, use bullet points, and be direct about actions needed. Avoid formal report language - be more like a helpful colleague. Always end with 1-2 practical questions that help the team think through next steps.' 
           },
           { role: 'user', content: prompt }
         ],
