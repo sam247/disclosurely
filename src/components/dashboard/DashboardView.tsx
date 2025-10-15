@@ -145,9 +145,12 @@ const DashboardView = () => {
         .single();
 
       if (!profile?.organization_id) {
+        console.log('No organization_id found for user:', user.id);
         setLoading(false);
         return;
       }
+
+      console.log('Fetching reports for organization:', profile.organization_id);
 
       // First, try to fetch with AI fields, fallback to basic fields if they don't exist
       let reportsData, archivedData;
@@ -158,7 +161,7 @@ const DashboardView = () => {
           .from('reports')
           .select('id, title, tracking_id, status, created_at, encrypted_content, encryption_key_hash, priority, report_type, submitted_by_email, tags, assigned_to, ai_risk_score, ai_risk_level, ai_likelihood_score, ai_impact_score, ai_risk_assessment, ai_assessed_at, manual_risk_level')
           .eq('organization_id', profile.organization_id)
-          .neq('status', 'archived')
+          .not('status', 'in', ['archived', 'closed', 'deleted'])
           .is('deleted_at', null)
           .order('created_at', { ascending: false })
           .limit(20);
@@ -190,7 +193,7 @@ const DashboardView = () => {
           .from('reports')
           .select('id, title, tracking_id, status, created_at, encrypted_content, encryption_key_hash, priority, report_type, submitted_by_email, tags, assigned_to, manual_risk_level')
           .eq('organization_id', profile.organization_id)
-          .neq('status', 'archived')
+          .not('status', 'in', ['archived', 'closed', 'deleted'])
           .is('deleted_at', null)
           .order('created_at', { ascending: false })
           .limit(20);
@@ -211,6 +214,8 @@ const DashboardView = () => {
         archivedData = archivedBasic;
       }
 
+      console.log('Reports fetched:', reportsData);
+      console.log('Archived reports fetched:', archivedData);
       setReports(reportsData || []);
       setArchivedReports(archivedData || []);
     } catch (error) {
