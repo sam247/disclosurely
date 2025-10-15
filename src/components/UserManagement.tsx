@@ -149,15 +149,37 @@ const UserManagement = () => {
       return;
     }
 
-    console.log('Proceeding with invitation insert');
+    console.log('Proceeding with invitation');
     
     try {
-      // Insert invitation without token - the trigger will generate it
+      const emailToInvite = inviteEmail.toLowerCase().trim();
+      
+      // Check for existing invitations
+      const { data: existingInvitations, error: checkError } = await supabase
+        .from('user_invitations')
+        .select('*')
+        .eq('organization_id', organization.id)
+        .eq('email', emailToInvite);
+
+      if (checkError) throw checkError;
+
+      // If there's an existing invitation, delete it first
+      if (existingInvitations && existingInvitations.length > 0) {
+        const { error: deleteError } = await supabase
+          .from('user_invitations')
+          .delete()
+          .eq('organization_id', organization.id)
+          .eq('email', emailToInvite);
+
+        if (deleteError) throw deleteError;
+      }
+
+      // Insert new invitation without token - the trigger will generate it
       const { data: newInvitation, error } = await supabase
         .from('user_invitations')
         .insert({
           organization_id: organization.id,
-          email: inviteEmail.toLowerCase().trim(),
+          email: emailToInvite,
           role: inviteRole,
           invited_by: user.id,
           token: '', // This will be replaced by the trigger
@@ -193,19 +215,11 @@ const UserManagement = () => {
     } catch (error: any) {
       console.error('Error sending invitation:', error);
       
-      if (error.code === '23505') {
-        toast({
-          title: "Error",
-          description: "This email has already been invited",
-          variant: "destructive",
-        });
-      } else {
-        toast({
-          title: "Error",
-          description: "Failed to send invitation",
-          variant: "destructive",
-        });
-      }
+      toast({
+        title: "Error",
+        description: "Failed to send invitation. Please try again.",
+        variant: "destructive",
+      });
     }
   };
 
