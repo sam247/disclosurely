@@ -257,6 +257,8 @@ const DashboardView = () => {
   const assessRisk = async (reportId: string) => {
     setIsAssessingRisk(reportId);
     try {
+      console.log('Starting AI risk assessment for report:', reportId);
+      
       // Get the report data
       const report = reports.find(r => r.id === reportId);
       if (!report) throw new Error('Report not found');
@@ -285,6 +287,8 @@ Evidence: ${decryptedContent.evidence || 'No evidence provided'}
 Additional Details: ${decryptedContent.additionalDetails || 'None provided'}
       `.trim();
 
+      console.log('Calling AI risk assessment function...');
+      
       // Call the AI risk assessment function
       const { data, error } = await supabase.functions.invoke('assess-risk-with-ai', {
         body: {
@@ -299,7 +303,12 @@ Additional Details: ${decryptedContent.additionalDetails || 'None provided'}
         }
       });
 
-      if (error) throw error;
+      if (error) {
+        console.error('AI risk assessment error:', error);
+        throw error;
+      }
+
+      console.log('AI risk assessment response:', data);
 
       // Update the report with AI risk assessment
       const { error: updateError } = await supabase
@@ -315,7 +324,12 @@ Additional Details: ${decryptedContent.additionalDetails || 'None provided'}
         })
         .eq('id', reportId);
 
-      if (updateError) throw updateError;
+      if (updateError) {
+        console.error('Database update error:', updateError);
+        throw updateError;
+      }
+
+      console.log('AI risk assessment completed successfully');
 
       toast({
         title: "Risk Assessment Complete",
@@ -328,7 +342,7 @@ Additional Details: ${decryptedContent.additionalDetails || 'None provided'}
       console.error('Error assessing risk:', error);
       toast({
         title: "Error",
-        description: "Failed to assess risk. Please try again.",
+        description: `Failed to assess risk: ${error instanceof Error ? error.message : 'Unknown error'}`,
         variant: "destructive",
       });
     } finally {

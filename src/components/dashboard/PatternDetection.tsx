@@ -40,6 +40,23 @@ const PatternDetection = () => {
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [lastAnalyzed, setLastAnalyzed] = useState<string | null>(null);
 
+  // Load persisted analysis on component mount
+  useEffect(() => {
+    const savedAnalysis = localStorage.getItem('ai-analysis');
+    const savedTimestamp = localStorage.getItem('ai-analysis-timestamp');
+    
+    if (savedAnalysis && savedTimestamp) {
+      try {
+        setPatternAnalysis(JSON.parse(savedAnalysis));
+        setLastAnalyzed(savedTimestamp);
+      } catch (error) {
+        console.error('Failed to load saved analysis:', error);
+        localStorage.removeItem('ai-analysis');
+        localStorage.removeItem('ai-analysis-timestamp');
+      }
+    }
+  }, []);
+
   const analyzePatterns = async () => {
     if (!user) return;
     
@@ -82,6 +99,10 @@ const PatternDetection = () => {
 
       setPatternAnalysis(data.patternAnalysis);
       setLastAnalyzed(new Date().toISOString());
+
+      // Persist analysis to localStorage
+      localStorage.setItem('ai-analysis', JSON.stringify(data.patternAnalysis));
+      localStorage.setItem('ai-analysis-timestamp', new Date().toISOString());
 
       toast({
         title: "Pattern Analysis Complete",
@@ -203,7 +224,7 @@ const PatternDetection = () => {
               <div className="p-4 border rounded-lg">
                 <h3 className="font-semibold mb-3 flex items-center gap-2">
                   <TrendingUp className="h-4 w-4 text-blue-500" />
-                  Common Themes
+                  Patterns
                 </h3>
                 {patternAnalysis.common_themes.length > 0 ? (
                   <div className="space-y-2">
@@ -227,32 +248,6 @@ const PatternDetection = () => {
                 )}
               </div>
             </div>
-
-            {/* Category Patterns - Full width below */}
-            {patternAnalysis.category_patterns.length > 0 && (
-              <div>
-                <h3 className="font-semibold mb-3">Category Patterns</h3>
-                <div className="grid gap-2">
-                  {patternAnalysis.category_patterns.slice(0, 4).map((category, index) => (
-                    <div key={index} className="flex items-center justify-between p-2 border rounded">
-                      <span className="font-medium">{category.category}</span>
-                      <div className="flex items-center gap-2">
-                        <Badge variant="outline">{category.count} reports</Badge>
-                        <Badge 
-                          variant={
-                            category.trend === 'increasing' ? 'destructive' :
-                            category.trend === 'decreasing' ? 'default' :
-                            'secondary'
-                          }
-                        >
-                          {category.trend}
-                        </Badge>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
           </div>
         ) : (
           <div className="text-center py-8 text-muted-foreground">
