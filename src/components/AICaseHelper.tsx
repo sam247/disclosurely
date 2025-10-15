@@ -603,7 +603,7 @@ Case Details:
           </div>
 
           {/* Right Column - Chat Interface */}
-          <div className="flex flex-col h-[600px]">
+          <div className="flex flex-col">
             {/* Chat Header */}
             <div className="flex items-center justify-between p-4 border-b bg-gray-50 rounded-t-lg">
               <h4 className="font-semibold flex items-center gap-2">
