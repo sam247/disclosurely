@@ -271,7 +271,7 @@ const DashboardView = () => {
 
       <div>
         <h2 className="text-2xl font-bold">{t('reportsOverview')}</h2>
-        <p className="text-muted-foreground">{t('manageAndReviewReports')}</p>
+        <p className="text-muted-foreground break-words hyphens-auto">{t('manageAndReviewReports')}</p>
       </div>
 
       <div className="flex flex-col sm:flex-row gap-4">

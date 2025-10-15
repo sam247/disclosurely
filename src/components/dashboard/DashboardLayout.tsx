@@ -1,5 +1,5 @@
 import { ReactNode, useState, useEffect } from 'react';
-import { SidebarProvider } from '@/components/ui/sidebar';
+import { SidebarProvider, SidebarTrigger } from '@/components/ui/sidebar';
 import DashboardSidebar from './DashboardSidebar';
 import { Button } from '@/components/ui/button';
 import { LogOut, User } from 'lucide-react';
@@ -58,7 +58,7 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
   };
 
   return (
-    <SidebarProvider defaultOpen={true}>
+    <SidebarProvider>
       <div className="min-h-screen flex w-full">
         <DashboardSidebar onLockedFeatureClick={handleLockedFeatureClick} />
         
@@ -66,6 +66,7 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
           {/* Header */}
           <header className="h-16 border-b bg-background flex items-center justify-between px-4 md:px-6 sticky top-0 z-10">
             <div className="flex items-center gap-3">
+              <SidebarTrigger className="md:hidden" />
               <h1 className="text-base md:text-lg font-semibold truncate">
                 {t('welcomeBack')}{firstName && `, ${firstName}`}
               </h1>
