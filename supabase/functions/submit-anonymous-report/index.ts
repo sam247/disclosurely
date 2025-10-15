@@ -180,6 +180,52 @@ serve(async (req) => {
 
     console.log('Report created successfully:', report[0]?.id)
 
+    // Trigger AI analysis for the new report in the background
+    try {
+      console.log('Triggering AI analysis for new report...')
+      
+      // Get the decrypted content for AI analysis
+      const { decryptReport } = await import('https://esm.sh/@supabase/supabase-js@2.50.0')
+      
+      // Call the AI risk assessment function
+      const aiAnalysisResponse = await supabaseAdmin.functions.invoke('assess-risk-with-ai', {
+        body: {
+          reportData: {
+            title: report[0].title,
+            tracking_id: report[0].tracking_id,
+            status: report[0].status,
+            report_type: report[0].report_type,
+            created_at: report[0].created_at
+          },
+          reportContent: `Title: ${report[0].title}\nCategory: ${report[0].tags?.[0] || 'Not specified'}\nPriority: ${report[0].priority}\nStatus: ${report[0].status}`
+        }
+      })
+
+      if (aiAnalysisResponse.error) {
+        console.error('AI analysis failed:', aiAnalysisResponse.error)
+        // Don't fail the report creation if AI analysis fails
+      } else {
+        console.log('AI analysis completed successfully')
+        
+        // Update the report with AI risk assessment
+        await supabaseAdmin
+          .from('reports')
+          .update({
+            ai_risk_score: aiAnalysisResponse.data.riskAssessment.risk_score,
+            ai_likelihood_score: aiAnalysisResponse.data.riskAssessment.likelihood_score,
+            ai_impact_score: aiAnalysisResponse.data.riskAssessment.impact_score,
+            ai_risk_level: aiAnalysisResponse.data.riskAssessment.risk_level,
+            ai_risk_assessment: aiAnalysisResponse.data.riskAssessment,
+            ai_assessed_at: new Date().toISOString(),
+            updated_at: new Date().toISOString()
+          })
+          .eq('id', report[0].id)
+      }
+    } catch (aiError) {
+      console.error('AI analysis invocation failed:', aiError)
+      // Don't fail the report creation if AI analysis fails
+    }
+
     // Send email notifications in the background
     try {
       const notificationResponse = await supabaseAdmin.functions.invoke('send-notification-emails', {

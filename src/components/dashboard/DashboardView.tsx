@@ -450,11 +450,7 @@ Additional Details: ${decryptedContent.additionalDetails || 'None provided'}
 
         <TabsContent value="active">
           <Card>
-            <CardHeader>
-              <CardTitle>{t('activeReports')}</CardTitle>
-              <CardDescription>{t('allActiveAndOngoingReports')}</CardDescription>
-            </CardHeader>
-            <CardContent>
+            <CardContent className="pt-6">
               {filteredReports.length === 0 ? (
                 <div className="text-center py-8 text-muted-foreground">
                   {t('noReportsFound')}

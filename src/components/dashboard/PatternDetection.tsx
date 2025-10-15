@@ -101,20 +101,18 @@ const PatternDetection = () => {
   };
 
   useEffect(() => {
-    // Auto-analyze on component mount if we have data
-    if (user) {
-      analyzePatterns();
-    }
+    // Don't auto-analyze on component mount - only on manual refresh
+    // This prevents AI credits from being used up on every login
   }, [user]);
 
   return (
     <Card>
       <CardHeader>
         <div className="flex items-center justify-between">
-          <CardTitle className="flex items-center gap-2">
-            <TrendingUp className="h-5 w-5" />
-            Pattern Detection
-          </CardTitle>
+            <CardTitle className="flex items-center gap-2">
+              <TrendingUp className="h-5 w-5" />
+              AI Analysis
+            </CardTitle>
           <Button
             variant="outline"
             size="sm"
@@ -155,30 +153,82 @@ const PatternDetection = () => {
                 Key Insights
               </h3>
               <p className="text-sm text-muted-foreground">{patternAnalysis.summary}</p>
+              
+              {/* Recommendations Dropdown */}
+              {patternAnalysis.recommendations.length > 0 && (
+                <details className="mt-4">
+                  <summary className="cursor-pointer font-medium text-sm text-primary hover:underline">
+                    View Recommendations ({patternAnalysis.recommendations.length})
+                  </summary>
+                  <div className="mt-3 space-y-2 pl-4">
+                    {patternAnalysis.recommendations.map((recommendation, index) => (
+                      <div key={index} className="flex items-start gap-2 p-2 bg-blue-50 border border-blue-200 rounded">
+                        <Target className="h-4 w-4 text-blue-600 mt-0.5 flex-shrink-0" />
+                        <span className="text-sm text-blue-800">{recommendation}</span>
+                      </div>
+                    ))}
+                  </div>
+                </details>
+              )}
             </div>
 
-            {/* Common Themes */}
-            {patternAnalysis.common_themes.length > 0 && (
-              <div>
-                <h3 className="font-semibold mb-3">Common Themes</h3>
-                <div className="space-y-2">
-                  {patternAnalysis.common_themes.slice(0, 3).map((theme, index) => (
-                    <div key={index} className="flex items-center justify-between p-3 border rounded-lg">
-                      <div>
-                        <div className="font-medium">{theme.theme}</div>
-                        <div className="text-sm text-muted-foreground">{theme.description}</div>
-                        <div className="text-xs text-muted-foreground mt-1">
-                          Examples: {theme.examples.slice(0, 2).join(', ')}
-                        </div>
-                      </div>
-                      <Badge variant="secondary">{theme.frequency} reports</Badge>
+            {/* Small boxes for Risk Insights and Common Themes */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {/* Risk Insights Box */}
+              <div className="p-4 border rounded-lg">
+                <h3 className="font-semibold mb-3 flex items-center gap-2">
+                  <AlertCircle className="h-4 w-4 text-red-500" />
+                  Risk Insights
+                </h3>
+                {patternAnalysis.risk_insights.high_risk_categories.length > 0 ? (
+                  <div>
+                    <div className="text-sm font-medium text-red-800 mb-2">High Risk Categories:</div>
+                    <div className="flex flex-wrap gap-1 mb-2">
+                      {patternAnalysis.risk_insights.high_risk_categories.map((category, index) => (
+                        <Badge key={index} variant="destructive" className="text-xs">
+                          {category}
+                        </Badge>
+                      ))}
                     </div>
-                  ))}
-                </div>
+                    <div className="text-xs text-red-700">
+                      {patternAnalysis.risk_insights.risk_trends}
+                    </div>
+                  </div>
+                ) : (
+                  <p className="text-sm text-muted-foreground">No high-risk categories identified</p>
+                )}
               </div>
-            )}
 
-            {/* Category Patterns */}
+              {/* Common Themes Box */}
+              <div className="p-4 border rounded-lg">
+                <h3 className="font-semibold mb-3 flex items-center gap-2">
+                  <TrendingUp className="h-4 w-4 text-blue-500" />
+                  Common Themes
+                </h3>
+                {patternAnalysis.common_themes.length > 0 ? (
+                  <div className="space-y-2">
+                    {patternAnalysis.common_themes.slice(0, 2).map((theme, index) => (
+                      <div key={index} className="flex items-center justify-between">
+                        <div>
+                          <div className="font-medium text-sm">{theme.theme}</div>
+                          <div className="text-xs text-muted-foreground">{theme.description}</div>
+                        </div>
+                        <Badge variant="secondary" className="text-xs">{theme.frequency}</Badge>
+                      </div>
+                    ))}
+                    {patternAnalysis.common_themes.length > 2 && (
+                      <div className="text-xs text-muted-foreground">
+                        +{patternAnalysis.common_themes.length - 2} more themes
+                      </div>
+                    )}
+                  </div>
+                ) : (
+                  <p className="text-sm text-muted-foreground">No common themes identified</p>
+                )}
+              </div>
+            </div>
+
+            {/* Category Patterns - Full width below */}
             {patternAnalysis.category_patterns.length > 0 && (
               <div>
                 <h3 className="font-semibold mb-3">Category Patterns</h3>
@@ -198,41 +248,6 @@ const PatternDetection = () => {
                           {category.trend}
                         </Badge>
                       </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {/* Risk Insights */}
-            {patternAnalysis.risk_insights.high_risk_categories.length > 0 && (
-              <div>
-                <h3 className="font-semibold mb-3">Risk Insights</h3>
-                <div className="p-3 bg-red-50 border border-red-200 rounded-lg">
-                  <div className="font-medium text-red-800 mb-2">High Risk Categories:</div>
-                  <div className="flex flex-wrap gap-1">
-                    {patternAnalysis.risk_insights.high_risk_categories.map((category, index) => (
-                      <Badge key={index} variant="destructive" className="text-xs">
-                        {category}
-                      </Badge>
-                    ))}
-                  </div>
-                  <div className="text-sm text-red-700 mt-2">
-                    {patternAnalysis.risk_insights.risk_trends}
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {/* Recommendations */}
-            {patternAnalysis.recommendations.length > 0 && (
-              <div>
-                <h3 className="font-semibold mb-3">Recommendations</h3>
-                <div className="space-y-2">
-                  {patternAnalysis.recommendations.slice(0, 3).map((recommendation, index) => (
-                    <div key={index} className="flex items-start gap-2 p-2 bg-blue-50 border border-blue-200 rounded">
-                      <Target className="h-4 w-4 text-blue-600 mt-0.5 flex-shrink-0" />
-                      <span className="text-sm text-blue-800">{recommendation}</span>
                     </div>
                   ))}
                 </div>
