@@ -170,7 +170,7 @@ const DashboardView = () => {
           .from('reports')
           .select('id, title, tracking_id, status, created_at, encrypted_content, encryption_key_hash, priority, report_type, submitted_by_email, tags, assigned_to, ai_risk_score, ai_risk_level, ai_likelihood_score, ai_impact_score, ai_risk_assessment, ai_assessed_at, manual_risk_level')
           .eq('organization_id', profile.organization_id)
-          .not('status', 'in', ['archived', 'closed', 'deleted'])
+          .not('status', 'in', '(archived,closed,deleted)')
           .is('deleted_at', null)
           .order('created_at', { ascending: false })
           .limit(20);
@@ -202,7 +202,7 @@ const DashboardView = () => {
           .from('reports')
           .select('id, title, tracking_id, status, created_at, encrypted_content, encryption_key_hash, priority, report_type, submitted_by_email, tags, assigned_to, manual_risk_level')
           .eq('organization_id', profile.organization_id)
-          .not('status', 'in', ['archived', 'closed', 'deleted'])
+          .not('status', 'in', '(archived,closed,deleted)')
           .is('deleted_at', null)
           .order('created_at', { ascending: false })
           .limit(20);
