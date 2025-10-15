@@ -64,7 +64,7 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
         
         <div className="flex-1 flex flex-col min-w-0">
           {/* Header */}
-          <header className="h-16 border-b bg-background flex items-center justify-between px-4 md:px-6 sticky top-0 z-10">
+          <header className="h-16 border-b border-l-0 bg-background flex items-center justify-between px-4 md:px-6 sticky top-0 z-10">
             <div className="flex items-center gap-3">
               <SidebarTrigger className="md:hidden" />
               <h1 className="text-base md:text-lg font-semibold truncate">

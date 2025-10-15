@@ -16,10 +16,68 @@ import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useCustomDomain } from '@/hooks/useCustomDomain';
 import { useTranslation } from 'react-i18next';
 import PatternDetection from './PatternDetection';
+
+// Risk Level Selector Component
+const RiskLevelSelector = ({ 
+  reportId, 
+  currentLevel, 
+  onUpdate, 
+  isUpdating 
+}: { 
+  reportId: string; 
+  currentLevel?: number; 
+  onUpdate: (level: number) => void; 
+  isUpdating: boolean;
+}) => {
+  const getRiskLevelColor = (level: number) => {
+    if (level <= 2) return 'bg-green-100 text-green-800 border-green-200';
+    if (level === 3) return 'bg-yellow-100 text-yellow-800 border-yellow-200';
+    return 'bg-red-100 text-red-800 border-red-200';
+  };
+
+  const getRiskLevelText = (level: number) => {
+    if (level <= 2) return 'Low';
+    if (level === 3) return 'Medium';
+    return 'High';
+  };
+
+  return (
+    <Popover>
+      <PopoverTrigger asChild>
+        <Button 
+          variant="outline" 
+          size="sm" 
+          className={`h-8 px-2 text-xs ${currentLevel ? getRiskLevelColor(currentLevel) : 'bg-gray-100 text-gray-600'}`}
+          disabled={isUpdating}
+        >
+          {currentLevel ? `${getRiskLevelText(currentLevel)} (${currentLevel}/5)` : 'Set Risk'}
+        </Button>
+      </PopoverTrigger>
+      <PopoverContent className="w-48 p-2">
+        <div className="space-y-1">
+          <div className="text-xs font-medium text-gray-600 mb-2">Select Risk Level</div>
+          {[1, 2, 3, 4, 5].map((level) => (
+            <Button
+              key={level}
+              variant="ghost"
+              size="sm"
+              className={`w-full justify-start text-xs ${currentLevel === level ? 'bg-primary/10' : ''}`}
+              onClick={() => onUpdate(level)}
+            >
+              <div className={`w-2 h-2 rounded-full mr-2 ${getRiskLevelColor(level).split(' ')[0]}`} />
+              {getRiskLevelText(level)} ({level}/5)
+            </Button>
+          ))}
+        </div>
+      </PopoverContent>
+    </Popover>
+  );
+};
 
 interface Report {
   id: string;
@@ -48,6 +106,7 @@ interface Report {
   ai_impact_score?: number;
   ai_risk_assessment?: any;
   ai_assessed_at?: string;
+  manual_risk_level?: number;
 }
 
 const DashboardView = () => {
@@ -67,6 +126,7 @@ const DashboardView = () => {
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('desc');
   const [reportCategories, setReportCategories] = useState<Record<string, string>>({});
   const [isAssessingRisk, setIsAssessingRisk] = useState<string | null>(null);
+  const [updatingRiskLevel, setUpdatingRiskLevel] = useState<string | null>(null);
 
   useEffect(() => {
     if (user) {
@@ -96,7 +156,7 @@ const DashboardView = () => {
         // Try with AI fields first
         const { data: reportsWithAI, error: reportsError } = await supabase
           .from('reports')
-          .select('id, title, tracking_id, status, created_at, encrypted_content, encryption_key_hash, priority, report_type, submitted_by_email, tags, assigned_to, ai_risk_score, ai_risk_level, ai_likelihood_score, ai_impact_score, ai_risk_assessment, ai_assessed_at')
+          .select('id, title, tracking_id, status, created_at, encrypted_content, encryption_key_hash, priority, report_type, submitted_by_email, tags, assigned_to, ai_risk_score, ai_risk_level, ai_likelihood_score, ai_impact_score, ai_risk_assessment, ai_assessed_at, manual_risk_level')
           .eq('organization_id', profile.organization_id)
           .neq('status', 'archived')
           .is('deleted_at', null)
@@ -128,7 +188,7 @@ const DashboardView = () => {
         // Fallback to basic query without AI fields
         const { data: reportsBasic, error: reportsBasicError } = await supabase
           .from('reports')
-          .select('id, title, tracking_id, status, created_at, encrypted_content, encryption_key_hash, priority, report_type, submitted_by_email, tags, assigned_to')
+          .select('id, title, tracking_id, status, created_at, encrypted_content, encryption_key_hash, priority, report_type, submitted_by_email, tags, assigned_to, manual_risk_level')
           .eq('organization_id', profile.organization_id)
           .neq('status', 'archived')
           .is('deleted_at', null)
@@ -354,6 +414,44 @@ Additional Details: ${decryptedContent.additionalDetails || 'None provided'}
     }
   };
 
+  const updateManualRiskLevel = async (reportId: string, riskLevel: number) => {
+    setUpdatingRiskLevel(reportId);
+    try {
+      const { error } = await supabase
+        .from('reports')
+        .update({ 
+          manual_risk_level: riskLevel,
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', reportId);
+
+      if (error) throw error;
+
+      toast({
+        title: "Risk Level Updated",
+        description: `Manual risk level set to ${riskLevel}/5`,
+      });
+
+      // Update local state
+      setReports(prevReports => 
+        prevReports.map(r => 
+          r.id === reportId 
+            ? { ...r, manual_risk_level: riskLevel }
+            : r
+        )
+      );
+    } catch (error) {
+      console.error('Error updating risk level:', error);
+      toast({
+        title: "Error",
+        description: "Failed to update risk level. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setUpdatingRiskLevel(null);
+    }
+  };
+
   const filteredReports = reports.filter(report => {
     const matchesSearch = report.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          report.tracking_id.toLowerCase().includes(searchTerm.toLowerCase());
@@ -516,8 +614,17 @@ Additional Details: ${decryptedContent.additionalDetails || 'None provided'}
                           )}
                         </TableCell>
                         <TableCell>
-                          {report.ai_risk_level ? (
-                            <div className="flex items-center gap-2">
+                          <div className="flex items-center gap-2">
+                            {/* Manual Risk Level */}
+                            <RiskLevelSelector
+                              reportId={report.id}
+                              currentLevel={report.manual_risk_level}
+                              onUpdate={(level) => updateManualRiskLevel(report.id, level)}
+                              isUpdating={updatingRiskLevel === report.id}
+                            />
+                            
+                            {/* AI Risk Level (if available) */}
+                            {report.ai_risk_level && (
                               <Badge 
                                 variant={
                                   report.ai_risk_level === 'Critical' ? 'destructive' :
@@ -527,16 +634,12 @@ Additional Details: ${decryptedContent.additionalDetails || 'None provided'}
                                 }
                                 className="text-xs"
                               >
-                                {report.ai_risk_level}
+                                AI: {report.ai_risk_level}
                               </Badge>
-                              {report.ai_risk_score && (
-                                <span className="text-xs text-muted-foreground">
-                                  ({report.ai_risk_score})
-                                </span>
-                              )}
-                            </div>
-                          ) : report.priority ? (
-                            <div className="flex items-center gap-2">
+                            )}
+                            
+                            {/* Legacy Priority (if no manual risk level) */}
+                            {!report.manual_risk_level && report.priority && (
                               <Badge 
                                 variant={
                                   report.priority >= 4 ? 'destructive' :
@@ -545,15 +648,13 @@ Additional Details: ${decryptedContent.additionalDetails || 'None provided'}
                                 }
                                 className="text-xs"
                               >
-                                {report.priority >= 4 ? 'High' : 
-                                 report.priority >= 3 ? 'Medium' : 'Low'}
+                                Legacy: {report.priority >= 4 ? 'High' : 
+                                 report.priority >= 3 ? 'Medium' : 'Low'} ({report.priority}/5)
                               </Badge>
-                              <span className="text-xs text-muted-foreground">
-                                (Manual: {report.priority}/5)
-                              </span>
-                            </div>
-                          ) : (
-                            <div className="flex items-center gap-2">
+                            )}
+                            
+                            {/* Assess Button (if no risk level set) */}
+                            {!report.manual_risk_level && !report.ai_risk_level && !report.priority && (
                               <Button
                                 variant="outline"
                                 size="sm"
@@ -563,8 +664,8 @@ Additional Details: ${decryptedContent.additionalDetails || 'None provided'}
                               >
                                 {isAssessingRisk === report.id ? 'Assessing...' : 'Assess'}
                               </Button>
-                            </div>
-                          )}
+                            )}
+                          </div>
                         </TableCell>
                         <TableCell>
                           {report.assigned_to ? (

@@ -2,7 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { AlertCircle, TrendingUp, Calendar, Target, RefreshCw } from 'lucide-react';
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
+import { AlertCircle, TrendingUp, Calendar, Target, RefreshCw, ChevronDown, ChevronUp } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
@@ -39,11 +40,13 @@ const PatternDetection = () => {
   const [patternAnalysis, setPatternAnalysis] = useState<PatternAnalysis | null>(null);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [lastAnalyzed, setLastAnalyzed] = useState<string | null>(null);
+  const [isOpen, setIsOpen] = useState(true); // Collapsible state
 
-  // Load persisted analysis on component mount
+  // Load persisted analysis and collapsible state on component mount
   useEffect(() => {
     const savedAnalysis = localStorage.getItem('ai-analysis');
     const savedTimestamp = localStorage.getItem('ai-analysis-timestamp');
+    const savedCollapsedState = localStorage.getItem('ai-analysis-collapsed');
     
     if (savedAnalysis && savedTimestamp) {
       try {
@@ -55,7 +58,17 @@ const PatternDetection = () => {
         localStorage.removeItem('ai-analysis-timestamp');
       }
     }
+    
+    // Load collapsed state, default to expanded (false)
+    if (savedCollapsedState !== null) {
+      setIsOpen(!JSON.parse(savedCollapsedState));
+    }
   }, []);
+
+  // Save collapsed state to localStorage
+  useEffect(() => {
+    localStorage.setItem('ai-analysis-collapsed', JSON.stringify(!isOpen));
+  }, [isOpen]);
 
   const analyzePatterns = async () => {
     if (!user) return;
@@ -128,38 +141,49 @@ const PatternDetection = () => {
 
   return (
     <Card>
-      <CardHeader>
-        <div className="flex items-center justify-between">
-            <CardTitle className="flex items-center gap-2">
-              <TrendingUp className="h-5 w-5" />
-              AI Analysis
-            </CardTitle>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={analyzePatterns}
-            disabled={isAnalyzing}
-          >
-            {isAnalyzing ? (
-              <>
-                <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
-                Analyzing...
-              </>
-            ) : (
-              <>
-                <RefreshCw className="h-4 w-4 mr-2" />
-                Refresh
-              </>
-            )}
-          </Button>
-        </div>
-        {lastAnalyzed && (
-          <p className="text-sm text-muted-foreground">
-            Last analyzed: {new Date(lastAnalyzed).toLocaleString()}
-          </p>
-        )}
-      </CardHeader>
-      <CardContent>
+      <Collapsible open={isOpen} onOpenChange={setIsOpen}>
+        <CardHeader>
+          <div className="flex items-center justify-between">
+            <CollapsibleTrigger asChild>
+              <Button variant="ghost" className="flex items-center gap-2 p-0 h-auto hover:bg-transparent">
+                <CardTitle className="flex items-center gap-2">
+                  <TrendingUp className="h-5 w-5" />
+                  AI Analysis
+                </CardTitle>
+                {isOpen ? (
+                  <ChevronUp className="h-4 w-4" />
+                ) : (
+                  <ChevronDown className="h-4 w-4" />
+                )}
+              </Button>
+            </CollapsibleTrigger>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={analyzePatterns}
+              disabled={isAnalyzing}
+            >
+              {isAnalyzing ? (
+                <>
+                  <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
+                  Analyzing...
+                </>
+              ) : (
+                <>
+                  <RefreshCw className="h-4 w-4 mr-2" />
+                  Refresh
+                </>
+              )}
+            </Button>
+          </div>
+          {lastAnalyzed && (
+            <p className="text-sm text-muted-foreground">
+              Last analyzed: {new Date(lastAnalyzed).toLocaleString()}
+            </p>
+          )}
+        </CardHeader>
+        <CollapsibleContent>
+          <CardContent>
         {isAnalyzing ? (
           <div className="text-center py-8">
             <RefreshCw className="h-8 w-8 animate-spin mx-auto mb-4 text-primary" />
@@ -206,7 +230,9 @@ const PatternDetection = () => {
             <p className="text-sm">This will provide strategic insights for senior compliance and HR review.</p>
           </div>
         )}
-      </CardContent>
+          </CardContent>
+        </CollapsibleContent>
+      </Collapsible>
     </Card>
   );
 };
