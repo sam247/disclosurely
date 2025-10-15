@@ -27,7 +27,7 @@ serve(async (req) => {
       documentContext = `\n\nCOMPANY POLICY CONTEXT:\n${companyDocuments.map((doc: any) => `- ${doc.name}: ${doc.content || 'Document uploaded but content not provided'}`).join('\n')}`;
     }
 
-    const prompt = `You are an expert compliance analyst reviewing a whistleblower case. Analyze the following case and provide detailed recommendations.
+    const prompt = `You are a helpful AI assistant for compliance teams. Analyze this whistleblower case and provide actionable guidance in a conversational, helpful format.
 
 CASE DETAILS:
 - Title: ${caseData.title}
@@ -41,15 +41,35 @@ CASE CONTENT:
 ${caseContent || 'Case content not available'}
 ${documentContext}
 
-Please provide a comprehensive analysis including:
-1. Risk assessment and compliance implications
-2. Immediate actions required
-3. Short-term and medium-term recommendations
-4. Legal considerations and stakeholder notifications
-5. Policy compliance review (if company documents provided)
-6. Recommended course of action with timelines
+Please provide your analysis in this helpful format:
 
-Format your response professionally as a detailed compliance report.`;
+🚨 **What's the situation?**
+[Brief summary of what happened]
+
+⚠️ **Risk Level Assessment**
+[Your assessment of the risk level and why]
+
+🎯 **Immediate Actions Needed**
+• [Action 1 with timeline]
+• [Action 2 with timeline]
+• [Action 3 with timeline]
+
+📋 **Next Steps**
+• [Short-term action]
+• [Medium-term action]
+• [Long-term action]
+
+⚖️ **Legal & Compliance Notes**
+• [Key legal consideration]
+• [Policy compliance note]
+• [Stakeholder notification needed]
+
+💡 **My Recommendations**
+• [Strategic recommendation 1]
+• [Strategic recommendation 2]
+• [Strategic recommendation 3]
+
+Keep it conversational, practical, and focused on what the compliance team needs to do next. Use bullet points and be direct about actions needed.`;
 
     const response = await fetch('https://api.deepseek.com/chat/completions', {
       method: 'POST',
@@ -62,7 +82,7 @@ Format your response professionally as a detailed compliance report.`;
         messages: [
           { 
             role: 'system', 
-            content: 'You are an expert compliance analyst specializing in whistleblower case analysis, risk assessment, and regulatory compliance. Provide detailed, actionable recommendations.' 
+            content: 'You are a helpful AI assistant for compliance teams. You provide practical, actionable guidance in a conversational tone. Focus on what compliance teams need to do next, use bullet points, and be direct about actions needed. Avoid formal report language - be more like a helpful colleague.' 
           },
           { role: 'user', content: prompt }
         ],
@@ -92,24 +112,34 @@ Format your response professionally as a detailed compliance report.`;
     return new Response(JSON.stringify({ 
       error: (error as Error).message,
       fallbackAnalysis: `
-AI CASE ANALYSIS REPORT
-// @ts-ignore - fix later
+🚨 **What's the situation?**
+AI analysis is temporarily unavailable, but I can still help guide your next steps.
 
-NOTE: AI analysis service temporarily unavailable. Please proceed with manual review.
+⚠️ **Risk Level Assessment**
+Since I can't analyze the specific content right now, treat this as a standard priority case until manual review.
 
-IMMEDIATE ACTIONS REQUIRED:
-1. Assign case to senior case handler
-2. Review case content for urgency indicators
-3. Implement standard escalation procedures
-4. Document all actions taken
+🎯 **Immediate Actions Needed**
+• Assign this case to a senior case handler (within 24 hours)
+• Review the case content for any urgency indicators
+• Implement your standard escalation procedures
+• Document all actions taken
 
-RECOMMENDED TIMELINE:
-- Initial review: Within 24 hours
-- Preliminary investigation: 1-7 days
-- Full investigation: 1-4 weeks
+📋 **Next Steps**
+• Initial review: Within 24 hours
+• Preliminary investigation: 1-7 days
+• Full investigation: 1-4 weeks
 
-Please contact your compliance team for detailed analysis.
-Generated: ${new Date().toLocaleString()}
+⚖️ **Legal & Compliance Notes**
+• Follow your organization's standard whistleblower protection procedures
+• Ensure proper documentation throughout the process
+• Notify relevant stakeholders as per your policy
+
+💡 **My Recommendations**
+• Contact your compliance team for detailed analysis
+• Use this as an opportunity to review your case handling procedures
+• Consider implementing additional AI analysis capabilities
+
+*Analysis generated: ${new Date().toLocaleString()}*
       `
     }), {
       status: 200, // Return 200 so the frontend can handle gracefully

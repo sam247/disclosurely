@@ -41,24 +41,22 @@ serve(async (req) => {
       tracking_id: report.tracking_id
     }));
 
-    const prompt = `You are an AI Compliance Intelligence Analyst within Disclosurely.
-
-Your task is to review all whistleblowing cases in the dashboard and provide a clear, actionable overview for senior compliance and HR review.
+    const prompt = `You are a helpful AI assistant for compliance teams. Review all whistleblowing cases and provide actionable insights in a conversational, helpful format.
 
 REPORTS DATASET:
 ${JSON.stringify(reportsSummary, null, 2)}
 
-ANALYSIS REQUIREMENTS:
-Focus on identifying patterns, emerging risks, and organizational themes that require immediate attention from compliance leadership.
+I need you to analyze these cases and provide insights that help compliance teams understand what's happening and what to do next.
 
-Provide your analysis in the following JSON format:
+Please provide your analysis in this helpful JSON format:
 {
   "common_themes": [
     {
       "theme": "theme name",
       "frequency": number,
-      "description": "description of the theme",
-      "examples": ["example report titles"]
+      "description": "what this means for your organization",
+      "examples": ["example report titles"],
+      "action_needed": "what you should do about this"
     }
   ],
   "category_patterns": [
@@ -66,32 +64,35 @@ Provide your analysis in the following JSON format:
       "category": "category name",
       "count": number,
       "percentage": number,
-      "trend": "increasing/stable/decreasing"
+      "trend": "increasing/stable/decreasing",
+      "concern_level": "high/medium/low",
+      "suggested_action": "what to do about this trend"
     }
   ],
   "temporal_insights": {
-    "peak_periods": ["time periods with high activity"],
+    "peak_periods": ["when you're seeing more reports"],
     "trend": "increasing/stable/decreasing",
-    "seasonal_patterns": ["any seasonal patterns identified"]
+    "seasonal_patterns": ["any patterns in timing"],
+    "what_this_means": "what these patterns suggest about your organization"
   },
   "risk_insights": {
-    "high_risk_categories": ["categories with highest risk"],
-    "risk_trends": "description of risk trends"
+    "high_risk_categories": ["areas that need immediate attention"],
+    "risk_trends": "what's getting better or worse",
+    "urgent_actions": ["immediate steps you should take"]
   },
   "recommendations": [
-    "strategic recommendations for senior compliance and HR review"
+    "practical steps for your compliance team"
   ],
-  "summary": "concise compliance intelligence summary covering case trends, emerging risks, cultural signals, and immediate insights for senior leadership"
+  "summary": "a helpful overview of what's happening with your reports and what you should focus on next"
 }
 
-ANALYSIS FOCUS:
-- Case trends and patterns across the organization
-- Emerging risks that require immediate attention
-- Cultural signals and organizational themes
-- Strategic recommendations for compliance leadership
-- Immediate actions for senior review
+Focus on:
+- What patterns mean for your organization
+- Immediate actions you should take
+- Areas that need attention
+- Practical next steps
 
-Your tone should mirror that of an internal compliance report — concise, factual, and practical.`;
+Be conversational and helpful - like a colleague giving you insights about your data.`;
 
     const response = await fetch('https://api.deepseek.com/chat/completions', {
       method: 'POST',
@@ -104,7 +105,7 @@ Your tone should mirror that of an internal compliance report — concise, factu
         messages: [
           { 
             role: 'system', 
-            content: 'You are an expert pattern recognition analyst specializing in whistleblower case analysis. Identify meaningful patterns and provide actionable insights. Always respond with valid JSON format.' 
+            content: 'You are a helpful AI assistant for compliance teams. You analyze patterns in whistleblower data and provide practical, actionable insights. Be conversational and helpful - like a colleague giving you insights about your data. Focus on what compliance teams need to do next and always respond with valid JSON format.' 
           },
           { role: 'user', content: prompt }
         ],
@@ -147,8 +148,8 @@ Your tone should mirror that of an internal compliance report — concise, factu
           high_risk_categories: [],
           risk_trends: "Unable to analyze due to parsing error"
         },
-        recommendations: ["Review analysis manually"],
-        summary: "Pattern analysis failed - manual review recommended"
+        recommendations: ["I couldn't analyze the patterns right now - please review your cases manually"],
+        summary: "Sorry, I couldn't analyze your case patterns at the moment. Please review your reports manually to identify any trends or areas that need attention."
       };
     }
 
