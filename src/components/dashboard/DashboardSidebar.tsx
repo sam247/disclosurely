@@ -66,7 +66,7 @@ const DashboardSidebar = ({
   };
 
   return (
-    <Sidebar className="border-r">
+    <Sidebar className="border-r border-b-0">
       <SidebarHeader className="p-4 border-b">
         <button onClick={() => navigate('/dashboard')} className="flex items-center w-full hover:opacity-80 transition-opacity gap-3">
           <img src={disclosurelyFullLogo} alt="Disclosurely" className="h-7 w-auto" />

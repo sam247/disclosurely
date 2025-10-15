@@ -152,6 +152,15 @@ const DashboardView = () => {
 
       console.log('Fetching reports for organization:', profile.organization_id);
 
+      // First, let's check what reports exist in the database
+      const { data: allReports, error: allReportsError } = await supabase
+        .from('reports')
+        .select('id, title, tracking_id, status, organization_id')
+        .eq('organization_id', profile.organization_id);
+      
+      console.log('All reports for this organization:', allReports);
+      console.log('All reports error:', allReportsError);
+
       // First, try to fetch with AI fields, fallback to basic fields if they don't exist
       let reportsData, archivedData;
       

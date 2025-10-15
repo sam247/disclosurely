@@ -69,6 +69,8 @@ const AuthenticatedApp = () => {
         return;
       }
 
+      console.log('Profile found, checking organization_id:', profile.organization_id);
+
       // If profile exists but no organization, needs setup
       if (!profile.organization_id) {
         console.log('Profile exists but no organization_id, needs setup');
