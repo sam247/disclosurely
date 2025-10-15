@@ -1,129 +1,173 @@
-import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
+import "https://deno.land/x/xhr@0.1.0/mod.ts";
+import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+
+const deepseekApiKey = Deno.env.get('DEEPSEEK_API_KEY');
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
-}
+};
 
 serve(async (req) => {
+  // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
-    return new Response('ok', { headers: corsHeaders })
+    return new Response(null, { headers: corsHeaders });
   }
 
   try {
-    const { reports } = await req.json()
+    const { reports } = await req.json();
 
-    if (!reports || !Array.isArray(reports)) {
-      return new Response(
-        JSON.stringify({ error: 'Reports array is required' }),
-        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      )
+    if (!deepseekApiKey) {
+      throw new Error('Deepseek API key not configured');
     }
 
-    // Prepare reports data for AI analysis
-    const reportsData = reports.map(report => ({
-      id: report.id,
+    if (!reports || reports.length === 0) {
+      return new Response(JSON.stringify({ 
+        patterns: [],
+        insights: "No reports available for pattern analysis",
+        timestamp: new Date().toISOString()
+      }), {
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+
+    // Prepare reports data for analysis
+    const reportsSummary = reports.map((report: any) => ({
       title: report.title,
-      category: report.category || 'Unknown',
-      priority: report.priority || 1,
-      status: report.status || 'new',
+      category: report.category,
+      status: report.status,
       created_at: report.created_at,
-      tags: report.tags || []
-    }))
+      priority: report.priority,
+      tracking_id: report.tracking_id
+    }));
 
-    // AI prompt for pattern analysis
-    const prompt = `You are a Compliance Intelligence Analyst reviewing whistleblower reports. Analyze the following reports and provide insights on patterns, emerging risks, and organizational themes.
+    const prompt = `You are an AI Compliance Intelligence Analyst within Disclosurely.
 
-Reports to analyze:
-${JSON.stringify(reportsData, null, 2)}
+Your task is to review all whistleblowing cases in the dashboard and provide a clear, actionable overview for senior compliance and HR review.
 
-Please provide a comprehensive analysis focusing on:
+REPORTS DATASET:
+${JSON.stringify(reportsSummary, null, 2)}
 
-1. **Key Insights**: Overall patterns and trends across all cases
-2. **Common Themes**: Recurring issues, categories, or concerns
-3. **Recommendations**: Actionable steps for senior compliance/HR review
+ANALYSIS REQUIREMENTS:
+Focus on identifying patterns, emerging risks, and organizational themes that require immediate attention from compliance leadership.
 
-Format your response as JSON with the following structure:
+Provide your analysis in the following JSON format:
 {
-  "key_insights": "Brief overview of patterns and emerging risks",
   "common_themes": [
     {
-      "theme": "Theme name",
-      "frequency": "Number of occurrences",
-      "description": "Brief description"
+      "theme": "theme name",
+      "frequency": number,
+      "description": "description of the theme",
+      "examples": ["example report titles"]
     }
   ],
+  "category_patterns": [
+    {
+      "category": "category name",
+      "count": number,
+      "percentage": number,
+      "trend": "increasing/stable/decreasing"
+    }
+  ],
+  "temporal_insights": {
+    "peak_periods": ["time periods with high activity"],
+    "trend": "increasing/stable/decreasing",
+    "seasonal_patterns": ["any seasonal patterns identified"]
+  },
+  "risk_insights": {
+    "high_risk_categories": ["categories with highest risk"],
+    "risk_trends": "description of risk trends"
+  },
   "recommendations": [
-    "Specific actionable recommendation 1",
-    "Specific actionable recommendation 2"
-  ]
+    "strategic recommendations for senior compliance and HR review"
+  ],
+  "summary": "concise compliance intelligence summary covering case trends, emerging risks, cultural signals, and immediate insights for senior leadership"
 }
 
-Keep the analysis concise, factual, and practical. Focus on compliance intelligence that would be valuable for senior management review.`
+ANALYSIS FOCUS:
+- Case trends and patterns across the organization
+- Emerging risks that require immediate attention
+- Cultural signals and organizational themes
+- Strategic recommendations for compliance leadership
+- Immediate actions for senior review
 
-    // Call DeepSeek AI
-    const aiResponse = await fetch('https://api.deepseek.com/v1/chat/completions', {
+Your tone should mirror that of an internal compliance report — concise, factual, and practical.`;
+
+    const response = await fetch('https://api.deepseek.com/chat/completions', {
       method: 'POST',
       headers: {
-        'Authorization': `Bearer ${Deno.env.get('DEEPSEEK_API_KEY')}`,
+        'Authorization': `Bearer ${deepseekApiKey}`,
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
         model: 'deepseek-chat',
         messages: [
-          {
-            role: 'system',
-            content: 'You are a Compliance Intelligence Analyst specializing in whistleblower report analysis. Provide structured, actionable insights.'
+          { 
+            role: 'system', 
+            content: 'You are an expert pattern recognition analyst specializing in whistleblower case analysis. Identify meaningful patterns and provide actionable insights. Always respond with valid JSON format.' 
           },
-          {
-            role: 'user',
-            content: prompt
-          }
+          { role: 'user', content: prompt }
         ],
         temperature: 0.3,
-        max_tokens: 2000
-      })
-    })
-
-    if (!aiResponse.ok) {
-      throw new Error(`AI API error: ${aiResponse.status}`)
-    }
-
-    const aiData = await aiResponse.json()
-    const analysisText = aiData.choices[0]?.message?.content
-
-    if (!analysisText) {
-      throw new Error('No analysis received from AI')
-    }
-
-    // Try to parse JSON response, fallback to text if parsing fails
-    let analysis
-    try {
-      analysis = JSON.parse(analysisText)
-    } catch {
-      // Fallback if AI doesn't return valid JSON
-      analysis = {
-        key_insights: analysisText,
-        common_themes: [],
-        recommendations: []
-      }
-    }
-
-    return new Response(
-      JSON.stringify({ 
-        success: true, 
-        analysis,
-        analyzed_at: new Date().toISOString(),
-        reports_analyzed: reportsData.length
+        max_tokens: 2000,
       }),
-      { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-    )
+    });
 
+    if (!response.ok) {
+      const errorData = await response.text();
+      console.error('Deepseek API error:', errorData);
+      throw new Error(`Deepseek API error: ${response.status}`);
+    }
+
+    const data = await response.json();
+    const analysisText = data.choices[0].message.content;
+
+    // Try to parse JSON from the response
+    let patternAnalysis;
+    try {
+      // Extract JSON from the response
+      const jsonMatch = analysisText.match(/\{[\s\S]*\}/);
+      if (jsonMatch) {
+        patternAnalysis = JSON.parse(jsonMatch[0]);
+      } else {
+        throw new Error('No JSON found in response');
+      }
+    } catch (parseError) {
+      console.error('Failed to parse AI response as JSON:', parseError);
+      // Fallback: create a basic pattern analysis
+      patternAnalysis = {
+        common_themes: [],
+        category_patterns: [],
+        temporal_insights: {
+          peak_periods: [],
+          trend: "stable",
+          seasonal_patterns: []
+        },
+        risk_insights: {
+          high_risk_categories: [],
+          risk_trends: "Unable to analyze due to parsing error"
+        },
+        recommendations: ["Review analysis manually"],
+        summary: "Pattern analysis failed - manual review recommended"
+      };
+    }
+
+    return new Response(JSON.stringify({ 
+      patternAnalysis,
+      timestamp: new Date().toISOString(),
+      reportsAnalyzed: reports.length,
+      rawAnalysis: analysisText
+    }), {
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+    });
   } catch (error) {
-    console.error('Pattern analysis error:', error)
-    return new Response(
-      JSON.stringify({ error: error.message }),
-      { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-    )
+    console.error('Pattern analysis error:', error);
+    return new Response(JSON.stringify({ 
+      error: error.message,
+      timestamp: new Date().toISOString()
+    }), {
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      status: 500,
+    });
   }
-})
+});
