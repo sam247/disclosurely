@@ -57,7 +57,7 @@ const PatternDetection = () => {
       // Fetch all reports for pattern analysis
       const { data: reports, error } = await supabase
         .from('reports')
-        .select('id, title, tracking_id, status, created_at, priority, tags, ai_risk_score, ai_risk_level')
+        .select('id, title, tracking_id, status, created_at, priority, tags')
         .eq('organization_id', profile.organization_id)
         .is('deleted_at', null)
         .order('created_at', { ascending: false });

@@ -63,7 +63,7 @@ const DashboardView = () => {
   const [showArchived, setShowArchived] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
-  const [sortField, setSortField] = useState<'created_at' | 'title' | 'tracking_id' | 'ai_risk_score'>('ai_risk_score');
+  const [sortField, setSortField] = useState<'created_at' | 'title' | 'tracking_id' | 'ai_risk_score'>('created_at');
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('desc');
   const [reportCategories, setReportCategories] = useState<Record<string, string>>({});
   const [isAssessingRisk, setIsAssessingRisk] = useState<string | null>(null);
@@ -89,28 +89,73 @@ const DashboardView = () => {
         return;
       }
 
-      const { data: reportsData } = await supabase
-        .from('reports')
-        .select('id, title, tracking_id, status, created_at, encrypted_content, encryption_key_hash, priority, report_type, submitted_by_email, tags, assigned_to, ai_risk_score, ai_risk_level, ai_likelihood_score, ai_impact_score, ai_risk_assessment, ai_assessed_at')
-        .eq('organization_id', profile.organization_id)
-        .neq('status', 'archived')
-        .is('deleted_at', null)
-        .order('ai_risk_score', { ascending: false, nullsLast: true })
-        .limit(20);
+      // First, try to fetch with AI fields, fallback to basic fields if they don't exist
+      let reportsData, archivedData;
+      
+      try {
+        // Try with AI fields first
+        const { data: reportsWithAI, error: reportsError } = await supabase
+          .from('reports')
+          .select('id, title, tracking_id, status, created_at, encrypted_content, encryption_key_hash, priority, report_type, submitted_by_email, tags, assigned_to, ai_risk_score, ai_risk_level, ai_likelihood_score, ai_impact_score, ai_risk_assessment, ai_assessed_at')
+          .eq('organization_id', profile.organization_id)
+          .neq('status', 'archived')
+          .is('deleted_at', null)
+          .order('created_at', { ascending: false })
+          .limit(20);
 
-      const { data: archivedData } = await supabase
-        .from('reports')
-        .select('id, title, tracking_id, status, created_at, encrypted_content, encryption_key_hash, priority, report_type, submitted_by_email, tags, assigned_to')
-        .eq('organization_id', profile.organization_id)
-        .eq('status', 'archived')
-        .is('deleted_at', null)
-        .order('created_at', { ascending: false })
-        .limit(20);
+        if (reportsError) throw reportsError;
+        reportsData = reportsWithAI;
+
+        const { data: archivedWithAI, error: archivedError } = await supabase
+          .from('reports')
+          .select('id, title, tracking_id, status, created_at, encrypted_content, encryption_key_hash, priority, report_type, submitted_by_email, tags, assigned_to')
+          .eq('organization_id', profile.organization_id)
+          .eq('status', 'archived')
+          .is('deleted_at', null)
+          .order('created_at', { ascending: false })
+          .limit(20);
+
+        if (archivedError) throw archivedError;
+        archivedData = archivedWithAI;
+
+      } catch (aiError) {
+        console.log('AI fields not available, falling back to basic query:', aiError);
+        
+        // Fallback to basic query without AI fields
+        const { data: reportsBasic, error: reportsBasicError } = await supabase
+          .from('reports')
+          .select('id, title, tracking_id, status, created_at, encrypted_content, encryption_key_hash, priority, report_type, submitted_by_email, tags, assigned_to')
+          .eq('organization_id', profile.organization_id)
+          .neq('status', 'archived')
+          .is('deleted_at', null)
+          .order('created_at', { ascending: false })
+          .limit(20);
+
+        if (reportsBasicError) throw reportsBasicError;
+        reportsData = reportsBasic;
+
+        const { data: archivedBasic, error: archivedBasicError } = await supabase
+          .from('reports')
+          .select('id, title, tracking_id, status, created_at, encrypted_content, encryption_key_hash, priority, report_type, submitted_by_email, tags, assigned_to')
+          .eq('organization_id', profile.organization_id)
+          .eq('status', 'archived')
+          .is('deleted_at', null)
+          .order('created_at', { ascending: false })
+          .limit(20);
+
+        if (archivedBasicError) throw archivedBasicError;
+        archivedData = archivedBasic;
+      }
 
       setReports(reportsData || []);
       setArchivedReports(archivedData || []);
     } catch (error) {
       console.error('Error fetching dashboard data:', error);
+      toast({
+        title: "Error",
+        description: "Failed to load reports. Please try refreshing the page.",
+        variant: "destructive",
+      });
     } finally {
       setLoading(false);
     }
