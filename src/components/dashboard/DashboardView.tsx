@@ -477,7 +477,7 @@ Additional Details: ${decryptedContent.additionalDetails || 'None provided'}
                       <TableHead>{t('title')}</TableHead>
                       <TableHead>{t('status')}</TableHead>
                       <TableHead>{t('category')}</TableHead>
-                      <TableHead>AI Risk</TableHead>
+                      <TableHead>Risk Level</TableHead>
                       <TableHead>{t('assignedTo')}</TableHead>
                       <TableHead>{t('date')}</TableHead>
                       <TableHead className="text-right">{t('actions')}</TableHead>
@@ -512,7 +512,7 @@ Additional Details: ${decryptedContent.additionalDetails || 'None provided'}
                           )}
                         </TableCell>
                         <TableCell>
-                          {report.ai_risk_score ? (
+                          {report.ai_risk_level ? (
                             <div className="flex items-center gap-2">
                               <Badge 
                                 variant={
@@ -523,22 +523,26 @@ Additional Details: ${decryptedContent.additionalDetails || 'None provided'}
                                 }
                                 className="text-xs"
                               >
-                                {report.ai_risk_score}
-                              </Badge>
-                              <span className="text-xs text-muted-foreground">
                                 {report.ai_risk_level}
-                              </span>
+                              </Badge>
+                              {report.ai_risk_score && (
+                                <span className="text-xs text-muted-foreground">
+                                  ({report.ai_risk_score})
+                                </span>
+                              )}
                             </div>
                           ) : (
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              onClick={() => assessRisk(report.id)}
-                              className="text-xs"
-                              disabled={isAssessingRisk === report.id}
-                            >
-                              {isAssessingRisk === report.id ? 'Assessing...' : 'Assess'}
-                            </Button>
+                            <div className="flex items-center gap-2">
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => assessRisk(report.id)}
+                                className="text-xs"
+                                disabled={isAssessingRisk === report.id}
+                              >
+                                {isAssessingRisk === report.id ? 'Assessing...' : 'Assess'}
+                              </Button>
+                            </div>
                           )}
                         </TableCell>
                         <TableCell>

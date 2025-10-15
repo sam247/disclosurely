@@ -163,96 +163,47 @@ const PatternDetection = () => {
         {isAnalyzing ? (
           <div className="text-center py-8">
             <RefreshCw className="h-8 w-8 animate-spin mx-auto mb-4 text-primary" />
-            <p className="text-muted-foreground">Analyzing patterns in your reports...</p>
+            <p className="text-muted-foreground">Analyzing compliance patterns across all cases...</p>
           </div>
         ) : patternAnalysis ? (
           <div className="space-y-6">
-            {/* Summary */}
-            <div className="p-4 bg-muted/50 rounded-lg">
-              <h3 className="font-semibold mb-2 flex items-center gap-2">
-                <AlertCircle className="h-4 w-4" />
-                Key Insights
+            {/* Key Insights - Enhanced for compliance intelligence */}
+            <div className="p-6 bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-lg">
+              <h3 className="font-semibold mb-4 flex items-center gap-2 text-blue-900">
+                <AlertCircle className="h-5 w-5" />
+                Compliance Intelligence Summary
               </h3>
-              <p className="text-sm text-muted-foreground">{patternAnalysis.summary}</p>
+              <div className="prose prose-sm max-w-none">
+                <p className="text-gray-700 leading-relaxed">{patternAnalysis.summary}</p>
+              </div>
               
               {/* Recommendations Dropdown */}
               {patternAnalysis.recommendations.length > 0 && (
-                <details className="mt-4">
-                  <summary className="cursor-pointer font-medium text-sm text-primary hover:underline">
-                    View Recommendations ({patternAnalysis.recommendations.length})
+                <details className="mt-6">
+                  <summary className="cursor-pointer font-semibold text-sm text-blue-800 hover:text-blue-900 hover:underline flex items-center gap-2">
+                    <Target className="h-4 w-4" />
+                    View Strategic Recommendations ({patternAnalysis.recommendations.length})
                   </summary>
-                  <div className="mt-3 space-y-2 pl-4">
+                  <div className="mt-4 space-y-3 pl-6">
                     {patternAnalysis.recommendations.map((recommendation, index) => (
-                      <div key={index} className="flex items-start gap-2 p-2 bg-blue-50 border border-blue-200 rounded">
-                        <Target className="h-4 w-4 text-blue-600 mt-0.5 flex-shrink-0" />
-                        <span className="text-sm text-blue-800">{recommendation}</span>
+                      <div key={index} className="flex items-start gap-3 p-4 bg-white border border-blue-200 rounded-lg shadow-sm">
+                        <div className="flex-shrink-0 w-6 h-6 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center text-xs font-semibold">
+                          {index + 1}
+                        </div>
+                        <span className="text-sm text-gray-800 leading-relaxed">{recommendation}</span>
                       </div>
                     ))}
                   </div>
                 </details>
               )}
             </div>
-
-            {/* Small boxes for Risk Insights and Common Themes */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {/* Risk Insights Box */}
-              <div className="p-4 border rounded-lg">
-                <h3 className="font-semibold mb-3 flex items-center gap-2">
-                  <AlertCircle className="h-4 w-4 text-red-500" />
-                  Risk Insights
-                </h3>
-                {patternAnalysis.risk_insights.high_risk_categories.length > 0 ? (
-                  <div>
-                    <div className="text-sm font-medium text-red-800 mb-2">High Risk Categories:</div>
-                    <div className="flex flex-wrap gap-1 mb-2">
-                      {patternAnalysis.risk_insights.high_risk_categories.map((category, index) => (
-                        <Badge key={index} variant="destructive" className="text-xs">
-                          {category}
-                        </Badge>
-                      ))}
-                    </div>
-                    <div className="text-xs text-red-700">
-                      {patternAnalysis.risk_insights.risk_trends}
-                    </div>
-                  </div>
-                ) : (
-                  <p className="text-sm text-muted-foreground">No high-risk categories identified</p>
-                )}
-              </div>
-
-              {/* Common Themes Box */}
-              <div className="p-4 border rounded-lg">
-                <h3 className="font-semibold mb-3 flex items-center gap-2">
-                  <TrendingUp className="h-4 w-4 text-blue-500" />
-                  Patterns
-                </h3>
-                {patternAnalysis.common_themes.length > 0 ? (
-                  <div className="space-y-2">
-                    {patternAnalysis.common_themes.slice(0, 2).map((theme, index) => (
-                      <div key={index} className="flex items-center justify-between">
-                        <div>
-                          <div className="font-medium text-sm">{theme.theme}</div>
-                          <div className="text-xs text-muted-foreground">{theme.description}</div>
-                        </div>
-                        <Badge variant="secondary" className="text-xs">{theme.frequency}</Badge>
-                      </div>
-                    ))}
-                    {patternAnalysis.common_themes.length > 2 && (
-                      <div className="text-xs text-muted-foreground">
-                        +{patternAnalysis.common_themes.length - 2} more themes
-                      </div>
-                    )}
-                  </div>
-                ) : (
-                  <p className="text-sm text-muted-foreground">No common themes identified</p>
-                )}
-              </div>
-            </div>
           </div>
         ) : (
-          <div className="text-center py-8 text-muted-foreground">
-            <TrendingUp className="h-8 w-8 mx-auto mb-4" />
-            <p>No pattern analysis available. Click "Refresh" to analyze your reports.</p>
+          <div className="text-center py-12 text-muted-foreground">
+            <TrendingUp className="h-12 w-12 mx-auto mb-4 text-gray-400" />
+            <h3 className="text-lg font-semibold mb-2">No Compliance Analysis Available</h3>
+            <p className="mb-4">Click "Refresh" to analyze patterns across all your whistleblowing cases.</p>
+            <p className="text-sm">This will provide strategic insights for senior compliance and HR review.</p>
           </div>
         )}
       </CardContent>

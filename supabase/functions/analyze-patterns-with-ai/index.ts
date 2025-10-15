@@ -41,19 +41,15 @@ serve(async (req) => {
       tracking_id: report.tracking_id
     }));
 
-    const prompt = `You are an expert pattern recognition analyst specializing in whistleblower case analysis. Analyze the following collection of reports to identify patterns, trends, and insights.
+    const prompt = `You are an AI Compliance Intelligence Analyst within Disclosurely.
 
-REPORTS DATA:
+Your task is to review all whistleblowing cases in the dashboard and provide a clear, actionable overview for senior compliance and HR review.
+
+REPORTS DATASET:
 ${JSON.stringify(reportsSummary, null, 2)}
 
-Please analyze these reports and identify:
-
-1. COMMON THEMES: What recurring themes or topics appear across multiple reports?
-2. CATEGORY PATTERNS: Are there patterns in report categories?
-3. TEMPORAL PATTERNS: Are there time-based patterns (spikes, trends)?
-4. RISK PATTERNS: Are there patterns in risk levels or priorities?
-5. STATUS PATTERNS: Are there patterns in how cases are being handled?
-6. EMERGING CONCERNS: What new or emerging issues are appearing?
+ANALYSIS REQUIREMENTS:
+Focus on identifying patterns, emerging risks, and organizational themes that require immediate attention from compliance leadership.
 
 Provide your analysis in the following JSON format:
 {
@@ -83,12 +79,19 @@ Provide your analysis in the following JSON format:
     "risk_trends": "description of risk trends"
   },
   "recommendations": [
-    "actionable recommendations based on patterns"
+    "strategic recommendations for senior compliance and HR review"
   ],
-  "summary": "overall summary of key findings"
+  "summary": "concise compliance intelligence summary covering case trends, emerging risks, cultural signals, and immediate insights for senior leadership"
 }
 
-Focus on actionable insights that can help improve case management and prevent future issues.`;
+ANALYSIS FOCUS:
+- Case trends and patterns across the organization
+- Emerging risks that require immediate attention
+- Cultural signals and organizational themes
+- Strategic recommendations for compliance leadership
+- Immediate actions for senior review
+
+Your tone should mirror that of an internal compliance report — concise, factual, and practical.`;
 
     const response = await fetch('https://api.deepseek.com/chat/completions', {
       method: 'POST',
