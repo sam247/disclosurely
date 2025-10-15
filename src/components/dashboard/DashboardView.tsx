@@ -19,6 +19,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSepara
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useCustomDomain } from '@/hooks/useCustomDomain';
 import { useTranslation } from 'react-i18next';
+import PatternDetection from './PatternDetection';
 
 interface Report {
   id: string;
@@ -425,6 +426,8 @@ Additional Details: ${decryptedContent.additionalDetails || 'None provided'}
         </Card>
       </div>
 
+      {/* Pattern Detection */}
+      <PatternDetection />
 
       <div>
         <h2 className="text-2xl font-bold">{t('reportsOverview')}</h2>
