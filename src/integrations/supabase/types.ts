@@ -544,6 +544,74 @@ export type Database = {
           },
         ]
       }
+      global_seo_settings: {
+        Row: {
+          created_at: string
+          custom_head_tags: string | null
+          default_meta_description: string | null
+          default_meta_title: string | null
+          default_og_image_url: string | null
+          default_twitter_image_url: string | null
+          facebook_pixel_id: string | null
+          favicon_url: string | null
+          google_analytics_id: string | null
+          google_tag_manager_id: string | null
+          id: string
+          is_active: boolean | null
+          logo_url: string | null
+          organization_id: string
+          site_description: string | null
+          site_name: string | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          custom_head_tags?: string | null
+          default_meta_description?: string | null
+          default_meta_title?: string | null
+          default_og_image_url?: string | null
+          default_twitter_image_url?: string | null
+          facebook_pixel_id?: string | null
+          favicon_url?: string | null
+          google_analytics_id?: string | null
+          google_tag_manager_id?: string | null
+          id?: string
+          is_active?: boolean | null
+          logo_url?: string | null
+          organization_id: string
+          site_description?: string | null
+          site_name?: string | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          custom_head_tags?: string | null
+          default_meta_description?: string | null
+          default_meta_title?: string | null
+          default_og_image_url?: string | null
+          default_twitter_image_url?: string | null
+          facebook_pixel_id?: string | null
+          favicon_url?: string | null
+          google_analytics_id?: string | null
+          google_tag_manager_id?: string | null
+          id?: string
+          is_active?: boolean | null
+          logo_url?: string | null
+          organization_id?: string
+          site_description?: string | null
+          site_name?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "global_seo_settings_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: true
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       link_analytics: {
         Row: {
           created_at: string
@@ -1033,6 +1101,13 @@ export type Database = {
       }
       reports: {
         Row: {
+          ai_assessed_at: string | null
+          ai_assessment_version: string | null
+          ai_impact_score: number | null
+          ai_likelihood_score: number | null
+          ai_risk_assessment: Json | null
+          ai_risk_level: string | null
+          ai_risk_score: number | null
           anonymous_access_token: string | null
           archived_at: string | null
           assigned_to: string | null
@@ -1058,6 +1133,13 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          ai_assessed_at?: string | null
+          ai_assessment_version?: string | null
+          ai_impact_score?: number | null
+          ai_likelihood_score?: number | null
+          ai_risk_assessment?: Json | null
+          ai_risk_level?: string | null
+          ai_risk_score?: number | null
           anonymous_access_token?: string | null
           archived_at?: string | null
           assigned_to?: string | null
@@ -1083,6 +1165,13 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          ai_assessed_at?: string | null
+          ai_assessment_version?: string | null
+          ai_impact_score?: number | null
+          ai_likelihood_score?: number | null
+          ai_risk_assessment?: Json | null
+          ai_risk_level?: string | null
+          ai_risk_score?: number | null
           anonymous_access_token?: string | null
           archived_at?: string | null
           assigned_to?: string | null
@@ -1207,6 +1296,83 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "security_events_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      seo_settings: {
+        Row: {
+          canonical_url: string | null
+          created_at: string
+          custom_head_tags: string | null
+          id: string
+          is_active: boolean | null
+          language_code: string
+          meta_description: string | null
+          meta_keywords: string[] | null
+          meta_title: string | null
+          og_description: string | null
+          og_image_url: string | null
+          og_title: string | null
+          organization_id: string
+          page_identifier: string
+          robots_directive: string | null
+          structured_data: Json | null
+          twitter_description: string | null
+          twitter_image_url: string | null
+          twitter_title: string | null
+          updated_at: string
+        }
+        Insert: {
+          canonical_url?: string | null
+          created_at?: string
+          custom_head_tags?: string | null
+          id?: string
+          is_active?: boolean | null
+          language_code?: string
+          meta_description?: string | null
+          meta_keywords?: string[] | null
+          meta_title?: string | null
+          og_description?: string | null
+          og_image_url?: string | null
+          og_title?: string | null
+          organization_id: string
+          page_identifier: string
+          robots_directive?: string | null
+          structured_data?: Json | null
+          twitter_description?: string | null
+          twitter_image_url?: string | null
+          twitter_title?: string | null
+          updated_at?: string
+        }
+        Update: {
+          canonical_url?: string | null
+          created_at?: string
+          custom_head_tags?: string | null
+          id?: string
+          is_active?: boolean | null
+          language_code?: string
+          meta_description?: string | null
+          meta_keywords?: string[] | null
+          meta_title?: string | null
+          og_description?: string | null
+          og_image_url?: string | null
+          og_title?: string | null
+          organization_id?: string
+          page_identifier?: string
+          robots_directive?: string | null
+          structured_data?: Json | null
+          twitter_description?: string | null
+          twitter_image_url?: string | null
+          twitter_title?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "seo_settings_organization_id_fkey"
             columns: ["organization_id"]
             isOneToOne: false
             referencedRelation: "organizations"
