@@ -109,6 +109,13 @@ const DashboardView = () => {
         }
         reportsData = reportsWithAI;
         console.log('Successfully fetched reports with AI fields:', reportsData);
+        console.log('AI fields details:', reportsData.map(r => ({
+          id: r.id,
+          title: r.title,
+          ai_risk_score: r.ai_risk_score,
+          ai_risk_level: r.ai_risk_level,
+          ai_assessed_at: r.ai_assessed_at
+        })));
 
         const { data: archivedWithAI, error: archivedError } = await supabase
           .from('reports')
@@ -436,6 +443,36 @@ Additional Details: ${decryptedContent.additionalDetails || 'None provided'}
       <div>
         <h2 className="text-2xl font-bold">{t('reportsOverview')}</h2>
         <p className="text-muted-foreground break-words hyphens-auto">{t('manageAndReviewReports')}</p>
+        
+        {/* AI Assessment Status */}
+        {reports.some(r => !r.ai_risk_level) && (
+          <div className="mt-4 p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <AlertCircle className="h-4 w-4 text-yellow-600" />
+                <span className="text-sm text-yellow-800">
+                  {reports.filter(r => !r.ai_risk_level).length} reports need AI risk assessment
+                </span>
+              </div>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={async () => {
+                  const unassessedReports = reports.filter(r => !r.ai_risk_level);
+                  for (const report of unassessedReports) {
+                    await assessRisk(report.id);
+                    // Small delay between assessments
+                    await new Promise(resolve => setTimeout(resolve, 1000));
+                  }
+                }}
+                disabled={isAssessingRisk !== null}
+                className="text-xs"
+              >
+                Assess All Reports
+              </Button>
+            </div>
+          </div>
+        )}
       </div>
 
       <div className="flex flex-col sm:flex-row gap-4">
