@@ -33,11 +33,11 @@ serve(async (req) => {
     if (!user?.email) throw new Error("User not authenticated or email not available");
     logStep("User authenticated", { userId: user.id, email: user.email });
 
-    const { tier, employee_count } = await req.json();
+    const { tier, employee_count, rdt_cid } = await req.json();
     if (!tier || !employee_count) {
       throw new Error("Missing required fields: tier and employee_count");
     }
-    logStep("Request data", { tier, employee_count });
+    logStep("Request data", { tier, employee_count, rdt_cid });
 
     const stripe = new Stripe(Deno.env.get("STRIPE_SECRET_KEY") || "", { 
       apiVersion: "2023-10-16" 
@@ -95,7 +95,9 @@ serve(async (req) => {
       metadata: {
         user_id: user.id,
         tier: tier,
-        employee_count: employee_count.toString()
+        employee_count: employee_count.toString(),
+        rdt_cid: rdt_cid || null,
+        source: 'reddit'
       }
     });
 

@@ -18,13 +18,19 @@ const SubscriptionPromptModal = ({ open, onOpenChange }: SubscriptionPromptModal
   const handleSubscribe = async (plan: 'starter' | 'pro') => {
     setLoading(true);
     try {
+      // Get rdt_cid from localStorage or cookies
+      const rdtCid = localStorage.getItem('rdt_cid') || 
+        document.cookie.split('; ').find(row => row.startsWith('rdt_cid='))?.split('=')[1] || 
+        null;
+
       const { data, error } = await supabase.functions.invoke('create-checkout', {
         headers: {
           Authorization: `Bearer ${(await supabase.auth.getSession()).data.session?.access_token}`,
         },
         body: { 
           tier: plan === 'starter' ? 'tier1' : 'tier2',
-          employee_count: plan === 'starter' ? '0-49' : '50+'
+          employee_count: plan === 'starter' ? '0-49' : '50+',
+          rdt_cid: rdtCid
         }
       });
 

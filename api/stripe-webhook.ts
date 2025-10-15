@@ -1,113 +1,146 @@
+// pages/api/stripe-webhook.ts
 import type { NextApiRequest, NextApiResponse } from 'next';
 import Stripe from 'stripe';
-import { buffer } from 'micro';
 
-export const config = { api: { bodyParser: false } };
+export const config = {
+  api: {
+    bodyParser: false, // Stripe needs the raw body to verify signatures
+  },
+};
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY as string, {
-  apiVersion: '2024-06-20',
+  apiVersion: '2023-10-16',
 });
 
-function centsToDecimal(cents?: number | null) {
-  return cents ? Math.round(cents) / 100 : 0;
+// ---- GA4 / sGTM MP config ----
+// We send Measurement Protocol events to the *server container* endpoint.
+// Example provided by you:
+const GA4_MP_ENDPOINT =
+  process.env.GA4_MP_ENDPOINT ||
+  'https://server-side-tagging-nsepetvtjq-uc.a.run.app/mp/collect';
+const GA4_MEASUREMENT_ID =
+  process.env.GA4_MEASUREMENT_ID || 'G-8QLEGKTKCW';
+const GA4_API_SECRET =
+  process.env.GA4_API_SECRET || '8PERvggaTUublSyLXCDB8A';
+
+// Utility: read raw body for Stripe validation
+async function buffer(readable: any) {
+  const chunks: Buffer[] = [];
+  for await (const chunk of readable) {
+    chunks.push(typeof chunk === 'string' ? Buffer.from(chunk) : chunk);
+  }
+  return Buffer.concat(chunks);
 }
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method !== 'POST') return res.status(405).end('Method Not Allowed');
 
   const sig = req.headers['stripe-signature'] as string;
-  const buf = await buffer(req);
+  const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
+  if (!webhookSecret) {
+    console.error('Missing STRIPE_WEBHOOK_SECRET');
+    return res.status(500).send('Server misconfigured');
+  }
 
   let event: Stripe.Event;
+  const buf = await buffer(req);
   try {
-    event = stripe.webhooks.constructEvent(
-      buf,
-      sig,
-      process.env.STRIPE_WEBHOOK_SECRET as string
-    );
+    event = stripe.webhooks.constructEvent(buf, sig, webhookSecret);
   } catch (err: any) {
-    console.error('Webhook signature verification failed', err?.message);
+    console.error('❌ Stripe signature verification failed:', err.message);
     return res.status(400).send(`Webhook Error: ${err.message}`);
   }
 
-  // Build a GA4 'purchase' from relevant Stripe events
-  let purchase:
-    | {
-        transaction_id: string;
-        value: number;
-        currency: string;
-        items: Array<{ item_id: string; item_name?: string; quantity?: number }>;
-      }
-    | null = null;
+  try {
+    // We care about successful purchases:
+    // - checkout.session.completed (first-time subscription)
+    // - invoice.payment_succeeded (renewals)
+    if (
+      event.type === 'checkout.session.completed' ||
+      event.type === 'invoice.payment_succeeded'
+    ) {
+      // For both event types, `event.data.object` will be different:
+      // - checkout.session.completed -> Stripe.Checkout.Session
+      // - invoice.payment_succeeded -> Stripe.Invoice
+      // We normalize to get value, currency, email, transaction_id, rdt_cid.
+      let currency: string | undefined;
+      let value: number | undefined;
+      let email: string | undefined;
+      let transactionId: string | undefined;
+      let rdtCid: string | null = null;
 
-  switch (event.type) {
-    case 'checkout.session.completed': {
-      const s = event.data.object as Stripe.Checkout.Session;
-      if (s.payment_status === 'paid') {
-        const plan = (s.metadata?.plan || 'subscription').toLowerCase(); // set when you create the checkout session
-        purchase = {
-          transaction_id: s.id, // or s.payment_intent as string
-          value: centsToDecimal(s.amount_total),
-          currency: (s.currency || 'gbp').toUpperCase(),
-          items: [{ item_id: plan, item_name: plan, quantity: 1 }],
-        };
-      }
-      break;
-    }
-    case 'invoice.payment_succeeded': {
-      const inv = event.data.object as Stripe.Invoice;
-      const line = inv.lines?.data?.[0];
-      const nickname =
-        line?.plan?.nickname || line?.price?.nickname || inv.metadata?.plan || 'subscription';
-      purchase = {
-        transaction_id: inv.id,
-        value: centsToDecimal(inv.amount_paid),
-        currency: (inv.currency || 'gbp').toUpperCase(),
-        items: [{ item_id: nickname.toLowerCase(), item_name: nickname, quantity: 1 }],
-      };
-      break;
-    }
-    default:
-      // ignore others
-  }
-
-  if (purchase) {
-    try {
-      const endpoint =
-        process.env.GA4_ENDPOINT ||
-        'https://server-side-tagging-nsepetvtjq-uc.a.run.app/mp/collect';
-
-      // GA4 requires client_id OR user_id. A random client_id is fine for server events.
-      const clientId = `${Date.now()}.${Math.floor(Math.random() * 1e9)}`;
-
-      await fetch(
-        `${endpoint}?measurement_id=${process.env.GA4_MEASUREMENT_ID}&api_secret=${process.env.GA4_API_SECRET}`,
-        {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            client_id: clientId,
-            non_personalized_ads: true,
-            events: [
-              {
-                name: 'purchase',
-                params: {
-                  transaction_id: purchase.transaction_id,
-                  value: purchase.value,
-                  currency: purchase.currency,
-                  items: purchase.items,
-                  affiliation: 'stripe',
-                },
-              },
-            ],
-          }),
+      if (event.type === 'checkout.session.completed') {
+        const session = event.data.object as Stripe.Checkout.Session;
+        currency = session.currency ?? undefined;
+        // amount_total is in cents (or the smallest currency unit)
+        value = session.amount_total ? session.amount_total / 100 : undefined;
+        email = session.customer_details?.email ?? undefined;
+        transactionId = session.id;
+        rdtCid = (session.metadata?.rdt_cid as string) || null;
+      } else {
+        const invoice = event.data.object as Stripe.Invoice;
+        currency = invoice.currency ?? undefined;
+        value = invoice.amount_paid ? invoice.amount_paid / 100 : undefined;
+        // Fetch customer to get email if not present
+        if (invoice.customer_email) {
+          email = invoice.customer_email;
+        } else if (invoice.customer) {
+          const customer =
+            typeof invoice.customer === 'string'
+              ? await stripe.customers.retrieve(invoice.customer)
+              : invoice.customer;
+          if (!('deleted' in customer)) {
+            email = customer.email ?? undefined;
+          }
         }
-      );
-    } catch (e) {
-      console.error('Failed sending to sGTM / GA4 MP:', e);
-      // Still return 200 so Stripe doesn't retry forever if your sGTM blips.
-    }
-  }
+        transactionId = invoice.id;
 
-  return res.status(200).json({ received: true });
+        // Try to pull rdt_cid from the originating checkout session on first invoice
+        // (Some setups carry this on subscription or invoice metadata)
+        rdtCid =
+          ((invoice.metadata && (invoice.metadata['rdt_cid'] as string)) ||
+            null);
+      }
+
+      // Build GA4 MP payload for sGTM
+      // We send email & rdt_cid as custom params; your Reddit CAPI tag maps them.
+      const mpPayload = {
+        client_id: '555.1', // static client_id for server events; replace if you generate one
+        events: [
+          {
+            name: 'purchase',
+            params: {
+              currency,
+              value,
+              transaction_id: transactionId,
+              email,     // <-- used by sGTM Reddit tag
+              rdt_cid: rdtCid // <-- used by sGTM Reddit tag
+            },
+          },
+        ],
+      };
+
+      const url = `${GA4_MP_ENDPOINT}?measurement_id=${encodeURIComponent(
+        GA4_MEASUREMENT_ID
+      )}&api_secret=${encodeURIComponent(GA4_API_SECRET)}`;
+
+      const resp = await fetch(url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(mpPayload),
+      });
+
+      if (!resp.ok) {
+        const t = await resp.text().catch(() => '');
+        console.error('❌ GA4 MP (via sGTM) failed:', resp.status, t);
+      } else {
+        console.log('✅ GA4 MP (via sGTM) purchase sent.');
+      }
+    }
+
+    return res.status(200).json({ received: true });
+  } catch (err) {
+    console.error('Webhook handler error:', err);
+    return res.status(500).send('Webhook handler error');
+  }
 }

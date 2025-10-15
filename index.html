@@ -22,6 +22,20 @@
     </script>
     <!-- End Google Tag Manager -->
 
+    <!-- Reddit Click ID Capture -->
+    <script>
+      (function() {
+        try {
+          const usp = new URLSearchParams(window.location.search);
+          const rdt = usp.get('rdt_cid');
+          if (rdt) {
+            localStorage.setItem('rdt_cid', rdt);
+            document.cookie = "rdt_cid=" + rdt + "; Path=/; Max-Age=2592000; SameSite=Lax";
+          }
+        } catch (e) {}
+      })();
+    </script>
+
     <!-- Open Graph / Facebook -->
     <meta property="og:type" content="website" />
     <meta property="og:url" content="https://disclosurely.com/" />

@@ -18,10 +18,16 @@ const TrialPromptModal = ({ open, onOpenChange }: TrialPromptModalProps) => {
   const handleStartTrial = async (plan: 'basic' | 'pro') => {
     setLoading(true);
     try {
+      // Get rdt_cid from localStorage or cookies
+      const rdtCid = localStorage.getItem('rdt_cid') || 
+        document.cookie.split('; ').find(row => row.startsWith('rdt_cid='))?.split('=')[1] || 
+        null;
+
       const { data, error } = await supabase.functions.invoke('create-checkout', {
         body: { 
           plan,
-          mode: 'subscription' 
+          mode: 'subscription',
+          rdt_cid: rdtCid
         }
       });
 
