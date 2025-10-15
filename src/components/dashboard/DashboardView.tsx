@@ -35,15 +35,25 @@ const RiskLevelSelector = ({
   isUpdating: boolean;
 }) => {
   const getRiskLevelColor = (level: number) => {
-    if (level <= 2) return 'bg-green-100 text-green-800 border-green-200';
-    if (level === 3) return 'bg-yellow-100 text-yellow-800 border-yellow-200';
-    return 'bg-red-100 text-red-800 border-red-200';
+    switch (level) {
+      case 1: return 'bg-red-100 text-red-800 border-red-200'; // Critical - Red
+      case 2: return 'bg-orange-100 text-orange-800 border-orange-200'; // High - Orange
+      case 3: return 'bg-yellow-100 text-yellow-800 border-yellow-200'; // Medium - Yellow
+      case 4: return 'bg-blue-100 text-blue-800 border-blue-200'; // Low - Light Blue
+      case 5: return 'bg-green-100 text-green-800 border-green-200'; // Informational - Green
+      default: return 'bg-gray-100 text-gray-600 border-gray-200';
+    }
   };
 
   const getRiskLevelText = (level: number) => {
-    if (level <= 2) return 'Low';
-    if (level === 3) return 'Medium';
-    return 'High';
+    switch (level) {
+      case 1: return 'Critical';
+      case 2: return 'High';
+      case 3: return 'Medium';
+      case 4: return 'Low';
+      case 5: return 'Info';
+      default: return 'Unknown';
+    }
   };
 
   return (
@@ -58,10 +68,16 @@ const RiskLevelSelector = ({
           {currentLevel ? `${getRiskLevelText(currentLevel)} (${currentLevel}/5)` : 'Set Risk'}
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="w-48 p-2">
+      <PopoverContent className="w-64 p-2">
         <div className="space-y-1">
           <div className="text-xs font-medium text-gray-600 mb-2">Select Risk Level</div>
-          {[1, 2, 3, 4, 5].map((level) => (
+          {[
+            { level: 1, text: 'Critical', desc: 'Immediate danger/serious violation' },
+            { level: 2, text: 'High', desc: 'Significant impact' },
+            { level: 3, text: 'Medium', desc: 'Standard concern' },
+            { level: 4, text: 'Low', desc: 'Minor issue' },
+            { level: 5, text: 'Info', desc: 'General feedback' }
+          ].map(({ level, text, desc }) => (
             <Button
               key={level}
               variant="ghost"
@@ -70,7 +86,10 @@ const RiskLevelSelector = ({
               onClick={() => onUpdate(level)}
             >
               <div className={`w-2 h-2 rounded-full mr-2 ${getRiskLevelColor(level).split(' ')[0]}`} />
-              {getRiskLevelText(level)} ({level}/5)
+              <div className="text-left">
+                <div className="font-medium">{text} ({level}/5)</div>
+                <div className="text-xs text-gray-500">{desc}</div>
+              </div>
             </Button>
           ))}
         </div>
