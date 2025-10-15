@@ -103,8 +103,12 @@ const DashboardView = () => {
           .order('created_at', { ascending: false })
           .limit(20);
 
-        if (reportsError) throw reportsError;
+        if (reportsError) {
+          console.log('AI fields query failed, falling back to basic query:', reportsError);
+          throw reportsError;
+        }
         reportsData = reportsWithAI;
+        console.log('Successfully fetched reports with AI fields:', reportsData);
 
         const { data: archivedWithAI, error: archivedError } = await supabase
           .from('reports')
@@ -530,6 +534,23 @@ Additional Details: ${decryptedContent.additionalDetails || 'None provided'}
                                   ({report.ai_risk_score})
                                 </span>
                               )}
+                            </div>
+                          ) : report.priority ? (
+                            <div className="flex items-center gap-2">
+                              <Badge 
+                                variant={
+                                  report.priority >= 4 ? 'destructive' :
+                                  report.priority >= 3 ? 'secondary' :
+                                  'outline'
+                                }
+                                className="text-xs"
+                              >
+                                {report.priority >= 4 ? 'High' : 
+                                 report.priority >= 3 ? 'Medium' : 'Low'}
+                              </Badge>
+                              <span className="text-xs text-muted-foreground">
+                                (Manual: {report.priority}/5)
+                              </span>
                             </div>
                           ) : (
                             <div className="flex items-center gap-2">
