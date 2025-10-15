@@ -547,59 +547,47 @@ export type Database = {
       global_seo_settings: {
         Row: {
           created_at: string
-          custom_head_tags: string | null
           default_meta_description: string | null
           default_meta_title: string | null
-          default_og_image_url: string | null
-          default_twitter_image_url: string | null
+          default_og_image: string | null
+          default_twitter_image: string | null
           facebook_pixel_id: string | null
-          favicon_url: string | null
+          global_robots_txt: string | null
+          global_sitemap_xml: string | null
           google_analytics_id: string | null
           google_tag_manager_id: string | null
           id: string
-          is_active: boolean | null
-          logo_url: string | null
           organization_id: string
-          site_description: string | null
-          site_name: string | null
           updated_at: string
         }
         Insert: {
           created_at?: string
-          custom_head_tags?: string | null
           default_meta_description?: string | null
           default_meta_title?: string | null
-          default_og_image_url?: string | null
-          default_twitter_image_url?: string | null
+          default_og_image?: string | null
+          default_twitter_image?: string | null
           facebook_pixel_id?: string | null
-          favicon_url?: string | null
+          global_robots_txt?: string | null
+          global_sitemap_xml?: string | null
           google_analytics_id?: string | null
           google_tag_manager_id?: string | null
           id?: string
-          is_active?: boolean | null
-          logo_url?: string | null
           organization_id: string
-          site_description?: string | null
-          site_name?: string | null
           updated_at?: string
         }
         Update: {
           created_at?: string
-          custom_head_tags?: string | null
           default_meta_description?: string | null
           default_meta_title?: string | null
-          default_og_image_url?: string | null
-          default_twitter_image_url?: string | null
+          default_og_image?: string | null
+          default_twitter_image?: string | null
           facebook_pixel_id?: string | null
-          favicon_url?: string | null
+          global_robots_txt?: string | null
+          global_sitemap_xml?: string | null
           google_analytics_id?: string | null
           google_tag_manager_id?: string | null
           id?: string
-          is_active?: boolean | null
-          logo_url?: string | null
           organization_id?: string
-          site_description?: string | null
-          site_name?: string | null
           updated_at?: string
         }
         Relationships: [
@@ -1307,66 +1295,69 @@ export type Database = {
         Row: {
           canonical_url: string | null
           created_at: string
-          custom_head_tags: string | null
+          facebook_pixel_id: string | null
+          google_analytics_id: string | null
+          google_tag_manager_id: string | null
           id: string
-          is_active: boolean | null
-          language_code: string
+          lang: string
           meta_description: string | null
-          meta_keywords: string[] | null
           meta_title: string | null
           og_description: string | null
-          og_image_url: string | null
+          og_image: string | null
           og_title: string | null
           organization_id: string
           page_identifier: string
-          robots_directive: string | null
-          structured_data: Json | null
+          robots_txt: string | null
+          sitemap_xml: string | null
+          structured_data_json: Json | null
           twitter_description: string | null
-          twitter_image_url: string | null
+          twitter_image: string | null
           twitter_title: string | null
           updated_at: string
         }
         Insert: {
           canonical_url?: string | null
           created_at?: string
-          custom_head_tags?: string | null
+          facebook_pixel_id?: string | null
+          google_analytics_id?: string | null
+          google_tag_manager_id?: string | null
           id?: string
-          is_active?: boolean | null
-          language_code?: string
+          lang?: string
           meta_description?: string | null
-          meta_keywords?: string[] | null
           meta_title?: string | null
           og_description?: string | null
-          og_image_url?: string | null
+          og_image?: string | null
           og_title?: string | null
           organization_id: string
           page_identifier: string
-          robots_directive?: string | null
-          structured_data?: Json | null
+          robots_txt?: string | null
+          sitemap_xml?: string | null
+          structured_data_json?: Json | null
           twitter_description?: string | null
-          twitter_image_url?: string | null
+          twitter_image?: string | null
           twitter_title?: string | null
           updated_at?: string
         }
         Update: {
           canonical_url?: string | null
           created_at?: string
-          custom_head_tags?: string | null
+          facebook_pixel_id?: string | null
+          google_analytics_id?: string | null
+          google_tag_manager_id?: string | null
           id?: string
-          is_active?: boolean | null
-          language_code?: string
+          lang?: string
           meta_description?: string | null
-          meta_keywords?: string[] | null
           meta_title?: string | null
           og_description?: string | null
-          og_image_url?: string | null
+          og_image?: string | null
           og_title?: string | null
           organization_id?: string
           page_identifier?: string
-          robots_directive?: string | null
-          structured_data?: Json | null
+          robots_txt?: string | null
+          sitemap_xml?: string | null
+          structured_data_json?: Json | null
           twitter_description?: string | null
-          twitter_image_url?: string | null
+          twitter_image?: string | null
           twitter_title?: string | null
           updated_at?: string
         }
