@@ -50,6 +50,9 @@ const AICaseHelper: React.FC<AICaseHelperProps> = ({ reportId, reportContent }) 
   const [customPrompt, setCustomPrompt] = useState('');
   const [selectedCaseId, setSelectedCaseId] = useState<string>('');
   const [selectedCaseData, setSelectedCaseData] = useState<any>(null);
+  const [chatMessages, setChatMessages] = useState<Array<{role: 'user' | 'assistant', content: string, timestamp: Date}>>([]);
+  const [chatInput, setChatInput] = useState('');
+  const [isChatting, setIsChatting] = useState(false);
   const [liveCases, setLiveCases] = useState<LiveCase[]>([]);
   const [documents, setDocuments] = useState<CompanyDocument[]>([]);
   const [selectedDocs, setSelectedDocs] = useState<string[]>([]);
@@ -392,6 +395,98 @@ Case Details:
     }
   };
 
+  const sendChatMessage = async () => {
+    if (!chatInput.trim() || !selectedCaseId || !analysis) {
+      toast({
+        title: "Cannot Send Message",
+        description: "Please select a case and run an initial analysis first.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setIsChatting(true);
+    const userMessage = chatInput.trim();
+    setChatInput('');
+    
+    // Add user message to chat
+    setChatMessages(prev => [...prev, {
+      role: 'user',
+      content: userMessage,
+      timestamp: new Date()
+    }]);
+
+    try {
+      // Get the case data for context
+      const { data: caseData, error: caseError } = await supabase
+        .from('reports')
+        .select('*')
+        .eq('id', selectedCaseId)
+        .single();
+
+      if (caseError) throw caseError;
+
+      // Decrypt content for context
+      let decryptedContent = '';
+      if (caseData.encrypted_content && caseData.organization_id) {
+        try {
+          const { decryptReport } = await import('@/utils/encryption');
+          const decrypted = decryptReport(caseData.encrypted_content, caseData.organization_id);
+          decryptedContent = `
+Category: ${decrypted.category || 'Not specified'}
+Description: ${decrypted.description || 'Not provided'}
+Location: ${decrypted.location || 'Not specified'}
+Date of Incident: ${decrypted.dateOfIncident || 'Not specified'}
+Witnesses: ${decrypted.witnesses || 'None mentioned'}
+Evidence: ${decrypted.evidence || 'No evidence provided'}
+Additional Details: ${decrypted.additionalDetails || 'None provided'}
+          `.trim();
+        } catch (decryptError) {
+          console.error('Decryption error:', decryptError);
+          decryptedContent = '[Case content is encrypted and could not be decrypted for analysis]';
+        }
+      }
+
+      // Prepare chat context
+      const chatContext = chatMessages.map(msg => `${msg.role}: ${msg.content}`).join('\n');
+      
+      const { data, error } = await supabase.functions.invoke('analyze-case-with-ai', {
+        body: {
+          caseData: {
+            title: caseData.title,
+            status: caseData.status,
+            created_at: caseData.created_at,
+            priority: caseData.priority,
+            tracking_id: caseData.tracking_id,
+            report_type: caseData.report_type
+          },
+          caseContent: decryptedContent,
+          companyDocuments: [],
+          customPrompt: `This is a follow-up question about the case. Previous analysis: ${analysis}\n\nPrevious conversation:\n${chatContext}\n\nUser's new question: ${userMessage}\n\nPlease provide a helpful response to this follow-up question, keeping the same conversational tone.`
+        }
+      });
+
+      if (error) throw error;
+
+      // Add AI response to chat
+      setChatMessages(prev => [...prev, {
+        role: 'assistant',
+        content: data.analysis,
+        timestamp: new Date()
+      }]);
+
+    } catch (error) {
+      console.error('Chat error:', error);
+      toast({
+        title: "Chat Error",
+        description: "Failed to send message. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsChatting(false);
+    }
+  };
+
   return (
     <Card>
       <CardHeader>
@@ -409,256 +504,198 @@ Case Details:
           Select a live case and upload company documents for AI-powered analysis
         </CardDescription>
       </CardHeader>
-      <CardContent className="space-y-6">
-        {/* Case Selection */}
-        <div className="space-y-2">
-          <label className="text-sm font-medium">Select Live Case</label>
-          <Select value={selectedCaseId} onValueChange={(value) => {
-            setSelectedCaseId(value);
-            const selectedCase = liveCases.find(c => c.id === value);
-            setSelectedCaseData(selectedCase || null);
-          }} disabled={isLoadingCases}>
-            <SelectTrigger>
-              <SelectValue placeholder={isLoadingCases ? "Loading cases..." : "Choose a live case"} />
-            </SelectTrigger>
-            <SelectContent>
-              {liveCases.map((case_) => (
-                <SelectItem key={case_.id} value={case_.id}>
-                  <div className="flex items-center justify-between w-full">
-                    <span className="font-medium">{case_.tracking_id}</span>
-                    <span className="text-sm text-muted-foreground ml-2">{case_.title}</span>
-                  </div>
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
-
-        {/* Document Upload */}
-        <div className="space-y-4">
-          <div className="flex items-center justify-between">
-            <label className="text-sm font-medium">Company Documents</label>
-            <div className="relative">
-              <input
-                type="file"
-                multiple
-                accept=".pdf,.doc,.docx,.txt"
-                onChange={handleFileUpload}
-                disabled={isUploading}
-                className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
-              />
-              <Button size="sm" disabled={isUploading}>
-                {isUploading ? (
-                  <>
-                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                    Uploading...
-                  </>
-                ) : (
-                  <>
-                    <Upload className="h-4 w-4 mr-2" />
-                    Upload Files
-                  </>
-                )}
-              </Button>
-            </div>
-          </div>
-
-          {/* Document List */}
-          {isLoadingDocs ? (
-            <div className="text-sm text-muted-foreground">Loading documents...</div>
-          ) : documents.length > 0 ? (
-            <div className="space-y-2 max-h-48 overflow-y-auto">
-              {documents.map((doc) => (
-                <div key={doc.id} className="flex items-center justify-between p-3 border rounded-lg">
-                  <div className="flex items-center space-x-3">
-                    <Checkbox
-                      checked={selectedDocs.includes(doc.id)}
-                      onCheckedChange={() => toggleDocSelection(doc.id)}
-                    />
-                    <div className="flex items-center space-x-2">
-                      {doc.content_type === 'application/pdf' ? (
-                        <FileText className="h-4 w-4 text-red-500" />
-                      ) : (
-                        <File className="h-4 w-4 text-blue-500" />
-                      )}
-                      <div>
-                        <div className="text-sm font-medium">{doc.name}</div>
-                        <div className="text-xs text-muted-foreground">
-                          {(doc.file_size / 1024).toFixed(1)} KB
-                        </div>
+      <CardContent className="p-0">
+        {/* Two Column Layout */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 p-6">
+          {/* Left Column - Input Controls */}
+          <div className="space-y-6">
+            {/* Case Selection */}
+            <div className="space-y-2">
+              <label className="text-sm font-medium">Select Live Case</label>
+              <Select value={selectedCaseId} onValueChange={(value) => {
+                setSelectedCaseId(value);
+                const selectedCase = liveCases.find(c => c.id === value);
+                setSelectedCaseData(selectedCase || null);
+                // Clear previous analysis and chat when switching cases
+                setAnalysis('');
+                setChatMessages([]);
+              }} disabled={isLoadingCases}>
+                <SelectTrigger>
+                  <SelectValue placeholder={isLoadingCases ? "Loading cases..." : "Choose a live case"} />
+                </SelectTrigger>
+                <SelectContent>
+                  {liveCases.map((case_) => (
+                    <SelectItem key={case_.id} value={case_.id}>
+                      <div className="flex items-center justify-between w-full">
+                        <span className="font-medium">{case_.tracking_id}</span>
+                        <span className="text-sm text-muted-foreground ml-2">{case_.title}</span>
                       </div>
-                    </div>
-                  </div>
-                  <Button
-                    size="sm"
-                    variant="ghost"
-                    onClick={() => deleteDocument(doc)}
-                    className="h-8 w-8 p-0"
-                  >
-                    <Trash2 className="h-4 w-4 text-destructive" />
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            {/* Document Upload */}
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <label className="text-sm font-medium">Company Documents</label>
+                <div className="relative">
+                  <input
+                    type="file"
+                    multiple
+                    accept=".pdf,.doc,.docx,.txt"
+                    onChange={handleFileUpload}
+                    disabled={isUploading}
+                    className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                  />
+                  <Button size="sm" disabled={isUploading}>
+                    {isUploading ? (
+                      <>
+                        <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                        Uploading...
+                      </>
+                    ) : (
+                      <>
+                        <Upload className="h-4 w-4 mr-2" />
+                        Upload Files
+                      </>
+                    )}
                   </Button>
                 </div>
-              ))}
-            </div>
-          ) : (
-            <div className="text-sm text-muted-foreground text-center py-8">
-              No documents uploaded yet. Upload PDFs, Word documents, or text files to include in analysis.
-            </div>
-          )}
-        </div>
+              </div>
 
-        {/* Analysis Progress */}
-        {isAnalyzing && (
-          <div className="space-y-2">
-            <div className="flex items-center justify-between text-sm">
-              <span className="text-muted-foreground">Analysis Progress</span>
-              <span className="font-medium">{analysisProgress}%</span>
-            </div>
-            <div className="h-2 bg-secondary rounded-full overflow-hidden">
-              <div 
-                className="h-full bg-primary transition-all duration-500 ease-out"
-                style={{ width: `${analysisProgress}%` }}
-              />
-            </div>
-          </div>
-        )}
-
-        {/* Analysis Controls */}
-        <div className="space-y-4">
-          <div className="flex gap-2">
-            <Button
-              onClick={() => analyzeCase()}
-              disabled={isAnalyzing || !selectedCaseId}
-              className="flex-1"
-            >
-              {isAnalyzing ? (
-                <>
-                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                  Analyzing...
-                </>
-              ) : (
-                'Analyze Case'
-              )}
-            </Button>
-          </div>
-
-          <div className="space-y-2">
-            <Textarea
-              placeholder="Ask a specific question about this case..."
-              value={customPrompt}
-              onChange={(e) => setCustomPrompt(e.target.value)}
-              disabled={isAnalyzing}
-            />
-            <Button
-              onClick={handleCustomAnalysis}
-              disabled={isAnalyzing || !customPrompt.trim() || !selectedCaseId}
-              variant="outline"
-              className="w-full"
-            >
-              {isAnalyzing ? (
-                <>
-                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                  Analyzing...
-                </>
-              ) : (
-                'Custom Analysis'
-              )}
-            </Button>
-          </div>
-        </div>
-
-        {/* Analysis Results */}
-        {analysis && (
-          <div className="mt-6 space-y-4">
-            <div className="flex items-center justify-between">
-              <h4 className="font-semibold">AI Analysis Results:</h4>
-              <Button
-                onClick={saveAnalysis}
-                disabled={isSaving}
-                size="sm"
-                variant="outline"
-              >
-                {isSaving ? (
-                  <>
-                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                    Saving...
-                  </>
-                ) : (
-                  'Save Analysis'
-                )}
-              </Button>
-            </div>
-            
-            {/* Two Column Layout */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              {/* Left Column - Case Info */}
-              <div className="space-y-4">
-                <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg">
-                  <h5 className="font-semibold text-blue-900 mb-3 flex items-center gap-2">
-                    📋 Case Summary
-                  </h5>
-                  {selectedCaseData ? (
-                    <div className="space-y-2">
-                      <div className="text-sm">
-                        <span className="font-medium text-blue-800">Tracking ID:</span>
-                        <span className="ml-2 text-blue-700">{selectedCaseData.tracking_id}</span>
+              {/* Document List */}
+              {isLoadingDocs ? (
+                <div className="text-sm text-muted-foreground">Loading documents...</div>
+              ) : documents.length > 0 ? (
+                <div className="space-y-2 max-h-48 overflow-y-auto">
+                  {documents.map((doc) => (
+                    <div key={doc.id} className="flex items-center justify-between p-3 border rounded-lg">
+                      <div className="flex items-center space-x-3">
+                        <Checkbox
+                          checked={selectedDocs.includes(doc.id)}
+                          onCheckedChange={() => toggleDocSelection(doc.id)}
+                        />
+                        <div className="flex items-center space-x-2">
+                          {doc.content_type === 'application/pdf' ? (
+                            <FileText className="h-4 w-4 text-red-500" />
+                          ) : (
+                            <File className="h-4 w-4 text-blue-500" />
+                          )}
+                          <div>
+                            <div className="text-sm font-medium">{doc.name}</div>
+                            <div className="text-xs text-muted-foreground">
+                              {(doc.file_size / 1024).toFixed(1)} KB
+                            </div>
+                          </div>
+                        </div>
                       </div>
-                      <div className="text-sm">
-                        <span className="font-medium text-blue-800">Title:</span>
-                        <span className="ml-2 text-blue-700">{selectedCaseData.title}</span>
-                      </div>
-                      <div className="text-sm">
-                        <span className="font-medium text-blue-800">Status:</span>
-                        <span className="ml-2 text-blue-700">{selectedCaseData.status}</span>
-                      </div>
-                      <div className="text-sm">
-                        <span className="font-medium text-blue-800">Priority:</span>
-                        <span className="ml-2 text-blue-700">{selectedCaseData.priority}/5</span>
-                      </div>
-                      <div className="text-sm">
-                        <span className="font-medium text-blue-800">Created:</span>
-                        <span className="ml-2 text-blue-700">
-                          {new Date(selectedCaseData.created_at).toLocaleDateString()}
-                        </span>
-                      </div>
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        onClick={() => deleteDocument(doc)}
+                        className="h-8 w-8 p-0"
+                      >
+                        <Trash2 className="h-4 w-4 text-destructive" />
+                      </Button>
                     </div>
-                  ) : (
-                    <p className="text-sm text-blue-700">No case selected</p>
-                  )}
+                  ))}
                 </div>
-                
-                {/* Key Points */}
-                <div className="p-4 bg-green-50 border border-green-200 rounded-lg">
-                  <h5 className="font-semibold text-green-900 mb-3 flex items-center gap-2">
-                    🔍 Key Points
-                  </h5>
-                  <div className="space-y-2 text-sm text-green-800">
-                    <div className="flex items-start gap-2">
-                      <span className="text-green-600 mt-1">•</span>
-                      <span>Physical contact occurred after verbal objections</span>
-                    </div>
-                    <div className="flex items-start gap-2">
-                      <span className="text-green-600 mt-1">•</span>
-                      <span>Manager-subordinate power dynamic</span>
-                    </div>
-                    <div className="flex items-start gap-2">
-                      <span className="text-green-600 mt-1">•</span>
-                      <span>Clear impact on employee's work environment and mental state</span>
-                    </div>
-                    <div className="flex items-start gap-2">
-                      <span className="text-green-600 mt-1">•</span>
-                      <span>Potential for escalation if not addressed</span>
-                    </div>
-                  </div>
+              ) : (
+                <div className="text-sm text-muted-foreground text-center py-8">
+                  No documents uploaded yet. Upload PDFs, Word documents, or text files to include in analysis.
+                </div>
+              )}
+            </div>
+
+            {/* Analysis Progress */}
+            {isAnalyzing && (
+              <div className="space-y-2">
+                <div className="flex items-center justify-between text-sm">
+                  <span className="text-muted-foreground">Analysis Progress</span>
+                  <span className="font-medium">{analysisProgress}%</span>
+                </div>
+                <div className="h-2 bg-secondary rounded-full overflow-hidden">
+                  <div 
+                    className="h-full bg-primary transition-all duration-500 ease-out"
+                    style={{ width: `${analysisProgress}%` }}
+                  />
                 </div>
               </div>
-              
-              {/* Right Column - AI Analysis */}
-              <div className="space-y-4">
+            )}
+
+            {/* Analysis Controls */}
+            <div className="space-y-4">
+              <div className="flex gap-2">
+                <Button
+                  onClick={() => analyzeCase()}
+                  disabled={isAnalyzing || !selectedCaseId}
+                  className="flex-1"
+                >
+                  {isAnalyzing ? (
+                    <>
+                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                      Analyzing...
+                    </>
+                  ) : (
+                    'Analyze Case'
+                  )}
+                </Button>
+              </div>
+
+              <div className="space-y-2">
+                <Textarea
+                  placeholder="Ask a specific question about this case..."
+                  value={customPrompt}
+                  onChange={(e) => setCustomPrompt(e.target.value)}
+                  disabled={isAnalyzing}
+                />
+                <Button
+                  onClick={handleCustomAnalysis}
+                  disabled={isAnalyzing || !customPrompt.trim() || !selectedCaseId}
+                  variant="outline"
+                  className="w-full"
+                >
+                  {isAnalyzing ? (
+                    <>
+                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                      Analyzing...
+                    </>
+                  ) : (
+                    'Custom Analysis'
+                  )}
+                </Button>
+              </div>
+            </div>
+          </div>
+
+          {/* Right Column - Analysis & Chat */}
+          <div className="space-y-4">
+            {analysis ? (
+              <>
+                {/* Analysis Header */}
+                <div className="flex items-center justify-between">
+                  <h4 className="font-semibold">AI Analysis Results</h4>
+                  <Button
+                    onClick={saveAnalysis}
+                    disabled={isSaving}
+                    size="sm"
+                    variant="outline"
+                  >
+                    {isSaving ? (
+                      <>
+                        <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                        Saving...
+                      </>
+                    ) : (
+                      'Save Analysis'
+                    )}
+                  </Button>
+                </div>
+
+                {/* Initial Analysis */}
                 <div className="p-4 bg-muted rounded-lg">
-                  <h5 className="font-semibold mb-3 flex items-center gap-2">
-                    🤖 AI Analysis
-                  </h5>
                   <div 
                     className="prose prose-sm max-w-none"
                     dangerouslySetInnerHTML={{ 
@@ -666,10 +703,100 @@ Case Details:
                     }}
                   />
                 </div>
+
+                {/* Chat Interface */}
+                <div className="border rounded-lg">
+                  <div className="p-4 border-b bg-gray-50">
+                    <h5 className="font-semibold flex items-center gap-2">
+                      💬 Continue the Conversation
+                    </h5>
+                    <p className="text-sm text-muted-foreground mt-1">
+                      Ask follow-up questions about this case
+                    </p>
+                  </div>
+                  
+                  {/* Chat Messages */}
+                  <div className="h-64 overflow-y-auto p-4 space-y-4">
+                    {chatMessages.length === 0 ? (
+                      <div className="text-center text-muted-foreground py-8">
+                        <p>No conversation yet. Ask a follow-up question below!</p>
+                      </div>
+                    ) : (
+                      chatMessages.map((message, index) => (
+                        <div key={index} className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}>
+                          <div className={`max-w-[80%] p-3 rounded-lg ${
+                            message.role === 'user' 
+                              ? 'bg-primary text-primary-foreground' 
+                              : 'bg-muted'
+                          }`}>
+                            <div 
+                              className="prose prose-sm max-w-none"
+                              dangerouslySetInnerHTML={{ 
+                                __html: sanitizeHtml(formatMarkdownToHtml(message.content))
+                              }}
+                            />
+                            <div className={`text-xs mt-2 ${
+                              message.role === 'user' ? 'text-primary-foreground/70' : 'text-muted-foreground'
+                            }`}>
+                              {message.timestamp.toLocaleTimeString()}
+                            </div>
+                          </div>
+                        </div>
+                      ))
+                    )}
+                    {isChatting && (
+                      <div className="flex justify-start">
+                        <div className="bg-muted p-3 rounded-lg">
+                          <div className="flex items-center gap-2">
+                            <Loader2 className="h-4 w-4 animate-spin" />
+                            <span className="text-sm text-muted-foreground">AI is thinking...</span>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                  
+                  {/* Chat Input */}
+                  <div className="p-4 border-t">
+                    <div className="flex gap-2">
+                      <Textarea
+                        placeholder="Ask a follow-up question..."
+                        value={chatInput}
+                        onChange={(e) => setChatInput(e.target.value)}
+                        disabled={isChatting}
+                        className="flex-1 min-h-[60px]"
+                        onKeyDown={(e) => {
+                          if (e.key === 'Enter' && !e.shiftKey) {
+                            e.preventDefault();
+                            sendChatMessage();
+                          }
+                        }}
+                      />
+                      <Button
+                        onClick={sendChatMessage}
+                        disabled={isChatting || !chatInput.trim()}
+                        className="self-end"
+                      >
+                        {isChatting ? (
+                          <Loader2 className="h-4 w-4 animate-spin" />
+                        ) : (
+                          'Send'
+                        )}
+                      </Button>
+                    </div>
+                  </div>
+                </div>
+              </>
+            ) : (
+              <div className="text-center py-12 text-muted-foreground">
+                <Brain className="h-12 w-12 mx-auto mb-4 text-gray-400" />
+                <h3 className="text-lg font-semibold mb-2">No Analysis Yet</h3>
+                <p className="mb-4">Select a case and click "Analyze Case" to get started.</p>
+                <p className="text-sm">You'll be able to chat with the AI about the analysis once it's complete.</p>
               </div>
-            </div>
+            )}
           </div>
-        )}
+        </div>
       </CardContent>
     </Card>
   );
