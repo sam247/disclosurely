@@ -1,4 +1,4 @@
-import { Home, Bot, Users, Palette, Lock, BarChart3, ScrollText, Link as LinkIcon, MessageSquare, Info, FileText } from 'lucide-react';
+import { Home, Bot, Users, Palette, Lock, BarChart3, ScrollText, Link as LinkIcon, MessageSquare, Info, FileText, Zap } from 'lucide-react';
 import { Separator } from '@/components/ui/separator';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { Sidebar, SidebarContent, SidebarFooter, SidebarGroup, SidebarGroupContent, SidebarHeader, SidebarMenu, SidebarMenuButton, SidebarMenuItem } from '@/components/ui/sidebar';
@@ -55,6 +55,11 @@ const DashboardSidebar = ({
     icon: Palette,
     path: '/dashboard/branding',
     locked: !limits.hasCustomBranding
+  }, {
+    title: 'Integrations',
+    icon: Zap,
+    path: '/dashboard/integrations',
+    locked: false
   }];
 
   const handleNavigation = (item: typeof menuItems[0]) => {
