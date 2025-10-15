@@ -168,7 +168,7 @@ const DashboardView = () => {
         // Try with AI fields first
         const { data: reportsWithAI, error: reportsError } = await supabase
           .from('reports')
-          .select('id, title, tracking_id, status, created_at, encrypted_content, encryption_key_hash, priority, report_type, submitted_by_email, tags, assigned_to, ai_risk_score, ai_risk_level, ai_likelihood_score, ai_impact_score, ai_risk_assessment, ai_assessed_at')
+          .select('id, title, tracking_id, status, created_at, encrypted_content, encryption_key_hash, priority, report_type, submitted_by_email, tags, assigned_to, ai_risk_score, ai_risk_level, ai_likelihood_score, ai_impact_score, ai_risk_assessment, ai_assessed_at, manual_risk_level')
           .eq('organization_id', profile.organization_id)
           .not('status', 'in', '(archived,closed,deleted)')
           .is('deleted_at', null)
@@ -200,7 +200,7 @@ const DashboardView = () => {
         // Fallback to basic query without AI fields
         const { data: reportsBasic, error: reportsBasicError } = await supabase
           .from('reports')
-          .select('id, title, tracking_id, status, created_at, encrypted_content, encryption_key_hash, priority, report_type, submitted_by_email, tags, assigned_to')
+          .select('id, title, tracking_id, status, created_at, encrypted_content, encryption_key_hash, priority, report_type, submitted_by_email, tags, assigned_to, manual_risk_level')
           .eq('organization_id', profile.organization_id)
           .not('status', 'in', '(archived,closed,deleted)')
           .is('deleted_at', null)
@@ -629,13 +629,13 @@ Additional Details: ${decryptedContent.additionalDetails || 'None provided'}
                         </TableCell>
                         <TableCell>
                           <div className="flex items-center gap-2">
-                            {/* Manual Risk Level - Temporarily disabled until migration is applied */}
-                            {/* <RiskLevelSelector
+                            {/* Manual Risk Level */}
+                            <RiskLevelSelector
                               reportId={report.id}
                               currentLevel={report.manual_risk_level}
                               onUpdate={(level) => updateManualRiskLevel(report.id, level)}
                               isUpdating={updatingRiskLevel === report.id}
-                            /> */}
+                            />
                             
                             {/* AI Risk Level (if available) */}
                             {report.ai_risk_level && (
@@ -652,8 +652,8 @@ Additional Details: ${decryptedContent.additionalDetails || 'None provided'}
                               </Badge>
                             )}
                             
-                            {/* Legacy Priority (if no AI risk level) */}
-                            {!report.ai_risk_level && report.priority && (
+                            {/* Legacy Priority (if no manual risk level) */}
+                            {!report.manual_risk_level && report.priority && (
                               <Badge 
                                 variant={
                                   report.priority >= 4 ? 'destructive' :
@@ -662,13 +662,13 @@ Additional Details: ${decryptedContent.additionalDetails || 'None provided'}
                                 }
                                 className="text-xs"
                               >
-                                {report.priority >= 4 ? 'High' : 
+                                Legacy: {report.priority >= 4 ? 'High' : 
                                  report.priority >= 3 ? 'Medium' : 'Low'} ({report.priority}/5)
                               </Badge>
                             )}
                             
                             {/* Assess Button (if no risk level set) */}
-                            {!report.ai_risk_level && !report.priority && (
+                            {!report.manual_risk_level && !report.ai_risk_level && !report.priority && (
                               <Button
                                 variant="outline"
                                 size="sm"
