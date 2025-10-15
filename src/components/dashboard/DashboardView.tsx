@@ -19,7 +19,6 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSepara
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useCustomDomain } from '@/hooks/useCustomDomain';
 import { useTranslation } from 'react-i18next';
-import PatternDetection from './PatternDetection';
 
 interface Report {
   id: string;
@@ -103,19 +102,8 @@ const DashboardView = () => {
           .order('created_at', { ascending: false })
           .limit(20);
 
-        if (reportsError) {
-          console.log('AI fields query failed, falling back to basic query:', reportsError);
-          throw reportsError;
-        }
+        if (reportsError) throw reportsError;
         reportsData = reportsWithAI;
-        console.log('Successfully fetched reports with AI fields:', reportsData);
-        console.log('AI fields details:', reportsData.map(r => ({
-          id: r.id,
-          title: r.title,
-          ai_risk_score: r.ai_risk_score,
-          ai_risk_level: r.ai_risk_level,
-          ai_assessed_at: r.ai_assessed_at
-        })));
 
         const { data: archivedWithAI, error: archivedError } = await supabase
           .from('reports')
@@ -437,42 +425,10 @@ Additional Details: ${decryptedContent.additionalDetails || 'None provided'}
         </Card>
       </div>
 
-      {/* Pattern Detection */}
-      <PatternDetection />
 
       <div>
         <h2 className="text-2xl font-bold">{t('reportsOverview')}</h2>
         <p className="text-muted-foreground break-words hyphens-auto">{t('manageAndReviewReports')}</p>
-        
-        {/* AI Assessment Status */}
-        {reports.some(r => !r.ai_risk_level) && (
-          <div className="mt-4 p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <AlertCircle className="h-4 w-4 text-yellow-600" />
-                <span className="text-sm text-yellow-800">
-                  {reports.filter(r => !r.ai_risk_level).length} reports need AI risk assessment
-                </span>
-              </div>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={async () => {
-                  const unassessedReports = reports.filter(r => !r.ai_risk_level);
-                  for (const report of unassessedReports) {
-                    await assessRisk(report.id);
-                    // Small delay between assessments
-                    await new Promise(resolve => setTimeout(resolve, 1000));
-                  }
-                }}
-                disabled={isAssessingRisk !== null}
-                className="text-xs"
-              >
-                Assess All Reports
-              </Button>
-            </div>
-          </div>
-        )}
       </div>
 
       <div className="flex flex-col sm:flex-row gap-4">
@@ -571,23 +527,6 @@ Additional Details: ${decryptedContent.additionalDetails || 'None provided'}
                                   ({report.ai_risk_score})
                                 </span>
                               )}
-                            </div>
-                          ) : report.priority ? (
-                            <div className="flex items-center gap-2">
-                              <Badge 
-                                variant={
-                                  report.priority >= 4 ? 'destructive' :
-                                  report.priority >= 3 ? 'secondary' :
-                                  'outline'
-                                }
-                                className="text-xs"
-                              >
-                                {report.priority >= 4 ? 'High' : 
-                                 report.priority >= 3 ? 'Medium' : 'Low'}
-                              </Badge>
-                              <span className="text-xs text-muted-foreground">
-                                (Manual: {report.priority}/5)
-                              </span>
                             </div>
                           ) : (
                             <div className="flex items-center gap-2">
