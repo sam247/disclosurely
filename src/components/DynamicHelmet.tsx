@@ -66,7 +66,7 @@ const DynamicHelmet: React.FC<DynamicHelmetProps> = ({
         const currentLanguage = i18n.language || 'en';
         
         // Fetch page-specific SEO data
-        const { data: seoSettings, error: seoError } = await supabase
+        const { data: seoSettings, error: seoError } = await (supabase as any)
           .from('seo_settings')
           .select('*')
           .eq('page_identifier', pageIdentifier)
@@ -79,7 +79,7 @@ const DynamicHelmet: React.FC<DynamicHelmetProps> = ({
         }
 
         // Fetch global SEO data
-        const { data: globalSettings, error: globalError } = await supabase
+        const { data: globalSettings, error: globalError } = await (supabase as any)
           .from('global_seo_settings')
           .select('*')
           .eq('is_active', true)

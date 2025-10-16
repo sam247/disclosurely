@@ -136,11 +136,29 @@ const AcceptInvite = () => {
 
       // Store userId for OTP verification
       setUserId(authData.user.id);
+
+      // Explicitly (re)send the signup OTP to the invited email
+      const { error: resendError } = await supabase.auth.resend({
+        type: 'signup',
+        email: invitation.email,
+      });
+
+      if (resendError) {
+        console.error('Failed to send signup OTP:', resendError);
+        toast({
+          title: 'Email not sent',
+          description: 'We could not send the verification code. Please try again in a moment.',
+          variant: 'destructive',
+        });
+        setSubmitting(false);
+        return;
+      }
+
       setShowOtpInput(true);
       setSubmitting(false);
 
       toast({
-        title: "Check Your Email",
+        title: 'Check Your Email',
         description: "We've sent you a 6-digit verification code.",
       });
 
