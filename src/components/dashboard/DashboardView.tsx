@@ -560,19 +560,26 @@ Additional Details: ${decryptedContent.additionalDetails || 'None provided'}
         </Card>
       </div>
 
-      <Tabs defaultValue="active" className="space-y-4">
-        <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
+      <div className="space-y-4">
+        {/* Title and Subtitle */}
+        <div>
+          <h2 className="text-2xl font-bold">{t('reportsOverview')}</h2>
+          <p className="text-muted-foreground break-words hyphens-auto">{t('manageAndReviewReports')}</p>
+        </div>
+
+        {/* Tabs, Search, and Filter Row */}
+        <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center">
           <TabsList>
             <TabsTrigger value="active">{t('activeReports')} ({reports.length})</TabsTrigger>
             <TabsTrigger value="archived">{t('archived')} ({archivedReports.length})</TabsTrigger>
           </TabsList>
           
-          <div className="flex flex-col sm:flex-row gap-4 w-full sm:w-auto">
+          <div className="flex flex-col sm:flex-row gap-4 flex-1">
             <Input
               placeholder={t('searchReports')}
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="flex-1 sm:w-64"
+              className="flex-1"
             />
             <Select value={statusFilter} onValueChange={setStatusFilter}>
               <SelectTrigger className="w-full sm:w-48">
@@ -590,11 +597,8 @@ Additional Details: ${decryptedContent.additionalDetails || 'None provided'}
           </div>
         </div>
 
-        <TabsContent value="active">
-          <div className="mb-4">
-            <h2 className="text-2xl font-bold">{t('reportsOverview')}</h2>
-            <p className="text-muted-foreground break-words hyphens-auto">{t('manageAndReviewReports')}</p>
-          </div>
+        <Tabs defaultValue="active">
+          <TabsContent value="active">
           <Card>
             <CardContent className="pt-6">
               {filteredReports.length === 0 ? (
@@ -807,10 +811,6 @@ Additional Details: ${decryptedContent.additionalDetails || 'None provided'}
         </TabsContent>
 
         <TabsContent value="archived">
-          <div className="mb-4">
-            <h2 className="text-2xl font-bold">{t('reportsOverview')}</h2>
-            <p className="text-muted-foreground break-words hyphens-auto">{t('manageAndReviewReports')}</p>
-          </div>
           <Card>
             <CardHeader>
               <CardTitle>Archived Reports</CardTitle>
