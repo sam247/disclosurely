@@ -13,6 +13,7 @@ import TeamView from './components/dashboard/TeamView';
 import BrandingView from './components/dashboard/BrandingView';
 import SecureLinkView from './components/dashboard/SecureLinkView';
 import IntegrationsView from './components/IntegrationsView';
+import AnalyticsView from './components/AnalyticsView';
 import Index from './pages/Index';
 import Login from './pages/Login';
 import Signup from './pages/Signup';
@@ -205,6 +206,16 @@ const AppContent = () => {
             <ProtectedRoute>
               <DashboardLayout>
                 <IntegrationsView />
+              </DashboardLayout>
+            </ProtectedRoute>
+          } 
+        />
+        <Route 
+          path="/dashboard/analytics" 
+          element={
+            <ProtectedRoute>
+              <DashboardLayout>
+                <AnalyticsView />
               </DashboardLayout>
             </ProtectedRoute>
           } 
