@@ -137,18 +137,6 @@ const DashboardSidebar = ({
           </button>
           
           <LanguageSelector collapsed={false} />
-          
-          {/* Subscription Badge */}
-          {subscriptionData?.subscribed && (
-            <div className="px-3 py-2">
-              <Badge 
-                variant={subscriptionData.subscription_tier === 'pro' ? 'default' : 'secondary'}
-                className="text-xs font-medium w-full justify-center"
-              >
-                {subscriptionData.subscription_tier === 'pro' ? 'PRO' : 'STARTER'}
-              </Badge>
-            </div>
-          )}
         </div>
         
         {/* Separator line */}
