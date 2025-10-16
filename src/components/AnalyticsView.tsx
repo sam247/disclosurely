@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { 
   TrendingUp, 
   TrendingDown, 
@@ -620,56 +619,57 @@ const AnalyticsView: React.FC = () => {
         </Card>
       </div>
 
-      {/* Main Analytics Tabs */}
-      <Tabs defaultValue="trends" className="space-y-4">
-        <TabsList>
-          <TabsTrigger value="trends" className="gap-2">
-            <TrendingUp className="h-4 w-4" />
-            Trends
-          </TabsTrigger>
-          <TabsTrigger value="overview" className="gap-2">
-            <BarChart3 className="h-4 w-4" />
-            Overview
-          </TabsTrigger>
-          <TabsTrigger value="categories" className="gap-2">
-            <PieChart className="h-4 w-4" />
-            Categories
-          </TabsTrigger>
-          <TabsTrigger value="recent" className="gap-2">
-            <Activity className="h-4 w-4" />
-            Recent Activity
-          </TabsTrigger>
-        </TabsList>
-
-        {/* Trends Tab */}
-        <TabsContent value="trends" className="space-y-4">
-          <div className="flex items-center justify-between">
-            <div>
-              <h3 className="text-xl font-semibold">Report Trends</h3>
-              <p className="text-muted-foreground">Track submission patterns and identify spikes</p>
-            </div>
-            <div className="flex items-center gap-2">
-              <label className="text-sm font-medium">View:</label>
-              <select 
-                value={chartPeriod} 
-                onChange={(e) => setChartPeriod(e.target.value as any)}
-                className="px-3 py-1 border rounded-md text-sm"
-              >
-                <option value="week">Weekly</option>
-                <option value="month">Monthly</option>
-                <option value="year">Yearly</option>
-              </select>
-            </div>
-          </div>
-          
+      {/* Main Analytics Content - Two Column Layout */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* Left Column */}
+        <div className="space-y-6">
+          {/* Performance Metrics */}
           <Card>
             <CardHeader>
-              <CardTitle>Cases Submitted Over Time</CardTitle>
-              <CardDescription>
-                {chartPeriod === 'week' && 'Weekly submission trends'}
-                {chartPeriod === 'month' && 'Monthly submission trends'}  
-                {chartPeriod === 'year' && 'Yearly submission trends'}
-              </CardDescription>
+              <CardTitle>Performance Metrics</CardTitle>
+              <CardDescription>Key performance indicators</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="flex items-center justify-between">
+                <span className="text-sm font-medium">Resolution Rate</span>
+                <Badge variant="default">{analyticsData.resolutionRate}%</Badge>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-sm font-medium">Escalation Rate</span>
+                <Badge variant={analyticsData.escalationRate > 20 ? 'destructive' : 'secondary'}>
+                  {analyticsData.escalationRate}%
+                </Badge>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-sm font-medium">Avg Response Time</span>
+                <Badge variant={analyticsData.avgResponseTime > 7 ? 'destructive' : 'default'}>
+                  {analyticsData.avgResponseTime} days
+                </Badge>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Report Trends */}
+          <Card>
+            <CardHeader>
+              <div className="flex items-center justify-between">
+                <div>
+                  <CardTitle>Report Trends</CardTitle>
+                  <CardDescription>Track submission patterns and identify spikes</CardDescription>
+                </div>
+                <div className="flex items-center gap-2">
+                  <label className="text-sm font-medium">View:</label>
+                  <select 
+                    value={chartPeriod} 
+                    onChange={(e) => setChartPeriod(e.target.value as any)}
+                    className="px-3 py-1 border rounded-md text-sm"
+                  >
+                    <option value="week">Weekly</option>
+                    <option value="month">Monthly</option>
+                    <option value="year">Yearly</option>
+                  </select>
+                </div>
+              </div>
             </CardHeader>
             <CardContent>
               {getChartData() ? (
@@ -677,6 +677,7 @@ const AnalyticsView: React.FC = () => {
                   data={getChartData()!} 
                   options={{
                     responsive: true,
+                    maintainAspectRatio: false,
                     plugins: {
                       legend: {
                         position: 'top' as const,
@@ -714,140 +715,8 @@ const AnalyticsView: React.FC = () => {
               )}
             </CardContent>
           </Card>
-        </TabsContent>
 
-        {/* Overview Tab */}
-        <TabsContent value="overview" className="space-y-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <Card>
-              <CardHeader>
-                <CardTitle>Performance Metrics</CardTitle>
-                <CardDescription>Key performance indicators</CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="flex items-center justify-between">
-                  <span className="text-sm font-medium">Resolution Rate</span>
-                  <Badge variant="default">{analyticsData.resolutionRate}%</Badge>
-                </div>
-                <div className="flex items-center justify-between">
-                  <span className="text-sm font-medium">Escalation Rate</span>
-                  <Badge variant={analyticsData.escalationRate > 20 ? 'destructive' : 'secondary'}>
-                    {analyticsData.escalationRate}%
-                  </Badge>
-                </div>
-                <div className="flex items-center justify-between">
-                  <span className="text-sm font-medium">Avg Response Time</span>
-                  <Badge variant={analyticsData.avgResponseTime > 7 ? 'destructive' : 'default'}>
-                    {analyticsData.avgResponseTime} days
-                  </Badge>
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader>
-                <CardTitle>Quick Insights</CardTitle>
-                <CardDescription>AI-generated insights</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-3">
-                  {analyticsData.avgResponseTime > 7 && (
-                    <div className="p-3 border border-orange-200 bg-orange-50 rounded-lg">
-                      <p className="text-sm font-medium text-orange-800">Slow Response Times</p>
-                      <p className="text-xs text-orange-600">Consider implementing automated triage</p>
-                    </div>
-                  )}
-                  {analyticsData.escalationRate > 20 && (
-                    <div className="p-3 border border-red-200 bg-red-50 rounded-lg">
-                      <p className="text-sm font-medium text-red-800">High Escalation Rate</p>
-                      <p className="text-xs text-red-600">Review case prioritization process</p>
-                    </div>
-                  )}
-                  {analyticsData.resolutionRate < 50 && (
-                    <div className="p-3 border border-yellow-200 bg-yellow-50 rounded-lg">
-                      <p className="text-sm font-medium text-yellow-800">Low Resolution Rate</p>
-                      <p className="text-xs text-yellow-600">Consider additional resources or training</p>
-                    </div>
-                  )}
-                  {analyticsData.avgResponseTime <= 3 && analyticsData.resolutionRate >= 70 && (
-                    <div className="p-3 border border-green-200 bg-green-50 rounded-lg">
-                      <p className="text-sm font-medium text-green-800">Excellent Performance</p>
-                      <p className="text-xs text-green-600">Team is performing well</p>
-                    </div>
-                  )}
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-        </TabsContent>
-
-        {/* Categories Tab */}
-        <TabsContent value="categories" className="space-y-4">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-            <Card>
-              <CardHeader>
-                <CardTitle>Report Categories</CardTitle>
-                <CardDescription>Distribution by report type</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-3">
-                  {analyticsData.categories.map((category, index) => (
-                    <div key={index} className="flex items-center justify-between">
-                      <span className="text-sm">{category.category}</span>
-                      <div className="flex items-center gap-2">
-                        <span className="text-sm font-medium">{category.count}</span>
-                        <div className="w-20 bg-gray-200 rounded-full h-2">
-                          <div 
-                            className="bg-primary h-2 rounded-full" 
-                            style={{ width: `${(category.count / analyticsData.totalReports) * 100}%` }}
-                          ></div>
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
-            
-            <Card>
-              <CardHeader>
-                <CardTitle>Category Distribution</CardTitle>
-                <CardDescription>Visual breakdown of report types</CardDescription>
-              </CardHeader>
-              <CardContent>
-                {getCategoryChartData() ? (
-                  <Doughnut 
-                    data={getCategoryChartData()!} 
-                    options={{
-                      responsive: true,
-                      plugins: {
-                        legend: {
-                          position: 'bottom' as const,
-                        },
-                        tooltip: {
-                          callbacks: {
-                            label: function(context) {
-                              const total = analyticsData?.totalReports || 1;
-                              const percentage = ((context.parsed / total) * 100).toFixed(1);
-                              return `${context.label}: ${context.parsed} (${percentage}%)`;
-                            }
-                          }
-                        }
-                      }
-                    }}
-                  />
-                ) : (
-                  <div className="h-64 flex items-center justify-center text-muted-foreground">
-                    No category data available
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-          </div>
-        </TabsContent>
-
-        {/* Recent Activity Tab */}
-        <TabsContent value="recent" className="space-y-4">
+          {/* Recent Reports */}
           <Card>
             <CardHeader>
               <CardTitle>Recent Reports</CardTitle>
@@ -875,8 +744,110 @@ const AnalyticsView: React.FC = () => {
               </div>
             </CardContent>
           </Card>
-        </TabsContent>
-      </Tabs>
+        </div>
+
+        {/* Right Column */}
+        <div className="space-y-6">
+          {/* Quick Insights */}
+          <Card>
+            <CardHeader>
+              <CardTitle>Quick Insights</CardTitle>
+              <CardDescription>AI-generated insights</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-3">
+                {analyticsData.avgResponseTime > 7 && (
+                  <div className="p-3 border border-orange-200 bg-orange-50 rounded-lg">
+                    <p className="text-sm font-medium text-orange-800">Slow Response Times</p>
+                    <p className="text-xs text-orange-600">Consider implementing automated triage</p>
+                  </div>
+                )}
+                {analyticsData.escalationRate > 20 && (
+                  <div className="p-3 border border-red-200 bg-red-50 rounded-lg">
+                    <p className="text-sm font-medium text-red-800">High Escalation Rate</p>
+                    <p className="text-xs text-red-600">Review case prioritization process</p>
+                  </div>
+                )}
+                {analyticsData.resolutionRate < 50 && (
+                  <div className="p-3 border border-yellow-200 bg-yellow-50 rounded-lg">
+                    <p className="text-sm font-medium text-yellow-800">Low Resolution Rate</p>
+                    <p className="text-xs text-yellow-600">Consider additional resources or training</p>
+                  </div>
+                )}
+                {analyticsData.avgResponseTime <= 3 && analyticsData.resolutionRate >= 70 && (
+                  <div className="p-3 border border-green-200 bg-green-50 rounded-lg">
+                    <p className="text-sm font-medium text-green-800">Excellent Performance</p>
+                    <p className="text-xs text-green-600">Team is performing well</p>
+                  </div>
+                )}
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Category Distribution */}
+          <Card>
+            <CardHeader>
+              <CardTitle>Category Distribution</CardTitle>
+              <CardDescription>Visual breakdown of report types</CardDescription>
+            </CardHeader>
+            <CardContent>
+              {getCategoryChartData() ? (
+                <Doughnut 
+                  data={getCategoryChartData()!} 
+                  options={{
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                      legend: {
+                        position: 'bottom' as const,
+                      },
+                      tooltip: {
+                        callbacks: {
+                          label: function(context) {
+                            const total = analyticsData?.totalReports || 1;
+                            const percentage = ((context.parsed / total) * 100).toFixed(1);
+                            return `${context.label}: ${context.parsed} (${percentage}%)`;
+                          }
+                        }
+                      }
+                    }
+                  }}
+                />
+              ) : (
+                <div className="h-64 flex items-center justify-center text-muted-foreground">
+                  No category data available
+                </div>
+              )}
+            </CardContent>
+          </Card>
+
+          {/* Report Categories List */}
+          <Card>
+            <CardHeader>
+              <CardTitle>Report Categories</CardTitle>
+              <CardDescription>Distribution by report type</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-3">
+                {analyticsData.categories.map((category, index) => (
+                  <div key={index} className="flex items-center justify-between">
+                    <span className="text-sm">{category.category}</span>
+                    <div className="flex items-center gap-2">
+                      <span className="text-sm font-medium">{category.count}</span>
+                      <div className="w-20 bg-gray-200 rounded-full h-2">
+                        <div 
+                          className="bg-primary h-2 rounded-full" 
+                          style={{ width: `${(category.count / analyticsData.totalReports) * 100}%` }}
+                        ></div>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      </div>
     </div>
   );
 };
