@@ -567,37 +567,36 @@ Additional Details: ${decryptedContent.additionalDetails || 'None provided'}
           <p className="text-muted-foreground break-words hyphens-auto">{t('manageAndReviewReports')}</p>
         </div>
 
-        {/* Tabs, Search, and Filter Row */}
-        <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center">
-          <TabsList>
-            <TabsTrigger value="active">{t('activeReports')} ({reports.length})</TabsTrigger>
-            <TabsTrigger value="archived">{t('archived')} ({archivedReports.length})</TabsTrigger>
-          </TabsList>
-          
-          <div className="flex flex-col sm:flex-row gap-4 flex-1">
-            <Input
-              placeholder={t('searchReports')}
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="flex-1"
-            />
-            <Select value={statusFilter} onValueChange={setStatusFilter}>
-              <SelectTrigger className="w-full sm:w-48">
-                <SelectValue placeholder={t('filterByStatus')} />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">{t('allStatuses')}</SelectItem>
-                <SelectItem value="new">{t('newIssue')}</SelectItem>
-                <SelectItem value="live">{t('live')}</SelectItem>
-                <SelectItem value="in_review">{t('inReview')}</SelectItem>
-                <SelectItem value="investigating">{t('investigating')}</SelectItem>
-                <SelectItem value="resolved">{t('resolved')}</SelectItem>
-              </SelectContent>
-            </Select>
+        <Tabs defaultValue="active" className="space-y-4">
+          {/* Tabs, Search, and Filter Row */}
+          <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center">
+            <TabsList>
+              <TabsTrigger value="active">{t('activeReports')} ({reports.length})</TabsTrigger>
+              <TabsTrigger value="archived">{t('archived')} ({archivedReports.length})</TabsTrigger>
+            </TabsList>
+            
+            <div className="flex flex-col sm:flex-row gap-4 flex-1">
+              <Input
+                placeholder={t('searchReports')}
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="flex-1"
+              />
+              <Select value={statusFilter} onValueChange={setStatusFilter}>
+                <SelectTrigger className="w-full sm:w-48">
+                  <SelectValue placeholder={t('filterByStatus')} />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">{t('allStatuses')}</SelectItem>
+                  <SelectItem value="new">{t('newIssue')}</SelectItem>
+                  <SelectItem value="live">{t('live')}</SelectItem>
+                  <SelectItem value="in_review">{t('inReview')}</SelectItem>
+                  <SelectItem value="investigating">{t('investigating')}</SelectItem>
+                  <SelectItem value="resolved">{t('resolved')}</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
           </div>
-        </div>
-
-        <Tabs defaultValue="active">
           <TabsContent value="active">
           <Card>
             <CardContent className="pt-6">
@@ -896,7 +895,6 @@ Additional Details: ${decryptedContent.additionalDetails || 'None provided'}
           </Card>
         </TabsContent>
       </Tabs>
-      </div>
 
       {/* Report Details Dialog */}
       <Dialog open={isReportDialogOpen} onOpenChange={setIsReportDialogOpen}>
