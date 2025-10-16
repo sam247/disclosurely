@@ -15,12 +15,40 @@ import {
   PieChart,
   Activity,
   Target,
-  Zap
+  Zap,
+  Calendar,
+  Eye,
+  Filter
 } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { useOrganization } from '@/hooks/useOrganization';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import {
+  Chart as ChartJS,
+  CategoryScale,
+  LinearScale,
+  PointElement,
+  LineElement,
+  BarElement,
+  Title,
+  Tooltip,
+  Legend,
+  ArcElement,
+} from 'chart.js';
+import { Line, Bar, Doughnut } from 'react-chartjs-2';
+
+ChartJS.register(
+  CategoryScale,
+  LinearScale,
+  PointElement,
+  LineElement,
+  BarElement,
+  Title,
+  Tooltip,
+  Legend,
+  ArcElement
+);
 
 interface SimpleAnalyticsData {
   totalReports: number;
@@ -30,6 +58,12 @@ interface SimpleAnalyticsData {
   escalationRate: number;
   categories: Array<{ category: string; count: number }>;
   recentReports: Array<{ id: string; title: string; status: string; created_at: string }>;
+  dailyTrends: Array<{ date: string; count: number; categories: string[] }>;
+  weeklyTrends: Array<{ week: string; count: number; categories: string[] }>;
+  monthlyTrends: Array<{ month: string; count: number; categories: string[] }>;
+  yearlyTrends: Array<{ year: string; count: number; categories: string[] }>;
+  statusBreakdown: Array<{ status: string; count: number }>;
+  priorityBreakdown: Array<{ priority: number; count: number }>;
 }
 
 const AnalyticsView: React.FC = () => {
@@ -39,6 +73,7 @@ const AnalyticsView: React.FC = () => {
   const [analyticsData, setAnalyticsData] = useState<SimpleAnalyticsData | null>(null);
   const [loading, setLoading] = useState(true);
   const [selectedPeriod, setSelectedPeriod] = useState<'7d' | '30d' | '90d' | '1y'>('30d');
+  const [chartPeriod, setChartPeriod] = useState<'week' | 'month' | 'year'>('month');
   const [exporting, setExporting] = useState(false);
 
   useEffect(() => {
@@ -73,12 +108,13 @@ const AnalyticsView: React.FC = () => {
     setLoading(true);
     
     try {
-      // Simple query with timeout
+      // Query all reports (not filtered by date for total count)
       const queryPromise = supabase
         .from('reports')
         .select('id, title, status, created_at, updated_at, report_type, priority, manual_risk_level')
         .eq('organization_id', organization.id)
-        .gte('created_at', getDateFilter(selectedPeriod));
+        .not('status', 'in', '(archived,closed,deleted)')
+        .is('deleted_at', null);
 
       const timeoutPromise = new Promise((_, reject) => 
         setTimeout(() => reject(new Error('Query timeout')), 5000)
@@ -128,6 +164,89 @@ const AnalyticsView: React.FC = () => {
     }
   };
 
+  const generateDailyTrends = (reports: any[]) => {
+    const trends: Record<string, { count: number; categories: string[] }> = {};
+    
+    reports.forEach(report => {
+      const date = new Date(report.created_at).toISOString().split('T')[0];
+      if (!trends[date]) {
+        trends[date] = { count: 0, categories: [] };
+      }
+      trends[date].count++;
+      if (report.report_type && !trends[date].categories.includes(report.report_type)) {
+        trends[date].categories.push(report.report_type);
+      }
+    });
+
+    return Object.entries(trends)
+      .map(([date, data]) => ({ date, ...data }))
+      .sort((a, b) => a.date.localeCompare(b.date));
+  };
+
+  const generateWeeklyTrends = (reports: any[]) => {
+    const trends: Record<string, { count: number; categories: string[] }> = {};
+    
+    reports.forEach(report => {
+      const date = new Date(report.created_at);
+      const weekStart = new Date(date);
+      weekStart.setDate(date.getDate() - date.getDay());
+      const weekKey = weekStart.toISOString().split('T')[0];
+      
+      if (!trends[weekKey]) {
+        trends[weekKey] = { count: 0, categories: [] };
+      }
+      trends[weekKey].count++;
+      if (report.report_type && !trends[weekKey].categories.includes(report.report_type)) {
+        trends[weekKey].categories.push(report.report_type);
+      }
+    });
+
+    return Object.entries(trends)
+      .map(([week, data]) => ({ week, ...data }))
+      .sort((a, b) => a.week.localeCompare(b.week));
+  };
+
+  const generateMonthlyTrends = (reports: any[]) => {
+    const trends: Record<string, { count: number; categories: string[] }> = {};
+    
+    reports.forEach(report => {
+      const date = new Date(report.created_at);
+      const monthKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
+      
+      if (!trends[monthKey]) {
+        trends[monthKey] = { count: 0, categories: [] };
+      }
+      trends[monthKey].count++;
+      if (report.report_type && !trends[monthKey].categories.includes(report.report_type)) {
+        trends[monthKey].categories.push(report.report_type);
+      }
+    });
+
+    return Object.entries(trends)
+      .map(([month, data]) => ({ month, ...data }))
+      .sort((a, b) => a.month.localeCompare(b.month));
+  };
+
+  const generateYearlyTrends = (reports: any[]) => {
+    const trends: Record<string, { count: number; categories: string[] }> = {};
+    
+    reports.forEach(report => {
+      const year = new Date(report.created_at).getFullYear().toString();
+      
+      if (!trends[year]) {
+        trends[year] = { count: 0, categories: [] };
+      }
+      trends[year].count++;
+      if (report.report_type && !trends[year].categories.includes(report.report_type)) {
+        trends[year].categories.push(report.report_type);
+      }
+    });
+
+    return Object.entries(trends)
+      .map(([year, data]) => ({ year, ...data }))
+      .sort((a, b) => a.year.localeCompare(b.year));
+  };
+
   const processSimpleAnalytics = (reports: any[]): SimpleAnalyticsData => {
     const totalReports = reports.length;
     const activeReports = reports.filter(r => !['closed', 'archived'].includes(r.status)).length;
@@ -173,6 +292,35 @@ const AnalyticsView: React.FC = () => {
         created_at: r.created_at
       }));
 
+    // Generate trend data
+    const dailyTrends = generateDailyTrends(reports);
+    const weeklyTrends = generateWeeklyTrends(reports);
+    const monthlyTrends = generateMonthlyTrends(reports);
+    const yearlyTrends = generateYearlyTrends(reports);
+
+    // Status breakdown
+    const statusCounts = reports.reduce((acc, r) => {
+      acc[r.status] = (acc[r.status] || 0) + 1;
+      return acc;
+    }, {} as Record<string, number>);
+
+    const statusBreakdown = Object.entries(statusCounts).map(([status, count]) => ({
+      status,
+      count
+    }));
+
+    // Priority breakdown
+    const priorityCounts = reports.reduce((acc, r) => {
+      const priority = r.priority || 1;
+      acc[priority] = (acc[priority] || 0) + 1;
+      return acc;
+    }, {} as Record<number, number>);
+
+    const priorityBreakdown = Object.entries(priorityCounts).map(([priority, count]) => ({
+      priority: parseInt(priority),
+      count
+    }));
+
     return {
       totalReports,
       activeReports,
@@ -180,7 +328,13 @@ const AnalyticsView: React.FC = () => {
       resolutionRate: Math.round(resolutionRate * 10) / 10,
       escalationRate: Math.round(escalationRate * 10) / 10,
       categories,
-      recentReports
+      recentReports,
+      dailyTrends,
+      weeklyTrends,
+      monthlyTrends,
+      yearlyTrends,
+      statusBreakdown,
+      priorityBreakdown
     };
   };
 
@@ -223,6 +377,96 @@ const AnalyticsView: React.FC = () => {
     csv += `Resolution Rate,${data.resolutionRate}%,${selectedPeriod}\n`;
     csv += `Escalation Rate,${data.escalationRate}%,${selectedPeriod}\n`;
     return csv;
+  };
+
+  const getChartData = () => {
+    if (!analyticsData) return null;
+
+    let trends, labels, data;
+    
+    switch (chartPeriod) {
+      case 'week':
+        trends = analyticsData.weeklyTrends;
+        labels = trends.map(t => new Date(t.week).toLocaleDateString());
+        data = trends.map(t => t.count);
+        break;
+      case 'month':
+        trends = analyticsData.monthlyTrends;
+        labels = trends.map(t => {
+          const [year, month] = t.month.split('-');
+          return new Date(parseInt(year), parseInt(month) - 1).toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
+        });
+        data = trends.map(t => t.count);
+        break;
+      case 'year':
+        trends = analyticsData.yearlyTrends;
+        labels = trends.map(t => t.year);
+        data = trends.map(t => t.count);
+        break;
+      default:
+        trends = analyticsData.dailyTrends.slice(-30); // Last 30 days
+        labels = trends.map(t => new Date(t.date).toLocaleDateString());
+        data = trends.map(t => t.count);
+    }
+
+    return {
+      labels,
+      datasets: [
+        {
+          label: 'Reports Submitted',
+          data,
+          borderColor: 'rgb(59, 130, 246)',
+          backgroundColor: 'rgba(59, 130, 246, 0.1)',
+          tension: 0.1,
+          fill: true,
+        },
+      ],
+    };
+  };
+
+  const getCategoryChartData = () => {
+    if (!analyticsData) return null;
+
+    return {
+      labels: analyticsData.categories.map(c => c.category),
+      datasets: [
+        {
+          data: analyticsData.categories.map(c => c.count),
+          backgroundColor: [
+            '#FF6384',
+            '#36A2EB', 
+            '#FFCE56',
+            '#4BC0C0',
+            '#9966FF',
+            '#FF9900',
+            '#FF9F40',
+            '#FF6384',
+            '#C9CBCF',
+            '#4BC0C0'
+          ],
+        },
+      ],
+    };
+  };
+
+  const getStatusChartData = () => {
+    if (!analyticsData) return null;
+
+    return {
+      labels: analyticsData.statusBreakdown.map(s => s.status),
+      datasets: [
+        {
+          label: 'Count',
+          data: analyticsData.statusBreakdown.map(s => s.count),
+          backgroundColor: [
+            '#4CAF50', // Resolved/Closed - Green
+            '#FFC107', // In Progress - Yellow  
+            '#F44336', // New/Investigating - Red
+            '#2196F3', // Other - Blue
+          ],
+        },
+      ],
+    };
   };
 
   if (loading || orgLoading) {
@@ -377,8 +621,12 @@ const AnalyticsView: React.FC = () => {
       </div>
 
       {/* Main Analytics Tabs */}
-      <Tabs defaultValue="overview" className="space-y-4">
+      <Tabs defaultValue="trends" className="space-y-4">
         <TabsList>
+          <TabsTrigger value="trends" className="gap-2">
+            <TrendingUp className="h-4 w-4" />
+            Trends
+          </TabsTrigger>
           <TabsTrigger value="overview" className="gap-2">
             <BarChart3 className="h-4 w-4" />
             Overview
@@ -392,6 +640,81 @@ const AnalyticsView: React.FC = () => {
             Recent Activity
           </TabsTrigger>
         </TabsList>
+
+        {/* Trends Tab */}
+        <TabsContent value="trends" className="space-y-4">
+          <div className="flex items-center justify-between">
+            <div>
+              <h3 className="text-xl font-semibold">Report Trends</h3>
+              <p className="text-muted-foreground">Track submission patterns and identify spikes</p>
+            </div>
+            <div className="flex items-center gap-2">
+              <label className="text-sm font-medium">View:</label>
+              <select 
+                value={chartPeriod} 
+                onChange={(e) => setChartPeriod(e.target.value as any)}
+                className="px-3 py-1 border rounded-md text-sm"
+              >
+                <option value="week">Weekly</option>
+                <option value="month">Monthly</option>
+                <option value="year">Yearly</option>
+              </select>
+            </div>
+          </div>
+          
+          <Card>
+            <CardHeader>
+              <CardTitle>Cases Submitted Over Time</CardTitle>
+              <CardDescription>
+                {chartPeriod === 'week' && 'Weekly submission trends'}
+                {chartPeriod === 'month' && 'Monthly submission trends'}  
+                {chartPeriod === 'year' && 'Yearly submission trends'}
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              {getChartData() ? (
+                <Line 
+                  data={getChartData()!} 
+                  options={{
+                    responsive: true,
+                    plugins: {
+                      legend: {
+                        position: 'top' as const,
+                      },
+                      tooltip: {
+                        callbacks: {
+                          afterLabel: function(context) {
+                            const dataIndex = context.dataIndex;
+                            const trends = chartPeriod === 'week' ? analyticsData?.weeklyTrends :
+                                         chartPeriod === 'month' ? analyticsData?.monthlyTrends :
+                                         analyticsData?.yearlyTrends;
+                            if (trends && trends[dataIndex]) {
+                              const categories = trends[dataIndex].categories;
+                              return categories.length > 0 ? `Categories: ${categories.join(', ')}` : '';
+                            }
+                            return '';
+                          }
+                        }
+                      }
+                    },
+                    scales: {
+                      y: {
+                        beginAtZero: true,
+                        ticks: {
+                          stepSize: 1
+                        }
+                      }
+                    }
+                  }}
+                />
+              ) : (
+                <div className="h-64 flex items-center justify-center text-muted-foreground">
+                  No trend data available
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        </TabsContent>
 
         {/* Overview Tab */}
         <TabsContent value="overview" className="space-y-4">
@@ -460,30 +783,67 @@ const AnalyticsView: React.FC = () => {
 
         {/* Categories Tab */}
         <TabsContent value="categories" className="space-y-4">
-          <Card>
-            <CardHeader>
-              <CardTitle>Report Categories</CardTitle>
-              <CardDescription>Distribution by report type</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-3">
-                {analyticsData.categories.map((category, index) => (
-                  <div key={index} className="flex items-center justify-between">
-                    <span className="text-sm">{category.category}</span>
-                    <div className="flex items-center gap-2">
-                      <span className="text-sm font-medium">{category.count}</span>
-                      <div className="w-20 bg-gray-200 rounded-full h-2">
-                        <div 
-                          className="bg-primary h-2 rounded-full" 
-                          style={{ width: `${(category.count / analyticsData.totalReports) * 100}%` }}
-                        ></div>
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+            <Card>
+              <CardHeader>
+                <CardTitle>Report Categories</CardTitle>
+                <CardDescription>Distribution by report type</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-3">
+                  {analyticsData.categories.map((category, index) => (
+                    <div key={index} className="flex items-center justify-between">
+                      <span className="text-sm">{category.category}</span>
+                      <div className="flex items-center gap-2">
+                        <span className="text-sm font-medium">{category.count}</span>
+                        <div className="w-20 bg-gray-200 rounded-full h-2">
+                          <div 
+                            className="bg-primary h-2 rounded-full" 
+                            style={{ width: `${(category.count / analyticsData.totalReports) * 100}%` }}
+                          ></div>
+                        </div>
                       </div>
                     </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+            
+            <Card>
+              <CardHeader>
+                <CardTitle>Category Distribution</CardTitle>
+                <CardDescription>Visual breakdown of report types</CardDescription>
+              </CardHeader>
+              <CardContent>
+                {getCategoryChartData() ? (
+                  <Doughnut 
+                    data={getCategoryChartData()!} 
+                    options={{
+                      responsive: true,
+                      plugins: {
+                        legend: {
+                          position: 'bottom' as const,
+                        },
+                        tooltip: {
+                          callbacks: {
+                            label: function(context) {
+                              const total = analyticsData?.totalReports || 1;
+                              const percentage = ((context.parsed / total) * 100).toFixed(1);
+                              return `${context.label}: ${context.parsed} (${percentage}%)`;
+                            }
+                          }
+                        }
+                      }
+                    }}
+                  />
+                ) : (
+                  <div className="h-64 flex items-center justify-center text-muted-foreground">
+                    No category data available
                   </div>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
+                )}
+              </CardContent>
+            </Card>
+          </div>
         </TabsContent>
 
         {/* Recent Activity Tab */}
