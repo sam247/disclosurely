@@ -187,7 +187,18 @@ const UserManagement = () => {
         .select()
         .single();
 
-      if (error) throw error;
+      if (error) {
+        console.error('Error creating invitation:', error);
+        if (error.code === '23505') {
+          toast({
+            title: "Invitation Already Sent",
+            description: "An invitation has already been sent to this email address.",
+            variant: "destructive",
+          });
+          return;
+        }
+        throw error;
+      }
 
       // Send invitation email via edge function
       const { error: emailError } = await supabase.functions.invoke('send-team-invitation', {

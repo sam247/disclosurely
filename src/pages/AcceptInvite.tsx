@@ -137,14 +137,20 @@ const AcceptInvite = () => {
       // Store userId for OTP verification
       setUserId(authData.user.id);
 
-      // Explicitly (re)send the signup OTP to the invited email
-      const { error: resendError } = await supabase.auth.resend({
-        type: 'signup',
-        email: invitation.email,
+      // Generate a 6-digit OTP
+      const otp = Math.floor(100000 + Math.random() * 900000).toString();
+      
+      // Send OTP via our custom email function
+      const { error: emailError } = await supabase.functions.invoke('send-otp-email', {
+        body: {
+          email: invitation.email,
+          otp: otp,
+          type: 'signup'
+        }
       });
 
-      if (resendError) {
-        console.error('Failed to send signup OTP:', resendError);
+      if (emailError) {
+        console.error('Failed to send OTP email:', emailError);
         toast({
           title: 'Email not sent',
           description: 'We could not send the verification code. Please try again in a moment.',
@@ -153,6 +159,9 @@ const AcceptInvite = () => {
         setSubmitting(false);
         return;
       }
+
+      // Store the OTP for verification (in a real app, you'd store this securely)
+      sessionStorage.setItem('pending_otp', otp);
 
       setShowOtpInput(true);
       setSubmitting(false);
@@ -181,22 +190,32 @@ const AcceptInvite = () => {
     setSubmitting(true);
 
     try {
-      // Verify OTP
-      const { error: verifyError } = await supabase.auth.verifyOtp({
-        email: invitation.email,
-        token: otp,
-        type: 'email',
-      });
-
-      if (verifyError) {
+      // Get the stored OTP from sessionStorage
+      const storedOtp = sessionStorage.getItem('pending_otp');
+      
+      if (!storedOtp) {
         toast({
           title: "Verification Failed",
-          description: verifyError.message,
+          description: "No verification code found. Please try signing up again.",
           variant: "destructive",
         });
         setSubmitting(false);
         return;
       }
+
+      // Verify the OTP
+      if (otp !== storedOtp) {
+        toast({
+          title: "Verification Failed",
+          description: "Invalid verification code. Please check and try again.",
+          variant: "destructive",
+        });
+        setSubmitting(false);
+        return;
+      }
+
+      // Clear the stored OTP
+      sessionStorage.removeItem('pending_otp');
 
       // Accept the invitation via edge function
       const { error: acceptError } = await supabase.functions.invoke('accept-team-invitation', {
