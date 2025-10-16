@@ -18,6 +18,7 @@ import {
   Zap
 } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
+import { useOrganization } from '@/hooks/useOrganization';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 
@@ -32,7 +33,8 @@ interface SimpleAnalyticsData {
 }
 
 const AnalyticsView: React.FC = () => {
-  const { user, organization } = useAuth();
+  const { user } = useAuth();
+  const { organization, loading: orgLoading } = useOrganization();
   const { toast } = useToast();
   const [analyticsData, setAnalyticsData] = useState<SimpleAnalyticsData | null>(null);
   const [loading, setLoading] = useState(true);
@@ -42,21 +44,23 @@ const AnalyticsView: React.FC = () => {
   useEffect(() => {
     console.log('Analytics useEffect - organization:', organization);
     console.log('Analytics useEffect - organization ID:', organization?.id);
+    console.log('Analytics useEffect - orgLoading:', orgLoading);
+    
+    // Wait for organization to finish loading
+    if (orgLoading) {
+      console.log('Organization still loading...');
+      return;
+    }
     
     // Only fetch data if we have an organization ID
     if (organization?.id) {
       console.log('Organization ID available, fetching analytics data');
       fetchAnalyticsData();
     } else {
-      console.log('No organization ID, waiting...');
-      // If no organization ID, set loading to false after a short delay
-      const timer = setTimeout(() => {
-        console.log('Setting loading to false due to no organization ID');
-        setLoading(false);
-      }, 1000);
-      return () => clearTimeout(timer);
+      console.log('No organization ID, setting loading to false');
+      setLoading(false);
     }
-  }, [selectedPeriod, organization?.id]);
+  }, [selectedPeriod, organization?.id, orgLoading]);
 
   const fetchAnalyticsData = async () => {
     if (!organization?.id) {
@@ -221,13 +225,15 @@ const AnalyticsView: React.FC = () => {
     return csv;
   };
 
-  if (loading) {
+  if (loading || orgLoading) {
     return (
       <div className="space-y-6">
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-3xl font-bold">Analytics</h1>
-            <p className="text-muted-foreground mt-2">Loading insights...</p>
+            <p className="text-muted-foreground mt-2">
+              {orgLoading ? 'Loading organization...' : 'Loading insights...'}
+            </p>
           </div>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -244,13 +250,13 @@ const AnalyticsView: React.FC = () => {
     );
   }
 
-  if (!analyticsData && !loading) {
+  if (!analyticsData && !loading && !orgLoading) {
     return (
       <div className="space-y-6">
         <div>
           <h1 className="text-3xl font-bold">Analytics</h1>
           <p className="text-muted-foreground mt-2">
-            {!organization?.id ? 'Organization not loaded yet. Please wait...' : 'No data available for the selected period.'}
+            {!organization?.id ? 'No organization found. Please contact support.' : 'No data available for the selected period.'}
           </p>
           <div className="flex items-center gap-3 mt-4">
             <Button 
