@@ -7,8 +7,8 @@ const TeamView = () => {
   return (
     <div className="p-6">
       <div className="mb-6">
-        <h2 className="text-2xl font-bold">{t('teamManagementTitle')}</h2>
-        <p className="text-muted-foreground">{t('teamManagementDescription')}</p>
+        <h1 className="text-3xl font-bold">{t('teamManagementTitle')}</h1>
+        <p className="text-muted-foreground mt-2">{t('teamManagementDescription')}</p>
       </div>
       <UserManagement />
     </div>

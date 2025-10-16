@@ -20,7 +20,6 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useCustomDomain } from '@/hooks/useCustomDomain';
 import { useTranslation } from 'react-i18next';
-import PatternDetection from './PatternDetection';
 
 // Risk Level Selector Component
 const RiskLevelSelector = ({ 
@@ -561,41 +560,40 @@ Additional Details: ${decryptedContent.additionalDetails || 'None provided'}
         </Card>
       </div>
 
-      {/* Pattern Detection */}
-      <PatternDetection />
-
-      <div>
-        <h2 className="text-2xl font-bold">{t('reportsOverview')}</h2>
-        <p className="text-muted-foreground break-words hyphens-auto">{t('manageAndReviewReports')}</p>
-      </div>
-
-      <div className="flex flex-col sm:flex-row gap-4">
-        <Input
-          placeholder={t('searchReports')}
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-          className="flex-1"
-        />
-        <Select value={statusFilter} onValueChange={setStatusFilter}>
-          <SelectTrigger className="w-full sm:w-48">
-            <SelectValue placeholder={t('filterByStatus')} />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">{t('allStatuses')}</SelectItem>
-            <SelectItem value="new">{t('newIssue')}</SelectItem>
-            <SelectItem value="live">{t('live')}</SelectItem>
-            <SelectItem value="in_review">{t('inReview')}</SelectItem>
-            <SelectItem value="investigating">{t('investigating')}</SelectItem>
-            <SelectItem value="resolved">{t('resolved')}</SelectItem>
-          </SelectContent>
-        </Select>
-      </div>
-
       <Tabs defaultValue="active" className="space-y-4">
-        <TabsList>
-          <TabsTrigger value="active">{t('activeReports')} ({reports.length})</TabsTrigger>
-          <TabsTrigger value="archived">{t('archived')} ({archivedReports.length})</TabsTrigger>
-        </TabsList>
+        <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
+          <TabsList>
+            <TabsTrigger value="active">{t('activeReports')} ({reports.length})</TabsTrigger>
+            <TabsTrigger value="archived">{t('archived')} ({archivedReports.length})</TabsTrigger>
+          </TabsList>
+          
+          <div className="flex flex-col sm:flex-row gap-4 w-full sm:w-auto">
+            <Input
+              placeholder={t('searchReports')}
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="flex-1 sm:w-64"
+            />
+            <Select value={statusFilter} onValueChange={setStatusFilter}>
+              <SelectTrigger className="w-full sm:w-48">
+                <SelectValue placeholder={t('filterByStatus')} />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">{t('allStatuses')}</SelectItem>
+                <SelectItem value="new">{t('newIssue')}</SelectItem>
+                <SelectItem value="live">{t('live')}</SelectItem>
+                <SelectItem value="in_review">{t('inReview')}</SelectItem>
+                <SelectItem value="investigating">{t('investigating')}</SelectItem>
+                <SelectItem value="resolved">{t('resolved')}</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+        </div>
+
+        <div className="mt-4">
+          <h2 className="text-2xl font-bold">{t('reportsOverview')}</h2>
+          <p className="text-muted-foreground break-words hyphens-auto">{t('manageAndReviewReports')}</p>
+        </div>
 
         <TabsContent value="active">
           <Card>

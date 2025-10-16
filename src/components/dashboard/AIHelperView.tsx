@@ -7,8 +7,8 @@ const AIHelperView = () => {
   return (
     <div className="p-6">
       <div className="mb-6">
-        <h2 className="text-2xl font-bold">{t('aiCaseHelperTitle')}</h2>
-        <p className="text-muted-foreground">{t('aiCaseHelperDescription')}</p>
+        <h1 className="text-3xl font-bold">{t('aiCaseHelperTitle')}</h1>
+        <p className="text-muted-foreground mt-2">{t('aiCaseHelperDescription')}</p>
       </div>
       <AICaseHelper />
     </div>
