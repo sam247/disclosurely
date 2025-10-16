@@ -590,12 +590,11 @@ Additional Details: ${decryptedContent.additionalDetails || 'None provided'}
           </div>
         </div>
 
-        <div className="mt-4">
-          <h2 className="text-2xl font-bold">{t('reportsOverview')}</h2>
-          <p className="text-muted-foreground break-words hyphens-auto">{t('manageAndReviewReports')}</p>
-        </div>
-
         <TabsContent value="active">
+          <div className="mb-4">
+            <h2 className="text-2xl font-bold">{t('reportsOverview')}</h2>
+            <p className="text-muted-foreground break-words hyphens-auto">{t('manageAndReviewReports')}</p>
+          </div>
           <Card>
             <CardContent className="pt-6">
               {filteredReports.length === 0 ? (
@@ -808,6 +807,10 @@ Additional Details: ${decryptedContent.additionalDetails || 'None provided'}
         </TabsContent>
 
         <TabsContent value="archived">
+          <div className="mb-4">
+            <h2 className="text-2xl font-bold">{t('reportsOverview')}</h2>
+            <p className="text-muted-foreground break-words hyphens-auto">{t('manageAndReviewReports')}</p>
+          </div>
           <Card>
             <CardHeader>
               <CardTitle>Archived Reports</CardTitle>
