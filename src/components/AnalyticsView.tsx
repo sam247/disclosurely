@@ -40,7 +40,22 @@ const AnalyticsView: React.FC = () => {
   const [exporting, setExporting] = useState(false);
 
   useEffect(() => {
-    fetchAnalyticsData();
+    console.log('Analytics useEffect - organization:', organization);
+    console.log('Analytics useEffect - organization ID:', organization?.id);
+    
+    // Only fetch data if we have an organization ID
+    if (organization?.id) {
+      console.log('Organization ID available, fetching analytics data');
+      fetchAnalyticsData();
+    } else {
+      console.log('No organization ID, waiting...');
+      // If no organization ID, set loading to false after a short delay
+      const timer = setTimeout(() => {
+        console.log('Setting loading to false due to no organization ID');
+        setLoading(false);
+      }, 1000);
+      return () => clearTimeout(timer);
+    }
   }, [selectedPeriod, organization?.id]);
 
   const fetchAnalyticsData = async () => {
@@ -234,14 +249,32 @@ const AnalyticsView: React.FC = () => {
       <div className="space-y-6">
         <div>
           <h1 className="text-3xl font-bold">Analytics</h1>
-          <p className="text-muted-foreground mt-2">No data available for the selected period.</p>
-          <Button 
-            onClick={fetchAnalyticsData} 
-            className="mt-4"
-            variant="outline"
-          >
-            Retry
-          </Button>
+          <p className="text-muted-foreground mt-2">
+            {!organization?.id ? 'Organization not loaded yet. Please wait...' : 'No data available for the selected period.'}
+          </p>
+          <div className="flex items-center gap-3 mt-4">
+            <Button 
+              onClick={fetchAnalyticsData} 
+              variant="outline"
+            >
+              Retry
+            </Button>
+            {organization?.id && (
+              <div className="flex items-center gap-2">
+                <label className="text-sm font-medium">Period:</label>
+                <select 
+                  value={selectedPeriod} 
+                  onChange={(e) => setSelectedPeriod(e.target.value as any)}
+                  className="px-3 py-1 border rounded-md text-sm"
+                >
+                  <option value="7d">Last 7 days</option>
+                  <option value="30d">Last 30 days</option>
+                  <option value="90d">Last 90 days</option>
+                  <option value="1y">Last year</option>
+                </select>
+              </div>
+            )}
+          </div>
         </div>
       </div>
     );
