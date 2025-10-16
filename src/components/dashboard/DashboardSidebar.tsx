@@ -1,5 +1,6 @@
 import { Home, Bot, Users, Palette, Lock, BarChart3, ScrollText, Link as LinkIcon, MessageSquare, Info, FileText, Zap } from 'lucide-react';
 import { Separator } from '@/components/ui/separator';
+import { Badge } from '@/components/ui/badge';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { Sidebar, SidebarContent, SidebarFooter, SidebarGroup, SidebarGroupContent, SidebarHeader, SidebarMenu, SidebarMenuButton, SidebarMenuItem } from '@/components/ui/sidebar';
 import { useSubscriptionLimits } from '@/hooks/useSubscriptionLimits';
@@ -10,10 +11,15 @@ import LanguageSelector from '@/components/LanguageSelector';
 
 interface DashboardSidebarProps {
   onLockedFeatureClick: (feature: string) => void;
+  subscriptionData?: {
+    subscribed: boolean;
+    subscription_tier?: 'basic' | 'pro';
+  };
 }
 
 const DashboardSidebar = ({
-  onLockedFeatureClick
+  onLockedFeatureClick,
+  subscriptionData
 }: DashboardSidebarProps) => {
   const navigate = useNavigate();
   const location = useLocation();
@@ -131,6 +137,18 @@ const DashboardSidebar = ({
           </button>
           
           <LanguageSelector collapsed={false} />
+          
+          {/* Subscription Badge */}
+          {subscriptionData?.subscribed && (
+            <div className="px-3 py-2">
+              <Badge 
+                variant={subscriptionData.subscription_tier === 'pro' ? 'default' : 'secondary'}
+                className="text-xs font-medium w-full justify-center"
+              >
+                {subscriptionData.subscription_tier === 'pro' ? 'PRO' : 'STARTER'}
+              </Badge>
+            </div>
+          )}
         </div>
         
         {/* Separator line */}

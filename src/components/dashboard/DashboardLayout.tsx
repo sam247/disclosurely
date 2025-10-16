@@ -2,6 +2,7 @@ import { ReactNode, useState, useEffect } from 'react';
 import { SidebarProvider, SidebarTrigger } from '@/components/ui/sidebar';
 import DashboardSidebar from './DashboardSidebar';
 import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
 import { LogOut, User } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { useNavigate } from 'react-router-dom';
@@ -16,7 +17,7 @@ interface DashboardLayoutProps {
 }
 
 const DashboardLayout = ({ children }: DashboardLayoutProps) => {
-  const { signOut, user } = useAuth();
+  const { signOut, user, subscriptionData } = useAuth();
   const navigate = useNavigate();
   const { t } = useTranslation();
   const [showUpgradeModal, setShowUpgradeModal] = useState(false);
@@ -60,7 +61,10 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
   return (
     <SidebarProvider>
       <div className="min-h-screen flex w-full">
-        <DashboardSidebar onLockedFeatureClick={handleLockedFeatureClick} />
+        <DashboardSidebar 
+          onLockedFeatureClick={handleLockedFeatureClick} 
+          subscriptionData={subscriptionData}
+        />
         
         <div className="flex-1 flex flex-col min-w-0">
           {/* Header */}
@@ -70,6 +74,14 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
               <h1 className="text-base md:text-lg font-semibold truncate">
                 {t('welcomeBack')}{firstName && `, ${firstName}`}
               </h1>
+              {subscriptionData.subscribed && (
+                <Badge 
+                  variant={subscriptionData.subscription_tier === 'pro' ? 'default' : 'secondary'}
+                  className="text-xs font-medium"
+                >
+                  {subscriptionData.subscription_tier === 'pro' ? 'PRO' : 'STARTER'}
+                </Badge>
+              )}
             </div>
             <div className="flex items-center gap-2">
               <NotificationSystem />
