@@ -896,6 +896,7 @@ Additional Details: ${decryptedContent.additionalDetails || 'None provided'}
           </Card>
         </TabsContent>
       </Tabs>
+      </div>
 
       {/* Report Details Dialog */}
       <Dialog open={isReportDialogOpen} onOpenChange={setIsReportDialogOpen}>
