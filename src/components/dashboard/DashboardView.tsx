@@ -620,7 +620,7 @@ Additional Details: ${decryptedContent.additionalDetails || 'None provided'}
                   <SelectItem value="all">{t('allStatuses')}</SelectItem>
                   <SelectItem value="new">{t('newIssue')}</SelectItem>
                   <SelectItem value="live">{t('live')}</SelectItem>
-                  <SelectItem value="in_review">{t('inReview')}</SelectItem>
+                  <SelectItem value="reviewing">{t('inReview')}</SelectItem>
                   <SelectItem value="investigating">{t('investigating')}</SelectItem>
                   <SelectItem value="resolved">{t('resolved')}</SelectItem>
                 </SelectContent>
