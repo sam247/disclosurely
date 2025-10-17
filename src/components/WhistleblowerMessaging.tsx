@@ -128,6 +128,17 @@ const WhistleblowerMessaging = () => {
         return;
       }
 
+      // Check if report is archived - don't show to whistleblowers
+      if (data.status === 'archived') {
+        console.log('Report is archived, not showing to whistleblower');
+        toast({
+          title: "Case Not Found",
+          description: "Your case was either resolved or removed. Please submit a new case or check your case ID.",
+          variant: "destructive",
+        });
+        return;
+      }
+
       console.log('Report found:', data);
       setReport(data);
       toast({

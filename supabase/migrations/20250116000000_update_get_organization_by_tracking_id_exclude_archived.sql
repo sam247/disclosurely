@@ -1,7 +1,6 @@
--- Allow public access to organization branding data via tracking ID lookup
--- This is needed for the success page to show proper branding
+-- Update get_organization_by_tracking_id function to exclude archived reports
+-- This prevents whistleblowers from seeing archived cases
 
--- Create a secure function to get organization data by tracking ID without exposing report content
 CREATE OR REPLACE FUNCTION public.get_organization_by_tracking_id(p_tracking_id text)
 RETURNS TABLE(
   organization_id uuid,
@@ -29,6 +28,3 @@ BEGIN
   LIMIT 1;
 END;
 $$;
-
--- Grant execute permission to anonymous users
-GRANT EXECUTE ON FUNCTION public.get_organization_by_tracking_id(text) TO anon;

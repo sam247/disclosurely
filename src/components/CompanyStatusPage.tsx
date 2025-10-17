@@ -165,6 +165,13 @@ const CompanyStatusPage = () => {
         return;
       }
 
+      // Check if report is archived - don't show to whistleblowers
+      if (reportData.status === 'archived') {
+        console.log("Report is archived, not showing to whistleblower");
+        toast.error("Case Not Found. Your case was either resolved or removed. Please submit a new case or check your case ID.");
+        return;
+      }
+
       console.log("Report found:", reportData);
       setReport(reportData);
 

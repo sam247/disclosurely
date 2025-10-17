@@ -26,3 +26,4 @@ dist-ssr
 
 .cursor/rules/kluster-code-verify.mdc
 .kluster
+.vercel
