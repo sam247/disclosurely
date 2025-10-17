@@ -14,6 +14,7 @@ import BrandingView from './components/dashboard/BrandingView';
 import SecureLinkView from './components/dashboard/SecureLinkView';
 import IntegrationsView from './components/IntegrationsView';
 import AnalyticsView from './components/AnalyticsView';
+import AuditLogView from './components/AuditLogView';
 import Index from './pages/Index';
 import Login from './pages/Login';
 import Signup from './pages/Signup';
@@ -216,6 +217,16 @@ const AppContent = () => {
             <ProtectedRoute>
               <DashboardLayout>
                 <AnalyticsView />
+              </DashboardLayout>
+            </ProtectedRoute>
+          } 
+        />
+        <Route 
+          path="/dashboard/audit" 
+          element={
+            <ProtectedRoute>
+              <DashboardLayout>
+                <AuditLogView />
               </DashboardLayout>
             </ProtectedRoute>
           } 
