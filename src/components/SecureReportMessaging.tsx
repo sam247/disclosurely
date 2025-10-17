@@ -63,6 +63,8 @@ const SecureReportMessaging = () => {
   useEffect(() => {
     if (trackingId) {
       fetchReportAndMessages();
+      // Also fetch organization branding independently in case report lookup fails
+      fetchOrganizationBranding();
     }
     
     // Get organization data from navigation state if available
@@ -193,6 +195,36 @@ const SecureReportMessaging = () => {
     }
   };
 
+  const fetchOrganizationBranding = async () => {
+    if (!trackingId) return;
+    
+    try {
+      console.log('Fetching organization branding for tracking ID:', trackingId);
+      
+      // Use the RPC function to get organization data by tracking ID
+      const { data: orgData, error: orgError } = await supabase
+        .rpc('get_organization_by_tracking_id', { p_tracking_id: trackingId });
+
+      if (orgError || !orgData || orgData.length === 0) {
+        console.error('Organization branding lookup error:', orgError);
+        return;
+      }
+
+      const org = orgData[0];
+      console.log('Found organization branding:', org);
+      
+      setOrganizationData({
+        id: org.organization_id,
+        name: org.organization_name,
+        logo_url: org.logo_url,
+        custom_logo_url: org.custom_logo_url,
+        brand_color: org.brand_color
+      });
+    } catch (error) {
+      console.error('Error fetching organization branding:', error);
+    }
+  };
+
   const handleSendMessage = async (e: React.FormEvent) => {
     e.preventDefault();
     
@@ -294,6 +326,8 @@ const SecureReportMessaging = () => {
         title="Report Not Found"
         description="Unable to load report"
         organizationName={organizationData?.name || "Error"}
+        logoUrl={organizationData?.custom_logo_url || organizationData?.logo_url}
+        brandColor={organizationData?.brand_color}
       >
         <div className="text-center py-8">
           <p className="text-red-600">Report not found. Please check your tracking ID.</p>
