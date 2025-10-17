@@ -6,7 +6,7 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { Badge } from '@/components/ui/badge';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
-import { FileText, Eye, Archive, Trash2, RotateCcw, MoreVertical, XCircle, ChevronUp, ChevronDown, CheckCircle } from 'lucide-react';
+import { FileText, Eye, Archive, Trash2, RotateCcw, MoreVertical, XCircle, ChevronUp, ChevronDown, CheckCircle, Search } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import ReportMessaging from '@/components/ReportMessaging';
 import ReportContentDisplay from '@/components/ReportContentDisplay';
@@ -188,7 +188,7 @@ const DashboardView = () => {
           .from('reports')
           .select('id, title, tracking_id, status, created_at, encrypted_content, encryption_key_hash, priority, report_type, submitted_by_email, tags, assigned_to, ai_risk_score, ai_risk_level, ai_likelihood_score, ai_impact_score, ai_risk_assessment, ai_assessed_at, manual_risk_level')
           .eq('organization_id', profile.organization_id)
-          .not('status', 'in', '(archived,closed,deleted)')
+          .not('status', 'in', '(archived,deleted)')
           .is('deleted_at', null)
           .order('created_at', { ascending: false })
           .limit(20);
@@ -220,7 +220,7 @@ const DashboardView = () => {
           .from('reports')
           .select('id, title, tracking_id, status, created_at, encrypted_content, encryption_key_hash, priority, report_type, submitted_by_email, tags, assigned_to, manual_risk_level')
           .eq('organization_id', profile.organization_id)
-          .not('status', 'in', '(archived,closed,deleted)')
+          .not('status', 'in', '(archived,deleted)')
           .is('deleted_at', null)
           .order('created_at', { ascending: false })
           .limit(20);
@@ -725,32 +725,84 @@ Additional Details: ${decryptedContent.additionalDetails || 'None provided'}
                                   <MoreVertical className="h-4 w-4" />
                                 </Button>
                               </DropdownMenuTrigger>
-                              <DropdownMenuContent align="end" className="w-40">
+                              <DropdownMenuContent align="end" className="w-48">
                                 <DropdownMenuItem 
                                   onClick={async () => {
                                     try {
                                       const { error } = await supabase
                                         .from('reports')
                                         .update({ 
-                                          status: 'closed',
-                                          closed_at: new Date().toISOString()
+                                          status: 'in_review',
+                                          updated_at: new Date().toISOString()
                                         })
                                         .eq('id', report.id);
                                       
                                       if (error) throw error;
-                                      toast({ title: 'Report closed successfully' });
+                                      toast({ title: 'Report marked as In Review' });
                                       fetchData();
                                     } catch (error) {
-                                      console.error('Error closing report:', error);
+                                      console.error('Error updating report status:', error);
                                       toast({ 
-                                        title: 'Error closing report',
+                                        title: 'Error updating report status',
                                         variant: 'destructive'
                                       });
                                     }
                                   }}
                                 >
-                                  <XCircle className="h-4 w-4 mr-2" />
-                                  Close
+                                  <Eye className="h-4 w-4 mr-2" />
+                                  Mark as In Review
+                                </DropdownMenuItem>
+                                <DropdownMenuItem 
+                                  onClick={async () => {
+                                    try {
+                                      const { error } = await supabase
+                                        .from('reports')
+                                        .update({ 
+                                          status: 'investigating',
+                                          updated_at: new Date().toISOString()
+                                        })
+                                        .eq('id', report.id);
+                                      
+                                      if (error) throw error;
+                                      toast({ title: 'Report marked as Investigating' });
+                                      fetchData();
+                                    } catch (error) {
+                                      console.error('Error updating report status:', error);
+                                      toast({ 
+                                        title: 'Error updating report status',
+                                        variant: 'destructive'
+                                      });
+                                    }
+                                  }}
+                                >
+                                  <Search className="h-4 w-4 mr-2" />
+                                  Mark as Investigating
+                                </DropdownMenuItem>
+                                <DropdownMenuItem 
+                                  onClick={async () => {
+                                    try {
+                                      const { error } = await supabase
+                                        .from('reports')
+                                        .update({ 
+                                          status: 'resolved',
+                                          resolved_at: new Date().toISOString()
+                                        })
+                                        .eq('id', report.id);
+                                      
+                                      if (error) throw error;
+                                      toast({ title: 'Report marked as resolved' });
+                                      fetchData();
+                                    } catch (error) {
+                                      console.error('Error resolving report:', error);
+                                      toast({ 
+                                        title: 'Error resolving report',
+                                        variant: 'destructive'
+                                      });
+                                    }
+                                  }}
+                                >
+                                  <CheckCircle className="h-4 w-4 mr-2" />
+                                  Mark as Resolved
                                 </DropdownMenuItem>
                                 <DropdownMenuItem onClick={() => handleArchiveReport(report.id)}>
                                   <Archive className="h-4 w-4 mr-2" />
