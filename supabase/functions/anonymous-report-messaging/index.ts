@@ -46,6 +46,7 @@ serve(async (req) => {
           "id, tracking_id, title, status, created_at, organization_id, organizations(name, brand_color, logo_url, custom_logo_url)"
         )
         .eq("tracking_id", trackingId)
+        .neq("status", "archived") // Exclude archived reports
         .maybeSingle();
       return report;
     };
