@@ -6,6 +6,7 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { Badge } from '@/components/ui/badge';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
+import { logCaseEvent } from '@/utils/auditLogger';
 import { FileText, Eye, Archive, Trash2, RotateCcw, MoreVertical, XCircle, ChevronUp, ChevronDown, CheckCircle, Search } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import ReportMessaging from '@/components/ReportMessaging';
@@ -275,6 +276,19 @@ const DashboardView = () => {
 
         if (error) throw error;
 
+        // Log audit event
+        await logCaseEvent(
+          'update',
+          user?.id || '',
+          user?.email || '',
+          report.organization_id,
+          report.id,
+          report.title,
+          { status: 'new' },
+          { status: 'live', first_read_at: new Date().toISOString() },
+          { action: 'first_view', previous_status: 'new' }
+        );
+
         // Update local state
         setReports(prevReports => 
           prevReports.map(r => 
@@ -300,6 +314,22 @@ const DashboardView = () => {
         .eq('id', reportId);
 
       if (error) throw error;
+
+      // Log audit event
+      const reportToArchive = reports.find(r => r.id === reportId);
+      if (reportToArchive) {
+        await logCaseEvent(
+          'archive',
+          user?.id || '',
+          user?.email || '',
+          reportToArchive.organization_id,
+          reportToArchive.id,
+          reportToArchive.title,
+          { status: reportToArchive.status },
+          { status: 'archived', archived_at: new Date().toISOString() },
+          { action: 'archive', previous_status: reportToArchive.status }
+        );
+      }
 
       toast({
         title: "Report archived",
@@ -738,6 +768,20 @@ Additional Details: ${decryptedContent.additionalDetails || 'None provided'}
                                         .eq('id', report.id);
                                       
                                       if (error) throw error;
+                                      
+                                      // Log audit event
+                                      await logCaseEvent(
+                                        'update',
+                                        user?.id || '',
+                                        user?.email || '',
+                                        report.organization_id,
+                                        report.id,
+                                        report.title,
+                                        { status: report.status },
+                                        { status: 'in_review', updated_at: new Date().toISOString() },
+                                        { action: 'status_change', previous_status: report.status }
+                                      );
+                                      
                                       toast({ title: 'Report marked as In Review' });
                                       fetchData();
                                     } catch (error) {
@@ -764,6 +808,20 @@ Additional Details: ${decryptedContent.additionalDetails || 'None provided'}
                                         .eq('id', report.id);
                                       
                                       if (error) throw error;
+                                      
+                                      // Log audit event
+                                      await logCaseEvent(
+                                        'update',
+                                        user?.id || '',
+                                        user?.email || '',
+                                        report.organization_id,
+                                        report.id,
+                                        report.title,
+                                        { status: report.status },
+                                        { status: 'investigating', updated_at: new Date().toISOString() },
+                                        { action: 'status_change', previous_status: report.status }
+                                      );
+                                      
                                       toast({ title: 'Report marked as Investigating' });
                                       fetchData();
                                     } catch (error) {
@@ -790,6 +848,20 @@ Additional Details: ${decryptedContent.additionalDetails || 'None provided'}
                                         .eq('id', report.id);
                                       
                                       if (error) throw error;
+                                      
+                                      // Log audit event
+                                      await logCaseEvent(
+                                        'resolve',
+                                        user?.id || '',
+                                        user?.email || '',
+                                        report.organization_id,
+                                        report.id,
+                                        report.title,
+                                        { status: report.status },
+                                        { status: 'resolved', resolved_at: new Date().toISOString() },
+                                        { action: 'status_change', previous_status: report.status }
+                                      );
+                                      
                                       toast({ title: 'Report marked as resolved' });
                                       fetchData();
                                     } catch (error) {
