@@ -782,7 +782,7 @@ Additional Details: ${decryptedContent.additionalDetails || 'None provided'}
                                         { action: 'status_change', previous_status: report.status }
                                       );
                                       
-                                      toast({ title: 'Report marked as In Review' });
+                                      toast({ title: 'Report marked as Reviewing' });
                                       fetchData();
                                     } catch (error) {
                                       console.error('Error updating report status:', error);
@@ -794,7 +794,7 @@ Additional Details: ${decryptedContent.additionalDetails || 'None provided'}
                                   }}
                                 >
                                   <Eye className="h-4 w-4 mr-2" />
-                                  Mark as In Review
+                                  Mark as Reviewing
                                 </DropdownMenuItem>
                                 <DropdownMenuItem 
                                   onClick={async () => {
