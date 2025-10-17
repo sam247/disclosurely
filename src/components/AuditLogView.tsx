@@ -43,6 +43,7 @@ const AuditLogView = () => {
   const [hasMore, setHasMore] = useState(false);
   const [selectedLog, setSelectedLog] = useState<AuditLogEntry | null>(null);
   const [chainVerification, setChainVerification] = useState<AuditChainVerification | null>(null);
+  const [tableExists, setTableExists] = useState(true);
   
   // Filters
   const [filters, setFilters] = useState<AuditLogFilters>({
@@ -76,17 +77,23 @@ const AuditLogView = () => {
         organizationId: organization.id,
         dateFrom: dateFrom || undefined,
         dateTo: dateTo || undefined,
-        category: category || undefined,
-        action: action || undefined,
-        severity: severity || undefined,
-        actorType: actorType || undefined,
-        targetType: targetType || undefined,
+        category: category && category !== 'all' ? category : undefined,
+        action: action && action !== 'all' ? action : undefined,
+        severity: severity && severity !== 'all' ? severity : undefined,
+        actorType: actorType && actorType !== 'all' ? actorType : undefined,
+        targetType: targetType && targetType !== 'all' ? targetType : undefined,
         searchText: searchText || undefined,
         limit: filters.limit,
         offset: resetOffset ? 0 : filters.offset
       };
 
       const result = await auditLogger.getLogs(currentFilters);
+      
+      // Check if table exists based on result
+      if (result.total === 0 && logs.length === 0 && !loading) {
+        // This might indicate table doesn't exist, but we'll check more specifically
+        setTableExists(true); // Keep optimistic for now
+      }
       
       if (resetOffset) {
         setLogs(result.logs);
@@ -140,11 +147,11 @@ const AuditLogView = () => {
         organizationId: organization.id,
         dateFrom: dateFrom || undefined,
         dateTo: dateTo || undefined,
-        category: category || undefined,
-        action: action || undefined,
-        severity: severity || undefined,
-        actorType: actorType || undefined,
-        targetType: targetType || undefined,
+        category: category && category !== 'all' ? category : undefined,
+        action: action && action !== 'all' ? action : undefined,
+        severity: severity && severity !== 'all' ? severity : undefined,
+        actorType: actorType && actorType !== 'all' ? actorType : undefined,
+        targetType: targetType && targetType !== 'all' ? targetType : undefined,
         searchText: searchText || undefined
       };
 
@@ -291,7 +298,7 @@ const AuditLogView = () => {
                   <SelectValue placeholder="All categories" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">All categories</SelectItem>
+                  <SelectItem value="all">All categories</SelectItem>
                   <SelectItem value="authentication">Authentication</SelectItem>
                   <SelectItem value="case_management">Case Management</SelectItem>
                   <SelectItem value="user_management">User Management</SelectItem>
@@ -313,7 +320,7 @@ const AuditLogView = () => {
                   <SelectValue placeholder="All severities" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">All severities</SelectItem>
+                  <SelectItem value="all">All severities</SelectItem>
                   <SelectItem value="low">Low</SelectItem>
                   <SelectItem value="medium">Medium</SelectItem>
                   <SelectItem value="high">High</SelectItem>
@@ -347,7 +354,7 @@ const AuditLogView = () => {
                   <SelectValue placeholder="All actions" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">All actions</SelectItem>
+                  <SelectItem value="all">All actions</SelectItem>
                   <SelectItem value="create">Create</SelectItem>
                   <SelectItem value="read">Read</SelectItem>
                   <SelectItem value="update">Update</SelectItem>
@@ -369,7 +376,7 @@ const AuditLogView = () => {
                   <SelectValue placeholder="All actors" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">All actors</SelectItem>
+                  <SelectItem value="all">All actors</SelectItem>
                   <SelectItem value="user">User</SelectItem>
                   <SelectItem value="system">System</SelectItem>
                   <SelectItem value="api">API</SelectItem>
@@ -388,11 +395,11 @@ const AuditLogView = () => {
             <Button variant="outline" onClick={() => {
               setDateFrom('');
               setDateTo('');
-              setCategory('');
-              setAction('');
-              setSeverity('');
-              setActorType('');
-              setTargetType('');
+              setCategory('all');
+              setAction('all');
+              setSeverity('all');
+              setActorType('all');
+              setTargetType('all');
               setSearchText('');
               setFilters(prev => ({ ...prev, offset: 0 }));
               fetchLogs(true);
@@ -426,94 +433,109 @@ const AuditLogView = () => {
           </div>
         </CardHeader>
         <CardContent>
-          <div className="rounded-md border">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Time</TableHead>
-                  <TableHead>Event</TableHead>
-                  <TableHead>Actor</TableHead>
-                  <TableHead>Target</TableHead>
-                  <TableHead>Severity</TableHead>
-                  <TableHead>Summary</TableHead>
-                  <TableHead>Actions</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {logs.map((log) => (
-                  <TableRow key={log.id}>
-                    <TableCell>
-                      <div className="flex items-center space-x-2">
-                        <Clock className="h-4 w-4 text-muted-foreground" />
-                        <div>
-                          <div className="text-sm">{formatTimestamp(log.createdAt)}</div>
-                          <div className="text-xs text-muted-foreground">
-                            {new Date(log.createdAt).toLocaleString()}
-                          </div>
-                        </div>
-                      </div>
-                    </TableCell>
-                    <TableCell>
-                      <div>
-                        <div className="font-medium">{log.eventType}</div>
-                        <Badge variant="outline" className="text-xs">
-                          {log.category}
-                        </Badge>
-                      </div>
-                    </TableCell>
-                    <TableCell>
-                      <div className="flex items-center space-x-2">
-                        <User className="h-4 w-4 text-muted-foreground" />
-                        <div>
-                          <div className="text-sm">{log.actorEmail || log.actorType}</div>
-                          <div className="text-xs text-muted-foreground">{log.actorType}</div>
-                        </div>
-                      </div>
-                    </TableCell>
-                    <TableCell>
-                      {log.targetType && (
-                        <div className="flex items-center space-x-2">
-                          <Target className="h-4 w-4 text-muted-foreground" />
-                          <div>
-                            <div className="text-sm">{log.targetName || log.targetType}</div>
-                            <div className="text-xs text-muted-foreground">{log.targetType}</div>
-                          </div>
-                        </div>
-                      )}
-                    </TableCell>
-                    <TableCell>
-                      <Badge variant={getSeverityColor(log.severity)}>
-                        {getSeverityIcon(log.severity)}
-                        <span className="ml-1 capitalize">{log.severity}</span>
-                      </Badge>
-                    </TableCell>
-                    <TableCell>
-                      <div className="max-w-xs truncate">
-                        {log.summary}
-                      </div>
-                    </TableCell>
-                    <TableCell>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => setSelectedLog(log)}
-                      >
-                        <Eye className="h-4 w-4" />
-                      </Button>
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </div>
-          
-          {/* Load More */}
-          {hasMore && (
-            <div className="flex justify-center mt-4">
-              <Button variant="outline" onClick={loadMore} disabled={loading}>
-                {loading ? 'Loading...' : 'Load More'}
-              </Button>
+          {logs.length === 0 && !loading ? (
+            <div className="text-center py-12">
+              <Shield className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+              <h3 className="text-lg font-medium mb-2">No Audit Logs Yet</h3>
+              <p className="text-muted-foreground mb-4">
+                The audit trail system is ready, but no events have been logged yet.
+              </p>
+              <p className="text-sm text-muted-foreground">
+                Audit logs will appear here as users interact with the system.
+              </p>
             </div>
+          ) : (
+            <>
+              <div className="rounded-md border">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Time</TableHead>
+                      <TableHead>Event</TableHead>
+                      <TableHead>Actor</TableHead>
+                      <TableHead>Target</TableHead>
+                      <TableHead>Severity</TableHead>
+                      <TableHead>Summary</TableHead>
+                      <TableHead>Actions</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {logs.map((log) => (
+                      <TableRow key={log.id}>
+                        <TableCell>
+                          <div className="flex items-center space-x-2">
+                            <Clock className="h-4 w-4 text-muted-foreground" />
+                            <div>
+                              <div className="text-sm">{formatTimestamp(log.createdAt)}</div>
+                              <div className="text-xs text-muted-foreground">
+                                {new Date(log.createdAt).toLocaleString()}
+                              </div>
+                            </div>
+                          </div>
+                        </TableCell>
+                        <TableCell>
+                          <div>
+                            <div className="font-medium">{log.eventType}</div>
+                            <Badge variant="outline" className="text-xs">
+                              {log.category}
+                            </Badge>
+                          </div>
+                        </TableCell>
+                        <TableCell>
+                          <div className="flex items-center space-x-2">
+                            <User className="h-4 w-4 text-muted-foreground" />
+                            <div>
+                              <div className="text-sm">{log.actorEmail || log.actorType}</div>
+                              <div className="text-xs text-muted-foreground">{log.actorType}</div>
+                            </div>
+                          </div>
+                        </TableCell>
+                        <TableCell>
+                          {log.targetType && (
+                            <div className="flex items-center space-x-2">
+                              <Target className="h-4 w-4 text-muted-foreground" />
+                              <div>
+                                <div className="text-sm">{log.targetName || log.targetType}</div>
+                                <div className="text-xs text-muted-foreground">{log.targetType}</div>
+                              </div>
+                            </div>
+                          )}
+                        </TableCell>
+                        <TableCell>
+                          <Badge variant={getSeverityColor(log.severity)}>
+                            {getSeverityIcon(log.severity)}
+                            <span className="ml-1 capitalize">{log.severity}</span>
+                          </Badge>
+                        </TableCell>
+                        <TableCell>
+                          <div className="max-w-xs truncate">
+                            {log.summary}
+                          </div>
+                        </TableCell>
+                        <TableCell>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => setSelectedLog(log)}
+                          >
+                            <Eye className="h-4 w-4" />
+                          </Button>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </div>
+              
+              {/* Load More */}
+              {hasMore && (
+                <div className="flex justify-center mt-4">
+                  <Button variant="outline" onClick={loadMore} disabled={loading}>
+                    {loading ? 'Loading...' : 'Load More'}
+                  </Button>
+                </div>
+              )}
+            </>
           )}
         </CardContent>
       </Card>

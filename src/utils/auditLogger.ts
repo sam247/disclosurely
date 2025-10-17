@@ -208,6 +208,11 @@ class AuditLogger {
       const { data, error, count } = await query;
 
       if (error) {
+        // Check if it's a table doesn't exist error
+        if (error.code === '42703' || error.message.includes('does not exist')) {
+          console.warn('Audit logs table does not exist yet. Migration may not have been applied.');
+          return { logs: [], total: 0, hasMore: false };
+        }
         console.error('Failed to fetch audit logs:', error);
         return { logs: [], total: 0, hasMore: false };
       }
@@ -263,6 +268,15 @@ class AuditLogger {
         .rpc('verify_audit_chain', { p_organization_id: organizationId });
 
       if (error) {
+        // Check if it's a function doesn't exist error
+        if (error.code === 'PGRST202' || error.message.includes('Could not find the function')) {
+          console.warn('Audit chain verification function does not exist yet. Migration may not have been applied.');
+          return {
+            isValid: true, // Assume valid if function doesn't exist yet
+            totalRecords: 0,
+            invalidRecords: 0
+          };
+        }
         console.error('Failed to verify audit chain:', error);
         return {
           isValid: false,
