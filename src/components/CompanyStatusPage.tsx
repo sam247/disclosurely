@@ -5,6 +5,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Shield, Search, MessageSquare, Clock } from "lucide-react";
+import disclosurelyIcon from "@/assets/logos/disclosurely-icon.png";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { Badge } from "@/components/ui/badge";
@@ -305,20 +306,30 @@ const CompanyStatusPage = () => {
                   <img 
                     src={logoUrl} 
                     alt={`${organizationName} logo`}
-                    className="w-10 h-10 object-contain"
+                    className="w-10 h-10 object-contain cursor-pointer"
+                    onClick={() => window.location.href = '/secure/tool/status'}
                     onError={(e) => {
                       const target = e.target as HTMLImageElement;
                       target.style.display = 'none';
                       target.nextElementSibling?.classList.remove('hidden');
                     }}
                   />
-                ) : null}
-                <div 
-                  className={`w-10 h-10 rounded-lg flex items-center justify-center ${logoUrl ? 'hidden' : ''}`}
-                  style={{ backgroundColor: brandColor }}
-                >
-                  <Shield className="h-6 w-6 text-white" />
-                </div>
+                ) : (
+                  <img 
+                    src={disclosurelyIcon} 
+                    alt="Disclosurely logo"
+                    className="w-10 h-10 object-contain cursor-pointer"
+                    onClick={() => window.location.href = '/secure/tool/status'}
+                  />
+                )}
+                {logoUrl && (
+                  <img 
+                    src={disclosurelyIcon} 
+                    alt="Disclosurely logo"
+                    className="w-10 h-10 object-contain cursor-pointer hidden"
+                    onClick={() => window.location.href = '/secure/tool/status'}
+                  />
+                )}
               </div>
               <div>
                 <h1 className="text-xl font-bold text-gray-900">{organizationName}</h1>
@@ -482,6 +493,16 @@ const CompanyStatusPage = () => {
             </div>
           )}
         </div>
+      </div>
+      
+      {/* Back to Submission Portal Link */}
+      <div className="text-center py-6">
+        <a 
+          href="/secure/tool/submit" 
+          className="text-sm text-gray-600 hover:text-gray-800 underline"
+        >
+          ← Back to Secure Submission Portal
+        </a>
       </div>
     </div>
   );

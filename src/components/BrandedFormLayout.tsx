@@ -2,6 +2,7 @@
 import React from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Shield } from 'lucide-react';
+import disclosurelyIcon from "@/assets/logos/disclosurely-icon.png";
 
 interface BrandedFormLayoutProps {
   title: string;
@@ -9,6 +10,7 @@ interface BrandedFormLayoutProps {
   organizationName?: string;
   logoUrl?: string;
   brandColor?: string;
+  subscriptionTier?: 'basic' | 'pro' | null;
   children: React.ReactNode;
 }
 
@@ -18,6 +20,7 @@ const BrandedFormLayout = ({
   organizationName,
   logoUrl,
   brandColor = '#2563eb',
+  subscriptionTier,
   children 
 }: BrandedFormLayoutProps) => {
   return (
@@ -28,11 +31,12 @@ const BrandedFormLayout = ({
           <div className="flex items-center justify-between py-4 max-w-7xl mx-auto">
             <div className="flex items-center">
               <div className="flex items-center justify-center mr-4">
-                 {logoUrl ? (
+                 {logoUrl && subscriptionTier === 'pro' ? (
                    <img 
                      src={logoUrl} 
                      alt={`${organizationName || 'Organization'} logo`}
-                     className="w-10 h-10 sm:w-12 sm:h-12 object-contain"
+                     className="w-10 h-10 sm:w-12 sm:h-12 object-contain cursor-pointer"
+                     onClick={() => window.location.href = '/secure/tool/status'}
                      onError={(e) => {
                        const target = e.target as HTMLImageElement;
                        target.style.display = 'none';
@@ -40,20 +44,20 @@ const BrandedFormLayout = ({
                      }}
                    />
                  ) : (
-                   <div 
-                     className="w-10 h-10 sm:w-12 sm:h-12 rounded-lg flex items-center justify-center"
-                     style={{ backgroundColor: brandColor }}
-                   >
-                     <Shield className="h-6 w-6 sm:h-7 sm:w-7 text-white" />
-                   </div>
+                   <img 
+                     src={disclosurelyIcon} 
+                     alt="Disclosurely logo"
+                     className="w-10 h-10 sm:w-12 sm:h-12 object-contain cursor-pointer"
+                     onClick={() => window.location.href = '/secure/tool/status'}
+                   />
                  )}
-                {logoUrl && (
-                  <div 
-                    className="w-10 h-10 rounded-lg flex items-center justify-center hidden"
-                    style={{ backgroundColor: brandColor }}
-                  >
-                    <Shield className="h-6 w-6 text-white" />
-                  </div>
+                {logoUrl && subscriptionTier === 'pro' && (
+                  <img 
+                    src={disclosurelyIcon} 
+                    alt="Disclosurely logo"
+                    className="w-10 h-10 sm:w-12 sm:h-12 object-contain cursor-pointer hidden"
+                    onClick={() => window.location.href = '/secure/tool/status'}
+                  />
                 )}
               </div>
               <div>
