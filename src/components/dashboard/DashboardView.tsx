@@ -102,7 +102,7 @@ interface Report {
   id: string;
   title: string;
   tracking_id: string;
-  status: 'new' | 'live' | 'in_review' | 'investigating' | 'resolved' | 'closed' | 'archived' | 'deleted';
+  status: 'new' | 'live' | 'reviewing' | 'investigating' | 'resolved' | 'closed' | 'archived' | 'deleted';
   created_at: string;
   encrypted_content: string;
   encryption_key_hash: string;
@@ -762,7 +762,7 @@ Additional Details: ${decryptedContent.additionalDetails || 'None provided'}
                                       const { error } = await supabase
                                         .from('reports')
                                         .update({ 
-                                          status: 'in_review',
+                                          status: 'reviewing',
                                           updated_at: new Date().toISOString()
                                         })
                                         .eq('id', report.id);
@@ -778,7 +778,7 @@ Additional Details: ${decryptedContent.additionalDetails || 'None provided'}
                                         report.id,
                                         report.title,
                                         { status: report.status },
-                                        { status: 'in_review', updated_at: new Date().toISOString() },
+                                        { status: 'reviewing', updated_at: new Date().toISOString() },
                                         { action: 'status_change', previous_status: report.status }
                                       );
                                       

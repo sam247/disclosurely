@@ -1659,7 +1659,7 @@ export type Database = {
     Enums: {
       report_status:
         | "new"
-        | "in_review"
+        | "reviewing"
         | "investigating"
         | "resolved"
         | "closed"
@@ -1797,7 +1797,7 @@ export const Constants = {
     Enums: {
       report_status: [
         "new",
-        "in_review",
+        "reviewing",
         "investigating",
         "resolved",
         "closed",
