@@ -21,12 +21,17 @@ import aiPoweredCaseAnalysisArtwork from "@/assets/artwork/ai_powered_case_analy
 import iso27001Badge from "/lovable-uploads/9762866a-d8d9-4860-bf30-3ffd178885a8.png";
 import gdprBadge from "/lovable-uploads/70aa6ac0-c161-4167-921d-79f08f6f4b02.png";
 import aicpaBadge from "/lovable-uploads/a9716d48-ff27-4193-b51c-9b035d1692b0.png";
-import techFlowLogo from "@/assets/logos/techflow-logo-clean.png";
-import greenPointLogo from "@/assets/logos/greenpoint-logo.png";
-import innovateLogo from "@/assets/logos/innovate-logo.png";
-import horizonLogo from "@/assets/logos/horizon-logo.png";
-import metroSyncLogo from "@/assets/logos/metrosync-logo-clean.png";
-import prismLogo from "@/assets/logos/prism-logo-clean.png";
+// Business logos from /public/business_logos/
+const businessLogos = [
+  { src: "/business_logos/page-1.png", alt: "Business Partner 1" },
+  { src: "/business_logos/page-2.png", alt: "Business Partner 2" },
+  { src: "/business_logos/page-3.png", alt: "Business Partner 3" },
+  { src: "/business_logos/page-4.png", alt: "Business Partner 4" },
+  { src: "/business_logos/page-5.png", alt: "Business Partner 5" },
+  { src: "/business_logos/page-6.png", alt: "Business Partner 6" },
+  { src: "/business_logos/page-7.png", alt: "Business Partner 7" },
+  { src: "/business_logos/page-8.png", alt: "Business Partner 8" }
+];
 const Landing = () => {
   const { t, i18n } = useTranslation();
   const currentLanguage = i18n.language;
@@ -106,70 +111,26 @@ const Landing = () => {
               <div className="flex animate-scroll space-x-16 items-center">
                 {/* First set of logos */}
                 <div className="flex space-x-16 items-center min-w-fit">
-                  <img
-                    src={techFlowLogo}
-                    alt="TechFlow"
-                    className="h-24 w-auto object-contain opacity-70 hover:opacity-100 transition-opacity"
-                  />
-                  <img
-                    src={greenPointLogo}
-                    alt="GreenPoint"
-                    className="h-24 w-auto object-contain opacity-70 hover:opacity-100 transition-opacity"
-                  />
-                  <img
-                    src={innovateLogo}
-                    alt="Innovate Industries"
-                    className="h-24 w-auto object-contain opacity-70 hover:opacity-100 transition-opacity"
-                  />
-                  <img
-                    src={horizonLogo}
-                    alt="Horizon Group"
-                    className="h-24 w-auto object-contain opacity-70 hover:opacity-100 transition-opacity"
-                  />
-                  <img
-                    src={metroSyncLogo}
-                    alt="MetroSync Technologies"
-                    className="h-24 w-auto object-contain opacity-70 hover:opacity-100 transition-opacity"
-                  />
-                  <img
-                    src={prismLogo}
-                    alt="Prism Analytics"
-                    className="h-24 w-auto object-contain opacity-70 hover:opacity-100 transition-opacity"
-                  />
+                  {businessLogos.map((logo, index) => (
+                    <img
+                      key={`first-${index}`}
+                      src={logo.src}
+                      alt={logo.alt}
+                      className="h-12 w-auto object-contain opacity-70 hover:opacity-100 transition-opacity"
+                    />
+                  ))}
                 </div>
 
                 {/* Duplicate set for seamless loop */}
                 <div className="flex space-x-16 items-center min-w-fit">
-                  <img
-                    src={techFlowLogo}
-                    alt="TechFlow"
-                    className="h-24 w-auto object-contain opacity-70 hover:opacity-100 transition-opacity"
-                  />
-                  <img
-                    src={greenPointLogo}
-                    alt="GreenPoint"
-                    className="h-24 w-auto object-contain opacity-70 hover:opacity-100 transition-opacity"
-                  />
-                  <img
-                    src={innovateLogo}
-                    alt="Innovate Industries"
-                    className="h-24 w-auto object-contain opacity-70 hover:opacity-100 transition-opacity"
-                  />
-                  <img
-                    src={horizonLogo}
-                    alt="Horizon Group"
-                    className="h-24 w-auto object-contain opacity-70 hover:opacity-100 transition-opacity"
-                  />
-                  <img
-                    src={metroSyncLogo}
-                    alt="MetroSync Technologies"
-                    className="h-24 w-auto object-contain opacity-70 hover:opacity-100 transition-opacity"
-                  />
-                  <img
-                    src={prismLogo}
-                    alt="Prism Analytics"
-                    className="h-24 w-auto object-contain opacity-70 hover:opacity-100 transition-opacity"
-                  />
+                  {businessLogos.map((logo, index) => (
+                    <img
+                      key={`second-${index}`}
+                      src={logo.src}
+                      alt={logo.alt}
+                      className="h-12 w-auto object-contain opacity-70 hover:opacity-100 transition-opacity"
+                    />
+                  ))}
                 </div>
               </div>
             </div>
