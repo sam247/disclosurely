@@ -277,17 +277,19 @@ const DashboardView = () => {
         if (error) throw error;
 
         // Log audit event
-        await logCaseEvent(
-          'update',
-          user?.id || '',
-          user?.email || '',
-          report.organization_id,
-          report.id,
-          report.title,
-          { status: 'new' },
-          { status: 'live', first_read_at: new Date().toISOString() },
-          { action: 'first_view', previous_status: 'new' }
-        );
+        if (organizationId) {
+          await logCaseEvent(
+            'update',
+            user?.id || '',
+            user?.email || '',
+            organizationId,
+            report.id,
+            report.title,
+            { status: 'new' },
+            { status: 'live', first_read_at: new Date().toISOString() },
+            { action: 'first_view', previous_status: 'new' }
+          );
+        }
 
         // Update local state
         setReports(prevReports => 
@@ -317,12 +319,12 @@ const DashboardView = () => {
 
       // Log audit event
       const reportToArchive = reports.find(r => r.id === reportId);
-      if (reportToArchive) {
+      if (reportToArchive && organizationId) {
         await logCaseEvent(
           'archive',
           user?.id || '',
           user?.email || '',
-          reportToArchive.organization_id,
+          organizationId,
           reportToArchive.id,
           reportToArchive.title,
           { status: reportToArchive.status },
@@ -770,17 +772,19 @@ Additional Details: ${decryptedContent.additionalDetails || 'None provided'}
                                       if (error) throw error;
                                       
                                       // Log audit event
-                                      await logCaseEvent(
-                                        'update',
-                                        user?.id || '',
-                                        user?.email || '',
-                                        report.organization_id,
-                                        report.id,
-                                        report.title,
-                                        { status: report.status },
-                                        { status: 'reviewing', updated_at: new Date().toISOString() },
-                                        { action: 'status_change', previous_status: report.status }
-                                      );
+                                      if (organizationId) {
+                                        await logCaseEvent(
+                                          'update',
+                                          user?.id || '',
+                                          user?.email || '',
+                                          organizationId,
+                                          report.id,
+                                          report.title,
+                                          { status: report.status },
+                                          { status: 'reviewing', updated_at: new Date().toISOString() },
+                                          { action: 'status_change', previous_status: report.status }
+                                        );
+                                      }
                                       
                                       toast({ title: 'Report marked as Reviewing' });
                                       fetchData();
@@ -810,17 +814,19 @@ Additional Details: ${decryptedContent.additionalDetails || 'None provided'}
                                       if (error) throw error;
                                       
                                       // Log audit event
-                                      await logCaseEvent(
-                                        'update',
-                                        user?.id || '',
-                                        user?.email || '',
-                                        report.organization_id,
-                                        report.id,
-                                        report.title,
-                                        { status: report.status },
-                                        { status: 'investigating', updated_at: new Date().toISOString() },
-                                        { action: 'status_change', previous_status: report.status }
-                                      );
+                                      if (organizationId) {
+                                        await logCaseEvent(
+                                          'update',
+                                          user?.id || '',
+                                          user?.email || '',
+                                          organizationId,
+                                          report.id,
+                                          report.title,
+                                          { status: report.status },
+                                          { status: 'investigating', updated_at: new Date().toISOString() },
+                                          { action: 'status_change', previous_status: report.status }
+                                        );
+                                      }
                                       
                                       toast({ title: 'Report marked as Investigating' });
                                       fetchData();
@@ -850,17 +856,19 @@ Additional Details: ${decryptedContent.additionalDetails || 'None provided'}
                                       if (error) throw error;
                                       
                                       // Log audit event
-                                      await logCaseEvent(
-                                        'resolve',
-                                        user?.id || '',
-                                        user?.email || '',
-                                        report.organization_id,
-                                        report.id,
-                                        report.title,
-                                        { status: report.status },
-                                        { status: 'resolved', resolved_at: new Date().toISOString() },
-                                        { action: 'status_change', previous_status: report.status }
-                                      );
+                                      if (organizationId) {
+                                        await logCaseEvent(
+                                          'resolve',
+                                          user?.id || '',
+                                          user?.email || '',
+                                          organizationId,
+                                          report.id,
+                                          report.title,
+                                          { status: report.status },
+                                          { status: 'resolved', resolved_at: new Date().toISOString() },
+                                          { action: 'status_change', previous_status: report.status }
+                                        );
+                                      }
                                       
                                       toast({ title: 'Report marked as resolved' });
                                       fetchData();
