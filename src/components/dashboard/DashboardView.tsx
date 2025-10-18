@@ -768,6 +768,7 @@ Additional Details: ${decryptedContent.additionalDetails || 'None provided'}
                               <DropdownMenuContent align="end" className="w-48">
                                 <DropdownMenuItem 
                                   onClick={async () => {
+                                    console.log('Dropdown clicked: Mark as Reviewing');
                                     try {
                                       console.log('DashboardView: Starting status change to reviewing for report:', report.id);
                                       const { error } = await supabase
