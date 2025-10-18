@@ -135,6 +135,8 @@ class AuditLogger {
       if (error) {
         console.error('Failed to log audit event:', error);
         console.error('Error details:', error.message, error.code, error.details);
+        console.error('Error hint:', error.hint);
+        console.error('Full error object:', JSON.stringify(error, null, 2));
         return null;
       }
 
