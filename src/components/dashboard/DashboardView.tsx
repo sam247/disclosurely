@@ -777,6 +777,8 @@ Additional Details: ${decryptedContent.additionalDetails || 'None provided'}
                                       
                                       // Log audit event
                                       console.log('DashboardView: Dropdown action - organizationId:', organizationId);
+                                      console.log('DashboardView: User ID:', user?.id);
+                                      console.log('DashboardView: User email:', user?.email);
                                       if (organizationId) {
                                         await logCaseEvent(
                                           'update',

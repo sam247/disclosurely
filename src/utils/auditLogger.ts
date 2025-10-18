@@ -95,6 +95,8 @@ class AuditLogger {
   async log(data: AuditLogData): Promise<AuditLogEntry | null> {
     try {
       console.log('AuditLogger: Attempting to log event:', data);
+      console.log('AuditLogger: About to call supabase.from(audit_logs).insert');
+      
       const { data: result, error } = await supabase
         .from('audit_logs')
         .insert({
@@ -132,6 +134,9 @@ class AuditLogger {
         .select()
         .single();
 
+      console.log('AuditLogger: Insert completed. Result:', result);
+      console.log('AuditLogger: Error:', error);
+
       if (error) {
         console.error('Failed to log audit event:', error);
         console.error('Error details:', error.message, error.code, error.details);
@@ -140,6 +145,7 @@ class AuditLogger {
         return null;
       }
 
+      console.log('AuditLogger: Log event successful:', result);
       return result as AuditLogEntry;
     } catch (error) {
       console.error('Error logging audit event:', error);
