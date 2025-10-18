@@ -44,6 +44,7 @@ const AuditLogView = () => {
   const [selectedLog, setSelectedLog] = useState<AuditLogEntry | null>(null);
   const [chainVerification, setChainVerification] = useState<AuditChainVerification | null>(null);
   const [tableExists, setTableExists] = useState(true);
+  const [filtersExpanded, setFiltersExpanded] = useState(false);
   
   // Filters
   const [filters, setFilters] = useState<AuditLogFilters>({
@@ -263,12 +264,21 @@ const AuditLogView = () => {
       {/* Filters */}
       <Card>
         <CardHeader>
-          <CardTitle className="flex items-center">
+          <CardTitle 
+            className="flex items-center cursor-pointer hover:bg-gray-50 p-2 -m-2 rounded"
+            onClick={() => setFiltersExpanded(!filtersExpanded)}
+          >
             <Filter className="h-5 w-5 mr-2" />
             Filters
+            {filtersExpanded ? (
+              <ChevronDown className="h-4 w-4 ml-auto" />
+            ) : (
+              <ChevronRight className="h-4 w-4 ml-auto" />
+            )}
           </CardTitle>
         </CardHeader>
-        <CardContent className="space-y-4">
+        {filtersExpanded && (
+          <CardContent className="space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
             {/* Date Range */}
             <div className="space-y-2">
@@ -408,6 +418,7 @@ const AuditLogView = () => {
             </Button>
           </div>
         </CardContent>
+        )}
       </Card>
 
       {/* Results */}
