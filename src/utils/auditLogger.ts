@@ -94,6 +94,7 @@ class AuditLogger {
    */
   async log(data: AuditLogData): Promise<AuditLogEntry | null> {
     try {
+      console.log('AuditLogger: Attempting to log event:', data);
       const { data: result, error } = await supabase
         .from('audit_logs')
         .insert({
@@ -129,6 +130,7 @@ class AuditLogger {
 
       if (error) {
         console.error('Failed to log audit event:', error);
+        console.error('Error details:', error.message, error.code, error.details);
         return null;
       }
 
@@ -416,6 +418,7 @@ export async function logCaseEvent(
   afterState?: Record<string, any>,
   metadata?: Record<string, any>
 ) {
+  console.log('logCaseEvent called with:', { action, actorId, actorEmail, organizationId, caseId, caseTitle });
   return auditLogger.log({
     eventType: `case.${action}`,
     category: 'case_management',
