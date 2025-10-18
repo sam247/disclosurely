@@ -795,7 +795,10 @@ Additional Details: ${decryptedContent.additionalDetails || 'None provided'}
                                       console.log('DashboardView: Dropdown action - effectiveOrganizationId:', effectiveOrganizationId);
                                       console.log('DashboardView: User ID:', user?.id);
                                       console.log('DashboardView: User email:', user?.email);
+                                      console.log('DashboardView: User metadata:', user?.user_metadata);
+                                      console.log('DashboardView: About to check if effectiveOrganizationId exists...');
                                       if (effectiveOrganizationId) {
+                                        console.log('DashboardView: effectiveOrganizationId is valid, calling logCaseEvent...');
                                         await logCaseEvent(
                                           'update',
                                           user?.id || '',
@@ -812,6 +815,8 @@ Additional Details: ${decryptedContent.additionalDetails || 'None provided'}
                                         await new Promise(resolve => setTimeout(resolve, 100));
                                       } else {
                                         console.log('DashboardView: effectiveOrganizationId is null/undefined, cannot log audit event');
+                                        console.log('DashboardView: organizationId from useCustomDomain:', organizationId);
+                                        console.log('DashboardView: user?.user_metadata?.organization_id:', user?.user_metadata?.organization_id);
                                       }
                                       
                                       toast({ title: 'Report marked as Reviewing' });
