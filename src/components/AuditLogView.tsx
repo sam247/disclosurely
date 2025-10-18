@@ -436,6 +436,14 @@ const AuditLogView = () => {
               </CardDescription>
             </div>
             <div className="flex items-center space-x-2">
+              <Button 
+                variant="outline" 
+                onClick={() => fetchLogs(true)}
+                disabled={loading}
+              >
+                <Activity className="h-4 w-4 mr-2" />
+                Refresh
+              </Button>
               <Button variant="outline" onClick={() => exportLogs('csv')}>
                 <Download className="h-4 w-4 mr-2" />
                 Export CSV

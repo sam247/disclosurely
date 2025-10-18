@@ -790,6 +790,8 @@ Additional Details: ${decryptedContent.additionalDetails || 'None provided'}
                                           { action: 'status_change', previous_status: report.status }
                                         );
                                         console.log('DashboardView: Audit event logged successfully');
+                                        // Small delay to ensure database transaction is committed
+                                        await new Promise(resolve => setTimeout(resolve, 100));
                                       } else {
                                         console.log('DashboardView: organizationId is null/undefined, cannot log audit event');
                                       }
