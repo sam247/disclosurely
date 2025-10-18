@@ -764,6 +764,7 @@ Additional Details: ${decryptedContent.additionalDetails || 'None provided'}
                                 <DropdownMenuItem 
                                   onClick={async () => {
                                     try {
+                                      console.log('DashboardView: Starting status change to reviewing for report:', report.id);
                                       const { error } = await supabase
                                         .from('reports')
                                         .update({ 
@@ -810,6 +811,7 @@ Additional Details: ${decryptedContent.additionalDetails || 'None provided'}
                                 <DropdownMenuItem 
                                   onClick={async () => {
                                     try {
+                                      console.log('DashboardView: Starting status change to investigating for report:', report.id);
                                       const { error } = await supabase
                                         .from('reports')
                                         .update({ 
