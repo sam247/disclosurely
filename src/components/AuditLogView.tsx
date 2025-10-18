@@ -489,16 +489,16 @@ const AuditLogView = () => {
                           <div className="flex items-center space-x-2">
                             <Clock className="h-4 w-4 text-muted-foreground" />
                             <div>
-                              <div className="text-sm">{formatTimestamp(log.createdAt)}</div>
+                              <div className="text-sm">{formatTimestamp(log.created_at)}</div>
                               <div className="text-xs text-muted-foreground">
-                                {new Date(log.createdAt).toLocaleString()}
+                                {new Date(log.created_at).toLocaleString()}
                               </div>
                             </div>
                           </div>
                         </TableCell>
                         <TableCell>
                           <div>
-                            <div className="font-medium">{log.eventType}</div>
+                            <div className="font-medium">{log.event_type}</div>
                             <Badge variant="outline" className="text-xs">
                               {log.category}
                             </Badge>
@@ -508,18 +508,18 @@ const AuditLogView = () => {
                           <div className="flex items-center space-x-2">
                             <User className="h-4 w-4 text-muted-foreground" />
                             <div>
-                              <div className="text-sm">{log.actorEmail || log.actorType}</div>
-                              <div className="text-xs text-muted-foreground">{log.actorType}</div>
+                              <div className="text-sm">{log.actor_email || log.actor_type}</div>
+                              <div className="text-xs text-muted-foreground">{log.actor_type}</div>
                             </div>
                           </div>
                         </TableCell>
                         <TableCell>
-                          {log.targetType && (
+                          {log.target_type && (
                             <div className="flex items-center space-x-2">
                               <Target className="h-4 w-4 text-muted-foreground" />
                               <div>
-                                <div className="text-sm">{log.targetName || log.targetType}</div>
-                                <div className="text-xs text-muted-foreground">{log.targetType}</div>
+                                <div className="text-sm">{log.target_name || log.target_type}</div>
+                                <div className="text-xs text-muted-foreground">{log.target_type}</div>
                               </div>
                             </div>
                           )}
@@ -587,7 +587,7 @@ const AuditLogView = () => {
                   <div className="grid grid-cols-2 gap-4">
                     <div>
                       <Label className="text-sm font-medium">Event Type</Label>
-                      <p className="text-sm">{selectedLog.eventType}</p>
+                      <p className="text-sm">{selectedLog.event_type}</p>
                     </div>
                     <div>
                       <Label className="text-sm font-medium">Category</Label>
@@ -605,11 +605,11 @@ const AuditLogView = () => {
                     </div>
                     <div>
                       <Label className="text-sm font-medium">Actor</Label>
-                      <p className="text-sm">{selectedLog.actorEmail || selectedLog.actorType}</p>
+                      <p className="text-sm">{selectedLog.actor_email || selectedLog.actor_type}</p>
                     </div>
                     <div>
                       <Label className="text-sm font-medium">Target</Label>
-                      <p className="text-sm">{selectedLog.targetName || selectedLog.targetType || 'N/A'}</p>
+                      <p className="text-sm">{selectedLog.target_name || selectedLog.target_type || 'N/A'}</p>
                     </div>
                     <div>
                       <Label className="text-sm font-medium">Summary</Label>
@@ -626,19 +626,19 @@ const AuditLogView = () => {
                   <div className="grid grid-cols-2 gap-4">
                     <div>
                       <Label className="text-sm font-medium">Timestamp</Label>
-                      <p className="text-sm">{new Date(selectedLog.createdAt).toLocaleString()}</p>
+                      <p className="text-sm">{new Date(selectedLog.created_at).toLocaleString()}</p>
                     </div>
                     <div>
                       <Label className="text-sm font-medium">IP Address</Label>
-                      <p className="text-sm">{selectedLog.actorIpAddress || 'N/A'}</p>
+                      <p className="text-sm">{selectedLog.actor_ip_address || 'N/A'}</p>
                     </div>
                     <div>
                       <Label className="text-sm font-medium">User Agent</Label>
-                      <p className="text-sm truncate">{selectedLog.actorUserAgent || 'N/A'}</p>
+                      <p className="text-sm truncate">{selectedLog.actor_user_agent || 'N/A'}</p>
                     </div>
                     <div>
                       <Label className="text-sm font-medium">Request Path</Label>
-                      <p className="text-sm">{selectedLog.requestPath || 'N/A'}</p>
+                      <p className="text-sm">{selectedLog.request_path || 'N/A'}</p>
                     </div>
                   </div>
                   
@@ -651,20 +651,20 @@ const AuditLogView = () => {
                     </div>
                     <div>
                       <Label className="text-sm font-medium">Chain Index</Label>
-                      <p className="text-sm">{selectedLog.chainIndex}</p>
+                      <p className="text-sm">{selectedLog.chain_index}</p>
                     </div>
                   </div>
                 </TabsContent>
                 
                 <TabsContent value="before">
                   <pre className="text-sm bg-muted p-4 rounded-md overflow-auto">
-                    {selectedLog.beforeState ? JSON.stringify(selectedLog.beforeState, null, 2) : 'No before state'}
+                    {selectedLog.before_state ? JSON.stringify(selectedLog.before_state, null, 2) : 'No before state'}
                   </pre>
                 </TabsContent>
                 
                 <TabsContent value="after">
                   <pre className="text-sm bg-muted p-4 rounded-md overflow-auto">
-                    {selectedLog.afterState ? JSON.stringify(selectedLog.afterState, null, 2) : 'No after state'}
+                    {selectedLog.after_state ? JSON.stringify(selectedLog.after_state, null, 2) : 'No after state'}
                   </pre>
                 </TabsContent>
                 

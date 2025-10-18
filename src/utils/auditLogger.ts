@@ -7,7 +7,7 @@ export interface AuditLogData {
   // Core event information
   eventType: string; // e.g., 'user.login', 'case.created', 'case.updated'
   category: 'authentication' | 'case_management' | 'user_management' | 'organization_management' | 'billing' | 'api_access' | 'system' | 'security' | 'compliance';
-  action: 'create' | 'read' | 'update' | 'delete' | 'login' | 'logout' | 'export' | 'import' | 'approve' | 'reject' | 'archive' | 'restore' | 'invite' | 'revoke';
+  action: string; // Changed to string for flexibility
   severity?: 'low' | 'medium' | 'high' | 'critical';
   
   // Actor information
@@ -47,13 +47,39 @@ export interface AuditLogData {
   organizationId: string;
 }
 
-export interface AuditLogEntry extends AuditLogData {
+export interface AuditLogEntry {
   id: string;
-  createdAt: string;
+  created_at: string;
+  event_type: string;
+  category: string;
+  action: string;
+  severity: string;
+  actor_type: string;
+  actor_id?: string | null;
+  actor_email?: string | null;
+  actor_ip_address?: string | null;
+  actor_user_agent?: string | null;
+  actor_session_id?: string | null;
+  target_type?: string | null;
+  target_id?: string | null;
+  target_name?: string | null;
+  summary: string;
+  description?: string | null;
+  metadata?: Record<string, any>;
+  before_state?: Record<string, any> | null;
+  after_state?: Record<string, any> | null;
+  request_id?: string | null;
+  request_method?: string | null;
+  request_path?: string | null;
+  request_params?: Record<string, any> | null;
+  geo_country?: string | null;
+  geo_region?: string | null;
+  geo_city?: string | null;
+  organization_id: string;
   hash: string;
-  previousHash: string;
-  chainIndex: number;
-  retentionUntil: string;
+  previous_hash?: string | null;
+  chain_index: number;
+  retention_until?: string | null;
 }
 
 export interface AuditLogFilters {
@@ -127,10 +153,10 @@ class AuditLogger {
           geo_city: data.geoCity,
           organization_id: data.organizationId,
           // Let the database trigger handle hash generation
-          hash: null,
-          previous_hash: null,
-          chain_index: null
-        })
+          hash: '',
+          previous_hash: '',
+          chain_index: 0
+        } as any)
         .select()
         .single();
 
@@ -146,7 +172,7 @@ class AuditLogger {
       }
 
       console.log('AuditLogger: Log event successful:', result);
-      return result as AuditLogEntry;
+      return result as unknown as AuditLogEntry;
     } catch (error) {
       console.error('Error logging audit event:', error);
       return null;
@@ -235,7 +261,7 @@ class AuditLogger {
       }
 
       return {
-        logs: data as AuditLogEntry[],
+        logs: data as unknown as AuditLogEntry[],
         total: count || 0,
         hasMore: (offset + limit) < (count || 0)
       };
@@ -269,7 +295,7 @@ class AuditLogger {
         return [];
       }
 
-      return data as AuditLogEntry[];
+      return data as unknown as AuditLogEntry[];
     } catch (error) {
       console.error('Error fetching entity audit logs:', error);
       return [];
@@ -282,7 +308,7 @@ class AuditLogger {
   async verifyChain(organizationId: string): Promise<AuditChainVerification> {
     try {
       const { data, error } = await supabase
-        .rpc('verify_audit_chain', { p_organization_id: organizationId });
+        .rpc('verify_audit_chain' as any, { p_organization_id: organizationId });
 
       if (error) {
         // Check if it's a function doesn't exist error
@@ -303,7 +329,7 @@ class AuditLogger {
       }
 
       // The RPC function returns: { is_valid: boolean, total_records: bigint, invalid_records: bigint }
-      if (data && data.length > 0) {
+      if (data && Array.isArray(data) && data.length > 0) {
         const result = data[0];
         return {
           isValid: result.is_valid,
@@ -370,20 +396,20 @@ class AuditLogger {
     ];
 
     const rows = logs.map(log => [
-      log.createdAt,
-      log.eventType,
+      log.created_at,
+      log.event_type,
       log.category,
       log.action,
       log.severity,
-      log.actorType,
-      log.actorEmail || '',
-      log.actorIpAddress || '',
-      log.targetType || '',
-      log.targetName || '',
+      log.actor_type,
+      log.actor_email || '',
+      log.actor_ip_address || '',
+      log.target_type || '',
+      log.target_name || '',
       log.summary,
       log.description || '',
       log.hash,
-      log.chainIndex
+      log.chain_index
     ]);
 
     return [headers, ...rows]

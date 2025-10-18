@@ -22,8 +22,6 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { useCustomDomain } from '@/hooks/useCustomDomain';
-import { useTranslation } from 'react-i18next';
 
 // Risk Level Selector Component
 const RiskLevelSelector = ({ 
