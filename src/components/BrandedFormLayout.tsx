@@ -31,7 +31,7 @@ const BrandedFormLayout = ({
           <div className="flex items-center justify-between py-4 max-w-7xl mx-auto">
             <div className="flex items-center">
               <div className="flex items-center justify-center mr-4">
-                 {logoUrl && subscriptionTier === 'pro' ? (
+                 {logoUrl ? (
                    <img 
                      src={logoUrl} 
                      alt={`${organizationName || 'Organization'} logo`}
@@ -51,7 +51,7 @@ const BrandedFormLayout = ({
                      onClick={() => window.location.href = '/secure/tool/status'}
                    />
                  )}
-                {logoUrl && subscriptionTier === 'pro' && (
+                {logoUrl && (
                   <img 
                     src={disclosurelyIcon} 
                     alt="Disclosurely logo"

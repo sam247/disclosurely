@@ -30,6 +30,7 @@ const SubmissionFormWrapper = () => {
   
   const [linkData, setLinkData] = useState<LinkData | null>(null);
   const [loading, setLoading] = useState(true);
+  const [subscriptionTier, setSubscriptionTier] = useState<'basic' | 'pro' | null>(null);
 
   useEffect(() => {
     if (linkToken) {
@@ -115,6 +116,9 @@ const SubmissionFormWrapper = () => {
         is_active: linkInfo.is_active
       });
 
+      // Fetch subscription tier for the organization
+      await fetchSubscriptionTier(linkInfo.organization_id);
+
     } catch (error) {
       console.error('Error fetching link data:', error);
       toast({
@@ -125,6 +129,47 @@ const SubmissionFormWrapper = () => {
       navigate('/404');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const fetchSubscriptionTier = async (organizationId: string) => {
+    try {
+      // Get organization admins
+      const { data: orgAdmins, error: adminsError } = await supabase
+        .from('profiles')
+        .select('email')
+        .eq('organization_id', organizationId)
+        .eq('role', 'org_admin')
+        .eq('is_active', true);
+
+      if (adminsError) {
+        console.error('Failed to fetch org admins for subscription check:', adminsError);
+        return;
+      }
+
+      const adminEmails = (orgAdmins || []).map(a => a.email).filter((e): e is string => Boolean(e));
+
+      if (adminEmails.length > 0) {
+        const { data: subs, error: subsError } = await supabase
+          .from('subscribers')
+          .select('email, subscribed, subscription_tier')
+          .in('email', adminEmails);
+
+        if (subsError) {
+          console.error('Failed to fetch subscribers for org admins:', subsError);
+          return;
+        }
+
+        const anyActive = subs?.some(s => s.subscribed) ?? false;
+        const tierRaw = subs?.find(s => s.subscribed)?.subscription_tier ?? subs?.[0]?.subscription_tier ?? null;
+        const normalizedTier = tierRaw === 'starter' ? 'basic' : tierRaw; // normalize historic values
+
+        if (anyActive && normalizedTier) {
+          setSubscriptionTier(normalizedTier as 'basic' | 'pro');
+        }
+      }
+    } catch (error) {
+      console.error('Error fetching subscription tier:', error);
     }
   };
 
@@ -163,6 +208,7 @@ const SubmissionFormWrapper = () => {
       organizationName={linkData.organization_name}
       logoUrl={logoUrl}
       brandColor={brandColor}
+      subscriptionTier={subscriptionTier}
     >
       <SecureSubmissionForm
         linkToken={linkToken!}
