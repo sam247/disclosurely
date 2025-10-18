@@ -30,7 +30,7 @@ interface Report {
   id: string;
   title: string;
   tracking_id: string;
-  status: 'new' | 'live' | 'in_review' | 'investigating' | 'resolved' | 'closed' | 'archived' | 'deleted';
+  status: 'new' | 'live' | 'reviewing' | 'investigating' | 'resolved' | 'closed' | 'archived' | 'deleted';
   created_at: string;
   encrypted_content: string;
   encryption_key_hash: string;
@@ -726,7 +726,7 @@ const Dashboard = () => {
     switch (status) {
       case 'new': return 'bg-blue-100 text-blue-800';
       case 'live': return 'bg-green-100 text-green-800';
-      case 'in_review': return 'bg-yellow-100 text-yellow-800';
+      case 'reviewing': return 'bg-yellow-100 text-yellow-800';
       case 'investigating': return 'bg-orange-100 text-orange-800';
       case 'resolved': return 'bg-purple-100 text-purple-800';
       case 'closed': return 'bg-gray-100 text-gray-800';
@@ -765,7 +765,7 @@ const Dashboard = () => {
               <SelectItem value="all">All Statuses</SelectItem>
               <SelectItem value="new">New</SelectItem>
               <SelectItem value="live">Live</SelectItem>
-              <SelectItem value="in_review">In Review</SelectItem>
+              <SelectItem value="reviewing">In Review</SelectItem>
               <SelectItem value="investigating">Investigating</SelectItem>
               <SelectItem value="resolved">Resolved</SelectItem>
               <SelectItem value="closed">Closed</SelectItem>
@@ -992,7 +992,7 @@ const Dashboard = () => {
                 </div>
                 <span className={`px-2 py-1 text-xs rounded-full flex-shrink-0 ml-2 ${
                   report.status === 'new' ? 'bg-blue-100 text-blue-800' :
-                  report.status === 'in_review' ? 'bg-yellow-100 text-yellow-800' :
+                  report.status === 'reviewing' ? 'bg-yellow-100 text-yellow-800' :
                   report.status === 'investigating' ? 'bg-orange-100 text-orange-800' :
                   report.status === 'resolved' ? 'bg-green-100 text-green-800' :
                   report.status === 'closed' ? 'bg-gray-100 text-gray-800' :
@@ -1073,7 +1073,7 @@ const Dashboard = () => {
               <div className="flex items-center space-x-3">
                 <span className={`px-2 py-1 text-xs rounded-full ${
                   report.status === 'new' ? 'bg-blue-100 text-blue-800' :
-                  report.status === 'in_review' ? 'bg-yellow-100 text-yellow-800' :
+                  report.status === 'reviewing' ? 'bg-yellow-100 text-yellow-800' :
                   report.status === 'investigating' ? 'bg-orange-100 text-orange-800' :
                   report.status === 'resolved' ? 'bg-green-100 text-green-800' :
                   report.status === 'closed' ? 'bg-gray-100 text-gray-800' :
@@ -1414,7 +1414,7 @@ const Dashboard = () => {
                                 </div>
                                 <span className={`px-2 py-1 text-xs rounded-full ${
                                   report.status === 'new' ? 'bg-blue-100 text-blue-800' :
-                                  report.status === 'in_review' ? 'bg-yellow-100 text-yellow-800' :
+                                  report.status === 'reviewing' ? 'bg-yellow-100 text-yellow-800' :
                                   report.status === 'investigating' ? 'bg-orange-100 text-orange-800' :
                                   report.status === 'resolved' ? 'bg-green-100 text-green-800' :
                                   report.status === 'closed' ? 'bg-gray-100 text-gray-800' :

@@ -189,64 +189,49 @@ class AuditLogger {
   }> {
     try {
       console.log('AuditLogger: Fetching logs with filters:', filters);
-      let query = supabase
+      const baseQuery = supabase
         .from('audit_logs')
         .select('*', { count: 'exact' });
 
-      // Apply filters
-      if (filters.organizationId) {
-        query = query.eq('organization_id', filters.organizationId);
-      }
+      // Build filters with explicit typing to avoid deep instantiation
+      const filterConditions: any[] = [];
+      
+      if (filters.organizationId) filterConditions.push(['organization_id', 'eq', filters.organizationId]);
+      if (filters.dateFrom) filterConditions.push(['created_at', 'gte', filters.dateFrom]);
+      if (filters.dateTo) filterConditions.push(['created_at', 'lte', filters.dateTo]);
+      if (filters.category) filterConditions.push(['category', 'eq', filters.category]);
+      if (filters.action) filterConditions.push(['action', 'eq', filters.action]);
+      if (filters.severity) filterConditions.push(['severity', 'eq', filters.severity]);
+      if (filters.actorType) filterConditions.push(['actor_type', 'eq', filters.actorType]);
+      if (filters.actorId) filterConditions.push(['actor_id', 'eq', filters.actorId]);
+      if (filters.targetType) filterConditions.push(['target_type', 'eq', filters.targetType]);
+      if (filters.targetId) filterConditions.push(['target_id', 'eq', filters.targetId]);
 
-      if (filters.dateFrom) {
-        query = query.gte('created_at', filters.dateFrom);
-      }
-
-      if (filters.dateTo) {
-        query = query.lte('created_at', filters.dateTo);
-      }
-
-      if (filters.category) {
-        query = query.eq('category', filters.category);
-      }
-
-      if (filters.action) {
-        query = query.eq('action', filters.action);
-      }
-
-      if (filters.severity) {
-        query = query.eq('severity', filters.severity);
-      }
-
-      if (filters.actorType) {
-        query = query.eq('actor_type', filters.actorType);
-      }
-
-      if (filters.actorId) {
-        query = query.eq('actor_id', filters.actorId);
-      }
-
-      if (filters.targetType) {
-        query = query.eq('target_type', filters.targetType);
-      }
-
-      if (filters.targetId) {
-        query = query.eq('target_id', filters.targetId);
+      // Build the query with all filters
+      let finalQuery: any = baseQuery;
+      for (const [column, operator, value] of filterConditions) {
+        if (operator === 'eq') {
+          finalQuery = finalQuery.eq(column, value);
+        } else if (operator === 'gte') {
+          finalQuery = finalQuery.gte(column, value);
+        } else if (operator === 'lte') {
+          finalQuery = finalQuery.lte(column, value);
+        }
       }
 
       if (filters.searchText) {
-        query = query.or(`summary.ilike.%${filters.searchText}%,description.ilike.%${filters.searchText}%,target_name.ilike.%${filters.searchText}%`);
+        finalQuery = finalQuery.or(`summary.ilike.%${filters.searchText}%,description.ilike.%${filters.searchText}%,target_name.ilike.%${filters.searchText}%`);
       }
 
       // Apply pagination
       const limit = filters.limit || 50;
       const offset = filters.offset || 0;
       
-      query = query
+      finalQuery = finalQuery
         .order('created_at', { ascending: false })
         .range(offset, offset + limit - 1);
 
-      const { data, error, count } = await query;
+      const { data, error, count } = await finalQuery;
 
       console.log('AuditLogger: Query result:', { data, error, count });
 
@@ -281,14 +266,17 @@ class AuditLogger {
     limit: number = 50
   ): Promise<AuditLogEntry[]> {
     try {
-      const { data, error } = await supabase
-        .from('audit_logs')
+      // Type cast at the start to avoid deep type instantiation issues
+      const auditLogsTable: any = supabase.from('audit_logs');
+      const query = auditLogsTable
         .select('*')
         .eq('organization_id', organizationId)
         .eq('target_type', targetType)
         .eq('target_id', targetId)
         .order('created_at', { ascending: false })
         .limit(limit);
+      
+      const { data, error } = await query;
 
       if (error) {
         console.error('Failed to fetch entity audit logs:', error);

@@ -37,6 +37,7 @@ interface Message {
 }
 
 interface OrganizationData {
+  id?: string;
   name: string;
   logo_url?: string;
   custom_logo_url?: string;

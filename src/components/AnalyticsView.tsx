@@ -277,7 +277,7 @@ const AnalyticsView: React.FC = () => {
 
     const categories = Object.entries(categoryCounts).map(([category, count]) => ({
       category,
-      count
+      count: count as number
     }));
 
     // Get recent reports
@@ -305,7 +305,7 @@ const AnalyticsView: React.FC = () => {
 
     const statusBreakdown = Object.entries(statusCounts).map(([status, count]) => ({
       status,
-      count
+      count: count as number
     }));
 
     // Priority breakdown
@@ -317,7 +317,7 @@ const AnalyticsView: React.FC = () => {
 
     const priorityBreakdown = Object.entries(priorityCounts).map(([priority, count]) => ({
       priority: parseInt(priority),
-      count
+      count: count as number
     }));
 
     return {
