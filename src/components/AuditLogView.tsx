@@ -29,7 +29,8 @@ import {
   Clock,
   Hash,
   ChevronLeft,
-  ChevronRight
+  ChevronRight,
+  ChevronDown
 } from 'lucide-react';
 import { auditLogger, AuditLogEntry, AuditLogFilters, AuditChainVerification } from '@/utils/auditLogger';
 

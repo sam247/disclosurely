@@ -154,6 +154,7 @@ class AuditLogger {
     hasMore: boolean;
   }> {
     try {
+      console.log('AuditLogger: Fetching logs with filters:', filters);
       let query = supabase
         .from('audit_logs')
         .select('*', { count: 'exact' });
@@ -212,6 +213,8 @@ class AuditLogger {
         .range(offset, offset + limit - 1);
 
       const { data, error, count } = await query;
+
+      console.log('AuditLogger: Query result:', { data, error, count });
 
       if (error) {
         // Check if it's a table doesn't exist error
