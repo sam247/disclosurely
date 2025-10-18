@@ -5,7 +5,10 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } f
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 import { Badge } from '@/components/ui/badge';
 import { useAuth } from '@/hooks/useAuth';
+import { useCustomDomain } from '@/hooks/useCustomDomain';
+import { useOrganization } from '@/hooks/useOrganization';
 import { useToast } from '@/hooks/use-toast';
+import { useTranslation } from 'react-i18next';
 import { logCaseEvent } from '@/utils/auditLogger';
 import { FileText, Eye, Archive, Trash2, RotateCcw, MoreVertical, XCircle, ChevronUp, ChevronDown, CheckCircle, Search } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
@@ -131,15 +134,16 @@ interface Report {
 const DashboardView = () => {
   const { user } = useAuth();
   const { customDomain, organizationId } = useCustomDomain();
+  const { organization } = useOrganization();
   const { toast } = useToast();
   const { t } = useTranslation();
   
-  // Get organization ID from user profile if useCustomDomain returns null
-  const effectiveOrganizationId = organizationId || user?.user_metadata?.organization_id;
+  // Get organization ID from multiple sources
+  const effectiveOrganizationId = organizationId || organization?.id;
   
   // Debug: Log organization ID sources
   console.log('DashboardView: organizationId from useCustomDomain:', organizationId);
-  console.log('DashboardView: user?.user_metadata?.organization_id:', user?.user_metadata?.organization_id);
+  console.log('DashboardView: organization?.id from useOrganization:', organization?.id);
   console.log('DashboardView: effectiveOrganizationId:', effectiveOrganizationId);
   console.log('DashboardView: Component loaded with latest code!');
   
