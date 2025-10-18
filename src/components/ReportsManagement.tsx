@@ -33,6 +33,7 @@ import {
 import ReportsStatistics from '@/components/ReportsStatistics';
 import TagEditor from '@/components/TagEditor';
 import { useTranslation } from 'react-i18next';
+import { auditLogger } from '@/utils/auditLogger';
 
 type ReportStatus = 'new' | 'live' | 'reviewing' | 'investigating' | 'resolved' | 'closed' | 'archived' | 'deleted';
 
@@ -259,6 +260,9 @@ const ReportsManagement = () => {
 
   const archiveReport = async (reportId: string) => {
     try {
+      const report = reports.find(r => r.id === reportId);
+      const profile = await supabase.from('profiles').select('organization_id').eq('id', user?.id).single();
+      
       const { error } = await supabase
         .from('reports')
         .update({ 
@@ -268,6 +272,32 @@ const ReportsManagement = () => {
         .eq('id', reportId);
 
       if (error) throw error;
+      
+      // Log archive action
+      if (report && profile.data?.organization_id) {
+        await auditLogger.log({
+          eventType: 'report.archived',
+          category: 'case_management',
+          action: 'Report archived',
+          severity: 'medium',
+          actorType: 'user',
+          actorId: user?.id,
+          actorEmail: user?.email,
+          targetType: 'report',
+          targetId: reportId,
+          targetName: report.tracking_id,
+          summary: `Report ${report.tracking_id} archived by ${user?.email}`,
+          description: `Report "${report.title}" moved to archive`,
+          beforeState: { status: report.status },
+          afterState: { status: 'archived' },
+          metadata: {
+            report_type: report.report_type,
+            priority: report.priority,
+            tags: report.tags,
+          },
+          organizationId: profile.data.organization_id,
+        });
+      }
       
       await fetchReports();
       toast({
@@ -286,11 +316,41 @@ const ReportsManagement = () => {
 
   const deleteReport = async (reportId: string) => {
     try {
+      const report = reports.find(r => r.id === reportId);
+      const profile = await supabase.from('profiles').select('organization_id').eq('id', user?.id).single();
+      
       const { error } = await supabase.functions.invoke('soft-delete-report', {
         body: { reportId },
       });
 
       if (error) throw error;
+      
+      // Log deletion action
+      if (report && profile.data?.organization_id) {
+        await auditLogger.log({
+          eventType: 'report.deleted',
+          category: 'case_management',
+          action: 'Report soft deleted',
+          severity: 'high',
+          actorType: 'user',
+          actorId: user?.id,
+          actorEmail: user?.email,
+          targetType: 'report',
+          targetId: reportId,
+          targetName: report.tracking_id,
+          summary: `Report ${report.tracking_id} deleted by ${user?.email}`,
+          description: `Report "${report.title}" moved to deleted status`,
+          beforeState: { status: report.status, deleted_at: null },
+          afterState: { status: 'deleted', deleted_at: new Date().toISOString() },
+          metadata: {
+            report_type: report.report_type,
+            priority: report.priority,
+            tags: report.tags,
+            deletion_reason: 'manual_deletion',
+          },
+          organizationId: profile.data.organization_id,
+        });
+      }
       
       await fetchReports();
       toast({
@@ -309,6 +369,9 @@ const ReportsManagement = () => {
 
   const restoreReport = async (reportId: string) => {
     try {
+      const report = reports.find(r => r.id === reportId);
+      const profile = await supabase.from('profiles').select('organization_id').eq('id', user?.id).single();
+      
       const { error } = await supabase
         .from('reports')
         .update({ 
@@ -318,6 +381,33 @@ const ReportsManagement = () => {
         .eq('id', reportId);
 
       if (error) throw error;
+      
+      // Log restoration action
+      if (report && profile.data?.organization_id) {
+        await auditLogger.log({
+          eventType: 'report.restored',
+          category: 'case_management',
+          action: 'Report restored from archive',
+          severity: 'medium',
+          actorType: 'user',
+          actorId: user?.id,
+          actorEmail: user?.email,
+          targetType: 'report',
+          targetId: reportId,
+          targetName: report.tracking_id,
+          summary: `Report ${report.tracking_id} restored by ${user?.email}`,
+          description: `Report "${report.title}" restored from ${report.status} status`,
+          beforeState: { status: report.status, archived_at: report.archived_at, deleted_at: report.deleted_at },
+          afterState: { status: 'live', archived_at: null, deleted_at: null },
+          metadata: {
+            report_type: report.report_type,
+            priority: report.priority,
+            tags: report.tags,
+            previous_status: report.status,
+          },
+          organizationId: profile.data.organization_id,
+        });
+      }
       
       await fetchReports();
       toast({

@@ -9,6 +9,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { MessageSquare, Clock, Send } from 'lucide-react';
+import { auditLogger } from '@/utils/auditLogger';
 
 interface Report {
   id: string;
@@ -270,6 +271,28 @@ const SecureReportMessaging = () => {
       setMessages(prev => 
         prev.map(msg => (msg.id === tempId ? data : msg))
       );
+
+      // Log message to audit trail
+      await auditLogger.log({
+        eventType: 'report.message_sent',
+        category: 'case_management',
+        action: 'Whistleblower sent secure message',
+        severity: 'low',
+        actorType: 'user',
+        actorEmail: 'anonymous_whistleblower',
+        targetType: 'report',
+        targetId: report.id,
+        targetName: report.tracking_id,
+        summary: `Whistleblower sent message on report ${report.tracking_id}`,
+        description: `Message sent via secure report messaging interface`,
+        metadata: {
+          message_length: messageText.length,
+          sender_type: 'whistleblower',
+          report_status: report.status,
+          report_type: report.report_type,
+        },
+        organizationId: report.organization_id,
+      });
 
       toast({
         title: "Message Sent",

@@ -7,6 +7,37 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 }
 
+// Helper function to log audit events
+async function logAuditEvent(supabase: any, data: any) {
+  try {
+    await supabase.from('audit_logs').insert({
+      event_type: data.eventType,
+      category: data.category,
+      action: data.action,
+      severity: data.severity || 'low',
+      actor_type: data.actorType,
+      actor_id: data.actorId || null,
+      actor_email: data.actorEmail || null,
+      actor_ip_address: data.actorIpAddress || null,
+      actor_user_agent: data.actorUserAgent || null,
+      target_type: data.targetType || null,
+      target_id: data.targetId || null,
+      target_name: data.targetName || null,
+      summary: data.summary,
+      description: data.description || null,
+      metadata: data.metadata || {},
+      before_state: data.beforeState || null,
+      after_state: data.afterState || null,
+      organization_id: data.organizationId,
+      hash: '',
+      previous_hash: '',
+      chain_index: 0
+    });
+  } catch (error) {
+    console.error('Failed to log audit event:', error);
+  }
+}
+
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response('ok', { headers: corsHeaders })
@@ -179,6 +210,37 @@ serve(async (req) => {
       .eq('id', linkData.id)
 
     console.log('Report created successfully:', report[0]?.id)
+
+    // Log report creation to audit trail
+    await logAuditEvent(supabaseAdmin, {
+      eventType: 'report.created',
+      category: 'case_management',
+      action: 'Anonymous report submitted',
+      severity: 'medium',
+      actorType: 'user',
+      actorEmail: 'anonymous_whistleblower',
+      actorIpAddress: req.headers.get('x-forwarded-for') || req.headers.get('x-real-ip') || null,
+      actorUserAgent: req.headers.get('user-agent') || null,
+      targetType: 'report',
+      targetId: report[0].id,
+      targetName: report[0].tracking_id,
+      summary: `Anonymous report ${report[0].tracking_id} created`,
+      description: `New ${report[0].report_type} report: "${report[0].title}"`,
+      afterState: {
+        tracking_id: report[0].tracking_id,
+        title: report[0].title,
+        status: report[0].status,
+        report_type: report[0].report_type,
+        priority: report[0].priority,
+      },
+      metadata: {
+        submitted_via_link: true,
+        link_id: linkData.id,
+        report_type: report[0].report_type,
+        has_attachments: false,
+      },
+      organizationId: linkData.organization_id,
+    });
 
     // Trigger AI analysis for the new report in the background
     try {

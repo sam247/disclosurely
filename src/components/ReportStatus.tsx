@@ -10,6 +10,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Badge } from "@/components/ui/badge";
 import { Textarea } from "@/components/ui/textarea";
 import BrandedFormLayout from './BrandedFormLayout';
+import { auditLogger } from "@/utils/auditLogger";
 
 interface Report {
   id: string;
@@ -22,6 +23,7 @@ interface Report {
   report_type: string;
   encrypted_content: string;
   encryption_key_hash: string;
+  organization_id: string;
   organizations: {
     name: string;
     brand_color: string;
@@ -226,6 +228,30 @@ const ReportStatus = () => {
 
       setMessages(messagesData || []);
       setNewMessage("");
+      
+      // Log message to audit trail
+      if (report.organization_id) {
+        await auditLogger.log({
+          eventType: 'report.message_sent',
+          category: 'case_management',
+          action: 'Whistleblower sent message',
+          severity: 'low',
+          actorType: 'user',
+          actorEmail: 'whistleblower',
+          targetType: 'report',
+          targetId: report.id,
+          targetName: report.tracking_id,
+          summary: `Message sent on report ${report.tracking_id} via report status page`,
+          description: 'Message sent via report status page interface',
+          metadata: {
+            message_length: newMessage.trim().length,
+            sender_type: 'whistleblower',
+            report_status: report.status,
+          },
+          organizationId: report.organization_id,
+        });
+      }
+      
       toast.success("Message sent successfully!");
 
     } catch (error) {

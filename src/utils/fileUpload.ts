@@ -1,5 +1,6 @@
 
 import { supabase } from '@/integrations/supabase/client';
+import { auditLogger } from './auditLogger';
 
 export interface FileUploadResult {
   success: boolean;
@@ -60,6 +61,42 @@ export const uploadReportFile = async (
         .from('report-attachments')
         .remove([fileName]);
       return { success: false, error: dbError.message };
+    }
+
+    // Log file upload to audit trail
+    try {
+      const { data: report } = await supabase
+        .from('reports')
+        .select('organization_id, tracking_id')
+        .eq('id', reportId)
+        .single();
+
+      if (report?.organization_id) {
+        await auditLogger.log({
+          eventType: 'report.attachment_uploaded',
+          category: 'case_management',
+          action: 'File attachment uploaded',
+          severity: 'low',
+          actorType: 'user',
+          actorEmail: 'whistleblower',
+          targetType: 'report',
+          targetId: reportId,
+          targetName: report.tracking_id,
+          summary: `File "${file.name}" uploaded to report ${report.tracking_id}`,
+          description: `Attachment uploaded via secure file upload`,
+          metadata: {
+            filename: file.name,
+            file_size: file.size,
+            content_type: file.type,
+            file_extension: fileExtension,
+            uploaded_by_whistleblower: true,
+          },
+          organizationId: report.organization_id,
+        });
+      }
+    } catch (auditError) {
+      // Don't fail the upload if audit logging fails
+      console.error('Failed to log file upload audit:', auditError);
     }
 
     return { success: true, fileUrl: publicUrl };

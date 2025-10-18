@@ -8,9 +8,10 @@ import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
 import { MessageSquare, Clock, Send } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { auditLogger } from '@/utils/auditLogger';
 
 interface OrgBranding { name?: string; brand_color?: string; logo_url?: string; custom_logo_url?: string; }
-interface ReportInfo { id: string; tracking_id: string; title: string; status: string; created_at: string; }
+interface ReportInfo { id: string; tracking_id: string; title: string; status: string; created_at: string; organization_id: string; }
 interface Message { id: string; sender_type: string; encrypted_message: string; created_at: string; is_read: boolean; }
 
 const AnonymousMessaging = () => {
@@ -76,6 +77,29 @@ const AnonymousMessaging = () => {
     } else {
       // replace optimistic with real
       setMessages(prev => prev.map(m => (m.id === optimistic.id ? data.message : m)));
+      
+      // Log successful message to audit trail
+      if (report?.organization_id) {
+        await auditLogger.log({
+          eventType: 'report.anonymous_message_sent',
+          category: 'case_management',
+          action: 'Anonymous whistleblower sent message',
+          severity: 'low',
+          actorType: 'user',
+          actorEmail: 'anonymous_user',
+          targetType: 'report',
+          targetId: report.id,
+          targetName: report.tracking_id,
+          summary: `Anonymous message sent on report ${report.tracking_id}`,
+          description: 'Message sent via anonymous messaging interface',
+          metadata: {
+            message_length: messageText.length,
+            sender_type: 'whistleblower',
+            report_status: report.status,
+          },
+          organizationId: report.organization_id,
+        });
+      }
     }
     setSending(false);
   };

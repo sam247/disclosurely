@@ -7,6 +7,35 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
+// Helper function to log audit events
+async function logAuditEvent(supabase: any, data: any) {
+  try {
+    await supabase.from('audit_logs').insert({
+      event_type: data.eventType,
+      category: data.category,
+      action: data.action,
+      severity: data.severity || 'low',
+      actor_type: data.actorType,
+      actor_id: data.actorId || null,
+      actor_email: data.actorEmail || null,
+      actor_ip_address: data.actorIpAddress || null,
+      actor_user_agent: data.actorUserAgent || null,
+      target_type: data.targetType || null,
+      target_id: data.targetId || null,
+      target_name: data.targetName || null,
+      summary: data.summary,
+      description: data.description || null,
+      metadata: data.metadata || {},
+      organization_id: data.organizationId,
+      hash: '',
+      previous_hash: '',
+      chain_index: 0
+    });
+  } catch (error) {
+    console.error('Failed to log audit event:', error);
+  }
+}
+
 serve(async (req) => {
   // CORS preflight
   if (req.method === "OPTIONS") {
@@ -137,6 +166,29 @@ serve(async (req) => {
         p_failure_reason: null,
         p_ip_address: req.headers.get('x-forwarded-for') || null,
         p_user_agent: req.headers.get('user-agent') || null,
+      });
+
+      // Log to audit trail
+      await logAuditEvent(supabase, {
+        eventType: 'report.message_sent',
+        category: 'case_management',
+        action: 'Anonymous message sent via edge function',
+        severity: 'low',
+        actorType: 'user',
+        actorEmail: 'anonymous_whistleblower',
+        actorIpAddress: req.headers.get('x-forwarded-for') || req.headers.get('x-real-ip') || null,
+        actorUserAgent: req.headers.get('user-agent') || null,
+        targetType: 'report',
+        targetId: report.id,
+        targetName: report.tracking_id,
+        summary: `Anonymous message sent on report ${report.tracking_id}`,
+        description: 'Message sent via anonymous messaging edge function',
+        metadata: {
+          message_length: message.length,
+          sender_type: 'whistleblower',
+          report_status: report.status,
+        },
+        organizationId: report.organization_id || (report as any).organizations?.id,
       });
 
       return new Response(JSON.stringify({ message: data }), {

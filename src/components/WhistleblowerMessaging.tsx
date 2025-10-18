@@ -8,6 +8,7 @@ import { Input } from '@/components/ui/input';
 import { MessageSquare, Send, Lock, Search } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
+import { auditLogger } from '@/utils/auditLogger';
 
 interface Message {
   id: string;
@@ -24,6 +25,7 @@ interface Report {
   tracking_id: string;
   status: string;
   created_at: string;
+  organization_id: string;
 }
 
 const WhistleblowerMessaging = () => {
@@ -114,7 +116,7 @@ const WhistleblowerMessaging = () => {
       
       const { data, error } = await supabase
         .from('reports')
-        .select('id, title, tracking_id, status, created_at')
+        .select('id, title, tracking_id, status, created_at, organization_id')
         .eq('tracking_id', trackingId.trim())
         .single();
 
@@ -229,6 +231,29 @@ const WhistleblowerMessaging = () => {
       }
 
       console.log('Message sent successfully');
+      
+      // Log message to audit trail
+      if (report.organization_id) {
+        await auditLogger.log({
+          eventType: 'report.message_sent',
+          category: 'case_management',
+          action: 'Whistleblower sent message',
+          severity: 'low',
+          actorType: 'user',
+          actorEmail: 'whistleblower',
+          targetType: 'report',
+          targetId: report.id,
+          targetName: report.tracking_id,
+          summary: `Whistleblower sent message on report ${report.tracking_id}`,
+          description: 'Message sent via whistleblower messaging interface',
+          metadata: {
+            message_length: newMessage.trim().length,
+            sender_type: 'whistleblower',
+            report_status: report.status,
+          },
+          organizationId: report.organization_id,
+        });
+      }
       
       toast({
         title: "Success",
