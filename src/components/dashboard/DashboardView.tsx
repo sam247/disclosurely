@@ -137,6 +137,12 @@ const DashboardView = () => {
   // Get organization ID from user profile if useCustomDomain returns null
   const effectiveOrganizationId = organizationId || user?.user_metadata?.organization_id;
   
+  // Debug: Log organization ID sources
+  console.log('DashboardView: organizationId from useCustomDomain:', organizationId);
+  console.log('DashboardView: user?.user_metadata?.organization_id:', user?.user_metadata?.organization_id);
+  console.log('DashboardView: effectiveOrganizationId:', effectiveOrganizationId);
+  console.log('DashboardView: Component loaded with latest code!');
+  
   const [reports, setReports] = useState<Report[]>([]);
   const [archivedReports, setArchivedReports] = useState<Report[]>([]);
   const [loading, setLoading] = useState(true);
