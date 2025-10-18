@@ -1,26 +1,15 @@
--- Simple script to fix audit trail system
+-- SIMPLIFIED AUDIT TRAIL SETUP
 -- Run this in Supabase SQL Editor
 
--- Check if required tables exist
-DO $$
-BEGIN
-    IF NOT EXISTS (SELECT 1 FROM information_schema.tables WHERE table_name = 'organizations' AND table_schema = 'public') THEN
-        RAISE EXCEPTION 'organizations table does not exist. Please ensure your database schema is properly set up.';
-    END IF;
-    
-    IF NOT EXISTS (SELECT 1 FROM information_schema.tables WHERE table_name = 'profiles' AND table_schema = 'public') THEN
-        RAISE EXCEPTION 'profiles table does not exist. Please ensure your database schema is properly set up.';
-    END IF;
-END $$;
-
--- 1. Drop and recreate audit_logs table to ensure clean state
+-- 1. Drop existing audit_logs table if it exists
 DROP TABLE IF EXISTS public.audit_logs CASCADE;
 
+-- 2. Create audit_logs table without foreign key constraints initially
 CREATE TABLE public.audit_logs (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   created_at TIMESTAMP WITH TIME ZONE DEFAULT now() NOT NULL,
-  organization_id UUID REFERENCES public.organizations(id) ON DELETE CASCADE,
-  actor_id UUID REFERENCES public.profiles(id) ON DELETE SET NULL,
+  organization_id UUID,
+  actor_id UUID,
   actor_email TEXT,
   actor_type TEXT NOT NULL DEFAULT 'user',
   event_type TEXT NOT NULL,
@@ -42,14 +31,15 @@ CREATE TABLE public.audit_logs (
   chain_index BIGINT NOT NULL DEFAULT 0
 );
 
--- 2. Create indexes
-CREATE INDEX IF NOT EXISTS idx_audit_logs_organization_id ON public.audit_logs(organization_id);
-CREATE INDEX IF NOT EXISTS idx_audit_logs_created_at ON public.audit_logs(created_at);
+-- 3. Create indexes
+CREATE INDEX idx_audit_logs_organization_id ON public.audit_logs(organization_id);
+CREATE INDEX idx_audit_logs_created_at ON public.audit_logs(created_at);
+CREATE INDEX idx_audit_logs_category_action ON public.audit_logs(category, action);
 
--- 3. Enable RLS
+-- 4. Enable RLS
 ALTER TABLE public.audit_logs ENABLE ROW LEVEL SECURITY;
 
--- 4. Create RLS policies
+-- 5. Create RLS policies
 CREATE POLICY "Organization members can view their own audit logs"
   ON public.audit_logs FOR SELECT
   USING (
@@ -70,7 +60,7 @@ CREATE POLICY "Organization members can insert audit logs"
     )
   );
 
--- 5. Create verify_audit_chain function
+-- 6. Create verify_audit_chain function
 CREATE OR REPLACE FUNCTION public.verify_audit_chain(p_organization_id UUID)
 RETURNS TABLE(
   is_valid BOOLEAN,
@@ -91,8 +81,8 @@ BEGIN
 END;
 $$;
 
--- 6. Add 'reviewing' to report_status enum
+-- 7. Add 'reviewing' to report_status enum
 ALTER TYPE public.report_status ADD VALUE IF NOT EXISTS 'reviewing';
 
--- Success message
+-- 8. Success message
 SELECT 'Audit trail system successfully set up!' as message;
