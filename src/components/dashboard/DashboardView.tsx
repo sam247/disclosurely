@@ -133,6 +133,10 @@ const DashboardView = () => {
   const { customDomain, organizationId } = useCustomDomain();
   const { toast } = useToast();
   const { t } = useTranslation();
+  
+  // Get organization ID from user profile if useCustomDomain returns null
+  const effectiveOrganizationId = organizationId || user?.user_metadata?.organization_id;
+  
   const [reports, setReports] = useState<Report[]>([]);
   const [archivedReports, setArchivedReports] = useState<Report[]>([]);
   const [loading, setLoading] = useState(true);
@@ -278,12 +282,13 @@ const DashboardView = () => {
 
         // Log audit event
         console.log('DashboardView: organizationId from useCustomDomain:', organizationId);
-        if (organizationId) {
+        console.log('DashboardView: effectiveOrganizationId:', effectiveOrganizationId);
+        if (effectiveOrganizationId) {
           await logCaseEvent(
             'update',
             user?.id || '',
             user?.email || '',
-            organizationId,
+            effectiveOrganizationId,
             report.id,
             report.title,
             { status: 'new' },
@@ -291,7 +296,7 @@ const DashboardView = () => {
             { action: 'first_view', previous_status: 'new' }
           );
         } else {
-          console.log('DashboardView: organizationId is null/undefined, cannot log audit event');
+          console.log('DashboardView: effectiveOrganizationId is null/undefined, cannot log audit event');
         }
 
         // Update local state
@@ -322,12 +327,12 @@ const DashboardView = () => {
 
       // Log audit event
       const reportToArchive = reports.find(r => r.id === reportId);
-      if (reportToArchive && organizationId) {
+      if (reportToArchive && effectiveOrganizationId) {
         await logCaseEvent(
           'archive',
           user?.id || '',
           user?.email || '',
-          organizationId,
+          effectiveOrganizationId,
           reportToArchive.id,
           reportToArchive.title,
           { status: reportToArchive.status },
@@ -777,14 +782,15 @@ Additional Details: ${decryptedContent.additionalDetails || 'None provided'}
                                       
                                       // Log audit event
                                       console.log('DashboardView: Dropdown action - organizationId:', organizationId);
+                                      console.log('DashboardView: Dropdown action - effectiveOrganizationId:', effectiveOrganizationId);
                                       console.log('DashboardView: User ID:', user?.id);
                                       console.log('DashboardView: User email:', user?.email);
-                                      if (organizationId) {
+                                      if (effectiveOrganizationId) {
                                         await logCaseEvent(
                                           'update',
                                           user?.id || '',
                                           user?.email || '',
-                                          organizationId,
+                                          effectiveOrganizationId,
                                           report.id,
                                           report.title,
                                           { status: report.status },
@@ -795,7 +801,7 @@ Additional Details: ${decryptedContent.additionalDetails || 'None provided'}
                                         // Small delay to ensure database transaction is committed
                                         await new Promise(resolve => setTimeout(resolve, 100));
                                       } else {
-                                        console.log('DashboardView: organizationId is null/undefined, cannot log audit event');
+                                        console.log('DashboardView: effectiveOrganizationId is null/undefined, cannot log audit event');
                                       }
                                       
                                       toast({ title: 'Report marked as Reviewing' });
