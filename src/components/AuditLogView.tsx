@@ -73,6 +73,7 @@ const AuditLogView = () => {
   const fetchLogs = async (resetOffset = false) => {
     if (!organization?.id) return;
     
+    console.log('AuditLogView: Fetching logs for organization:', organization.id);
     setLoading(true);
     try {
       const currentFilters: AuditLogFilters = {
@@ -90,6 +91,8 @@ const AuditLogView = () => {
       };
 
       const result = await auditLogger.getLogs(currentFilters);
+      
+      console.log('AuditLogView: Received result:', result);
       
       // Check if table exists based on result
       if (result.total === 0 && logs.length === 0 && !loading) {
