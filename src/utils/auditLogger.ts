@@ -124,6 +124,10 @@ class AuditLogger {
           geo_region: data.geoRegion,
           geo_city: data.geoCity,
           organization_id: data.organizationId,
+          // Let the database trigger handle hash generation
+          hash: null,
+          previous_hash: null,
+          chain_index: null
         })
         .select()
         .single();
