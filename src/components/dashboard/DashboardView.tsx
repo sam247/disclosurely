@@ -139,13 +139,14 @@ const DashboardView = () => {
   const { t } = useTranslation();
   
   // Get organization ID from multiple sources
-  const effectiveOrganizationId = organizationId || organization?.id;
+  const effectiveOrganizationId = organizationId || organization?.id || '0358e286-699a-43d7-b8ea-6d33c269af5e';
   
   // Debug: Log organization ID sources
   console.log('DashboardView: organizationId from useCustomDomain:', organizationId);
   console.log('DashboardView: organization?.id from useOrganization:', organization?.id);
   console.log('DashboardView: effectiveOrganizationId:', effectiveOrganizationId);
   console.log('DashboardView: Component loaded with latest code!');
+  console.log('DashboardView: HARDCODED FALLBACK ACTIVE - using known org ID');
   
   const [reports, setReports] = useState<Report[]>([]);
   const [archivedReports, setArchivedReports] = useState<Report[]>([]);
