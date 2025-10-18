@@ -285,7 +285,21 @@ class AuditLogger {
         };
       }
 
-      return data[0] as AuditChainVerification;
+      // The RPC function returns: { is_valid: boolean, total_records: bigint, invalid_records: bigint }
+      if (data && data.length > 0) {
+        const result = data[0];
+        return {
+          isValid: result.is_valid,
+          totalRecords: Number(result.total_records),
+          invalidRecords: Number(result.invalid_records)
+        };
+      }
+
+      return {
+        isValid: true,
+        totalRecords: 0,
+        invalidRecords: 0
+      };
     } catch (error) {
       console.error('Error verifying audit chain:', error);
       return {
