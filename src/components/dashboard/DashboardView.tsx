@@ -277,6 +277,7 @@ const DashboardView = () => {
         if (error) throw error;
 
         // Log audit event
+        console.log('DashboardView: organizationId from useCustomDomain:', organizationId);
         if (organizationId) {
           await logCaseEvent(
             'update',
@@ -289,6 +290,8 @@ const DashboardView = () => {
             { status: 'live', first_read_at: new Date().toISOString() },
             { action: 'first_view', previous_status: 'new' }
           );
+        } else {
+          console.log('DashboardView: organizationId is null/undefined, cannot log audit event');
         }
 
         // Update local state
@@ -772,6 +775,7 @@ Additional Details: ${decryptedContent.additionalDetails || 'None provided'}
                                       if (error) throw error;
                                       
                                       // Log audit event
+                                      console.log('DashboardView: Dropdown action - organizationId:', organizationId);
                                       if (organizationId) {
                                         await logCaseEvent(
                                           'update',
@@ -784,6 +788,9 @@ Additional Details: ${decryptedContent.additionalDetails || 'None provided'}
                                           { status: 'reviewing', updated_at: new Date().toISOString() },
                                           { action: 'status_change', previous_status: report.status }
                                         );
+                                        console.log('DashboardView: Audit event logged successfully');
+                                      } else {
+                                        console.log('DashboardView: organizationId is null/undefined, cannot log audit event');
                                       }
                                       
                                       toast({ title: 'Report marked as Reviewing' });
