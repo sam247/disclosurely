@@ -767,6 +767,15 @@ Additional Details: ${decryptedContent.additionalDetails || 'None provided'}
                               </DropdownMenuTrigger>
                               <DropdownMenuContent align="end" className="w-48">
                                 <DropdownMenuItem 
+                                  onClick={() => {
+                                    alert('Dropdown clicked! This should appear immediately.');
+                                    console.log('BASIC TEST: Dropdown clicked!');
+                                  }}
+                                >
+                                  <Eye className="h-4 w-4 mr-2" />
+                                  Test Dropdown
+                                </DropdownMenuItem>
+                                <DropdownMenuItem 
                                   onClick={async () => {
                                     console.log('Dropdown clicked: Mark as Reviewing');
                                     try {
