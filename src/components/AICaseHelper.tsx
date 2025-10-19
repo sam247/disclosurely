@@ -12,6 +12,7 @@ import { sanitizeHtml } from '@/utils/sanitizer';
 import { formatMarkdownToHtml } from '@/utils/markdownFormatter';
 import { useAuth } from '@/hooks/useAuth';
 import { useOrganization } from '@/hooks/useOrganization';
+import { auditLogger } from '@/utils/auditLogger';
 
 interface LiveCase {
   id: string;
@@ -349,6 +350,29 @@ Case Details:
       // Set the main analysis for the first time
       if (!analysis) {
         setAnalysis(data.analysis);
+      }
+
+      // Log AI analysis event
+      if (user && organization?.id) {
+        await auditLogger.log({
+          eventType: 'case.ai_analysis',
+          category: 'case_management',
+          action: 'analyze',
+          severity: 'low',
+          actorType: 'user',
+          actorId: user.id,
+          actorEmail: user.email,
+          organizationId: organization.id,
+          targetType: 'case',
+          targetId: selectedCaseId,
+          targetName: caseData.title,
+          summary: `AI analysis performed on case: ${caseData.title}`,
+          metadata: {
+            has_custom_prompt: !!userMessage,
+            documents_analyzed: companyDocuments.length,
+            is_follow_up: isFollowUp
+          }
+        });
       }
 
       toast({
