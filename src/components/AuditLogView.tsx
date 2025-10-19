@@ -558,8 +558,10 @@ const AuditLogView = () => {
             </p>
           </div>
         ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full">
+          <div className="border rounded-lg overflow-hidden">
+            <div className="h-[600px] overflow-y-auto">
+              <div className="overflow-x-auto">
+                <table className="w-full">
               {/* Fixed Header */}
               <thead className="bg-gray-50 sticky top-0 z-10">
                 <tr className="border-b">
@@ -708,6 +710,8 @@ const AuditLogView = () => {
                 ))}
               </tbody>
             </table>
+              </div>
+            </div>
           </div>
         )}
         
