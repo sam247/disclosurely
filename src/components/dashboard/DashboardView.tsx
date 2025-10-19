@@ -103,7 +103,7 @@ interface Report {
   id: string;
   title: string;
   tracking_id: string;
-  status: 'new' | 'live' | 'reviewing' | 'investigating' | 'resolved' | 'closed' | 'archived' | 'deleted';
+  status: 'new' | 'reviewing' | 'investigating' | 'resolved' | 'closed' | 'archived' | 'deleted';
   created_at: string;
   encrypted_content: string;
   encryption_key_hash: string;
@@ -274,13 +274,13 @@ const DashboardView = () => {
     setSelectedReport(report);
     setIsReportDialogOpen(true);
     
-    // Automatically change status from "new" to "live" when first viewed
+    // Automatically change status from "new" to "new" when first viewed
     if (report.status === 'new') {
       try {
         const { error } = await supabase
           .from('reports')
           .update({ 
-            status: 'live',
+            status: 'new',
             first_read_at: new Date().toISOString(),
             updated_at: new Date().toISOString()
           })
@@ -300,7 +300,7 @@ const DashboardView = () => {
             report.id,
             report.title,
             { status: 'new' },
-            { status: 'live', first_read_at: new Date().toISOString() },
+            { status: 'new', first_read_at: new Date().toISOString() },
             { action: 'first_view', previous_status: 'new' }
           );
         } else {
@@ -311,7 +311,7 @@ const DashboardView = () => {
         setReports(prevReports => 
           prevReports.map(r => 
             r.id === report.id 
-              ? { ...r, status: 'live' as const, first_read_at: new Date().toISOString() }
+              ? { ...r, status: 'new' as const, first_read_at: new Date().toISOString() }
               : r
           )
         );
@@ -375,7 +375,7 @@ const DashboardView = () => {
       const { error } = await supabase
         .from('reports')
         .update({ 
-          status: 'live',
+          status: 'new',
           updated_at: new Date().toISOString()
         })
         .eq('id', reportId);
@@ -661,7 +661,6 @@ Additional Details: ${decryptedContent.additionalDetails || 'None provided'}
                 <SelectContent>
                   <SelectItem value="all">{t('allStatuses')}</SelectItem>
                   <SelectItem value="new">{t('newIssue')}</SelectItem>
-                  <SelectItem value="live">{t('live')}</SelectItem>
                   <SelectItem value="reviewing">{t('inReview')}</SelectItem>
                   <SelectItem value="investigating">{t('investigating')}</SelectItem>
                   <SelectItem value="resolved">{t('resolved')}</SelectItem>
@@ -696,7 +695,7 @@ Additional Details: ${decryptedContent.additionalDetails || 'None provided'}
                         <TableCell className="font-mono text-sm">{report.tracking_id}</TableCell>
                         <TableCell className="font-medium">{report.title}</TableCell>
                         <TableCell>
-                          <Badge variant={report.status === 'live' ? 'default' : 'secondary'}>
+                          <Badge variant={report.status === 'new' ? 'default' : 'secondary'}>
                             {report.status}
                           </Badge>
                         </TableCell>

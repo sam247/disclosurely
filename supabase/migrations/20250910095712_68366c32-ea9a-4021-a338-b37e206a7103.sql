@@ -1,5 +1,5 @@
 -- Extend report_status enum to include new workflow states
-ALTER TYPE report_status ADD VALUE IF NOT EXISTS 'live';
+ALTER TYPE report_status ADD VALUE IF NOT EXISTS 'new';
 ALTER TYPE report_status ADD VALUE IF NOT EXISTS 'closed';
 ALTER TYPE report_status ADD VALUE IF NOT EXISTS 'archived';
 ALTER TYPE report_status ADD VALUE IF NOT EXISTS 'deleted';

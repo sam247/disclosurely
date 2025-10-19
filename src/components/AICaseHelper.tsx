@@ -14,7 +14,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { useOrganization } from '@/hooks/useOrganization';
 import { auditLogger } from '@/utils/auditLogger';
 
-interface LiveCase {
+interface NewCase {
   id: string;
   tracking_id: string;
   title: string;
@@ -54,7 +54,7 @@ const AICaseHelper: React.FC<AICaseHelperProps> = ({ reportId, reportContent }) 
   const [chatMessages, setChatMessages] = useState<Array<{role: 'user' | 'assistant', content: string, timestamp: Date}>>([]);
   const [chatInput, setChatInput] = useState('');
   const [isChatting, setIsChatting] = useState(false);
-  const [liveCases, setLiveCases] = useState<LiveCase[]>([]);
+  const [newCases, setNewCases] = useState<NewCase[]>([]);
   const [documents, setDocuments] = useState<CompanyDocument[]>([]);
   const [selectedDocs, setSelectedDocs] = useState<string[]>([]);
   const [isUploading, setIsUploading] = useState(false);
@@ -71,11 +71,11 @@ const AICaseHelper: React.FC<AICaseHelperProps> = ({ reportId, reportContent }) 
     if (reportId) {
       setSelectedCaseId(reportId);
     }
-    loadLiveCases();
+    loadNewCases();
     loadDocuments();
   }, [reportId]);
 
-  const loadLiveCases = async () => {
+  const loadNewCases = async () => {
     if (!user) return;
     
     setIsLoadingCases(true);
@@ -83,16 +83,16 @@ const AICaseHelper: React.FC<AICaseHelperProps> = ({ reportId, reportContent }) 
       const { data, error } = await supabase
         .from('reports')
         .select('id, tracking_id, title, status, created_at, priority')
-        .eq('status', 'live')
+        .eq('status', 'new')
         .order('created_at', { ascending: false });
 
       if (error) throw error;
-      setLiveCases(data || []);
+      setNewCases(data || []);
     } catch (error) {
-      console.error('Error loading live cases:', error);
+      console.error('Error loading new cases:', error);
       toast({
         title: "Error",
-        description: "Failed to load live cases.",
+        description: "Failed to load new cases.",
         variant: "destructive"
       });
     } finally {
@@ -474,7 +474,7 @@ Case Details:
           </div>
         </CardTitle>
         <CardDescription>
-          Select a live case and upload company documents for AI-powered analysis
+          Select a new case and upload company documents for AI-powered analysis
         </CardDescription>
       </CardHeader>
       <CardContent className="p-0">
@@ -484,20 +484,20 @@ Case Details:
           <div className="space-y-6">
             {/* Case Selection */}
             <div className="space-y-2">
-              <label className="text-sm font-medium">Select Live Case</label>
+              <label className="text-sm font-medium">Select New Case</label>
               <Select value={selectedCaseId} onValueChange={(value) => {
                 setSelectedCaseId(value);
-                const selectedCase = liveCases.find(c => c.id === value);
+                const selectedCase = newCases.find(c => c.id === value);
                 setSelectedCaseData(selectedCase || null);
                 // Clear previous analysis and chat when switching cases
                 setAnalysis('');
                 setChatMessages([]);
               }} disabled={isLoadingCases}>
                 <SelectTrigger>
-                  <SelectValue placeholder={isLoadingCases ? "Loading cases..." : "Choose a live case"} />
+                  <SelectValue placeholder={isLoadingCases ? "Loading cases..." : "Choose a new case"} />
                 </SelectTrigger>
                 <SelectContent>
-                  {liveCases.map((case_) => (
+                  {newCases.map((case_) => (
                     <SelectItem key={case_.id} value={case_.id}>
                       <div className="flex items-center justify-between w-full">
                         <span className="font-medium">{case_.tracking_id}</span>

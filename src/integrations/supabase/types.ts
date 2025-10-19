@@ -1663,7 +1663,6 @@ export type Database = {
         | "investigating"
         | "resolved"
         | "closed"
-        | "live"
         | "archived"
         | "deleted"
       report_type: "anonymous" | "confidential"
@@ -1801,7 +1800,6 @@ export const Constants = {
         "investigating",
         "resolved",
         "closed",
-        "live",
         "archived",
         "deleted",
       ],

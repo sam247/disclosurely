@@ -31,7 +31,7 @@ interface Report {
   id: string;
   title: string;
   tracking_id: string;
-  status: 'new' | 'live' | 'reviewing' | 'investigating' | 'resolved' | 'closed' | 'archived' | 'deleted';
+  status: 'new' | 'reviewing' | 'investigating' | 'resolved' | 'closed' | 'archived' | 'deleted';
   created_at: string;
   encrypted_content: string;
   encryption_key_hash: string;
@@ -447,7 +447,7 @@ const Dashboard = () => {
       const { error } = await supabase
         .from('reports')
         .update({ 
-          status: 'live',
+          status: 'new',
           updated_at: new Date().toISOString()
         })
         .eq('id', reportId);
@@ -527,7 +527,7 @@ const Dashboard = () => {
       const { error } = await supabase
         .from('reports')
         .update({ 
-          status: 'live',
+          status: 'new',
           first_read_at: new Date().toISOString(),
           updated_at: new Date().toISOString()
         })
@@ -552,13 +552,13 @@ const Dashboard = () => {
           targetName: report.title,
           summary: `Case marked as read: ${report.title}`,
           beforeState: { status: 'new' },
-          afterState: { status: 'live', first_read_at: new Date().toISOString() }
+          afterState: { status: 'new', first_read_at: new Date().toISOString() }
         });
       }
 
       toast({
         title: "Report marked as read",
-        description: "The report status has been updated to live",
+        description: "The report status has been updated to new",
       });
 
       setTimeout(() => {
@@ -650,7 +650,7 @@ const Dashboard = () => {
       const { error } = await supabase
         .from('reports')
         .update({ 
-          status: 'live',
+          status: 'new',
           updated_at: new Date().toISOString()
         })
         .eq('id', reportId);
@@ -673,7 +673,7 @@ const Dashboard = () => {
           targetName: report.title,
           summary: `Case reopened: ${report.title}`,
           beforeState: { status: report.status },
-          afterState: { status: 'live' }
+          afterState: { status: 'new' }
         });
       }
 
@@ -713,7 +713,7 @@ const Dashboard = () => {
       const { error } = await supabase
         .from('reports')
         .update({ 
-          status: 'live',
+          status: 'new',
           updated_at: new Date().toISOString()
         })
         .eq('id', reportId);
@@ -736,7 +736,7 @@ const Dashboard = () => {
           targetName: report.title,
           summary: `Case restored: ${report.title}`,
           beforeState: { status: report.status },
-          afterState: { status: 'live' }
+          afterState: { status: 'new' }
         });
       }
 
@@ -838,7 +838,6 @@ const Dashboard = () => {
   const getStatusColor = (status: string) => {
     switch (status) {
       case 'new': return 'bg-blue-100 text-blue-800';
-      case 'live': return 'bg-green-100 text-green-800';
       case 'reviewing': return 'bg-yellow-100 text-yellow-800';
       case 'investigating': return 'bg-orange-100 text-orange-800';
       case 'resolved': return 'bg-purple-100 text-purple-800';
@@ -877,7 +876,6 @@ const Dashboard = () => {
             <SelectContent>
               <SelectItem value="all">All Statuses</SelectItem>
               <SelectItem value="new">New</SelectItem>
-              <SelectItem value="live">Live</SelectItem>
               <SelectItem value="reviewing">In Review</SelectItem>
               <SelectItem value="investigating">Investigating</SelectItem>
               <SelectItem value="resolved">Resolved</SelectItem>

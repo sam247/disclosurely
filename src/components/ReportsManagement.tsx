@@ -35,7 +35,7 @@ import TagEditor from '@/components/TagEditor';
 import { useTranslation } from 'react-i18next';
 import { auditLogger } from '@/utils/auditLogger';
 
-type ReportStatus = 'new' | 'live' | 'reviewing' | 'investigating' | 'resolved' | 'closed' | 'archived' | 'deleted';
+type ReportStatus = 'new' | 'reviewing' | 'investigating' | 'resolved' | 'closed' | 'archived' | 'deleted';
 
 interface Report {
   id: string;
@@ -238,7 +238,7 @@ const ReportsManagement = () => {
       const { error } = await supabase
         .from('reports')
         .update({ 
-          status: 'live',
+          status: 'new',
           first_read_at: new Date().toISOString(),
           updated_at: new Date().toISOString()
         })
@@ -263,7 +263,7 @@ const ReportsManagement = () => {
           summary: `Report ${report.tracking_id} marked as read`,
           description: `First read of "${report.title}"`,
           beforeState: { status: 'new' },
-          afterState: { status: 'live', first_read_at: new Date().toISOString() },
+          afterState: { status: 'new', first_read_at: new Date().toISOString() },
           organizationId: profile.organization_id,
         });
       }
@@ -451,7 +451,7 @@ const ReportsManagement = () => {
       const { error } = await supabase
         .from('reports')
         .update({ 
-          status: 'live',
+          status: 'new',
           updated_at: new Date().toISOString()
         })
         .eq('id', reportId);
@@ -474,7 +474,7 @@ const ReportsManagement = () => {
           summary: `Report ${report.tracking_id} restored by ${user?.email}`,
           description: `Report "${report.title}" restored from ${report.status} status`,
           beforeState: { status: report.status, archived_at: report.archived_at, deleted_at: report.deleted_at },
-          afterState: { status: 'live', archived_at: null, deleted_at: null },
+          afterState: { status: 'new', archived_at: null, deleted_at: null },
           metadata: {
             report_type: report.report_type,
             priority: report.priority,
@@ -671,7 +671,6 @@ const ReportsManagement = () => {
   const getStatusColor = (status: ReportStatus) => {
     switch (status) {
       case "new": return "bg-blue-100 text-blue-800";
-      case "live": return "bg-green-100 text-green-800";
       case "reviewing": return "bg-yellow-100 text-yellow-800";
       case "investigating": return "bg-orange-100 text-orange-800";
       case "resolved": return "bg-emerald-100 text-emerald-800";
@@ -685,7 +684,6 @@ const ReportsManagement = () => {
   const getStatusIcon = (status: ReportStatus) => {
     switch (status) {
       case "new": return <AlertTriangle className="h-4 w-4" />;
-      case "live": return <BookOpen className="h-4 w-4" />;
       case "reviewing": return <Clock className="h-4 w-4" />;
       case "investigating": return <Eye className="h-4 w-4" />;
       case "resolved": return <CheckCircle className="h-4 w-4" />;
@@ -768,7 +766,7 @@ const ReportsManagement = () => {
               <SelectContent>
                 <SelectItem value="all">All Statuses</SelectItem>
                 <SelectItem value="new">New</SelectItem>
-                <SelectItem value="live">Live</SelectItem>
+                <SelectItem value="new">New</SelectItem>
                 <SelectItem value="reviewing">In Review</SelectItem>
                 <SelectItem value="investigating">Investigating</SelectItem>
                 <SelectItem value="resolved">Resolved</SelectItem>
@@ -955,7 +953,7 @@ const ReportsManagement = () => {
                       </SelectTrigger>
                       <SelectContent>
                         <SelectItem value="new">New</SelectItem>
-                        <SelectItem value="live">Live</SelectItem>
+                        <SelectItem value="new">New</SelectItem>
                         <SelectItem value="reviewing">In Review</SelectItem>
                         <SelectItem value="investigating">Investigating</SelectItem>
                         <SelectItem value="resolved">Resolved</SelectItem>
