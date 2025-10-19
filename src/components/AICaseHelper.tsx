@@ -701,7 +701,8 @@ Case Details:
                   value={chatInput}
                   onChange={(e) => setChatInput(e.target.value)}
                   disabled={isAnalyzing}
-                  className="flex-1 min-h-[60px]"
+                  className="flex-1 min-h-[40px] max-h-[40px] resize-none"
+                  rows={1}
                   onKeyDown={(e) => {
                     if (e.key === 'Enter' && !e.shiftKey) {
                       e.preventDefault();
