@@ -11,6 +11,9 @@ import { supabase } from '@/integrations/supabase/client';
 import { useSecureForm } from '@/hooks/useSecureForm';
 import { sanitizeHtml } from '@/utils/inputValidation';
 import TranslateButton from '@/components/TranslateButton';
+import { auditLogger } from '@/utils/auditLogger';
+import { useAuth } from '@/hooks/useAuth';
+import { useOrganization } from '@/hooks/useOrganization';
 
 interface Report {
   id: string;
@@ -42,6 +45,8 @@ interface SecureMessagingProps {
 const SecureMessaging = ({ report, onClose }: SecureMessagingProps) => {
   const { toast } = useToast();
   const { t } = useTranslation();
+  const { user } = useAuth();
+  const { organization } = useOrganization();
   const [messages, setMessages] = useState<Message[]>([]);
   const [newMessage, setNewMessage] = useState('');
   const [isLoading, setIsLoading] = useState(true);
@@ -181,6 +186,30 @@ const SecureMessaging = ({ report, onClose }: SecureMessagingProps) => {
     }
 
     console.log('Message sent successfully');
+    
+    // Log to audit trail
+    if (user && organization?.id) {
+      await auditLogger.log({
+        eventType: 'report.message_sent',
+        category: 'case_management',
+        action: 'Organization sent message',
+        severity: 'low',
+        actorType: 'user',
+        actorId: user.id,
+        actorEmail: user.email,
+        targetType: 'report',
+        targetId: report.id,
+        targetName: report.tracking_id,
+        summary: `Organization sent message on report ${report.tracking_id}`,
+        description: 'Message sent via secure messaging interface',
+        metadata: {
+          message_length: data.message.length,
+          sender_type: 'organization',
+          report_status: report.status,
+        },
+        organizationId: organization.id,
+      });
+    }
     
     toast({
       title: "Success",

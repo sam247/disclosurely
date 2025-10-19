@@ -170,6 +170,9 @@ const ReportsManagement = () => {
 
   const updateReportStatus = async (reportId: string, newStatus: ReportStatus) => {
     try {
+      const report = reports.find(r => r.id === reportId);
+      const { data: profile } = await supabase.from('profiles').select('organization_id').eq('id', user?.id).single();
+      
       const updateData: any = { 
         status: newStatus,
         updated_at: new Date().toISOString()
@@ -186,6 +189,31 @@ const ReportsManagement = () => {
         .eq('id', reportId);
 
       if (error) throw error;
+      
+      // Log status update to audit trail
+      if (report && profile?.organization_id) {
+        await auditLogger.log({
+          eventType: 'case.update',
+          category: 'case_management',
+          action: 'Status changed',
+          severity: 'medium',
+          actorType: 'user',
+          actorId: user?.id,
+          actorEmail: user?.email,
+          targetType: 'report',
+          targetId: reportId,
+          targetName: report.tracking_id,
+          summary: `Report ${report.tracking_id} status changed from ${report.status} to ${newStatus}`,
+          description: `Status updated for "${report.title}"`,
+          beforeState: { status: report.status },
+          afterState: { status: newStatus },
+          metadata: {
+            report_type: report.report_type,
+            priority: report.priority,
+          },
+          organizationId: profile.organization_id,
+        });
+      }
       
       await fetchReports();
       toast({
@@ -204,6 +232,9 @@ const ReportsManagement = () => {
 
   const markAsRead = async (reportId: string) => {
     try {
+      const report = reports.find(r => r.id === reportId);
+      const { data: profile } = await supabase.from('profiles').select('organization_id').eq('id', user?.id).single();
+      
       const { error } = await supabase
         .from('reports')
         .update({ 
@@ -215,6 +246,27 @@ const ReportsManagement = () => {
         .eq('status', 'new');
 
       if (error) throw error;
+      
+      // Log mark as read to audit trail
+      if (report && profile?.organization_id) {
+        await auditLogger.log({
+          eventType: 'case.update',
+          category: 'case_management',
+          action: 'Marked as read',
+          severity: 'low',
+          actorType: 'user',
+          actorId: user?.id,
+          actorEmail: user?.email,
+          targetType: 'report',
+          targetId: reportId,
+          targetName: report.tracking_id,
+          summary: `Report ${report.tracking_id} marked as read`,
+          description: `First read of "${report.title}"`,
+          beforeState: { status: 'new' },
+          afterState: { status: 'live', first_read_at: new Date().toISOString() },
+          organizationId: profile.organization_id,
+        });
+      }
       
       await fetchReports();
       toast({
@@ -233,6 +285,9 @@ const ReportsManagement = () => {
 
   const closeReport = async (reportId: string) => {
     try {
+      const report = reports.find(r => r.id === reportId);
+      const { data: profile } = await supabase.from('profiles').select('organization_id').eq('id', user?.id).single();
+      
       const { error } = await supabase
         .from('reports')
         .update({ 
@@ -242,6 +297,27 @@ const ReportsManagement = () => {
         .eq('id', reportId);
 
       if (error) throw error;
+      
+      // Log close action to audit trail
+      if (report && profile?.organization_id) {
+        await auditLogger.log({
+          eventType: 'case.update',
+          category: 'case_management',
+          action: 'Report closed',
+          severity: 'medium',
+          actorType: 'user',
+          actorId: user?.id,
+          actorEmail: user?.email,
+          targetType: 'report',
+          targetId: reportId,
+          targetName: report.tracking_id,
+          summary: `Report ${report.tracking_id} closed`,
+          description: `Case "${report.title}" closed`,
+          beforeState: { status: report.status },
+          afterState: { status: 'closed', closed_at: new Date().toISOString() },
+          organizationId: profile.organization_id,
+        });
+      }
       
       await fetchReports();
       toast({
@@ -426,6 +502,9 @@ const ReportsManagement = () => {
 
   const updateReportTags = async (reportId: string, tags: string[]) => {
     try {
+      const report = reports.find(r => r.id === reportId);
+      const { data: profile } = await supabase.from('profiles').select('organization_id').eq('id', user?.id).single();
+      
       const { error } = await supabase
         .from('reports')
         .update({ 
@@ -435,6 +514,27 @@ const ReportsManagement = () => {
         .eq('id', reportId);
 
       if (error) throw error;
+      
+      // Log tag update to audit trail
+      if (report && profile?.organization_id) {
+        await auditLogger.log({
+          eventType: 'case.update',
+          category: 'case_management',
+          action: 'Tags updated',
+          severity: 'low',
+          actorType: 'user',
+          actorId: user?.id,
+          actorEmail: user?.email,
+          targetType: 'report',
+          targetId: reportId,
+          targetName: report.tracking_id,
+          summary: `Tags updated for report ${report.tracking_id}`,
+          description: `Tags changed for "${report.title}"`,
+          beforeState: { tags: report.tags },
+          afterState: { tags },
+          organizationId: profile.organization_id,
+        });
+      }
       
       await fetchReports();
       setEditingTags(false);
@@ -454,15 +554,44 @@ const ReportsManagement = () => {
 
   const assignReport = async (reportId: string, assigneeId: string) => {
     try {
+      const report = reports.find(r => r.id === reportId);
+      const assignee = teamMembers.find(m => m.id === assigneeId);
+      const { data: profile } = await supabase.from('profiles').select('organization_id').eq('id', user?.id).single();
+      
       const { error } = await supabase
         .from('reports')
         .update({ 
-          assigned_to: assigneeId,
+          assigned_to: assigneeId === 'unassigned' ? null : assigneeId,
           updated_at: new Date().toISOString()
         })
         .eq('id', reportId);
 
       if (error) throw error;
+      
+      // Log assignment to audit trail
+      if (report && profile?.organization_id) {
+        await auditLogger.log({
+          eventType: 'case.assign',
+          category: 'case_management',
+          action: 'Report assigned',
+          severity: 'medium',
+          actorType: 'user',
+          actorId: user?.id,
+          actorEmail: user?.email,
+          targetType: 'report',
+          targetId: reportId,
+          targetName: report.tracking_id,
+          summary: `Report ${report.tracking_id} assigned to ${assignee ? `${assignee.first_name} ${assignee.last_name}` : 'unassigned'}`,
+          description: `Assignment changed for "${report.title}"`,
+          beforeState: { assigned_to: report.assigned_to },
+          afterState: { assigned_to: assigneeId === 'unassigned' ? null : assigneeId },
+          metadata: {
+            assignee_email: assignee?.email,
+            assignee_role: assignee?.role,
+          },
+          organizationId: profile.organization_id,
+        });
+      }
       
       await fetchReports();
       toast({
@@ -483,6 +612,8 @@ const ReportsManagement = () => {
     if (!selectedReport || !newNote.trim()) return;
 
     try {
+      const { data: profile } = await supabase.from('profiles').select('organization_id').eq('id', user?.id).single();
+      
       const { error } = await supabase
         .from('report_notes')
         .insert({
@@ -492,6 +623,28 @@ const ReportsManagement = () => {
         });
 
       if (error) throw error;
+      
+      // Log note addition to audit trail
+      if (profile?.organization_id) {
+        await auditLogger.log({
+          eventType: 'case.note_added',
+          category: 'case_management',
+          action: 'Internal note added',
+          severity: 'low',
+          actorType: 'user',
+          actorId: user?.id,
+          actorEmail: user?.email,
+          targetType: 'report',
+          targetId: selectedReport.id,
+          targetName: selectedReport.tracking_id,
+          summary: `Note added to report ${selectedReport.tracking_id}`,
+          description: `Internal note added to "${selectedReport.title}"`,
+          metadata: {
+            note_length: newNote.length,
+          },
+          organizationId: profile.organization_id,
+        });
+      }
       
       setNewNote('');
       await fetchReportNotes(selectedReport.id);
