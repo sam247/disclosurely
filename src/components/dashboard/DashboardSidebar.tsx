@@ -115,7 +115,7 @@ const DashboardSidebar = ({
         </SidebarGroup>
       </SidebarContent>
 
-      <SidebarFooter className="p-2 border-t space-y-2">
+      <SidebarFooter className="p-2 space-y-2">
         {/* Language Selector above the separator line */}
         <LanguageSelector collapsed={false} />
         
