@@ -559,7 +559,7 @@ const AuditLogView = () => {
           </div>
         ) : (
           <div className="border rounded-lg overflow-hidden">
-            <div className="h-[600px] overflow-y-auto">
+            <div className="h-[450px] overflow-y-auto">
               <div className="overflow-x-auto">
                 <table className="w-full">
               {/* Fixed Header */}
