@@ -1,11 +1,9 @@
-import React, { useState, useEffect } from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { ScrollArea } from '@/components/ui/scroll-area';
@@ -30,7 +28,10 @@ import {
   Hash,
   ChevronLeft,
   ChevronRight,
-  ChevronDown
+  ChevronDown,
+  ChevronUp,
+  RefreshCw,
+  MoreHorizontal
 } from 'lucide-react';
 import { auditLogger, AuditLogEntry, AuditLogFilters, AuditChainVerification } from '@/utils/auditLogger';
 
@@ -38,20 +39,22 @@ const AuditLogView = () => {
   const { toast } = useToast();
   const { user } = useAuth();
   const { organization } = useOrganization();
+  
+  // Core state
   const [logs, setLogs] = useState<AuditLogEntry[]>([]);
   const [loading, setLoading] = useState(false);
   const [total, setTotal] = useState(0);
-  const [hasMore, setHasMore] = useState(false);
   const [selectedLog, setSelectedLog] = useState<AuditLogEntry | null>(null);
   const [chainVerification, setChainVerification] = useState<AuditChainVerification | null>(null);
-  const [tableExists, setTableExists] = useState(true);
   const [filtersExpanded, setFiltersExpanded] = useState(false);
+  const [newRecordsCount, setNewRecordsCount] = useState(0);
+  const [lastRefreshTime, setLastRefreshTime] = useState<Date>(new Date());
   
-  // Filters
-  const [filters, setFilters] = useState<AuditLogFilters>({
-    limit: 50,
-    offset: 0
-  });
+  // Pagination state
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState(25);
+  const [sortField, setSortField] = useState<keyof AuditLogEntry>('created_at');
+  const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('desc');
   
   // Filter states
   const [dateFrom, setDateFrom] = useState('');
@@ -62,6 +65,52 @@ const AuditLogView = () => {
   const [actorType, setActorType] = useState('');
   const [targetType, setTargetType] = useState('');
   const [searchText, setSearchText] = useState('');
+  
+  // Auto-refresh state
+  const [autoRefreshEnabled, setAutoRefreshEnabled] = useState(true);
+  const [userInteracting, setUserInteracting] = useState(false);
+
+  // Computed values
+  const totalPages = Math.ceil(total / pageSize);
+  const startRecord = (currentPage - 1) * pageSize + 1;
+  const endRecord = Math.min(currentPage * pageSize, total);
+  
+  // Active filters count
+  const activeFiltersCount = useMemo(() => {
+    let count = 0;
+    if (dateFrom) count++;
+    if (dateTo) count++;
+    if (category && category !== 'all') count++;
+    if (action && action !== 'all') count++;
+    if (severity && severity !== 'all') count++;
+    if (actorType && actorType !== 'all') count++;
+    if (targetType && targetType !== 'all') count++;
+    if (searchText) count++;
+    return count;
+  }, [dateFrom, dateTo, category, action, severity, actorType, targetType, searchText]);
+
+  // Auto-refresh effect
+  useEffect(() => {
+    if (!autoRefreshEnabled || userInteracting || !organization?.id) return;
+    
+    const interval = setInterval(() => {
+      fetchLogs(true);
+      setLastRefreshTime(new Date());
+    }, 30000); // 30 seconds
+    
+    return () => clearInterval(interval);
+  }, [autoRefreshEnabled, userInteracting, organization?.id]);
+
+  // User interaction timeout
+  useEffect(() => {
+    if (!userInteracting) return;
+    
+    const timeout = setTimeout(() => {
+      setUserInteracting(false);
+    }, 10000); // Resume after 10 seconds
+    
+    return () => clearTimeout(timeout);
+  }, [userInteracting]);
 
   useEffect(() => {
     if (organization?.id) {
@@ -70,10 +119,9 @@ const AuditLogView = () => {
     }
   }, [organization?.id]);
 
-  const fetchLogs = async (resetOffset = false) => {
+  const fetchLogs = useCallback(async (resetPage = false) => {
     if (!organization?.id) return;
     
-    console.log('AuditLogView: Fetching logs for organization:', organization.id);
     setLoading(true);
     try {
       const currentFilters: AuditLogFilters = {
@@ -86,29 +134,20 @@ const AuditLogView = () => {
         actorType: actorType && actorType !== 'all' ? actorType : undefined,
         targetType: targetType && targetType !== 'all' ? targetType : undefined,
         searchText: searchText || undefined,
-        limit: filters.limit,
-        offset: resetOffset ? 0 : filters.offset
+        limit: pageSize,
+        offset: resetPage ? 0 : (currentPage - 1) * pageSize
       };
 
       const result = await auditLogger.getLogs(currentFilters);
       
-      console.log('AuditLogView: Received result:', result);
-      
-      // Check if table exists based on result
-      if (result.total === 0 && logs.length === 0 && !loading) {
-        // This might indicate table doesn't exist, but we'll check more specifically
-        setTableExists(true); // Keep optimistic for now
-      }
-      
-      if (resetOffset) {
-        setLogs(result.logs);
-        setFilters(prev => ({ ...prev, offset: 0 }));
-      } else {
-        setLogs(prev => [...prev, ...result.logs]);
-      }
-      
+      setLogs(result.logs);
       setTotal(result.total);
-      setHasMore(result.hasMore);
+      
+      if (resetPage) {
+        setCurrentPage(1);
+        setNewRecordsCount(0);
+      }
+      
     } catch (error) {
       console.error('Error fetching audit logs:', error);
       toast({
@@ -119,7 +158,7 @@ const AuditLogView = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [organization?.id, dateFrom, dateTo, category, action, severity, actorType, targetType, searchText, pageSize, currentPage]);
 
   const verifyChain = async () => {
     if (!organization?.id) return;
@@ -133,18 +172,49 @@ const AuditLogView = () => {
   };
 
   const handleFilterChange = () => {
-    setFilters(prev => ({ ...prev, offset: 0 }));
+    setUserInteracting(true);
     fetchLogs(true);
   };
 
-  const loadMore = () => {
-    if (hasMore && !loading) {
-      setFilters(prev => ({ ...prev, offset: prev.offset + (prev.limit || 50) }));
-      fetchLogs();
+  const handleSort = (field: keyof AuditLogEntry) => {
+    setUserInteracting(true);
+    if (sortField === field) {
+      setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc');
+    } else {
+      setSortField(field);
+      setSortDirection('desc');
     }
+    fetchLogs(true);
   };
 
-  const exportLogs = async (format: 'csv' | 'json') => {
+  const handlePageChange = (page: number) => {
+    setUserInteracting(true);
+    setCurrentPage(page);
+    fetchLogs();
+  };
+
+  const handlePageSizeChange = (newSize: number) => {
+    setUserInteracting(true);
+    setPageSize(newSize);
+    setCurrentPage(1);
+    fetchLogs(true);
+  };
+
+  const clearAllFilters = () => {
+    setUserInteracting(true);
+    setDateFrom('');
+    setDateTo('');
+    setCategory('');
+    setAction('');
+    setSeverity('');
+    setActorType('');
+    setTargetType('');
+    setSearchText('');
+    setCurrentPage(1);
+    fetchLogs(true);
+  };
+
+  const exportLogs = async (format: 'csv' | 'json' | 'excel') => {
     if (!organization?.id) return;
     
     try {
@@ -160,15 +230,26 @@ const AuditLogView = () => {
         searchText: searchText || undefined
       };
 
-      const data = await auditLogger.exportLogs(currentFilters, format);
+      let data: string;
+      let mimeType: string;
+      let fileExtension: string;
+
+      if (format === 'excel') {
+        // For Excel, we'll export as CSV for now (can be enhanced later)
+        data = await auditLogger.exportLogs(currentFilters, 'csv');
+        mimeType = 'text/csv';
+        fileExtension = 'csv';
+      } else {
+        data = await auditLogger.exportLogs(currentFilters, format);
+        mimeType = format === 'csv' ? 'text/csv' : 'application/json';
+        fileExtension = format;
+      }
       
-      const blob = new Blob([data], { 
-        type: format === 'csv' ? 'text/csv' : 'application/json' 
-      });
+      const blob = new Blob([data], { type: mimeType });
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
-      a.download = `audit-logs-${new Date().toISOString().split('T')[0]}.${format}`;
+      a.download = `audit-logs-${new Date().toISOString().split('T')[0]}.${fileExtension}`;
       document.body.appendChild(a);
       a.click();
       document.body.removeChild(a);
@@ -190,11 +271,11 @@ const AuditLogView = () => {
 
   const getSeverityIcon = (severity: string) => {
     switch (severity) {
-      case 'critical': return <AlertTriangle className="h-4 w-4 text-red-500" />;
-      case 'high': return <AlertTriangle className="h-4 w-4 text-orange-500" />;
-      case 'medium': return <AlertTriangle className="h-4 w-4 text-yellow-500" />;
-      case 'low': return <CheckCircle className="h-4 w-4 text-green-500" />;
-      default: return <Activity className="h-4 w-4 text-gray-500" />;
+      case 'critical': return <AlertTriangle className="h-3 w-3 text-red-500" />;
+      case 'high': return <AlertTriangle className="h-3 w-3 text-orange-500" />;
+      case 'medium': return <AlertTriangle className="h-3 w-3 text-yellow-500" />;
+      case 'low': return <CheckCircle className="h-3 w-3 text-green-500" />;
+      default: return <Activity className="h-3 w-3 text-gray-500" />;
     }
   };
 
@@ -210,16 +291,14 @@ const AuditLogView = () => {
 
   const formatTimestamp = (timestamp: string) => {
     const date = new Date(timestamp);
-    const now = new Date();
-    const diffMs = now.getTime() - date.getTime();
-    const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
-    const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
-    const diffMinutes = Math.floor(diffMs / (1000 * 60));
+    return date.toISOString().replace('T', ' ').substring(0, 19);
+  };
 
-    if (diffDays > 0) return `${diffDays}d ago`;
-    if (diffHours > 0) return `${diffHours}h ago`;
-    if (diffMinutes > 0) return `${diffMinutes}m ago`;
-    return 'Just now';
+  const getSortIcon = (field: keyof AuditLogEntry) => {
+    if (sortField !== field) return <MoreHorizontal className="h-3 w-3 text-gray-400" />;
+    return sortDirection === 'asc' ? 
+      <ChevronUp className="h-3 w-3 text-blue-600" /> : 
+      <ChevronDown className="h-3 w-3 text-blue-600" />;
   };
 
   if (!organization) {
@@ -234,7 +313,7 @@ const AuditLogView = () => {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
@@ -265,305 +344,446 @@ const AuditLogView = () => {
         )}
       </div>
 
-      {/* Filters */}
-      <Card>
-        <CardHeader>
-          <CardTitle 
-            className="flex items-center cursor-pointer hover:bg-gray-50 p-2 -m-2 rounded"
-            onClick={() => setFiltersExpanded(!filtersExpanded)}
-          >
-            <Filter className="h-5 w-5 mr-2" />
-            Filters
-            {filtersExpanded ? (
-              <ChevronDown className="h-4 w-4 ml-auto" />
-            ) : (
-              <ChevronRight className="h-4 w-4 ml-auto" />
+      {/* Filters - Collapsible Horizontal Layout */}
+      <div className="border rounded-lg bg-white">
+        <div 
+          className="flex items-center justify-between p-3 cursor-pointer hover:bg-gray-50"
+          onClick={() => setFiltersExpanded(!filtersExpanded)}
+        >
+          <div className="flex items-center space-x-2">
+            <Filter className="h-4 w-4" />
+            <span className="font-medium">Filters</span>
+            {activeFiltersCount > 0 && (
+              <Badge variant="secondary" className="text-xs">
+                {activeFiltersCount}
+              </Badge>
             )}
-          </CardTitle>
-        </CardHeader>
-        {filtersExpanded && (
-          <CardContent className="space-y-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-            {/* Date Range */}
-            <div className="space-y-2">
-              <Label htmlFor="dateFrom">From Date</Label>
-              <Input
-                id="dateFrom"
-                type="date"
-                value={dateFrom}
-                onChange={(e) => setDateFrom(e.target.value)}
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="dateTo">To Date</Label>
-              <Input
-                id="dateTo"
-                type="date"
-                value={dateTo}
-                onChange={(e) => setDateTo(e.target.value)}
-              />
-            </div>
-            
-            {/* Category */}
-            <div className="space-y-2">
-              <Label>Category</Label>
-              <Select value={category} onValueChange={setCategory}>
-                <SelectTrigger>
-                  <SelectValue placeholder="All categories" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All categories</SelectItem>
-                  <SelectItem value="authentication">Authentication</SelectItem>
-                  <SelectItem value="case_management">Case Management</SelectItem>
-                  <SelectItem value="user_management">User Management</SelectItem>
-                  <SelectItem value="organization_management">Organization</SelectItem>
-                  <SelectItem value="billing">Billing</SelectItem>
-                  <SelectItem value="api_access">API Access</SelectItem>
-                  <SelectItem value="system">System</SelectItem>
-                  <SelectItem value="security">Security</SelectItem>
-                  <SelectItem value="compliance">Compliance</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-            
-            {/* Severity */}
-            <div className="space-y-2">
-              <Label>Severity</Label>
-              <Select value={severity} onValueChange={setSeverity}>
-                <SelectTrigger>
-                  <SelectValue placeholder="All severities" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All severities</SelectItem>
-                  <SelectItem value="low">Low</SelectItem>
-                  <SelectItem value="medium">Medium</SelectItem>
-                  <SelectItem value="high">High</SelectItem>
-                  <SelectItem value="critical">Critical</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
           </div>
-          
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            {/* Search */}
-            <div className="space-y-2">
-              <Label htmlFor="search">Search</Label>
-              <div className="relative">
-                <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+          {filtersExpanded ? (
+            <ChevronUp className="h-4 w-4" />
+          ) : (
+            <ChevronDown className="h-4 w-4" />
+          )}
+        </div>
+        
+        {filtersExpanded && (
+          <div className="border-t p-4 space-y-4">
+            {/* Horizontal Filter Row */}
+            <div className="flex flex-wrap gap-4 items-end">
+              {/* Date Range */}
+              <div className="flex items-center space-x-2">
+                <Label htmlFor="dateFrom" className="text-xs font-medium whitespace-nowrap">From:</Label>
                 <Input
-                  id="search"
-                  placeholder="Search logs..."
-                  value={searchText}
-                  onChange={(e) => setSearchText(e.target.value)}
-                  className="pl-10"
+                  id="dateFrom"
+                  type="date"
+                  value={dateFrom}
+                  onChange={(e) => setDateFrom(e.target.value)}
+                  className="h-8 text-xs"
                 />
+              </div>
+              <div className="flex items-center space-x-2">
+                <Label htmlFor="dateTo" className="text-xs font-medium whitespace-nowrap">To:</Label>
+                <Input
+                  id="dateTo"
+                  type="date"
+                  value={dateTo}
+                  onChange={(e) => setDateTo(e.target.value)}
+                  className="h-8 text-xs"
+                />
+              </div>
+              
+              {/* Category */}
+              <div className="flex items-center space-x-2">
+                <Label className="text-xs font-medium whitespace-nowrap">Category:</Label>
+                <Select value={category} onValueChange={setCategory}>
+                  <SelectTrigger className="h-8 text-xs w-32">
+                    <SelectValue placeholder="All" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All</SelectItem>
+                    <SelectItem value="authentication">Authentication</SelectItem>
+                    <SelectItem value="case_management">Case Management</SelectItem>
+                    <SelectItem value="user_management">User Management</SelectItem>
+                    <SelectItem value="organization_management">Organization</SelectItem>
+                    <SelectItem value="billing">Billing</SelectItem>
+                    <SelectItem value="api_access">API Access</SelectItem>
+                    <SelectItem value="system">System</SelectItem>
+                    <SelectItem value="security">Security</SelectItem>
+                    <SelectItem value="compliance">Compliance</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              
+              {/* Action */}
+              <div className="flex items-center space-x-2">
+                <Label className="text-xs font-medium whitespace-nowrap">Action:</Label>
+                <Select value={action} onValueChange={setAction}>
+                  <SelectTrigger className="h-8 text-xs w-28">
+                    <SelectValue placeholder="All" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All</SelectItem>
+                    <SelectItem value="create">Create</SelectItem>
+                    <SelectItem value="read">Read</SelectItem>
+                    <SelectItem value="update">Update</SelectItem>
+                    <SelectItem value="delete">Delete</SelectItem>
+                    <SelectItem value="login">Login</SelectItem>
+                    <SelectItem value="logout">Logout</SelectItem>
+                    <SelectItem value="export">Export</SelectItem>
+                    <SelectItem value="archive">Archive</SelectItem>
+                    <SelectItem value="restore">Restore</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              
+              {/* Severity */}
+              <div className="flex items-center space-x-2">
+                <Label className="text-xs font-medium whitespace-nowrap">Severity:</Label>
+                <Select value={severity} onValueChange={setSeverity}>
+                  <SelectTrigger className="h-8 text-xs w-24">
+                    <SelectValue placeholder="All" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All</SelectItem>
+                    <SelectItem value="low">Low</SelectItem>
+                    <SelectItem value="medium">Medium</SelectItem>
+                    <SelectItem value="high">High</SelectItem>
+                    <SelectItem value="critical">Critical</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              
+              {/* Actor Type */}
+              <div className="flex items-center space-x-2">
+                <Label className="text-xs font-medium whitespace-nowrap">Actor:</Label>
+                <Select value={actorType} onValueChange={setActorType}>
+                  <SelectTrigger className="h-8 text-xs w-24">
+                    <SelectValue placeholder="All" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All</SelectItem>
+                    <SelectItem value="user">User</SelectItem>
+                    <SelectItem value="system">System</SelectItem>
+                    <SelectItem value="api">API</SelectItem>
+                    <SelectItem value="webhook">Webhook</SelectItem>
+                    <SelectItem value="scheduled_job">Scheduled Job</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              
+              {/* Search */}
+              <div className="flex items-center space-x-2">
+                <Label className="text-xs font-medium whitespace-nowrap">Search:</Label>
+                <div className="relative">
+                  <Search className="absolute left-2 top-2 h-3 w-3 text-muted-foreground" />
+                  <Input
+                    placeholder="Search logs..."
+                    value={searchText}
+                    onChange={(e) => setSearchText(e.target.value)}
+                    className="h-8 text-xs pl-7 w-48"
+                  />
+                </div>
               </div>
             </div>
             
-            {/* Action */}
-            <div className="space-y-2">
-              <Label>Action</Label>
-              <Select value={action} onValueChange={setAction}>
-                <SelectTrigger>
-                  <SelectValue placeholder="All actions" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All actions</SelectItem>
-                  <SelectItem value="create">Create</SelectItem>
-                  <SelectItem value="read">Read</SelectItem>
-                  <SelectItem value="update">Update</SelectItem>
-                  <SelectItem value="delete">Delete</SelectItem>
-                  <SelectItem value="login">Login</SelectItem>
-                  <SelectItem value="logout">Logout</SelectItem>
-                  <SelectItem value="export">Export</SelectItem>
-                  <SelectItem value="archive">Archive</SelectItem>
-                  <SelectItem value="restore">Restore</SelectItem>
-                </SelectContent>
-              </Select>
+            {/* Action Buttons */}
+            <div className="flex items-center space-x-2">
+              <Button onClick={handleFilterChange} disabled={loading} size="sm" className="h-8 text-xs">
+                <Filter className="h-3 w-3 mr-1" />
+                Apply
+              </Button>
+              <Button variant="outline" onClick={clearAllFilters} size="sm" className="h-8 text-xs">
+                Clear All
+              </Button>
             </div>
-            
-            {/* Actor Type */}
-            <div className="space-y-2">
-              <Label>Actor Type</Label>
-              <Select value={actorType} onValueChange={setActorType}>
-                <SelectTrigger>
-                  <SelectValue placeholder="All actors" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All actors</SelectItem>
-                  <SelectItem value="user">User</SelectItem>
-                  <SelectItem value="system">System</SelectItem>
-                  <SelectItem value="api">API</SelectItem>
-                  <SelectItem value="webhook">Webhook</SelectItem>
-                  <SelectItem value="scheduled_job">Scheduled Job</SelectItem>
-                </SelectContent>
-              </Select>
+          </div>
+        )}
+      </div>
+
+      {/* Excel-Style Table */}
+      <div className="border rounded-lg bg-white">
+        {/* Table Header */}
+        <div className="flex items-center justify-between p-3 border-b bg-gray-50">
+          <div className="flex items-center space-x-4">
+            <div>
+              <h3 className="font-semibold text-sm">Audit Logs</h3>
+              <p className="text-xs text-muted-foreground">
+                Showing {startRecord}-{endRecord} of {total} records
+              </p>
             </div>
+            {newRecordsCount > 0 && (
+              <Badge variant="secondary" className="text-xs">
+                {newRecordsCount} new
+              </Badge>
+            )}
           </div>
           
           <div className="flex items-center space-x-2">
-            <Button onClick={handleFilterChange} disabled={loading}>
-              <Filter className="h-4 w-4 mr-2" />
-              Apply Filters
+            <Button 
+              variant="outline" 
+              onClick={() => fetchLogs(true)}
+              disabled={loading}
+              size="sm"
+              className="h-8 text-xs"
+            >
+              <RefreshCw className={`h-3 w-3 mr-1 ${loading ? 'animate-spin' : ''}`} />
+              Refresh
             </Button>
-            <Button variant="outline" onClick={() => {
-              setDateFrom('');
-              setDateTo('');
-              setCategory('all');
-              setAction('all');
-              setSeverity('all');
-              setActorType('all');
-              setTargetType('all');
-              setSearchText('');
-              setFilters(prev => ({ ...prev, offset: 0 }));
-              fetchLogs(true);
-            }}>
-              Clear Filters
-            </Button>
+            
+            {/* Export Dropdown */}
+            <Select onValueChange={(value) => exportLogs(value as 'csv' | 'json' | 'excel')}>
+              <SelectTrigger className="h-8 text-xs w-24">
+                <Download className="h-3 w-3 mr-1" />
+                Export
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="csv">CSV</SelectItem>
+                <SelectItem value="json">JSON</SelectItem>
+                <SelectItem value="excel">Excel</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
-        </CardContent>
+        </div>
+        
+        {/* Excel-Style Table */}
+        {logs.length === 0 && !loading ? (
+          <div className="text-center py-12">
+            <Shield className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+            <h3 className="text-lg font-medium mb-2">No Audit Logs Yet</h3>
+            <p className="text-muted-foreground mb-4">
+              The audit trail system is ready, but no events have been logged yet.
+            </p>
+            <p className="text-sm text-muted-foreground">
+              Audit logs will appear here as users interact with the system.
+            </p>
+          </div>
+        ) : (
+          <div className="overflow-x-auto">
+            <table className="w-full">
+              {/* Fixed Header */}
+              <thead className="bg-gray-50 sticky top-0 z-10">
+                <tr className="border-b">
+                  <th 
+                    className="px-3 py-2 text-left text-xs font-semibold text-gray-700 border-r cursor-pointer hover:bg-gray-100"
+                    style={{ width: '150px' }}
+                    onClick={() => handleSort('created_at')}
+                  >
+                    <div className="flex items-center justify-between">
+                      Timestamp
+                      {getSortIcon('created_at')}
+                    </div>
+                  </th>
+                  <th 
+                    className="px-3 py-2 text-left text-xs font-semibold text-gray-700 border-r cursor-pointer hover:bg-gray-100"
+                    style={{ width: '120px' }}
+                    onClick={() => handleSort('event_type')}
+                  >
+                    <div className="flex items-center justify-between">
+                      Event Type
+                      {getSortIcon('event_type')}
+                    </div>
+                  </th>
+                  <th 
+                    className="px-3 py-2 text-left text-xs font-semibold text-gray-700 border-r cursor-pointer hover:bg-gray-100"
+                    style={{ width: '100px' }}
+                    onClick={() => handleSort('category')}
+                  >
+                    <div className="flex items-center justify-between">
+                      Category
+                      {getSortIcon('category')}
+                    </div>
+                  </th>
+                  <th 
+                    className="px-3 py-2 text-left text-xs font-semibold text-gray-700 border-r cursor-pointer hover:bg-gray-100"
+                    style={{ width: '120px' }}
+                    onClick={() => handleSort('action')}
+                  >
+                    <div className="flex items-center justify-between">
+                      Action
+                      {getSortIcon('action')}
+                    </div>
+                  </th>
+                  <th 
+                    className="px-3 py-2 text-left text-xs font-semibold text-gray-700 border-r cursor-pointer hover:bg-gray-100"
+                    style={{ width: '150px' }}
+                    onClick={() => handleSort('actor_email')}
+                  >
+                    <div className="flex items-center justify-between">
+                      Actor
+                      {getSortIcon('actor_email')}
+                    </div>
+                  </th>
+                  <th 
+                    className="px-3 py-2 text-left text-xs font-semibold text-gray-700 border-r cursor-pointer hover:bg-gray-100"
+                    style={{ width: '150px' }}
+                    onClick={() => handleSort('target_name')}
+                  >
+                    <div className="flex items-center justify-between">
+                      Target
+                      {getSortIcon('target_name')}
+                    </div>
+                  </th>
+                  <th 
+                    className="px-3 py-2 text-left text-xs font-semibold text-gray-700 border-r cursor-pointer hover:bg-gray-100"
+                    style={{ width: '80px' }}
+                    onClick={() => handleSort('severity')}
+                  >
+                    <div className="flex items-center justify-between">
+                      Severity
+                      {getSortIcon('severity')}
+                    </div>
+                  </th>
+                  <th 
+                    className="px-3 py-2 text-left text-xs font-semibold text-gray-700 border-r cursor-pointer hover:bg-gray-100"
+                    onClick={() => handleSort('summary')}
+                  >
+                    <div className="flex items-center justify-between">
+                      Summary
+                      {getSortIcon('summary')}
+                    </div>
+                  </th>
+                  <th 
+                    className="px-3 py-2 text-center text-xs font-semibold text-gray-700"
+                    style={{ width: '60px' }}
+                  >
+                    Actions
+                  </th>
+                </tr>
+              </thead>
+              
+              {/* Table Body */}
+              <tbody>
+                {logs.map((log, index) => (
+                  <tr 
+                    key={log.id} 
+                    className={`border-b hover:bg-gray-50 ${index % 2 === 0 ? 'bg-white' : 'bg-gray-50'}`}
+                    style={{ height: '32px' }}
+                  >
+                    <td className="px-3 py-1 text-xs text-gray-900 border-r font-mono">
+                      {formatTimestamp(log.created_at)}
+                    </td>
+                    <td className="px-3 py-1 text-xs text-gray-900 border-r">
+                      {log.event_type}
+                    </td>
+                    <td className="px-3 py-1 text-xs border-r">
+                      <Badge variant="outline" className="text-xs px-1 py-0">
+                        {log.category}
+                      </Badge>
+                    </td>
+                    <td className="px-3 py-1 text-xs text-gray-900 border-r">
+                      {log.action}
+                    </td>
+                    <td className="px-3 py-1 text-xs text-gray-900 border-r">
+                      <div className="truncate" title={log.actor_email || log.actor_type}>
+                        {log.actor_email || log.actor_type}
+                      </div>
+                    </td>
+                    <td className="px-3 py-1 text-xs text-gray-900 border-r">
+                      <div className="truncate" title={log.target_name || log.target_type || ''}>
+                        {log.target_name || log.target_type || '-'}
+                      </div>
+                    </td>
+                    <td className="px-3 py-1 text-xs border-r">
+                      <Badge variant={getSeverityColor(log.severity)} className="text-xs px-1 py-0">
+                        {getSeverityIcon(log.severity)}
+                        <span className="ml-1 capitalize">{log.severity}</span>
+                      </Badge>
+                    </td>
+                    <td className="px-3 py-1 text-xs text-gray-900 border-r">
+                      <div className="truncate" title={log.summary}>
+                        {log.summary}
+                      </div>
+                    </td>
+                    <td className="px-3 py-1 text-center">
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => setSelectedLog(log)}
+                        className="h-6 w-6 p-0"
+                      >
+                        <Eye className="h-3 w-3" />
+                      </Button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         )}
-      </Card>
-
-      {/* Results */}
-      <Card>
-        <CardHeader>
-          <div className="flex items-center justify-between">
-            <div>
-              <CardTitle>Audit Logs</CardTitle>
-              <CardDescription>
-                {total} total records found
-              </CardDescription>
-            </div>
-            <div className="flex items-center space-x-2">
-              <Button 
-                variant="outline" 
-                onClick={() => fetchLogs(true)}
-                disabled={loading}
-              >
-                <Activity className="h-4 w-4 mr-2" />
-                Refresh
-              </Button>
-              <Button variant="outline" onClick={() => exportLogs('csv')}>
-                <Download className="h-4 w-4 mr-2" />
-                Export CSV
-              </Button>
-              <Button variant="outline" onClick={() => exportLogs('json')}>
-                <Download className="h-4 w-4 mr-2" />
-                Export JSON
-              </Button>
-            </div>
-          </div>
-        </CardHeader>
-        <CardContent>
-          {logs.length === 0 && !loading ? (
-            <div className="text-center py-12">
-              <Shield className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-              <h3 className="text-lg font-medium mb-2">No Audit Logs Yet</h3>
-              <p className="text-muted-foreground mb-4">
-                The audit trail system is ready, but no events have been logged yet.
-              </p>
-              <p className="text-sm text-muted-foreground">
-                Audit logs will appear here as users interact with the system.
-              </p>
-            </div>
-          ) : (
-            <>
-              <div className="rounded-md border">
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Time</TableHead>
-                      <TableHead>Event</TableHead>
-                      <TableHead>Actor</TableHead>
-                      <TableHead>Target</TableHead>
-                      <TableHead>Severity</TableHead>
-                      <TableHead>Summary</TableHead>
-                      <TableHead>Actions</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {logs.map((log) => (
-                      <TableRow key={log.id}>
-                        <TableCell>
-                          <div className="flex items-center space-x-2">
-                            <Clock className="h-4 w-4 text-muted-foreground" />
-                            <div>
-                              <div className="text-sm">{formatTimestamp(log.created_at)}</div>
-                              <div className="text-xs text-muted-foreground">
-                                {new Date(log.created_at).toLocaleString()}
-                              </div>
-                            </div>
-                          </div>
-                        </TableCell>
-                        <TableCell>
-                          <div>
-                            <div className="font-medium">{log.event_type}</div>
-                            <Badge variant="outline" className="text-xs">
-                              {log.category}
-                            </Badge>
-                          </div>
-                        </TableCell>
-                        <TableCell>
-                          <div className="flex items-center space-x-2">
-                            <User className="h-4 w-4 text-muted-foreground" />
-                            <div>
-                              <div className="text-sm">{log.actor_email || log.actor_type}</div>
-                              <div className="text-xs text-muted-foreground">{log.actor_type}</div>
-                            </div>
-                          </div>
-                        </TableCell>
-                        <TableCell>
-                          {log.target_type && (
-                            <div className="flex items-center space-x-2">
-                              <Target className="h-4 w-4 text-muted-foreground" />
-                              <div>
-                                <div className="text-sm">{log.target_name || log.target_type}</div>
-                                <div className="text-xs text-muted-foreground">{log.target_type}</div>
-                              </div>
-                            </div>
-                          )}
-                        </TableCell>
-                        <TableCell>
-                          <Badge variant={getSeverityColor(log.severity)}>
-                            {getSeverityIcon(log.severity)}
-                            <span className="ml-1 capitalize">{log.severity}</span>
-                          </Badge>
-                        </TableCell>
-                        <TableCell>
-                          <div className="max-w-xs truncate">
-                            {log.summary}
-                          </div>
-                        </TableCell>
-                        <TableCell>
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => setSelectedLog(log)}
-                          >
-                            <Eye className="h-4 w-4" />
-                          </Button>
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
+        
+        {/* Pagination */}
+        {total > 0 && (
+          <div className="flex items-center justify-between p-3 border-t bg-gray-50">
+            <div className="flex items-center space-x-4">
+              <div className="flex items-center space-x-2">
+                <Label className="text-xs">Rows per page:</Label>
+                <Select value={pageSize.toString()} onValueChange={(value) => handlePageSizeChange(Number(value))}>
+                  <SelectTrigger className="h-7 text-xs w-16">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="10">10</SelectItem>
+                    <SelectItem value="25">25</SelectItem>
+                    <SelectItem value="50">50</SelectItem>
+                    <SelectItem value="100">100</SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
               
-              {/* Load More */}
-              {hasMore && (
-                <div className="flex justify-center mt-4">
-                  <Button variant="outline" onClick={loadMore} disabled={loading}>
-                    {loading ? 'Loading...' : 'Load More'}
-                  </Button>
-                </div>
-              )}
-            </>
-          )}
-        </CardContent>
-      </Card>
+              <div className="text-xs text-muted-foreground">
+                Page {currentPage} of {totalPages}
+              </div>
+            </div>
+            
+            <div className="flex items-center space-x-2">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => handlePageChange(currentPage - 1)}
+                disabled={currentPage === 1 || loading}
+                className="h-7 text-xs"
+              >
+                <ChevronLeft className="h-3 w-3" />
+                Previous
+              </Button>
+              
+              {/* Page Numbers */}
+              <div className="flex items-center space-x-1">
+                {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
+                  const pageNum = Math.max(1, Math.min(totalPages - 4, currentPage - 2)) + i;
+                  if (pageNum > totalPages) return null;
+                  
+                  return (
+                    <Button
+                      key={pageNum}
+                      variant={pageNum === currentPage ? "default" : "outline"}
+                      size="sm"
+                      onClick={() => handlePageChange(pageNum)}
+                      disabled={loading}
+                      className="h-7 w-7 text-xs p-0"
+                    >
+                      {pageNum}
+                    </Button>
+                  );
+                })}
+              </div>
+              
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => handlePageChange(currentPage + 1)}
+                disabled={currentPage === totalPages || loading}
+                className="h-7 text-xs"
+              >
+                Next
+                <ChevronRight className="h-3 w-3" />
+              </Button>
+            </div>
+          </div>
+        )}
+      </div>
 
-      {/* Details Dialog */}
+      {/* Details Dialog - Keep existing implementation */}
       <Dialog open={!!selectedLog} onOpenChange={() => setSelectedLog(null)}>
         <DialogContent className="max-w-4xl max-h-[80vh]">
           <DialogHeader>
