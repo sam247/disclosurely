@@ -25,6 +25,7 @@ import { useSubscriptionLimits } from '@/hooks/useSubscriptionLimits';
 import SubscriptionPromptModal from '@/components/SubscriptionPromptModal';
 import TrialPromptModal from '@/components/TrialPromptModal';
 import type { Report as DatabaseReport } from '@/types/database';
+import { auditLogger } from '@/utils/auditLogger';
 
 interface Report {
   id: string;
@@ -515,6 +516,14 @@ const Dashboard = () => {
 
   const handleMarkAsRead = async (reportId: string) => {
     try {
+      // Get report details for audit log
+      const report = reports.find(r => r.id === reportId);
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('organization_id')
+        .eq('id', user?.id)
+        .single();
+
       const { error } = await supabase
         .from('reports')
         .update({ 
@@ -526,6 +535,26 @@ const Dashboard = () => {
         .eq('status', 'new');
 
       if (error) throw error;
+
+      // Log the status change
+      if (user && profile?.organization_id && report) {
+        await auditLogger.log({
+          eventType: 'case.update',
+          category: 'case_management',
+          action: 'mark_as_read',
+          severity: 'low',
+          actorType: 'user',
+          actorId: user.id,
+          actorEmail: user.email,
+          organizationId: profile.organization_id,
+          targetType: 'case',
+          targetId: reportId,
+          targetName: report.title,
+          summary: `Case marked as read: ${report.title}`,
+          beforeState: { status: 'new' },
+          afterState: { status: 'live', first_read_at: new Date().toISOString() }
+        });
+      }
 
       toast({
         title: "Report marked as read",
@@ -547,6 +576,14 @@ const Dashboard = () => {
 
   const handleCloseReport = async (reportId: string) => {
     try {
+      // Get report details for audit log
+      const report = reports.find(r => r.id === reportId) || archivedReports.find(r => r.id === reportId);
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('organization_id')
+        .eq('id', user?.id)
+        .single();
+
       const { error } = await supabase
         .from('reports')
         .update({ 
@@ -556,6 +593,26 @@ const Dashboard = () => {
         .eq('id', reportId);
 
       if (error) throw error;
+
+      // Log the status change
+      if (user && profile?.organization_id && report) {
+        await auditLogger.log({
+          eventType: 'case.update',
+          category: 'case_management',
+          action: 'close',
+          severity: 'medium',
+          actorType: 'user',
+          actorId: user.id,
+          actorEmail: user.email,
+          organizationId: profile.organization_id,
+          targetType: 'case',
+          targetId: reportId,
+          targetName: report.title,
+          summary: `Case closed: ${report.title}`,
+          beforeState: { status: report.status },
+          afterState: { status: 'closed' }
+        });
+      }
 
       toast({
         title: "Report closed",
@@ -582,6 +639,14 @@ const Dashboard = () => {
 
   const handleReopenReport = async (reportId: string) => {
     try {
+      // Get report details for audit log
+      const report = reports.find(r => r.id === reportId) || archivedReports.find(r => r.id === reportId);
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('organization_id')
+        .eq('id', user?.id)
+        .single();
+
       const { error } = await supabase
         .from('reports')
         .update({ 
@@ -591,6 +656,26 @@ const Dashboard = () => {
         .eq('id', reportId);
 
       if (error) throw error;
+
+      // Log the status change
+      if (user && profile?.organization_id && report) {
+        await auditLogger.log({
+          eventType: 'case.update',
+          category: 'case_management',
+          action: 'reopen',
+          severity: 'medium',
+          actorType: 'user',
+          actorId: user.id,
+          actorEmail: user.email,
+          organizationId: profile.organization_id,
+          targetType: 'case',
+          targetId: reportId,
+          targetName: report.title,
+          summary: `Case reopened: ${report.title}`,
+          beforeState: { status: report.status },
+          afterState: { status: 'live' }
+        });
+      }
 
       toast({
         title: "Report reopened",
@@ -617,6 +702,14 @@ const Dashboard = () => {
 
   const handleRestoreReport = async (reportId: string) => {
     try {
+      // Get report details for audit log
+      const report = reports.find(r => r.id === reportId) || archivedReports.find(r => r.id === reportId);
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('organization_id')
+        .eq('id', user?.id)
+        .single();
+
       const { error } = await supabase
         .from('reports')
         .update({ 
@@ -626,6 +719,26 @@ const Dashboard = () => {
         .eq('id', reportId);
 
       if (error) throw error;
+
+      // Log the status change
+      if (user && profile?.organization_id && report) {
+        await auditLogger.log({
+          eventType: 'case.update',
+          category: 'case_management',
+          action: 'restore',
+          severity: 'medium',
+          actorType: 'user',
+          actorId: user.id,
+          actorEmail: user.email,
+          organizationId: profile.organization_id,
+          targetType: 'case',
+          targetId: reportId,
+          targetName: report.title,
+          summary: `Case restored: ${report.title}`,
+          beforeState: { status: report.status },
+          afterState: { status: 'live' }
+        });
+      }
 
       toast({
         title: "Report restored",

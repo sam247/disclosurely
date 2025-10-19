@@ -407,7 +407,7 @@ const DashboardView = () => {
       const report = reports.find(r => r.id === reportId);
       if (!report) throw new Error('Report not found');
 
-      // Get user's organization ID
+      // Get user's organization ID (will be used for audit logging)
       const { data: profile } = await supabase
         .from('profiles')
         .select('organization_id')
@@ -474,6 +474,30 @@ Additional Details: ${decryptedContent.additionalDetails || 'None provided'}
       }
 
       console.log('AI risk assessment completed successfully');
+
+      // Log AI risk assessment to audit trail
+      await logCaseEvent(
+        'update',
+        user?.id || '',
+        user?.email || '',
+        profile.organization_id,
+        report.id,
+        report.title,
+        { 
+          ai_risk_score: null,
+          ai_risk_level: null,
+        },
+        { 
+          ai_risk_score: data.riskAssessment.risk_score,
+          ai_risk_level: data.riskAssessment.risk_level,
+          ai_likelihood_score: data.riskAssessment.likelihood_score,
+          ai_impact_score: data.riskAssessment.impact_score,
+        },
+        { 
+          action: 'ai_risk_assessment',
+          assessment_version: '1.0',
+        }
+      );
 
       toast({
         title: "Risk Assessment Complete",

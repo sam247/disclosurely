@@ -12,6 +12,7 @@ import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { useOrganization } from '@/hooks/useOrganization';
+import { auditLogger } from '@/utils/auditLogger';
 import { 
   Users, 
   UserPlus, 
@@ -219,6 +220,28 @@ const UserManagement = () => {
         });
       }
 
+      // Log team invitation to audit trail
+      await auditLogger.log({
+        eventType: 'user.invite',
+        category: 'user_management',
+        action: 'Team member invited',
+        severity: 'medium',
+        actorType: 'user',
+        actorId: user.id,
+        actorEmail: user.email,
+        targetType: 'user',
+        targetId: newInvitation.id,
+        targetName: emailToInvite,
+        summary: `Team invitation sent to ${emailToInvite}`,
+        description: `Invitation sent for ${inviteRole} role`,
+        metadata: {
+          invited_email: emailToInvite,
+          invited_role: inviteRole,
+          invitation_id: newInvitation.id,
+        },
+        organizationId: organization.id,
+      });
+
       setInviteEmail('');
       setInviteRole('case_handler');
       setIsInviteDialogOpen(false);
@@ -236,12 +259,37 @@ const UserManagement = () => {
 
   const cancelInvitation = async (invitationId: string) => {
     try {
+      const invitation = invitations.find(i => i.id === invitationId);
+      
       const { error } = await supabase
         .from('user_invitations')
         .delete()
         .eq('id', invitationId);
 
       if (error) throw error;
+
+      // Log cancellation to audit trail
+      if (invitation && organization?.id) {
+        await auditLogger.log({
+          eventType: 'user.invite_cancelled',
+          category: 'user_management',
+          action: 'Invitation cancelled',
+          severity: 'low',
+          actorType: 'user',
+          actorId: user?.id,
+          actorEmail: user?.email,
+          targetType: 'user',
+          targetId: invitationId,
+          targetName: invitation.email,
+          summary: `Invitation cancelled for ${invitation.email}`,
+          description: `Cancelled ${invitation.role} invitation`,
+          metadata: {
+            cancelled_email: invitation.email,
+            cancelled_role: invitation.role,
+          },
+          organizationId: organization.id,
+        });
+      }
 
       toast({
         title: "Invitation cancelled",
@@ -261,12 +309,41 @@ const UserManagement = () => {
 
   const updateUserRole = async (userId: string, newRole: UserRole) => {
     try {
+      const member = teamMembers.find(m => m.id === userId);
+      const oldRole = member?.role;
+      
       const { error } = await supabase
         .from('profiles')
         .update({ role: newRole })
         .eq('id', userId);
 
       if (error) throw error;
+
+      // Log role change to audit trail
+      if (member && organization?.id) {
+        await auditLogger.log({
+          eventType: 'user.role_change',
+          category: 'user_management',
+          action: 'User role updated',
+          severity: 'high',
+          actorType: 'user',
+          actorId: user?.id,
+          actorEmail: user?.email,
+          targetType: 'user',
+          targetId: userId,
+          targetName: member.email,
+          summary: `User role changed from ${oldRole} to ${newRole}`,
+          description: `Role updated for ${member.email}`,
+          beforeState: { role: oldRole },
+          afterState: { role: newRole },
+          metadata: {
+            target_user_email: member.email,
+            old_role: oldRole,
+            new_role: newRole,
+          },
+          organizationId: organization.id,
+        });
+      }
 
       toast({
         title: "Role updated",
@@ -286,12 +363,39 @@ const UserManagement = () => {
 
   const deactivateUser = async (userId: string) => {
     try {
+      const member = teamMembers.find(m => m.id === userId);
+      
       const { error } = await supabase
         .from('profiles')
         .update({ is_active: false })
         .eq('id', userId);
 
       if (error) throw error;
+
+      // Log deactivation to audit trail
+      if (member && organization?.id) {
+        await auditLogger.log({
+          eventType: 'user.deactivate',
+          category: 'user_management',
+          action: 'User deactivated',
+          severity: 'high',
+          actorType: 'user',
+          actorId: user?.id,
+          actorEmail: user?.email,
+          targetType: 'user',
+          targetId: userId,
+          targetName: member.email,
+          summary: `User ${member.email} deactivated`,
+          description: `User account deactivated by ${user?.email}`,
+          beforeState: { is_active: true },
+          afterState: { is_active: false },
+          metadata: {
+            target_user_email: member.email,
+            target_user_role: member.role,
+          },
+          organizationId: organization.id,
+        });
+      }
 
       toast({
         title: "User deactivated",
