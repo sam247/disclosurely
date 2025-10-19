@@ -118,8 +118,6 @@ const DashboardSidebar = ({
       <SidebarFooter className="p-2 border-t space-y-2">
         {/* Footer links above the line */}
         <div className="space-y-1">
-          <LanguageSelector collapsed={false} />
-          
           <a 
             href="https://disclosurely.featurebase.app" 
             target="_blank" 
@@ -138,6 +136,9 @@ const DashboardSidebar = ({
             About Disclosurely
           </button>
         </div>
+        
+        {/* Language Selector just above the separator line */}
+        <LanguageSelector collapsed={false} />
         
         {/* Separator line */}
         <Separator />
