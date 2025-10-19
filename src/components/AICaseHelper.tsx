@@ -605,11 +605,8 @@ Case Details:
           {/* Right Column - Chat Interface */}
           <div className="flex flex-col">
             {/* Chat Header */}
-            <div className="flex items-center justify-between p-4 border-b bg-gray-50 rounded-t-lg">
-              <h4 className="font-semibold flex items-center gap-2">
-                💬 AI Case Analysis
-              </h4>
-              {analysis && (
+            {analysis && (
+              <div className="flex justify-end p-4 border-b">
                 <Button
                   onClick={saveAnalysis}
                   disabled={isSaving}
@@ -625,8 +622,8 @@ Case Details:
                     'Save Analysis'
                   )}
                 </Button>
-              )}
-            </div>
+              </div>
+            )}
             
             {/* Chat Messages - Scrolling Area */}
             <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-white">
@@ -673,7 +670,7 @@ Case Details:
             </div>
             
             {/* Chat Input */}
-            <div className="p-4 border-t bg-gray-50 rounded-b-lg">
+            <div className="p-4 border-t">
               <div className="flex gap-2">
                 <Textarea
                   placeholder="Ask a follow-up question or leave blank for general analysis..."

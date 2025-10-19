@@ -108,28 +108,30 @@ const Landing = () => {
 
             {/* Logo Carousel */}
             <div className="relative overflow-hidden">
-              <div className="flex animate-scroll space-x-16 items-center">
+              <div className="flex animate-scroll items-center">
                 {/* First set of logos */}
-                <div className="flex space-x-16 items-center min-w-fit">
+                <div className="flex items-center min-w-fit">
                   {businessLogos.map((logo, index) => (
-                    <img
-                      key={`first-${index}`}
-                      src={logo.src}
-                      alt={logo.alt}
-                      className="h-12 w-auto object-contain opacity-70 hover:opacity-100 transition-opacity"
-                    />
+                    <div key={`first-${index}`} className="mx-8 flex-shrink-0">
+                      <img
+                        src={logo.src}
+                        alt={logo.alt}
+                        className="h-12 w-auto object-contain opacity-70 hover:opacity-100 transition-opacity"
+                      />
+                    </div>
                   ))}
                 </div>
 
                 {/* Duplicate set for seamless loop */}
-                <div className="flex space-x-16 items-center min-w-fit">
+                <div className="flex items-center min-w-fit">
                   {businessLogos.map((logo, index) => (
-                    <img
-                      key={`second-${index}`}
-                      src={logo.src}
-                      alt={logo.alt}
-                      className="h-12 w-auto object-contain opacity-70 hover:opacity-100 transition-opacity"
-                    />
+                    <div key={`second-${index}`} className="mx-8 flex-shrink-0">
+                      <img
+                        src={logo.src}
+                        alt={logo.alt}
+                        className="h-12 w-auto object-contain opacity-70 hover:opacity-100 transition-opacity"
+                      />
+                    </div>
                   ))}
                 </div>
               </div>
