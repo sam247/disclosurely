@@ -61,6 +61,8 @@ const UserManagement = () => {
   const [isInviteDialogOpen, setIsInviteDialogOpen] = useState(false);
   const [inviteEmail, setInviteEmail] = useState('');
   const [inviteRole, setInviteRole] = useState<UserRole>('case_handler');
+  const [isSendingInvitation, setIsSendingInvitation] = useState(false);
+  const [cancellingInvitation, setCancellingInvitation] = useState<string | null>(null);
 
   useEffect(() => {
     if (organization && profile?.role === 'org_admin') {
@@ -123,6 +125,13 @@ const UserManagement = () => {
 
   const sendInvitation = async () => {
     console.log('Send invitation clicked', { inviteEmail, organization: organization?.id, userId: user?.id });
+    console.log('User auth state:', { 
+      user: user, 
+      profile: profile, 
+      organization: organization,
+      userRole: profile?.role,
+      isOrgAdmin: profile?.role === 'org_admin'
+    });
     
     if (!inviteEmail.trim()) {
       toast({
@@ -151,8 +160,18 @@ const UserManagement = () => {
       return;
     }
 
+    if (profile?.role !== 'org_admin') {
+      toast({
+        title: "Error",
+        description: "Only organization administrators can send invitations.",
+        variant: "destructive",
+      });
+      return;
+    }
+
     console.log('Proceeding with invitation');
     
+    setIsSendingInvitation(true);
     try {
       const emailToInvite = inviteEmail.toLowerCase().trim();
       
@@ -255,10 +274,13 @@ const UserManagement = () => {
         description: "Failed to send invitation. Please try again.",
         variant: "destructive",
       });
+    } finally {
+      setIsSendingInvitation(false);
     }
   };
 
   const cancelInvitation = async (invitationId: string) => {
+    setCancellingInvitation(invitationId);
     try {
       const invitation = invitations.find(i => i.id === invitationId);
       
@@ -305,6 +327,8 @@ const UserManagement = () => {
         description: "Failed to cancel invitation",
         variant: "destructive",
       });
+    } finally {
+      setCancellingInvitation(null);
     }
   };
 
@@ -516,6 +540,7 @@ const UserManagement = () => {
                         console.log('Cancel button clicked');
                         setIsInviteDialogOpen(false);
                       }}
+                      className="transition-all duration-200 hover:scale-105 active:scale-95"
                     >
                       Cancel
                     </Button>
@@ -524,9 +549,17 @@ const UserManagement = () => {
                         console.log('Send invitation button clicked, disabled:', !inviteEmail.trim());
                         sendInvitation();
                       }} 
-                      disabled={!inviteEmail.trim()}
+                      disabled={!inviteEmail.trim() || isSendingInvitation}
+                      className="transition-all duration-200 hover:scale-105 active:scale-95"
                     >
-                      Send Invitation
+                      {isSendingInvitation ? (
+                        <>
+                          <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                          Sending...
+                        </>
+                      ) : (
+                        'Send Invitation'
+                      )}
                     </Button>
                   </div>
                 </div>
@@ -686,9 +719,14 @@ const UserManagement = () => {
                           size="sm"
                           variant="outline"
                           onClick={() => cancelInvitation(invitation.id)}
-                          className="text-red-600 hover:text-red-700"
+                          disabled={cancellingInvitation === invitation.id}
+                          className="text-red-600 hover:text-red-700 transition-all duration-200 hover:scale-105 active:scale-95"
                         >
-                          <Trash2 className="h-4 w-4" />
+                          {cancellingInvitation === invitation.id ? (
+                            <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-red-600"></div>
+                          ) : (
+                            <Trash2 className="h-4 w-4" />
+                          )}
                         </Button>
                       </TableCell>
                     </TableRow>
