@@ -158,6 +158,7 @@ const DashboardView = () => {
   const [reportCategories, setReportCategories] = useState<Record<string, string>>({});
   const [isAssessingRisk, setIsAssessingRisk] = useState<string | null>(null);
   const [updatingRiskLevel, setUpdatingRiskLevel] = useState<string | null>(null);
+  const [teamMembers, setTeamMembers] = useState<any[]>([]);
 
   useEffect(() => {
     if (user) {
@@ -258,6 +259,19 @@ const DashboardView = () => {
       console.log('Archived reports fetched:', archivedData);
       setReports(reportsData || []);
       setArchivedReports(archivedData || []);
+
+      // Fetch team members for assignment
+      const { data: teamData, error: teamError } = await supabase
+        .from('profiles')
+        .select('id, email, first_name, last_name, role')
+        .eq('organization_id', profile.organization_id)
+        .eq('is_active', true);
+
+      if (teamError) {
+        console.error('Error fetching team members:', teamError);
+      } else {
+        setTeamMembers(teamData || []);
+      }
     } catch (error) {
       console.error('Error fetching dashboard data:', error);
       toast({
@@ -267,6 +281,53 @@ const DashboardView = () => {
       });
     } finally {
       setLoading(false);
+    }
+  };
+
+  const assignReport = async (reportId: string, assigneeId: string) => {
+    try {
+      const report = reports.find(r => r.id === reportId);
+      const assignee = teamMembers.find(m => m.id === assigneeId);
+      
+      const { error } = await supabase
+        .from('reports')
+        .update({ 
+          assigned_to: assigneeId === 'unassigned' ? null : assigneeId,
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', reportId);
+
+      if (error) throw error;
+      
+      // Log assignment to audit trail
+      if (report && effectiveOrganizationId) {
+        await logCaseEvent(
+          'update',
+          user?.id || '',
+          user?.email || '',
+          effectiveOrganizationId,
+          reportId,
+          report.title,
+          { assigned_to: report.assigned_to },
+          { assigned_to: assigneeId === 'unassigned' ? null : assigneeId },
+          { action: 'assignment_change', assignee_email: assignee?.email }
+        );
+      }
+      
+      await fetchData();
+      toast({
+        title: "Success",
+        description: assigneeId === 'unassigned' 
+          ? "Report unassigned successfully" 
+          : `Report assigned to ${assignee?.first_name || assignee?.email}`,
+      });
+    } catch (error) {
+      console.error('Error assigning report:', error);
+      toast({
+        title: "Error",
+        description: "Failed to assign report",
+        variant: "destructive",
+      });
     }
   };
 
@@ -772,11 +833,25 @@ Additional Details: ${decryptedContent.additionalDetails || 'None provided'}
                           </div>
                         </TableCell>
                         <TableCell>
-                          {report.assigned_to ? (
-                            <span className="text-sm">{t('assigned')}</span>
-                          ) : (
-                            <span className="text-sm text-muted-foreground">{t('unassigned')}</span>
-                          )}
+                          <Select
+                            value={report.assigned_to || 'unassigned'}
+                            onValueChange={(value) => assignReport(report.id, value)}
+                          >
+                            <SelectTrigger className="w-40 h-8 text-xs">
+                              <SelectValue placeholder="Assign to..." />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="unassigned">Unassigned</SelectItem>
+                              {teamMembers.map((member) => (
+                                <SelectItem key={member.id} value={member.id}>
+                                  {member.first_name && member.last_name 
+                                    ? `${member.first_name} ${member.last_name}`
+                                    : member.email
+                                  }
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
                         </TableCell>
                         <TableCell className="text-sm text-muted-foreground">
                           {new Date(report.created_at).toLocaleDateString()}
