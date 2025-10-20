@@ -7,9 +7,12 @@ const corsHeaders = {
 };
 
 serve(async (req) => {
+  // Handle CORS preflight
   if (req.method === 'OPTIONS') {
     return new Response('ok', { headers: corsHeaders });
   }
+
+  console.log('accept-team-invitation function invoked');
 
   try {
     const supabaseClient = createClient(
