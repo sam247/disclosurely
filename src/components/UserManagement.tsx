@@ -20,7 +20,8 @@ import {
   Shield, 
   CheckCircle,
   XCircle,
-  Trash2
+  Trash2,
+  UserCheck
 } from 'lucide-react';
 
 type UserRole = 'admin' | 'case_handler' | 'reviewer' | 'org_admin';
@@ -60,11 +61,13 @@ const UserManagement = () => {
   const [isInviteDialogOpen, setIsInviteDialogOpen] = useState(false);
   const [inviteEmail, setInviteEmail] = useState('');
   const [inviteRole, setInviteRole] = useState<UserRole>('case_handler');
+  const [reports, setReports] = useState<any[]>([]);
 
   useEffect(() => {
     if (organization && profile?.role === 'org_admin') {
       fetchTeamMembers();
       fetchInvitations();
+      fetchReports();
     }
   }, [organization, profile?.role]);
 
@@ -117,6 +120,22 @@ const UserManagement = () => {
       });
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const fetchReports = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('reports')
+        .select('id, tracking_id, title, assigned_to, status')
+        .eq('organization_id', organization?.id)
+        .eq('deleted_at', null)
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+      setReports(data || []);
+    } catch (error) {
+      console.error('Error fetching reports:', error);
     }
   };
 
@@ -413,6 +432,62 @@ const UserManagement = () => {
     }
   };
 
+  const assignCaseToUser = async (userId: string, reportId: string) => {
+    try {
+      const report = reports.find(r => r.id === reportId);
+      const member = teamMembers.find(m => m.id === userId);
+      
+      const { error } = await supabase
+        .from('reports')
+        .update({ 
+          assigned_to: reportId === 'unassigned' ? null : userId,
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', reportId);
+
+      if (error) throw error;
+
+      // Log assignment to audit trail
+      if (report && member && organization?.id) {
+        await auditLogger.log({
+          eventType: 'case.assign',
+          category: 'case_management',
+          action: 'Report assigned',
+          severity: 'medium',
+          actorType: 'user',
+          actorId: user?.id,
+          actorEmail: user?.email,
+          targetType: 'report',
+          targetId: reportId,
+          targetName: report.tracking_id,
+          summary: `Report ${report.tracking_id} assigned to ${member.email}`,
+          description: `Assignment changed for "${report.title}"`,
+          beforeState: { assigned_to: report.assigned_to },
+          afterState: { assigned_to: userId },
+          metadata: {
+            assignee_email: member.email,
+            assignee_role: member.role,
+          },
+          organizationId: organization.id,
+        });
+      }
+
+      toast({
+        title: "Case assigned",
+        description: `Report assigned to ${member?.email}`,
+      });
+
+      await fetchReports();
+    } catch (error) {
+      console.error('Error assigning case:', error);
+      toast({
+        title: "Error",
+        description: "Failed to assign case",
+        variant: "destructive",
+      });
+    }
+  };
+
   const getRoleColor = (role: UserRole) => {
     switch (role) {
       case 'org_admin': return 'bg-purple-100 text-purple-800';
@@ -542,11 +617,11 @@ const UserManagement = () => {
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Name</TableHead>
-                  <TableHead>Email</TableHead>
-                  <TableHead>Role</TableHead>
-                  <TableHead>Last Login</TableHead>
-                  <TableHead>Actions</TableHead>
+                  <TableHead className="w-[200px]">Name</TableHead>
+                  <TableHead className="w-[250px]">Email</TableHead>
+                  <TableHead className="w-[120px]">Role</TableHead>
+                  <TableHead className="w-[100px]">Last Login</TableHead>
+                  <TableHead className="w-[300px]">Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -558,38 +633,54 @@ const UserManagement = () => {
                   </TableRow>
                 ) : (
                   teamMembers.map((member) => (
-                    <TableRow key={member.id}>
+                    <TableRow key={member.id} className="hover:bg-gray-50">
                       <TableCell>
-                        <div>
-                          <div className="font-medium">
-                            {member.first_name && member.last_name 
-                              ? `${member.first_name} ${member.last_name}`
-                              : 'Not provided'
-                            }
+                        <div className="flex items-center space-x-3">
+                          <div className="w-8 h-8 bg-gray-200 rounded-full flex items-center justify-center">
+                            <span className="text-sm font-medium text-gray-600">
+                              {member.first_name ? member.first_name[0].toUpperCase() : 
+                               member.email ? member.email[0].toUpperCase() : '?'}
+                            </span>
+                          </div>
+                          <div>
+                            <div className="font-medium text-sm">
+                              {member.first_name && member.last_name 
+                                ? `${member.first_name} ${member.last_name}`
+                                : 'Not provided'
+                              }
+                            </div>
+                            <div className="text-xs text-gray-500">
+                              ID: {member.id.slice(0, 8)}...
+                            </div>
                           </div>
                         </div>
                       </TableCell>
-                      <TableCell>{member.email}</TableCell>
                       <TableCell>
-                        <Badge className={getRoleColor(member.role)}>
+                        <div className="text-sm">{member.email}</div>
+                        <div className="text-xs text-gray-500">
+                          {member.is_active ? 'Active' : 'Inactive'}
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        <Badge className={`${getRoleColor(member.role)} text-xs`}>
                           {formatRole(member.role)}
                         </Badge>
                       </TableCell>
-                      <TableCell className="text-sm text-gray-500">
+                      <TableCell className="text-xs text-gray-500">
                         {member.last_login 
                           ? new Date(member.last_login).toLocaleDateString()
                           : 'Never'
                         }
                       </TableCell>
                       <TableCell>
-                        <div className="flex space-x-2">
+                        <div className="flex items-center space-x-2">
                           {member.id !== user?.id && (
                             <>
                               <Select
                                 value={member.role}
                                 onValueChange={(value: UserRole) => updateUserRole(member.id, value)}
                               >
-                                <SelectTrigger className="w-32">
+                                <SelectTrigger className="w-28 h-8 text-xs">
                                   <SelectValue />
                                 </SelectTrigger>
                                 <SelectContent>
@@ -599,15 +690,35 @@ const UserManagement = () => {
                                   <SelectItem value="org_admin">Org Admin</SelectItem>
                                 </SelectContent>
                               </Select>
+                              <Select
+                                value={reports.find(r => r.assigned_to === member.id)?.id || 'unassigned'}
+                                onValueChange={(value) => assignCaseToUser(member.id, value)}
+                              >
+                                <SelectTrigger className="w-32 h-8 text-xs">
+                                  <SelectValue placeholder="Assign case" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  <SelectItem value="unassigned">Unassigned</SelectItem>
+                                  {reports.map((report) => (
+                                    <SelectItem key={report.id} value={report.id}>
+                                      {report.tracking_id}
+                                    </SelectItem>
+                                  ))}
+                                </SelectContent>
+                              </Select>
                               <Button
                                 size="sm"
                                 variant="outline"
                                 onClick={() => deactivateUser(member.id)}
-                                className="text-red-600 hover:text-red-700"
+                                className="h-8 w-8 p-0 text-red-600 hover:text-red-700 hover:bg-red-50"
+                                title="Deactivate user"
                               >
                                 <XCircle className="h-4 w-4" />
                               </Button>
                             </>
+                          )}
+                          {member.id === user?.id && (
+                            <span className="text-xs text-gray-400 italic">You</span>
                           )}
                         </div>
                       </TableCell>
