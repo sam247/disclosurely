@@ -840,16 +840,25 @@ const ReportsManagement = () => {
                         </span>
                       </TableCell>
                       <TableCell>
-                        {report.profiles ? (
-                          <div className="flex items-center space-x-1">
-                            <User className="h-4 w-4 text-gray-400" />
-                            <span className="text-sm">
-                              {report.profiles.first_name} {report.profiles.last_name}
-                            </span>
-                          </div>
-                        ) : (
-                          <span className="text-gray-400 text-sm">Unassigned</span>
-                        )}
+                        <Select
+                          value={report.assigned_to || 'unassigned'}
+                          onValueChange={(value) => assignReport(report.id, value)}
+                        >
+                          <SelectTrigger className="w-40 h-8 text-xs">
+                            <SelectValue placeholder="Assign to..." />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="unassigned">Unassigned</SelectItem>
+                            {teamMembers.map((member) => (
+                              <SelectItem key={member.id} value={member.id}>
+                                {member.first_name && member.last_name 
+                                  ? `${member.first_name} ${member.last_name}`
+                                  : member.email
+                                }
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
                       </TableCell>
                       <TableCell className="text-sm text-gray-500">
                         {new Date(report.created_at).toLocaleDateString()}

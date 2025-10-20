@@ -24,7 +24,7 @@ import {
   UserCheck
 } from 'lucide-react';
 
-type UserRole = 'admin' | 'case_handler' | 'reviewer' | 'org_admin';
+type UserRole = 'case_handler' | 'org_admin';
 
 interface TeamMember {
   id: string;
@@ -61,13 +61,11 @@ const UserManagement = () => {
   const [isInviteDialogOpen, setIsInviteDialogOpen] = useState(false);
   const [inviteEmail, setInviteEmail] = useState('');
   const [inviteRole, setInviteRole] = useState<UserRole>('case_handler');
-  const [reports, setReports] = useState<any[]>([]);
 
   useEffect(() => {
     if (organization && profile?.role === 'org_admin') {
       fetchTeamMembers();
       fetchInvitations();
-      fetchReports();
     }
   }, [organization, profile?.role]);
 
@@ -120,22 +118,6 @@ const UserManagement = () => {
       });
     } finally {
       setIsLoading(false);
-    }
-  };
-
-  const fetchReports = async () => {
-    try {
-      const { data, error } = await supabase
-        .from('reports')
-        .select('id, tracking_id, title, assigned_to, status')
-        .eq('organization_id', organization?.id)
-        .eq('deleted_at', null)
-        .order('created_at', { ascending: false });
-
-      if (error) throw error;
-      setReports(data || []);
-    } catch (error) {
-      console.error('Error fetching reports:', error);
     }
   };
 
@@ -432,68 +414,10 @@ const UserManagement = () => {
     }
   };
 
-  const assignCaseToUser = async (userId: string, reportId: string) => {
-    try {
-      const report = reports.find(r => r.id === reportId);
-      const member = teamMembers.find(m => m.id === userId);
-      
-      const { error } = await supabase
-        .from('reports')
-        .update({ 
-          assigned_to: reportId === 'unassigned' ? null : userId,
-          updated_at: new Date().toISOString()
-        })
-        .eq('id', reportId);
-
-      if (error) throw error;
-
-      // Log assignment to audit trail
-      if (report && member && organization?.id) {
-        await auditLogger.log({
-          eventType: 'case.assign',
-          category: 'case_management',
-          action: 'Report assigned',
-          severity: 'medium',
-          actorType: 'user',
-          actorId: user?.id,
-          actorEmail: user?.email,
-          targetType: 'report',
-          targetId: reportId,
-          targetName: report.tracking_id,
-          summary: `Report ${report.tracking_id} assigned to ${member.email}`,
-          description: `Assignment changed for "${report.title}"`,
-          beforeState: { assigned_to: report.assigned_to },
-          afterState: { assigned_to: userId },
-          metadata: {
-            assignee_email: member.email,
-            assignee_role: member.role,
-          },
-          organizationId: organization.id,
-        });
-      }
-
-      toast({
-        title: "Case assigned",
-        description: `Report assigned to ${member?.email}`,
-      });
-
-      await fetchReports();
-    } catch (error) {
-      console.error('Error assigning case:', error);
-      toast({
-        title: "Error",
-        description: "Failed to assign case",
-        variant: "destructive",
-      });
-    }
-  };
-
   const getRoleColor = (role: UserRole) => {
     switch (role) {
       case 'org_admin': return 'bg-purple-100 text-purple-800';
-      case 'admin': return 'bg-red-100 text-red-800';
       case 'case_handler': return 'bg-blue-100 text-blue-800';
-      case 'reviewer': return 'bg-green-100 text-green-800';
       default: return 'bg-gray-100 text-gray-800';
     }
   };
@@ -581,9 +505,7 @@ const UserManagement = () => {
                       </SelectTrigger>
                       <SelectContent>
                         <SelectItem value="case_handler">Case Handler</SelectItem>
-                        <SelectItem value="reviewer">Reviewer</SelectItem>
-                        <SelectItem value="admin">Admin</SelectItem>
-                        <SelectItem value="org_admin">Organization Admin</SelectItem>
+                        <SelectItem value="org_admin">Org Admin</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
@@ -621,7 +543,7 @@ const UserManagement = () => {
                   <TableHead className="w-[250px]">Email</TableHead>
                   <TableHead className="w-[120px]">Role</TableHead>
                   <TableHead className="w-[100px]">Last Login</TableHead>
-                  <TableHead className="w-[300px]">Actions</TableHead>
+                  <TableHead className="w-[150px]">Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -685,25 +607,7 @@ const UserManagement = () => {
                                 </SelectTrigger>
                                 <SelectContent>
                                   <SelectItem value="case_handler">Case Handler</SelectItem>
-                                  <SelectItem value="reviewer">Reviewer</SelectItem>
-                                  <SelectItem value="admin">Admin</SelectItem>
                                   <SelectItem value="org_admin">Org Admin</SelectItem>
-                                </SelectContent>
-                              </Select>
-                              <Select
-                                value={reports.find(r => r.assigned_to === member.id)?.id || 'unassigned'}
-                                onValueChange={(value) => assignCaseToUser(member.id, value)}
-                              >
-                                <SelectTrigger className="w-32 h-8 text-xs">
-                                  <SelectValue placeholder="Assign case" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                  <SelectItem value="unassigned">Unassigned</SelectItem>
-                                  {reports.map((report) => (
-                                    <SelectItem key={report.id} value={report.id}>
-                                      {report.tracking_id}
-                                    </SelectItem>
-                                  ))}
                                 </SelectContent>
                               </Select>
                               <Button
