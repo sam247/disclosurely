@@ -223,13 +223,14 @@ const AcceptInvite = () => {
 
       // Accept the invitation via edge function with retry (handles eventual consistency)
       let acceptError: any = null;
-      for (let attempt = 1; attempt <= 3; attempt++) {
+      for (let attempt = 1; attempt <= 8; attempt++) {
         const { error } = await supabase.functions.invoke('accept-team-invitation', {
           body: { token, userId },
         });
         acceptError = error;
         if (!acceptError) break;
-        await new Promise((r) => setTimeout(r, 750 * attempt));
+        // Progressive backoff up to ~36s
+        await new Promise((r) => setTimeout(r, 1000 * attempt));
       }
 
       if (acceptError) {

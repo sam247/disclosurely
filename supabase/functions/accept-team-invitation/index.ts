@@ -63,13 +63,14 @@ serve(async (req) => {
     const wait = (ms: number) => new Promise((res) => setTimeout(res, ms));
     let userData: any = null;
     let userError: any = null;
-    for (let attempt = 1; attempt <= 5; attempt++) {
+    for (let attempt = 1; attempt <= 10; attempt++) {
       const res = await supabaseClient.auth.admin.getUserById(userId);
       userData = res.data;
       userError = res.error;
       console.log(`getUserById attempt ${attempt}`, { hasUser: !!userData?.user, error: userError?.message });
       if (userData?.user && !userError) break;
-      await wait(400 * attempt);
+      // Exponential backoff up to ~30s total
+      await wait(1000 * attempt);
     }
 
     if (!userData?.user) {
