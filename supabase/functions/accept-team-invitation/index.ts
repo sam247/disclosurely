@@ -15,10 +15,13 @@ serve(async (req) => {
   console.log('accept-team-invitation function invoked');
 
   try {
-    const supabaseClient = createClient(
-      Deno.env.get('SUPABASE_URL') ?? '',
-      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
-    );
+    const supabaseUrl = Deno.env.get('SUPABASE_URL') ?? '';
+    const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '';
+    const supabaseAnonKey = Deno.env.get('SUPABASE_ANON_KEY') ?? '';
+
+    // Create clients for different operations
+    const supabaseServiceClient = createClient(supabaseUrl, supabaseServiceKey);
+    const supabaseAnonClient = createClient(supabaseUrl, supabaseAnonKey);
 
     const { token, userId } = await req.json();
 
@@ -29,8 +32,8 @@ serve(async (req) => {
       );
     }
 
-    // Fetch and validate invitation
-    const { data: invitation, error: invitationError } = await supabaseClient
+    // Fetch and validate invitation using anon client (bypasses RLS for token-based access)
+    const { data: invitation, error: invitationError } = await supabaseAnonClient
       .from('user_invitations')
       .select('*')
       .eq('token', token)
@@ -64,7 +67,7 @@ serve(async (req) => {
     let userData: any = null;
     let userError: any = null;
     for (let attempt = 1; attempt <= 5; attempt++) {
-      const res = await supabaseClient.auth.admin.getUserById(userId);
+      const res = await supabaseServiceClient.auth.admin.getUserById(userId);
       userData = res.data;
       userError = res.error;
       console.log(`getUserById attempt ${attempt}`, { hasUser: !!userData?.user, error: userError?.message });
@@ -87,8 +90,8 @@ serve(async (req) => {
       );
     }
 
-    // Update user profile with organization and role
-    const { error: profileError } = await supabaseClient
+    // Update user profile with organization and role (using service client for admin operations)
+    const { error: profileError } = await supabaseServiceClient
       .from('profiles')
       .update({
         organization_id: invitation.organization_id,
@@ -104,8 +107,8 @@ serve(async (req) => {
       );
     }
 
-    // Mark invitation as accepted
-    const { error: acceptError } = await supabaseClient
+    // Mark invitation as accepted (using service client for admin operations)
+    const { error: acceptError } = await supabaseServiceClient
       .from('user_invitations')
       .update({ accepted_at: new Date().toISOString() })
       .eq('id', invitation.id);
