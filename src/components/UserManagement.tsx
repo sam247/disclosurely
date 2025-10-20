@@ -184,8 +184,28 @@ const UserManagement = () => {
 
       if (checkError) throw checkError;
 
+      // Check if user is already a team member
+      const { data: existingMember, error: memberError } = await supabase
+        .from('profiles')
+        .select('id, email, is_active')
+        .eq('organization_id', organization.id)
+        .eq('email', emailToInvite)
+        .single();
+
+      if (memberError && memberError.code !== 'PGRST116') throw memberError;
+
+      if (existingMember && existingMember.is_active) {
+        toast({
+          title: "User Already Exists",
+          description: `${emailToInvite} is already a team member.`,
+          variant: "destructive",
+        });
+        return;
+      }
+
       // If there's an existing invitation, delete it first
       if (existingInvitations && existingInvitations.length > 0) {
+        console.log('Found existing invitation, deleting it first:', existingInvitations[0]);
         const { error: deleteError } = await supabase
           .from('user_invitations')
           .delete()
@@ -193,6 +213,7 @@ const UserManagement = () => {
           .eq('email', emailToInvite);
 
         if (deleteError) throw deleteError;
+        console.log('Existing invitation deleted successfully');
       }
 
       // Insert new invitation without token - the trigger will generate it
@@ -212,8 +233,8 @@ const UserManagement = () => {
         console.error('Error creating invitation:', error);
         if (error.code === '23505') {
           toast({
-            title: "Invitation Already Sent",
-            description: "An invitation has already been sent to this email address.",
+            title: "Invitation Already Exists",
+            description: "An invitation has already been sent to this email address. Please wait for it to expire or cancel the existing invitation first.",
             variant: "destructive",
           });
           return;
