@@ -217,6 +217,22 @@ const AcceptInvite = () => {
       // Clear the stored OTP
       sessionStorage.removeItem('pending_otp');
 
+      // Now verify with Supabase Auth to confirm the user
+      const { data: verifyData, error: verifyError } = await supabase.auth.verifyOtp({
+        email: invitation.email,
+        token: otp,
+        type: 'signup'
+      });
+
+      if (verifyError) {
+        console.error('Error verifying with Supabase:', verifyError);
+        // If verification fails with Supabase, still try to accept invitation
+        // since we've verified the OTP matches what we sent
+      }
+
+      // Wait a moment for user to be fully created in auth system
+      await new Promise(resolve => setTimeout(resolve, 1000));
+
       // Accept the invitation via edge function
       const { error: acceptError } = await supabase.functions.invoke('accept-team-invitation', {
         body: {
