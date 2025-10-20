@@ -59,11 +59,21 @@ serve(async (req) => {
       );
     }
 
-    // Get user email to verify it matches invitation
-    const { data: userData, error: userError } = await supabaseClient.auth.admin.getUserById(userId);
+    // Get user email to verify it matches invitation (retry for eventual consistency)
+    const wait = (ms: number) => new Promise((res) => setTimeout(res, ms));
+    let userData: any = null;
+    let userError: any = null;
+    for (let attempt = 1; attempt <= 5; attempt++) {
+      const res = await supabaseClient.auth.admin.getUserById(userId);
+      userData = res.data;
+      userError = res.error;
+      console.log(`getUserById attempt ${attempt}`, { hasUser: !!userData?.user, error: userError?.message });
+      if (userData?.user && !userError) break;
+      await wait(400 * attempt);
+    }
 
-    if (userError || !userData.user) {
-      console.error('Error fetching user:', userError);
+    if (!userData?.user) {
+      console.error('Error fetching user after retries:', userError);
       return new Response(
         JSON.stringify({ error: 'User not found' }),
         { status: 404, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
