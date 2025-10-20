@@ -110,7 +110,8 @@ const AcceptInvite = () => {
             first_name: firstName,
             last_name: lastName,
           },
-          emailRedirectTo: `${window.location.origin}/dashboard`,
+          // Disable email confirmation to prevent Supabase's default flow
+          emailRedirectTo: undefined,
         },
       });
 
