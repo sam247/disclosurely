@@ -2,14 +2,12 @@ import { useEffect, useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Calendar, ArrowRight } from 'lucide-react';
-import { supabase } from '@/integrations/supabase/client';
+import { Calendar, ArrowRight, Clock } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
 import { Link, useParams, useSearchParams } from 'react-router-dom';
 import { Footer } from '@/components/ui/footer';
 import { StandardHeader } from '@/components/StandardHeader';
 import DynamicHelmet from '@/components/DynamicHelmet';
-import { formatMarkdownToHtml } from '@/utils/markdownFormatter';
 import { useLanguageFromUrl } from '@/hooks/useLanguageFromUrl';
 import { useTranslation } from 'react-i18next';
 
@@ -19,134 +17,39 @@ interface BlogPost {
   slug: string;
   excerpt?: string;
   content: string;
-  featured_image_url?: string;
-  published_at: string;
-  meta_title?: string;
-  meta_description?: string;
+  featuredImage?: string;
+  publishDate: string;
+  seoTitle?: string;
+  seoDescription?: string;
   tags: string[];
-  organization_id: string;
+  author?: {
+    name: string;
+    email: string;
+  };
+  categories?: Array<{
+    name: string;
+    slug: string;
+  }>;
+  readingTime?: number;
+  status: string;
 }
 
-// Mock data for sample blog posts
-const SAMPLE_POSTS: BlogPost[] = [
-  {
-    id: '1',
-    title: 'Understanding the EU Whistleblowing Directive',
-    slug: 'understanding-eu-whistleblowing-directive',
-    excerpt: 'A comprehensive guide to compliance with the EU Whistleblowing Directive and how it affects your organization.',
-    featured_image_url: 'https://images.unsplash.com/photo-1589829545856-d10d557cf95f?w=800&h=400&fit=crop&crop=center',
-    content: `# Understanding the EU Whistleblowing Directive
-
-The EU Whistleblowing Directive (Directive (EU) 2019/1937) represents a significant step forward in protecting individuals who report breaches of EU law.
-
-## Key Requirements
-
-Organizations with 50 or more employees must establish internal reporting channels that allow whistleblowers to report concerns safely and confidentially.
-
-## Implementation Timeline
-
-Member states were required to transpose the Directive into national law by December 17, 2021. Organizations with 50-249 employees had until December 17, 2023, to comply.
-
-## What This Means for Your Business
-
-Implementing a compliant whistleblowing system is not just about meeting legal requirements—it's about fostering a culture of transparency and accountability.`,
-    tags: ['compliance', 'regulations'],
-    published_at: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString(),
-    organization_id: '1',
-  },
-  {
-    id: '2',
-    title: 'Best Practices for Anonymous Reporting',
-    slug: 'best-practices-anonymous-reporting',
-    excerpt: 'Learn how to implement effective anonymous reporting channels while maintaining trust and security.',
-    featured_image_url: 'https://images.unsplash.com/photo-1555949963-aa79dcee981c?w=800&h=400&fit=crop&crop=center',
-    content: `# Best Practices for Anonymous Reporting
-
-Anonymous reporting is a critical component of any effective whistleblowing system. Here's how to get it right.
-
-## Ensure True Anonymity
-
-Use secure, encrypted channels that don't collect IP addresses or other identifying information. Consider providing options for truly anonymous submissions.
-
-## Build Trust
-
-Communicate clearly about how reports are handled, who has access to them, and what protections are in place for whistleblowers.
-
-## Respond Effectively
-
-Even anonymous reports deserve acknowledgment and follow-up. Implement two-way messaging systems that maintain anonymity while allowing dialogue.`,
-    tags: ['best-practices', 'security'],
-    published_at: new Date(Date.now() - 12 * 24 * 60 * 60 * 1000).toISOString(),
-    organization_id: '1',
-  },
-  {
-    id: '3',
-    title: 'Case Study: Implementing Secure Whistleblowing in Healthcare',
-    slug: 'case-study-healthcare-whistleblowing',
-    excerpt: 'How a major healthcare provider transformed their compliance program with secure digital reporting.',
-    featured_image_url: 'https://images.unsplash.com/photo-1576091160399-112ba8d25d1f?w=800&h=400&fit=crop&crop=center',
-    content: `# Case Study: Healthcare Compliance Transformation
-
-When a 500-bed hospital network needed to modernize their whistleblowing procedures, they faced unique challenges in the healthcare sector.
-
-## The Challenge
-
-Healthcare organizations handle sensitive patient information while also needing robust channels for staff to report safety concerns, compliance issues, and ethical violations.
-
-## The Solution
-
-By implementing a secure digital reporting platform, the organization:
-- Reduced response times by 60%
-- Increased reporting by 200%
-- Improved staff confidence in the system
-
-## Results
-
-Within six months, the hospital identified and resolved several critical safety issues that had previously gone unreported.`,
-    tags: ['case-studies', 'healthcare'],
-    published_at: new Date(Date.now() - 20 * 24 * 60 * 60 * 1000).toISOString(),
-    organization_id: '1',
-  },
-  {
-    id: '4',
-    title: 'The Future of Workplace Transparency',
-    slug: 'future-workplace-transparency',
-    excerpt: 'Exploring emerging trends in organizational transparency and how technology is reshaping corporate accountability.',
-    featured_image_url: 'https://images.unsplash.com/photo-1451187580459-43490279c0fa?w=800&h=400&fit=crop&crop=center',
-    content: `# The Future of Workplace Transparency
-
-As we move further into 2025, workplace transparency is no longer optional—it's expected by employees, regulators, and stakeholders alike.
-
-## Technology-Driven Change
-
-AI-powered analysis tools can help organizations identify patterns in reports, prioritize cases, and ensure consistent handling of concerns.
-
-## Global Regulatory Trends
-
-Following the EU's lead, jurisdictions worldwide are implementing similar whistleblowing protections. Organizations operating globally need unified approaches.
-
-## Cultural Shift
-
-The most successful organizations are those that view transparency not as a compliance burden but as a competitive advantage.`,
-    tags: ['insights', 'trends'],
-    published_at: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString(),
-    organization_id: '1',
-  },
-];
+// Contentful API configuration
+const CONTENTFUL_SPACE_ID = 'rm7hib748uv7';
+const CONTENTFUL_ACCESS_TOKEN = 'e3JfeWQKBvfCQoqi22f6F_XzWgbZPXR9JWTyuSTGcFw'; // Content Delivery API token
+const CONTENTFUL_API_URL = `https://cdn.contentful.com/spaces/${CONTENTFUL_SPACE_ID}/environments/master`;
 
 const CATEGORIES = [
   { name: 'Latest', slug: 'latest' },
   { name: 'Compliance', slug: 'compliance' },
-  { name: 'Best Practices', slug: 'best-practices' },
-  { name: 'Case Studies', slug: 'case-studies' },
-  { name: 'Insights', slug: 'insights' },
-  { name: 'Security', slug: 'security' },
+  { name: 'Whistleblowing', slug: 'whistleblowing' },
+  { name: 'Industry Insights', slug: 'industry-insights' },
 ];
 
 const Blog = () => {
   const { slug } = useParams();
   const [searchParams] = useSearchParams();
-  const [posts, setPosts] = useState<BlogPost[]>(SAMPLE_POSTS);
+  const [posts, setPosts] = useState<BlogPost[]>([]);
   const [currentPost, setCurrentPost] = useState<BlogPost | null>(null);
   const [loading, setLoading] = useState(true);
   const selectedCategory = searchParams.get('category');
@@ -163,24 +66,31 @@ const Blog = () => {
 
   const fetchPosts = async () => {
     try {
-      const { data, error } = await supabase
-        .from('blog_posts')
-        .select('*')
-        .eq('status', 'published')
-        .lte('published_at', new Date().toISOString())
-        .order('published_at', { ascending: false });
-
-      if (error) {
-        console.log('No database posts found, using sample posts');
-        setPosts(SAMPLE_POSTS);
-      } else if (data && data.length > 0) {
-        setPosts(data);
-      } else {
-        setPosts(SAMPLE_POSTS);
+      setLoading(true);
+      
+      // Build Contentful query
+      let query = `entries?content_type=blogPost&fields.status=published&order=-fields.publishDate&include=10`;
+      
+      if (selectedCategory && selectedCategory !== 'latest') {
+        query += `&fields.categories.sys.contentType.sys.id=category&fields.categories.fields.slug=${selectedCategory}`;
       }
+
+      const response = await fetch(`${CONTENTFUL_API_URL}/${query}`, {
+        headers: {
+          'Authorization': `Bearer ${CONTENTFUL_ACCESS_TOKEN}`,
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error(`Contentful API error: ${response.statusText}`);
+      }
+
+      const data = await response.json();
+      const transformedPosts = transformContentfulPosts(data);
+      setPosts(transformedPosts);
     } catch (error) {
-      console.error('Error fetching blog posts:', error);
-      setPosts(SAMPLE_POSTS);
+      console.error('Error fetching blog posts from Contentful:', error);
+      setPosts([]);
     } finally {
       setLoading(false);
     }
@@ -188,102 +98,193 @@ const Blog = () => {
 
   const fetchSinglePost = async () => {
     try {
-      const { data, error } = await supabase
-        .from('blog_posts')
-        .select('*')
-        .eq('slug', slug)
-        .eq('status', 'published')
-        .lte('published_at', new Date().toISOString())
-        .maybeSingle();
+      setLoading(true);
+      
+      const response = await fetch(`${CONTENTFUL_API_URL}/entries?content_type=blogPost&fields.slug=${slug}&include=10`, {
+        headers: {
+          'Authorization': `Bearer ${CONTENTFUL_ACCESS_TOKEN}`,
+        },
+      });
 
-      if (error) {
-        console.log('Post not in database, checking sample posts');
-        const samplePost = SAMPLE_POSTS.find(p => p.slug === slug);
-        setCurrentPost(samplePost || null);
-      } else if (data) {
-        setCurrentPost(data);
+      if (!response.ok) {
+        throw new Error(`Contentful API error: ${response.statusText}`);
+      }
+
+      const data = await response.json();
+      
+      if (data.items && data.items.length > 0) {
+        const transformedPost = transformContentfulPost(data.items[0], data.includes);
+        setCurrentPost(transformedPost);
       } else {
-        const samplePost = SAMPLE_POSTS.find(p => p.slug === slug);
-        setCurrentPost(samplePost || null);
+        setCurrentPost(null);
       }
     } catch (error) {
-      console.error('Error fetching blog post:', error);
-      const samplePost = SAMPLE_POSTS.find(p => p.slug === slug);
-      setCurrentPost(samplePost || null);
+      console.error('Error fetching single post from Contentful:', error);
+      setCurrentPost(null);
     } finally {
       setLoading(false);
     }
   };
 
-  const filteredPosts = posts.filter(post => {
-    if (selectedCategory && selectedCategory !== 'latest') {
-      return post.tags.some(tag => tag.toLowerCase().includes(selectedCategory.toLowerCase()));
+  const transformContentfulPosts = (data: any): BlogPost[] => {
+    if (!data.items) return [];
+    
+    return data.items.map((item: any) => transformContentfulPost(item, data.includes));
+  };
+
+  const transformContentfulPost = (item: any, includes: any): BlogPost => {
+    const fields = item.fields;
+    
+    // Find author in includes
+    let author = null;
+    if (fields.author && includes?.Entry) {
+      const authorEntry = includes.Entry.find((entry: any) => entry.sys.id === fields.author.sys.id);
+      if (authorEntry) {
+        author = {
+          name: authorEntry.fields.name,
+          email: authorEntry.fields.email,
+        };
+      }
     }
-    return true;
-  });
+
+    // Find categories in includes
+    let categories = [];
+    if (fields.categories && includes?.Entry) {
+      categories = fields.categories.map((cat: any) => {
+        const categoryEntry = includes.Entry.find((entry: any) => entry.sys.id === cat.sys.id);
+        return categoryEntry ? {
+          name: categoryEntry.fields.name,
+          slug: categoryEntry.fields.slug,
+        } : null;
+      }).filter(Boolean);
+    }
+
+    return {
+      id: item.sys.id,
+      title: fields.title,
+      slug: fields.slug,
+      excerpt: fields.excerpt,
+      content: fields.content,
+      featuredImage: fields.featuredImage?.fields?.file?.url,
+      publishDate: fields.publishDate,
+      seoTitle: fields.seoTitle,
+      seoDescription: fields.seoDescription,
+      tags: fields.tags || [],
+      author,
+      categories,
+      readingTime: fields.readingTime,
+      status: fields.status,
+    };
+  };
+
+  const formatContentfulDate = (dateString: string) => {
+    return formatDistanceToNow(new Date(dateString), { addSuffix: true });
+  };
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto"></div>
-          <p className="mt-4 text-muted-foreground">Loading...</p>
+      <>
+        <DynamicHelmet
+          pageIdentifier="blog"
+          fallbackTitle={t("blog.meta.title")}
+          fallbackDescription={t("blog.meta.description")}
+        />
+        <StandardHeader currentLanguage={currentLanguage} />
+        <div className="min-h-screen bg-background flex items-center justify-center">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
+            <p className="text-muted-foreground">Loading blog posts...</p>
+          </div>
         </div>
-      </div>
+      </>
     );
   }
 
   // Single post view
-  if (slug && currentPost) {
+  if (currentPost) {
     return (
       <>
         <DynamicHelmet
-          pageIdentifier={`blog_post_${currentPost.slug}`}
-          fallbackTitle={currentPost.meta_title || currentPost.title}
-          fallbackDescription={currentPost.meta_description || currentPost.excerpt}
+          pageIdentifier="blog-post"
+          fallbackTitle={currentPost.seoTitle || currentPost.title}
+          fallbackDescription={currentPost.seoDescription || currentPost.excerpt}
         />
         <StandardHeader currentLanguage={currentLanguage} />
         <div className="min-h-screen bg-background">
-          <div className="max-w-4xl mx-auto px-4 py-8 sm:py-16">
+          <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
             {/* Back to blog */}
-            <Link to="/blog" className="inline-flex items-center text-primary hover:underline mb-8">
-              ← Back to Blog
+            <Link 
+              to="/blog" 
+              className="inline-flex items-center text-sm text-muted-foreground hover:text-foreground mb-8"
+            >
+              <ArrowRight className="h-4 w-4 mr-2 rotate-180" />
+              Back to Blog
             </Link>
 
             {/* Post header */}
             <div className="mb-8">
-              <h1 className="text-3xl sm:text-4xl font-bold mb-4 break-words hyphens-auto">{currentPost.title}</h1>
+              <div className="flex items-center gap-2 mb-4">
+                {currentPost.categories?.map((category) => (
+                  <Badge key={category.slug} variant="secondary">
+                    {category.name}
+                  </Badge>
+                ))}
+              </div>
               
-              <div className="flex items-center gap-4 text-muted-foreground mb-6">
+              <h1 className="text-4xl font-bold mb-4">{currentPost.title}</h1>
+              
+              <div className="flex items-center gap-4 text-sm text-muted-foreground mb-6">
+                {currentPost.author && (
+                  <span>By {currentPost.author.name}</span>
+                )}
                 <div className="flex items-center gap-1">
                   <Calendar className="h-4 w-4" />
-                  {new Date(currentPost.published_at).toLocaleDateString()}
+                  {formatContentfulDate(currentPost.publishDate)}
                 </div>
+                {currentPost.readingTime && (
+                  <div className="flex items-center gap-1">
+                    <Clock className="h-4 w-4" />
+                    {currentPost.readingTime} min read
+                  </div>
+                )}
               </div>
-
-              {currentPost.tags.length > 0 && (
-                <div className="flex flex-wrap gap-2 mb-6">
-                  {currentPost.tags.map((tag, index) => (
-                    <Badge key={index} variant="secondary">{tag}</Badge>
-                  ))}
-                </div>
-              )}
-
-              {currentPost.featured_image_url && (
-                <img
-                  src={currentPost.featured_image_url}
-                  alt={currentPost.title}
-                  className="w-full h-64 object-cover rounded-lg mb-6"
-                />
+              
+              {currentPost.excerpt && (
+                <p className="text-xl text-muted-foreground leading-relaxed">
+                  {currentPost.excerpt}
+                </p>
               )}
             </div>
+
+            {/* Featured image */}
+            {currentPost.featuredImage && (
+              <div className="mb-8">
+                <img 
+                  src={currentPost.featuredImage} 
+                  alt={currentPost.title}
+                  className="w-full h-64 object-cover rounded-lg"
+                />
+              </div>
+            )}
 
             {/* Post content */}
             <div className="prose prose-lg max-w-none dark:prose-invert">
-              <div 
-                dangerouslySetInnerHTML={{ __html: formatMarkdownToHtml(currentPost.content) }}
-              />
+              <div dangerouslySetInnerHTML={{ __html: currentPost.content }} />
             </div>
+
+            {/* Tags */}
+            {currentPost.tags && currentPost.tags.length > 0 && (
+              <div className="mt-8 pt-8 border-t">
+                <h3 className="text-sm font-medium mb-3">Tags</h3>
+                <div className="flex flex-wrap gap-2">
+                  {currentPost.tags.map((tag) => (
+                    <Badge key={tag} variant="outline">
+                      {tag}
+                    </Badge>
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
         </div>
         <Footer />
@@ -332,71 +333,77 @@ const Blog = () => {
 
             {/* Main Content Area */}
             <div className="flex-1 min-w-0">
-              {selectedCategory && selectedCategory !== 'latest' && (
-                <div className="mb-8">
-                  <h2 className="text-2xl font-semibold capitalize mb-2">
-                    {selectedCategory.replace('-', ' ')}
-                  </h2>
-                  <p className="text-muted-foreground">
-                    {filteredPosts.length} {filteredPosts.length === 1 ? 'post' : 'posts'}
-                  </p>
-                </div>
-              )}
-
-              {/* Posts grid */}
-              {filteredPosts.length === 0 ? (
+              {posts.length === 0 ? (
                 <div className="text-center py-16">
-                  <p className="text-muted-foreground text-lg">
-                    No posts found in this category.
+                  <h2 className="text-2xl font-semibold mb-4">No blog posts yet</h2>
+                  <p className="text-muted-foreground mb-8">
+                    Check back soon for insights on compliance, whistleblowing, and industry best practices.
                   </p>
+                  <Button asChild>
+                    <Link to="/">Go to Homepage</Link>
+                  </Button>
                 </div>
               ) : (
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  {filteredPosts.map((post) => (
-                    <Card key={post.id} className="h-full flex flex-col hover:shadow-lg transition-shadow">
-                      {post.featured_image_url && (
-                        <div className="aspect-video overflow-hidden rounded-t-lg bg-gradient-to-br from-primary/20 to-secondary/20">
-                          <img
-                            src={post.featured_image_url}
-                            alt={post.title}
-                            className="w-full h-full object-cover"
-                          />
-                        </div>
-                      )}
-                      
-                      <CardHeader className="flex-1">
-                        {post.tags.length > 0 && (
-                          <div className="mb-2">
-                            <Badge variant="secondary" className="text-xs">
-                              {post.tags[0]}
-                            </Badge>
+                <div className="grid gap-8">
+                  {posts.map((post) => (
+                    <Card key={post.id} className="overflow-hidden">
+                      <div className="flex flex-col md:flex-row">
+                        {post.featuredImage && (
+                          <div className="md:w-1/3">
+                            <img 
+                              src={post.featuredImage} 
+                              alt={post.title}
+                              className="w-full h-48 md:h-full object-cover"
+                            />
                           </div>
                         )}
-                        
-                        <CardTitle className="text-xl mb-2 line-clamp-2 break-words hyphens-auto">
-                          {post.title}
-                        </CardTitle>
-                        
-                        {post.excerpt && (
-                          <CardDescription className="line-clamp-3 break-words hyphens-auto">
+                        <div className={`${post.featuredImage ? 'md:w-2/3' : 'w-full'} p-6`}>
+                          <div className="flex items-center gap-2 mb-3">
+                            {post.categories?.map((category) => (
+                              <Badge key={category.slug} variant="secondary">
+                                {category.name}
+                              </Badge>
+                            ))}
+                          </div>
+                          
+                          <CardTitle className="mb-3">
+                            <Link 
+                              to={`/blog/${post.slug}`}
+                              className="hover:text-primary transition-colors"
+                            >
+                              {post.title}
+                            </Link>
+                          </CardTitle>
+                          
+                          <CardDescription className="mb-4">
                             {post.excerpt}
                           </CardDescription>
-                        )}
-                      </CardHeader>
-                      
-                      <CardContent className="pt-0">
-                        <div className="flex items-center justify-between">
-                          <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                            {formatDistanceToNow(new Date(post.published_at), { addSuffix: true })}
-                          </div>
-                          <Button asChild variant="ghost" size="sm">
-                            <Link to={`/blog/${post.slug}`} className="flex items-center gap-2">
-                              Read More
-                              <ArrowRight className="h-4 w-4" />
+                          
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-4 text-sm text-muted-foreground">
+                              {post.author && (
+                                <span>By {post.author.name}</span>
+                              )}
+                              <div className="flex items-center gap-1">
+                                <Calendar className="h-4 w-4" />
+                                {formatContentfulDate(post.publishDate)}
+                              </div>
+                              {post.readingTime && (
+                                <div className="flex items-center gap-1">
+                                  <Clock className="h-4 w-4" />
+                                  {post.readingTime} min read
+                                </div>
+                              )}
+                            </div>
+                            
+                            <Link to={`/blog/${post.slug}`}>
+                              <Button variant="ghost" size="sm">
+                                Read More <ArrowRight className="h-4 w-4 ml-1" />
+                              </Button>
                             </Link>
-                          </Button>
+                          </div>
                         </div>
-                      </CardContent>
+                      </div>
                     </Card>
                   ))}
                 </div>
