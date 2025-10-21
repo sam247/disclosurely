@@ -4,7 +4,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Calendar, ArrowRight, Clock } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
-import { Link, useParams, useSearchParams } from 'react-router-dom';
+import { Link, useParams, useSearchParams, useNavigate } from 'react-router-dom';
 import { Footer } from '@/components/ui/footer';
 import { StandardHeader } from '@/components/StandardHeader';
 import DynamicHelmet from '@/components/DynamicHelmet';
@@ -85,6 +85,14 @@ interface BlogPostDisplay {
 const Blog = () => {
   const { slug } = useParams();
   const [searchParams] = useSearchParams();
+  const navigate = useNavigate();
+
+  // Redirect if slug is undefined
+  useEffect(() => {
+    if (slug === 'undefined') {
+      navigate('/blog', { replace: true });
+    }
+  }, [slug, navigate]);
   const [posts, setPosts] = useState<BlogPostDisplay[]>([]);
   const [currentPost, setCurrentPost] = useState<BlogPostDisplay | null>(null);
   const [loading, setLoading] = useState(true);
@@ -97,7 +105,7 @@ const Blog = () => {
     const fetchData = async () => {
       setLoading(true);
       try {
-        if (slug) {
+        if (slug && slug !== 'undefined') {
           await fetchSinglePost(slug);
         } else {
           await fetchPosts();
