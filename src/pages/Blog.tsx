@@ -18,6 +18,12 @@ import { BLOCKS, INLINES } from '@contentful/rich-text-types';
 const CONTENTFUL_SPACE_ID = import.meta.env.VITE_CONTENTFUL_SPACE_ID || 'rm7hib748uv7';
 const CONTENTFUL_DELIVERY_TOKEN = import.meta.env.VITE_CONTENTFUL_DELIVERY_TOKEN || 'e3JfeWQKBvfCQoqi22f6F_XzWgbZPXR9JWTyuSTGcFw';
 
+console.log('Contentful config:', { 
+  spaceId: CONTENTFUL_SPACE_ID, 
+  hasToken: !!CONTENTFUL_DELIVERY_TOKEN,
+  tokenLength: CONTENTFUL_DELIVERY_TOKEN?.length 
+});
+
 const client = createClient({
   space: CONTENTFUL_SPACE_ID,
   accessToken: CONTENTFUL_DELIVERY_TOKEN,
@@ -128,6 +134,8 @@ const Blog = () => {
 
   const fetchPosts = async () => {
     try {
+      console.log('Fetching blog posts from Contentful...');
+      
       const query: any = {
         content_type: 'blogPost',
         'fields.status': 'published',
@@ -141,7 +149,11 @@ const Blog = () => {
         query['fields.categories.fields.slug'] = selectedCategorySlug;
       }
 
+      console.log('Contentful query:', query);
+      
       const response = await client.getEntries<ContentfulBlogPost>(query);
+      console.log('Contentful response:', response);
+      
       const fetchedPosts: BlogPostDisplay[] = response.items.map(item => {
         const authorEntry = item.fields.author?.['en-US'] as unknown as ContentfulAuthor;
         const categoryEntries = item.fields.categories?.['en-US'] as unknown as ContentfulCategory[];
@@ -167,9 +179,17 @@ const Blog = () => {
           status: item.fields.status['en-US'],
         };
       });
+      
+      console.log('Transformed posts:', fetchedPosts);
       setPosts(fetchedPosts);
     } catch (error) {
       console.error('Error fetching blog posts from Contentful:', error);
+      console.error('Error details:', {
+        message: error.message,
+        name: error.name,
+        code: error.code,
+        stack: error.stack
+      });
       setPosts([]);
     }
   };
