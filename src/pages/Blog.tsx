@@ -120,7 +120,7 @@ const Blog = () => {
   const fetchCategories = async () => {
     try {
       const response = await client.getEntries<ContentfulCategory>({
-        content_type: 'category',
+        content_type: '1Dn01YZmIbymrxi194Q2xV', // Category content type ID
         'fields.isActive': true,
         order: 'fields.name',
       });
@@ -137,7 +137,7 @@ const Blog = () => {
       console.log('Fetching blog posts from Contentful...');
       
       const query: any = {
-        content_type: 'blogPost',
+        content_type: '9oYANGj5uBRT6UHsl5LxO', // Blog Post content type ID
         'fields.status': 'published',
         'fields.publishDate[lte]': new Date().toISOString(),
         order: '-fields.publishDate',
@@ -145,7 +145,7 @@ const Blog = () => {
       };
 
       if (selectedCategorySlug && selectedCategorySlug !== 'latest') {
-        query['fields.categories.sys.contentType.sys.id'] = 'category';
+        query['fields.categories.sys.contentType.sys.id'] = '1Dn01YZmIbymrxi194Q2xV'; // Category content type ID
         query['fields.categories.fields.slug'] = selectedCategorySlug;
       }
 
@@ -197,7 +197,7 @@ const Blog = () => {
   const fetchSinglePost = async (postSlug: string) => {
     try {
       const response = await client.getEntries<ContentfulBlogPost>({
-        content_type: 'blogPost',
+        content_type: '9oYANGj5uBRT6UHsl5LxO', // Blog Post content type ID
         'fields.slug': postSlug,
         'fields.status': 'published',
         include: 2, // Include linked author and categories
