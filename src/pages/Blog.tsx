@@ -10,175 +10,219 @@ import { StandardHeader } from '@/components/StandardHeader';
 import DynamicHelmet from '@/components/DynamicHelmet';
 import { useLanguageFromUrl } from '@/hooks/useLanguageFromUrl';
 import { useTranslation } from 'react-i18next';
+import { createClient } from 'contentful';
+import { documentToHtml } from '@contentful/rich-text-html-renderer';
+import { BLOCKS, INLINES } from '@contentful/rich-text-types';
 
-interface BlogPost {
+// Contentful configuration
+const CONTENTFUL_SPACE_ID = import.meta.env.VITE_CONTENTFUL_SPACE_ID || 'rm7hib748uv7';
+const CONTENTFUL_DELIVERY_TOKEN = import.meta.env.VITE_CONTENTFUL_DELIVERY_TOKEN || 'e3JfeWQKBvfCQoqi22f6F_XzWgbZPXR9JWTyuSTGcFw';
+
+const client = createClient({
+  space: CONTENTFUL_SPACE_ID,
+  accessToken: CONTENTFUL_DELIVERY_TOKEN,
+});
+
+interface ContentfulBlogPost {
+  sys: { id: string; createdAt: string; updatedAt: string };
+  fields: {
+    title: { 'en-US': string };
+    slug: { 'en-US': string };
+    excerpt?: { 'en-US': string };
+    content: { 'en-US': any }; // RichText type
+    featuredImage?: { 'en-US': { sys: { id: string; linkType: 'Asset' } } };
+    publishDate: { 'en-US': string };
+    seoTitle?: { 'en-US': string };
+    seoDescription?: { 'en-US': string };
+    tags: { 'en-US': string[] };
+    author?: { 'en-US': { sys: { id: string; linkType: 'Entry' } } };
+    categories?: { 'en-US': Array<{ sys: { id: string; linkType: 'Entry' } }> };
+    readingTime?: { 'en-US': number };
+    status: { 'en-US': string };
+  };
+}
+
+interface ContentfulAuthor {
+  sys: { id: string };
+  fields: {
+    name: { 'en-US': string };
+    email: { 'en-US': string };
+  };
+}
+
+interface ContentfulCategory {
+  sys: { id: string };
+  fields: {
+    name: { 'en-US': string };
+    slug: { 'en-US': string };
+  };
+}
+
+interface BlogPostDisplay {
   id: string;
   title: string;
   slug: string;
   excerpt?: string;
-  content: string;
-  featuredImage?: string;
+  content: any; // RichText object
+  featuredImage?: string; // URL
   publishDate: string;
   seoTitle?: string;
   seoDescription?: string;
   tags: string[];
-  author?: {
-    name: string;
-    email: string;
-  };
-  categories?: Array<{
-    name: string;
-    slug: string;
-  }>;
+  authorName?: string;
+  authorEmail?: string;
+  categories: Array<{ name: string; slug: string }>;
   readingTime?: number;
   status: string;
 }
 
-// Contentful API configuration
-const CONTENTFUL_SPACE_ID = 'rm7hib748uv7';
-const CONTENTFUL_ACCESS_TOKEN = 'e3JfeWQKBvfCQoqi22f6F_XzWgbZPXR9JWTyuSTGcFw'; // Content Delivery API token
-const CONTENTFUL_API_URL = `https://cdn.contentful.com/spaces/${CONTENTFUL_SPACE_ID}/environments/master`;
-
-const CATEGORIES = [
-  { name: 'Latest', slug: 'latest' },
-  { name: 'Compliance', slug: 'compliance' },
-  { name: 'Whistleblowing', slug: 'whistleblowing' },
-  { name: 'Industry Insights', slug: 'industry-insights' },
-];
-
 const Blog = () => {
   const { slug } = useParams();
   const [searchParams] = useSearchParams();
-  const [posts, setPosts] = useState<BlogPost[]>([]);
-  const [currentPost, setCurrentPost] = useState<BlogPost | null>(null);
+  const [posts, setPosts] = useState<BlogPostDisplay[]>([]);
+  const [currentPost, setCurrentPost] = useState<BlogPostDisplay | null>(null);
   const [loading, setLoading] = useState(true);
-  const selectedCategory = searchParams.get('category');
+  const [categories, setCategories] = useState<ContentfulCategory[]>([]);
+  const selectedCategorySlug = searchParams.get('category');
   const { currentLanguage } = useLanguageFromUrl();
   const { t } = useTranslation();
 
   useEffect(() => {
-    if (slug) {
-      fetchSinglePost();
-    } else {
-      fetchPosts();
-    }
-  }, [slug, selectedCategory]);
-
-  const fetchPosts = async () => {
-    try {
+    const fetchData = async () => {
       setLoading(true);
-      
-      // Build Contentful query
-      let query = `entries?content_type=blogPost&fields.status=published&order=-fields.publishDate&include=10`;
-      
-      if (selectedCategory && selectedCategory !== 'latest') {
-        query += `&fields.categories.sys.contentType.sys.id=category&fields.categories.fields.slug=${selectedCategory}`;
+      try {
+        if (slug) {
+          await fetchSinglePost(slug);
+        } else {
+          await fetchPosts();
+        }
+        await fetchCategories();
+      } catch (error) {
+        console.error('Error fetching blog data:', error);
+      } finally {
+        setLoading(false);
       }
+    };
+    fetchData();
+  }, [slug, selectedCategorySlug]);
 
-      const response = await fetch(`${CONTENTFUL_API_URL}/${query}`, {
-        headers: {
-          'Authorization': `Bearer ${CONTENTFUL_ACCESS_TOKEN}`,
-        },
+  const fetchCategories = async () => {
+    try {
+      const response = await client.getEntries<ContentfulCategory>({
+        content_type: 'category',
+        'fields.isActive': true,
+        order: 'fields.name',
       });
-
-      if (!response.ok) {
-        throw new Error(`Contentful API error: ${response.statusText}`);
-      }
-
-      const data = await response.json();
-      const transformedPosts = transformContentfulPosts(data);
-      setPosts(transformedPosts);
+      setCategories(response.items);
     } catch (error) {
-      console.error('Error fetching blog posts from Contentful:', error);
-      setPosts([]);
-    } finally {
-      setLoading(false);
+      console.error('Error fetching categories:', error);
     }
   };
 
-  const fetchSinglePost = async () => {
+  const fetchPosts = async () => {
     try {
-      setLoading(true);
-      
-      const response = await fetch(`${CONTENTFUL_API_URL}/entries?content_type=blogPost&fields.slug=${slug}&include=10`, {
-        headers: {
-          'Authorization': `Bearer ${CONTENTFUL_ACCESS_TOKEN}`,
-        },
-      });
+      const query: any = {
+        content_type: 'blogPost',
+        'fields.status': 'published',
+        'fields.publishDate[lte]': new Date().toISOString(),
+        order: '-fields.publishDate',
+        include: 2, // Include linked author and categories
+      };
 
-      if (!response.ok) {
-        throw new Error(`Contentful API error: ${response.statusText}`);
+      if (selectedCategorySlug && selectedCategorySlug !== 'latest') {
+        query['fields.categories.sys.contentType.sys.id'] = 'category';
+        query['fields.categories.fields.slug'] = selectedCategorySlug;
       }
 
-      const data = await response.json();
-      
-      if (data.items && data.items.length > 0) {
-        const transformedPost = transformContentfulPost(data.items[0], data.includes);
-        setCurrentPost(transformedPost);
+      const response = await client.getEntries<ContentfulBlogPost>(query);
+      const fetchedPosts: BlogPostDisplay[] = response.items.map(item => {
+        const authorEntry = item.fields.author?.['en-US'] as unknown as ContentfulAuthor;
+        const categoryEntries = item.fields.categories?.['en-US'] as unknown as ContentfulCategory[];
+
+        return {
+          id: item.sys.id,
+          title: item.fields.title['en-US'],
+          slug: item.fields.slug['en-US'],
+          excerpt: item.fields.excerpt?.['en-US'],
+          content: item.fields.content['en-US'],
+          featuredImage: (item.fields.featuredImage?.['en-US'] as any)?.fields?.file?.['en-US']?.url,
+          publishDate: item.fields.publishDate['en-US'],
+          seoTitle: item.fields.seoTitle?.['en-US'],
+          seoDescription: item.fields.seoDescription?.['en-US'],
+          tags: item.fields.tags?.['en-US'] || [],
+          authorName: authorEntry?.fields?.name?.['en-US'],
+          authorEmail: authorEntry?.fields?.email?.['en-US'],
+          categories: categoryEntries ? categoryEntries.map(cat => ({
+            name: cat.fields.name['en-US'],
+            slug: cat.fields.slug['en-US'],
+          })) : [],
+          readingTime: item.fields.readingTime?.['en-US'],
+          status: item.fields.status['en-US'],
+        };
+      });
+      setPosts(fetchedPosts);
+    } catch (error) {
+      console.error('Error fetching blog posts from Contentful:', error);
+      setPosts([]);
+    }
+  };
+
+  const fetchSinglePost = async (postSlug: string) => {
+    try {
+      const response = await client.getEntries<ContentfulBlogPost>({
+        content_type: 'blogPost',
+        'fields.slug': postSlug,
+        'fields.status': 'published',
+        include: 2, // Include linked author and categories
+      });
+
+      if (response.items.length > 0) {
+        const item = response.items[0];
+        const authorEntry = item.fields.author?.['en-US'] as unknown as ContentfulAuthor;
+        const categoryEntries = item.fields.categories?.['en-US'] as unknown as ContentfulCategory[];
+
+        setCurrentPost({
+          id: item.sys.id,
+          title: item.fields.title['en-US'],
+          slug: item.fields.slug['en-US'],
+          excerpt: item.fields.excerpt?.['en-US'],
+          content: item.fields.content['en-US'],
+          featuredImage: (item.fields.featuredImage?.['en-US'] as any)?.fields?.file?.['en-US']?.url,
+          publishDate: item.fields.publishDate['en-US'],
+          seoTitle: item.fields.seoTitle?.['en-US'],
+          seoDescription: item.fields.seoDescription?.['en-US'],
+          tags: item.fields.tags?.['en-US'] || [],
+          authorName: authorEntry?.fields?.name?.['en-US'],
+          authorEmail: authorEntry?.fields?.email?.['en-US'],
+          categories: categoryEntries ? categoryEntries.map(cat => ({
+            name: cat.fields.name['en-US'],
+            slug: cat.fields.slug['en-US'],
+          })) : [],
+          readingTime: item.fields.readingTime?.['en-US'],
+          status: item.fields.status['en-US'],
+        });
       } else {
         setCurrentPost(null);
       }
     } catch (error) {
-      console.error('Error fetching single post from Contentful:', error);
+      console.error('Error fetching single blog post from Contentful:', error);
       setCurrentPost(null);
-    } finally {
-      setLoading(false);
     }
   };
 
-  const transformContentfulPosts = (data: any): BlogPost[] => {
-    if (!data.items) return [];
-    
-    return data.items.map((item: any) => transformContentfulPost(item, data.includes));
-  };
-
-  const transformContentfulPost = (item: any, includes: any): BlogPost => {
-    const fields = item.fields;
-    
-    // Find author in includes
-    let author = null;
-    if (fields.author && includes?.Entry) {
-      const authorEntry = includes.Entry.find((entry: any) => entry.sys.id === fields.author.sys.id);
-      if (authorEntry) {
-        author = {
-          name: authorEntry.fields.name,
-          email: authorEntry.fields.email,
-        };
-      }
-    }
-
-    // Find categories in includes
-    let categories = [];
-    if (fields.categories && includes?.Entry) {
-      categories = fields.categories.map((cat: any) => {
-        const categoryEntry = includes.Entry.find((entry: any) => entry.sys.id === cat.sys.id);
-        return categoryEntry ? {
-          name: categoryEntry.fields.name,
-          slug: categoryEntry.fields.slug,
-        } : null;
-      }).filter(Boolean);
-    }
-
-    return {
-      id: item.sys.id,
-      title: fields.title,
-      slug: fields.slug,
-      excerpt: fields.excerpt,
-      content: fields.content,
-      featuredImage: fields.featuredImage?.fields?.file?.url,
-      publishDate: fields.publishDate,
-      seoTitle: fields.seoTitle,
-      seoDescription: fields.seoDescription,
-      tags: fields.tags || [],
-      author,
-      categories,
-      readingTime: fields.readingTime,
-      status: fields.status,
-    };
-  };
-
-  const formatContentfulDate = (dateString: string) => {
-    return formatDistanceToNow(new Date(dateString), { addSuffix: true });
+  const renderRichText = (richTextDocument: any) => {
+    if (!richTextDocument) return null;
+    return documentToHtml(richTextDocument, {
+      renderNode: {
+        [BLOCKS.EMBEDDED_ASSET]: (node: any) =>
+          `<img src="${node.data.target.fields.file['en-US'].url}" alt="${node.data.target.fields.description?.['en-US'] || node.data.target.fields.title?.['en-US']}" />`,
+        [INLINES.HYPERLINK]: (node: any, next: any) => {
+          const url = node.data.uri;
+          const text = next(node.content);
+          return `<a href="${url}" target="_blank" rel="noopener noreferrer">${text}</a>`;
+        },
+      },
+    });
   };
 
   if (loading) {
@@ -234,12 +278,12 @@ const Blog = () => {
               <h1 className="text-4xl font-bold mb-4">{currentPost.title}</h1>
               
               <div className="flex items-center gap-4 text-sm text-muted-foreground mb-6">
-                {currentPost.author && (
-                  <span>By {currentPost.author.name}</span>
+                {currentPost.authorName && (
+                  <span>By {currentPost.authorName}</span>
                 )}
                 <div className="flex items-center gap-1">
                   <Calendar className="h-4 w-4" />
-                  {formatContentfulDate(currentPost.publishDate)}
+                  {formatDistanceToNow(new Date(currentPost.publishDate), { addSuffix: true })}
                 </div>
                 {currentPost.readingTime && (
                   <div className="flex items-center gap-1">
@@ -269,7 +313,7 @@ const Blog = () => {
 
             {/* Post content */}
             <div className="prose prose-lg max-w-none dark:prose-invert">
-              <div dangerouslySetInnerHTML={{ __html: currentPost.content }} />
+              <div dangerouslySetInnerHTML={{ __html: renderRichText(currentPost.content) }} />
             </div>
 
             {/* Tags */}
@@ -314,17 +358,25 @@ const Blog = () => {
                 </p>
                 
                 <nav className="space-y-1">
-                  {CATEGORIES.map((category) => (
+                  <Link
+                    to="/blog"
+                    className={`block px-3 py-2 text-sm rounded-md transition-colors ${
+                      !selectedCategorySlug ? 'bg-muted font-medium' : 'text-muted-foreground hover:bg-muted/50'
+                    }`}
+                  >
+                    Latest
+                  </Link>
+                  {categories.map((category) => (
                     <Link
-                      key={category.slug}
-                      to={category.slug === 'latest' ? '/blog' : `/blog?category=${category.slug}`}
+                      key={category.sys.id}
+                      to={`/blog?category=${category.fields.slug['en-US']}`}
                       className={`block px-3 py-2 text-sm rounded-md transition-colors ${
-                        (category.slug === 'latest' && !selectedCategory) || selectedCategory === category.slug
+                        selectedCategorySlug === category.fields.slug['en-US']
                           ? 'bg-muted font-medium'
                           : 'text-muted-foreground hover:bg-muted/50'
                       }`}
                     >
-                      {category.name}
+                      {category.fields.name['en-US']}
                     </Link>
                   ))}
                 </nav>
@@ -381,12 +433,12 @@ const Blog = () => {
                           
                           <div className="flex items-center justify-between">
                             <div className="flex items-center gap-4 text-sm text-muted-foreground">
-                              {post.author && (
-                                <span>By {post.author.name}</span>
+                              {post.authorName && (
+                                <span>By {post.authorName}</span>
                               )}
                               <div className="flex items-center gap-1">
                                 <Calendar className="h-4 w-4" />
-                                {formatContentfulDate(post.publishDate)}
+                                {formatDistanceToNow(new Date(post.publishDate), { addSuffix: true })}
                               </div>
                               {post.readingTime && (
                                 <div className="flex items-center gap-1">
