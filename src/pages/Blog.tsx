@@ -138,7 +138,6 @@ const Blog = () => {
       
       const query: any = {
         content_type: '9oYANGj5uBRT6UHsl5LxO', // Blog Post content type ID
-        'fields.status': 'published',
         'fields.publishDate[lte]': new Date().toISOString(),
         order: '-fields.publishDate',
         include: 2, // Include linked author and categories
@@ -199,7 +198,6 @@ const Blog = () => {
       const response = await client.getEntries<ContentfulBlogPost>({
         content_type: '9oYANGj5uBRT6UHsl5LxO', // Blog Post content type ID
         'fields.slug': postSlug,
-        'fields.status': 'published',
         include: 2, // Include linked author and categories
       });
 
