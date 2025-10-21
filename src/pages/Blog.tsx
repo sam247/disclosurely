@@ -173,10 +173,10 @@ const Blog = () => {
 
         return {
           id: item.sys.id,
-          title: item.fields.title['en-US'],
-          slug: item.fields.slug['en-US'],
+          title: item.fields.title?.['en-US'],
+          slug: item.fields.slug?.['en-US'],
           excerpt: item.fields.excerpt?.['en-US'],
-          content: item.fields.content['en-US'],
+          content: item.fields.content?.['en-US'],
           featuredImage: (item.fields.featuredImage?.['en-US'] as any)?.fields?.file?.['en-US']?.url,
           publishDate: item.fields.publishDate?.['en-US'] || new Date().toISOString(),
           seoTitle: item.fields.seoTitle?.['en-US'],
@@ -225,7 +225,7 @@ const Blog = () => {
           title: item.fields.title['en-US'],
           slug: item.fields.slug['en-US'],
           excerpt: item.fields.excerpt?.['en-US'],
-          content: item.fields.content['en-US'],
+          content: item.fields.content?.['en-US'],
           featuredImage: (item.fields.featuredImage?.['en-US'] as any)?.fields?.file?.['en-US']?.url,
           publishDate: item.fields.publishDate?.['en-US'] || new Date().toISOString(),
           seoTitle: item.fields.seoTitle?.['en-US'],
