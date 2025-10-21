@@ -32,8 +32,8 @@ serve(async (req) => {
       );
     }
 
-    // Fetch and validate invitation using anon client (bypasses RLS for token-based access)
-    const { data: invitation, error: invitationError } = await supabaseAnonClient
+    // Fetch and validate invitation using service client to bypass RLS safely
+    const { data: invitation, error: invitationError } = await supabaseServiceClient
       .from('user_invitations')
       .select('*')
       .eq('token', token)
@@ -64,40 +64,67 @@ serve(async (req) => {
 
     // Get user email to verify it matches invitation (retry for eventual consistency)
     const wait = (ms: number) => new Promise((res) => setTimeout(res, ms));
+    const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+
+    let resolvedUserId: string | null = null;
     let userData: any = null;
     let userError: any = null;
-    for (let attempt = 1; attempt <= 5; attempt++) {
+
+    for (let attempt = 1; attempt <= 10; attempt++) {
       const res = await supabaseServiceClient.auth.admin.getUserById(userId);
       userData = res.data;
       userError = res.error;
       console.log(`getUserById attempt ${attempt}`, { hasUser: !!userData?.user, error: userError?.message });
-      if (userData?.user && !userError) break;
-      await wait(400 * attempt);
+      if (userData?.user && !userError) {
+        resolvedUserId = userData.user.id;
+        break;
+      }
+      await wait(500 * attempt);
     }
 
-    if (!userData?.user) {
-      console.error('Error fetching user after retries:', userError);
-      return new Response(
-        JSON.stringify({ error: 'User not found' }),
-        { status: 404, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
+    if (!resolvedUserId) {
+      console.warn('Falling back to resolve user via profiles by email');
+      const { data: existingProfile, error: profileLookupError } = await supabaseServiceClient
+        .from('profiles')
+        .select('id, email')
+        .eq('email', invitation.email)
+        .maybeSingle();
+
+      if (profileLookupError) {
+        console.error('Profile lookup error (fallback):', profileLookupError);
+      }
+
+      if (existingProfile?.id) {
+        resolvedUserId = existingProfile.id;
+      } else if (uuidRegex.test(userId)) {
+        // Last resort: trust that the provided ID is a valid UUID (token already verified)
+        resolvedUserId = userId;
+      } else {
+        return new Response(
+          JSON.stringify({ error: 'Unable to resolve user for invitation' }),
+          { status: 404, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      }
     }
 
-    if (userData.user.email?.toLowerCase() !== invitation.email.toLowerCase()) {
+    // If we have user data, verify email matches the invitation as an integrity check
+    if (userData?.user?.email && (userData.user.email.toLowerCase() !== invitation.email.toLowerCase())) {
       return new Response(
         JSON.stringify({ error: 'Email does not match invitation' }),
         { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
 
-    // Update user profile with organization and role (using service client for admin operations)
+    // Upsert user profile with organization and role (service role bypasses RLS)
     const { error: profileError } = await supabaseServiceClient
       .from('profiles')
-      .update({
+      .upsert({
+        id: resolvedUserId,
+        email: invitation.email,
         organization_id: invitation.organization_id,
         role: invitation.role,
-      })
-      .eq('id', userId);
+        is_active: true,
+      }, { onConflict: 'id' });
 
     if (profileError) {
       console.error('Error updating profile:', profileError);

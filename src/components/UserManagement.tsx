@@ -24,7 +24,7 @@ import {
   UserCheck
 } from 'lucide-react';
 
-type UserRole = 'case_handler' | 'org_admin';
+type UserRole = 'admin' | 'org_admin' | 'case_handler' | 'reviewer';
 
 interface TeamMember {
   id: string;
