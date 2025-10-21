@@ -168,7 +168,10 @@ const Blog = () => {
           id: item.sys.id,
           title: item.fields.title?.['en-US'],
           slug: item.fields.slug?.['en-US'],
-          fields: Object.keys(item.fields)
+          fields: Object.keys(item.fields),
+          rawFields: item.fields,
+          titleField: item.fields.title,
+          slugField: item.fields.slug
         });
 
         return {
