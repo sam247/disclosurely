@@ -156,6 +156,13 @@ const Blog = () => {
         const authorEntry = item.fields.author?.['en-US'] as unknown as ContentfulAuthor;
         const categoryEntries = item.fields.categories?.['en-US'] as unknown as ContentfulCategory[];
 
+        console.log('Processing blog post:', {
+          id: item.sys.id,
+          title: item.fields.title?.['en-US'],
+          slug: item.fields.slug?.['en-US'],
+          fields: Object.keys(item.fields)
+        });
+
         return {
           id: item.sys.id,
           title: item.fields.title['en-US'],
