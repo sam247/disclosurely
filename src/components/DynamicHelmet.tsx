@@ -61,53 +61,9 @@ const DynamicHelmet: React.FC<DynamicHelmetProps> = ({
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const fetchSEOData = async () => {
-      try {
-        const currentLanguage = i18n.language || 'en';
-        
-        // Try to fetch page-specific SEO data (with error handling)
-        try {
-          const { data: seoSettings, error: seoError } = await (supabase as any)
-            .from('seo_settings')
-            .select('*')
-            .eq('page_identifier', pageIdentifier)
-            .eq('language_code', currentLanguage)
-            .eq('is_active', true)
-            .single();
-
-          if (seoError && seoError.code !== 'PGRST116') {
-            console.warn('Error fetching SEO settings:', seoError);
-          } else {
-            setSeoData(seoSettings);
-          }
-        } catch (seoError) {
-          console.warn('SEO settings table not available:', seoError);
-        }
-
-        // Try to fetch global SEO data (with error handling)
-        try {
-          const { data: globalSettings, error: globalError } = await (supabase as any)
-            .from('global_seo_settings')
-            .select('*')
-            .eq('is_active', true)
-            .single();
-
-          if (globalError && globalError.code !== 'PGRST116') {
-            console.warn('Error fetching global SEO settings:', globalError);
-          } else {
-            setGlobalSeoData(globalSettings);
-          }
-        } catch (globalError) {
-          console.warn('Global SEO settings table not available:', globalError);
-        }
-      } catch (error) {
-        console.error('Error fetching SEO data:', error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchSEOData();
+    // Temporarily disable Supabase SEO fetching to prevent blocking
+    // TODO: Re-enable when SEO tables are properly set up
+    setLoading(false);
   }, [pageIdentifier, i18n.language]);
 
   if (loading) {
