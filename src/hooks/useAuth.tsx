@@ -67,7 +67,6 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     const now = Date.now();
     
     if (lastCheck && (now - parseInt(lastCheck)) < 3600000) { // 1 hour
-      console.log('Using cached subscription data');
       return;
     }
 
@@ -89,11 +88,10 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
         setSubscriptionData(mappedData);
         localStorage.setItem('subscription_data', JSON.stringify(mappedData));
         localStorage.setItem(cacheKey, now.toString());
-        console.log('Fast subscription check from database:', mappedData);
         return;
       }
     } catch (error) {
-      console.log('Direct DB check failed, falling back to edge function');
+      // Silent fallback
     }
     
     try {
@@ -106,11 +104,8 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
       });
 
       if (error) {
-        console.error('Subscription check error:', error);
         return;
       }
-
-      console.log('Subscription data received from API:', data);
       
       const mappedData = {
         subscribed: data?.subscribed || false,
@@ -118,14 +113,12 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
         subscription_end: data?.subscription_end || undefined,
       };
       
-      console.log('Mapped subscription data:', mappedData);
       setSubscriptionData(mappedData);
       
       // Cache the subscription data and timestamp
       localStorage.setItem('subscription_data', JSON.stringify(mappedData));
       localStorage.setItem(cacheKey, now.toString());
     } catch (error) {
-      console.error('Error refreshing subscription:', error);
       // Set basic data on error - user exists but subscription check failed
       setSubscriptionData({ subscribed: false });
     } finally {
@@ -137,8 +130,6 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     // Set up auth state listener
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       (event, session) => {
-        console.log('Auth state changed:', event, session?.user?.email);
-        
         setSession(session);
         setUser(session?.user ?? null);
         setLoading(false);
@@ -148,17 +139,14 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
         if (event === 'TOKEN_REFRESHED' && session?.user && session?.access_token) {
           // Delay subscription check to ensure session is fully established
           setTimeout(() => {
-            console.log('Checking subscription after token refresh:', event);
             refreshSubscription(session);
           }, 1000);
         } else if (event === 'SIGNED_OUT') {
           // Clear subscription data on actual logout
           setSubscriptionData({ subscribed: false });
-          console.log('User signed out, clearing subscription data');
         } else if (event === 'SIGNED_IN') {
           // Check subscription after successful sign-in with a delay
           setTimeout(() => {
-            console.log('User signed in, checking subscription after delay');
             refreshSubscription(session);
           }, 1500);
         }
@@ -167,7 +155,6 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
 
     // Get initial session and check subscription once
     supabase.auth.getSession().then(({ data: { session } }) => {
-      console.log('Initial session:', session?.user?.email);
       setSession(session);
       setUser(session?.user ?? null);
       setLoading(false);
@@ -175,7 +162,6 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
       // Check subscription for existing session after a delay
       if (session?.user && session?.access_token) {
         setTimeout(() => {
-          console.log('Checking subscription for existing session');
           refreshSubscription(session);
         }, 2000);
       }

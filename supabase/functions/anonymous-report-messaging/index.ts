@@ -57,11 +57,20 @@ serve(async (req) => {
 
   try {
     const body = await req.json();
-    const action = String(body?.action || '').toLowerCase();
+    const action = String(body?.action || '').toLowerCase().trim();
     const trackingId = String(body?.trackingId || '').toUpperCase().replace(/\s+/g, '');
 
+    // Validate action
+    if (!['load', 'send'].includes(action)) {
+      return new Response(JSON.stringify({ error: "Invalid action" }), {
+        status: 400,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    // Validate tracking ID format
     if (!/^DIS-[A-Z0-9]{8}$/.test(trackingId)) {
-      return new Response(JSON.stringify({ error: "Invalid tracking ID" }), {
+      return new Response(JSON.stringify({ error: "Invalid tracking ID format" }), {
         status: 400,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
@@ -109,6 +118,8 @@ serve(async (req) => {
 
     if (action === 'send') {
       const message = String(body?.message || '').trim();
+      
+      // Validate message
       if (!message) {
         return new Response(JSON.stringify({ error: "Message is required" }), {
           status: 400,
@@ -116,8 +127,17 @@ serve(async (req) => {
         });
       }
 
-      if (message.length > 2000) {
-        return new Response(JSON.stringify({ error: "Message too long" }), {
+      if (message.length < 1 || message.length > 2000) {
+        return new Response(JSON.stringify({ error: "Message must be between 1 and 2000 characters" }), {
+          status: 400,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+
+      // Basic XSS prevention - reject messages with script tags
+      const dangerousPatterns = /<script|<iframe|javascript:|onerror=|onload=/i;
+      if (dangerousPatterns.test(message)) {
+        return new Response(JSON.stringify({ error: "Message contains prohibited content" }), {
           status: 400,
           headers: { ...corsHeaders, "Content-Type": "application/json" },
         });

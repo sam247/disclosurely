@@ -89,50 +89,128 @@ export type Database = {
       audit_logs: {
         Row: {
           action: string
+          actor_email: string | null
+          actor_id: string | null
+          actor_ip_address: unknown | null
+          actor_session_id: string | null
+          actor_type: string
+          actor_user_agent: string | null
+          after_state: Json | null
+          archive_location: string | null
+          archived_at: string | null
+          before_state: Json | null
+          category: string
+          chain_index: number
           created_at: string
-          details: Json | null
+          description: string | null
           event_type: string
+          geo_city: string | null
+          geo_country: string | null
+          geo_region: string | null
+          hash: string
           id: string
-          ip_address: unknown | null
-          resource_id: string | null
-          resource_type: string | null
-          result: string
-          risk_level: string
-          user_agent: string | null
-          user_email: string | null
-          user_id: string | null
+          metadata: Json | null
+          organization_id: string
+          previous_hash: string | null
+          request_id: string | null
+          request_method: string | null
+          request_params: Json | null
+          request_path: string | null
+          retention_until: string | null
+          severity: string
+          summary: string
+          target_id: string | null
+          target_name: string | null
+          target_type: string | null
         }
         Insert: {
           action: string
+          actor_email?: string | null
+          actor_id?: string | null
+          actor_ip_address?: unknown | null
+          actor_session_id?: string | null
+          actor_type: string
+          actor_user_agent?: string | null
+          after_state?: Json | null
+          archive_location?: string | null
+          archived_at?: string | null
+          before_state?: Json | null
+          category: string
+          chain_index?: number
           created_at?: string
-          details?: Json | null
+          description?: string | null
           event_type: string
+          geo_city?: string | null
+          geo_country?: string | null
+          geo_region?: string | null
+          hash: string
           id?: string
-          ip_address?: unknown | null
-          resource_id?: string | null
-          resource_type?: string | null
-          result: string
-          risk_level?: string
-          user_agent?: string | null
-          user_email?: string | null
-          user_id?: string | null
+          metadata?: Json | null
+          organization_id: string
+          previous_hash?: string | null
+          request_id?: string | null
+          request_method?: string | null
+          request_params?: Json | null
+          request_path?: string | null
+          retention_until?: string | null
+          severity?: string
+          summary: string
+          target_id?: string | null
+          target_name?: string | null
+          target_type?: string | null
         }
         Update: {
           action?: string
+          actor_email?: string | null
+          actor_id?: string | null
+          actor_ip_address?: unknown | null
+          actor_session_id?: string | null
+          actor_type?: string
+          actor_user_agent?: string | null
+          after_state?: Json | null
+          archive_location?: string | null
+          archived_at?: string | null
+          before_state?: Json | null
+          category?: string
+          chain_index?: number
           created_at?: string
-          details?: Json | null
+          description?: string | null
           event_type?: string
+          geo_city?: string | null
+          geo_country?: string | null
+          geo_region?: string | null
+          hash?: string
           id?: string
-          ip_address?: unknown | null
-          resource_id?: string | null
-          resource_type?: string | null
-          result?: string
-          risk_level?: string
-          user_agent?: string | null
-          user_email?: string | null
-          user_id?: string | null
+          metadata?: Json | null
+          organization_id?: string
+          previous_hash?: string | null
+          request_id?: string | null
+          request_method?: string | null
+          request_params?: Json | null
+          request_path?: string | null
+          retention_until?: string | null
+          severity?: string
+          summary?: string
+          target_id?: string | null
+          target_name?: string | null
+          target_type?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "audit_logs_actor_id_fkey"
+            columns: ["actor_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "audit_logs_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       blog_categories: {
         Row: {
@@ -1108,6 +1186,7 @@ export type Database = {
           encryption_key_hash: string
           first_read_at: string | null
           id: string
+          manual_risk_level: number | null
           organization_id: string
           priority: number | null
           report_type: Database["public"]["Enums"]["report_type"]
@@ -1140,6 +1219,7 @@ export type Database = {
           encryption_key_hash: string
           first_read_at?: string | null
           id?: string
+          manual_risk_level?: number | null
           organization_id: string
           priority?: number | null
           report_type?: Database["public"]["Enums"]["report_type"]
@@ -1172,6 +1252,7 @@ export type Database = {
           encryption_key_hash?: string
           first_read_at?: string | null
           id?: string
+          manual_risk_level?: number | null
           organization_id?: string
           priority?: number | null
           report_type?: Database["public"]["Enums"]["report_type"]
@@ -1458,6 +1539,50 @@ export type Database = {
           },
         ]
       }
+      user_roles: {
+        Row: {
+          granted_at: string | null
+          granted_by: string | null
+          id: string
+          is_active: boolean
+          organization_id: string
+          revoked_at: string | null
+          revoked_by: string | null
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Insert: {
+          granted_at?: string | null
+          granted_by?: string | null
+          id?: string
+          is_active?: boolean
+          organization_id: string
+          revoked_at?: string | null
+          revoked_by?: string | null
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Update: {
+          granted_at?: string | null
+          granted_by?: string | null
+          id?: string
+          is_active?: boolean
+          organization_id?: string
+          revoked_at?: string | null
+          revoked_by?: string | null
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_roles_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
@@ -1533,6 +1658,16 @@ export type Database = {
           valid: boolean
         }[]
       }
+      get_organization_branding_by_link: {
+        Args: { p_link_token: string }
+        Returns: {
+          brand_color: string
+          custom_logo_url: string
+          logo_url: string
+          organization_id: string
+          organization_name: string
+        }[]
+      }
       get_organization_by_tracking_id: {
         Args: { p_tracking_id: string }
         Returns: {
@@ -1580,6 +1715,13 @@ export type Database = {
           organization_id: string
           role: Database["public"]["Enums"]["user_role"]
         }[]
+      }
+      has_role: {
+        Args: {
+          _role: Database["public"]["Enums"]["app_role"]
+          _user_id: string
+        }
+        Returns: boolean
       }
       log_link_validation_failure: {
         Args: {
@@ -1655,16 +1797,37 @@ export type Database = {
           valid: boolean
         }[]
       }
+      validate_submission_link: {
+        Args: { p_link_token: string }
+        Returns: {
+          custom_fields: Json
+          is_valid: boolean
+          link_id: string
+          organization_id: string
+          reason: string
+        }[]
+      }
+      verify_audit_chain: {
+        Args: { p_organization_id: string }
+        Returns: {
+          invalid_records: number
+          is_valid: boolean
+          total_records: number
+        }[]
+      }
     }
     Enums: {
+      app_role: "admin" | "org_admin" | "case_handler" | "reviewer"
       report_status:
         | "new"
-        | "reviewing"
+        | "in_review"
         | "investigating"
         | "resolved"
         | "closed"
+        | "live"
         | "archived"
         | "deleted"
+        | "reviewing"
       report_type: "anonymous" | "confidential"
       user_role: "admin" | "case_handler" | "reviewer" | "org_admin"
     }
@@ -1794,14 +1957,17 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
+      app_role: ["admin", "org_admin", "case_handler", "reviewer"],
       report_status: [
         "new",
-        "reviewing",
+        "in_review",
         "investigating",
         "resolved",
         "closed",
+        "live",
         "archived",
         "deleted",
+        "reviewing",
       ],
       report_type: ["anonymous", "confidential"],
       user_role: ["admin", "case_handler", "reviewer", "org_admin"],

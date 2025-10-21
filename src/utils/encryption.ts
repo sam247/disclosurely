@@ -13,20 +13,14 @@ export const encryptData = (data: string, key: string): string => {
       throw new Error('Data and key are required for encryption');
     }
     
-    console.log('Encrypting data length:', data.length, 'with key length:', key.length);
-    
     // Use AES encryption with explicit configuration
     const encrypted = CryptoJS.AES.encrypt(data, key, {
       mode: CryptoJS.mode.CBC,
       padding: CryptoJS.pad.Pkcs7
     });
     
-    const result = encrypted.toString();
-    console.log('Encryption successful, result length:', result.length);
-    
-    return result;
+    return encrypted.toString();
   } catch (error) {
-    console.error('Encryption failed:', error);
     throw new Error('Failed to encrypt data: ' + (error instanceof Error ? error.message : 'Unknown error'));
   }
 };
@@ -38,32 +32,21 @@ export const decryptData = (encryptedData: string, key: string): string => {
       throw new Error('Encrypted data and key are required for decryption');
     }
     
-    console.log('Attempting decryption...');
-    console.log('Encrypted data length:', encryptedData.length);
-    console.log('Key length:', key.length);
-    console.log('Encrypted data sample:', encryptedData.substring(0, 100));
-    
     // Attempt decryption with explicit configuration
     const decrypted = CryptoJS.AES.decrypt(encryptedData, key, {
       mode: CryptoJS.mode.CBC,
       padding: CryptoJS.pad.Pkcs7
     });
     
-    console.log('Decryption object created:', !!decrypted);
-    
     // Convert to UTF8 string
     const decryptedString = decrypted.toString(CryptoJS.enc.Utf8);
-    console.log('Decrypted string length:', decryptedString.length);
     
     if (!decryptedString || decryptedString.length === 0) {
-      console.error('Decryption resulted in empty string - likely wrong key or corrupted data');
       throw new Error('Decryption resulted in empty string - please verify the encryption key');
     }
     
-    console.log('Decryption successful');
     return decryptedString;
   } catch (error) {
-    console.error('Decryption failed with error:', error);
     throw new Error('Failed to decrypt data: ' + (error instanceof Error ? error.message : 'Unknown error'));
   }
 };
@@ -76,9 +59,6 @@ export const createKeyHash = (key: string): string => {
 // Simplified organization-based encryption for reports
 export const encryptReport = (reportData: any, organizationId: string): { encryptedData: string; keyHash: string } => {
   try {
-    console.log('=== ENCRYPTING REPORT ===');
-    console.log('Organization ID:', organizationId);
-    
     if (!organizationId) {
       throw new Error('Organization ID is required for encryption');
     }
@@ -88,24 +68,15 @@ export const encryptReport = (reportData: any, organizationId: string): { encryp
     const keyMaterial = organizationId + salt;
     const organizationKey = CryptoJS.SHA256(keyMaterial).toString();
     
-    console.log('Generated key hash:', organizationKey.substring(0, 8) + '...');
-    
     // Stringify the data
     const dataString = JSON.stringify(reportData);
-    console.log('Data to encrypt (length):', dataString.length);
-    console.log('Data sample:', dataString.substring(0, 100));
     
     // Encrypt the data
     const encryptedData = encryptData(dataString, organizationKey);
     const keyHash = createKeyHash(organizationKey);
     
-    console.log('Encryption completed successfully');
-    console.log('Encrypted data length:', encryptedData.length);
-    console.log('Key hash:', keyHash.substring(0, 16) + '...');
-    
     return { encryptedData, keyHash };
   } catch (error) {
-    console.error('Report encryption failed:', error);
     throw new Error('Failed to encrypt report data: ' + (error instanceof Error ? error.message : 'Unknown error'));
   }
 };
