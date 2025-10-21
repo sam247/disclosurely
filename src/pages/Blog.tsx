@@ -138,7 +138,6 @@ const Blog = () => {
       
       const query: any = {
         content_type: '9oYANGj5uBRT6UHsl5LxO', // Blog Post content type ID
-        'fields.publishDate[lte]': new Date().toISOString(),
         order: '-fields.publishDate',
         include: 2, // Include linked author and categories
       };
@@ -164,7 +163,7 @@ const Blog = () => {
           excerpt: item.fields.excerpt?.['en-US'],
           content: item.fields.content['en-US'],
           featuredImage: (item.fields.featuredImage?.['en-US'] as any)?.fields?.file?.['en-US']?.url,
-          publishDate: item.fields.publishDate['en-US'],
+          publishDate: item.fields.publishDate?.['en-US'] || new Date().toISOString(),
           seoTitle: item.fields.seoTitle?.['en-US'],
           seoDescription: item.fields.seoDescription?.['en-US'],
           tags: item.fields.tags?.['en-US'] || [],
@@ -213,7 +212,7 @@ const Blog = () => {
           excerpt: item.fields.excerpt?.['en-US'],
           content: item.fields.content['en-US'],
           featuredImage: (item.fields.featuredImage?.['en-US'] as any)?.fields?.file?.['en-US']?.url,
-          publishDate: item.fields.publishDate['en-US'],
+          publishDate: item.fields.publishDate?.['en-US'] || new Date().toISOString(),
           seoTitle: item.fields.seoTitle?.['en-US'],
           seoDescription: item.fields.seoDescription?.['en-US'],
           tags: item.fields.tags?.['en-US'] || [],
