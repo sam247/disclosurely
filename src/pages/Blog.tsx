@@ -96,9 +96,14 @@ const Blog = () => {
         } else {
           await fetchPosts();
         }
-        await fetchCategories();
+        // Fetch categories separately to avoid blocking posts
+        fetchCategories();
       } catch (error) {
         console.error('Error fetching blog data:', error);
+        // Ensure we still show posts even if categories fail
+        if (!slug) {
+          await fetchPosts();
+        }
       } finally {
         setLoading(false);
       }
@@ -116,6 +121,8 @@ const Blog = () => {
       setCategories(response.items);
     } catch (error) {
       console.error('Error fetching categories:', error);
+      // Set empty categories array instead of failing
+      setCategories([]);
     }
   };
 

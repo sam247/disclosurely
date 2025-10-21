@@ -65,32 +65,41 @@ const DynamicHelmet: React.FC<DynamicHelmetProps> = ({
       try {
         const currentLanguage = i18n.language || 'en';
         
-        // Fetch page-specific SEO data
-        const { data: seoSettings, error: seoError } = await (supabase as any)
-          .from('seo_settings')
-          .select('*')
-          .eq('page_identifier', pageIdentifier)
-          .eq('language_code', currentLanguage)
-          .eq('is_active', true)
-          .single();
+        // Try to fetch page-specific SEO data (with error handling)
+        try {
+          const { data: seoSettings, error: seoError } = await (supabase as any)
+            .from('seo_settings')
+            .select('*')
+            .eq('page_identifier', pageIdentifier)
+            .eq('language_code', currentLanguage)
+            .eq('is_active', true)
+            .single();
 
-        if (seoError && seoError.code !== 'PGRST116') {
-          console.warn('Error fetching SEO settings:', seoError);
+          if (seoError && seoError.code !== 'PGRST116') {
+            console.warn('Error fetching SEO settings:', seoError);
+          } else {
+            setSeoData(seoSettings);
+          }
+        } catch (seoError) {
+          console.warn('SEO settings table not available:', seoError);
         }
 
-        // Fetch global SEO data
-        const { data: globalSettings, error: globalError } = await (supabase as any)
-          .from('global_seo_settings')
-          .select('*')
-          .eq('is_active', true)
-          .single();
+        // Try to fetch global SEO data (with error handling)
+        try {
+          const { data: globalSettings, error: globalError } = await (supabase as any)
+            .from('global_seo_settings')
+            .select('*')
+            .eq('is_active', true)
+            .single();
 
-        if (globalError && globalError.code !== 'PGRST116') {
-          console.warn('Error fetching global SEO settings:', globalError);
+          if (globalError && globalError.code !== 'PGRST116') {
+            console.warn('Error fetching global SEO settings:', globalError);
+          } else {
+            setGlobalSeoData(globalSettings);
+          }
+        } catch (globalError) {
+          console.warn('Global SEO settings table not available:', globalError);
         }
-
-        setSeoData(seoSettings);
-        setGlobalSeoData(globalSettings);
       } catch (error) {
         console.error('Error fetching SEO data:', error);
       } finally {
