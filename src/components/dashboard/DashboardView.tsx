@@ -479,7 +479,7 @@ const DashboardView = () => {
 
       // Decrypt the report content
       const { decryptReport } = await import('@/utils/encryption');
-      const decryptedContent = decryptReport(report.encrypted_content, profile.organization_id);
+      const decryptedContent = await decryptReport(report.encrypted_content, profile.organization_id);
       
       // Format content for AI analysis
       const formattedContent = `

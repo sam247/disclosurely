@@ -112,19 +112,15 @@ serve(async (req) => {
     // Determine organization subscription via org admin emails
     let orgSubscription: { subscribed: boolean; subscription_tier: string | null } = { subscribed: false, subscription_tier: null };
 
-    // Find active admins for this organization
-    const { data: orgAdmins, error: adminsError } = await supabaseAdmin
-      .from('profiles')
-      .select('email, role, is_active')
-      .eq('organization_id', linkData.organization_id)
-      .eq('is_active', true)
-      .in('role', ['admin', 'org_admin']);
+    // Use secure RPC function to get org admin emails
+    const { data: adminEmailData, error: adminsError } = await supabaseAdmin
+      .rpc('get_org_admin_emails', { p_org_id: linkData.organization_id });
 
     if (adminsError) {
       console.error('Failed to fetch org admins for subscription check:', adminsError);
     }
 
-    const adminEmails = (orgAdmins || []).map(a => a.email).filter((e): e is string => Boolean(e));
+    const adminEmails = (adminEmailData || []).map(row => row.email).filter((e): e is string => Boolean(e));
 
     if (adminEmails.length > 0) {
       const { data: subs, error: subsError } = await supabaseAdmin

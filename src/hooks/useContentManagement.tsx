@@ -3,6 +3,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { useOrganization } from '@/hooks/useOrganization';
 import { useToast } from '@/hooks/use-toast';
+import { useUserRoles } from '@/hooks/useUserRoles';
 
 export interface PageContent {
   id: string;
@@ -39,9 +40,10 @@ export const useContentManagement = () => {
   const { user } = useAuth();
   const { profile, organization } = useOrganization();
   const { toast } = useToast();
+  const { isOrgAdmin } = useUserRoles();
 
   // Check if user has admin permissions
-  const isAdmin = profile?.role === 'admin' || profile?.role === 'org_admin';
+  const isAdmin = isOrgAdmin;
 
   // Fetch page content
   const fetchPageContent = async () => {

@@ -231,7 +231,7 @@ const DynamicSubmissionForm = () => {
       };
 
       console.log('Encrypting report content...');
-      const { encryptedData, keyHash } = encryptReport(reportContent, linkData.organization_id);
+      const { encryptedData, keyHash } = await encryptReport(reportContent, linkData.organization_id);
 
       const reportPayload = {
         tracking_id: trackingId,

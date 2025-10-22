@@ -7,6 +7,7 @@ import { BlogEditor } from './BlogEditor';
 import { SEOSettings } from './SEOSettings';
 import { useOrganization } from '@/hooks/useOrganization';
 import { useTranslation } from 'react-i18next';
+import { useUserRoles } from '@/hooks/useUserRoles';
 import { cn } from '@/lib/utils';
 
 type AdminSection = 'blog' | 'seo';
@@ -38,14 +39,16 @@ export const AdminPanel = () => {
   const { t } = useTranslation();
   const [activeSection, setActiveSection] = useState<AdminSection>('blog');
 
+  const { isOrgAdmin, isAdmin: isSuperAdmin, loading: rolesLoading } = useUserRoles();
+  
   // Debug logging
   console.log('AdminPanel - Profile:', profile);
-  console.log('AdminPanel - Loading:', loading);
+  console.log('AdminPanel - Loading:', loading, 'Roles Loading:', rolesLoading);
 
   // Check if user has admin permissions
-  const isAdmin = profile?.role === 'admin' || profile?.role === 'org_admin';
+  const isAdmin = isOrgAdmin || isSuperAdmin;
 
-  if (loading) {
+  if (loading || rolesLoading) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
@@ -101,7 +104,7 @@ export const AdminPanel = () => {
             </div>
             <Badge variant="secondary" className="flex items-center gap-1">
               <Users className="h-3 w-3" />
-              {profile?.role === 'admin' ? t('admin.superAdmin') : t('admin.orgAdmin')}
+              {isSuperAdmin ? t('admin.superAdmin') : t('admin.orgAdmin')}
             </Badge>
           </div>
         </div>

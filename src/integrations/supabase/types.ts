@@ -989,7 +989,6 @@ export type Database = {
           last_name: string | null
           mfa_enabled: boolean | null
           organization_id: string | null
-          role: Database["public"]["Enums"]["user_role"] | null
           updated_at: string
         }
         Insert: {
@@ -1002,7 +1001,6 @@ export type Database = {
           last_name?: string | null
           mfa_enabled?: boolean | null
           organization_id?: string | null
-          role?: Database["public"]["Enums"]["user_role"] | null
           updated_at?: string
         }
         Update: {
@@ -1015,7 +1013,6 @@ export type Database = {
           last_name?: string | null
           mfa_enabled?: boolean | null
           organization_id?: string | null
-          role?: Database["public"]["Enums"]["user_role"] | null
           updated_at?: string
         }
         Relationships: [
@@ -1598,6 +1595,13 @@ export type Database = {
         }
         Returns: string
       }
+      encrypt_report_server_side: {
+        Args: { p_organization_id: string; p_report_data: Json }
+        Returns: {
+          encrypted_data: string
+          key_hash: string
+        }[]
+      }
       generate_anonymous_access_token: {
         Args: Record<PropertyKey, never>
         Returns: string
@@ -1656,6 +1660,12 @@ export type Database = {
           custom_logo_url: string
           organization_name: string
           valid: boolean
+        }[]
+      }
+      get_org_admin_emails: {
+        Args: { p_org_id: string }
+        Returns: {
+          email: string
         }[]
       }
       get_organization_branding_by_link: {

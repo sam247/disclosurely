@@ -140,8 +140,8 @@ const SecureSubmissionForm = ({ linkToken, linkData, brandColor }: SecureSubmiss
       submission_method: 'web_form'
     };
 
-    console.log('Encrypting report content...');
-    const { encryptedData, keyHash } = encryptReport(reportContent, linkData.organization_id);
+    console.log('Encrypting report content via server...');
+    const { encryptedData, keyHash } = await encryptReport(reportContent, linkData.organization_id);
 
     const reportPayload = {
       tracking_id: trackingId,
