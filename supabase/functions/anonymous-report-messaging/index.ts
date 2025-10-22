@@ -106,11 +106,61 @@ serve(async (req) => {
         .order("created_at", { ascending: true })
         .limit(100);
 
+      // Decrypt messages
+      const decryptedMessages = [];
+      if (messages) {
+        for (const message of messages) {
+          try {
+            // Decrypt message using organization-specific key
+            const ENCRYPTION_SALT = Deno.env.get('ENCRYPTION_SALT') || 'disclosurely-server-salt-2024-secure';
+            const keyMaterial = report.organization_id + ENCRYPTION_SALT;
+            
+            // Hash the key material using Web Crypto API
+            const keyBuffer = new TextEncoder().encode(keyMaterial);
+            const hashBuffer = await crypto.subtle.digest('SHA-256', keyBuffer);
+            const organizationKey = Array.from(new Uint8Array(hashBuffer))
+              .map(b => b.toString(16).padStart(2, '0'))
+              .join('');
+            
+            // Decrypt message using AES-GCM
+            const combined = new Uint8Array(atob(message.encrypted_message).split('').map(c => c.charCodeAt(0)));
+            const iv = combined.slice(0, 12);
+            const encryptedData = combined.slice(12);
+            
+            const keyBytes = new Uint8Array(organizationKey.match(/.{1,2}/g)!.map(byte => parseInt(byte, 16)));
+            const cryptoKey = await crypto.subtle.importKey(
+              'raw',
+              keyBytes,
+              { name: 'AES-GCM' },
+              false,
+              ['decrypt']
+            );
+            
+            const decryptedBuffer = await crypto.subtle.decrypt(
+              { name: 'AES-GCM', iv: iv },
+              cryptoKey,
+              encryptedData
+            );
+            
+            const decryptedMessage = new TextDecoder().decode(decryptedBuffer);
+            
+            decryptedMessages.push({
+              ...message,
+              encrypted_message: decryptedMessage
+            });
+          } catch (error) {
+            console.error('Failed to decrypt message:', error);
+            // For backward compatibility, if decryption fails, return the original message
+            decryptedMessages.push(message);
+          }
+        }
+      }
+
       return new Response(
         JSON.stringify({
           report,
           organization: report.organizations,
-          messages: messages || [],
+          messages: decryptedMessages,
         }),
         { headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
@@ -151,12 +201,53 @@ serve(async (req) => {
         });
       }
 
+      // Encrypt the message using organization-specific key
+      console.log('🔐 Encrypting message for organization:', report.organization_id);
+      
+      // Use same encryption system as reports
+      const ENCRYPTION_SALT = Deno.env.get('ENCRYPTION_SALT') || 'disclosurely-server-salt-2024-secure';
+      const keyMaterial = report.organization_id + ENCRYPTION_SALT;
+      
+      // Hash the key material using Web Crypto API
+      const keyBuffer = new TextEncoder().encode(keyMaterial);
+      const hashBuffer = await crypto.subtle.digest('SHA-256', keyBuffer);
+      const organizationKey = Array.from(new Uint8Array(hashBuffer))
+        .map(b => b.toString(16).padStart(2, '0'))
+        .join('');
+      
+      // Encrypt message using AES-GCM
+      const iv = crypto.getRandomValues(new Uint8Array(12));
+      const keyBytes = new Uint8Array(organizationKey.match(/.{1,2}/g)!.map(byte => parseInt(byte, 16)));
+      const cryptoKey = await crypto.subtle.importKey(
+        'raw',
+        keyBytes,
+        { name: 'AES-GCM' },
+        false,
+        ['encrypt']
+      );
+      
+      const messageBuffer = new TextEncoder().encode(message);
+      const encryptedBuffer = await crypto.subtle.encrypt(
+        { name: 'AES-GCM', iv: iv },
+        cryptoKey,
+        messageBuffer
+      );
+      
+      // Combine IV and encrypted data
+      const combined = new Uint8Array(iv.length + encryptedBuffer.byteLength);
+      combined.set(iv);
+      combined.set(new Uint8Array(encryptedBuffer), iv.length);
+      
+      // Convert to base64 for storage
+      const encryptedMessage = btoa(String.fromCharCode(...combined));
+      console.log('✅ Message encrypted successfully');
+
       const { data, error } = await supabase
         .from("report_messages")
         .insert({
           report_id: report.id,
           sender_type: 'whistleblower',
-          encrypted_message: message,
+          encrypted_message: encryptedMessage,
         })
         .select("id, sender_type, encrypted_message, created_at, is_read")
         .single();

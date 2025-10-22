@@ -1,13 +1,13 @@
 import { Link } from "react-router-dom";
 import { SystemStatusIndicator } from "@/components/SystemStatusIndicator";
-import { useTranslation } from 'react-i18next';
-import { Linkedin, Facebook, Instagram } from 'lucide-react';
+import { useTranslation } from "react-i18next";
+import { Linkedin, Facebook, Instagram } from "lucide-react";
 
 export const Footer = () => {
   const { i18n } = useTranslation();
   const currentLanguage = i18n.language;
-  const langPrefix = currentLanguage && currentLanguage !== 'en' ? `/${currentLanguage}` : '';
-  
+  const langPrefix = currentLanguage && currentLanguage !== "en" ? `/${currentLanguage}` : "";
+
   return (
     <footer className="bg-gray-900 text-white">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
@@ -105,30 +105,28 @@ export const Footer = () => {
 
         <div className="border-t border-gray-800 mt-8 pt-8">
           <div className="flex justify-between items-center">
-            <p className="text-gray-400 text-sm">
-              © 2025 Disclosurely. All rights reserved.
-            </p>
+            <p className="text-gray-400 text-sm">© 2025 Disclosurely. All rights reserved.</p>
             <div className="flex items-center gap-4">
               <div className="flex items-center gap-3">
-                <a 
-                  href="https://linkedin.com/company/disclosurely" 
-                  target="_blank" 
+                <a
+                  href="https://linkedin.com/company/disclosurely"
+                  target="_blank"
                   rel="noopener noreferrer"
                   className="text-gray-400 hover:text-white transition-colors"
                 >
                   <Linkedin className="h-5 w-5" />
                 </a>
-                <a 
-                  href="https://facebook.com/disclosurely" 
-                  target="_blank" 
+                <a
+                  href="https://facebook.com/disclosurely"
+                  target="_blank"
                   rel="noopener noreferrer"
                   className="text-gray-400 hover:text-white transition-colors"
                 >
                   <Facebook className="h-5 w-5" />
                 </a>
-                <a 
-                  href="https://instagram.com/disclosurely" 
-                  target="_blank" 
+                <a
+                  href="https://instagram.com/disclosurely"
+                  target="_blank"
                   rel="noopener noreferrer"
                   className="text-gray-400 hover:text-white transition-colors"
                 >

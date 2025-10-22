@@ -104,9 +104,15 @@ if (orgError) {
           // Check which subscribers are admins for this organization
           const { data: adminProfiles } = await supabaseAdmin
             .from('profiles')
-            .select('id, email, first_name')
+            .select(`
+              id, 
+              email, 
+              first_name,
+              user_roles!inner(role)
+            `)
             .eq('organization_id', report.organization_id)
-            .eq('role', 'admin')
+            .eq('user_roles.role', 'admin')
+            .eq('user_roles.is_active', true)
             .in('id', subscribers.map(s => s.user_id))
           
           if (adminProfiles && adminProfiles.length > 0) {
