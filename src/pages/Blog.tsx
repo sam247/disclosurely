@@ -11,8 +11,6 @@ import DynamicHelmet from '@/components/DynamicHelmet';
 import { useLanguageFromUrl } from '@/hooks/useLanguageFromUrl';
 import { useTranslation } from 'react-i18next';
 import { createClient } from 'contentful';
-import * as contentfulRichText from '@contentful/rich-text-html-renderer';
-import { BLOCKS, INLINES } from '@contentful/rich-text-types';
 
 // Contentful configuration
 const CONTENTFUL_SPACE_ID = import.meta.env.VITE_CONTENTFUL_SPACE_ID || 'rm7hib748uv7';
@@ -254,17 +252,24 @@ const Blog = () => {
 
   const renderRichText = (richTextDocument: any) => {
     if (!richTextDocument) return null;
-    return contentfulRichText.documentToHtml(richTextDocument, {
-      renderNode: {
-        [BLOCKS.EMBEDDED_ASSET]: (node: any) =>
-          `<img src="${node.data.target.fields.file['en-US'].url}" alt="${node.data.target.fields.description?.['en-US'] || node.data.target.fields.title?.['en-US']}" />`,
-        [INLINES.HYPERLINK]: (node: any, next: any) => {
-          const url = node.data.uri;
-          const text = next(node.content);
-          return `<a href="${url}" target="_blank" rel="noopener noreferrer">${text}</a>`;
-        },
-      },
-    });
+    
+    // Simple text extraction from Rich Text structure
+    const extractText = (node: any): string => {
+      if (typeof node === 'string') return node;
+      if (!node) return '';
+      
+      if (node.nodeType === 'text') {
+        return node.value || '';
+      }
+      
+      if (node.content && Array.isArray(node.content)) {
+        return node.content.map(extractText).join('');
+      }
+      
+      return '';
+    };
+    
+    return extractText(richTextDocument);
   };
 
   if (loading) {
