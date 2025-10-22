@@ -62,7 +62,7 @@ serve(async (req) => {
       });
     }
 
-    console.log(`Found ${pendingNotifications.length} pending notifications`);
+    console.log('Found', pendingNotifications.length, 'pending notifications');
 
     let emailsSent = 0;
     let emailsFailed = 0;
@@ -70,7 +70,7 @@ serve(async (req) => {
     // Process each notification
     for (const notification of pendingNotifications) {
       try {
-        console.log(`Processing notification ${notification.id} for report ${notification.report_id}`);
+        console.log('Processing notification', notification.id, 'for report', notification.report_id);
 
         // Get users to notify for this organization using user_roles table
         const { data: users, error: usersError } = await supabase
@@ -91,7 +91,7 @@ serve(async (req) => {
         }
 
         if (!users || users.length === 0) {
-          console.log(`No active users found for organization ${notification.organization_id}`);
+          console.log('No active users found for organization', notification.organization_id);
           continue;
         }
 
@@ -101,7 +101,7 @@ serve(async (req) => {
         // Send email to each user
         for (const user of users) {
           if (!user.email) {
-            console.log(`No email address for user ${user.id}`);
+            console.log('No email address for user', user.id);
             continue;
           }
 
@@ -157,7 +157,7 @@ serve(async (req) => {
               console.error(`Failed to send email to ${user.email}:`, emailResponse.error);
               emailsFailed++;
             } else {
-              console.log(`Email sent successfully to ${user.email}`);
+              console.log('Email sent successfully to', user.email);
               emailsSent++;
             }
 
@@ -196,7 +196,7 @@ serve(async (req) => {
       }
     }
 
-    console.log(`Email processing complete. Sent: ${emailsSent}, Failed: ${emailsFailed}`);
+    console.log('Email processing complete. Sent:', emailsSent, 'Failed:', emailsFailed);
 
     return new Response(JSON.stringify({
       success: true,
