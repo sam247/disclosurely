@@ -11,7 +11,7 @@ import DynamicHelmet from '@/components/DynamicHelmet';
 import { useLanguageFromUrl } from '@/hooks/useLanguageFromUrl';
 import { useTranslation } from 'react-i18next';
 import { createClient } from 'contentful';
-import { documentToHtml } from '@contentful/rich-text-html-renderer';
+import * as contentfulRichText from '@contentful/rich-text-html-renderer';
 import { BLOCKS, INLINES } from '@contentful/rich-text-types';
 
 // Contentful configuration
@@ -254,7 +254,7 @@ const Blog = () => {
 
   const renderRichText = (richTextDocument: any) => {
     if (!richTextDocument) return null;
-    return documentToHtml(richTextDocument, {
+    return contentfulRichText.documentToHtml(richTextDocument, {
       renderNode: {
         [BLOCKS.EMBEDDED_ASSET]: (node: any) =>
           `<img src="${node.data.target.fields.file['en-US'].url}" alt="${node.data.target.fields.description?.['en-US'] || node.data.target.fields.title?.['en-US']}" />`,
