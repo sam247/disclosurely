@@ -146,7 +146,7 @@ serve(async (req) => {
       actorType: 'anonymous',
       actorId: null,
       actorEmail: reportData.submitted_by_email,
-      actorIpAddress: req.headers.get('x-forwarded-for') || req.headers.get('x-real-ip'),
+      actorIpAddress: null, // Set to null to avoid inet type issues
       actorUserAgent: req.headers.get('user-agent'),
       targetType: 'report',
       targetId: report.id,
