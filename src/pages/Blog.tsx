@@ -11,6 +11,7 @@ import DynamicHelmet from '@/components/DynamicHelmet';
 import { useLanguageFromUrl } from '@/hooks/useLanguageFromUrl';
 import { useTranslation } from 'react-i18next';
 import { createClient } from 'contentful';
+import { documentToReactComponents } from '@contentful/rich-text-react-renderer';
 
 // Contentful configuration
 const CONTENTFUL_SPACE_ID = import.meta.env.VITE_CONTENTFUL_SPACE_ID || 'rm7hib748uv7';
@@ -263,23 +264,48 @@ const Blog = () => {
   const renderRichText = (richTextDocument: any) => {
     if (!richTextDocument) return null;
     
-    // Simple text extraction from Rich Text structure
-    const extractText = (node: any): string => {
-      if (typeof node === 'string') return node;
-      if (!node) return '';
+    try {
+      return documentToReactComponents(richTextDocument, {
+        renderNode: {
+          'paragraph': (node, children) => <p className="mb-4">{children}</p>,
+          'heading-1': (node, children) => <h1 className="text-3xl font-bold mb-6">{children}</h1>,
+          'heading-2': (node, children) => <h2 className="text-2xl font-bold mb-4">{children}</h2>,
+          'heading-3': (node, children) => <h3 className="text-xl font-bold mb-3">{children}</h3>,
+          'heading-4': (node, children) => <h4 className="text-lg font-bold mb-2">{children}</h4>,
+          'heading-5': (node, children) => <h5 className="text-base font-bold mb-2">{children}</h5>,
+          'heading-6': (node, children) => <h6 className="text-sm font-bold mb-2">{children}</h6>,
+          'unordered-list': (node, children) => <ul className="list-disc list-inside mb-4">{children}</ul>,
+          'ordered-list': (node, children) => <ol className="list-decimal list-inside mb-4">{children}</ol>,
+          'list-item': (node, children) => <li className="mb-1">{children}</li>,
+          'blockquote': (node, children) => <blockquote className="border-l-4 border-gray-300 pl-4 italic mb-4">{children}</blockquote>,
+          'hyperlink': (node, children) => <a href={node.data.uri} className="text-blue-600 hover:underline" target="_blank" rel="noopener noreferrer">{children}</a>,
+        },
+        renderMark: {
+          'bold': (text) => <strong>{text}</strong>,
+          'italic': (text) => <em>{text}</em>,
+          'underline': (text) => <u>{text}</u>,
+        },
+      });
+    } catch (error) {
+      console.error('Error rendering rich text:', error);
+      // Fallback to plain text extraction
+      const extractText = (node: any): string => {
+        if (typeof node === 'string') return node;
+        if (!node) return '';
+        
+        if (node.nodeType === 'text') {
+          return node.value || '';
+        }
+        
+        if (node.content && Array.isArray(node.content)) {
+          return node.content.map(extractText).join('');
+        }
+        
+        return '';
+      };
       
-      if (node.nodeType === 'text') {
-        return node.value || '';
-      }
-      
-      if (node.content && Array.isArray(node.content)) {
-        return node.content.map(extractText).join('');
-      }
-      
-      return '';
-    };
-    
-    return extractText(richTextDocument);
+      return <div className="whitespace-pre-line">{extractText(richTextDocument)}</div>;
+    }
   };
 
   if (loading) {
