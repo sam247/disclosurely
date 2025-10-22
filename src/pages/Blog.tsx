@@ -270,11 +270,21 @@ const Blog = () => {
     if (!richTextDocument) return null;
     
     console.log('Rendering Rich Text document:', richTextDocument);
+    console.log('Document nodeType:', richTextDocument.nodeType);
+    console.log('Document content length:', richTextDocument.content?.length);
+    console.log('First content item:', richTextDocument.content?.[0]);
     
     try {
       const htmlString = documentToHtmlString(richTextDocument, {
         renderNode: {
-          'paragraph': (node, next) => `<p class="mb-4">${next(node.content)}</p>`,
+          'document': (node, next) => {
+            console.log('Rendering document node:', node);
+            return next(node.content);
+          },
+          'paragraph': (node, next) => {
+            console.log('Rendering paragraph node:', node);
+            return `<p class="mb-4">${next(node.content)}</p>`;
+          },
           'heading-1': (node, next) => `<h1 class="text-3xl font-bold mb-6">${next(node.content)}</h1>`,
           'heading-2': (node, next) => `<h2 class="text-2xl font-bold mb-4">${next(node.content)}</h2>`,
           'heading-3': (node, next) => `<h3 class="text-xl font-bold mb-3">${next(node.content)}</h3>`,
