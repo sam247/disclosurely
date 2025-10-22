@@ -67,9 +67,24 @@ serve(async (req) => {
       return new Response(JSON.stringify({ error: 'Profile not found' }), { status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
     }
 
+    console.log('Profile found:', profile);
+    console.log('User roles:', profile.user_roles);
+
     const allowedRoles = ['admin', 'case_handler', 'org_admin'];
     const userRole = profile.user_roles?.find((ur: any) => ur.is_active)?.role;
+    
+    console.log('User role:', userRole);
+    console.log('Profile is_active:', profile.is_active);
+    console.log('Profile organization_id:', profile.organization_id);
+    console.log('Report organization_id:', report.organization_id);
+    
     if (!profile.is_active || profile.organization_id !== report.organization_id || !userRole || !allowedRoles.includes(userRole)) {
+      console.log('Permission check failed:', {
+        is_active: profile.is_active,
+        org_match: profile.organization_id === report.organization_id,
+        has_role: !!userRole,
+        role_allowed: allowedRoles.includes(userRole)
+      });
       return new Response(JSON.stringify({ error: 'Insufficient permissions' }), { status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
     }
 

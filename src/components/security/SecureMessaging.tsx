@@ -70,51 +70,52 @@ const SecureMessaging = ({ report, onClose }: SecureMessagingProps) => {
   useEffect(() => {
     fetchMessages();
     
-    // Set up real-time subscription for new messages
-    const channel = supabase
-      .channel(`report-messages-secure-${report.id}`)
-      .on(
-        'postgres_changes',
-        {
-          event: 'INSERT',
-          schema: 'public',
-          table: 'report_messages',
-          filter: `report_id=eq.${report.id}`,
-        },
-        (payload) => {
-          console.log('New message received:', payload.new);
-          const newMsg = payload.new as Message;
-          setMessages(prev => {
-            // Check if message already exists to prevent duplicates
-            if (prev.some(msg => msg.id === newMsg.id)) {
-              return prev;
-            }
-            return [...prev, newMsg].sort((a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime());
-          });
-        }
-      )
-      .on(
-        'postgres_changes',
-        {
-          event: 'UPDATE',
-          schema: 'public',
-          table: 'report_messages',
-          filter: `report_id=eq.${report.id}`,
-        },
-        (payload) => {
-          console.log('Message updated:', payload.new);
-          const updatedMsg = payload.new as Message;
-          setMessages(prev => prev.map(msg => msg.id === updatedMsg.id ? updatedMsg : msg));
-        }
-      )
-      .subscribe((status) => {
-        console.log('Secure messaging subscription status:', status);
-      });
+    // Disabled real-time subscription to avoid encrypted message display issues
+    // Messages are refreshed manually after sending to ensure decrypted content
+    // const channel = supabase
+    //   .channel(`report-messages-secure-${report.id}`)
+    //   .on(
+    //     'postgres_changes',
+    //     {
+    //       event: 'INSERT',
+    //       schema: 'public',
+    //       table: 'report_messages',
+    //       filter: `report_id=eq.${report.id}`,
+    //     },
+    //     (payload) => {
+    //       console.log('New message received:', payload.new);
+    //       const newMsg = payload.new as Message;
+    //       setMessages(prev => {
+    //         // Check if message already exists to prevent duplicates
+    //         if (prev.some(msg => msg.id === newMsg.id)) {
+    //           return prev;
+    //         }
+    //         return [...prev, newMsg].sort((a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime());
+    //       });
+    //     }
+    //   )
+    //   .on(
+    //     'postgres_changes',
+    //     {
+    //       event: 'UPDATE',
+    //       schema: 'public',
+    //       table: 'report_messages',
+    //       filter: `report_id=eq.${report.id}`,
+    //     },
+    //     (payload) => {
+    //       console.log('Message updated:', payload.new);
+    //       const updatedMsg = payload.new as Message;
+    //       setMessages(prev => prev.map(msg => msg.id === updatedMsg.id ? updatedMsg : msg));
+    //     }
+    //   )
+    //   .subscribe((status) => {
+    //     console.log('Secure messaging subscription status:', status);
+    //   });
 
-    return () => {
-      console.log('Cleaning up secure messaging subscription');
-      supabase.removeChannel(channel);
-    };
+    // return () => {
+    //   console.log('Cleaning up secure messaging subscription');
+    //   supabase.removeChannel(channel);
+    // };
   }, [report.id]);
 
   const fetchMessages = async () => {
@@ -219,6 +220,8 @@ const SecureMessaging = ({ report, onClose }: SecureMessagingProps) => {
     });
 
     setNewMessage('');
+    // Refresh messages to get the decrypted version
+    await fetchMessages();
   };
 
   const handleSubmit = (e: React.FormEvent) => {
