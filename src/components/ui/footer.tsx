@@ -65,7 +65,7 @@ export const Footer = () => {
               </li>
               <li>
                 <Link to={`${langPrefix}/blog`} className="text-gray-400 hover:text-white">
-                  Disclosurely Blog
+                  Blog
                 </Link>
               </li>
               <li>
