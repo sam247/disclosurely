@@ -7,48 +7,50 @@ const corsHeaders = {
 }
 
 serve(async (req) => {
-  console.log('Function started')
-  
   if (req.method === 'OPTIONS') {
-    console.log('OPTIONS request')
     return new Response('ok', { headers: corsHeaders })
   }
 
   try {
-    console.log('Processing POST request')
+    console.log('🔍 ENCRYPT FUNCTION STARTED')
     
     const body = await req.json()
-    console.log('Request body parsed:', Object.keys(body || {}))
+    console.log('📦 Request body received:', Object.keys(body || {}))
     
     const { reportData, organizationId } = body
-    console.log('Extracted data:', { organizationId, hasReportData: !!reportData })
+    console.log('🔑 Organization ID:', organizationId)
+    console.log('📊 Report data keys:', Object.keys(reportData || {}))
     
     // Test CryptoJS import
-    console.log('Testing CryptoJS import...')
+    console.log('📦 Importing CryptoJS...')
     const CryptoJS = await import('https://esm.sh/crypto-js@4.2.0')
-    console.log('CryptoJS imported successfully')
+    console.log('✅ CryptoJS imported successfully')
     
-    // Test basic encryption
-    console.log('Testing basic encryption...')
-    const testData = 'test data'
-    const testKey = 'test key'
-    const encrypted = CryptoJS.AES.encrypt(testData, testKey)
-    console.log('Basic encryption test passed')
+    // Simple test encryption
+    console.log('🔐 Testing encryption...')
+    const testString = JSON.stringify(reportData || { test: 'data' })
+    const testKey = 'test-key-123'
+    const encrypted = CryptoJS.AES.encrypt(testString, testKey)
+    console.log('✅ Encryption test successful')
     
     return new Response(
       JSON.stringify({ 
-        success: true, 
-        message: 'Function working correctly',
-        encryptedTest: encrypted.toString()
+        success: true,
+        encryptedData: encrypted.toString(),
+        keyHash: CryptoJS.SHA256(testKey).toString(),
+        message: 'Encryption function working correctly'
       }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     )
 
   } catch (error) {
-    console.error('Error in function:', error)
+    console.error('❌ ERROR IN ENCRYPT FUNCTION:', error)
+    console.error('❌ Error message:', error.message)
+    console.error('❌ Error stack:', error.stack)
+    
     return new Response(
       JSON.stringify({ 
-        error: 'Function error', 
+        error: 'Encryption failed', 
         details: error.message,
         stack: error.stack
       }),
