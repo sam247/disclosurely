@@ -19,7 +19,6 @@ interface Organization {
 interface Profile {
   id: string;
   organization_id: string | null;
-  role: string;
   email: string;
   first_name: string | null;
   last_name: string | null;

@@ -989,7 +989,6 @@ export type Database = {
           last_name: string | null
           mfa_enabled: boolean | null
           organization_id: string | null
-          role: Database["public"]["Enums"]["user_role"] | null
           updated_at: string
         }
         Insert: {
@@ -1002,7 +1001,6 @@ export type Database = {
           last_name?: string | null
           mfa_enabled?: boolean | null
           organization_id?: string | null
-          role?: Database["public"]["Enums"]["user_role"] | null
           updated_at?: string
         }
         Update: {
@@ -1015,7 +1013,6 @@ export type Database = {
           last_name?: string | null
           mfa_enabled?: boolean | null
           organization_id?: string | null
-          role?: Database["public"]["Enums"]["user_role"] | null
           updated_at?: string
         }
         Relationships: [

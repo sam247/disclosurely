@@ -24,14 +24,13 @@ import {
   UserCheck
 } from 'lucide-react';
 
-type UserRole = 'admin' | 'org_admin' | 'case_handler' | 'reviewer';
+import { useUserRoles } from '@/hooks/useUserRoles';
 
 interface TeamMember {
   id: string;
   email: string;
   first_name: string | null;
   last_name: string | null;
-  role: UserRole;
   is_active: boolean;
   last_login: string | null;
   created_at: string;
@@ -63,13 +62,14 @@ const UserManagement = () => {
   const [inviteRole, setInviteRole] = useState<UserRole>('case_handler');
   const [isSendingInvitation, setIsSendingInvitation] = useState(false);
   const [cancellingInvitation, setCancellingInvitation] = useState<string | null>(null);
+  const { isOrgAdmin } = useUserRoles();
 
   useEffect(() => {
-    if (organization && profile?.role === 'org_admin') {
+    if (organization && isOrgAdmin) {
       fetchTeamMembers();
       fetchInvitations();
     }
-  }, [organization, profile?.role]);
+  }, [organization, isOrgAdmin]);
 
   const fetchTeamMembers = async () => {
     try {
@@ -129,8 +129,7 @@ const UserManagement = () => {
       user: user, 
       profile: profile, 
       organization: organization,
-      userRole: profile?.role,
-      isOrgAdmin: profile?.role === 'org_admin'
+      isOrgAdmin: isOrgAdmin
     });
     
     if (!inviteEmail.trim()) {
@@ -160,7 +159,7 @@ const UserManagement = () => {
       return;
     }
 
-    if (profile?.role !== 'org_admin') {
+    if (!isOrgAdmin) {
       toast({
         title: "Error",
         description: "Only organization administrators can send invitations.",
@@ -353,17 +352,45 @@ const UserManagement = () => {
     }
   };
 
-  const updateUserRole = async (userId: string, newRole: UserRole) => {
+  const updateUserRole = async (userId: string, newRole: string) => {
     try {
-      const member = teamMembers.find(m => m.id === userId);
-      const oldRole = member?.role;
-      
-      const { error } = await supabase
-        .from('profiles')
-        .update({ role: newRole })
-        .eq('id', userId);
+      // Insert or update role in user_roles table
+      const { data: existingRole, error: fetchError } = await supabase
+        .from('user_roles')
+        .select('*')
+        .eq('user_id', userId)
+        .eq('organization_id', organization?.id)
+        .single();
 
-      if (error) throw error;
+      if (fetchError && fetchError.code !== 'PGRST116') throw fetchError;
+
+      if (existingRole) {
+        // Update existing role
+        const { error: updateError } = await supabase
+          .from('user_roles')
+          .update({ 
+            role: newRole,
+            granted_by: user?.id,
+            granted_at: new Date().toISOString(),
+            is_active: true
+          })
+          .eq('id', existingRole.id);
+
+        if (updateError) throw updateError;
+      } else {
+        // Insert new role
+        const { error: insertError } = await supabase
+          .from('user_roles')
+          .insert({
+            user_id: userId,
+            organization_id: organization?.id,
+            role: newRole,
+            granted_by: user?.id,
+            is_active: true
+          });
+
+        if (insertError) throw insertError;
+      }
 
       // Log role change to audit trail
       if (member && organization?.id) {
@@ -473,7 +500,7 @@ const UserManagement = () => {
     ).join(' ');
   };
 
-  if (profile?.role !== 'org_admin') {
+  if (!isOrgAdmin) {
     return (
       <Card>
         <CardContent className="p-6">
