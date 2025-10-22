@@ -63,7 +63,7 @@ BEGIN
     CASE WHEN p_success THEN 'low' ELSE 'medium' END,
     p_sender_type,
     p_user_id,
-    p_ip_address,
+    NULL, -- Set to NULL to avoid inet type issues
     p_user_agent,
     'report',
     p_report_id,
@@ -114,7 +114,7 @@ BEGIN
     p_severity,
     CASE WHEN p_user_id IS NOT NULL THEN 'user' ELSE 'system' END,
     p_user_id,
-    p_ip_address,
+    NULL, -- Set to NULL to avoid inet type issues
     p_user_agent,
     'system',
     p_organization_id,
