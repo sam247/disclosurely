@@ -7,37 +7,76 @@ const corsHeaders = {
 }
 
 serve(async (req) => {
+  console.log('🔍 ENCRYPT FUNCTION STARTED')
+  
   if (req.method === 'OPTIONS') {
+    console.log('OPTIONS request')
     return new Response('ok', { headers: corsHeaders })
   }
 
   try {
-    console.log('🔍 ENCRYPT FUNCTION STARTED')
+    console.log('Processing POST request')
     
     const body = await req.json()
-    console.log('📦 Request body received:', Object.keys(body || {}))
+    console.log('Request body parsed:', Object.keys(body || {}))
     
     const { reportData, organizationId } = body
-    console.log('🔑 Organization ID:', organizationId)
-    console.log('📊 Report data keys:', Object.keys(reportData || {}))
+    console.log('Extracted data:', { organizationId, hasReportData: !!reportData })
+    
+    // Validate inputs
+    if (!reportData || typeof reportData !== 'object') {
+      console.log('❌ Invalid report data')
+      return new Response(
+        JSON.stringify({ error: 'Invalid report data' }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      )
+    }
+
+    if (!organizationId || typeof organizationId !== 'string') {
+      console.log('❌ Invalid organization ID')
+      return new Response(
+        JSON.stringify({ error: 'Invalid organization ID' }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      )
+    }
     
     // Test CryptoJS import
     console.log('📦 Importing CryptoJS...')
     const CryptoJS = await import('https://esm.sh/crypto-js@4.2.0')
     console.log('✅ CryptoJS imported successfully')
     
-    // Simple test encryption
-    console.log('🔐 Testing encryption...')
-    const testString = JSON.stringify(reportData || { test: 'data' })
-    const testKey = 'test-key-123'
-    const encrypted = CryptoJS.AES.encrypt(testString, testKey)
-    console.log('✅ Encryption test successful')
+    // Use server-side salt (protected from client access)
+    const ENCRYPTION_SALT = Deno.env.get('ENCRYPTION_SALT') || 'disclosurely-server-salt-2024-secure'
+    console.log('🔑 Using encryption salt:', ENCRYPTION_SALT.substring(0, 20) + '...')
+    
+    // Create organization-specific key
+    const keyMaterial = organizationId + ENCRYPTION_SALT
+    console.log('🔐 Key material created, length:', keyMaterial.length)
+    
+    const organizationKey = CryptoJS.SHA256(keyMaterial).toString()
+    console.log('✅ Organization key generated')
+    
+    // Stringify the data
+    const dataString = JSON.stringify(reportData)
+    console.log('📊 Data stringified, length:', dataString.length)
+    
+    // Encrypt using AES
+    console.log('🔐 Starting AES encryption...')
+    const encrypted = CryptoJS.AES.encrypt(dataString, organizationKey, {
+      mode: CryptoJS.mode.CBC,
+      padding: CryptoJS.pad.Pkcs7
+    })
+    console.log('✅ AES encryption completed')
+    
+    const encryptedData = encrypted.toString()
+    const keyHash = CryptoJS.SHA256(organizationKey).toString()
+    console.log('🎉 Encryption process completed successfully')
     
     return new Response(
       JSON.stringify({ 
         success: true,
-        encryptedData: encrypted.toString(),
-        keyHash: CryptoJS.SHA256(testKey).toString(),
+        encryptedData,
+        keyHash,
         message: 'Encryption function working correctly'
       }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
