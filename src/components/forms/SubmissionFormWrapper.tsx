@@ -134,12 +134,29 @@ const SubmissionFormWrapper = () => {
 
   const fetchSubscriptionTier = async (organizationId: string) => {
     try {
-      // Get organization admins
+      // Get organization admins from user_roles table
+      const { data: orgAdminRoles, error: rolesError } = await supabase
+        .from('user_roles')
+        .select('user_id')
+        .eq('organization_id', organizationId)
+        .eq('role', 'org_admin')
+        .eq('is_active', true);
+
+      if (rolesError) {
+        console.error('Error fetching org admin roles:', rolesError);
+        return null;
+      }
+
+      const adminUserIds = (orgAdminRoles || []).map(r => r.user_id);
+      
+      if (adminUserIds.length === 0) {
+        return null;
+      }
+
       const { data: orgAdmins, error: adminsError } = await supabase
         .from('profiles')
         .select('email')
-        .eq('organization_id', organizationId)
-        .eq('role', 'org_admin')
+        .in('id', adminUserIds)
         .eq('is_active', true);
 
       if (adminsError) {

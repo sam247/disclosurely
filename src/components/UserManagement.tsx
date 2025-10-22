@@ -24,7 +24,7 @@ import {
   UserCheck
 } from 'lucide-react';
 
-import { useUserRoles } from '@/hooks/useUserRoles';
+import { useUserRoles, UserRole } from '@/hooks/useUserRoles';
 
 interface TeamMember {
   id: string;
@@ -34,6 +34,7 @@ interface TeamMember {
   is_active: boolean;
   last_login: string | null;
   created_at: string;
+  roles: UserRole[];
 }
 
 interface Invitation {
@@ -73,15 +74,33 @@ const UserManagement = () => {
 
   const fetchTeamMembers = async () => {
     try {
-      const { data, error } = await supabase
+      const { data: profiles, error: profilesError } = await supabase
         .from('profiles')
         .select('*')
         .eq('organization_id', organization?.id)
         .eq('is_active', true)
         .order('created_at', { ascending: false });
 
-      if (error) throw error;
-      setTeamMembers(data || []);
+      if (profilesError) throw profilesError;
+
+      // Fetch roles for each member
+      const { data: userRoles, error: rolesError } = await supabase
+        .from('user_roles')
+        .select('user_id, role')
+        .eq('organization_id', organization?.id)
+        .eq('is_active', true);
+
+      if (rolesError) throw rolesError;
+
+      // Combine profiles with roles
+      const membersWithRoles = (profiles || []).map(profile => ({
+        ...profile,
+        roles: (userRoles || [])
+          .filter(ur => ur.user_id === profile.id)
+          .map(ur => ur.role as UserRole)
+      }));
+
+      setTeamMembers(membersWithRoles);
     } catch (error) {
       console.error('Error fetching team members:', error);
       toast({
@@ -354,6 +373,9 @@ const UserManagement = () => {
 
   const updateUserRole = async (userId: string, newRole: string) => {
     try {
+      const member = teamMembers.find(m => m.id === userId);
+      const oldRole = member?.roles[0] || 'none';
+
       // Insert or update role in user_roles table
       const { data: existingRole, error: fetchError } = await supabase
         .from('user_roles')
@@ -369,7 +391,7 @@ const UserManagement = () => {
         const { error: updateError } = await supabase
           .from('user_roles')
           .update({ 
-            role: newRole,
+            role: newRole as any,
             granted_by: user?.id,
             granted_at: new Date().toISOString(),
             is_active: true
@@ -381,13 +403,13 @@ const UserManagement = () => {
         // Insert new role
         const { error: insertError } = await supabase
           .from('user_roles')
-          .insert({
+          .insert([{
             user_id: userId,
-            organization_id: organization?.id,
-            role: newRole,
+            organization_id: organization?.id!,
+            role: newRole as any,
             granted_by: user?.id,
             is_active: true
-          });
+          }]);
 
         if (insertError) throw insertError;
       }
@@ -464,7 +486,7 @@ const UserManagement = () => {
           afterState: { is_active: false },
           metadata: {
             target_user_email: member.email,
-            target_user_role: member.role,
+            target_user_roles: member.roles,
           },
           organizationId: organization.id,
         });
@@ -665,9 +687,15 @@ const UserManagement = () => {
                         </div>
                       </TableCell>
                       <TableCell>
-                        <Badge className={`${getRoleColor(member.role)} text-xs`}>
-                          {formatRole(member.role)}
-                        </Badge>
+                        {member.roles.length > 0 ? (
+                          <Badge className={`${getRoleColor(member.roles[0])} text-xs`}>
+                            {formatRole(member.roles[0])}
+                          </Badge>
+                        ) : (
+                          <Badge className="bg-gray-100 text-gray-800 text-xs">
+                            No Role
+                          </Badge>
+                        )}
                       </TableCell>
                       <TableCell className="text-xs text-gray-500">
                         {member.last_login 
@@ -680,7 +708,7 @@ const UserManagement = () => {
                           {member.id !== user?.id && (
                             <>
                               <Select
-                                value={member.role}
+                                value={member.roles[0] || 'case_handler'}
                                 onValueChange={(value: UserRole) => updateUserRole(member.id, value)}
                               >
                                 <SelectTrigger className="w-28 h-8 text-xs">
