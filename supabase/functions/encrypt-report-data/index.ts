@@ -13,6 +13,8 @@ serve(async (req) => {
   }
 
   try {
+    console.log('Starting encryption process...')
+    
     const supabase = createClient(
       Deno.env.get('SUPABASE_URL') ?? '',
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '',
@@ -24,7 +26,10 @@ serve(async (req) => {
       }
     )
 
+    console.log('Supabase client created successfully')
+    
     const { reportData, organizationId } = await req.json()
+    console.log('Request data parsed:', { organizationId, reportDataKeys: Object.keys(reportData || {}) })
 
     // Validate inputs
     if (!reportData || typeof reportData !== 'object') {
@@ -42,28 +47,36 @@ serve(async (req) => {
     }
 
     // Server-side encryption using CryptoJS
+    console.log('Importing CryptoJS...')
     const CryptoJS = await import('https://esm.sh/crypto-js@4.2.0')
+    console.log('CryptoJS imported successfully')
     
     // Use server-side salt (protected from client access)
     const ENCRYPTION_SALT = Deno.env.get('ENCRYPTION_SALT') || 'disclosurely-server-salt-2024-secure'
+    console.log('Using encryption salt:', ENCRYPTION_SALT.substring(0, 20) + '...')
     
     // Create organization-specific key
     const keyMaterial = organizationId + ENCRYPTION_SALT
+    console.log('Key material created, length:', keyMaterial.length)
+    
     const organizationKey = CryptoJS.SHA256(keyMaterial).toString()
+    console.log('Organization key generated')
     
     // Stringify the data
     const dataString = JSON.stringify(reportData)
+    console.log('Data stringified, length:', dataString.length)
     
     // Encrypt using AES
+    console.log('Starting AES encryption...')
     const encrypted = CryptoJS.AES.encrypt(dataString, organizationKey, {
       mode: CryptoJS.mode.CBC,
       padding: CryptoJS.pad.Pkcs7
     })
+    console.log('AES encryption completed')
     
     const encryptedData = encrypted.toString()
     const keyHash = CryptoJS.SHA256(organizationKey).toString()
-
-    console.log('Successfully encrypted report data')
+    console.log('Encryption process completed successfully')
 
     return new Response(
       JSON.stringify({ encryptedData, keyHash }),
