@@ -49,51 +49,52 @@ const WhistleblowerMessaging = () => {
     if (report) {
       fetchMessages();
       
-      // Set up real-time subscription for new messages
-      const channel = supabase
-        .channel(`whistleblower-messages-${report.id}`)
-        .on(
-          'postgres_changes',
-          {
-            event: 'INSERT',
-            schema: 'public',
-            table: 'report_messages',
-            filter: `report_id=eq.${report.id}`,
-          },
-          (payload) => {
-            console.log('New message received on whistleblower side:', payload.new);
-            const newMsg = payload.new as Message;
-            setMessages(prev => {
-              // Check if message already exists to prevent duplicates
-              if (prev.some(msg => msg.id === newMsg.id)) {
-                return prev;
-              }
-              return [...prev, newMsg].sort((a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime());
-            });
-          }
-        )
-        .on(
-          'postgres_changes',
-          {
-            event: 'UPDATE',
-            schema: 'public',
-            table: 'report_messages',
-            filter: `report_id=eq.${report.id}`,
-          },
-          (payload) => {
-            console.log('Message updated on whistleblower side:', payload.new);
-            const updatedMsg = payload.new as Message;
-            setMessages(prev => prev.map(msg => msg.id === updatedMsg.id ? updatedMsg : msg));
-          }
-        )
-        .subscribe((status) => {
-          console.log('Whistleblower messaging subscription status:', status);
-        });
+      // Disabled real-time subscription to avoid encrypted message display issues
+      // Messages are refreshed manually after sending to ensure decrypted content
+      // const channel = supabase
+      //   .channel(`whistleblower-messages-${report.id}`)
+      //   .on(
+      //     'postgres_changes',
+      //     {
+      //       event: 'INSERT',
+      //       schema: 'public',
+      //       table: 'report_messages',
+      //       filter: `report_id=eq.${report.id}`,
+      //     },
+      //     (payload) => {
+      //       console.log('New message received on whistleblower side:', payload.new);
+      //       const newMsg = payload.new as Message;
+      //       setMessages(prev => {
+      //         // Check if message already exists to prevent duplicates
+      //         if (prev.some(msg => msg.id === newMsg.id)) {
+      //           return prev;
+      //         }
+      //         return [...prev, newMsg].sort((a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime());
+      //       });
+      //     }
+      //   )
+      //   .on(
+      //     'postgres_changes',
+      //     {
+      //       event: 'UPDATE',
+      //       schema: 'public',
+      //       table: 'report_messages',
+      //       filter: `report_id=eq.${report.id}`,
+      //     },
+      //     (payload) => {
+      //       console.log('Message updated on whistleblower side:', payload.new);
+      //       const updatedMsg = payload.new as Message;
+      //       setMessages(prev => prev.map(msg => msg.id === updatedMsg.id ? updatedMsg : msg));
+      //     }
+      //   )
+      //   .subscribe((status) => {
+      //     console.log('Whistleblower messaging subscription status:', status);
+      //   });
 
-      return () => {
-        console.log('Cleaning up whistleblower messaging subscription');
-        supabase.removeChannel(channel);
-      };
+      // return () => {
+      //   console.log('Cleaning up whistleblower messaging subscription');
+      //   supabase.removeChannel(channel);
+      // };
     }
   }, [report?.id]);
 
@@ -280,7 +281,8 @@ const WhistleblowerMessaging = () => {
       });
 
       setNewMessage('');
-      // Don't refresh messages here - let the real-time subscription handle it
+      // Refresh messages to get the decrypted version
+      await fetchMessages();
 
     } catch (error) {
       console.error('Error sending message:', error);

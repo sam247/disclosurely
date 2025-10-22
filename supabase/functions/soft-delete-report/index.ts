@@ -56,17 +56,19 @@ serve(async (req) => {
         id, 
         organization_id, 
         is_active,
-        user_roles!inner(role)
+        user_roles!left(role, is_active)
       `)
       .eq('id', userId)
       .single();
 
     if (profileError || !profile) {
+      console.log('Profile query error:', profileError);
+      console.log('Profile data:', profile);
       return new Response(JSON.stringify({ error: 'Profile not found' }), { status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
     }
 
     const allowedRoles = ['admin', 'case_handler', 'org_admin'];
-    const userRole = profile.user_roles?.[0]?.role;
+    const userRole = profile.user_roles?.find((ur: any) => ur.is_active)?.role;
     if (!profile.is_active || profile.organization_id !== report.organization_id || !userRole || !allowedRoles.includes(userRole)) {
       return new Response(JSON.stringify({ error: 'Insufficient permissions' }), { status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
     }
