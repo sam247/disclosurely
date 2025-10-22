@@ -31,19 +31,19 @@ interface ContentfulBlogPost {
   contentTypeId: '9oYANGj5uBRT6UHsl5LxO';
   sys: { id: string; createdAt: string; updatedAt: string };
   fields: {
-    title: { 'en-US': string };
-    slug: { 'en-US': string };
-    excerpt?: { 'en-US': string };
-    content: { 'en-US': any }; // RichText type
-    featuredImage?: { 'en-US': { sys: { id: string; linkType: 'Asset' } } };
-    publishDate: { 'en-US': string };
-    seoTitle?: { 'en-US': string };
-    seoDescription?: { 'en-US': string };
-    tags: { 'en-US': string[] };
-    author?: { 'en-US': { sys: { id: string; linkType: 'Entry' } } };
-    categories?: { 'en-US': Array<{ sys: { id: string; linkType: 'Entry' } }> };
-    readingTime?: { 'en-US': number };
-    status: { 'en-US': string };
+    title: string;
+    slug: string;
+    excerpt?: string;
+    content: any; // RichText type
+    featuredImage?: { sys: { id: string; linkType: 'Asset' } };
+    publishDate: string;
+    seoTitle?: string;
+    seoDescription?: string;
+    tags: string[];
+    author?: { sys: { id: string; linkType: 'Entry' } };
+    categories?: Array<{ sys: { id: string; linkType: 'Entry' } }>;
+    readingTime?: number;
+    status: string;
   };
 }
 
@@ -160,8 +160,8 @@ const Blog = () => {
       console.log('Contentful response:', response);
       
       const fetchedPosts: BlogPostDisplay[] = response.items.map(item => {
-        const authorEntry = item.fields.author?.['en-US'] as unknown as ContentfulAuthor;
-        const categoryEntries = item.fields.categories?.['en-US'] as unknown as ContentfulCategory[];
+        const authorEntry = item.fields.author as unknown as ContentfulAuthor;
+        const categoryEntries = item.fields.categories as unknown as ContentfulCategory[];
 
         console.log('Processing blog post:', {
           id: item.sys.id,
@@ -175,23 +175,23 @@ const Blog = () => {
 
         return {
           id: item.sys.id,
-          title: item.fields.title?.['en-US'],
-          slug: item.fields.slug?.['en-US'],
-          excerpt: item.fields.excerpt?.['en-US'],
-          content: item.fields.content?.['en-US'],
-          featuredImage: (item.fields.featuredImage?.['en-US'] as any)?.fields?.file?.['en-US']?.url,
-          publishDate: item.fields.publishDate?.['en-US'] || new Date().toISOString(),
-          seoTitle: item.fields.seoTitle?.['en-US'],
-          seoDescription: item.fields.seoDescription?.['en-US'],
-          tags: item.fields.tags?.['en-US'] || [],
-          authorName: authorEntry?.fields?.name?.['en-US'],
-          authorEmail: authorEntry?.fields?.email?.['en-US'],
+          title: item.fields.title,
+          slug: item.fields.slug,
+          excerpt: item.fields.excerpt,
+          content: item.fields.content,
+          featuredImage: (item.fields.featuredImage as any)?.fields?.file?.url,
+          publishDate: item.fields.publishDate || new Date().toISOString(),
+          seoTitle: item.fields.seoTitle,
+          seoDescription: item.fields.seoDescription,
+          tags: item.fields.tags || [],
+          authorName: authorEntry?.fields?.name,
+          authorEmail: authorEntry?.fields?.email,
           categories: categoryEntries ? categoryEntries.map(cat => ({
-            name: cat.fields.name?.['en-US'] || '',
-            slug: cat.fields.slug?.['en-US'] || '',
+            name: cat.fields.name || '',
+            slug: cat.fields.slug || '',
           })) : [],
-          readingTime: item.fields.readingTime?.['en-US'],
-          status: item.fields.status?.['en-US'],
+          readingTime: item.fields.readingTime,
+          status: item.fields.status,
         };
       });
       
@@ -218,7 +218,7 @@ const Blog = () => {
       
       // Filter by slug manually since Contentful API typing is strict
       const filtered = response.items.filter(item => 
-        item.fields.slug?.['en-US'] === postSlug
+        item.fields.slug === postSlug
       );
       
       if (filtered.length === 0) {
@@ -228,28 +228,28 @@ const Blog = () => {
 
       if (filtered.length > 0) {
         const item = filtered[0];
-        const authorEntry = item.fields.author?.['en-US'] as unknown as ContentfulAuthor;
-        const categoryEntries = item.fields.categories?.['en-US'] as unknown as ContentfulCategory[];
+        const authorEntry = item.fields.author as unknown as ContentfulAuthor;
+        const categoryEntries = item.fields.categories as unknown as ContentfulCategory[];
 
         setCurrentPost({
           id: item.sys.id,
-          title: item.fields.title?.['en-US'] || '',
-          slug: item.fields.slug?.['en-US'] || '',
-          excerpt: item.fields.excerpt?.['en-US'],
-          content: item.fields.content?.['en-US'],
-          featuredImage: (item.fields.featuredImage?.['en-US'] as any)?.fields?.file?.['en-US']?.url,
-          publishDate: item.fields.publishDate?.['en-US'] || new Date().toISOString(),
-          seoTitle: item.fields.seoTitle?.['en-US'],
-          seoDescription: item.fields.seoDescription?.['en-US'],
-          tags: item.fields.tags?.['en-US'] || [],
-          authorName: authorEntry?.fields?.name?.['en-US'],
-          authorEmail: authorEntry?.fields?.email?.['en-US'],
+          title: item.fields.title || '',
+          slug: item.fields.slug || '',
+          excerpt: item.fields.excerpt,
+          content: item.fields.content,
+          featuredImage: (item.fields.featuredImage as any)?.fields?.file?.url,
+          publishDate: item.fields.publishDate || new Date().toISOString(),
+          seoTitle: item.fields.seoTitle,
+          seoDescription: item.fields.seoDescription,
+          tags: item.fields.tags || [],
+          authorName: authorEntry?.fields?.name,
+          authorEmail: authorEntry?.fields?.email,
           categories: categoryEntries ? categoryEntries.map(cat => ({
-            name: cat.fields.name?.['en-US'] || '',
-            slug: cat.fields.slug?.['en-US'] || '',
+            name: cat.fields.name || '',
+            slug: cat.fields.slug || '',
           })) : [],
-          readingTime: item.fields.readingTime?.['en-US'],
-          status: item.fields.status?.['en-US'] || '',
+          readingTime: item.fields.readingTime,
+          status: item.fields.status || '',
         });
       } else {
         setCurrentPost(null);
