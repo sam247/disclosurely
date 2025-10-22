@@ -176,7 +176,7 @@ const AnonymousMessaging = () => {
                       <span className="text-sm font-medium text-gray-700">{m.sender_type === 'whistleblower' ? 'You' : 'Case Handler'}</span>
                       <span className="text-xs text-gray-500">{new Date(m.created_at).toLocaleString()}</span>
                     </div>
-                    <p className="text-sm text-gray-900">{m.encrypted_message}</p>
+                    <p className="text-sm text-gray-900">{m.decrypted_message || m.encrypted_message}</p>
                   </div>
                 ))
               )}

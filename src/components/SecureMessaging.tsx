@@ -298,7 +298,7 @@ const SecureMessaging = () => {
                               {message.sender_type === 'whistleblower' ? 'You' : 'Organization'}
                             </span>
                           </div>
-                          <p className="text-sm">{message.encrypted_message}</p>
+                          <p className="text-sm">{message.decrypted_message || message.encrypted_message}</p>
                           <p className="text-xs opacity-75 mt-1">
                             {formatDate(message.created_at)}
                           </p>

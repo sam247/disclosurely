@@ -150,7 +150,8 @@ serve(async (req) => {
             
             decryptedMessages.push({
               ...message,
-              encrypted_message: decryptedMessage
+              decrypted_message: decryptedMessage,
+              encrypted_message: message.encrypted_message // Keep original for reference
             });
           } catch (error) {
             console.error('Failed to decrypt message:', error);

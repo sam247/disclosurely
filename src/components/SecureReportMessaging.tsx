@@ -424,7 +424,7 @@ const SecureReportMessaging = () => {
                           {new Date(message.created_at).toLocaleString()}
                         </span>
                       </div>
-                      <p className="text-sm text-gray-900">{message.encrypted_message}</p>
+                      <p className="text-sm text-gray-900">{message.decrypted_message || message.encrypted_message}</p>
                     </div>
                   ))}
                   <div ref={messagesEndRef} />

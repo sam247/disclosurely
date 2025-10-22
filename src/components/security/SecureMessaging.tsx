@@ -315,7 +315,7 @@ const SecureMessaging = ({ report, onClose }: SecureMessagingProps) => {
                   <div 
                     className="text-sm whitespace-pre-wrap"
                     dangerouslySetInnerHTML={{ 
-                      __html: sanitizeHtml(translatedMessages[message.id] || message.encrypted_message)
+                      __html: sanitizeHtml(translatedMessages[message.id] || message.decrypted_message || message.encrypted_message)
                     }}
                   />
                 </div>
