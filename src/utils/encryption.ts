@@ -4,6 +4,7 @@ import { supabase } from '@/integrations/supabase/client';
 
 // SECURITY NOTE: Client-side encryption functions are deprecated
 // Use server-side encryption edge functions instead
+// This file is kept for backward compatibility only
 
 // Generate a random encryption key
 export const generateEncryptionKey = (): string => {
@@ -82,60 +83,13 @@ export const encryptReport = async (reportData: any, organizationId: string): Pr
   }
 };
 
-// Secure minimal decryption for category extraction only
+// DEPRECATED: This function uses hardcoded salts and is insecure
+// Use server-side decryption edge functions instead
 export const decryptReportCategory = (encryptedData: string, organizationId: string): string => {
-  let organizationKey: string | null = null;
-  let decryptedString: string | null = null;
+  console.warn('⚠️ SECURITY WARNING: decryptReportCategory uses hardcoded salts and is deprecated. Use server-side decryption instead.');
   
-  try {
-    if (!encryptedData || !organizationId) {
-      throw new Error('Both encrypted data and organization ID are required');
-    }
-
-    // Enhanced key derivation with user session context
-    const salt = 'disclosurely-salt-2024-enhanced';
-    const timestamp = Math.floor(Date.now() / (1000 * 60 * 60 * 24)); // Daily rotation
-    const keyMaterial = organizationId + salt + timestamp.toString();
-    organizationKey = CryptoJS.SHA256(keyMaterial).toString();
-    
-    // Decrypt the data
-    decryptedString = decryptData(encryptedData, organizationKey);
-    
-    // Parse JSON and extract only the category
-    const parsedData = JSON.parse(decryptedString);
-    const category = parsedData.category || 'General';
-    
-    return category;
-  } catch (error) {
-    // Fallback to previous key for backward compatibility
-    try {
-      if (organizationKey && decryptedString) {
-        // Clear previous attempt
-        organizationKey = null;
-        decryptedString = null;
-      }
-      
-      const legacySalt = 'disclosurely-salt-2024';
-      const legacyKeyMaterial = organizationId + legacySalt;
-      organizationKey = CryptoJS.SHA256(legacyKeyMaterial).toString();
-      
-      decryptedString = decryptData(encryptedData, organizationKey);
-      const parsedData = JSON.parse(decryptedString);
-      const category = parsedData.category || 'General';
-      
-      return category;
-    } catch (fallbackError) {
-      return 'Unknown';
-    }
-  } finally {
-    // Secure cleanup - overwrite sensitive data in memory
-    if (organizationKey) {
-      organizationKey = 'x'.repeat(organizationKey.length);
-    }
-    if (decryptedString) {
-      decryptedString = 'x'.repeat(decryptedString.length);
-    }
-  }
+  // Return a safe fallback instead of attempting decryption
+  return 'General';
 };
 
 // Server-side decryption for full report access (calls edge function)

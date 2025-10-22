@@ -7,7 +7,6 @@ import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
-import { encryptData, decryptData } from '@/utils/encryption';
 import { MessageSquare, Send, Lock, Clock, User, Shield } from 'lucide-react';
 
 interface Message {
@@ -30,7 +29,6 @@ interface Report {
 const SecureMessaging = () => {
   const { toast } = useToast();
   const [trackingId, setTrackingId] = useState('');
-  const [encryptionKey, setEncryptionKey] = useState('');
   const [report, setReport] = useState<Report | null>(null);
   const [messages, setMessages] = useState<Message[]>([]);
   const [newMessage, setNewMessage] = useState('');
@@ -38,10 +36,10 @@ const SecureMessaging = () => {
   const [isSending, setIsSending] = useState(false);
 
   const verifyAndLoadReport = async () => {
-    if (!trackingId.trim() || !encryptionKey.trim()) {
+    if (!trackingId.trim()) {
       toast({
         title: "Missing Information",
-        description: "Please provide both tracking ID and encryption key",
+        description: "Please provide tracking ID",
         variant: "destructive",
       });
       return;
@@ -49,14 +47,25 @@ const SecureMessaging = () => {
 
     setIsLoading(true);
     try {
-      // First, find the report by tracking ID
-      const { data: reportData, error: reportError } = await supabase
-        .from('reports')
-        .select('*')
-        .eq('tracking_id', trackingId.toUpperCase())
-        .single();
+      // Use the anonymous-report-messaging function to load report and messages
+      const { data, error } = await supabase.functions.invoke('anonymous-report-messaging', {
+        body: {
+          action: 'load',
+          trackingId: trackingId.toUpperCase()
+        }
+      });
 
-      if (reportError || !reportData) {
+      if (error) {
+        console.error('Error loading report:', error);
+        toast({
+          title: "Error",
+          description: error.message || "Failed to load report",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      if (!data || !data.report) {
         toast({
           title: "Report Not Found",
           description: "No report found with this tracking ID",
@@ -65,39 +74,18 @@ const SecureMessaging = () => {
         return;
       }
 
-      // Try to decrypt the report content to verify the key
-      try {
-        const decryptedContent = decryptData(reportData.encrypted_content, encryptionKey);
-        const contentData = JSON.parse(decryptedContent);
-        
-        setReport({
-          id: reportData.id,
-          tracking_id: reportData.tracking_id,
-          title: reportData.title,
-          status: reportData.status,
-          created_at: reportData.created_at
-        });
-
-        // Load messages for this report
-        await loadMessages(reportData.id);
-
-        toast({
-          title: "Access Granted",
-          description: "Successfully accessed your report",
-        });
-      } catch (decryptError) {
-        toast({
-          title: "Invalid Key",
-          description: "The encryption key provided is incorrect",
-          variant: "destructive",
-        });
-        return;
-      }
+      setReport(data.report);
+      setMessages(data.messages || []);
+      
+      toast({
+        title: "Report Loaded",
+        description: "Report and messages loaded successfully",
+      });
     } catch (error) {
-      console.error('Error verifying report:', error);
+      console.error('Error loading report:', error);
       toast({
         title: "Error",
-        description: "Failed to verify report access",
+        description: "Failed to load report",
         variant: "destructive",
       });
     } finally {
@@ -105,54 +93,43 @@ const SecureMessaging = () => {
     }
   };
 
-  const loadMessages = async (reportId: string) => {
-    try {
-      const { data, error } = await supabase
-        .from('report_messages')
-        .select('*')
-        .eq('report_id', reportId)
-        .order('created_at', { ascending: true });
-
-      if (error) throw error;
-      
-      // Type assertion to ensure sender_type is properly typed
-      const typedMessages = (data || []).map(msg => ({
-        ...msg,
-        sender_type: msg.sender_type as 'whistleblower' | 'organization'
-      }));
-      
-      setMessages(typedMessages);
-    } catch (error) {
-      console.error('Error loading messages:', error);
-      toast({
-        title: "Error",
-        description: "Failed to load messages",
-        variant: "destructive",
-      });
-    }
-  };
-
   const sendMessage = async () => {
-    if (!newMessage.trim() || !report || !encryptionKey) return;
+    if (!newMessage.trim() || !report) return;
 
     setIsSending(true);
     try {
-      // Encrypt the message
-      const encryptedMessage = encryptData(newMessage, encryptionKey);
+      // Use the anonymous-report-messaging function to send message
+      const { data, error } = await supabase.functions.invoke('anonymous-report-messaging', {
+        body: {
+          action: 'send',
+          trackingId: report.tracking_id,
+          message: newMessage.trim()
+        }
+      });
 
-      const { error } = await supabase
-        .from('report_messages')
-        .insert({
-          report_id: report.id,
-          encrypted_message: encryptedMessage,
-          sender_type: 'whistleblower',
-          sender_id: null
+      if (error) {
+        console.error('Error sending message:', error);
+        toast({
+          title: "Error",
+          description: error.message || "Failed to send message",
+          variant: "destructive",
         });
-
-      if (error) throw error;
+        return;
+      }
 
       setNewMessage('');
-      await loadMessages(report.id);
+      
+      // Reload messages to get the updated list
+      const { data: reloadData, error: reloadError } = await supabase.functions.invoke('anonymous-report-messaging', {
+        body: {
+          action: 'load',
+          trackingId: report.tracking_id
+        }
+      });
+
+      if (!reloadError && reloadData?.messages) {
+        setMessages(reloadData.messages);
+      }
       
       toast({
         title: "Message Sent",
@@ -167,14 +144,6 @@ const SecureMessaging = () => {
       });
     } finally {
       setIsSending(false);
-    }
-  };
-
-  const decryptMessage = (encryptedMessage: string): string => {
-    try {
-      return decryptData(encryptedMessage, encryptionKey);
-    } catch (error) {
-      return '[Message could not be decrypted]';
     }
   };
 
@@ -219,25 +188,11 @@ const SecureMessaging = () => {
                     className="mt-1"
                   />
                 </div>
-                <div>
-                  <Label htmlFor="encryption-key">Encryption Key</Label>
-                  <Input
-                    id="encryption-key"
-                    type="password"
-                    placeholder="Enter your encryption key"
-                    value={encryptionKey}
-                    onChange={(e) => setEncryptionKey(e.target.value)}
-                    className="mt-1"
-                  />
-                  <p className="text-sm text-gray-600 mt-1">
-                    This is the key you received when you submitted your report
-                  </p>
-                </div>
               </div>
 
               <Button 
                 onClick={verifyAndLoadReport}
-                disabled={isLoading || !trackingId.trim() || !encryptionKey.trim()}
+                disabled={isLoading || !trackingId.trim()}
                 className="w-full"
               >
                 {isLoading ? (
@@ -343,7 +298,7 @@ const SecureMessaging = () => {
                               {message.sender_type === 'whistleblower' ? 'You' : 'Organization'}
                             </span>
                           </div>
-                          <p className="text-sm">{decryptMessage(message.encrypted_message)}</p>
+                          <p className="text-sm">{message.encrypted_message}</p>
                           <p className="text-xs opacity-75 mt-1">
                             {formatDate(message.created_at)}
                           </p>

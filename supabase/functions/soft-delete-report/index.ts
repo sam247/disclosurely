@@ -49,10 +49,15 @@ serve(async (req) => {
       return new Response(JSON.stringify({ error: 'Report not found' }), { status: 404, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
     }
 
-    // Load user profile and verify permissions
+    // Load user profile and verify permissions using user_roles table
     const { data: profile, error: profileError } = await supabaseAdmin
       .from('profiles')
-      .select('id, organization_id, role, is_active')
+      .select(`
+        id, 
+        organization_id, 
+        is_active,
+        user_roles!inner(role)
+      `)
       .eq('id', userId)
       .single();
 
@@ -61,7 +66,8 @@ serve(async (req) => {
     }
 
     const allowedRoles = ['admin', 'case_handler', 'org_admin'];
-    if (!profile.is_active || profile.organization_id !== report.organization_id || !allowedRoles.includes(profile.role)) {
+    const userRole = profile.user_roles?.[0]?.role;
+    if (!profile.is_active || profile.organization_id !== report.organization_id || !userRole || !allowedRoles.includes(userRole)) {
       return new Response(JSON.stringify({ error: 'Insufficient permissions' }), { status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
     }
 

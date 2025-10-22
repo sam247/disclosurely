@@ -58,13 +58,18 @@ serve(async (req) => {
       throw new Error('Report not found');
     }
 
-    // Get organization users who should be notified
+    // Get organization users who should be notified using user_roles table
     const { data: users, error: usersError } = await supabase
       .from('profiles')
-      .select('email, first_name, last_name')
+      .select(`
+        email, 
+        first_name, 
+        last_name,
+        user_roles!inner(role)
+      `)
       .eq('organization_id', report.organization_id)
       .eq('is_active', true)
-      .in('role', ['admin', 'org_admin', 'case_handler']);
+      .in('user_roles.role', ['admin', 'org_admin', 'case_handler']);
 
     if (usersError) {
       console.error('Error fetching users:', usersError);

@@ -56,13 +56,19 @@ if (orgError) {
   console.error('Failed to fetch organization for report:', orgError)
 }
 
-    // Get users to notify
+    // Get users to notify using user_roles table
     const { data: users, error: usersError } = await supabaseAdmin
       .from('profiles')
-      .select('id, email, first_name, last_name')
+      .select(`
+        id, 
+        email, 
+        first_name, 
+        last_name,
+        user_roles!inner(role)
+      `)
       .eq('organization_id', report.organization_id)
       .eq('is_active', true)
-      .in('role', ['admin', 'case_handler', 'org_admin'])
+      .in('user_roles.role', ['admin', 'case_handler', 'org_admin'])
 
     if (usersError) {
       console.error('Failed to fetch users:', usersError)

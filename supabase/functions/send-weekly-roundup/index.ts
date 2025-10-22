@@ -51,13 +51,18 @@ serve(async (req) => {
       try {
         console.log(`Processing weekly roundup for organization: ${org.name}`);
 
-        // Get organization users
+        // Get organization users using user_roles table
         const { data: users, error: usersError } = await supabase
           .from('profiles')
-          .select('email, first_name, last_name')
+          .select(`
+            email, 
+            first_name, 
+            last_name,
+            user_roles!inner(role)
+          `)
           .eq('organization_id', org.id)
           .eq('is_active', true)
-          .in('role', ['admin', 'org_admin', 'case_handler']);
+          .in('user_roles.role', ['admin', 'org_admin', 'case_handler']);
 
         if (usersError || !users?.length) {
           console.log(`No users found for organization ${org.name}`);

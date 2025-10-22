@@ -72,13 +72,18 @@ serve(async (req) => {
       try {
         console.log(`Processing notification ${notification.id} for report ${notification.report_id}`);
 
-        // Get users to notify for this organization
+        // Get users to notify for this organization using user_roles table
         const { data: users, error: usersError } = await supabase
           .from('profiles')
-          .select('id, email, display_name, role')
+          .select(`
+            id, 
+            email, 
+            display_name,
+            user_roles!inner(role)
+          `)
           .eq('organization_id', notification.organization_id)
           .eq('is_active', true)
-          .in('role', ['admin', 'case_handler', 'org_admin']);
+          .in('user_roles.role', ['admin', 'case_handler', 'org_admin']);
 
         if (usersError) {
           console.error('Error fetching users:', usersError);
