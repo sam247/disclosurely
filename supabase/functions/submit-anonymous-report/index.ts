@@ -101,6 +101,14 @@ serve(async (req) => {
     
     // Create the report
     console.log('📝 Creating report in database...')
+    
+    // Ensure priority is an integer (convert if string)
+    const priorityValue = typeof reportData.priority === 'string' 
+      ? parseInt(reportData.priority, 10) 
+      : reportData.priority;
+    
+    console.log('Priority value:', priorityValue, 'Type:', typeof priorityValue);
+    
     const { data: report, error: reportError } = await supabase
       .from('reports')
       .insert({
@@ -111,7 +119,7 @@ serve(async (req) => {
         report_type: reportData.report_type,
         submitted_by_email: reportData.submitted_by_email,
         status: reportData.status,
-        priority: reportData.priority,
+        priority: priorityValue,
         tags: reportData.tags,
         organization_id: linkData.organization_id
       })

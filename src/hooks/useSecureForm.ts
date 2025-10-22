@@ -26,6 +26,7 @@ export const useSecureForm = (options: UseSecureFormOptions = {}) => {
       if (typeof value === 'string') {
         sanitized[key] = sanitizeInput(value);
       } else {
+        // Preserve non-string values (numbers, booleans, objects, etc.)
         sanitized[key] = value;
       }
     }
