@@ -70,6 +70,8 @@ const DynamicHelmet: React.FC<DynamicHelmetProps> = ({
   useEffect(() => {
     const fetchSEOData = async () => {
       try {
+        console.log('🔍 DynamicHelmet: Fetching SEO data for page:', pageIdentifier);
+        
         // Fetch SEO data from Contentful
         const response = await contentfulClient.getEntries({
           content_type: 'seoPage',
@@ -78,9 +80,13 @@ const DynamicHelmet: React.FC<DynamicHelmetProps> = ({
           limit: 1,
         });
 
+        console.log('📊 DynamicHelmet: Contentful response:', response);
+
         if (response.items.length > 0) {
           const item = response.items[0];
           const fields = item.fields as any;
+          
+          console.log('✅ DynamicHelmet: Found SEO data:', fields);
           
           setSeoData({
             meta_title: fields.pageTitle,
@@ -91,9 +97,11 @@ const DynamicHelmet: React.FC<DynamicHelmetProps> = ({
             canonical_url: fields.canonicalUrl,
             robots_directive: fields.robotsMeta,
           });
+        } else {
+          console.log('⚠️ DynamicHelmet: No SEO data found for page:', pageIdentifier);
         }
       } catch (error) {
-        console.error('Error fetching SEO data from Contentful:', error);
+        console.error('❌ DynamicHelmet: Error fetching SEO data from Contentful:', error);
       } finally {
         setLoading(false);
       }
@@ -136,6 +144,14 @@ const DynamicHelmet: React.FC<DynamicHelmetProps> = ({
   const finalKeywords = seoData?.meta_keywords || [];
 
   const finalStructuredData = structuredData || seoData?.structured_data || {};
+
+  // Debug logging
+  console.log('🎯 DynamicHelmet: Final title determination:', {
+    seoData: seoData?.meta_title,
+    fallbackTitle,
+    finalTitle,
+    loading
+  });
 
   return (
     <Helmet>
