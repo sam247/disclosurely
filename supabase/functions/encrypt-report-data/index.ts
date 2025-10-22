@@ -1,3 +1,5 @@
+console.log('encrypt-report-data module import')
+
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
 import "https://deno.land/x/xhr@0.1.0/mod.ts"
 
@@ -7,14 +9,16 @@ const corsHeaders = {
 }
 
 serve(async (req) => {
-  console.log('🔍 ENCRYPT FUNCTION STARTED')
+  console.log('encrypt-report-data request received')
   
-  if (req.method === 'OPTIONS') {
-    console.log('OPTIONS request')
-    return new Response('ok', { headers: corsHeaders })
-  }
-
   try {
+    console.log('🔍 ENCRYPT FUNCTION STARTED')
+    
+    if (req.method === 'OPTIONS') {
+      console.log('OPTIONS request')
+      return new Response('ok', { headers: corsHeaders })
+    }
+
     console.log('Processing POST request')
     
     const body = await req.json()
