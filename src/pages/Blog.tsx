@@ -152,11 +152,6 @@ const Blog = () => {
         include: 2, // Include linked author and categories
       };
 
-      if (selectedCategorySlug && selectedCategorySlug !== 'latest') {
-        query['fields.categories.sys.contentType.sys.id'] = '1Dn01YZmIbymrxi194Q2xV'; // Category content type ID
-        query['fields.categories.fields.slug'] = selectedCategorySlug;
-      }
-
       console.log('Contentful query:', query);
       
       const response = await client.getEntries<ContentfulBlogPost>(query);
@@ -198,8 +193,16 @@ const Blog = () => {
         };
       });
       
-      console.log('Transformed posts:', fetchedPosts);
-      setPosts(fetchedPosts);
+      // Filter by category client-side if needed
+      let filteredPosts = fetchedPosts;
+      if (selectedCategorySlug && selectedCategorySlug !== 'latest') {
+        filteredPosts = fetchedPosts.filter(post => 
+          post.categories?.some(cat => cat.slug === selectedCategorySlug)
+        );
+      }
+      
+      console.log('Transformed posts:', filteredPosts);
+      setPosts(filteredPosts);
     } catch (error) {
       console.error('Error fetching blog posts from Contentful:', error);
       console.error('Error details:', {
@@ -266,8 +269,10 @@ const Blog = () => {
   const renderRichText = (richTextDocument: any) => {
     if (!richTextDocument) return null;
     
+    console.log('Rendering Rich Text document:', richTextDocument);
+    
     try {
-      return documentToReactComponents(richTextDocument, {
+      const rendered = documentToReactComponents(richTextDocument, {
         renderNode: {
           'paragraph': (node, children) => <p className="mb-4">{children}</p>,
           'heading-1': (node, children) => <h1 className="text-3xl font-bold mb-6">{children}</h1>,
@@ -288,6 +293,9 @@ const Blog = () => {
           'underline': (text) => <u>{text}</u>,
         },
       });
+      
+      console.log('Rendered Rich Text:', rendered);
+      return rendered;
     } catch (error) {
       console.error('Error rendering rich text:', error);
       // Fallback to plain text extraction
