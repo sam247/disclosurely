@@ -52,8 +52,8 @@ interface ContentfulAuthor {
   contentTypeId: string;
   sys: { id: string };
   fields: {
-    name: { 'en-US': string };
-    email: { 'en-US': string };
+    name: string;
+    email: string;
   };
 }
 
@@ -61,8 +61,8 @@ interface ContentfulCategory {
   contentTypeId: '1Dn01YZmIbymrxi194Q2xV';
   sys: { id: string };
   fields: {
-    name: { 'en-US': string };
-    slug: { 'en-US': string };
+    name: string;
+    slug: string;
   };
 }
 
@@ -399,7 +399,7 @@ const Blog = () => {
 
             {/* Post content */}
             <div className="prose prose-lg max-w-none dark:prose-invert">
-              <div dangerouslySetInnerHTML={{ __html: renderRichText(currentPost.content) }} />
+              {renderRichText(currentPost.content)}
             </div>
 
             {/* Tags */}
@@ -455,14 +455,14 @@ const Blog = () => {
                   {categories.map((category) => (
                     <Link
                       key={category.sys.id}
-                      to={`/blog?category=${category.fields.slug['en-US']}`}
+                      to={`/blog?category=${category.fields.slug}`}
                       className={`block px-3 py-2 text-sm rounded-md transition-colors ${
-                        selectedCategorySlug === category.fields.slug['en-US']
+                        selectedCategorySlug === category.fields.slug
                           ? 'bg-muted font-medium'
                           : 'text-muted-foreground hover:bg-muted/50'
                       }`}
                     >
-                      {category.fields.name['en-US']}
+                      {category.fields.name}
                     </Link>
                   ))}
                 </nav>
