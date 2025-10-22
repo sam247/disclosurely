@@ -76,26 +76,58 @@ serve(async (req) => {
     // Server-side decryption using CryptoJS
     const CryptoJS = await import('https://esm.sh/crypto-js@4.2.0')
     
-    // Use server-side salt (protected from client access)
-    const ENCRYPTION_SALT = Deno.env.get('ENCRYPTION_SALT') || 'disclosurely-server-salt-2024-secure'
+    // Try multiple salt combinations for backward compatibility
+    const saltOptions = [
+      // New server-side salt
+      Deno.env.get('ENCRYPTION_SALT') || 'disclosurely-server-salt-2024-secure',
+      // Legacy salts from original client-side encryption
+      'disclosurely-salt-2024-enhanced',
+      'disclosurely-salt-2024'
+    ]
     
-    // Recreate the same key used for encryption
-    const keyMaterial = organizationId + ENCRYPTION_SALT
-    const organizationKey = CryptoJS.SHA256(keyMaterial).toString()
+    let decryptedData = null
+    let decryptionError = null
     
-    // Decrypt using AES
-    const decrypted = CryptoJS.AES.decrypt(encryptedData, organizationKey, {
-      mode: CryptoJS.mode.CBC,
-      padding: CryptoJS.pad.Pkcs7
-    })
-    
-    const decryptedString = decrypted.toString(CryptoJS.enc.Utf8)
-    
-    if (!decryptedString || decryptedString.length === 0) {
-      throw new Error('Decryption resulted in empty string - invalid key or corrupted data')
+    // Try each salt option
+    for (const salt of saltOptions) {
+      try {
+        let keyMaterial
+        let organizationKey
+        
+        if (salt === 'disclosurely-salt-2024-enhanced') {
+          // Enhanced salt with daily timestamp rotation (original implementation)
+          const timestamp = Math.floor(Date.now() / (1000 * 60 * 60 * 24))
+          keyMaterial = organizationId + salt + timestamp.toString()
+        } else {
+          // Standard salt
+          keyMaterial = organizationId + salt
+        }
+        
+        organizationKey = CryptoJS.SHA256(keyMaterial).toString()
+        
+        // Decrypt using AES
+        const decrypted = CryptoJS.AES.decrypt(encryptedData, organizationKey, {
+          mode: CryptoJS.mode.CBC,
+          padding: CryptoJS.pad.Pkcs7
+        })
+        
+        const decryptedString = decrypted.toString(CryptoJS.enc.Utf8)
+        
+        if (decryptedString && decryptedString.length > 0) {
+          decryptedData = JSON.parse(decryptedString)
+          console.log('Successfully decrypted using salt:', salt.substring(0, 20) + '...')
+          break
+        }
+      } catch (error) {
+        decryptionError = error
+        console.log('Failed to decrypt with salt:', salt.substring(0, 20) + '...')
+        continue
+      }
     }
     
-    const decryptedData = JSON.parse(decryptedString)
+    if (!decryptedData) {
+      throw new Error('Decryption failed with all salt options - data may be corrupted or encrypted with unknown key')
+    }
 
     console.log('Successfully decrypted report data for user:', user.id.substring(0, 8))
 
