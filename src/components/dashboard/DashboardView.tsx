@@ -9,7 +9,7 @@ import { useCustomDomain } from '@/hooks/useCustomDomain';
 import { useOrganization } from '@/hooks/useOrganization';
 import { useToast } from '@/hooks/use-toast';
 import { useTranslation } from 'react-i18next';
-import { logCaseEvent } from '@/utils/auditLogger';
+import { log } from '@/utils/logger';
 import { FileText, Eye, Archive, Trash2, RotateCcw, MoreVertical, XCircle, ChevronUp, ChevronDown, CheckCircle, Search } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import ReportMessaging from '@/components/ReportMessaging';
@@ -1024,8 +1024,24 @@ Additional Details: ${decryptedContent.additionalDetails || 'None provided'}
                                   className="text-destructive"
                                   onClick={async () => {
                                     try {
+                                      log.info('SYSTEM', 'Starting report deletion process', { 
+                                        reportId: report.id, 
+                                        trackingId: report.tracking_id,
+                                        userId: user?.id 
+                                      });
+                                      
                                       // Use edge function for soft delete
                                       const { data: { session } } = await supabase.auth.getSession();
+                                      
+                                      if (!session?.access_token) {
+                                        log.error('SYSTEM', 'No valid session token for deletion', new Error('Missing session token'), { reportId: report.id });
+                                        throw new Error('No valid session token');
+                                      }
+                                      
+                                      log.info('SYSTEM', 'Calling soft-delete-report Edge Function', { 
+                                        reportId: report.id,
+                                        hasToken: !!session?.access_token 
+                                      });
                                       
                                       const response = await fetch(
                                         `https://cxmuzperkittvibslnff.supabase.co/functions/v1/soft-delete-report`,
@@ -1039,14 +1055,31 @@ Additional Details: ${decryptedContent.additionalDetails || 'None provided'}
                                         }
                                       );
 
+                                      log.info('SYSTEM', 'Soft-delete-report response received', { 
+                                        reportId: report.id,
+                                        status: response.status,
+                                        ok: response.ok 
+                                      });
+
                                       if (!response.ok) {
                                         const errorData = await response.json();
+                                        log.error('SYSTEM', 'Soft-delete-report failed', new Error(errorData.error || 'Failed to delete report'), { 
+                                          reportId: report.id,
+                                          status: response.status,
+                                          errorData 
+                                        });
                                         throw new Error(errorData.error || 'Failed to delete report');
                                       }
                                       
+                                      log.info('SYSTEM', 'Report deleted successfully', { reportId: report.id });
                                       toast({ title: 'Report deleted successfully' });
                                       fetchData();
                                     } catch (error: any) {
+                                      log.error('SYSTEM', 'Report deletion failed', error, { 
+                                        reportId: report.id,
+                                        trackingId: report.tracking_id,
+                                        userId: user?.id 
+                                      });
                                       console.error('Error deleting report:', error);
                                       toast({ 
                                         title: 'Error deleting report',

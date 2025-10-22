@@ -6,9 +6,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { MessageSquare, Send, Lock, Search } from 'lucide-react';
-import { useToast } from '@/hooks/use-toast';
-import { supabase } from '@/integrations/supabase/client';
-import { auditLogger } from '@/utils/auditLogger';
+import { log } from '@/utils/logger';
 
 interface Message {
   id: string;
@@ -167,13 +165,19 @@ const WhistleblowerMessaging = () => {
     try {
       console.log('Fetching messages for report:', report.id);
       
-      const { data, error } = await supabase
-        .from('report_messages')
-        .select('*')
-        .eq('report_id', report.id)
-        .order('created_at', { ascending: true });
+      // Use Edge Function for encrypted message loading
+      const { data: result, error } = await supabase.functions.invoke('anonymous-report-messaging', {
+        body: {
+          action: 'load',
+          trackingId: report.tracking_id
+        }
+      });
 
       if (error) {
+        log.error('MESSAGING', 'Failed to load messages via Edge Function', error, { 
+          reportId: report.id, 
+          trackingId: report.tracking_id 
+        });
         console.error('Error fetching messages:', error);
         toast({
           title: "Error",
@@ -183,8 +187,13 @@ const WhistleblowerMessaging = () => {
         return;
       }
 
-      console.log('Messages loaded:', data);
-      setMessages(data || []);
+      log.info('MESSAGING', 'Messages loaded successfully via Edge Function', { 
+        reportId: report.id, 
+        trackingId: report.tracking_id,
+        messageCount: result?.messages?.length || 0 
+      });
+      console.log('Messages loaded:', result?.messages);
+      setMessages(result?.messages || []);
     } catch (error) {
       console.error('Error fetching messages:', error);
     } finally {
@@ -216,20 +225,30 @@ const WhistleblowerMessaging = () => {
     try {
       console.log('Sending message for report:', report.id);
       
-      const { error } = await supabase
-        .from('report_messages')
-        .insert({
-          report_id: report.id,
-          sender_type: 'whistleblower',
-          encrypted_message: newMessage.trim(),
-          sender_id: null
-        });
+      // Use Edge Function for encrypted message sending
+      const { data, error } = await supabase.functions.invoke('anonymous-report-messaging', {
+        body: {
+          action: 'send',
+          trackingId: report.tracking_id,
+          message: newMessage.trim()
+        }
+      });
 
       if (error) {
+        log.error('MESSAGING', 'Failed to send message via Edge Function', error, { 
+          reportId: report.id, 
+          trackingId: report.tracking_id,
+          messageLength: newMessage.trim().length 
+        });
         console.error('Error sending message:', error);
         throw error;
       }
 
+      log.info('MESSAGING', 'Message sent successfully via Edge Function', { 
+        reportId: report.id, 
+        trackingId: report.tracking_id,
+        messageLength: newMessage.trim().length 
+      });
       console.log('Message sent successfully');
       
       // Log message to audit trail
