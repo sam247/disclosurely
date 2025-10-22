@@ -172,18 +172,19 @@ const SecureReportMessaging = () => {
         });
       }
 
-      // Fetch messages
-      const { data: messagesData, error: messagesError } = await supabase
-        .from('report_messages')
-        .select('*')
-        .eq('report_id', reportData.id)
-        .order('created_at', { ascending: true });
+      // Fetch messages using Edge Function for decryption
+      const { data: messagesResult, error: messagesError } = await supabase.functions.invoke('anonymous-report-messaging', {
+        body: {
+          action: 'load',
+          trackingId: trackingId
+        }
+      });
 
       if (messagesError) {
         console.error('Messages fetch error:', messagesError);
       } else {
-        console.log('Messages fetched:', messagesData?.length || 0);
-        setMessages(messagesData || []);
+        console.log('Messages fetched:', messagesResult?.messages?.length || 0);
+        setMessages(messagesResult?.messages || []);
       }
     } catch (error) {
       console.error('Error fetching report and messages:', error);
@@ -249,15 +250,14 @@ const SecureReportMessaging = () => {
     setSending(true);
 
     try {
-      const { data, error } = await supabase
-        .from('report_messages')
-        .insert({
-          report_id: report.id,
-          sender_type: 'whistleblower',
-          encrypted_message: messageText,
-        })
-        .select()
-        .single();
+      // Use Edge Function for encrypted message sending
+      const { data, error } = await supabase.functions.invoke('anonymous-report-messaging', {
+        body: {
+          action: 'send',
+          trackingId: trackingId,
+          message: messageText
+        }
+      });
 
       if (error) {
         console.error('Message send error:', error);
@@ -269,7 +269,7 @@ const SecureReportMessaging = () => {
 
       // Replace optimistic message with real one
       setMessages(prev => 
-        prev.map(msg => (msg.id === tempId ? data : msg))
+        prev.map(msg => (msg.id === tempId ? data.message : msg))
       );
 
       // Log message to audit trail
