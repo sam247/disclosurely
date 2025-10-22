@@ -44,14 +44,70 @@ serve(async (req) => {
       )
     }
     
-    console.log('🎉 SIMPLE SUCCESS TEST - Function is working!')
+    // Use Deno's built-in Web Crypto API for encryption
+    console.log('🔐 Using Deno Web Crypto API for encryption...')
+    
+    // Use server-side salt (protected from client access)
+    const ENCRYPTION_SALT = Deno.env.get('ENCRYPTION_SALT') || 'disclosurely-server-salt-2024-secure'
+    console.log('🔑 Using encryption salt:', ENCRYPTION_SALT.substring(0, 20) + '...')
+    
+    // Create organization-specific key using Web Crypto API
+    const keyMaterial = organizationId + ENCRYPTION_SALT
+    console.log('🔐 Key material created, length:', keyMaterial.length)
+    
+    // Hash the key material using Web Crypto API
+    const keyBuffer = new TextEncoder().encode(keyMaterial)
+    const hashBuffer = await crypto.subtle.digest('SHA-256', keyBuffer)
+    const organizationKey = Array.from(new Uint8Array(hashBuffer))
+      .map(b => b.toString(16).padStart(2, '0'))
+      .join('')
+    console.log('✅ Organization key generated')
+    
+    // Stringify the data
+    const dataString = JSON.stringify(reportData)
+    console.log('📊 Data stringified, length:', dataString.length)
+    
+    // Encrypt using Web Crypto API
+    console.log('🔐 Starting AES-GCM encryption...')
+    
+    // Generate a random IV
+    const iv = crypto.getRandomValues(new Uint8Array(12))
+    
+    // Import the key for encryption
+    const keyBytes = new Uint8Array(organizationKey.match(/.{1,2}/g)!.map(byte => parseInt(byte, 16)))
+    const cryptoKey = await crypto.subtle.importKey(
+      'raw',
+      keyBytes,
+      { name: 'AES-GCM' },
+      false,
+      ['encrypt']
+    )
+    
+    // Encrypt the data
+    const dataBuffer = new TextEncoder().encode(dataString)
+    const encryptedBuffer = await crypto.subtle.encrypt(
+      { name: 'AES-GCM', iv: iv },
+      cryptoKey,
+      dataBuffer
+    )
+    
+    // Combine IV and encrypted data
+    const combined = new Uint8Array(iv.length + encryptedBuffer.byteLength)
+    combined.set(iv)
+    combined.set(new Uint8Array(encryptedBuffer), iv.length)
+    
+    // Convert to base64 for transport
+    const encryptedData = btoa(String.fromCharCode(...combined))
+    const keyHash = organizationKey
+    console.log('✅ AES-GCM encryption completed')
+    console.log('🎉 Encryption process completed successfully')
     
     return new Response(
       JSON.stringify({ 
         success: true,
-        encryptedData: 'test-encrypted-data',
-        keyHash: 'test-key-hash',
-        message: 'Function is working - ready for proper encryption'
+        encryptedData,
+        keyHash,
+        message: 'Report data encrypted successfully'
       }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     )

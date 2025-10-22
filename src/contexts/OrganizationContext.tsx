@@ -95,12 +95,37 @@ export const OrganizationProvider = ({ children }: OrganizationProviderProps) =>
     try {
       console.log('Looking up report with tracking ID:', trackingId);
       
-      // Use the secure function to get organization data by tracking ID
-      const { data: orgData, error: orgError } = await supabase
-        .rpc('get_organization_by_tracking_id', { p_tracking_id: trackingId });
+      // Retry mechanism for newly created reports
+      let retries = 3;
+      let orgData = null;
+      let orgError = null;
+      
+      while (retries > 0) {
+        try {
+          // Use the secure function to get organization data by tracking ID
+          const { data, error } = await supabase
+            .rpc('get_organization_by_tracking_id', { p_tracking_id: trackingId });
+
+          if (!error && data && data.length > 0) {
+            orgData = data;
+            orgError = null;
+            break;
+          } else {
+            orgError = error;
+            console.log(`Attempt ${4 - retries} failed, retrying in 1 second...`);
+            await new Promise(resolve => setTimeout(resolve, 1000));
+            retries--;
+          }
+        } catch (err) {
+          orgError = err;
+          console.log(`Attempt ${4 - retries} failed with error, retrying in 1 second...`);
+          await new Promise(resolve => setTimeout(resolve, 1000));
+          retries--;
+        }
+      }
 
       if (orgError || !orgData || orgData.length === 0) {
-        console.error('Organization lookup error:', orgError);
+        console.error('Organization lookup error after retries:', orgError);
         throw new Error('Organization not found for this report');
       }
 
