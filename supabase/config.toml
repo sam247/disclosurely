@@ -32,3 +32,9 @@ verify_jwt = false
 
 [functions.decrypt-report-data]
 verify_jwt = true
+
+[functions.analyze-logs-with-ai]
+verify_jwt = true
+
+[functions.monitor-logs-realtime]
+verify_jwt = true
