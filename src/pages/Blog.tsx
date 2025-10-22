@@ -164,8 +164,8 @@ const Blog = () => {
 
         console.log('Processing blog post:', {
           id: item.sys.id,
-          title: item.fields.title?.['en-US'],
-          slug: item.fields.slug?.['en-US'],
+          title: item.fields.title,
+          slug: item.fields.slug,
           fields: Object.keys(item.fields),
           rawFields: item.fields,
           titleField: item.fields.title,
