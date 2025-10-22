@@ -91,26 +91,135 @@ Format the response as JSON with this exact structure:
 
 function convertHtmlToRichText(html) {
   // Convert HTML to Contentful Rich Text format
-  // For now, we'll create a simple paragraph structure
-  const cleanText = html.replace(/<[^>]*>/g, '').trim();
+  // Parse HTML and convert to proper Rich Text structure
+  
+  const content = [];
+  
+  // Split by common HTML block elements
+  const blocks = html.split(/(<\/?(?:h[1-6]|p|div|ul|ol|li|blockquote|br)\b[^>]*>)/i);
+  
+  let currentBlock = '';
+  let inBlock = false;
+  
+  for (let i = 0; i < blocks.length; i++) {
+    const block = blocks[i];
+    
+    // Check if this is an opening tag
+    if (block.match(/^<(h[1-6]|p|div|ul|ol|li|blockquote)\b/i)) {
+      inBlock = true;
+      continue;
+    }
+    
+    // Check if this is a closing tag
+    if (block.match(/^<\/(h[1-6]|p|div|ul|ol|li|blockquote)>/i)) {
+      if (currentBlock.trim()) {
+        const tag = block.match(/^<\/(h[1-6]|p|div|ul|ol|li|blockquote)>/i)[1];
+        
+        if (tag.match(/^h[1-6]$/)) {
+          // Heading
+          const level = parseInt(tag[1]);
+          content.push({
+            nodeType: `heading-${level}`,
+            data: {},
+            content: [{
+              nodeType: 'text',
+              value: currentBlock.trim(),
+              marks: [],
+              data: {}
+            }]
+          });
+        } else if (tag === 'p' || tag === 'div') {
+          // Paragraph
+          content.push({
+            nodeType: 'paragraph',
+            data: {},
+            content: [{
+              nodeType: 'text',
+              value: currentBlock.trim(),
+              marks: [],
+              data: {}
+            }]
+          });
+        } else if (tag === 'blockquote') {
+          // Blockquote
+          content.push({
+            nodeType: 'blockquote',
+            data: {},
+            content: [{
+              nodeType: 'paragraph',
+              data: {},
+              content: [{
+                nodeType: 'text',
+                value: currentBlock.trim(),
+                marks: [],
+                data: {}
+              }]
+            }]
+          });
+        }
+      }
+      currentBlock = '';
+      inBlock = false;
+      continue;
+    }
+    
+    // Check for line breaks
+    if (block === '<br>' || block === '<br/>') {
+      if (currentBlock.trim()) {
+        content.push({
+          nodeType: 'paragraph',
+          data: {},
+          content: [{
+            nodeType: 'text',
+            value: currentBlock.trim(),
+            marks: [],
+            data: {}
+          }]
+        });
+        currentBlock = '';
+      }
+      continue;
+    }
+    
+    // If we're in a block, add the text content
+    if (inBlock && !block.match(/^<[^>]*>$/)) {
+      currentBlock += block;
+    }
+  }
+  
+  // Handle any remaining content
+  if (currentBlock.trim()) {
+    content.push({
+      nodeType: 'paragraph',
+      data: {},
+      content: [{
+        nodeType: 'text',
+        value: currentBlock.trim(),
+        marks: [],
+        data: {}
+      }]
+    });
+  }
+  
+  // If no content was parsed, fall back to simple paragraph
+  if (content.length === 0) {
+    const cleanText = html.replace(/<[^>]*>/g, '').trim();
+    content.push({
+      nodeType: 'paragraph',
+      data: {},
+      content: [{
+        nodeType: 'text',
+        value: cleanText,
+        marks: [],
+        data: {}
+      }]
+    });
+  }
   
   return {
     nodeType: 'document',
     data: {},
-    content: [
-      {
-        nodeType: 'paragraph',
-        data: {},
-        content: [
-          {
-            nodeType: 'text',
-            value: cleanText,
-            marks: [],
-            data: {}
-          }
-        ]
-      }
-    ]
+    content: content
   };
 }
 

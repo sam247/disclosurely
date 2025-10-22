@@ -1,8 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { useTranslation } from 'react-i18next';
-import { supabase } from '@/integrations/supabase/client';
-import { useAuth } from '@/hooks/useAuth';
+import { createClient } from 'contentful';
 
 interface SEOData {
   meta_title?: string;
@@ -45,6 +44,15 @@ interface DynamicHelmetProps {
   customTags?: string;
 }
 
+// Contentful configuration
+const CONTENTFUL_SPACE_ID = import.meta.env.VITE_CONTENTFUL_SPACE_ID || 'rm7hib748uv7';
+const CONTENTFUL_DELIVERY_TOKEN = import.meta.env.VITE_CONTENTFUL_DELIVERY_TOKEN || 'e3JfeWQKBvfCQoqi22f6F_XzWgbZPXR9JWTyuSTGcFw';
+
+const contentfulClient = createClient({
+  space: CONTENTFUL_SPACE_ID,
+  accessToken: CONTENTFUL_DELIVERY_TOKEN,
+});
+
 const DynamicHelmet: React.FC<DynamicHelmetProps> = ({
   pageIdentifier,
   fallbackTitle,
@@ -55,15 +63,43 @@ const DynamicHelmet: React.FC<DynamicHelmetProps> = ({
   customTags,
 }) => {
   const { i18n } = useTranslation();
-  const { user } = useAuth();
   const [seoData, setSeoData] = useState<SEOData | null>(null);
   const [globalSeoData, setGlobalSeoData] = useState<GlobalSEOData | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Temporarily disable Supabase SEO fetching to prevent blocking
-    // TODO: Re-enable when SEO tables are properly set up
-    setLoading(false);
+    const fetchSEOData = async () => {
+      try {
+        // Fetch SEO data from Contentful
+        const response = await contentfulClient.getEntries({
+          content_type: 'seoPage',
+          'fields.pagePath': pageIdentifier,
+          'fields.isActive': true,
+          limit: 1,
+        });
+
+        if (response.items.length > 0) {
+          const item = response.items[0];
+          const fields = item.fields as any;
+          
+          setSeoData({
+            meta_title: fields.pageTitle,
+            meta_description: fields.metaDescription,
+            og_title: fields.ogTitle,
+            og_description: fields.ogDescription,
+            og_image_url: fields.ogImage?.fields?.file?.url,
+            canonical_url: fields.canonicalUrl,
+            robots_directive: fields.robotsMeta,
+          });
+        }
+      } catch (error) {
+        console.error('Error fetching SEO data from Contentful:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchSEOData();
   }, [pageIdentifier, i18n.language]);
 
   if (loading) {
