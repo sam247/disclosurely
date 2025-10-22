@@ -48,6 +48,8 @@ serve(async (req) => {
     console.log('📦 Importing CryptoJS...')
     const CryptoJS = await import('https://esm.sh/crypto-js@4.2.0')
     console.log('✅ CryptoJS imported successfully')
+    console.log('🔍 CryptoJS object keys:', Object.keys(CryptoJS))
+    console.log('🔍 CryptoJS.SHA256 type:', typeof CryptoJS.SHA256)
     
     // Use server-side salt (protected from client access)
     const ENCRYPTION_SALT = Deno.env.get('ENCRYPTION_SALT') || 'disclosurely-server-salt-2024-secure'
