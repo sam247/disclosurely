@@ -84,7 +84,7 @@ const SecurityMonitoring = () => {
       // Fetch audit logs for metrics
       const { data: auditData, error: auditError } = await supabase
         .from('audit_logs')
-        .select('event_type, result, risk_level')
+        .select('event_type, action, severity')
         .gte('created_at', new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString());
 
       if (auditError) {
@@ -93,10 +93,10 @@ const SecurityMonitoring = () => {
       } else if (auditData) {
         const totalEvents = auditData.length;
         const failedLogins = auditData.filter(event => 
-          event.event_type === 'authentication' && event.result === 'failure'
+          event.event_type === 'authentication' && event.action.includes('failed')
         ).length;
         const suspiciousActivity = auditData.filter(event => 
-          event.risk_level === 'high' || event.risk_level === 'critical'
+          event.severity === 'high' || event.severity === 'critical'
         ).length;
         const activeAlerts = (alertsData || []).filter(alert => !alert.resolved).length;
 

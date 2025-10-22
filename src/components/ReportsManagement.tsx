@@ -35,7 +35,7 @@ import TagEditor from '@/components/TagEditor';
 import { useTranslation } from 'react-i18next';
 import { auditLogger } from '@/utils/auditLogger';
 
-type ReportStatus = 'new' | 'reviewing' | 'investigating' | 'resolved' | 'closed' | 'archived' | 'deleted';
+type ReportStatus = 'new' | 'in_review' | 'reviewing' | 'investigating' | 'resolved' | 'closed' | 'live' | 'archived' | 'deleted';
 
 interface Report {
   id: string;

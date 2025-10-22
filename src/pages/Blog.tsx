@@ -28,6 +28,7 @@ const client = createClient({
 });
 
 interface ContentfulBlogPost {
+  contentTypeId: '9oYANGj5uBRT6UHsl5LxO';
   sys: { id: string; createdAt: string; updatedAt: string };
   fields: {
     title: { 'en-US': string };
@@ -47,6 +48,7 @@ interface ContentfulBlogPost {
 }
 
 interface ContentfulAuthor {
+  contentTypeId: string;
   sys: { id: string };
   fields: {
     name: { 'en-US': string };
@@ -55,6 +57,7 @@ interface ContentfulAuthor {
 }
 
 interface ContentfulCategory {
+  contentTypeId: '1Dn01YZmIbymrxi194Q2xV';
   sys: { id: string };
   fields: {
     name: { 'en-US': string };
@@ -127,10 +130,8 @@ const Blog = () => {
     try {
       const response = await client.getEntries<ContentfulCategory>({
         content_type: '1Dn01YZmIbymrxi194Q2xV', // Category content type ID
-        'fields.isActive': true,
-        order: 'fields.name',
       });
-      setCategories(response.items);
+      setCategories(response.items as any);
     } catch (error) {
       console.error('Error fetching categories:', error);
       // Set empty categories array instead of failing
@@ -174,23 +175,23 @@ const Blog = () => {
 
         return {
           id: item.sys.id,
-          title: item.fields.title,
-          slug: item.fields.slug,
-          excerpt: item.fields.excerpt,
-          content: item.fields.content,
+          title: item.fields.title?.['en-US'],
+          slug: item.fields.slug?.['en-US'],
+          excerpt: item.fields.excerpt?.['en-US'],
+          content: item.fields.content?.['en-US'],
           featuredImage: (item.fields.featuredImage?.['en-US'] as any)?.fields?.file?.['en-US']?.url,
-          publishDate: item.fields.publishDate || new Date().toISOString(),
-          seoTitle: item.fields.seoTitle,
-          seoDescription: item.fields.seoDescription,
-          tags: item.fields.tags || [],
+          publishDate: item.fields.publishDate?.['en-US'] || new Date().toISOString(),
+          seoTitle: item.fields.seoTitle?.['en-US'],
+          seoDescription: item.fields.seoDescription?.['en-US'],
+          tags: item.fields.tags?.['en-US'] || [],
           authorName: authorEntry?.fields?.name?.['en-US'],
           authorEmail: authorEntry?.fields?.email?.['en-US'],
           categories: categoryEntries ? categoryEntries.map(cat => ({
-            name: cat.fields.name,
-            slug: cat.fields.slug,
+            name: cat.fields.name?.['en-US'] || '',
+            slug: cat.fields.slug?.['en-US'] || '',
           })) : [],
-          readingTime: item.fields.readingTime,
-          status: item.fields.status,
+          readingTime: item.fields.readingTime?.['en-US'],
+          status: item.fields.status?.['en-US'],
         };
       });
       
@@ -212,34 +213,43 @@ const Blog = () => {
     try {
       const response = await client.getEntries<ContentfulBlogPost>({
         content_type: '9oYANGj5uBRT6UHsl5LxO', // Blog Post content type ID
-        'fields.slug': postSlug,
         include: 2, // Include linked author and categories
       });
+      
+      // Filter by slug manually since Contentful API typing is strict
+      const filtered = response.items.filter(item => 
+        item.fields.slug?.['en-US'] === postSlug
+      );
+      
+      if (filtered.length === 0) {
+        setCurrentPost(null);
+        return;
+      }
 
-      if (response.items.length > 0) {
-        const item = response.items[0];
+      if (filtered.length > 0) {
+        const item = filtered[0];
         const authorEntry = item.fields.author?.['en-US'] as unknown as ContentfulAuthor;
         const categoryEntries = item.fields.categories?.['en-US'] as unknown as ContentfulCategory[];
 
         setCurrentPost({
           id: item.sys.id,
-          title: item.fields.title,
-          slug: item.fields.slug,
-          excerpt: item.fields.excerpt,
-          content: item.fields.content,
+          title: item.fields.title?.['en-US'] || '',
+          slug: item.fields.slug?.['en-US'] || '',
+          excerpt: item.fields.excerpt?.['en-US'],
+          content: item.fields.content?.['en-US'],
           featuredImage: (item.fields.featuredImage?.['en-US'] as any)?.fields?.file?.['en-US']?.url,
-          publishDate: item.fields.publishDate || new Date().toISOString(),
-          seoTitle: item.fields.seoTitle,
-          seoDescription: item.fields.seoDescription,
-          tags: item.fields.tags || [],
+          publishDate: item.fields.publishDate?.['en-US'] || new Date().toISOString(),
+          seoTitle: item.fields.seoTitle?.['en-US'],
+          seoDescription: item.fields.seoDescription?.['en-US'],
+          tags: item.fields.tags?.['en-US'] || [],
           authorName: authorEntry?.fields?.name?.['en-US'],
           authorEmail: authorEntry?.fields?.email?.['en-US'],
           categories: categoryEntries ? categoryEntries.map(cat => ({
-            name: cat.fields.name,
-            slug: cat.fields.slug,
+            name: cat.fields.name?.['en-US'] || '',
+            slug: cat.fields.slug?.['en-US'] || '',
           })) : [],
-          readingTime: item.fields.readingTime,
-          status: item.fields.status,
+          readingTime: item.fields.readingTime?.['en-US'],
+          status: item.fields.status?.['en-US'] || '',
         });
       } else {
         setCurrentPost(null);

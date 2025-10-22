@@ -31,7 +31,7 @@ interface Report {
   id: string;
   title: string;
   tracking_id: string;
-  status: 'new' | 'reviewing' | 'investigating' | 'resolved' | 'closed' | 'archived' | 'deleted';
+  status: 'new' | 'in_review' | 'reviewing' | 'investigating' | 'resolved' | 'closed' | 'live' | 'archived' | 'deleted';
   created_at: string;
   encrypted_content: string;
   encryption_key_hash: string;

@@ -14,17 +14,17 @@ import { format } from 'date-fns';
 interface AuditEvent {
   id: string;
   event_type: string;
-  user_id?: string;
-  user_email?: string;
-  ip_address?: unknown; // Changed from string to unknown to match database type
-  user_agent?: string;
-  resource_type?: string;
-  resource_id?: string;
+  actor_id?: string;
+  actor_email?: string;
+  actor_ip_address?: unknown;
+  actor_user_agent?: string;
+  target_type?: string;
+  target_id?: string;
   action: string;
-  result: 'success' | 'failure';
-  details: any;
-  risk_level: 'low' | 'medium' | 'high' | 'critical';
+  severity: 'low' | 'medium' | 'high' | 'critical';
+  metadata: any;
   created_at: string;
+  summary: string;
 }
 
 const AuditTrail = () => {
@@ -64,9 +64,9 @@ const AuditTrail = () => {
         query = query.eq('event_type', eventTypeFilter);
       }
 
-      // Apply risk level filter
+      // Apply severity level filter
       if (riskLevelFilter !== 'all') {
-        query = query.eq('risk_level', riskLevelFilter);
+        query = query.eq('severity', riskLevelFilter);
       }
 
       const { data, error } = await query;
@@ -85,17 +85,17 @@ const AuditTrail = () => {
       const typedData: AuditEvent[] = (data || []).map(item => ({
         id: item.id,
         event_type: item.event_type,
-        user_id: item.user_id,
-        user_email: item.user_email,
-        ip_address: item.ip_address,
-        user_agent: item.user_agent,
-        resource_type: item.resource_type,
-        resource_id: item.resource_id,
+        actor_id: item.actor_id || undefined,
+        actor_email: item.actor_email || undefined,
+        actor_ip_address: item.actor_ip_address,
+        actor_user_agent: item.actor_user_agent || undefined,
+        target_type: item.target_type || undefined,
+        target_id: item.target_id || undefined,
         action: item.action,
-        result: item.result as 'success' | 'failure',
-        details: item.details,
-        risk_level: item.risk_level as 'low' | 'medium' | 'high' | 'critical',
+        severity: item.severity as 'low' | 'medium' | 'high' | 'critical',
+        metadata: item.metadata,
         created_at: item.created_at,
+        summary: item.summary,
       }));
       
       setAuditEvents(typedData);
@@ -114,18 +114,18 @@ const AuditTrail = () => {
   const exportAuditLog = async () => {
     try {
       // Create CSV content
-      const headers = ['Timestamp', 'Event Type', 'User', 'Action', 'Result', 'Risk Level', 'IP Address', 'Details'];
+      const headers = ['Timestamp', 'Event Type', 'User', 'Action', 'Summary', 'Severity', 'IP Address', 'Details'];
       const csvContent = [
         headers.join(','),
         ...auditEvents.map(event => [
           format(new Date(event.created_at), 'yyyy-MM-dd HH:mm:ss'),
           event.event_type,
-          event.user_email || 'System',
+          event.actor_email || 'System',
           event.action,
-          event.result,
-          event.risk_level,
-          event.ip_address ? String(event.ip_address) : 'N/A', // Convert to string safely
-          JSON.stringify(event.details).replace(/,/g, ';')
+          event.summary,
+          event.severity,
+          event.actor_ip_address ? String(event.actor_ip_address) : 'N/A',
+          JSON.stringify(event.metadata || {}).replace(/,/g, ';')
         ].join(','))
       ].join('\n');
 
@@ -164,18 +164,21 @@ const AuditTrail = () => {
     }
   };
 
-  const getResultIcon = (result: string) => {
-    switch (result) {
-      case 'success': return <CheckCircle className="h-4 w-4 text-green-600" />;
-      case 'failure': return <XCircle className="h-4 w-4 text-red-600" />;
-      default: return <AlertTriangle className="h-4 w-4 text-yellow-600" />;
+  const getSeverityIcon = (severity: string) => {
+    switch (severity) {
+      case 'critical': return <XCircle className="h-4 w-4 text-red-600" />;
+      case 'high': return <AlertTriangle className="h-4 w-4 text-orange-600" />;
+      case 'medium': return <AlertTriangle className="h-4 w-4 text-yellow-600" />;
+      case 'low': return <CheckCircle className="h-4 w-4 text-green-600" />;
+      default: return <AlertTriangle className="h-4 w-4 text-gray-600" />;
     }
   };
 
   const filteredEvents = auditEvents.filter(event =>
     searchTerm === '' || 
     event.action.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    event.user_email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    event.actor_email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    event.summary.toLowerCase().includes(searchTerm.toLowerCase()) ||
     event.event_type.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
@@ -264,14 +267,14 @@ const AuditTrail = () => {
           ) : (
             <div className="space-y-2">
               {filteredEvents.map((event) => (
-                <div key={event.id} className="border rounded-lg p-3 hover:bg-gray-50">
+                 <div key={event.id} className="border rounded-lg p-3 hover:bg-gray-50">
                   <div className="flex items-start justify-between">
                     <div className="flex-1">
                       <div className="flex items-center gap-2 mb-1">
-                        {getResultIcon(event.result)}
-                        <span className="font-medium text-sm">{event.action}</span>
-                        <Badge className={`text-xs ${getRiskBadgeColor(event.risk_level)}`}>
-                          {event.risk_level.toUpperCase()}
+                        {getSeverityIcon(event.severity)}
+                        <span className="font-medium text-sm">{event.summary}</span>
+                        <Badge className={`text-xs ${getRiskBadgeColor(event.severity)}`}>
+                          {event.severity.toUpperCase()}
                         </Badge>
                         <Badge variant="outline" className="text-xs">
                           {event.event_type}
@@ -279,18 +282,19 @@ const AuditTrail = () => {
                       </div>
                       
                       <div className="text-sm text-gray-600 space-y-1">
-                        <div>User: {event.user_email || 'System'}</div>
-                        {event.ip_address && <div>IP: {String(event.ip_address)}</div>}
-                        {event.resource_type && (
-                          <div>Resource: {event.resource_type} {event.resource_id && `(${event.resource_id})`}</div>
+                        <div>Action: {event.action}</div>
+                        <div>User: {event.actor_email || 'System'}</div>
+                        {event.actor_ip_address && <div>IP: {String(event.actor_ip_address)}</div>}
+                        {event.target_type && (
+                          <div>Target: {event.target_type} {event.target_id && `(${event.target_id})`}</div>
                         )}
-                        {event.details && Object.keys(event.details).length > 0 && (
+                        {event.metadata && Object.keys(event.metadata).length > 0 && (
                           <details className="mt-1">
                             <summary className="cursor-pointer text-blue-600 hover:text-blue-800">
                               View Details
                             </summary>
                             <pre className="mt-1 text-xs bg-gray-100 p-2 rounded overflow-x-auto">
-                              {JSON.stringify(event.details, null, 2)}
+                              {JSON.stringify(event.metadata, null, 2)}
                             </pre>
                           </details>
                         )}
