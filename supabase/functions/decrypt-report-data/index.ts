@@ -73,62 +73,40 @@ serve(async (req) => {
       )
     }
 
-    // Server-side decryption using CryptoJS
-    const CryptoJS = await import('https://esm.sh/crypto-js@4.2.0')
+    // Server-side decryption using Web Crypto API (same as anonymous-report-messaging)
+    const ENCRYPTION_SALT = Deno.env.get('ENCRYPTION_SALT') || 'disclosurely-server-salt-2024-secure';
+    const keyMaterial = organizationId + ENCRYPTION_SALT;
     
-    // Try multiple salt combinations for backward compatibility
-    const saltOptions = [
-      // New server-side salt
-      Deno.env.get('ENCRYPTION_SALT') || 'disclosurely-server-salt-2024-secure',
-      // Legacy salts from original client-side encryption
-      'disclosurely-salt-2024-enhanced',
-      'disclosurely-salt-2024'
-    ]
+    // Hash the key material using Web Crypto API
+    const keyBuffer = new TextEncoder().encode(keyMaterial);
+    const hashBuffer = await crypto.subtle.digest('SHA-256', keyBuffer);
+    const organizationKey = Array.from(new Uint8Array(hashBuffer))
+      .map(b => b.toString(16).padStart(2, '0'))
+      .join('');
     
-    let decryptedData = null
-    let decryptionError = null
+    // Decrypt using AES-GCM (same as anonymous-report-messaging)
+    const combined = new Uint8Array(atob(encryptedData).split('').map(c => c.charCodeAt(0)));
+    const iv = combined.slice(0, 12);
+    const encryptedDataBytes = combined.slice(12);
     
-    // Try each salt option
-    for (const salt of saltOptions) {
-      try {
-        let keyMaterial
-        let organizationKey
-        
-        if (salt === 'disclosurely-salt-2024-enhanced') {
-          // Enhanced salt with daily timestamp rotation (original implementation)
-          const timestamp = Math.floor(Date.now() / (1000 * 60 * 60 * 24))
-          keyMaterial = organizationId + salt + timestamp.toString()
-        } else {
-          // Standard salt
-          keyMaterial = organizationId + salt
-        }
-        
-        organizationKey = CryptoJS.SHA256(keyMaterial).toString()
-        
-        // Decrypt using AES
-        const decrypted = CryptoJS.AES.decrypt(encryptedData, organizationKey, {
-          mode: CryptoJS.mode.CBC,
-          padding: CryptoJS.pad.Pkcs7
-        })
-        
-        const decryptedString = decrypted.toString(CryptoJS.enc.Utf8)
-        
-        if (decryptedString && decryptedString.length > 0) {
-          decryptedData = JSON.parse(decryptedString)
-          console.log('Successfully decrypted using salt:', salt.substring(0, 20) + '...')
-          break
-        }
-      } catch (error) {
-        decryptionError = error
-        console.log('Failed to decrypt with salt:', salt.substring(0, 20) + '...')
-        continue
-      }
-    }
+    const keyBytes = new Uint8Array(organizationKey.match(/.{1,2}/g)!.map(byte => parseInt(byte, 16)));
+    const cryptoKey = await crypto.subtle.importKey(
+      'raw',
+      keyBytes,
+      { name: 'AES-GCM' },
+      false,
+      ['decrypt']
+    );
     
-    if (!decryptedData) {
-      throw new Error('Decryption failed with all salt options - data may be corrupted or encrypted with unknown key')
-    }
-
+    const decryptedBuffer = await crypto.subtle.decrypt(
+      { name: 'AES-GCM', iv: iv },
+      cryptoKey,
+      encryptedDataBytes
+    );
+    
+    const decryptedString = new TextDecoder().decode(decryptedBuffer);
+    const decryptedData = JSON.parse(decryptedString);
+    
     console.log('Successfully decrypted report data for user:', user.id.substring(0, 8))
 
     return new Response(
