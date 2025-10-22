@@ -73,9 +73,15 @@ const DynamicHelmet: React.FC<DynamicHelmetProps> = ({
         console.log('🔍 DynamicHelmet: Fetching SEO data for page:', pageIdentifier);
         
         // Fetch SEO data from Contentful
+        // Try both with and without leading slash
+        const pagePathWithSlash = pageIdentifier.startsWith('/') ? pageIdentifier : `/${pageIdentifier}`;
+        const pagePathWithoutSlash = pageIdentifier.startsWith('/') ? pageIdentifier.slice(1) : pageIdentifier;
+        
+        console.log('🔍 DynamicHelmet: Searching for pagePath:', { pageIdentifier, pagePathWithSlash, pagePathWithoutSlash });
+        
         const response = await contentfulClient.getEntries({
           content_type: 'seoPage',
-          'fields.pagePath': pageIdentifier,
+          'fields.pagePath[in]': `${pagePathWithSlash},${pagePathWithoutSlash}`,
           'fields.isActive': true,
           limit: 1,
         });
