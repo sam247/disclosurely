@@ -110,6 +110,8 @@ const Blog = () => {
         if (slug && slug !== 'undefined') {
           await fetchSinglePost(slug);
         } else {
+          // Reset current post when going back to blog list
+          setCurrentPost(null);
           await fetchPosts();
         }
         // Fetch categories separately to avoid blocking posts
@@ -343,6 +345,7 @@ const Blog = () => {
             <Link 
               to="/blog" 
               className="inline-flex items-center text-sm text-muted-foreground hover:text-foreground mb-8"
+              onClick={() => console.log('Back to blog clicked')}
             >
               <ArrowRight className="h-4 w-4 mr-2 rotate-180" />
               Back to Blog
