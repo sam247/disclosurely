@@ -254,7 +254,7 @@ const AICaseHelper: React.FC<AICaseHelperProps> = ({ reportId, reportContent }) 
         try {
           // Import decrypt function dynamically
           const { decryptReport } = await import('@/utils/encryption');
-          const decrypted = decryptReport(caseData.encrypted_content, caseData.organization_id);
+          const decrypted = await decryptReport(caseData.encrypted_content, caseData.organization_id);
           decryptedContent = `
 Case Details:
 - Category: ${decrypted.category || 'Not specified'}

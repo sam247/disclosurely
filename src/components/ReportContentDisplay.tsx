@@ -82,8 +82,8 @@ const ReportContentDisplay = ({
       console.log('User organization ID:', profile.organization_id);
       setOrganizationId(profile.organization_id);
 
-      // Attempt to decrypt the report
-      const decrypted = decryptReport(encryptedContent, profile.organization_id);
+      // Attempt to decrypt the report via server
+      const decrypted = await decryptReport(encryptedContent, profile.organization_id);
       
       console.log('Successfully decrypted report content');
       console.log('Decrypted data:', decrypted);

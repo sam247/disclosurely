@@ -1,5 +1,9 @@
 
 import CryptoJS from 'crypto-js';
+import { supabase } from '@/integrations/supabase/client';
+
+// SECURITY NOTE: Client-side encryption functions are deprecated
+// Use server-side encryption edge functions instead
 
 // Generate a random encryption key
 export const generateEncryptionKey = (): string => {
@@ -56,26 +60,23 @@ export const createKeyHash = (key: string): string => {
   return CryptoJS.SHA256(key).toString();
 };
 
-// Simplified organization-based encryption for reports
-export const encryptReport = (reportData: any, organizationId: string): { encryptedData: string; keyHash: string } => {
+// Server-side encryption for reports (calls edge function)
+export const encryptReport = async (reportData: any, organizationId: string): Promise<{ encryptedData: string; keyHash: string }> => {
   try {
     if (!organizationId) {
       throw new Error('Organization ID is required for encryption');
     }
     
-    // Create a deterministic key based on organization ID
-    const salt = process.env.ENCRYPTION_SALT || 'disclosurely-salt-2024';
-    const keyMaterial = organizationId + salt;
-    const organizationKey = CryptoJS.SHA256(keyMaterial).toString();
-    
-    // Stringify the data
-    const dataString = JSON.stringify(reportData);
-    
-    // Encrypt the data
-    const encryptedData = encryptData(dataString, organizationKey);
-    const keyHash = createKeyHash(organizationKey);
-    
-    return { encryptedData, keyHash };
+    // Call server-side encryption edge function
+    const { data, error } = await supabase.functions.invoke('encrypt-report-data', {
+      body: { reportData, organizationId }
+    });
+
+    if (error) {
+      throw new Error('Server-side encryption failed: ' + error.message);
+    }
+
+    return { encryptedData: data.encryptedData, keyHash: data.keyHash };
   } catch (error) {
     throw new Error('Failed to encrypt report data: ' + (error instanceof Error ? error.message : 'Unknown error'));
   }
@@ -137,25 +138,31 @@ export const decryptReportCategory = (encryptedData: string, organizationId: str
   }
 };
 
-// Legacy function maintained for full report access when needed
-export const decryptReport = (encryptedData: string, organizationId: string): any => {
+// Server-side decryption for full report access (calls edge function)
+export const decryptReport = async (encryptedData: string, organizationId: string): Promise<any> => {
   try {
     if (!encryptedData || !organizationId) {
       throw new Error('Both encrypted data and organization ID are required');
     }
 
-    // Recreate the same key used for encryption
-    const salt = 'disclosurely-salt-2024';
-    const keyMaterial = organizationId + salt;
-    const organizationKey = CryptoJS.SHA256(keyMaterial).toString();
-    
-    // Decrypt the data
-    const decryptedString = decryptData(encryptedData, organizationKey);
-    
-    // Parse the JSON
-    const parsedData = JSON.parse(decryptedString);
-    
-    return parsedData;
+    // Call server-side decryption edge function with authentication
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session) {
+      throw new Error('Authentication required for decryption');
+    }
+
+    const { data, error } = await supabase.functions.invoke('decrypt-report-data', {
+      body: { encryptedData, organizationId },
+      headers: {
+        Authorization: `Bearer ${session.access_token}`
+      }
+    });
+
+    if (error) {
+      throw new Error('Server-side decryption failed: ' + error.message);
+    }
+
+    return data.decryptedData;
   } catch (error) {
     throw new Error('Failed to decrypt report: ' + (error instanceof Error ? error.message : 'Unknown error'));
   }
