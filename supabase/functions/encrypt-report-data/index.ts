@@ -49,11 +49,12 @@ serve(async (req) => {
     const CryptoJS = await import('https://esm.sh/crypto-js@4.2.0')
     console.log('✅ CryptoJS imported successfully')
     console.log('🔍 CryptoJS object keys:', Object.keys(CryptoJS))
+    console.log('🔍 CryptoJS.default:', CryptoJS.default)
     
-    // Use the correct import structure for Deno
-    const { SHA256, AES, mode, pad } = CryptoJS
-    console.log('🔍 SHA256 type:', typeof SHA256)
-    console.log('🔍 AES type:', typeof AES)
+    // Use the default export
+    const crypto = CryptoJS.default || CryptoJS
+    console.log('🔍 crypto object keys:', Object.keys(crypto))
+    console.log('🔍 crypto.SHA256 type:', typeof crypto.SHA256)
     
     // Use server-side salt (protected from client access)
     const ENCRYPTION_SALT = Deno.env.get('ENCRYPTION_SALT') || 'disclosurely-server-salt-2024-secure'
@@ -63,7 +64,7 @@ serve(async (req) => {
     const keyMaterial = organizationId + ENCRYPTION_SALT
     console.log('🔐 Key material created, length:', keyMaterial.length)
     
-    const organizationKey = SHA256(keyMaterial).toString()
+    const organizationKey = crypto.SHA256(keyMaterial).toString()
     console.log('✅ Organization key generated')
     
     // Stringify the data
@@ -72,14 +73,14 @@ serve(async (req) => {
     
     // Encrypt using AES
     console.log('🔐 Starting AES encryption...')
-    const encrypted = AES.encrypt(dataString, organizationKey, {
-      mode: mode.CBC,
-      padding: pad.Pkcs7
+    const encrypted = crypto.AES.encrypt(dataString, organizationKey, {
+      mode: crypto.mode.CBC,
+      padding: crypto.pad.Pkcs7
     })
     console.log('✅ AES encryption completed')
     
     const encryptedData = encrypted.toString()
-    const keyHash = SHA256(organizationKey).toString()
+    const keyHash = crypto.SHA256(organizationKey).toString()
     console.log('🎉 Encryption process completed successfully')
     
     return new Response(
