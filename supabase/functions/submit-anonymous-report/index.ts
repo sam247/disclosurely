@@ -21,7 +21,7 @@ async function logAuditEvent(supabase: any, event: any) {
         actor_type: event.actorType,
         actor_id: event.actorId,
         actor_email: event.actorEmail,
-        actor_ip_address: event.actorIpAddress,
+        actor_ip_address: event.actorIpAddress || null, // Ensure null for inet type
         actor_user_agent: event.actorUserAgent,
         target_type: event.targetType,
         target_id: event.targetId,
