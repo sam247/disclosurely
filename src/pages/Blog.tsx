@@ -188,11 +188,11 @@ const Blog = () => {
           authorName: authorEntry?.fields?.name?.['en-US'],
           authorEmail: authorEntry?.fields?.email?.['en-US'],
           categories: categoryEntries ? categoryEntries.map(cat => ({
-            name: cat.fields.name['en-US'],
-            slug: cat.fields.slug['en-US'],
+            name: cat.fields.name,
+            slug: cat.fields.slug,
           })) : [],
-          readingTime: item.fields.readingTime?.['en-US'],
-          status: item.fields.status['en-US'],
+          readingTime: item.fields.readingTime,
+          status: item.fields.status,
         };
       });
       
@@ -225,10 +225,10 @@ const Blog = () => {
 
         setCurrentPost({
           id: item.sys.id,
-          title: item.fields.title['en-US'],
-          slug: item.fields.slug['en-US'],
-          excerpt: item.fields.excerpt?.['en-US'],
-          content: item.fields.content?.['en-US'],
+          title: item.fields.title,
+          slug: item.fields.slug,
+          excerpt: item.fields.excerpt,
+          content: item.fields.content,
           featuredImage: (item.fields.featuredImage?.['en-US'] as any)?.fields?.file?.['en-US']?.url,
           publishDate: item.fields.publishDate || new Date().toISOString(),
           seoTitle: item.fields.seoTitle,
@@ -237,11 +237,11 @@ const Blog = () => {
           authorName: authorEntry?.fields?.name?.['en-US'],
           authorEmail: authorEntry?.fields?.email?.['en-US'],
           categories: categoryEntries ? categoryEntries.map(cat => ({
-            name: cat.fields.name['en-US'],
-            slug: cat.fields.slug['en-US'],
+            name: cat.fields.name,
+            slug: cat.fields.slug,
           })) : [],
-          readingTime: item.fields.readingTime?.['en-US'],
-          status: item.fields.status['en-US'],
+          readingTime: item.fields.readingTime,
+          status: item.fields.status,
         });
       } else {
         setCurrentPost(null);
