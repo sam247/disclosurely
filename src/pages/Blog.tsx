@@ -11,7 +11,7 @@ import DynamicHelmet from '@/components/DynamicHelmet';
 import { useLanguageFromUrl } from '@/hooks/useLanguageFromUrl';
 import { useTranslation } from 'react-i18next';
 import { createClient } from 'contentful';
-import { documentToReactComponents } from '@contentful/rich-text-react-renderer';
+import { documentToHtmlString } from '@contentful/rich-text-html-renderer';
 
 // Contentful configuration
 const CONTENTFUL_SPACE_ID = import.meta.env.VITE_CONTENTFUL_SPACE_ID || 'rm7hib748uv7';
@@ -272,30 +272,30 @@ const Blog = () => {
     console.log('Rendering Rich Text document:', richTextDocument);
     
     try {
-      const rendered = documentToReactComponents(richTextDocument, {
+      const htmlString = documentToHtmlString(richTextDocument, {
         renderNode: {
-          'paragraph': (node, children) => <p className="mb-4">{children}</p>,
-          'heading-1': (node, children) => <h1 className="text-3xl font-bold mb-6">{children}</h1>,
-          'heading-2': (node, children) => <h2 className="text-2xl font-bold mb-4">{children}</h2>,
-          'heading-3': (node, children) => <h3 className="text-xl font-bold mb-3">{children}</h3>,
-          'heading-4': (node, children) => <h4 className="text-lg font-bold mb-2">{children}</h4>,
-          'heading-5': (node, children) => <h5 className="text-base font-bold mb-2">{children}</h5>,
-          'heading-6': (node, children) => <h6 className="text-sm font-bold mb-2">{children}</h6>,
-          'unordered-list': (node, children) => <ul className="list-disc list-inside mb-4">{children}</ul>,
-          'ordered-list': (node, children) => <ol className="list-decimal list-inside mb-4">{children}</ol>,
-          'list-item': (node, children) => <li className="mb-1">{children}</li>,
-          'blockquote': (node, children) => <blockquote className="border-l-4 border-gray-300 pl-4 italic mb-4">{children}</blockquote>,
-          'hyperlink': (node, children) => <a href={node.data.uri} className="text-blue-600 hover:underline" target="_blank" rel="noopener noreferrer">{children}</a>,
+          'paragraph': (node, next) => `<p class="mb-4">${next(node.content)}</p>`,
+          'heading-1': (node, next) => `<h1 class="text-3xl font-bold mb-6">${next(node.content)}</h1>`,
+          'heading-2': (node, next) => `<h2 class="text-2xl font-bold mb-4">${next(node.content)}</h2>`,
+          'heading-3': (node, next) => `<h3 class="text-xl font-bold mb-3">${next(node.content)}</h3>`,
+          'heading-4': (node, next) => `<h4 class="text-lg font-bold mb-2">${next(node.content)}</h4>`,
+          'heading-5': (node, next) => `<h5 class="text-base font-bold mb-2">${next(node.content)}</h5>`,
+          'heading-6': (node, next) => `<h6 class="text-sm font-bold mb-2">${next(node.content)}</h6>`,
+          'unordered-list': (node, next) => `<ul class="list-disc list-inside mb-4">${next(node.content)}</ul>`,
+          'ordered-list': (node, next) => `<ol class="list-decimal list-inside mb-4">${next(node.content)}</ol>`,
+          'list-item': (node, next) => `<li class="mb-1">${next(node.content)}</li>`,
+          'blockquote': (node, next) => `<blockquote class="border-l-4 border-gray-300 pl-4 italic mb-4">${next(node.content)}</blockquote>`,
+          'hyperlink': (node, next) => `<a href="${node.data.uri}" class="text-blue-600 hover:underline" target="_blank" rel="noopener noreferrer">${next(node.content)}</a>`,
         },
         renderMark: {
-          'bold': (text) => <strong>{text}</strong>,
-          'italic': (text) => <em>{text}</em>,
-          'underline': (text) => <u>{text}</u>,
+          'bold': (text) => `<strong>${text}</strong>`,
+          'italic': (text) => `<em>${text}</em>`,
+          'underline': (text) => `<u>${text}</u>`,
         },
       });
       
-      console.log('Rendered Rich Text:', rendered);
-      return rendered;
+      console.log('Rendered HTML:', htmlString);
+      return <div dangerouslySetInnerHTML={{ __html: htmlString }} />;
     } catch (error) {
       console.error('Error rendering rich text:', error);
       // Fallback to plain text extraction
