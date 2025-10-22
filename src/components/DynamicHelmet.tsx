@@ -65,6 +65,7 @@ const DynamicHelmet: React.FC<DynamicHelmetProps> = ({
   const { i18n } = useTranslation();
   const [seoData, setSeoData] = useState<SEOData | null>(null);
   const [globalSeoData, setGlobalSeoData] = useState<GlobalSEOData | null>(null);
+  const [schemaData, setSchemaData] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -105,6 +106,51 @@ const DynamicHelmet: React.FC<DynamicHelmetProps> = ({
           });
         } else {
           console.log('⚠️ DynamicHelmet: No SEO data found for page:', pageIdentifier);
+        }
+
+        // Fetch global site settings
+        const siteSettingsResponse = await contentfulClient.getEntries({
+          content_type: 'siteSettings',
+          'fields.isActive': true,
+          limit: 1,
+        });
+
+        if (siteSettingsResponse.items.length > 0) {
+          const siteItem = siteSettingsResponse.items[0];
+          const siteFields = siteItem.fields as any;
+          
+          console.log('✅ DynamicHelmet: Found site settings:', siteFields);
+          
+          setGlobalSeoData({
+            site_name: siteFields.siteName,
+            default_meta_title: siteFields.siteName,
+            default_meta_description: 'Secure whistleblowing platform',
+            default_og_image_url: siteFields.defaultOgImage?.fields?.file?.url,
+            favicon_url: siteFields.faviconUrl,
+            google_analytics_id: siteFields.googleAnalyticsId,
+            google_tag_manager_id: siteFields.googleTagManagerId,
+            facebook_pixel_id: siteFields.facebookPixelId,
+            google_site_verification: siteFields.googleSiteVerification,
+            bing_site_verification: siteFields.bingSiteVerification,
+          });
+        }
+
+        // Fetch schema structured data for this page
+        const schemaResponse = await contentfulClient.getEntries({
+          content_type: 'schemaStructuredData',
+          'fields.isActive': true,
+          'fields.pagePath[in]': `${pagePathWithSlash},${pagePathWithoutSlash}`,
+          limit: 10,
+        });
+
+        if (schemaResponse.items.length > 0) {
+          const schemaItems = schemaResponse.items.map((item: any) => ({
+            type: item.fields.schemaType,
+            data: item.fields.schemaData,
+          }));
+          
+          console.log('✅ DynamicHelmet: Found schema data:', schemaItems);
+          setSchemaData(schemaItems);
         }
       } catch (error) {
         console.error('❌ DynamicHelmet: Error fetching SEO data from Contentful:', error);
@@ -149,7 +195,9 @@ const DynamicHelmet: React.FC<DynamicHelmetProps> = ({
 
   const finalKeywords = seoData?.meta_keywords || [];
 
-  const finalStructuredData = structuredData || seoData?.structured_data || {};
+  const finalStructuredData = structuredData || 
+                             (schemaData.length > 0 ? schemaData[0].data : {}) || 
+                             seoData?.structured_data || {};
 
   // Debug logging
   console.log('🎯 DynamicHelmet: Final title determination:', {
@@ -196,20 +244,30 @@ const DynamicHelmet: React.FC<DynamicHelmetProps> = ({
         </script>
       )}
 
-      {/* Google Analytics */}
-      {globalSeoData?.google_analytics_id && (
-        <>
-          <script async src={`https://www.googletagmanager.com/gtag/js?id=${globalSeoData.google_analytics_id}`} />
-          <script>
-            {`
-              window.dataLayer = window.dataLayer || [];
-              function gtag(){dataLayer.push(arguments);}
-              gtag('js', new Date());
-              gtag('config', '${globalSeoData.google_analytics_id}');
-            `}
-          </script>
-        </>
-      )}
+            {/* Google Site Verification */}
+            {globalSeoData?.google_site_verification && (
+              <meta name="google-site-verification" content={globalSeoData.google_site_verification} />
+            )}
+
+            {/* Bing Site Verification */}
+            {globalSeoData?.bing_site_verification && (
+              <meta name="msvalidate.01" content={globalSeoData.bing_site_verification} />
+            )}
+
+            {/* Google Analytics */}
+            {globalSeoData?.google_analytics_id && (
+              <>
+                <script async src={`https://www.googletagmanager.com/gtag/js?id=${globalSeoData.google_analytics_id}`} />
+                <script>
+                  {`
+                    window.dataLayer = window.dataLayer || [];
+                    function gtag(){dataLayer.push(arguments);}
+                    gtag('js', new Date());
+                    gtag('config', '${globalSeoData.google_analytics_id}');
+                  `}
+                </script>
+              </>
+            )}
 
       {/* Google Tag Manager */}
       {globalSeoData?.google_tag_manager_id && (
