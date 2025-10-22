@@ -121,11 +121,13 @@ const SecureMessaging = ({ report, onClose }: SecureMessagingProps) => {
     try {
       console.log('Fetching messages for report:', report.id);
       
-      const { data, error } = await supabase
-        .from('report_messages')
-        .select('*')
-        .eq('report_id', report.id)
-        .order('created_at', { ascending: true });
+      // Use Edge Function for encrypted message loading instead of direct database query
+      const { data: result, error } = await supabase.functions.invoke('anonymous-report-messaging', {
+        body: {
+          action: 'load',
+          trackingId: report.tracking_id
+        }
+      });
 
       if (error) {
         console.error('Error fetching messages:', error);
@@ -137,8 +139,8 @@ const SecureMessaging = ({ report, onClose }: SecureMessagingProps) => {
         return;
       }
 
-      console.log('Messages loaded:', data);
-      setMessages(data || []);
+      console.log('Messages loaded:', result?.messages);
+      setMessages(result?.messages || []);
     } catch (error) {
       console.error('Error fetching messages:', error);
     } finally {
@@ -171,14 +173,14 @@ const SecureMessaging = ({ report, onClose }: SecureMessagingProps) => {
   const submitMessage = async (data: { message: string }) => {
     console.log('Sending secure message for report:', report.id);
     
-    const { error } = await supabase
-      .from('report_messages')
-      .insert({
-        report_id: report.id,
-        sender_type: 'organization',
-        encrypted_message: data.message,
-        sender_id: null // Will be populated by RLS/auth context if authenticated
-      });
+    // Use Edge Function for encrypted messaging instead of direct database insert
+    const { data: result, error } = await supabase.functions.invoke('anonymous-report-messaging', {
+      body: {
+        action: 'send',
+        trackingId: report.tracking_id,
+        message: data.message
+      }
+    });
 
     if (error) {
       console.error('Error sending message:', error);
