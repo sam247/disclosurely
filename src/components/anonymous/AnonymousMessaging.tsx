@@ -9,6 +9,7 @@ import { Button } from '@/components/ui/button';
 import { MessageSquare, Clock, Send } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { auditLogger } from '@/utils/auditLogger';
+import StatusTimeline from '@/components/StatusTimeline';
 
 interface OrgBranding { name?: string; brand_color?: string; logo_url?: string; custom_logo_url?: string; }
 interface ReportInfo { id: string; tracking_id: string; title: string; status: string; created_at: string; organization_id: string; }
@@ -153,6 +154,9 @@ const AnonymousMessaging = () => {
             </div>
           </CardHeader>
         </Card>
+
+        {/* Status Timeline */}
+        <StatusTimeline reportId={report.id} currentStatus={report.status} />
 
         <Card>
           <CardHeader>

@@ -39,5 +39,5 @@ verify_jwt = true
 [functions.process-notifications-to-emails]
 verify_jwt = false
 
-[functions.process-pending-email-notifications]
+[functions.get-status-timeline]
 verify_jwt = false
