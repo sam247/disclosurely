@@ -12,8 +12,6 @@ serve(async (req) => {
     return new Response('ok', { headers: corsHeaders });
   }
 
-  console.log('accept-team-invitation function invoked with:', { token, userId });
-
   try {
     const supabaseUrl = Deno.env.get('SUPABASE_URL') ?? '';
     const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '';
@@ -24,6 +22,7 @@ serve(async (req) => {
     const supabaseAnonClient = createClient(supabaseUrl, supabaseAnonKey);
 
     const { token, userId } = await req.json();
+    console.log('accept-team-invitation function invoked with:', { token, userId });
 
     if (!token || !userId) {
       return new Response(
