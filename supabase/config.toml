@@ -36,5 +36,8 @@ verify_jwt = true
 [functions.analyze-logs-with-ai]
 verify_jwt = true
 
-[functions.monitor-logs-realtime]
-verify_jwt = true
+[functions.process-notifications-to-emails]
+verify_jwt = false
+
+[functions.process-pending-email-notifications]
+verify_jwt = false
