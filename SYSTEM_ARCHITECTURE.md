@@ -76,6 +76,7 @@ Sentinel Report SafeHaven is a secure whistleblowing platform built with React +
 ### **Notifications**
 - **`process-notifications-to-emails`**: Bridge function that converts notifications to email queue
 - **`process-pending-email-notifications`**: Processes notification queue with AI logging
+- **`get-status-timeline`**: Fetches status change history from audit logs for timeline display
 - **`send-notification-emails`**: Sends email notifications
 - **`send-weekly-roundup`**: Weekly summary emails
 - **`send-new-case-notification`**: New case notifications
@@ -434,16 +435,15 @@ ENCRYPTION_SALT=disclosurely-server-salt-2024-secure
   - **AI Logging**: Comprehensive monitoring throughout email process
 - **Status**: ✅ Fully operational - New reports and team invites now send emails
 
-### ✅ **Team Invite Verification Fixed**
-- **Root Cause**: `accept-team-invitation` Edge Function had critical issues:
-  1. Duplicate variable declaration causing syntax error
-  2. `log_role_change` trigger missing required `audit_logs` fields
-  3. Function crashing before returning CORS headers
-- **Fix**: 
-  1. Fixed duplicate destructuring in Edge Function
-  2. Updated `log_role_change` trigger to include all required fields
-  3. Enhanced error handling and CORS support
-- **Status**: ✅ Fully operational - Team invite verification working end-to-end
+### ✅ **Status Timeline Feature Added**
+- **Feature**: Real-time status timeline for anonymous users
+- **Components**: 
+  1. `StatusTimeline` component with user-friendly status mapping
+  2. `get-status-timeline` Edge Function for fetching audit logs
+  3. Status change tracking via database triggers
+- **Status Mapping**: `new` → `Submitted`, `reviewing` → `Under Review`, `investigating` → `Investigating`, `resolved` → `Resolved`, `closed/archived/deleted` → `Closed`
+- **UX**: Visual timeline with icons, colors, and descriptions
+- **Status**: ✅ Fully operational - Anonymous users can now see report progress
 
 ### 🤖 **Enhanced Debugging System**
 - **Comprehensive Logging**: All messaging and deletion operations now have detailed logging
