@@ -189,9 +189,25 @@ const DynamicHelmet: React.FC<DynamicHelmetProps> = ({
                      globalSeoData?.default_og_image_url || 
                      '/og-image.jpg';
 
-  const finalCanonicalUrl = seoData?.canonical_url || 
-                           canonicalUrl || 
-                           window.location.href;
+  // Normalize URL to always use non-www version
+  const normalizeCanonicalUrl = (url: string) => {
+    try {
+      const urlObj = new URL(url);
+      if (urlObj.hostname.startsWith('www.')) {
+        urlObj.hostname = urlObj.hostname.substring(4);
+      }
+      return urlObj.toString();
+    } catch (error) {
+      console.error('Error normalizing canonical URL:', error);
+      return url;
+    }
+  };
+
+  const finalCanonicalUrl = normalizeCanonicalUrl(
+    seoData?.canonical_url || 
+    canonicalUrl || 
+    (typeof window !== 'undefined' ? window.location.href : 'https://disclosurely.com')
+  );
 
   const finalRobots = seoData?.robots_directive || 'index,follow';
 
