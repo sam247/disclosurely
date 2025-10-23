@@ -307,7 +307,13 @@ serve(async (req) => {
         organizationId: report.organization_id || (report as any).organizations?.id,
       });
 
-      return new Response(JSON.stringify({ message: data }), {
+      return new Response(JSON.stringify({ 
+        message: {
+          ...data,
+          decrypted_message: message,
+          encrypted_message: data.encrypted_message
+        }
+      }), {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }

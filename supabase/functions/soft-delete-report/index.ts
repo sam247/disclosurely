@@ -55,8 +55,7 @@ serve(async (req) => {
       .select(`
         id, 
         organization_id, 
-        is_active,
-        user_roles!left(role, is_active)
+        is_active
       `)
       .eq('id', userId)
       .single();
@@ -67,23 +66,38 @@ serve(async (req) => {
       return new Response(JSON.stringify({ error: 'Profile not found' }), { status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
     }
 
-    console.log('Profile found:', profile);
-    console.log('User roles:', profile.user_roles);
+    console.log('Profile found:', JSON.stringify(profile));
+
+    // Now get the user's active role separately
+    const { data: userRoles, error: rolesError } = await supabaseAdmin
+      .from('user_roles')
+      .select('role, is_active')
+      .eq('user_id', userId)
+      .eq('is_active', true)
+      .single();
+
+    console.log('User roles query result:', JSON.stringify(userRoles));
+    console.log('User roles error:', rolesError);
 
     const allowedRoles = ['admin', 'case_handler', 'org_admin'];
-    const userRole = profile.user_roles?.find((ur: any) => ur.is_active)?.role;
+    const userRole = userRoles?.role;
     
-    console.log('User role:', userRole);
-    console.log('Profile is_active:', profile.is_active);
-    console.log('Profile organization_id:', profile.organization_id);
-    console.log('Report organization_id:', report.organization_id);
+    console.log('Determined User Role:', userRole);
+    console.log('Allowed Roles:', allowedRoles);
+
+    if (!userRole || !allowedRoles.includes(userRole)) {
+      console.log(`User ${userId} with role ${userRole} is not authorized to delete reports.`);
+      return new Response(JSON.stringify({ error: 'Unauthorized: Insufficient role permissions' }), { status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
+    }
+
+    console.log(`User ${userId} with role ${userRole} is authorized.`);
     
-    if (!profile.is_active || profile.organization_id !== report.organization_id || !userRole || !allowedRoles.includes(userRole)) {
+    if (!profile.is_active || profile.organization_id !== report.organization_id) {
       console.log('Permission check failed:', {
         is_active: profile.is_active,
         org_match: profile.organization_id === report.organization_id,
-        has_role: !!userRole,
-        role_allowed: allowedRoles.includes(userRole)
+        profile_org: profile.organization_id,
+        report_org: report.organization_id
       });
       return new Response(JSON.stringify({ error: 'Insufficient permissions' }), { status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
     }
