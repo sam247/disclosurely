@@ -8,6 +8,7 @@ import { Link, useParams, useSearchParams, useNavigate } from 'react-router-dom'
 import { Footer } from '@/components/ui/footer';
 import { StandardHeader } from '@/components/StandardHeader';
 import DynamicHelmet from '@/components/DynamicHelmet';
+import DOMPurify from 'dompurify';
 import { useLanguageFromUrl } from '@/hooks/useLanguageFromUrl';
 import { useTranslation } from 'react-i18next';
 import { createClient } from 'contentful';
@@ -305,7 +306,7 @@ const Blog = () => {
       });
       
       console.log('Rendered HTML:', htmlString);
-      return <div dangerouslySetInnerHTML={{ __html: htmlString }} />;
+      return <div dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(htmlString) }} />;
     } catch (error) {
       console.error('Error rendering rich text:', error);
       // Fallback to plain text extraction

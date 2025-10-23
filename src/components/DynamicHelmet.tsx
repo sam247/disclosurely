@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { useTranslation } from 'react-i18next';
 import { createClient } from 'contentful';
+import DOMPurify from 'dompurify';
 
 interface SEOData {
   meta_title?: string;
@@ -324,15 +325,15 @@ const DynamicHelmet: React.FC<DynamicHelmetProps> = ({
         </script>
       )}
 
-      {/* Custom Head Tags */}
+      {/* Custom Head Tags - Sanitized */}
       {seoData?.custom_head_tags && (
-        <div dangerouslySetInnerHTML={{ __html: seoData.custom_head_tags }} />
+        <div dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(seoData.custom_head_tags) }} />
       )}
       {globalSeoData?.custom_head_tags && (
-        <div dangerouslySetInnerHTML={{ __html: globalSeoData.custom_head_tags }} />
+        <div dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(globalSeoData.custom_head_tags) }} />
       )}
       {customTags && (
-        <div dangerouslySetInnerHTML={{ __html: customTags }} />
+        <div dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(customTags) }} />
       )}
     </Helmet>
   );
