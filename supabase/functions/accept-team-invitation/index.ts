@@ -73,7 +73,7 @@ serve(async (req) => {
       const res = await supabaseServiceClient.auth.admin.getUserById(userId);
       userData = res.data;
       userError = res.error;
-      console.log(`getUserById attempt ${attempt}`, { hasUser: !!userData?.user, error: userError?.message });
+      console.log('getUserById attempt', attempt, { hasUser: !!userData?.user, error: userError?.message });
       if (userData?.user && !userError) {
         resolvedUserId = userData.user.id;
         break;

@@ -434,6 +434,17 @@ ENCRYPTION_SALT=disclosurely-server-salt-2024-secure
   - **AI Logging**: Comprehensive monitoring throughout email process
 - **Status**: ✅ Fully operational - New reports and team invites now send emails
 
+### ✅ **Team Invite Verification Fixed**
+- **Root Cause**: `accept-team-invitation` Edge Function had critical issues:
+  1. Duplicate variable declaration causing syntax error
+  2. `log_role_change` trigger missing required `audit_logs` fields
+  3. Function crashing before returning CORS headers
+- **Fix**: 
+  1. Fixed duplicate destructuring in Edge Function
+  2. Updated `log_role_change` trigger to include all required fields
+  3. Enhanced error handling and CORS support
+- **Status**: ✅ Fully operational - Team invite verification working end-to-end
+
 ### 🤖 **Enhanced Debugging System**
 - **Comprehensive Logging**: All messaging and deletion operations now have detailed logging
 - **AI Analysis**: Automatic AI analysis triggered for critical errors
@@ -460,6 +471,6 @@ ENCRYPTION_SALT=disclosurely-server-salt-2024-secure
 ---
 
 *Last Updated: October 23, 2025*
-*Version: 2.3*
+*Version: 2.4*
 *Architecture: React + Supabase + Contentful*
 *Status: Production Ready - All Critical Issues Resolved*
