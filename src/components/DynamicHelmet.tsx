@@ -31,6 +31,8 @@ interface GlobalSEOData {
   google_analytics_id?: string;
   google_tag_manager_id?: string;
   facebook_pixel_id?: string;
+  google_site_verification?: string;
+  bing_site_verification?: string;
   custom_head_tags?: string;
 }
 

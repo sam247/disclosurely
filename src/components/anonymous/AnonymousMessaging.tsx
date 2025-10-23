@@ -12,7 +12,7 @@ import { auditLogger } from '@/utils/auditLogger';
 
 interface OrgBranding { name?: string; brand_color?: string; logo_url?: string; custom_logo_url?: string; }
 interface ReportInfo { id: string; tracking_id: string; title: string; status: string; created_at: string; organization_id: string; }
-interface Message { id: string; sender_type: string; encrypted_message: string; created_at: string; is_read: boolean; }
+interface Message { id: string; sender_type: string; encrypted_message: string; decrypted_message?: string; created_at: string; is_read: boolean; }
 
 const AnonymousMessaging = () => {
   const { trackingId } = useParams();

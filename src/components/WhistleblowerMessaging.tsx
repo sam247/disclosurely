@@ -7,11 +7,15 @@ import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { MessageSquare, Send, Lock, Search } from 'lucide-react';
 import { log } from '@/utils/logger';
+import { useToast } from '@/hooks/use-toast';
+import { createClient } from '@supabase/supabase-js';
+import { auditLogger } from '@/utils/auditLogger';
 
 interface Message {
   id: string;
   sender_type: string;
   encrypted_message: string;
+  decrypted_message?: string;
   created_at: string;
   is_read: boolean;
   sender_id: string | null;
@@ -36,6 +40,12 @@ const WhistleblowerMessaging = () => {
   const [isSending, setIsSending] = useState(false);
   const [isSearching, setIsSearching] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  // Initialize Supabase client
+  const supabase = createClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+  );
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });

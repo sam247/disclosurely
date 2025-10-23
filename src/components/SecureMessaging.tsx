@@ -12,6 +12,7 @@ import { MessageSquare, Send, Lock, Clock, User, Shield } from 'lucide-react';
 interface Message {
   id: string;
   encrypted_message: string;
+  decrypted_message?: string;
   sender_type: 'whistleblower' | 'organization';
   created_at: string;
   is_read: boolean;

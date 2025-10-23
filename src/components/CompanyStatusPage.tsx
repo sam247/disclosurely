@@ -35,6 +35,7 @@ interface Message {
   id: string;
   sender_type: string;
   encrypted_message: string;
+  decrypted_message?: string;
   created_at: string;
   is_read: boolean;
 }

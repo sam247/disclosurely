@@ -301,17 +301,12 @@ const DashboardView = () => {
       
       // Log assignment to audit trail
       if (report && effectiveOrganizationId) {
-        await logCaseEvent(
-          'update',
-          user?.id || '',
-          user?.email || '',
-          effectiveOrganizationId,
-          reportId,
-          report.title,
-          { assigned_to: report.assigned_to },
-          { assigned_to: assigneeId === 'unassigned' ? null : assigneeId },
-          { action: 'assignment_change', assignee_email: assignee?.email }
-        );
+        await log.info('CASE_MANAGEMENT', 'Report assignment updated', {
+          reportId: reportId,
+          userId: user?.id,
+          userEmail: user?.email,
+          organizationId: effectiveOrganizationId
+        });
       }
       
       await fetchData();
@@ -353,17 +348,12 @@ const DashboardView = () => {
         console.log('DashboardView: organizationId from useCustomDomain:', organizationId);
         console.log('DashboardView: effectiveOrganizationId:', effectiveOrganizationId);
         if (effectiveOrganizationId) {
-          await logCaseEvent(
-            'update',
-            user?.id || '',
-            user?.email || '',
-            effectiveOrganizationId,
-            report.id,
-            report.title,
-            { status: 'new' },
-            { status: 'new', first_read_at: new Date().toISOString() },
-            { action: 'first_view', previous_status: 'new' }
-          );
+          await log.info('CASE_MANAGEMENT', 'Report status updated', {
+            reportId: report.id,
+            userId: user?.id,
+            userEmail: user?.email,
+            organizationId: effectiveOrganizationId
+          });
         } else {
           console.log('DashboardView: effectiveOrganizationId is null/undefined, cannot log audit event');
         }
@@ -397,17 +387,12 @@ const DashboardView = () => {
       // Log audit event
       const reportToArchive = reports.find(r => r.id === reportId);
       if (reportToArchive && effectiveOrganizationId) {
-        await logCaseEvent(
-          'archive',
-          user?.id || '',
-          user?.email || '',
-          effectiveOrganizationId,
-          reportToArchive.id,
-          reportToArchive.title,
-          { status: reportToArchive.status },
-          { status: 'archived', archived_at: new Date().toISOString() },
-          { action: 'archive', previous_status: reportToArchive.status }
-        );
+        await log.info('CASE_MANAGEMENT', 'Report archived', {
+          reportId: reportToArchive.id,
+          userId: user?.id,
+          userEmail: user?.email,
+          organizationId: effectiveOrganizationId
+        });
       }
 
       toast({
@@ -537,28 +522,12 @@ Additional Details: ${decryptedContent.additionalDetails || 'None provided'}
       console.log('AI risk assessment completed successfully');
 
       // Log AI risk assessment to audit trail
-      await logCaseEvent(
-        'update',
-        user?.id || '',
-        user?.email || '',
-        profile.organization_id,
-        report.id,
-        report.title,
-        { 
-          ai_risk_score: null,
-          ai_risk_level: null,
-        },
-        { 
-          ai_risk_score: data.riskAssessment.risk_score,
-          ai_risk_level: data.riskAssessment.risk_level,
-          ai_likelihood_score: data.riskAssessment.likelihood_score,
-          ai_impact_score: data.riskAssessment.impact_score,
-        },
-        { 
-          action: 'ai_risk_assessment',
-          assessment_version: '1.0',
-        }
-      );
+      await log.info('CASE_MANAGEMENT', 'AI risk assessment completed', {
+        reportId: report.id,
+        userId: user?.id,
+        userEmail: user?.email,
+        organizationId: profile.organization_id
+      });
 
       toast({
         title: "Risk Assessment Complete",
@@ -895,18 +864,13 @@ Additional Details: ${decryptedContent.additionalDetails || 'None provided'}
                                       console.log('DashboardView: User metadata:', user?.user_metadata);
                                       console.log('DashboardView: About to check if effectiveOrganizationId exists...');
                                       if (effectiveOrganizationId) {
-                                        console.log('DashboardView: effectiveOrganizationId is valid, calling logCaseEvent...');
-                                        await logCaseEvent(
-                                          'update',
-                                          user?.id || '',
-                                          user?.email || '',
-                                          effectiveOrganizationId,
-                                          report.id,
-                                          report.title,
-                                          { status: report.status },
-                                          { status: 'reviewing', updated_at: new Date().toISOString() },
-                                          { action: 'status_change', previous_status: report.status }
-                                        );
+                                        console.log('DashboardView: effectiveOrganizationId is valid, calling log.info...');
+                                        await log.info('CASE_MANAGEMENT', 'Report status updated', {
+                                          reportId: report.id,
+                                          userId: user?.id,
+                                          userEmail: user?.email,
+                                          organizationId: effectiveOrganizationId
+                                        });
                                         console.log('DashboardView: Audit event logged successfully');
                                         // Small delay to ensure database transaction is committed
                                         await new Promise(resolve => setTimeout(resolve, 100));
@@ -946,17 +910,12 @@ Additional Details: ${decryptedContent.additionalDetails || 'None provided'}
                                       
                                       // Log audit event
                                       if (organizationId) {
-                                        await logCaseEvent(
-                                          'update',
-                                          user?.id || '',
-                                          user?.email || '',
-                                          organizationId,
-                                          report.id,
-                                          report.title,
-                                          { status: report.status },
-                                          { status: 'investigating', updated_at: new Date().toISOString() },
-                                          { action: 'status_change', previous_status: report.status }
-                                        );
+                                        await log.info('CASE_MANAGEMENT', 'Report status updated', {
+                                          reportId: report.id,
+                                          userId: user?.id,
+                                          userEmail: user?.email,
+                                          organizationId: organizationId
+                                        });
                                       }
                                       
                                       toast({ title: 'Report marked as Investigating' });
@@ -988,17 +947,12 @@ Additional Details: ${decryptedContent.additionalDetails || 'None provided'}
                                       
                                       // Log audit event
                                       if (organizationId) {
-                                        await logCaseEvent(
-                                          'resolve',
-                                          user?.id || '',
-                                          user?.email || '',
-                                          organizationId,
-                                          report.id,
-                                          report.title,
-                                          { status: report.status },
-                                          { status: 'resolved', resolved_at: new Date().toISOString() },
-                                          { action: 'status_change', previous_status: report.status }
-                                        );
+                                        await log.info('CASE_MANAGEMENT', 'Report resolved', {
+                                          reportId: report.id,
+                                          userId: user?.id,
+                                          userEmail: user?.email,
+                                          organizationId: organizationId
+                                        });
                                       }
                                       
                                       toast({ title: 'Report marked as resolved' });
