@@ -6,7 +6,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { MessageSquare, Send, Lock, Search } from 'lucide-react';
-import { log } from '@/utils/logger';
+import { log, LogContext } from '@/utils/logger';
 import { useToast } from '@/hooks/use-toast';
 import { createClient } from '@supabase/supabase-js';
 import { auditLogger } from '@/utils/auditLogger';
@@ -185,7 +185,7 @@ const WhistleblowerMessaging = () => {
       });
 
       if (error) {
-        log.error('MESSAGING', 'Failed to load messages via Edge Function', error, { 
+        log.error(LogContext.MESSAGING, 'Failed to load messages via Edge Function', error, { 
           reportId: report.id, 
           trackingId: report.tracking_id 
         });
@@ -198,7 +198,7 @@ const WhistleblowerMessaging = () => {
         return;
       }
 
-      log.info('MESSAGING', 'Messages loaded successfully via Edge Function', { 
+      log.info(LogContext.MESSAGING, 'Messages loaded successfully via Edge Function', { 
         reportId: report.id, 
         trackingId: report.tracking_id,
         messageCount: result?.messages?.length || 0 
@@ -246,7 +246,7 @@ const WhistleblowerMessaging = () => {
       });
 
       if (error) {
-        log.error('MESSAGING', 'Failed to send message via Edge Function', error, { 
+        log.error(LogContext.MESSAGING, 'Failed to send message via Edge Function', error, { 
           reportId: report.id, 
           trackingId: report.tracking_id,
           messageLength: newMessage.trim().length 
@@ -255,7 +255,7 @@ const WhistleblowerMessaging = () => {
         throw error;
       }
 
-      log.info('MESSAGING', 'Message sent successfully via Edge Function', { 
+      log.info(LogContext.MESSAGING, 'Message sent successfully via Edge Function', { 
         reportId: report.id, 
         trackingId: report.tracking_id,
         messageLength: newMessage.trim().length 

@@ -9,7 +9,7 @@ import { useCustomDomain } from '@/hooks/useCustomDomain';
 import { useOrganization } from '@/hooks/useOrganization';
 import { useToast } from '@/hooks/use-toast';
 import { useTranslation } from 'react-i18next';
-import { log } from '@/utils/logger';
+import { log, LogContext } from '@/utils/logger';
 import { FileText, Eye, Archive, Trash2, RotateCcw, MoreVertical, XCircle, ChevronUp, ChevronDown, CheckCircle, Search } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import ReportMessaging from '@/components/ReportMessaging';
@@ -301,7 +301,7 @@ const DashboardView = () => {
       
       // Log assignment to audit trail
       if (report && effectiveOrganizationId) {
-        await log.info('CASE_MANAGEMENT', 'Report assignment updated', {
+        await log.info(LogContext.CASE_MANAGEMENT, 'Report assignment updated', {
           reportId: reportId,
           userId: user?.id,
           userEmail: user?.email,
@@ -348,7 +348,7 @@ const DashboardView = () => {
         console.log('DashboardView: organizationId from useCustomDomain:', organizationId);
         console.log('DashboardView: effectiveOrganizationId:', effectiveOrganizationId);
         if (effectiveOrganizationId) {
-          await log.info('CASE_MANAGEMENT', 'Report status updated', {
+          await log.info(LogContext.CASE_MANAGEMENT, 'Report status updated', {
             reportId: report.id,
             userId: user?.id,
             userEmail: user?.email,
@@ -387,7 +387,7 @@ const DashboardView = () => {
       // Log audit event
       const reportToArchive = reports.find(r => r.id === reportId);
       if (reportToArchive && effectiveOrganizationId) {
-        await log.info('CASE_MANAGEMENT', 'Report archived', {
+        await log.info(LogContext.CASE_MANAGEMENT, 'Report archived', {
           reportId: reportToArchive.id,
           userId: user?.id,
           userEmail: user?.email,
@@ -522,7 +522,7 @@ Additional Details: ${decryptedContent.additionalDetails || 'None provided'}
       console.log('AI risk assessment completed successfully');
 
       // Log AI risk assessment to audit trail
-      await log.info('CASE_MANAGEMENT', 'AI risk assessment completed', {
+      await log.info(LogContext.CASE_MANAGEMENT, 'AI risk assessment completed', {
         reportId: report.id,
         userId: user?.id,
         userEmail: user?.email,
@@ -865,7 +865,7 @@ Additional Details: ${decryptedContent.additionalDetails || 'None provided'}
                                       console.log('DashboardView: About to check if effectiveOrganizationId exists...');
                                       if (effectiveOrganizationId) {
                                         console.log('DashboardView: effectiveOrganizationId is valid, calling log.info...');
-                                        await log.info('CASE_MANAGEMENT', 'Report status updated', {
+                                        await log.info(LogContext.CASE_MANAGEMENT, 'Report status updated', {
                                           reportId: report.id,
                                           userId: user?.id,
                                           userEmail: user?.email,
@@ -910,7 +910,7 @@ Additional Details: ${decryptedContent.additionalDetails || 'None provided'}
                                       
                                       // Log audit event
                                       if (organizationId) {
-                                        await log.info('CASE_MANAGEMENT', 'Report status updated', {
+                                        await log.info(LogContext.CASE_MANAGEMENT, 'Report status updated', {
                                           reportId: report.id,
                                           userId: user?.id,
                                           userEmail: user?.email,
@@ -947,7 +947,7 @@ Additional Details: ${decryptedContent.additionalDetails || 'None provided'}
                                       
                                       // Log audit event
                                       if (organizationId) {
-                                        await log.info('CASE_MANAGEMENT', 'Report resolved', {
+                                        await log.info(LogContext.CASE_MANAGEMENT, 'Report resolved', {
                                           reportId: report.id,
                                           userId: user?.id,
                                           userEmail: user?.email,
@@ -978,7 +978,7 @@ Additional Details: ${decryptedContent.additionalDetails || 'None provided'}
                                   className="text-destructive"
                                   onClick={async () => {
                                     try {
-                                      log.info('SYSTEM', 'Starting report deletion process', { 
+                                      log.info(LogContext.SYSTEM, 'Starting report deletion process', { 
                                         reportId: report.id, 
                                         trackingId: report.tracking_id,
                                         userId: user?.id 
@@ -988,11 +988,11 @@ Additional Details: ${decryptedContent.additionalDetails || 'None provided'}
                                       const { data: { session } } = await supabase.auth.getSession();
                                       
                                       if (!session?.access_token) {
-                                        log.error('SYSTEM', 'No valid session token for deletion', new Error('Missing session token'), { reportId: report.id });
+                                        log.error(LogContext.SYSTEM, 'No valid session token for deletion', new Error('Missing session token'), { reportId: report.id });
                                         throw new Error('No valid session token');
                                       }
                                       
-                                      log.info('SYSTEM', 'Calling soft-delete-report Edge Function', { 
+                                      log.info(LogContext.SYSTEM, 'Calling soft-delete-report Edge Function', { 
                                         reportId: report.id,
                                         hasToken: !!session?.access_token 
                                       });
@@ -1009,7 +1009,7 @@ Additional Details: ${decryptedContent.additionalDetails || 'None provided'}
                                         }
                                       );
 
-                                      log.info('SYSTEM', 'Soft-delete-report response received', { 
+                                      log.info(LogContext.SYSTEM, 'Soft-delete-report response received', { 
                                         reportId: report.id,
                                         status: response.status,
                                         ok: response.ok 
@@ -1017,7 +1017,7 @@ Additional Details: ${decryptedContent.additionalDetails || 'None provided'}
 
                                       if (!response.ok) {
                                         const errorData = await response.json();
-                                        log.error('SYSTEM', 'Soft-delete-report failed', new Error(errorData.error || 'Failed to delete report'), { 
+                                        log.error(LogContext.SYSTEM, 'Soft-delete-report failed', new Error(errorData.error || 'Failed to delete report'), { 
                                           reportId: report.id,
                                           status: response.status,
                                           errorData 
@@ -1025,11 +1025,11 @@ Additional Details: ${decryptedContent.additionalDetails || 'None provided'}
                                         throw new Error(errorData.error || 'Failed to delete report');
                                       }
                                       
-                                      log.info('SYSTEM', 'Report deleted successfully', { reportId: report.id });
+                                      log.info(LogContext.SYSTEM, 'Report deleted successfully', { reportId: report.id });
                                       toast({ title: 'Report deleted successfully' });
                                       fetchData();
                                     } catch (error: any) {
-                                      log.error('SYSTEM', 'Report deletion failed', error, { 
+                                      log.error(LogContext.SYSTEM, 'Report deletion failed', error, { 
                                         reportId: report.id,
                                         trackingId: report.tracking_id,
                                         userId: user?.id 

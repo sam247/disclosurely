@@ -115,14 +115,13 @@ serve(async (req) => {
       );
     }
 
-    // Upsert user profile with organization and role (service role bypasses RLS)
+    // Upsert user profile with organization (service role bypasses RLS)
     const { error: profileError } = await supabaseServiceClient
       .from('profiles')
       .upsert({
         id: resolvedUserId,
         email: invitation.email,
         organization_id: invitation.organization_id,
-        role: invitation.role,
         is_active: true,
       }, { onConflict: 'id' });
 
@@ -130,6 +129,24 @@ serve(async (req) => {
       console.error('Error updating profile:', profileError);
       return new Response(
         JSON.stringify({ error: 'Failed to update user profile' }),
+        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    // Create user role entry
+    const { error: roleError } = await supabaseServiceClient
+      .from('user_roles')
+      .upsert({
+        user_id: resolvedUserId,
+        organization_id: invitation.organization_id,
+        role: invitation.role,
+        is_active: true,
+      }, { onConflict: 'user_id,organization_id' });
+
+    if (roleError) {
+      console.error('Error creating user role:', roleError);
+      return new Response(
+        JSON.stringify({ error: 'Failed to create user role' }),
         { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
