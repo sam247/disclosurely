@@ -12,7 +12,7 @@ serve(async (req) => {
     return new Response('ok', { headers: corsHeaders });
   }
 
-  console.log('accept-team-invitation function invoked');
+  console.log('accept-team-invitation function invoked with:', { token, userId });
 
   try {
     const supabaseUrl = Deno.env.get('SUPABASE_URL') ?? '';
@@ -133,7 +133,13 @@ serve(async (req) => {
       );
     }
 
-    // Create user role entry
+    console.log('Creating user role entry for:', {
+      userId: resolvedUserId,
+      organizationId: invitation.organization_id,
+      role: invitation.role
+    });
+
+    // Create user role entry (handle existing roles)
     const { error: roleError } = await supabaseServiceClient
       .from('user_roles')
       .upsert({
@@ -141,7 +147,13 @@ serve(async (req) => {
         organization_id: invitation.organization_id,
         role: invitation.role,
         is_active: true,
-      }, { onConflict: 'user_id,organization_id' });
+        granted_at: new Date().toISOString()
+      }, { 
+        onConflict: 'user_id,role,organization_id',
+        ignoreDuplicates: false 
+      });
+
+    console.log('User role creation result:', { roleError });
 
     if (roleError) {
       console.error('Error creating user role:', roleError);

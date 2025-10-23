@@ -24,7 +24,8 @@ export enum LogContext {
   MESSAGING = 'messaging',
   AI_ANALYSIS = 'ai_analysis',
   MONITORING = 'monitoring',
-  SYSTEM = 'system'
+  SYSTEM = 'system',
+  CASE_MANAGEMENT = 'case_management'
 }
 
 export interface LogEntry {
