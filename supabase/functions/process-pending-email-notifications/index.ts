@@ -7,6 +7,33 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
+// AI Logging utility
+const logToSystem = async (level: string, context: string, message: string, data?: any) => {
+  try {
+    const logEntry = {
+      timestamp: new Date().toISOString(),
+      level,
+      context,
+      message,
+      data: data || {},
+      sessionId: 'email-sender',
+      requestId: `email-send-${Date.now()}`
+    };
+
+    // Send to logs Edge Function
+    await fetch(`${Deno.env.get('SUPABASE_URL')}/functions/v1/logs`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')}`
+      },
+      body: JSON.stringify(logEntry)
+    });
+  } catch (error) {
+    console.error('Failed to log to system:', error);
+  }
+};
+
 serve(async (req) => {
   // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
@@ -15,6 +42,7 @@ serve(async (req) => {
 
   try {
     console.log('Processing pending email notifications...');
+    await logToSystem('INFO', 'EMAIL_SENDING', 'Starting email sending process');
 
     // Create Supabase client with service role key
     const supabase = createClient(
@@ -23,6 +51,9 @@ serve(async (req) => {
     );
 
     const resend = new Resend(Deno.env.get('RESEND_API_KEY'));
+    await logToSystem('INFO', 'EMAIL_SENDING', 'Resend client initialized', { 
+      hasApiKey: Boolean(Deno.env.get('RESEND_API_KEY')) 
+    });
 
     // Get pending email notifications
     const { data: pendingNotifications, error: fetchError } = await supabase
@@ -49,11 +80,13 @@ serve(async (req) => {
 
     if (fetchError) {
       console.error('Error fetching pending notifications:', fetchError);
+      await logToSystem('ERROR', 'EMAIL_SENDING', 'Failed to fetch pending notifications', { error: fetchError });
       throw fetchError;
     }
 
     if (!pendingNotifications || pendingNotifications.length === 0) {
       console.log('No pending email notifications found');
+      await logToSystem('INFO', 'EMAIL_SENDING', 'No pending notifications found');
       return new Response(JSON.stringify({ 
         message: 'No pending notifications',
         processed: 0 
@@ -63,6 +96,9 @@ serve(async (req) => {
     }
 
     console.log('Found', pendingNotifications.length, 'pending notifications');
+    await logToSystem('INFO', 'EMAIL_SENDING', `Found ${pendingNotifications.length} pending notifications`, { 
+      count: pendingNotifications.length 
+    });
 
     let emailsSent = 0;
     let emailsFailed = 0;
