@@ -408,6 +408,7 @@ ENCRYPTION_SALT=disclosurely-server-salt-2024-secure
 3. **TypeScript Build Errors**: Fixed all interface mismatches and missing imports
 4. **Audit Logs RLS**: Fixed RLS policies to allow anonymous users to insert audit logs
 5. **Security Hardening**: Added `SET search_path = public` to all SECURITY DEFINER functions
+6. **Team Invite Verification**: Fixed critical syntax error and audit trigger issues
 
 ### 🔍 **Root Causes Identified & Fixed**
 
@@ -425,6 +426,14 @@ ENCRYPTION_SALT=disclosurely-server-salt-2024-secure
 - **Root Cause**: Three `SECURITY DEFINER` functions lacked `SET search_path = public`
 - **Fix**: Created migration to add `SET search_path = public` to all relevant functions
 - **Result**: System hardened against potential schema poisoning attacks
+
+#### **Team Invite Verification Failure**
+- **Root Cause**: `accept-team-invitation` Edge Function had duplicate variable declaration causing syntax error
+- **Secondary Issue**: `log_role_change` trigger missing required `audit_logs` fields (`actor_type`, `hash`, etc.)
+- **Fix**: 
+  - Fixed duplicate destructuring in Edge Function
+  - Updated `log_role_change` trigger to include all required audit_logs fields
+- **Result**: Team invite verification now works end-to-end with proper CORS headers and 200 OK responses
 
 ### ✅ **Email Notification System Fixed**
 - **Root Cause**: Disconnect between `notifications` table (where triggers create records) and `email_notifications` table (where email processing looks for records)
@@ -471,6 +480,6 @@ ENCRYPTION_SALT=disclosurely-server-salt-2024-secure
 ---
 
 *Last Updated: October 23, 2025*
-*Version: 2.4*
+*Version: 2.5*
 *Architecture: React + Supabase + Contentful*
 *Status: Production Ready - All Critical Issues Resolved*
