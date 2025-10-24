@@ -141,109 +141,111 @@ const LinkGenerator = () => {
   const portalType = isBranded ? t('brandedSubmissionPortal') : t('unbrandedSubmissionPortal');
 
   return (
-    <Card>
-      <CardHeader>
-        <div className="flex items-center justify-between">
-          <div>
-            <CardTitle className="text-lg">{t('secureReportLink')}</CardTitle>
-            <CardDescription className="text-sm mt-1">
-              {t('yourOrganisationCanUse')}
-            </CardDescription>
+    <>
+      <Card>
+        <CardHeader>
+          <div className="flex items-center justify-between">
+            <div>
+              <CardTitle className="text-lg">{t('secureReportLink')}</CardTitle>
+              <CardDescription className="text-sm mt-1">
+                {t('yourOrganisationCanUse')}
+              </CardDescription>
+            </div>
+            <Badge variant={primaryLink.is_active ? "default" : "secondary"}>
+              {primaryLink.is_active ? t('active') : t('inactive')}
+            </Badge>
           </div>
-          <Badge variant={primaryLink.is_active ? "default" : "secondary"}>
-            {primaryLink.is_active ? t('active') : t('inactive')}
-          </Badge>
-        </div>
-      </CardHeader>
-      <CardContent>
-        <div className="flex items-center justify-between p-4 bg-muted/50 rounded-lg border">
-          <div className="flex-1 min-w-0">
-            <p className="text-sm font-medium mb-1">{portalType}</p>
-            <p className="text-xs text-muted-foreground">
-              {t('usedTimes', { count: primaryLink.usage_count || 0 })}
-            </p>
-            {/* Show full URL for better guidance */}
-            <div className="mt-2">
-              <p className="text-xs text-muted-foreground mb-1">Your secure link URL:</p>
-              <code className="text-xs bg-background px-2 py-1 rounded border font-mono break-all">
-                {linkUrl}
+        </CardHeader>
+        <CardContent>
+          <div className="flex items-center justify-between p-4 bg-muted/50 rounded-lg border">
+            <div className="flex-1 min-w-0">
+              <p className="text-sm font-medium mb-1">{portalType}</p>
+              <p className="text-xs text-muted-foreground">
+                {t('usedTimes', { count: primaryLink.usage_count || 0 })}
+              </p>
+              {/* Show full URL for better guidance */}
+              <div className="mt-2">
+                <p className="text-xs text-muted-foreground mb-1">Your secure link URL:</p>
+                <code className="text-xs bg-background px-2 py-1 rounded border font-mono break-all">
+                  {linkUrl}
+                </code>
+              </div>
+            </div>
+            <div className="flex items-center gap-2 ml-4">
+              <code className="text-sm bg-background px-3 py-1.5 rounded border font-mono">
+                /{primaryLink.link_token}
               </code>
+              <Button
+                size="sm"
+                onClick={() => copyToClipboard(linkUrl)}
+                className="whitespace-nowrap"
+              >
+                {t('copyLink')}
+              </Button>
             </div>
           </div>
-          <div className="flex items-center gap-2 ml-4">
-            <code className="text-sm bg-background px-3 py-1.5 rounded border font-mono">
-              /{primaryLink.link_token}
-            </code>
-            <Button
-              size="sm"
-              onClick={() => copyToClipboard(linkUrl)}
-              className="whitespace-nowrap"
-            >
-              {t('copyLink')}
-            </Button>
-          </div>
-        </div>
-      </CardContent>
-    </Card>
+        </CardContent>
+      </Card>
 
-    {/* Custom Domain Information */}
-    {primaryDomain && (
-      <Alert>
-        <Info className="h-4 w-4" />
-        <AlertDescription>
-          <strong>Custom Domain Active:</strong> Your secure links now use <code className="bg-muted px-1 rounded">{primaryDomain}</code> instead of the default domain. 
-          Make sure this domain is properly configured in your DNS provider and Vercel project settings.
-        </AlertDescription>
-      </Alert>
-    )}
+      {/* Custom Domain Information */}
+      {primaryDomain && (
+        <Alert>
+          <Info className="h-4 w-4" />
+          <AlertDescription>
+            <strong>Custom Domain Active:</strong> Your secure links now use <code className="bg-muted px-1 rounded">{primaryDomain}</code> instead of the default domain. 
+            Make sure this domain is properly configured in your DNS provider.
+          </AlertDescription>
+        </Alert>
+      )}
 
-    {/* How Custom Domains Work */}
-    <Card>
-      <CardHeader>
-        <CardTitle className="text-lg">How Custom Domains Work</CardTitle>
-        <CardDescription>
-          Understanding how your secure links are structured
-        </CardDescription>
-      </CardHeader>
-      <CardContent className="space-y-4">
-        <div className="space-y-2">
-          <h4 className="font-medium">Default Setup:</h4>
-          <code className="block bg-muted p-2 rounded text-sm">
-            https://secure.disclosurely.com/secure/tool/submit/{primaryLink.link_token}
-          </code>
-        </div>
-        
-        {primaryDomain ? (
+      {/* How Custom Domains Work */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-lg">How Custom Domains Work</CardTitle>
+          <CardDescription>
+            Understanding how your secure links are structured
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
           <div className="space-y-2">
-            <h4 className="font-medium">With Your Custom Domain:</h4>
+            <h4 className="font-medium">Default Setup:</h4>
             <code className="block bg-muted p-2 rounded text-sm">
-              https://{primaryDomain}/secure/tool/submit/{primaryLink.link_token}
+              https://secure.disclosurely.com/secure/tool/submit/{primaryLink.link_token}
             </code>
+          </div>
+          
+          {primaryDomain ? (
+            <div className="space-y-2">
+              <h4 className="font-medium">With Your Custom Domain:</h4>
+              <code className="block bg-muted p-2 rounded text-sm">
+                https://{primaryDomain}/secure/tool/submit/{primaryLink.link_token}
+              </code>
+              <p className="text-sm text-muted-foreground">
+                Your custom domain replaces the default domain entirely. The path structure remains the same.
+              </p>
+            </div>
+          ) : (
+            <div className="space-y-2">
+              <h4 className="font-medium">To Use a Custom Domain:</h4>
+              <ol className="text-sm text-muted-foreground space-y-1 ml-4">
+                <li>1. Go to <a href="/dashboard/settings" className="text-blue-600 hover:underline">Settings → Custom Domains</a></li>
+                <li>2. Add your domain (e.g., secure.yourcompany.com)</li>
+                <li>3. Set up DNS CNAME record pointing to secure.disclosurely.com</li>
+                <li>4. Verify and activate the domain</li>
+                <li>5. Set it as primary to use for all secure links</li>
+              </ol>
+            </div>
+          )}
+          
+          <div className="pt-2 border-t">
             <p className="text-sm text-muted-foreground">
-              Your custom domain replaces the default domain entirely. The path structure remains the same.
+              <strong>Note:</strong> Once you add a custom domain to our system and configure DNS, 
+              we automatically handle the technical setup on our end.
             </p>
           </div>
-        ) : (
-          <div className="space-y-2">
-            <h4 className="font-medium">To Use a Custom Domain:</h4>
-            <ol className="text-sm text-muted-foreground space-y-1 ml-4">
-              <li>1. Go to <a href="/dashboard/settings" className="text-blue-600 hover:underline">Settings → Custom Domains</a></li>
-              <li>2. Add your domain (e.g., secure.yourcompany.com)</li>
-              <li>3. Set up DNS CNAME record pointing to secure.disclosurely.com</li>
-              <li>4. Verify and activate the domain</li>
-              <li>5. Set it as primary to use for all secure links</li>
-            </ol>
-          </div>
-        )}
-        
-        <div className="pt-2 border-t">
-          <p className="text-sm text-muted-foreground">
-            <strong>Important:</strong> Custom domains must be added to your Vercel project settings to work properly. 
-            Contact support if you need help with domain configuration.
-          </p>
-        </div>
-      </CardContent>
-    </Card>
+        </CardContent>
+      </Card>
+    </>
   );
 };
 
