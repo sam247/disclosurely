@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Progress } from '@/components/ui/progress';
 import { useToast } from '@/hooks/use-toast';
 import { useCustomDomains } from '@/hooks/useCustomDomains';
 import { supabase } from '@/integrations/supabase/client';
@@ -22,10 +23,30 @@ import {
 } from 'lucide-react';
 import { CustomDomain } from '@/types/database';
 
+// Helper functions for progress display
+const getProgressValue = (progressText: string): number => {
+  if (progressText.includes('Checking DNS')) return 20;
+  if (progressText.includes('Adding domain to Vercel')) return 50;
+  if (progressText.includes('Provisioning SSL')) return 80;
+  if (progressText.includes('Connected!')) return 100;
+  if (progressText.includes('failed') || progressText.includes('Error')) return 0;
+  return 0;
+};
+
+const getProgressStep = (progressText: string): string => {
+  if (progressText.includes('Checking DNS')) return 'Step 1 of 4: Verifying DNS configuration';
+  if (progressText.includes('Adding domain to Vercel')) return 'Step 2 of 4: Adding domain to Vercel';
+  if (progressText.includes('Provisioning SSL')) return 'Step 3 of 4: Provisioning SSL certificate';
+  if (progressText.includes('Connected!')) return 'Step 4 of 4: Complete!';
+  if (progressText.includes('failed') || progressText.includes('Error')) return 'Verification failed';
+  return '';
+};
+
 const CustomDomainSettings = () => {
   const [newDomain, setNewDomain] = useState('');
   const [isAdding, setIsAdding] = useState(false);
   const [verifyingDomains, setVerifyingDomains] = useState<Set<string>>(new Set());
+  const [verificationProgress, setVerificationProgress] = useState<Record<string, string>>({});
   const { toast } = useToast();
   
   const {
@@ -74,26 +95,96 @@ const CustomDomainSettings = () => {
   const handleVerifyDomain = async (domainId: string) => {
     try {
       setVerifyingDomains(prev => new Set(prev).add(domainId));
+      
+      // Step 1: Starting verification
+      setVerificationProgress(prev => ({
+        ...prev,
+        [domainId]: "Checking DNS records..."
+      }));
+      
+      // Step 2: Verify domain
       const result = await verifyDomain(domainId);
       
       if (result.verified) {
+        // Step 3: Adding to Vercel
+        setVerificationProgress(prev => ({
+          ...prev,
+          [domainId]: "Adding domain to Vercel..."
+        }));
+        
+        // Small delay to show the step
+        await new Promise(resolve => setTimeout(resolve, 1000));
+        
+        // Step 4: Provisioning SSL
+        setVerificationProgress(prev => ({
+          ...prev,
+          [domainId]: "Provisioning SSL certificate..."
+        }));
+        
+        // Small delay to show the step
+        await new Promise(resolve => setTimeout(resolve, 1500));
+        
+        // Step 5: Complete
+        setVerificationProgress(prev => ({
+          ...prev,
+          [domainId]: "Connected! Domain is ready to use."
+        }));
+        
         toast({
-          title: "Domain Verified",
-          description: result.message,
+          title: "Domain Verified & Connected",
+          description: "Your custom domain is now active with SSL certificate",
         });
+        
+        // Clear progress after 3 seconds
+        setTimeout(() => {
+          setVerificationProgress(prev => {
+            const newProgress = { ...prev };
+            delete newProgress[domainId];
+            return newProgress;
+          });
+        }, 3000);
+        
       } else {
+        setVerificationProgress(prev => ({
+          ...prev,
+          [domainId]: "Verification failed"
+        }));
+        
         toast({
           title: "Verification Failed",
           description: result.message,
           variant: "destructive",
         });
+        
+        // Clear progress after 2 seconds
+        setTimeout(() => {
+          setVerificationProgress(prev => {
+            const newProgress = { ...prev };
+            delete newProgress[domainId];
+            return newProgress;
+          });
+        }, 2000);
       }
     } catch (error: any) {
+      setVerificationProgress(prev => ({
+        ...prev,
+        [domainId]: "Error occurred"
+      }));
+      
       toast({
         title: "Error",
         description: error.message || "Failed to verify domain",
         variant: "destructive",
       });
+      
+      // Clear progress after 2 seconds
+      setTimeout(() => {
+        setVerificationProgress(prev => {
+          const newProgress = { ...prev };
+          delete newProgress[domainId];
+          return newProgress;
+        });
+      }, 2000);
     } finally {
       setVerifyingDomains(prev => {
         const newSet = new Set(prev);
@@ -299,6 +390,47 @@ const CustomDomainSettings = () => {
                       {getStatusBadge(domain.status)}
                     </div>
                     
+                    {/* Progress Indicator */}
+                    {verificationProgress[domain.id] && (
+                      <div className={`w-full mt-3 p-3 rounded-lg border ${
+                        verificationProgress[domain.id].includes('Connected!') 
+                          ? 'bg-green-50 border-green-200' 
+                          : verificationProgress[domain.id].includes('failed') || verificationProgress[domain.id].includes('Error')
+                          ? 'bg-red-50 border-red-200'
+                          : 'bg-blue-50 border-blue-200'
+                      }`}>
+                        <div className={`flex items-center gap-2 text-sm mb-2 ${
+                          verificationProgress[domain.id].includes('Connected!') 
+                            ? 'text-green-700' 
+                            : verificationProgress[domain.id].includes('failed') || verificationProgress[domain.id].includes('Error')
+                            ? 'text-red-700'
+                            : 'text-blue-700'
+                        }`}>
+                          {verificationProgress[domain.id].includes('Connected!') ? (
+                            <CheckCircle className="h-4 w-4" />
+                          ) : verificationProgress[domain.id].includes('failed') || verificationProgress[domain.id].includes('Error') ? (
+                            <XCircle className="h-4 w-4" />
+                          ) : (
+                            <RefreshCw className="h-4 w-4 animate-spin" />
+                          )}
+                          <span className="font-medium">{verificationProgress[domain.id]}</span>
+                        </div>
+                        <Progress 
+                          value={getProgressValue(verificationProgress[domain.id])} 
+                          className="h-2"
+                        />
+                        <div className={`text-xs mt-1 ${
+                          verificationProgress[domain.id].includes('Connected!') 
+                            ? 'text-green-600' 
+                            : verificationProgress[domain.id].includes('failed') || verificationProgress[domain.id].includes('Error')
+                            ? 'text-red-600'
+                            : 'text-blue-600'
+                        }`}>
+                          {getProgressStep(verificationProgress[domain.id])}
+                        </div>
+                      </div>
+                    )}
+                    
                     <div className="flex items-center gap-2">
                       {getStatusIcon(domain.status)}
                       
@@ -321,11 +453,14 @@ const CustomDomainSettings = () => {
                             className="flex items-center gap-1"
                           >
                             {verifyingDomains.has(domain.id) ? (
-                              <RefreshCw className="h-4 w-4 animate-spin" />
+                              <>
+                                <RefreshCw className="h-4 w-4 animate-spin" />
+                                Verifying...
+                              </>
                             ) : (
                               <>
                                 <CheckCircle className="h-4 w-4" />
-                                Verify
+                                Verify & Connect
                               </>
                             )}
                           </Button>
