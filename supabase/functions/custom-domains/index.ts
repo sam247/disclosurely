@@ -388,15 +388,41 @@ async function handleVerifyDomain(supabaseClient: any, organizationId: string, b
         }
       });
     } else {
-      // Log successful verification
-      await supabaseClient.functions.invoke('ai-logger', {
-        body: {
-          level: 'info',
-          context: 'custom-domains',
-          message: `Domain verification successful: ${domain.domain_name}`,
-          data: { domainId, domainName: domain.domain_name, successfulMethods: successfulVerifications }
-        }
-      });
+                // Log successful verification
+                await supabaseClient.functions.invoke('ai-logger', {
+                  body: {
+                    level: 'info',
+                    context: 'custom-domains',
+                    message: `Domain verification successful: ${domain.domain_name}`,
+                    data: { domainId, domainName: domain.domain_name, successfulMethods: successfulVerifications }
+                  }
+                });
+
+                // Automatically add verified domain to Vercel
+                try {
+                  await supabaseClient.functions.invoke('vercel-dns', {
+                    body: { domainId: domainId }
+                  });
+                  
+                  await supabaseClient.functions.invoke('ai-logger', {
+                    body: {
+                      level: 'info',
+                      context: 'custom-domains',
+                      message: `Domain automatically added to Vercel: ${domain.domain_name}`,
+                      data: { domainId, domainName: domain.domain_name }
+                    }
+                  });
+                } catch (vercelError) {
+                  console.error('Failed to add domain to Vercel:', vercelError);
+                  await supabaseClient.functions.invoke('ai-logger', {
+                    body: {
+                      level: 'warn',
+                      context: 'custom-domains',
+                      message: `Domain verified but Vercel addition failed: ${domain.domain_name}`,
+                      data: { domainId, domainName: domain.domain_name, error: vercelError.message }
+                    }
+                  });
+                }
     }
 
     // Update domain status
