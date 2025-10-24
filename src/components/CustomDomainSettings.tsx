@@ -6,6 +6,7 @@ import { Badge } from '@/components/ui/badge';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { useToast } from '@/hooks/use-toast';
 import { useCustomDomains } from '@/hooks/useCustomDomains';
+import { supabase } from '@/integrations/supabase/client';
 import { 
   Plus, 
   CheckCircle, 
@@ -16,7 +17,8 @@ import {
   Star,
   ExternalLink,
   Copy,
-  RefreshCw
+  RefreshCw,
+  Zap
 } from 'lucide-react';
 import { CustomDomain } from '@/types/database';
 
@@ -24,6 +26,7 @@ const CustomDomainSettings = () => {
   const [newDomain, setNewDomain] = useState('');
   const [isAdding, setIsAdding] = useState(false);
   const [verifyingDomains, setVerifyingDomains] = useState<Set<string>>(new Set());
+  const [automatingDomains, setAutomatingDomains] = useState<Set<string>>(new Set());
   const { toast } = useToast();
   
   const {
@@ -93,6 +96,49 @@ const CustomDomainSettings = () => {
       });
     } finally {
       setVerifyingDomains(prev => {
+        const newSet = new Set(prev);
+        newSet.delete(domainId);
+        return newSet;
+      });
+    }
+  };
+
+  const handleAutomatedDNS = async (domainId: string) => {
+    try {
+      setAutomatingDomains(prev => new Set(prev).add(domainId));
+      
+      const { data, error } = await supabase.functions.invoke('vercel-dns', {
+        method: 'POST',
+        body: { domainId },
+      });
+
+      if (error) {
+        throw error;
+      }
+
+      if (data.success) {
+        toast({
+          title: "DNS Automated",
+          description: "DNS record created automatically via Vercel",
+        });
+        
+        // Refresh domains list
+        await fetchDomains();
+      } else {
+        toast({
+          title: "Automation Failed",
+          description: data.message || "Failed to automate DNS setup",
+          variant: "destructive",
+        });
+      }
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to automate DNS setup",
+        variant: "destructive",
+      });
+    } finally {
+      setAutomatingDomains(prev => {
         const newSet = new Set(prev);
         newSet.delete(domainId);
         return newSet;
@@ -244,6 +290,15 @@ const CustomDomainSettings = () => {
               Current default: <code className="bg-muted px-1 rounded">secure.disclosurely.com</code>
             </AlertDescription>
           </Alert>
+
+          {/* Automated DNS Info */}
+          <Alert>
+            <Zap className="h-4 w-4" />
+            <AlertDescription>
+              <strong>Automated Setup:</strong> Use "Auto Setup" to automatically create DNS records via Vercel. 
+              Manual setup is also available if you prefer to manage DNS yourself.
+            </AlertDescription>
+          </Alert>
         </CardContent>
       </Card>
 
@@ -287,18 +342,36 @@ const CustomDomainSettings = () => {
                       )}
                       
                       {domain.status === 'pending' && (
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          onClick={() => handleVerifyDomain(domain.id)}
-                          disabled={verifyingDomains.has(domain.id)}
-                        >
-                          {verifyingDomains.has(domain.id) ? (
-                            <RefreshCw className="h-4 w-4 animate-spin" />
-                          ) : (
-                            'Verify'
-                          )}
-                        </Button>
+                        <div className="flex gap-2">
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => handleAutomatedDNS(domain.id)}
+                            disabled={automatingDomains.has(domain.id)}
+                            className="flex items-center gap-1"
+                          >
+                            {automatingDomains.has(domain.id) ? (
+                              <RefreshCw className="h-4 w-4 animate-spin" />
+                            ) : (
+                              <>
+                                <Zap className="h-4 w-4" />
+                                Auto Setup
+                              </>
+                            )}
+                          </Button>
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => handleVerifyDomain(domain.id)}
+                            disabled={verifyingDomains.has(domain.id)}
+                          >
+                            {verifyingDomains.has(domain.id) ? (
+                              <RefreshCw className="h-4 w-4 animate-spin" />
+                            ) : (
+                              'Verify'
+                            )}
+                          </Button>
+                        </div>
                       )}
                       
                       {domain.status === 'active' && !domain.is_primary && (

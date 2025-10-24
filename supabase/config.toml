@@ -42,5 +42,8 @@ verify_jwt = false
 [functions.custom-domains]
 verify_jwt = true
 
+[functions.vercel-dns]
+verify_jwt = true
+
 [functions.get-status-timeline]
 verify_jwt = false
