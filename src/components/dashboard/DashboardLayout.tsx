@@ -8,8 +8,8 @@ import { useAuth } from '@/hooks/useAuth';
 import { useUserRoles } from '@/hooks/useUserRoles';
 import { useNavigate } from 'react-router-dom';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { Button } from '@/components/ui/button';
 import SubscriptionManagement from '@/components/SubscriptionManagement';
+import ProfileSettings from './ProfileSettings';
 import { supabase } from '@/integrations/supabase/client';
 import NotificationSystem from '@/components/NotificationSystem';
 import { useTranslation } from 'react-i18next';
@@ -24,6 +24,7 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
   const navigate = useNavigate();
   const { t } = useTranslation();
   const [showUpgradeModal, setShowUpgradeModal] = useState(false);
+  const [showProfileModal, setShowProfileModal] = useState(false);
   const [lockedFeature, setLockedFeature] = useState('');
   const [firstName, setFirstName] = useState('');
 
@@ -94,7 +95,7 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
               <Button
                 variant="ghost"
                 size="sm"
-                onClick={() => navigate('/dashboard/settings')}
+                onClick={() => setShowProfileModal(true)}
                 className="gap-2"
               >
                 <User className="h-4 w-4" />
@@ -118,6 +119,19 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
           </main>
         </div>
       </div>
+
+      {/* Profile Modal */}
+      <Dialog open={showProfileModal} onOpenChange={setShowProfileModal}>
+        <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Profile Settings</DialogTitle>
+            <DialogDescription>
+              Manage your personal information and account settings
+            </DialogDescription>
+          </DialogHeader>
+          <ProfileSettings />
+        </DialogContent>
+      </Dialog>
 
       {/* Upgrade Modal */}
       <Dialog open={showUpgradeModal} onOpenChange={setShowUpgradeModal}>

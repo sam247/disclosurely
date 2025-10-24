@@ -9,6 +9,7 @@ import DashboardLayout from './components/dashboard/DashboardLayout';
 import DashboardView from './components/dashboard/DashboardView';
 import AIHelperView from './components/dashboard/AIHelperView';
 import SettingsView from './components/dashboard/SettingsView';
+import OrganizationSettings from './components/dashboard/OrganizationSettings';
 import TeamView from './components/dashboard/TeamView';
 import BrandingView from './components/dashboard/BrandingView';
 import SecureLinkView from './components/dashboard/SecureLinkView';
@@ -166,7 +167,7 @@ const AppContent = () => {
           element={
             <ProtectedRoute>
               <DashboardLayout>
-                <SettingsView />
+                <OrganizationSettings />
               </DashboardLayout>
             </ProtectedRoute>
           } 
