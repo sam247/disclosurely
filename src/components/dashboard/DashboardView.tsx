@@ -5,6 +5,7 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } f
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 import { Badge } from '@/components/ui/badge';
 import { useAuth } from '@/hooks/useAuth';
+import { useUserRoles } from '@/hooks/useUserRoles';
 import { useCustomDomain } from '@/hooks/useCustomDomain';
 import { useOrganization } from '@/hooks/useOrganization';
 import { useToast } from '@/hooks/use-toast';
@@ -131,6 +132,7 @@ interface Report {
 
 const DashboardView = () => {
   const { user } = useAuth();
+  const { isOrgAdmin, loading: rolesLoading } = useUserRoles();
   const { customDomain, organizationId } = useCustomDomain();
   const { organization } = useOrganization();
   const { toast } = useToast();
@@ -198,7 +200,7 @@ const DashboardView = () => {
       
       try {
         // Try with AI fields first
-        const { data: reportsWithAI, error: reportsError } = await supabase
+        let reportsQuery = supabase
           .from('reports')
           .select('id, title, tracking_id, status, created_at, encrypted_content, encryption_key_hash, priority, report_type, submitted_by_email, tags, assigned_to, ai_risk_score, ai_risk_level, ai_likelihood_score, ai_impact_score, ai_risk_assessment, ai_assessed_at, manual_risk_level')
           .eq('organization_id', profile.organization_id)
@@ -206,6 +208,17 @@ const DashboardView = () => {
           .is('deleted_at', null)
           .order('created_at', { ascending: false })
           .limit(20);
+
+        // Add filtering for team members
+        console.log('DashboardView - isOrgAdmin:', isOrgAdmin, 'rolesLoading:', rolesLoading);
+        if (!isOrgAdmin && !rolesLoading) {
+          console.log('DashboardView - Filtering reports for team member:', user?.id);
+          reportsQuery = reportsQuery.eq('assigned_to', user?.id);
+        } else {
+          console.log('DashboardView - Showing all reports for org admin');
+        }
+
+        const { data: reportsWithAI, error: reportsError } = await reportsQuery;
 
         if (reportsError) {
           console.log('AI fields query failed, falling back to basic query:', reportsError);
@@ -223,14 +236,22 @@ const DashboardView = () => {
           .order('created_at', { ascending: false })
           .limit(20);
 
-        if (archivedError) throw archivedError;
-        archivedData = archivedWithAI;
+        // Add filtering for archived reports
+        if (!isOrgAdmin && !rolesLoading) {
+          console.log('DashboardView - Filtering archived reports for team member:', user?.id);
+          // Note: We can't modify the query after it's executed, so we'll filter the results
+          if (archivedWithAI) {
+            archivedData = archivedWithAI.filter(report => report.assigned_to === user?.id);
+          }
+        } else {
+          archivedData = archivedWithAI;
+        }
 
       } catch (aiError) {
         console.log('AI fields not available, falling back to basic query:', aiError);
         
         // Fallback to basic query without AI fields
-        const { data: reportsBasic, error: reportsBasicError } = await supabase
+        let reportsBasicQuery = supabase
           .from('reports')
           .select('id, title, tracking_id, status, created_at, encrypted_content, encryption_key_hash, priority, report_type, submitted_by_email, tags, assigned_to, manual_risk_level')
           .eq('organization_id', profile.organization_id)
@@ -238,6 +259,14 @@ const DashboardView = () => {
           .is('deleted_at', null)
           .order('created_at', { ascending: false })
           .limit(20);
+
+        // Add filtering for team members in fallback query
+        if (!isOrgAdmin && !rolesLoading) {
+          console.log('DashboardView - Fallback: Filtering reports for team member:', user?.id);
+          reportsBasicQuery = reportsBasicQuery.eq('assigned_to', user?.id);
+        }
+
+        const { data: reportsBasic, error: reportsBasicError } = await reportsBasicQuery;
 
         if (reportsBasicError) throw reportsBasicError;
         reportsData = reportsBasic;
@@ -252,7 +281,14 @@ const DashboardView = () => {
           .limit(20);
 
         if (archivedBasicError) throw archivedBasicError;
-        archivedData = archivedBasic;
+        
+        // Add filtering for archived reports in fallback
+        if (!isOrgAdmin && !rolesLoading) {
+          console.log('DashboardView - Fallback: Filtering archived reports for team member:', user?.id);
+          archivedData = archivedBasic?.filter(report => report.assigned_to === user?.id) || [];
+        } else {
+          archivedData = archivedBasic;
+        }
       }
 
       console.log('Reports fetched:', reportsData);
