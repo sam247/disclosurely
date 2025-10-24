@@ -10,7 +10,7 @@
       ],
       "destination": "https://disclosurely.com/$1",
       "permanent": true
-    },
+    }
   ],
   "headers": [
     {
