@@ -56,8 +56,7 @@ serve(async (req) => {
     )
 
     const { method } = req
-    const url = new URL(req.url)
-    const path = url.pathname.split('/').pop()
+    const body = await req.json()
 
     // Get user from JWT
     const { data: { user }, error: authError } = await supabaseClient.auth.getUser()
@@ -98,23 +97,29 @@ serve(async (req) => {
       )
     }
 
-    switch (method) {
-      case 'GET':
-        return await handleGetDomains(supabaseClient, profile.organization_id, path)
+    // Route based on action in body
+    const { action } = body || {}
+
+    switch (action) {
+      case 'list':
+        return await handleGetDomains(supabaseClient, profile.organization_id)
       
-      case 'POST':
-        return await handleAddDomain(supabaseClient, profile.organization_id, user.id, req)
+      case 'add':
+        return await handleAddDomain(supabaseClient, profile.organization_id, user.id, body)
       
-      case 'PUT':
-        return await handleUpdateDomain(supabaseClient, profile.organization_id, path, req)
+      case 'update':
+        return await handleUpdateDomain(supabaseClient, profile.organization_id, body)
       
-      case 'DELETE':
-        return await handleDeleteDomain(supabaseClient, profile.organization_id, path)
+      case 'delete':
+        return await handleDeleteDomain(supabaseClient, profile.organization_id, body)
+      
+      case 'verify':
+        return await handleVerifyDomain(supabaseClient, profile.organization_id, body)
       
       default:
         return new Response(
-          JSON.stringify({ error: 'Method not allowed' }),
-          { status: 405, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+          JSON.stringify({ error: 'Invalid action' }),
+          { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
         )
     }
 
@@ -127,22 +132,7 @@ serve(async (req) => {
   }
 })
 
-async function handleGetDomains(supabaseClient: any, organizationId: string, path: string) {
-  if (path === 'verify') {
-    // Handle domain verification check
-    const url = new URL(supabaseClient.supabaseUrl)
-    const domainId = url.searchParams.get('domainId')
-    
-    if (!domainId) {
-      return new Response(
-        JSON.stringify({ error: 'Domain ID required' }),
-        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      )
-    }
-
-    return await verifyDomain(supabaseClient, organizationId, domainId)
-  }
-
+async function handleGetDomains(supabaseClient: any, organizationId: string) {
   // Get all domains for organization
   const { data: domains, error } = await supabaseClient
     .from('custom_domains')
@@ -163,8 +153,8 @@ async function handleGetDomains(supabaseClient: any, organizationId: string, pat
   )
 }
 
-async function handleAddDomain(supabaseClient: any, organizationId: string, userId: string, req: Request) {
-  const { domain_name } = await req.json()
+async function handleAddDomain(supabaseClient: any, organizationId: string, userId: string, body: any) {
+  const { domain_name } = body
 
   if (!domain_name) {
     return new Response(
@@ -252,9 +242,8 @@ async function handleAddDomain(supabaseClient: any, organizationId: string, user
   )
 }
 
-async function handleUpdateDomain(supabaseClient: any, organizationId: string, path: string, req: Request) {
-  const domainId = path
-  const updates = await req.json()
+async function handleUpdateDomain(supabaseClient: any, organizationId: string, body: any) {
+  const { domainId, updates } = body
 
   if (!domainId) {
     return new Response(
@@ -285,8 +274,8 @@ async function handleUpdateDomain(supabaseClient: any, organizationId: string, p
   )
 }
 
-async function handleDeleteDomain(supabaseClient: any, organizationId: string, path: string) {
-  const domainId = path
+async function handleDeleteDomain(supabaseClient: any, organizationId: string, body: any) {
+  const { domainId } = body
 
   if (!domainId) {
     return new Response(
@@ -315,7 +304,16 @@ async function handleDeleteDomain(supabaseClient: any, organizationId: string, p
   )
 }
 
-async function verifyDomain(supabaseClient: any, organizationId: string, domainId: string): Promise<Response> {
+async function handleVerifyDomain(supabaseClient: any, organizationId: string, body: any): Promise<Response> {
+  const { domainId } = body
+
+  if (!domainId) {
+    return new Response(
+      JSON.stringify({ error: 'Domain ID required' }),
+      { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+    )
+  }
+
   // Get domain details
   const { data: domain, error: fetchError } = await supabaseClient
     .from('custom_domains')

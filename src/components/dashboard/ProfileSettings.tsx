@@ -10,7 +10,7 @@ import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 
 const ProfileSettings = () => {
-  const { user, refreshUser } = useAuth();
+  const { user } = useAuth();
   const { t } = useTranslation();
   const { toast } = useToast();
   const [isUpdating, setIsUpdating] = useState(false);
@@ -51,8 +51,6 @@ const ProfileSettings = () => {
         throw profileError;
       }
 
-      await refreshUser();
-      
       toast({
         title: "Profile Updated",
         description: "Your profile has been updated successfully",

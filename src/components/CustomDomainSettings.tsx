@@ -33,6 +33,7 @@ const CustomDomainSettings = () => {
     domains,
     loading,
     error,
+    fetchDomains,
     addDomain,
     verifyDomain,
     activateDomain,

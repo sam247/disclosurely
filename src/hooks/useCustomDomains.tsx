@@ -31,7 +31,9 @@ export const useCustomDomains = () => {
       setError(null);
 
       const { data, error } = await supabase.functions.invoke('custom-domains', {
-        method: 'GET',
+        body: {
+          action: 'list'
+        }
       });
 
       if (error) {
@@ -50,8 +52,10 @@ export const useCustomDomains = () => {
   const addDomain = async (domainName: string): Promise<AddDomainResult> => {
     try {
       const { data, error } = await supabase.functions.invoke('custom-domains', {
-        method: 'POST',
-        body: { domain_name: domainName },
+        body: {
+          action: 'add',
+          domain_name: domainName
+        }
       });
 
       if (error) {
@@ -71,8 +75,10 @@ export const useCustomDomains = () => {
   const verifyDomain = async (domainId: string): Promise<DomainVerificationResult> => {
     try {
       const { data, error } = await supabase.functions.invoke('custom-domains', {
-        method: 'GET',
-        url: `custom-domains/verify?domainId=${domainId}`,
+        body: {
+          action: 'verify',
+          domainId: domainId
+        }
       });
 
       if (error) {
@@ -92,13 +98,15 @@ export const useCustomDomains = () => {
   const activateDomain = async (domainId: string): Promise<CustomDomain> => {
     try {
       const { data, error } = await supabase.functions.invoke('custom-domains', {
-        method: 'PUT',
-        url: `custom-domains/${domainId}`,
-        body: { 
-          is_active: true,
-          status: 'active',
-          activated_at: new Date().toISOString()
-        },
+        body: {
+          action: 'update',
+          domainId: domainId,
+          updates: { 
+            is_active: true,
+            status: 'active',
+            activated_at: new Date().toISOString()
+          }
+        }
       });
 
       if (error) {
@@ -118,8 +126,10 @@ export const useCustomDomains = () => {
   const deleteDomain = async (domainId: string): Promise<void> => {
     try {
       const { error } = await supabase.functions.invoke('custom-domains', {
-        method: 'DELETE',
-        url: `custom-domains/${domainId}`,
+        body: {
+          action: 'delete',
+          domainId: domainId
+        }
       });
 
       if (error) {
@@ -140,17 +150,21 @@ export const useCustomDomains = () => {
       const primaryDomain = domains.find(d => d.is_primary);
       if (primaryDomain) {
         await supabase.functions.invoke('custom-domains', {
-          method: 'PUT',
-          url: `custom-domains/${primaryDomain.id}`,
-          body: { is_primary: false },
+          body: {
+            action: 'update',
+            domainId: primaryDomain.id,
+            updates: { is_primary: false }
+          }
         });
       }
 
       // Set new primary domain
       const { data, error } = await supabase.functions.invoke('custom-domains', {
-        method: 'PUT',
-        url: `custom-domains/${domainId}`,
-        body: { is_primary: true },
+        body: {
+          action: 'update',
+          domainId: domainId,
+          updates: { is_primary: true }
+        }
       });
 
       if (error) {
