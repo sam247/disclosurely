@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from './useAuth';
 import { CustomDomain } from '@/types/database';
 
 export interface DomainVerificationResult {
@@ -24,6 +25,8 @@ export const useCustomDomains = () => {
   const [domains, setDomains] = useState<CustomDomain[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const { session } = useAuth();
+
 
   const fetchDomains = async () => {
     try {
@@ -51,6 +54,9 @@ export const useCustomDomains = () => {
 
   const addDomain = async (domainName: string): Promise<AddDomainResult> => {
     try {
+      console.log('🔍 Starting addDomain with:', domainName);
+      console.log('🔍 Current session:', session?.user?.id);
+      
       const { data, error } = await supabase.functions.invoke('custom-domains', {
         body: {
           action: 'add',
@@ -58,22 +64,28 @@ export const useCustomDomains = () => {
         }
       });
 
+      console.log('🔍 API Response:', { data, error });
+
       if (error) {
+        console.error('❌ Supabase error:', error);
         throw error;
       }
 
+      console.log('✅ Domain added successfully, refreshing list...');
       // Refresh domains list
       await fetchDomains();
       
       return data;
     } catch (err) {
-      console.error('Error adding domain:', err);
+      console.error('❌ Error adding domain:', err);
       throw err;
     }
   };
 
   const verifyDomain = async (domainId: string): Promise<DomainVerificationResult> => {
     try {
+      console.log('🔍 Starting verifyDomain with:', domainId);
+      
       const { data, error } = await supabase.functions.invoke('custom-domains', {
         body: {
           action: 'verify',
@@ -81,16 +93,20 @@ export const useCustomDomains = () => {
         }
       });
 
+      console.log('🔍 Verify API Response:', { data, error });
+
       if (error) {
+        console.error('❌ Supabase verify error:', error);
         throw error;
       }
 
+      console.log('✅ Domain verified successfully, refreshing list...');
       // Refresh domains list to get updated status
       await fetchDomains();
       
       return data;
     } catch (err) {
-      console.error('Error verifying domain:', err);
+      console.error('❌ Error verifying domain:', err);
       throw err;
     }
   };
