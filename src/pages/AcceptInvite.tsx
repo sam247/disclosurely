@@ -220,7 +220,7 @@ const AcceptInvite = () => {
 
       // Now verify with Supabase Auth to confirm the user
       // Skip Supabase verifyOtp since we issue our own OTP; allow brief propagation before linking
-      await new Promise((resolve) => setTimeout(resolve, 1500));
+      await new Promise((resolve) => setTimeout(resolve, 500));
 
       // Accept the invitation via edge function with retry (handles eventual consistency)
       let acceptError: any = null;
@@ -230,7 +230,7 @@ const AcceptInvite = () => {
         });
         acceptError = error;
         if (!acceptError) break;
-        await new Promise((r) => setTimeout(r, 750 * attempt));
+        await new Promise((r) => setTimeout(r, 300 * attempt));
       }
 
       if (acceptError) {

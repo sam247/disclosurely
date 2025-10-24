@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { LogOut, User } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
+import { useUserRoles } from '@/hooks/useUserRoles';
 import { useNavigate } from 'react-router-dom';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import SubscriptionManagement from '@/components/SubscriptionManagement';
@@ -18,6 +19,7 @@ interface DashboardLayoutProps {
 
 const DashboardLayout = ({ children }: DashboardLayoutProps) => {
   const { signOut, user, subscriptionData } = useAuth();
+  const { isOrgAdmin } = useUserRoles();
   const navigate = useNavigate();
   const { t } = useTranslation();
   const [showUpgradeModal, setShowUpgradeModal] = useState(false);
@@ -76,10 +78,13 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
               </h1>
               {subscriptionData.subscribed && (
                 <Badge 
-                  variant={subscriptionData.subscription_tier === 'pro' ? 'default' : 'secondary'}
+                  variant={isOrgAdmin && subscriptionData.subscription_tier === 'pro' ? 'default' : 'secondary'}
                   className="text-xs font-medium"
                 >
-                  {subscriptionData.subscription_tier === 'pro' ? 'PRO' : 'STARTER'}
+                  {isOrgAdmin 
+                    ? (subscriptionData.subscription_tier === 'pro' ? 'PRO' : 'STARTER')
+                    : 'TEAM MEMBER'
+                  }
                 </Badge>
               )}
             </div>

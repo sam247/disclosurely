@@ -8,6 +8,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { Badge } from '@/components/ui/badge';
 import { useAuth } from '@/hooks/useAuth';
+import { useUserRoles } from '@/hooks/useUserRoles';
 import { useToast } from '@/hooks/use-toast';
 import { LogOut, ExternalLink, FileText, Eye, Archive, Trash2, Settings, RotateCcw, MoreVertical, Bot, Search, User, XCircle, ChevronUp, ChevronDown } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
@@ -65,6 +66,7 @@ interface DomainVerification {
 
 const Dashboard = () => {
   const { user, signOut, subscriptionData, subscriptionLoading, refreshSubscription } = useAuth();
+  const { isOrgAdmin } = useUserRoles();
   const { customDomain, organizationId, isCustomDomain, refreshDomainInfo } = useCustomDomain();
   const { limits, hasAnySubscription, isAtCaseLimit } = useSubscriptionLimits();
   const navigate = useNavigate();
@@ -83,6 +85,7 @@ const Dashboard = () => {
   const [hasShownSubscriptionModal, setHasShownSubscriptionModal] = useState(false);
   const [isCheckingSubscription, setIsCheckingSubscription] = useState(false);
   const [selectedReportForAI, setSelectedReportForAI] = useState<Report | null>(null);
+  const [firstName, setFirstName] = useState('');
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
   const [teamMembers, setTeamMembers] = useState<any[]>([]);
@@ -160,6 +163,31 @@ const Dashboard = () => {
     const timeoutId = setTimeout(decryptCategories, 1000);
     return () => clearTimeout(timeoutId);
   }, [reports, user]);
+
+  // Fetch user's first name for welcome message
+  useEffect(() => {
+    const fetchUserProfile = async () => {
+      if (!user) return;
+      
+      try {
+        const { data, error } = await supabase
+          .from('profiles')
+          .select('first_name')
+          .eq('id', user.id)
+          .single();
+        
+        if (error) {
+          console.error('Error fetching profile:', error);
+        } else if (data) {
+          setFirstName(data.first_name || '');
+        }
+      } catch (error) {
+        console.error('Error fetching profile:', error);
+      }
+    };
+
+    fetchUserProfile();
+  }, [user]);
 
   // Also decrypt categories for archived reports
   useEffect(() => {
@@ -339,27 +367,41 @@ const Dashboard = () => {
         return;
       }
 
-      // Fetch active reports - now including submitted_by_email
-      const { data: reportsData, error: reportsError } = await supabase
+      // Fetch active reports - filter by assignment for team members
+      let reportsQuery = supabase
         .from('reports')
-        .select('id, title, tracking_id, status, created_at, encrypted_content, encryption_key_hash, priority, report_type, submitted_by_email')
+        .select('id, title, tracking_id, status, created_at, encrypted_content, encryption_key_hash, priority, report_type, submitted_by_email, assigned_to')
         .eq('organization_id', profile.organization_id)
         .neq('status', 'closed')
         .order('created_at', { ascending: false })
         .limit(20);
 
+      // If user is not org admin, only show reports assigned to them
+      if (!isOrgAdmin) {
+        reportsQuery = reportsQuery.eq('assigned_to', user.id);
+      }
+
+      const { data: reportsData, error: reportsError } = await reportsQuery;
+
       if (reportsError) {
         console.error('Error fetching reports:', reportsError);
       }
 
-      // Fetch archived reports - now including submitted_by_email
-      const { data: archivedData, error: archivedError } = await supabase
+      // Fetch archived reports - filter by assignment for team members
+      let archivedQuery = supabase
         .from('reports')
-        .select('id, title, tracking_id, status, created_at, encrypted_content, encryption_key_hash, priority, report_type, submitted_by_email')
+        .select('id, title, tracking_id, status, created_at, encrypted_content, encryption_key_hash, priority, report_type, submitted_by_email, assigned_to')
         .eq('organization_id', profile.organization_id)
         .eq('status', 'closed')
         .order('created_at', { ascending: false })
         .limit(20);
+
+      // If user is not org admin, only show reports assigned to them
+      if (!isOrgAdmin) {
+        archivedQuery = archivedQuery.eq('assigned_to', user.id);
+      }
+
+      const { data: archivedData, error: archivedError } = await archivedQuery;
 
       if (archivedError) {
         console.error('Error fetching archived reports:', archivedError);
@@ -1267,10 +1309,15 @@ const Dashboard = () => {
                />
               <div className="min-w-0 flex-1">
                 <div className="hidden sm:flex sm:flex-row sm:items-center sm:gap-4">
-                  <p className="text-xs sm:text-sm text-gray-600 truncate">Welcome back, {user?.email}</p>
+                  <p className="text-xs sm:text-sm text-gray-600 truncate">
+                    Welcome back{firstName ? `, ${firstName}` : `, ${user?.email}`}
+                  </p>
                   {subscriptionData.subscribed && (
                     <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                      {subscriptionData.subscription_tier === 'basic' ? 'STARTER' : 'PRO'}
+                      {isOrgAdmin 
+                        ? (subscriptionData.subscription_tier === 'basic' ? 'STARTER' : 'PRO')
+                        : 'TEAM MEMBER'
+                      }
                     </span>
                   )}
                 </div>
