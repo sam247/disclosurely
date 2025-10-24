@@ -244,6 +244,25 @@ const AcceptInvite = () => {
         return;
       }
 
+      // Sign the user in after successful invitation acceptance
+      const { error: signInError } = await supabase.auth.signInWithPassword({
+        email: invitation.email,
+        password: password,
+      });
+
+      if (signInError) {
+        console.error('Error signing in after invitation acceptance:', signInError);
+        toast({
+          title: "Success!",
+          description: `Welcome to ${invitation.organization.name}! Please sign in to continue.`,
+        });
+        // Redirect to login page instead of dashboard
+        setTimeout(() => {
+          navigate('/login');
+        }, 1500);
+        return;
+      }
+
       toast({
         title: "Success!",
         description: `Welcome to ${invitation.organization.name}! Redirecting to dashboard...`,

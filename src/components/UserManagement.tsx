@@ -221,17 +221,31 @@ const UserManagement = () => {
         return;
       }
 
-      // If there's an existing invitation, delete it first
+      // If there's an existing invitation, handle it appropriately
       if (existingInvitations && existingInvitations.length > 0) {
-        console.log('Found existing invitation, deleting it first:', existingInvitations[0]);
-        const { error: deleteError } = await supabase
-          .from('user_invitations')
-          .delete()
-          .eq('organization_id', organization.id)
-          .eq('email', emailToInvite);
+        const existingInvitation = existingInvitations[0];
+        console.log('Found existing invitation:', existingInvitation);
+        
+        if (existingInvitation.accepted_at) {
+          // Invitation was already accepted - user is already a team member
+          toast({
+            title: "User Already Exists",
+            description: `${emailToInvite} has already accepted an invitation and is a team member.`,
+            variant: "destructive",
+          });
+          return;
+        } else {
+          // Invitation exists but not accepted - delete it and create new one
+          console.log('Deleting existing unaccepted invitation');
+          const { error: deleteError } = await supabase
+            .from('user_invitations')
+            .delete()
+            .eq('organization_id', organization.id)
+            .eq('email', emailToInvite);
 
-        if (deleteError) throw deleteError;
-        console.log('Existing invitation deleted successfully');
+          if (deleteError) throw deleteError;
+          console.log('Existing invitation deleted successfully');
+        }
       }
 
       // Insert new invitation without token - the trigger will generate it
@@ -475,6 +489,18 @@ const UserManagement = () => {
         .eq('user_id', userId);
 
       if (rolesError) throw rolesError;
+
+      // Clean up any pending invitations for this user
+      const { error: invitationError } = await supabase
+        .from('user_invitations')
+        .delete()
+        .eq('email', member.email)
+        .eq('organization_id', organization.id);
+
+      if (invitationError) {
+        console.warn('Error cleaning up invitations:', invitationError);
+        // Don't throw here - invitation cleanup is not critical
+      }
 
       // Log deactivation to audit trail
       if (member && organization?.id) {
