@@ -263,9 +263,16 @@ const DashboardView = () => {
       // Fetch team members for assignment
       const { data: teamData, error: teamError } = await supabase
         .from('profiles')
-        .select('id, email, first_name, last_name, role')
+        .select(`
+          id, 
+          email, 
+          first_name, 
+          last_name,
+          user_roles!inner(role, is_active)
+        `)
         .eq('organization_id', profile.organization_id)
-        .eq('is_active', true);
+        .eq('is_active', true)
+        .eq('user_roles.is_active', true);
 
       if (teamError) {
         console.error('Error fetching team members:', teamError);

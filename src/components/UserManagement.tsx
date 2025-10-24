@@ -460,12 +460,21 @@ const UserManagement = () => {
     try {
       const member = teamMembers.find(m => m.id === userId);
       
-      const { error } = await supabase
+      // Deactivate user profile
+      const { error: profileError } = await supabase
         .from('profiles')
         .update({ is_active: false })
         .eq('id', userId);
 
-      if (error) throw error;
+      if (profileError) throw profileError;
+
+      // Deactivate all user roles
+      const { error: rolesError } = await supabase
+        .from('user_roles')
+        .update({ is_active: false })
+        .eq('user_id', userId);
+
+      if (rolesError) throw rolesError;
 
       // Log deactivation to audit trail
       if (member && organization?.id) {
@@ -481,7 +490,7 @@ const UserManagement = () => {
           targetId: userId,
           targetName: member.email,
           summary: `User ${member.email} deactivated`,
-          description: `User account deactivated by ${user?.email}`,
+          description: `User account and roles deactivated by ${user?.email}`,
           beforeState: { is_active: true },
           afterState: { is_active: false },
           metadata: {

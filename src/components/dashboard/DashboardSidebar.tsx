@@ -4,6 +4,7 @@ import { Badge } from '@/components/ui/badge';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { Sidebar, SidebarContent, SidebarFooter, SidebarGroup, SidebarGroupContent, SidebarHeader, SidebarMenu, SidebarMenuButton, SidebarMenuItem } from '@/components/ui/sidebar';
 import { useSubscriptionLimits } from '@/hooks/useSubscriptionLimits';
+import { useUserRoles } from '@/hooks/useUserRoles';
 import { cn } from '@/lib/utils';
 import { useTranslation } from 'react-i18next';
 import disclosurelyFullLogo from '@/assets/logos/disclosurely-full-logo.png';
@@ -25,6 +26,7 @@ const DashboardSidebar = ({
   const location = useLocation();
   const { t } = useTranslation();
   const { limits } = useSubscriptionLimits();
+  const { isOrgAdmin, isCaseHandler } = useUserRoles();
 
   const menuItems = [{
     title: t('dashboard'),
@@ -35,17 +37,17 @@ const DashboardSidebar = ({
     title: t('aiCaseHelper'),
     icon: Bot,
     path: '/dashboard/ai-helper',
-    locked: !limits.hasAIHelper
+    locked: !limits.hasAIHelper || !isOrgAdmin
   }, {
     title: t('analytics'),
     icon: BarChart3,
     path: '/dashboard/analytics',
-    locked: false
+    locked: !isOrgAdmin
   }, {
     title: t('audit'),
     icon: ScrollText,
     path: '/dashboard/audit',
-    locked: false
+    locked: !isOrgAdmin
   }, {
     title: 'Secure Link',
     icon: LinkIcon,
@@ -55,17 +57,17 @@ const DashboardSidebar = ({
     title: t('team'),
     icon: Users,
     path: '/dashboard/team',
-    locked: false
+    locked: !isOrgAdmin
   }, {
     title: t('branding'),
     icon: Palette,
     path: '/dashboard/branding',
-    locked: !limits.hasCustomBranding
+    locked: !limits.hasCustomBranding || !isOrgAdmin
   }, {
     title: 'Integrations',
     icon: Zap,
     path: '/dashboard/integrations',
-    locked: false
+    locked: !isOrgAdmin
   }];
 
   const handleNavigation = (item: typeof menuItems[0]) => {
