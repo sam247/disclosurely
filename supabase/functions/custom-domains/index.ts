@@ -400,7 +400,16 @@ async function handleVerifyDomain(supabaseClient: any, organizationId: string, b
 
                 // Automatically add verified domain to Vercel
                 try {
-                  await supabaseClient.functions.invoke('vercel-dns', {
+                  await supabaseClient.functions.invoke('ai-logger', {
+                    body: {
+                      level: 'info',
+                      context: 'custom-domains',
+                      message: `Calling vercel-dns function for domain: ${domain.domain_name}`,
+                      data: { domainId, domainName: domain.domain_name }
+                    }
+                  });
+
+                  const vercelResponse = await supabaseClient.functions.invoke('vercel-dns', {
                     body: { domainId: domainId }
                   });
                   
@@ -408,18 +417,18 @@ async function handleVerifyDomain(supabaseClient: any, organizationId: string, b
                     body: {
                       level: 'info',
                       context: 'custom-domains',
-                      message: `Domain automatically added to Vercel: ${domain.domain_name}`,
-                      data: { domainId, domainName: domain.domain_name }
+                      message: `Vercel DNS automation successful: ${domain.domain_name}`,
+                      data: { domainId, domainName: domain.domain_name, vercelResponse }
                     }
                   });
                 } catch (vercelError) {
                   console.error('Failed to add domain to Vercel:', vercelError);
                   await supabaseClient.functions.invoke('ai-logger', {
                     body: {
-                      level: 'warn',
+                      level: 'error',
                       context: 'custom-domains',
-                      message: `Domain verified but Vercel addition failed: ${domain.domain_name}`,
-                      data: { domainId, domainName: domain.domain_name, error: vercelError.message }
+                      message: `Vercel DNS automation failed: ${domain.domain_name}`,
+                      data: { domainId, domainName: domain.domain_name, error: vercelError.message, stack: vercelError.stack }
                     }
                   });
                 }

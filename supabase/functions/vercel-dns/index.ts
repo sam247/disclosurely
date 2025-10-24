@@ -1,18 +1,33 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 
+// AI Logger utility
+async function logToAI(level: string, message: string, context: any = {}) {
+  try {
+    const supabaseClient = createClient(
+      Deno.env.get('SUPABASE_URL') ?? '',
+      Deno.env.get('SUPABASE_ANON_KEY') ?? ''
+    )
+    
+    await supabaseClient.functions.invoke('ai-logger', {
+      body: {
+        level,
+        message,
+        context: {
+          service: 'vercel-dns',
+          timestamp: new Date().toISOString(),
+          ...context
+        }
+      }
+    })
+  } catch (error) {
+    console.error('Failed to log to AI:', error)
+  }
+}
+
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
-}
-
-interface VercelDNSRecord {
-  id: string
-  name: string
-  type: string
-  value: string
-  ttl: number
-  created_at: string
 }
 
 interface VercelDomain {
@@ -25,10 +40,12 @@ interface VercelDomain {
 class VercelDNSManager {
   private apiToken: string
   private teamId: string
+  private projectId: string
 
-  constructor(apiToken: string, teamId: string) {
+  constructor(apiToken: string, teamId: string, projectId: string) {
     this.apiToken = apiToken
     this.teamId = teamId
+    this.projectId = projectId
   }
 
   private async makeRequest(endpoint: string, options: RequestInit = {}) {
@@ -45,66 +62,61 @@ class VercelDNSManager {
 
     if (!response.ok) {
       const error = await response.text()
+      console.error(`Vercel API error: ${response.status} ${error}`)
       throw new Error(`Vercel API error: ${response.status} ${error}`)
     }
 
     return response.json()
   }
 
-  async addDomain(domainName: string): Promise<VercelDomain> {
+  async addDomainToProject(domainName: string): Promise<VercelDomain> {
     const payload = {
-      name: domainName,
-      ...(this.teamId && { teamId: this.teamId })
+      name: domainName
     }
 
-    return this.makeRequest('/v10/domains', {
+    const queryParams = new URLSearchParams()
+    if (this.teamId) queryParams.append('teamId', this.teamId)
+
+    return this.makeRequest(`/v6/projects/${this.projectId}/domains?${queryParams.toString()}`, {
       method: 'POST',
       body: JSON.stringify(payload),
     })
+  }
+
+  async getProjectDomains(): Promise<VercelDomain[]> {
+    const queryParams = new URLSearchParams()
+    if (this.teamId) queryParams.append('teamId', this.teamId)
+
+    const response = await this.makeRequest(`/v6/projects/${this.projectId}/domains?${queryParams.toString()}`)
+    return response.domains || []
   }
 
   async getDomain(domainName: string): Promise<VercelDomain> {
-    return this.makeRequest(`/v10/domains/${domainName}${this.teamId ? `?teamId=${this.teamId}` : ''}`)
+    const queryParams = new URLSearchParams()
+    if (this.teamId) queryParams.append('teamId', this.teamId)
+
+    return this.makeRequest(`/v6/domains/${domainName}?${queryParams.toString()}`)
   }
 
-  async addDNSRecord(domainName: string, record: {
-    type: string
-    name: string
-    value: string
-    ttl?: number
-  }): Promise<VercelDNSRecord> {
-    const payload = {
-      type: record.type,
-      name: record.name,
-      value: record.value,
-      ttl: record.ttl || 300,
-      ...(this.teamId && { teamId: this.teamId })
-    }
+  async getDomainConfig(domainName: string): Promise<any> {
+    const queryParams = new URLSearchParams()
+    if (this.teamId) queryParams.append('teamId', this.teamId)
 
-    return this.makeRequest(`/v10/domains/${domainName}/records`, {
-      method: 'POST',
-      body: JSON.stringify(payload),
-    })
+    return this.makeRequest(`/v6/domains/${domainName}/config?${queryParams.toString()}`)
   }
 
-  async getDNSRecords(domainName: string): Promise<VercelDNSRecord[]> {
-    const response = await this.makeRequest(`/v10/domains/${domainName}/records${this.teamId ? `?teamId=${this.teamId}` : ''}`)
-    return response.records || []
-  }
-
-  async deleteDNSRecord(domainName: string, recordId: string): Promise<void> {
-    await this.makeRequest(`/v10/domains/${domainName}/records/${recordId}${this.teamId ? `?teamId=${this.teamId}` : ''}`, {
-      method: 'DELETE',
-    })
-  }
-
-  async verifyDomain(domainName: string): Promise<boolean> {
+  async verifyDomain(domainName: string): Promise<{ verified: boolean, config?: any }> {
     try {
       const domain = await this.getDomain(domainName)
-      return domain.status === 'verified'
+      const config = await this.getDomainConfig(domainName)
+      
+      return {
+        verified: domain.status === 'verified',
+        config: config
+      }
     } catch (error) {
       console.error('Domain verification error:', error)
-      return false
+      return { verified: false }
     }
   }
 }
@@ -114,6 +126,8 @@ serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response('ok', { headers: corsHeaders })
   }
+
+  await logToAI('info', 'Vercel DNS function called', { method: req.method, url: req.url })
 
   try {
     const supabaseClient = createClient(
@@ -133,11 +147,14 @@ serve(async (req) => {
     // Get user from JWT
     const { data: { user }, error: authError } = await supabaseClient.auth.getUser()
     if (authError || !user) {
+      await logToAI('error', 'Authentication failed', { error: authError?.message })
       return new Response(
         JSON.stringify({ error: 'Unauthorized' }),
         { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       )
     }
+
+    await logToAI('info', 'User authenticated', { userId: user.id })
 
     // Get user's organization
     const { data: profile } = await supabaseClient
@@ -172,15 +189,28 @@ serve(async (req) => {
     // Initialize Vercel DNS Manager
     const vercelToken = Deno.env.get('VERCEL_API_TOKEN')
     const vercelTeamId = Deno.env.get('VERCEL_TEAM_ID')
+    const vercelProjectId = Deno.env.get('VERCEL_PROJECT_ID')
     
-    if (!vercelToken) {
+    await logToAI('info', 'Vercel configuration check', { 
+      hasToken: !!vercelToken, 
+      hasTeamId: !!vercelTeamId, 
+      hasProjectId: !!vercelProjectId,
+      projectId: vercelProjectId 
+    })
+    
+    if (!vercelToken || !vercelProjectId) {
+      await logToAI('error', 'Vercel integration not configured', { 
+        missingToken: !vercelToken, 
+        missingProjectId: !vercelProjectId 
+      })
       return new Response(
-        JSON.stringify({ error: 'Vercel integration not configured' }),
+        JSON.stringify({ error: 'Vercel integration not configured. Missing VERCEL_API_TOKEN or VERCEL_PROJECT_ID' }),
         { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       )
     }
 
-    const vercelDNS = new VercelDNSManager(vercelToken, vercelTeamId || '')
+    const vercelDNS = new VercelDNSManager(vercelToken, vercelTeamId || '', vercelProjectId)
+    await logToAI('info', 'Vercel DNS Manager initialized', { projectId: vercelProjectId })
 
     switch (method) {
       case 'POST':
@@ -208,7 +238,10 @@ serve(async (req) => {
 async function handleAutomatedDNS(supabaseClient: any, organizationId: string, vercelDNS: VercelDNSManager, req: Request) {
   const { domainId } = await req.json()
 
+  await logToAI('info', 'Starting automated DNS process', { domainId, organizationId })
+
   if (!domainId) {
+    await logToAI('error', 'Domain ID missing from request')
     return new Response(
       JSON.stringify({ error: 'Domain ID required' }),
       { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
@@ -224,24 +257,108 @@ async function handleAutomatedDNS(supabaseClient: any, organizationId: string, v
     .single()
 
   if (fetchError || !domain) {
+    await logToAI('error', 'Domain not found in database', { domainId, fetchError: fetchError?.message })
     return new Response(
       JSON.stringify({ error: 'Domain not found' }),
       { status: 404, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     )
   }
 
+  await logToAI('info', 'Domain found in database', { domainName: domain.domain_name, domainStatus: domain.status })
+
   try {
-    // Step 1: Check if domain already exists in Vercel
-    console.log(`Checking if domain ${domain.domain_name} exists in Vercel...`)
+    // Step 1: Check if domain already exists in project
+    console.log(`Checking if domain ${domain.domain_name} exists in Vercel project...`)
     let vercelDomain
+    let domainConfig
+    
     try {
-      vercelDomain = await vercelDNS.getDomain(domain.domain_name)
-      console.log(`Domain already exists in Vercel:`, vercelDomain)
+      await logToAI('info', 'Checking existing project domains', { domainName: domain.domain_name })
+      const projectDomains = await vercelDNS.getProjectDomains()
+      await logToAI('info', 'Retrieved project domains', { domainCount: projectDomains.length, domains: projectDomains.map(d => d.name) })
+      
+      const existingDomain = projectDomains.find(d => d.name === domain.domain_name)
+      
+      if (existingDomain) {
+        await logToAI('info', 'Domain already exists in Vercel project', { domainName: domain.domain_name, domainId: existingDomain.id })
+        console.log(`Domain already exists in Vercel project:`, existingDomain)
+        vercelDomain = existingDomain
+      } else {
+        // Domain doesn't exist, try to add it to project
+        await logToAI('info', 'Adding domain to Vercel project', { domainName: domain.domain_name })
+        console.log(`Adding domain ${domain.domain_name} to Vercel project...`)
+        
+        try {
+          vercelDomain = await vercelDNS.addDomainToProject(domain.domain_name)
+          await logToAI('info', 'Domain successfully added to Vercel project', { domainName: domain.domain_name, vercelDomain })
+          console.log(`Domain added to Vercel project:`, vercelDomain)
+        } catch (addError: any) {
+          // Check if it's a domain ownership error
+          if (addError.message?.includes('Not authorized to use') || addError.message?.includes('forbidden')) {
+            await logToAI('info', 'Domain ownership verification required', { domainName: domain.domain_name, error: addError.message })
+            
+            // Return verification required response
+            return new Response(
+              JSON.stringify({ 
+                success: false,
+                message: 'Domain ownership verification required',
+                domain: domain,
+                verification_required: true,
+                verification_config: {
+                  cname: {
+                    type: 'CNAME',
+                    name: 'secure',
+                    value: 'secure.disclosurely.com'
+                  },
+                  txt: {
+                    type: 'TXT',
+                    name: domain.domain_name,
+                    value: 'Please add a TXT record for domain verification. The exact value will be provided by Vercel after domain ownership is verified.'
+                  }
+                },
+                instructions: 'Please add both CNAME and TXT records to verify domain ownership, then try again.'
+              }),
+              { status: 202, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+            )
+          } else {
+            // Re-throw other errors
+            throw addError
+          }
+        }
+      }
+      
+      // Step 2: Get domain configuration to check verification status
+      await logToAI('info', 'Getting domain configuration', { domainName: domain.domain_name })
+      const verificationResult = await vercelDNS.verifyDomain(domain.domain_name)
+      domainConfig = verificationResult.config
+      
+      await logToAI('info', 'Domain verification status', { 
+        domainName: domain.domain_name, 
+        verified: verificationResult.verified,
+        config: domainConfig 
+      })
+      
+      if (!verificationResult.verified) {
+        // Domain needs verification - provide instructions to user
+        await logToAI('info', 'Domain requires verification', { domainName: domain.domain_name, config: domainConfig })
+        
+        return new Response(
+          JSON.stringify({ 
+            success: false,
+            message: 'Domain added to Vercel but requires verification',
+            domain: domain,
+            verification_required: true,
+            verification_config: domainConfig,
+            instructions: 'Please add the required DNS records to verify domain ownership, then try again.'
+          }),
+          { status: 202, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        )
+      }
+      
     } catch (error) {
-      // Domain doesn't exist, add it
-      console.log(`Adding domain ${domain.domain_name} to Vercel...`)
-      vercelDomain = await vercelDNS.addDomain(domain.domain_name)
-      console.log(`Domain added to Vercel:`, vercelDomain)
+      await logToAI('error', 'Error checking/adding domain to Vercel', { domainName: domain.domain_name, error: error.message })
+      console.error('Error checking/adding domain:', error)
+      throw error
     }
 
     // Step 2: Update domain status to active (since Vercel will handle SSL)
@@ -258,20 +375,34 @@ async function handleAutomatedDNS(supabaseClient: any, organizationId: string, v
       .single()
 
     if (updateError) {
+      await logToAI('error', 'Failed to update domain status in database', { domainId, updateError: updateError.message })
       throw updateError
     }
+
+    await logToAI('info', 'Domain successfully configured in Vercel', { 
+      domainName: domain.domain_name, 
+      domainId, 
+      vercelDomainId: vercelDomain.id 
+    })
 
     return new Response(
       JSON.stringify({ 
         success: true,
         message: 'Domain configured in Vercel successfully. SSL certificate will be provisioned automatically.',
         domain: updatedDomain,
-        vercel_domain: vercelDomain
+        vercel_domain: vercelDomain,
+        verification_config: domainConfig
       }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     )
 
   } catch (error) {
+    await logToAI('error', 'Vercel DNS automation failed', { 
+      domainId, 
+      domainName: domain?.domain_name, 
+      error: error.message,
+      stack: error.stack 
+    })
     console.error('Vercel DNS automation error:', error)
     
     // Update domain with error
@@ -323,26 +454,15 @@ async function handleCheckDNS(supabaseClient: any, organizationId: string, verce
   try {
     // Check domain verification status in Vercel
     const isVerified = await vercelDNS.verifyDomain(domain.domain_name)
-    
-    // Get DNS records to verify CNAME
-    const records = await vercelDNS.getDNSRecords(domain.domain_name)
-    const cnameRecord = records.find(record => 
-      record.type === 'CNAME' && 
-      record.name === domain.domain_name &&
-      record.value === 'secure.disclosurely.com'
-    )
-
-    const isCNAMEValid = !!cnameRecord
-    const overallStatus = isVerified && isCNAMEValid
 
     // Update domain status
     const updateData: any = {
       last_checked_at: new Date().toISOString(),
-      status: overallStatus ? 'verified' : 'failed',
-      error_message: overallStatus ? null : 'Domain verification or CNAME record not found'
+      status: isVerified ? 'verified' : 'failed',
+      error_message: isVerified ? null : 'Domain verification failed'
     }
 
-    if (overallStatus) {
+    if (isVerified) {
       updateData.verified_at = new Date().toISOString()
     }
 
@@ -359,12 +479,10 @@ async function handleCheckDNS(supabaseClient: any, organizationId: string, verce
 
     return new Response(
       JSON.stringify({ 
-        verified: overallStatus,
-        message: overallStatus ? 'Domain verified successfully' : 'Domain verification failed',
+        verified: isVerified,
+        message: isVerified ? 'Domain verified successfully' : 'Domain verification failed',
         domain: updatedDomain,
-        vercel_verified: isVerified,
-        cname_valid: isCNAMEValid,
-        records: records
+        vercel_verified: isVerified
       }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     )
