@@ -8,6 +8,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { useUserRoles } from '@/hooks/useUserRoles';
 import { useNavigate } from 'react-router-dom';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Button } from '@/components/ui/button';
 import SubscriptionManagement from '@/components/SubscriptionManagement';
 import { supabase } from '@/integrations/supabase/client';
 import NotificationSystem from '@/components/NotificationSystem';
@@ -120,14 +121,30 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
 
       {/* Upgrade Modal */}
       <Dialog open={showUpgradeModal} onOpenChange={setShowUpgradeModal}>
-        <DialogContent className="max-w-3xl">
+        <DialogContent className="max-w-md">
           <DialogHeader>
-            <DialogTitle>{t('upgradeRequired')}</DialogTitle>
+            <DialogTitle>
+              {isOrgAdmin ? t('upgradeRequired') : 'Feature Restricted'}
+            </DialogTitle>
             <DialogDescription>
-              {t('upgradeDescription', { feature: lockedFeature })}
+              {isOrgAdmin 
+                ? t('upgradeDescription', { feature: lockedFeature })
+                : 'This feature is managed by your administrator'
+              }
             </DialogDescription>
           </DialogHeader>
-          <SubscriptionManagement />
+          {isOrgAdmin ? (
+            <SubscriptionManagement />
+          ) : (
+            <div className="flex justify-end space-x-2 pt-4">
+              <Button 
+                variant="outline" 
+                onClick={() => setShowUpgradeModal(false)}
+              >
+                Go Back
+              </Button>
+            </div>
+          )}
         </DialogContent>
       </Dialog>
     </SidebarProvider>

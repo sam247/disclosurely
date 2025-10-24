@@ -501,64 +501,62 @@ const Blog = () => {
                   </Button>
                 </div>
               ) : (
-                <div className="grid gap-8">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   {posts.map((post) => (
-                    <Card key={post.id} className="overflow-hidden">
-                      <div className="flex flex-col md:flex-row">
-                        {post.featuredImage && (
-                          <div className="md:w-1/3">
-                            <img 
-                              src={post.featuredImage} 
-                              alt={post.title}
-                              className="w-full h-48 md:h-full object-cover"
-                            />
-                          </div>
-                        )}
-                        <div className={`${post.featuredImage ? 'md:w-2/3' : 'w-full'} p-6`}>
-                          <div className="flex items-center gap-2 mb-3">
-                            {post.categories?.map((category) => (
-                              <Badge key={category.slug} variant="secondary">
-                                {category.name}
-                              </Badge>
-                            ))}
-                          </div>
-                          
-                          <CardTitle className="mb-3">
-                            <Link 
-                              to={`/blog/${post.slug}`}
-                              className="hover:text-primary transition-colors"
-                            >
-                              {post.title}
-                            </Link>
-                          </CardTitle>
-                          
-                          <CardDescription className="mb-4">
-                            {post.excerpt}
-                          </CardDescription>
-                          
-                          <div className="flex items-center justify-between">
-                            <div className="flex items-center gap-4 text-sm text-muted-foreground">
-                              {post.authorName && (
-                                <span>By {post.authorName}</span>
-                              )}
-                              <div className="flex items-center gap-1">
-                                <Calendar className="h-4 w-4" />
-                                {formatDistanceToNow(new Date(post.publishDate), { addSuffix: true })}
-                              </div>
-                              {post.readingTime && (
-                                <div className="flex items-center gap-1">
-                                  <Clock className="h-4 w-4" />
-                                  {post.readingTime} min read
-                                </div>
-                              )}
+                    <Card key={post.id} className="overflow-hidden hover:shadow-lg transition-shadow">
+                      {post.featuredImage && (
+                        <div className="aspect-video overflow-hidden">
+                          <img 
+                            src={post.featuredImage} 
+                            alt={post.title}
+                            className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
+                          />
+                        </div>
+                      )}
+                      <div className="p-6">
+                        <div className="flex items-center gap-2 mb-3">
+                          {post.categories?.map((category) => (
+                            <Badge key={category.slug} variant="secondary" className="text-xs">
+                              {category.name}
+                            </Badge>
+                          ))}
+                        </div>
+                        
+                        <CardTitle className="text-lg mb-3 line-clamp-2">
+                          <Link 
+                            to={`/blog/${post.slug}`}
+                            className="hover:text-primary transition-colors"
+                          >
+                            {post.title}
+                          </Link>
+                        </CardTitle>
+                        
+                        <CardDescription className="text-gray-600 mb-4 line-clamp-3">
+                          {post.excerpt}
+                        </CardDescription>
+                        
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-3 text-sm text-muted-foreground">
+                            {post.authorName && (
+                              <span>By {post.authorName}</span>
+                            )}
+                            <div className="flex items-center gap-1">
+                              <Calendar className="h-4 w-4" />
+                              {formatDistanceToNow(new Date(post.publishDate), { addSuffix: true })}
                             </div>
-                            
-                            <Link to={`/blog/${post.slug}`}>
-                              <Button variant="ghost" size="sm">
-                                Read More <ArrowRight className="h-4 w-4 ml-1" />
-                              </Button>
-                            </Link>
+                            {post.readingTime && (
+                              <div className="flex items-center gap-1">
+                                <Clock className="h-4 w-4" />
+                                {post.readingTime} min read
+                              </div>
+                            )}
                           </div>
+                          
+                          <Link to={`/blog/${post.slug}`}>
+                            <Button variant="ghost" size="sm" className="text-primary hover:text-primary/80">
+                              Read More <ArrowRight className="h-4 w-4 ml-1" />
+                            </Button>
+                          </Link>
                         </div>
                       </div>
                     </Card>
