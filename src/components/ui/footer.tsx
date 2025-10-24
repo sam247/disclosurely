@@ -49,9 +49,6 @@ export const Footer = () => {
                   System Status
                 </Link>
               </li>
-              <li className="pt-2">
-                <SystemStatusIndicator />
-              </li>
             </ul>
           </div>
 
