@@ -191,6 +191,7 @@ const Dashboard = () => {
 
   // Refetch reports when user roles are loaded (for proper filtering)
   useEffect(() => {
+    console.log('useEffect triggered - rolesLoading:', rolesLoading, 'isOrgAdmin:', isOrgAdmin, 'user:', !!user);
     if (!rolesLoading && user) {
       console.log('User roles loaded, refetching reports with isOrgAdmin:', isOrgAdmin);
       fetchDashboardData();
@@ -385,7 +386,13 @@ const Dashboard = () => {
         .limit(20);
 
       // If user is not org admin, only show reports assigned to them
-      if (!isOrgAdmin) {
+      console.log('isOrgAdmin value:', isOrgAdmin, 'type:', typeof isOrgAdmin);
+      console.log('rolesLoading:', rolesLoading);
+      
+      // Fallback: if roles are still loading or isOrgAdmin is undefined, assume team member
+      const shouldFilter = !isOrgAdmin || rolesLoading || isOrgAdmin === undefined;
+      
+      if (shouldFilter) {
         console.log('Filtering reports for team member:', user.id);
         reportsQuery = reportsQuery.eq('assigned_to', user.id);
       } else {
@@ -408,7 +415,12 @@ const Dashboard = () => {
         .limit(20);
 
       // If user is not org admin, only show reports assigned to them
-      if (!isOrgAdmin) {
+      console.log('Archived reports - isOrgAdmin value:', isOrgAdmin, 'type:', typeof isOrgAdmin);
+      
+      // Fallback: if roles are still loading or isOrgAdmin is undefined, assume team member
+      const shouldFilterArchived = !isOrgAdmin || rolesLoading || isOrgAdmin === undefined;
+      
+      if (shouldFilterArchived) {
         console.log('Filtering archived reports for team member:', user.id);
         archivedQuery = archivedQuery.eq('assigned_to', user.id);
       } else {
