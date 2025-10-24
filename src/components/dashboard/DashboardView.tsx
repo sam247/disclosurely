@@ -750,7 +750,16 @@ Additional Details: ${decryptedContent.additionalDetails || 'None provided'}
             <CardContent className="pt-6">
               {filteredReports.length === 0 ? (
                 <div className="text-center py-8 text-muted-foreground">
-                  {t('noReportsFound')}
+                  {isOrgAdmin ? (
+                    t('noReportsFound')
+                  ) : (
+                    <div className="space-y-2">
+                      <div className="text-lg font-medium text-gray-700">No Reports Assigned</div>
+                      <div className="text-sm text-gray-500">
+                        Reports that are assigned to you by your administrator will appear here
+                      </div>
+                    </div>
+                  )}
                 </div>
               ) : (
                   <Table>
@@ -1115,7 +1124,16 @@ Additional Details: ${decryptedContent.additionalDetails || 'None provided'}
             <CardContent>
               {archivedReports.length === 0 ? (
                 <div className="text-center py-8 text-muted-foreground">
-                  No archived reports
+                  {isOrgAdmin ? (
+                    "No archived reports"
+                  ) : (
+                    <div className="space-y-2">
+                      <div className="text-lg font-medium text-gray-700">No Archived Reports Assigned</div>
+                      <div className="text-sm text-gray-500">
+                        Archived reports that are assigned to you by your administrator will appear here
+                      </div>
+                    </div>
+                  )}
                 </div>
               ) : (
                 <Table>
