@@ -1,344 +1,382 @@
-
-import { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
-import { AlertCircle, CheckCircle, ExternalLink, RefreshCw } from 'lucide-react';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 import { useToast } from '@/hooks/use-toast';
-import { supabase } from '@/integrations/supabase/client';
-import { useAuth } from '@/hooks/useAuth';
-
-interface DomainVerification {
-  id: string;
-  domain: string;
-  verification_token: string;
-  verification_type: string;
-  verified_at: string | null;
-}
+import { useCustomDomains } from '@/hooks/useCustomDomains';
+import { 
+  Plus, 
+  CheckCircle, 
+  XCircle, 
+  Clock, 
+  AlertCircle, 
+  Trash2, 
+  Star,
+  ExternalLink,
+  Copy,
+  RefreshCw
+} from 'lucide-react';
+import { CustomDomain } from '@/types/database';
 
 const CustomDomainSettings = () => {
-  const { user } = useAuth();
+  const [newDomain, setNewDomain] = useState('');
+  const [isAdding, setIsAdding] = useState(false);
+  const [verifyingDomains, setVerifyingDomains] = useState<Set<string>>(new Set());
   const { toast } = useToast();
-  const [domain, setDomain] = useState('');
-  const [verifications, setVerifications] = useState<DomainVerification[]>([]);
-  const [loading, setLoading] = useState(false);
-  const [verifyingId, setVerifyingId] = useState<string | null>(null);
-  const [refreshing, setRefreshing] = useState(false);
+  
+  const {
+    domains,
+    loading,
+    error,
+    addDomain,
+    verifyDomain,
+    activateDomain,
+    deleteDomain,
+    setPrimaryDomain,
+  } = useCustomDomains();
 
-  const fetchVerifications = async () => {
-    if (!user) return;
-    
-    try {
-      // Get user's profile and organization
-      const { data: profile, error: profileError } = await supabase
-        .from('profiles')
-        .select('organization_id')
-        .eq('id', user.id)
-        .single();
-
-      if (profileError || !profile?.organization_id) {
-        console.error('Error fetching profile:', profileError);
-        return;
-      }
-
-      const { data, error } = await supabase
-        .from('domain_verifications')
-        .select('*')
-        .eq('organization_id', profile.organization_id)
-        .order('created_at', { ascending: false });
-
-      if (error) {
-        console.error('Error fetching domain verifications:', error);
-        return;
-      }
-
-      setVerifications(data || []);
-    } catch (error) {
-      console.error('Error in fetchVerifications:', error);
-    }
-  };
-
-  const refreshVerifications = async () => {
-    setRefreshing(true);
-    try {
-      await fetchVerifications();
-      toast({
-        title: "Refreshed",
-        description: "Domain verifications updated",
-      });
-    } catch (error) {
-      console.error('Error refreshing verifications:', error);
+  const handleAddDomain = async () => {
+    if (!newDomain.trim()) {
       toast({
         title: "Error",
-        description: "Failed to refresh verifications",
-        variant: "destructive",
-      });
-    } finally {
-      setRefreshing(false);
-    }
-  };
-
-  useEffect(() => {
-    if (user) {
-      fetchVerifications();
-    }
-  }, [user]);
-
-  const addDomain = async () => {
-    if (!domain.trim()) {
-      toast({
-        title: "Error",
-        description: "Please enter a domain",
+        description: "Please enter a domain name",
         variant: "destructive",
       });
       return;
     }
 
-    setLoading(true);
     try {
-      // Get user's profile first
-      const { data: profile, error: profileError } = await supabase
-        .from('profiles')
-        .select('organization_id')
-        .eq('id', user?.id)
-        .single();
-
-      if (profileError || !profile?.organization_id) {
-        toast({
-          title: "Error",
-          description: "Organization not found",
-          variant: "destructive",
-        });
-        return;
-      }
-
-      // Generate a temporary verification token that will be overridden by the database trigger
-      const tempToken = `temp-${Date.now()}`;
-
-      const { error } = await supabase
-        .from('domain_verifications')
-        .insert({
-          domain: domain.trim(),
-          organization_id: profile.organization_id,
-          verification_type: 'TXT',
-          verification_token: tempToken
-        });
-
-      if (error) {
-        console.error('Database error:', error);
-        toast({
-          title: "Error",
-          description: error.message,
-          variant: "destructive",
-        });
-        return;
-      }
-
+      setIsAdding(true);
+      const result = await addDomain(newDomain.trim());
+      
       toast({
-        title: "Success",
-        description: "Domain added successfully",
+        title: "Domain Added",
+        description: `Please add the DNS record: CNAME ${result.dns_instructions.name} → ${result.dns_instructions.value}`,
       });
-
-      setDomain('');
-      await fetchVerifications();
-    } catch (error) {
-      console.error('Unexpected error:', error);
+      
+      setNewDomain('');
+    } catch (error: any) {
       toast({
         title: "Error",
-        description: "Failed to add domain",
+        description: error.message || "Failed to add domain",
         variant: "destructive",
       });
     } finally {
-      setLoading(false);
+      setIsAdding(false);
     }
   };
 
-  const verifyDomain = async (id: string) => {
-    setVerifyingId(id);
+  const handleVerifyDomain = async (domainId: string) => {
     try {
-      const { error } = await supabase
-        .from('domain_verifications')
-        .update({ verified_at: new Date().toISOString() })
-        .eq('id', id);
-
-      if (error) {
-        console.error('Verification error:', error);
+      setVerifyingDomains(prev => new Set(prev).add(domainId));
+      const result = await verifyDomain(domainId);
+      
+      if (result.verified) {
+        toast({
+          title: "Domain Verified",
+          description: result.message,
+        });
+      } else {
         toast({
           title: "Verification Failed",
-          description: error.message,
+          description: result.message,
           variant: "destructive",
         });
-        return;
       }
-
-      toast({
-        title: "Success",
-        description: "Domain verified successfully",
-      });
-
-      await fetchVerifications();
-    } catch (error) {
-      console.error('Unexpected verification error:', error);
+    } catch (error: any) {
       toast({
         title: "Error",
-        description: "Failed to verify domain",
+        description: error.message || "Failed to verify domain",
         variant: "destructive",
       });
     } finally {
-      setVerifyingId(null);
+      setVerifyingDomains(prev => {
+        const newSet = new Set(prev);
+        newSet.delete(domainId);
+        return newSet;
+      });
     }
   };
 
-  const removeDomain = async (id: string) => {
+  const handleActivateDomain = async (domainId: string) => {
     try {
-      const { error } = await supabase
-        .from('domain_verifications')
-        .delete()
-        .eq('id', id);
-
-      if (error) {
-        console.error('Delete error:', error);
-        toast({
-          title: "Error",
-          description: error.message,
-          variant: "destructive",
-        });
-        return;
-      }
-
+      await activateDomain(domainId);
       toast({
-        title: "Success",
-        description: "Domain removed",
+        title: "Domain Activated",
+        description: "Domain is now active and ready to use",
       });
-
-      await fetchVerifications();
-    } catch (error) {
-      console.error('Unexpected delete error:', error);
+    } catch (error: any) {
       toast({
         title: "Error",
-        description: "Failed to remove domain",
+        description: error.message || "Failed to activate domain",
         variant: "destructive",
       });
     }
   };
 
-  return (
-    <Card>
-      <CardHeader>
-        <div className="flex items-center justify-between">
-          <div>
-            <CardTitle>Custom Domain</CardTitle>
-            <CardDescription>
-              Set up a custom domain for your organization's report submission portal
-            </CardDescription>
-          </div>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={refreshVerifications}
-            disabled={refreshing}
-          >
-            <RefreshCw className={`w-4 h-4 mr-2 ${refreshing ? 'animate-spin' : ''}`} />
-            Refresh
-          </Button>
-        </div>
-      </CardHeader>
-      <CardContent className="space-y-6">
-        <div className="space-y-4">
-          <div className="grid grid-cols-4 gap-4">
-            <div className="col-span-3">
-              <Label htmlFor="domain">Domain</Label>
-              <Input
-                id="domain"
-                placeholder="reports.yourcompany.com"
-                value={domain}
-                onChange={(e) => setDomain(e.target.value)}
-              />
-            </div>
-            <div className="flex items-end">
-              <Button onClick={addDomain} disabled={loading} className="w-full">
-                {loading ? 'Adding...' : 'Add Domain'}
-              </Button>
-            </div>
-          </div>
-        </div>
+  const handleDeleteDomain = async (domainId: string) => {
+    if (!confirm('Are you sure you want to delete this domain? This action cannot be undone.')) {
+      return;
+    }
 
-        {verifications.length > 0 && (
-          <div className="space-y-4">
-            <h3 className="text-lg font-semibold">Domain Verifications</h3>
-            {verifications.map((verification) => (
-              <div key={verification.id} className="border rounded-lg p-4 space-y-3">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center space-x-2">
-                    <span className="font-medium">{verification.domain}</span>
-                    {verification.verified_at ? (
-                      <Badge variant="default" className="bg-green-100 text-green-800">
-                        <CheckCircle className="w-3 h-3 mr-1" />
-                        Verified
-                      </Badge>
-                    ) : (
-                      <Badge variant="secondary">
-                        <AlertCircle className="w-3 h-3 mr-1" />
-                        Pending
-                      </Badge>
-                    )}
-                  </div>
-                  <div className="flex space-x-2">
-                    {!verification.verified_at && (
+    try {
+      await deleteDomain(domainId);
+      toast({
+        title: "Domain Deleted",
+        description: "Domain has been removed",
+      });
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to delete domain",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleSetPrimary = async (domainId: string) => {
+    try {
+      await setPrimaryDomain(domainId);
+      toast({
+        title: "Primary Domain Set",
+        description: "This domain is now your primary secure link domain",
+      });
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to set primary domain",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const copyDNSToClipboard = (domain: CustomDomain) => {
+    const dnsRecord = `CNAME ${domain.domain_name} ${domain.dns_record_value}`;
+    navigator.clipboard.writeText(dnsRecord);
+    toast({
+      title: "Copied",
+      description: "DNS record copied to clipboard",
+    });
+  };
+
+  const getStatusIcon = (status: string) => {
+    switch (status) {
+      case 'active':
+        return <CheckCircle className="h-4 w-4 text-green-500" />;
+      case 'verified':
+        return <CheckCircle className="h-4 w-4 text-blue-500" />;
+      case 'pending':
+      case 'verifying':
+        return <Clock className="h-4 w-4 text-yellow-500" />;
+      case 'failed':
+        return <XCircle className="h-4 w-4 text-red-500" />;
+      default:
+        return <AlertCircle className="h-4 w-4 text-gray-500" />;
+    }
+  };
+
+  const getStatusBadge = (status: string) => {
+    const variants: Record<string, "default" | "secondary" | "destructive" | "outline"> = {
+      active: "default",
+      verified: "secondary", 
+      pending: "outline",
+      verifying: "outline",
+      failed: "destructive",
+    };
+
+    return (
+      <Badge variant={variants[status] || "outline"}>
+        {status.charAt(0).toUpperCase() + status.slice(1)}
+      </Badge>
+    );
+  };
+
+  if (loading) {
+    return (
+      <Card>
+        <CardHeader>
+          <CardTitle>Custom Domains</CardTitle>
+          <CardDescription>Loading your custom domains...</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="flex items-center justify-center py-8">
+            <RefreshCw className="h-6 w-6 animate-spin" />
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  return (
+    <div className="space-y-6">
+      <Card>
+        <CardHeader>
+          <CardTitle>Custom Domains</CardTitle>
+          <CardDescription>
+            Add custom domains for branded secure links. Your secure links will use your domain instead of disclosurely.com
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          {/* Add Domain Form */}
+          <div className="flex gap-2">
+            <Input
+              placeholder="secure.yourcompany.com"
+              value={newDomain}
+              onChange={(e) => setNewDomain(e.target.value)}
+              onKeyPress={(e) => e.key === 'Enter' && handleAddDomain()}
+            />
+            <Button 
+              onClick={handleAddDomain} 
+              disabled={isAdding}
+              className="flex items-center gap-2"
+            >
+              <Plus className="h-4 w-4" />
+              {isAdding ? 'Adding...' : 'Add Domain'}
+            </Button>
+          </div>
+
+          {/* Current Default */}
+          <Alert>
+            <AlertCircle className="h-4 w-4" />
+            <AlertDescription>
+              Current default: <code className="bg-muted px-1 rounded">secure.disclosurely.com</code>
+            </AlertDescription>
+          </Alert>
+        </CardContent>
+      </Card>
+
+      {/* Domains List */}
+      {domains.length > 0 && (
+        <Card>
+          <CardHeader>
+            <CardTitle>Your Domains</CardTitle>
+            <CardDescription>
+              Manage your custom domains and their verification status
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-4">
+              {domains.map((domain) => (
+                <div key={domain.id} className="border rounded-lg p-4 space-y-3">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <code className="bg-muted px-2 py-1 rounded text-sm font-mono">
+                        {domain.domain_name}
+                      </code>
+                      {domain.is_primary && (
+                        <Badge variant="default" className="flex items-center gap-1">
+                          <Star className="h-3 w-3" />
+                          Primary
+                        </Badge>
+                      )}
+                      {getStatusBadge(domain.status)}
+                    </div>
+                    
+                    <div className="flex items-center gap-2">
+                      {getStatusIcon(domain.status)}
+                      
+                      {domain.status === 'verified' && !domain.is_active && (
+                        <Button
+                          size="sm"
+                          onClick={() => handleActivateDomain(domain.id)}
+                        >
+                          Activate
+                        </Button>
+                      )}
+                      
+                      {domain.status === 'pending' && (
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => handleVerifyDomain(domain.id)}
+                          disabled={verifyingDomains.has(domain.id)}
+                        >
+                          {verifyingDomains.has(domain.id) ? (
+                            <RefreshCw className="h-4 w-4 animate-spin" />
+                          ) : (
+                            'Verify'
+                          )}
+                        </Button>
+                      )}
+                      
+                      {domain.status === 'active' && !domain.is_primary && (
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => handleSetPrimary(domain.id)}
+                        >
+                          Set Primary
+                        </Button>
+                      )}
+                      
                       <Button
                         size="sm"
-                        onClick={() => verifyDomain(verification.id)}
-                        disabled={verifyingId === verification.id}
+                        variant="outline"
+                        onClick={() => handleDeleteDomain(domain.id)}
+                        className="text-red-600 hover:text-red-700"
                       >
-                        {verifyingId === verification.id ? 'Verifying...' : 'Verify'}
+                        <Trash2 className="h-4 w-4" />
                       </Button>
+                    </div>
+                  </div>
+
+                  {/* DNS Instructions */}
+                  {domain.status === 'pending' && (
+                    <div className="bg-muted/50 rounded p-3 space-y-2">
+                      <div className="text-sm font-medium">DNS Setup Required:</div>
+                      <div className="flex items-center gap-2">
+                        <code className="bg-background px-2 py-1 rounded text-sm">
+                          CNAME {domain.domain_name} {domain.dns_record_value}
+                        </code>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => copyDNSToClipboard(domain)}
+                        >
+                          <Copy className="h-4 w-4" />
+                        </Button>
+                      </div>
+                      <div className="text-xs text-muted-foreground">
+                        Add this CNAME record to your DNS settings, then click Verify
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Error Message */}
+                  {domain.error_message && (
+                    <Alert variant="destructive">
+                      <AlertCircle className="h-4 w-4" />
+                      <AlertDescription>{domain.error_message}</AlertDescription>
+                    </Alert>
+                  )}
+
+                  {/* Domain Info */}
+                  <div className="text-xs text-muted-foreground">
+                    Added {new Date(domain.created_at).toLocaleDateString()}
+                    {domain.verified_at && (
+                      <> • Verified {new Date(domain.verified_at).toLocaleDateString()}</>
                     )}
-                    <Button
-                      size="sm"
-                      variant="destructive"
-                      onClick={() => removeDomain(verification.id)}
-                    >
-                      Remove
-                    </Button>
                   </div>
                 </div>
-
-                {!verification.verified_at && (
-                  <div className="bg-gray-50 p-3 rounded space-y-2">
-                    <p className="text-sm font-medium">DNS Configuration Required:</p>
-                    <div className="text-sm space-y-1">
-                      <p><strong>Type:</strong> {verification.verification_type}</p>
-                      <p><strong>Name:</strong> _disclosurely-verification</p>
-                      <p><strong>Value:</strong> {verification.verification_token}</p>
-                    </div>
-                    <p className="text-xs text-gray-600">
-                      Add this TXT record to your DNS settings and click Verify.
-                    </p>
-                  </div>
-                )}
-              </div>
-            ))}
-          </div>
-        )}
-
-        <div className="bg-blue-50 p-4 rounded-lg space-y-2">
-          <div className="flex items-start space-x-2">
-            <ExternalLink className="w-4 h-4 mt-0.5 text-blue-600" />
-            <div className="text-sm">
-              <p className="font-medium text-blue-900">How to set up custom domains:</p>
-              <ol className="list-decimal list-inside mt-2 space-y-1 text-blue-800">
-                <li>Add your domain above</li>
-                <li>Add the TXT record to your DNS settings</li>
-                <li>Click "Verify" to confirm setup</li>
-                <li>Once verified, your domain will be active</li>
-              </ol>
+              ))}
             </div>
-          </div>
-        </div>
-      </CardContent>
-    </Card>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Empty State */}
+      {domains.length === 0 && !loading && (
+        <Card>
+          <CardContent className="py-8 text-center">
+            <div className="text-muted-foreground">
+              No custom domains added yet. Add your first domain above to get started.
+            </div>
+          </CardContent>
+        </Card>
+      )}
+    </div>
   );
 };
 
