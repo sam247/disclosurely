@@ -733,20 +733,27 @@ const RelatedArticles = ({ currentPost }: { currentPost: BlogPostDisplay }) => {
   useEffect(() => {
     const fetchRelatedPosts = async () => {
       try {
-        // Get posts from the same category, excluding current post
+        console.log('Fetching related posts for:', currentPost.title);
+        console.log('Current post categories:', currentPost.categories);
+        
+        // Simplified query - just get recent posts, excluding current post
         const response = await client.getEntries<ContentfulBlogPost>({
           content_type: '9oYANGj5uBRT6UHsl5LxO',
           'fields.status': 'published',
-          limit: 3,
-          'sys.id[ne]': currentPost.id, // Exclude current post
-          ...(currentPost.categories?.[0] && {
-            'fields.categories.sys.contentType.sys.id': '1Dn01YZmIbymrxi194Q2xV',
-            'fields.categories.fields.slug': currentPost.categories[0].slug
-          })
+          limit: 5, // Get more to filter out current post
+          order: '-sys.createdAt'
         });
 
-        const posts = response.items.map(transformContentfulPost);
-        setRelatedPosts(posts.slice(0, 2)); // Show only 2 related posts
+        console.log('Fetched posts:', response.items.length);
+        
+        // Filter out current post and transform
+        const posts = response.items
+          .filter(item => item.sys.id !== currentPost.id)
+          .map(transformContentfulPost)
+          .slice(0, 2); // Show only 2 related posts
+
+        console.log('Related posts after filtering:', posts.length);
+        setRelatedPosts(posts);
       } catch (error) {
         console.error('Error fetching related posts:', error);
       } finally {
@@ -757,12 +764,32 @@ const RelatedArticles = ({ currentPost }: { currentPost: BlogPostDisplay }) => {
     fetchRelatedPosts();
   }, [currentPost]);
 
-  if (loading || relatedPosts.length === 0) return null;
+  if (loading) {
+    return (
+      <div className="mt-12 pt-8 border-t">
+        <h3 className="text-2xl font-semibold mb-6">Related Articles</h3>
+        <div className="text-center py-8 text-muted-foreground">
+          Loading related articles...
+        </div>
+      </div>
+    );
+  }
+
+  if (relatedPosts.length === 0) {
+    return (
+      <div className="mt-12 pt-8 border-t">
+        <h3 className="text-2xl font-semibold mb-6">Related Articles</h3>
+        <div className="text-center py-8 text-muted-foreground">
+          No related articles found.
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="mt-12 pt-8 border-t">
       <h3 className="text-2xl font-semibold mb-6">Related Articles</h3>
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div className={`grid gap-6 ${relatedPosts.length === 1 ? 'grid-cols-1 max-w-md mx-auto' : 'grid-cols-1 md:grid-cols-2'}`}>
         {relatedPosts.map((post) => (
           <Card key={post.id} className="overflow-hidden hover:shadow-lg transition-shadow">
             {post.featuredImage && (
