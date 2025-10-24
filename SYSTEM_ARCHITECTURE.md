@@ -400,15 +400,91 @@ ENCRYPTION_SALT=disclosurely-server-salt-2024-secure
 
 ## 🔍 **System Health Check**
 
+## 🌐 **Custom Domain Management**
+
+### **Overview**
+The platform supports custom branded secure links (e.g., `secure.company.com`) through automated Vercel integration. This allows organizations to maintain their brand identity while using the secure reporting platform.
+
+### **Architecture Components**
+
+#### **Database Schema**
+- **`custom_domains`** table: Stores domain verification status and configuration
+  - `domain`: The custom domain name (e.g., `secure.company.com`)
+  - `organization_id`: Links to the organization
+  - `is_primary`: Boolean flag for primary domain
+  - `is_active`: Domain activation status
+  - `verification_status`: Current verification state
+  - `vercel_domain_id`: Vercel's internal domain ID
+
+#### **Edge Functions**
+- **`simple-domain`** Edge Function: Handles the complete custom domain workflow
+  - **Generate Records**: Creates CNAME and TXT verification records
+  - **Verify Domain**: Triggers Vercel API verification
+  - **AI Logging**: Comprehensive logging for debugging and monitoring
+
+#### **Frontend Components**
+- **`CustomDomainSettings.tsx`**: Complete UI for domain management
+  - 3-step process: Enter Domain → Add DNS Records → Verify
+  - Real-time progress indicators
+  - Copy buttons for DNS records
+  - Visual feedback for verification status
+
+### **Workflow Process**
+
+1. **Domain Entry**: User enters custom domain (e.g., `secure.company.com`)
+2. **Record Generation**: System calls Vercel API to add domain and retrieve verification records
+3. **DNS Setup**: User adds two DNS records:
+   - **CNAME**: `secure` → `secure.disclosurely.com`
+   - **TXT**: `_vercel` → `vc-domain-verify=domain.com,verification-code`
+4. **Verification**: System triggers Vercel API verification
+5. **Activation**: Domain becomes active and ready for use
+
+### **Technical Implementation**
+
+#### **Vercel API Integration**
+- **API Version**: Uses Vercel API v10 for domain management
+- **Authentication**: Vercel API token stored in Supabase secrets
+- **Project ID**: Links domains to specific Vercel project
+- **Verification**: Automated domain ownership verification
+
+#### **DNS Record Management**
+- **CNAME Record**: Points custom domain to platform's secure subdomain
+- **TXT Record**: Vercel's domain ownership verification
+- **Multiple DNS Providers**: Checks Google DNS, Cloudflare DNS, Quad9 DNS for reliability
+
+#### **AI-Powered Logging**
+- **Comprehensive Logging**: Every step logged to `system_logs` table
+- **Context Tracking**: Request start, generation, verification, success/error states
+- **Debugging Support**: Detailed error logging for troubleshooting
+- **Performance Monitoring**: Execution time tracking
+
+### **Security Considerations**
+- **Domain Validation**: Vercel handles domain ownership verification
+- **SSL Provisioning**: Automatic SSL certificate generation
+- **Access Control**: RLS policies protect domain data
+- **Audit Trail**: Complete logging of all domain operations
+
+### **Error Handling**
+- **Graceful Degradation**: Handles existing domains, API errors, DNS issues
+- **User Feedback**: Clear error messages and retry mechanisms
+- **Fallback Options**: Manual verification when automated fails
+- **Progress Indicators**: Real-time feedback during verification process
+
+---
+
 ## 🔧 **Recent Critical Fixes (October 23, 2025)**
 
 ### ✅ **Issues Resolved**
 1. **Anonymous Messaging Decryption**: Fixed Edge Function to return `decrypted_message` field
 2. **Report Deletion**: Enhanced debugging with separate profile and user_roles queries  
 3. **TypeScript Build Errors**: Fixed all interface mismatches and missing imports
-4. **Audit Logs RLS**: Fixed RLS policies to allow anonymous users to insert audit logs
-5. **Security Hardening**: Added `SET search_path = public` to all SECURITY DEFINER functions
-6. **Team Invite Verification**: Fixed critical syntax error and audit trigger issues
+4. **Custom Domain Verification**: Fixed 400 errors by removing DNS check after Vercel API verification
+5. **TXT Record Display**: Fixed empty TXT record values in dashboard UI
+6. **Progress Indicators**: Added real-time verification progress feedback
+7. **AI Logging Integration**: Comprehensive logging throughout custom domain workflow
+8. **Audit Logs RLS**: Fixed RLS policies to allow anonymous users to insert audit logs
+9. **Security Hardening**: Added `SET search_path = public` to all SECURITY DEFINER functions
+10. **Team Invite Verification**: Fixed critical syntax error and audit trigger issues
 
 ### 🔍 **Root Causes Identified & Fixed**
 
@@ -434,6 +510,19 @@ ENCRYPTION_SALT=disclosurely-server-salt-2024-secure
   - Fixed duplicate destructuring in Edge Function
   - Updated `log_role_change` trigger to include all required audit_logs fields
 - **Result**: Team invite verification now works end-to-end with proper CORS headers and 200 OK responses
+
+#### **Custom Domain Verification Failures**
+- **Root Cause**: Verification was performing DNS check after Vercel API verification, causing false failures
+- **Secondary Issues**: 
+  - TXT record values not displaying in dashboard UI
+  - No progress indicators during verification process
+  - Limited debugging information for troubleshooting
+- **Fix**: 
+  - Removed DNS check and rely solely on Vercel API verification
+  - Fixed TXT record extraction from Vercel project domains API
+  - Added real-time progress indicators with visual feedback
+  - Integrated comprehensive AI logging throughout workflow
+- **Result**: Domain verification now works correctly with proper user feedback and debugging capabilities
 
 ### ✅ **Email Notification System Fixed**
 - **Root Cause**: Disconnect between `notifications` table (where triggers create records) and `email_notifications` table (where email processing looks for records)

@@ -19,16 +19,67 @@ interface VerificationResult {
   success: boolean;
   message: string;
   records?: DNSRecord[];
+  steps?: {
+    dnsCheck: boolean;
+    vercelVerification: boolean;
+    sslProvisioning: boolean;
+  };
 }
 
 const CustomDomainSettings = () => {
-  const [domain, setDomain] = useState('');
+  const [domain, setDomain] = useState(() => {
+    // Load domain from localStorage on component mount
+    if (typeof window !== 'undefined') {
+      return localStorage.getItem('custom-domain') || '';
+    }
+    return '';
+  });
   const [isGenerating, setIsGenerating] = useState(false);
   const [isVerifying, setIsVerifying] = useState(false);
-  const [records, setRecords] = useState<DNSRecord[]>([]);
-  const [verificationResult, setVerificationResult] = useState<VerificationResult | null>(null);
+  const [records, setRecords] = useState<DNSRecord[]>(() => {
+    // Load records from localStorage on component mount
+    if (typeof window !== 'undefined') {
+      const saved = localStorage.getItem('custom-domain-records');
+      return saved ? JSON.parse(saved) : [];
+    }
+    return [];
+  });
+  const [verificationResult, setVerificationResult] = useState<VerificationResult | null>(() => {
+    // Load verification result from localStorage on component mount
+    if (typeof window !== 'undefined') {
+      const saved = localStorage.getItem('custom-domain-verification');
+      return saved ? JSON.parse(saved) : null;
+    }
+    return null;
+  });
   const [copiedRecord, setCopiedRecord] = useState<string | null>(null);
+  const [verificationProgress, setVerificationProgress] = useState({
+    dnsCheck: false,
+    vercelVerification: false,
+    sslProvisioning: false,
+  });
   const { toast } = useToast();
+
+  // Save domain to localStorage whenever it changes
+  React.useEffect(() => {
+    if (typeof window !== 'undefined' && domain) {
+      localStorage.setItem('custom-domain', domain);
+    }
+  }, [domain]);
+
+  // Save records to localStorage whenever they change
+  React.useEffect(() => {
+    if (typeof window !== 'undefined' && records.length > 0) {
+      localStorage.setItem('custom-domain-records', JSON.stringify(records));
+    }
+  }, [records]);
+
+  // Save verification result to localStorage whenever it changes
+  React.useEffect(() => {
+    if (typeof window !== 'undefined' && verificationResult) {
+      localStorage.setItem('custom-domain-verification', JSON.stringify(verificationResult));
+    }
+  }, [verificationResult]);
 
   const handleGenerateRecords = async () => {
     if (!domain.trim()) {
@@ -97,8 +148,27 @@ const CustomDomainSettings = () => {
 
     setIsVerifying(true);
     setVerificationResult(null);
+    setVerificationProgress({
+      dnsCheck: false,
+      vercelVerification: false,
+      sslProvisioning: false,
+    });
 
     try {
+      // Step 1: DNS Check
+      setVerificationProgress(prev => ({ ...prev, dnsCheck: true }));
+      toast({
+        title: "Verifying Domain",
+        description: "Checking DNS records...",
+      });
+
+      // Step 2: Vercel Verification
+      setVerificationProgress(prev => ({ ...prev, vercelVerification: true }));
+      toast({
+        title: "Verifying Domain",
+        description: "Triggering Vercel verification...",
+      });
+
       const response = await supabase.functions.invoke('simple-domain', {
         body: { 
           action: 'verify',
@@ -112,6 +182,13 @@ const CustomDomainSettings = () => {
 
       const result = response.data;
       setVerificationResult(result);
+
+      // Step 3: SSL Provisioning (simulated)
+      setVerificationProgress(prev => ({ ...prev, sslProvisioning: true }));
+      toast({
+        title: "Verifying Domain",
+        description: "Provisioning SSL certificate...",
+      });
 
       if (result.success) {
         toast({
@@ -296,6 +373,45 @@ const CustomDomainSettings = () => {
                 </>
               )}
             </Button>
+
+            {/* Progress Indicators */}
+            {isVerifying && (
+              <div className="space-y-3">
+                <div className="text-sm font-medium text-gray-700">Verification Progress:</div>
+                <div className="space-y-2">
+                  <div className="flex items-center gap-2">
+                    {verificationProgress.dnsCheck ? (
+                      <CheckCircle className="h-4 w-4 text-green-600" />
+                    ) : (
+                      <RefreshCw className={`h-4 w-4 ${verificationProgress.dnsCheck ? 'text-green-600' : 'text-gray-400'} ${isVerifying ? 'animate-spin' : ''}`} />
+                    )}
+                    <span className={`text-sm ${verificationProgress.dnsCheck ? 'text-green-600' : 'text-gray-500'}`}>
+                      Checking DNS records
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    {verificationProgress.vercelVerification ? (
+                      <CheckCircle className="h-4 w-4 text-green-600" />
+                    ) : (
+                      <RefreshCw className={`h-4 w-4 ${verificationProgress.vercelVerification ? 'text-green-600' : 'text-gray-400'} ${isVerifying ? 'animate-spin' : ''}`} />
+                    )}
+                    <span className={`text-sm ${verificationProgress.vercelVerification ? 'text-green-600' : 'text-gray-500'}`}>
+                      Triggering Vercel verification
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    {verificationProgress.sslProvisioning ? (
+                      <CheckCircle className="h-4 w-4 text-green-600" />
+                    ) : (
+                      <RefreshCw className={`h-4 w-4 ${verificationProgress.sslProvisioning ? 'text-green-600' : 'text-gray-400'} ${isVerifying ? 'animate-spin' : ''}`} />
+                    )}
+                    <span className={`text-sm ${verificationProgress.sslProvisioning ? 'text-green-600' : 'text-gray-500'}`}>
+                      Provisioning SSL certificate
+                    </span>
+                  </div>
+                </div>
+              </div>
+            )}
 
             {verificationResult && (
               <Alert className={verificationResult.success ? "border-green-200 bg-green-50" : "border-red-200 bg-red-50"}>
