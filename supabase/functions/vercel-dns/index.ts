@@ -231,24 +231,18 @@ async function handleAutomatedDNS(supabaseClient: any, organizationId: string, v
   }
 
   try {
-    // Step 1: Add domain to Vercel
+    // Step 1: Add domain to Vercel (this triggers SSL provisioning)
     console.log(`Adding domain ${domain.domain_name} to Vercel...`)
     const vercelDomain = await vercelDNS.addDomain(domain.domain_name)
     
-    // Step 2: Add CNAME record
-    console.log(`Adding CNAME record for ${domain.domain_name}...`)
-    const dnsRecord = await vercelDNS.addDNSRecord(domain.domain_name, {
-      type: 'CNAME',
-      name: domain.domain_name,
-      value: 'secure.disclosurely.com',
-      ttl: 300
-    })
+    console.log(`Domain added to Vercel:`, vercelDomain)
 
-    // Step 3: Update domain status
+    // Step 2: Update domain status to active (since Vercel will handle SSL)
     const { data: updatedDomain, error: updateError } = await supabaseClient
       .from('custom_domains')
       .update({
-        status: 'verifying',
+        status: 'active',
+        is_active: true,
         last_checked_at: new Date().toISOString(),
         error_message: null
       })
@@ -263,10 +257,9 @@ async function handleAutomatedDNS(supabaseClient: any, organizationId: string, v
     return new Response(
       JSON.stringify({ 
         success: true,
-        message: 'DNS record created successfully',
+        message: 'Domain added to Vercel successfully. SSL certificate will be provisioned automatically.',
         domain: updatedDomain,
-        vercel_domain: vercelDomain,
-        dns_record: dnsRecord
+        vercel_domain: vercelDomain
       }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     )
