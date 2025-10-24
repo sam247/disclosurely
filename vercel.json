@@ -11,17 +11,6 @@
       "destination": "https://disclosurely.com/$1",
       "permanent": true
     },
-    {
-      "source": "/(.*)",
-      "has": [
-        {
-          "type": "host",
-          "value": "test.disclosurely.com"
-        }
-      ],
-      "destination": "https://disclosurely.com/secure-link",
-      "permanent": true
-    }
   ],
   "headers": [
     {

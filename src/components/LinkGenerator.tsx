@@ -24,7 +24,7 @@ const LinkGenerator = () => {
   const queryClient = useQueryClient();
   const limits = useSubscriptionLimits();
 
-  // Fetch verified custom domains and subdomains
+  // Fetch active custom domains
   const { data: customDomains } = useQuery({
     queryKey: ['custom-domains'],
     queryFn: async () => {
@@ -39,18 +39,19 @@ const LinkGenerator = () => {
       if (!profile?.organization_id) return [];
 
       const { data: domains } = await supabase
-        .from('domain_verifications')
-        .select('domain, verified_at, verification_type')
+        .from('custom_domains')
+        .select('domain_name, is_active, is_primary, status')
         .eq('organization_id', profile.organization_id)
-        .not('verified_at', 'is', null);
+        .eq('is_active', true)
+        .eq('status', 'active');
 
       return domains || [];
     },
     enabled: !!user,
   });
 
-  // Get the primary domain (prefer subdomain for immediate availability)
-  const primaryDomain = customDomains?.find(d => d.verification_type === 'SUBDOMAIN')?.domain || null;
+  // Get the primary domain (prefer primary custom domain)
+  const primaryDomain = customDomains?.find(d => d.is_primary)?.domain_name || null;
 
   // Fetch the primary active link
   const { data: primaryLink, isLoading } = useQuery({

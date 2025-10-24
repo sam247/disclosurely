@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
@@ -7,10 +6,8 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Trash2, Upload, Palette, CheckCircle, Lock } from 'lucide-react';
-import { useSubscriptionLimits } from '@/hooks/useSubscriptionLimits';
-import FeatureRestriction from '@/components/FeatureRestriction';
-import TrialPromptModal from '@/components/TrialPromptModal';
+import { Upload, Palette, ExternalLink } from 'lucide-react';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 
 interface Organization {
   id: string;
@@ -22,34 +19,18 @@ interface Organization {
   brand_color: string | null;
 }
 
-interface DomainVerification {
-  id: string;
-  organization_id: string;
-  domain: string;
-  verification_type: string;
-  verification_token: string | null;
-  verified_at: string | null;
-  created_at: string;
-}
-
 const OrganizationSettings = () => {
   const { user } = useAuth();
   const { toast } = useToast();
-  const queryClient = useQueryClient();
-  const { limits, hasAnySubscription } = useSubscriptionLimits();
 
   const [organization, setOrganization] = useState<Organization | null>(null);
-  const [domains, setDomains] = useState<DomainVerification[]>([]);
-  const [subdomainName, setSubdomainName] = useState('');
   const [brandColor, setBrandColor] = useState('#2563eb');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [logoFile, setLogoFile] = useState<File | null>(null);
   const [logoPreview, setLogoPreview] = useState<string | null>(null);
-  const [showTrialModal, setShowTrialModal] = useState(false);
 
   useEffect(() => {
     fetchOrganization();
-    fetchDomains();
   }, [user]);
 
   useEffect(() => {
@@ -73,7 +54,7 @@ const OrganizationSettings = () => {
 
       if (!profile?.organization_id) return;
 
-      const { data: organizationData, error } = await supabase
+      const { data: orgData, error } = await supabase
         .from('organizations')
         .select('*')
         .eq('id', profile.organization_id)
@@ -81,7 +62,7 @@ const OrganizationSettings = () => {
 
       if (error) throw error;
 
-      setOrganization(organizationData);
+      setOrganization(orgData);
     } catch (error) {
       console.error('Error fetching organization:', error);
       toast({
@@ -92,159 +73,28 @@ const OrganizationSettings = () => {
     }
   };
 
-  const fetchDomains = async () => {
-    if (!user) return;
+  const handleBrandColorChange = async (color: string) => {
+    if (!user || !organization) return;
 
-    try {
-      const { data: profile } = await supabase
-        .from('profiles')
-        .select('organization_id')
-        .eq('id', user.id)
-        .single();
-
-      if (!profile?.organization_id) return;
-
-      const { data: domainsData, error } = await supabase
-        .from('domain_verifications')
-        .select('*')
-        .eq('organization_id', profile.organization_id);
-
-      if (error) {
-        console.error('Error fetching domains:', error);
-        // Continue with empty domains array instead of throwing
-        setDomains([]);
-        return;
-      }
-
-      setDomains(domainsData || []);
-    } catch (error) {
-      console.error('Error fetching domains:', error);
-      toast({
-        title: "Error",
-        description: "Failed to load domain settings",
-        variant: "destructive",
-      });
-    }
-  };
-
-  const handleSubdomainSetup = async (e: React.FormEvent) => {
-    e.preventDefault();
+    setBrandColor(color);
     
-    if (!subdomainName.trim()) {
-      toast({
-        title: "Error",
-        description: "Please enter a subdomain name",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    if (!/^[a-z0-9-]+$/.test(subdomainName)) {
-      toast({
-        title: "Error", 
-        description: "Subdomain can only contain lowercase letters, numbers, and hyphens",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    if (!user) return;
-
-    setIsSubmitting(true);
-
     try {
-      const { data: profile } = await supabase
-        .from('profiles')
-        .select('organization_id')
-        .eq('id', user.id)
-        .single();
-
-      if (!profile?.organization_id) {
-        throw new Error('Organization not found');
-      }
-
-      const fullSubdomain = `${subdomainName}.disclosurely.com`;
-      
-      // Check if subdomain already exists across all organizations
-      const { data: existingDomain } = await supabase
-        .from('domain_verifications')
-        .select('id')
-        .eq('domain', fullSubdomain)
-        .maybeSingle();
-
-      if (existingDomain) {
-        toast({
-          title: "Error",
-          description: "This subdomain is already taken. Please choose a different one.",
-          variant: "destructive",
-        });
-        return;
-      }
-      
       const { error } = await supabase
-        .from('domain_verifications')
-        .insert({
-          organization_id: profile.organization_id,
-          domain: fullSubdomain,
-          verification_type: 'SUBDOMAIN',
-          verification_token: 'auto-verified-subdomain',
-          verified_at: new Date().toISOString()
-        });
+        .from('organizations')
+        .update({ brand_color: color })
+        .eq('id', organization.id);
 
       if (error) throw error;
 
       toast({
         title: "Success",
-        description: `Subdomain ${fullSubdomain} has been set up successfully!`,
+        description: "Brand color updated successfully",
       });
-
-      setSubdomainName('');
-      await fetchDomains(); // Refresh the domains list
-      
-      // Trigger a page refresh to update dashboard data
-      setTimeout(() => {
-        window.location.reload();
-      }, 1000);
-    } catch (error: any) {
-      console.error('Subdomain setup error:', error);
-      let errorMessage = "Failed to set up subdomain";
-      
-      if (error.code === '23505') {
-        errorMessage = "This subdomain is already taken. Please choose a different one.";
-      } else if (error.message) {
-        errorMessage = error.message;
-      }
-      
-      toast({
-        title: "Error",
-        description: errorMessage,
-        variant: "destructive",
-      });
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
-
-  const handleDeleteDomain = async (domainId: string) => {
-    try {
-      const { error } = await supabase
-        .from('domain_verifications')
-        .delete()
-        .eq('id', domainId);
-
-      if (error) throw error;
-
-      toast({
-        title: "Success",
-        description: "Domain removed successfully",
-      });
-
-      fetchDomains();
     } catch (error) {
-      console.error('Error deleting domain:', error);
+      console.error('Error updating brand color:', error);
       toast({
         title: "Error",
-        description: "Failed to remove domain",
+        description: "Failed to update brand color",
         variant: "destructive",
       });
     }
@@ -328,13 +178,13 @@ const OrganizationSettings = () => {
       });
 
       // Refresh organization data
-      fetchOrganization();
+      await fetchOrganization();
       setLogoFile(null);
-    } catch (error: any) {
-      console.error('Error updating organization:', error);
+    } catch (error) {
+      console.error('Error saving organization:', error);
       toast({
         title: "Error",
-        description: error.message || "Failed to update organization settings",
+        description: "Failed to save organization settings",
         variant: "destructive",
       });
     } finally {
@@ -342,140 +192,71 @@ const OrganizationSettings = () => {
     }
   };
 
-  const handleRemoveLogo = async () => {
-    if (!organization) return;
-
-    try {
-      const { error } = await supabase
-        .from('organizations')
-        .update({
-          logo_url: null,
-          updated_at: new Date().toISOString()
-        })
-        .eq('id', organization.id);
-
-      if (error) throw error;
-
-      // Remove from storage if it exists
-      if (organization.logo_url) {
-        const fileName = `${organization.id}/logo.png`;
-        await supabase.storage
-          .from('organization-logos')
-          .remove([fileName]);
-      }
-
-      toast({
-        title: "Success",
-        description: "Logo removed successfully",
-      });
-
-      setLogoPreview(null);
-      setLogoFile(null);
-      fetchOrganization();
-    } catch (error: any) {
-      console.error('Error removing logo:', error);
-      toast({
-        title: "Error",
-        description: error.message || "Failed to remove logo",
-        variant: "destructive",
-      });
-    }
-  };
+  if (!organization) {
+    return <div className="p-6">Loading organization settings...</div>;
+  }
 
   return (
-    <div className="space-y-6">
-      <div>
-        <h3 className="text-lg font-medium">Organization Settings</h3>
-        <p className="text-sm text-gray-600">
-          Manage your organization's profile and domain settings
-        </p>
+    <div className="p-6 space-y-6">
+      <div className="mb-6">
+        <h2 className="text-2xl font-bold">Organization Settings</h2>
+        <p className="text-muted-foreground">Manage your organization's branding and appearance</p>
       </div>
 
-      {/* Basic Information */}
-      {organization && (
-        <Card>
-          <CardHeader>
-            <CardTitle>Basic Information</CardTitle>
-            <CardDescription>
-              Update your organization's basic information
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div>
-              <Label>Name</Label>
-              <Input 
-                type="text" 
-                value={organization.name} 
-                onChange={(e) => setOrganization({...organization, name: e.target.value})}
-                placeholder="Enter organization name"
-              />
-            </div>
-            <div>
-              <Label>Description</Label>
-              <Input type="text" value={organization.description || 'N/A'} readOnly />
-            </div>
-            <div>
-              <Label>Created At</Label>
-              <Input type="text" value={new Date(organization.created_at).toLocaleDateString()} readOnly />
-            </div>
-          </CardContent>
-        </Card>
-      )}
+      {/* Custom Domains Notice */}
+      <Alert>
+        <ExternalLink className="h-4 w-4" />
+        <AlertDescription>
+          <strong>Custom Domains:</strong> To set up custom domains for your secure links (e.g., secure.yourcompany.com), 
+          please visit the <a href="/dashboard/settings" className="text-blue-600 hover:underline">Settings page</a> 
+          in your dashboard.
+        </AlertDescription>
+      </Alert>
 
-      {/* Branding Settings */}
+      {/* Organization Branding */}
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
-            Branding Settings
-            {!limits.hasCustomBranding && <Lock className="h-4 w-4 text-gray-400" />}
+            <Palette className="h-5 w-5" />
+            Organization Branding
           </CardTitle>
           <CardDescription>
-            Customize your organization's branding for submission forms
+            Customize your organization's appearance and branding
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
-          {!limits.hasCustomBranding && (
-            <FeatureRestriction 
-              feature="Custom Branding" 
-              requiredTier="pro"
-              onUpgrade={() => setShowTrialModal(true)}
+          {/* Organization Name */}
+          <div className="space-y-2">
+            <Label htmlFor="org-name">Organization Name</Label>
+            <Input
+              id="org-name"
+              value={organization.name}
+              onChange={(e) => setOrganization({ ...organization, name: e.target.value })}
+              placeholder="Enter organization name"
             />
-          )}
+          </div>
+
           {/* Logo Upload */}
-          <div className={`space-y-4 ${!limits.hasCustomBranding ? 'opacity-50' : ''}`}>
+          <div className="space-y-2">
             <Label>Organization Logo</Label>
-            <div className="flex items-center space-x-4">
-              {logoPreview ? (
-                <div className="relative">
-                  <img 
-                    src={logoPreview} 
-                    alt="Organization logo" 
-                    className="w-16 h-16 object-contain border rounded"
+            <div className="flex items-center gap-4">
+              {logoPreview && (
+                <div className="w-16 h-16 border rounded-lg overflow-hidden">
+                  <img
+                    src={logoPreview}
+                    alt="Organization logo"
+                    className="w-full h-full object-cover"
                   />
-                  <Button
-                    size="sm"
-                    variant="destructive"
-                    onClick={handleRemoveLogo}
-                    className="absolute -top-2 -right-2 w-6 h-6 rounded-full p-0"
-                  >
-                    ×
-                  </Button>
-                </div>
-              ) : (
-                <div className="w-16 h-16 bg-gray-100 border rounded flex items-center justify-center">
-                  <Upload className="h-6 w-6 text-gray-400" />
                 </div>
               )}
-              
-              <div className="space-y-2">
+              <div className="flex-1">
                 <Input
                   type="file"
                   accept="image/*"
                   onChange={handleLogoUpload}
-                  className="w-auto"
-                  disabled={!limits.hasCustomBranding}
+                  className="file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
                 />
-                <p className="text-xs text-gray-500">
+                <p className="text-sm text-muted-foreground mt-1">
                   Upload a logo (max 2MB, PNG/JPG recommended)
                 </p>
               </div>
@@ -483,114 +264,41 @@ const OrganizationSettings = () => {
           </div>
 
           {/* Brand Color */}
-          <div className={`space-y-4 ${!limits.hasCustomBranding ? 'opacity-50' : ''}`}>
-            <Label>Brand Color</Label>
-            <div className="flex items-center space-x-4">
-              <div className="flex items-center space-x-2">
-                <Palette className="h-4 w-4 text-gray-500" />
-                <Input
-                  type="color"
-                  value={brandColor}
-                  onChange={(e) => setBrandColor(e.target.value)}
-                  className="w-16 h-10 border rounded cursor-pointer"
-                  disabled={!limits.hasCustomBranding}
-                />
-                <Input
-                  type="text"
-                  value={brandColor}
-                  onChange={(e) => setBrandColor(e.target.value)}
-                  className="w-24 font-mono text-sm"
-                  placeholder="#2563eb"
-                  disabled={!limits.hasCustomBranding}
-                />
-              </div>
-              <div 
-                className="w-8 h-8 rounded border"
-                style={{ backgroundColor: brandColor }}
+          <div className="space-y-2">
+            <Label htmlFor="brand-color">Brand Color</Label>
+            <div className="flex items-center gap-3">
+              <Input
+                id="brand-color"
+                type="color"
+                value={brandColor}
+                onChange={(e) => handleBrandColorChange(e.target.value)}
+                className="w-16 h-10 p-1 border rounded"
+              />
+              <Input
+                value={brandColor}
+                onChange={(e) => handleBrandColorChange(e.target.value)}
+                placeholder="#2563eb"
+                className="flex-1"
               />
             </div>
-            <p className="text-xs text-gray-500">
-              This color will be used for buttons and accents in your submission forms
+            <p className="text-sm text-muted-foreground">
+              This color will be used throughout your organization's interface
             </p>
           </div>
 
-          <Button 
-            onClick={handleSaveOrganization}
-            disabled={isSubmitting}
-            className="w-full"
-          >
-            {isSubmitting ? 'Saving...' : 'Save Organization Settings'}
-          </Button>
-        </CardContent>
-      </Card>
-
-      {/* Custom Domain Settings */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Branded Subdomain</CardTitle>
-          <CardDescription>
-            Set up a branded subdomain for your organization's submission portal
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          {/* Subdomain Setup */}
-          <form onSubmit={handleSubdomainSetup} className="space-y-4">
-            <div>
-              <Label htmlFor="subdomain">Choose Your Subdomain</Label>
-              <div className="flex items-center space-x-2 mt-1">
-                <Input
-                  id="subdomain"
-                  value={subdomainName}
-                  onChange={(e) => setSubdomainName(e.target.value.toLowerCase())}
-                  placeholder="yourorg"
-                  className="flex-1"
-                />
-                <span className="text-sm text-gray-500">.disclosurely.com</span>
-              </div>
-              <p className="text-sm text-gray-500 mt-1">
-                This will be your branded URL for report submissions
-              </p>
-            </div>
-            <Button type="submit" disabled={isSubmitting}>
-              {isSubmitting ? 'Setting up...' : 'Set up Subdomain'}
+          {/* Save Button */}
+          <div className="flex justify-end">
+            <Button
+              onClick={handleSaveOrganization}
+              disabled={isSubmitting}
+              className="flex items-center gap-2"
+            >
+              <Upload className="h-4 w-4" />
+              {isSubmitting ? 'Saving...' : 'Save Changes'}
             </Button>
-          </form>
-
-          {/* Current Domains */}
-          {domains && domains.length > 0 && (
-            <div className="space-y-3">
-              <Label>Current Domains</Label>
-              {domains.map((domain) => (
-                <div key={domain.id} className="flex items-center justify-between p-3 border rounded-lg bg-green-50 border-green-200">
-                  <div>
-                    <div className="flex items-center gap-2">
-                      <CheckCircle className="h-4 w-4 text-green-600" />
-                      <p className="font-medium text-green-800">{domain.domain}</p>
-                    </div>
-                    <p className="text-sm text-green-600 ml-6">
-                      {domain.verification_type === 'SUBDOMAIN' ? 'Branded Subdomain' : 'Custom Domain'} • 
-                      <span className="ml-1">✓ Active & Ready</span>
-                    </p>
-                  </div>
-                  <Button
-                    variant="destructive"
-                    size="sm"
-                    onClick={() => handleDeleteDomain(domain.id)}
-                  >
-                    <Trash2 className="h-4 w-4 mr-1" />
-                    Remove
-                  </Button>
-                </div>
-              ))}
-            </div>
-          )}
+          </div>
         </CardContent>
       </Card>
-
-      <TrialPromptModal 
-        open={showTrialModal} 
-        onOpenChange={setShowTrialModal}
-      />
     </div>
   );
 };

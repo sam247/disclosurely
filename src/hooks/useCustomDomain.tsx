@@ -33,45 +33,20 @@ export const useCustomDomain = (): CustomDomainInfo => {
         return;
       }
 
-      // Check if it's a disclosurely.com subdomain
-      if (currentHost.endsWith('.disclosurely.com') && currentHost !== 'disclosurely.com') {
-        try {
-          const { data: domainVerification, error } = await supabase
-            .from('domain_verifications')
-            .select('domain, organization_id, verified_at')
-            .eq('domain', currentHost)
-            .eq('verification_type', 'SUBDOMAIN')
-            .not('verified_at', 'is', null)
-            .single();
-
-          if (!error && domainVerification) {
-            setDomainInfo({
-              customDomain: currentHost,
-              organizationId: domainVerification.organization_id,
-              isCustomDomain: true,
-              loading: false
-            });
-            return;
-          }
-        } catch (error) {
-          console.error('Error checking subdomain:', error);
-        }
-      }
-
-      // Check for full custom domains
+      // Check for custom domains (no more subdomain support)
       try {
-        const { data: domainVerification, error } = await supabase
-          .from('domain_verifications')
-          .select('domain, organization_id, verified_at')
-          .eq('domain', currentHost)
-          .eq('verification_type', 'CNAME')
-          .not('verified_at', 'is', null)
+        const { data: customDomain, error } = await supabase
+          .from('custom_domains')
+          .select('domain_name, organization_id, is_active, status')
+          .eq('domain_name', currentHost)
+          .eq('is_active', true)
+          .eq('status', 'active')
           .single();
 
-        if (!error && domainVerification) {
+        if (!error && customDomain) {
           setDomainInfo({
             customDomain: currentHost,
-            organizationId: domainVerification.organization_id,
+            organizationId: customDomain.organization_id,
             isCustomDomain: true,
             loading: false
           });

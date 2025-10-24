@@ -444,13 +444,13 @@ const Dashboard = () => {
         .eq('is_active', true)
         .limit(1);
 
-      // Fetch subdomains for this organization
-      const { data: subdomainsData } = await supabase
-        .from('domain_verifications')
-        .select('id, domain, verification_type, verified_at')
+      // Fetch custom domains for this organization
+      const { data: customDomainsData } = await supabase
+        .from('custom_domains')
+        .select('id, domain_name, is_active, is_primary, status')
         .eq('organization_id', profile.organization_id)
-        .eq('verification_type', 'SUBDOMAIN')
-        .not('verified_at', 'is', null);
+        .eq('is_active', true)
+        .eq('status', 'active');
 
       // Fetch team members for assignment
       const { data: teamData } = await supabase
@@ -463,7 +463,7 @@ const Dashboard = () => {
       setReports(reportsData || []);
       setArchivedReports(archivedData || []);
       setLinks(linksData || []);
-      setSubdomains(subdomainsData || []);
+      setSubdomains(customDomainsData || []);
       setTeamMembers(teamData || []);
     } catch (error) {
       console.error('Error fetching dashboard data:', error);
