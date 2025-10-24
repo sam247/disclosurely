@@ -442,9 +442,9 @@ const Blog = () => {
                 <RelatedArticles currentPost={currentPost} />
               </div>
 
-              {/* Right Sidebar */}
-              <aside className="w-full lg:w-80 flex-shrink-0">
-                <div className="lg:sticky lg:top-8 space-y-8">
+              {/* Right Sidebar - Hidden on mobile, visible on desktop */}
+              <aside className="hidden lg:block w-80 flex-shrink-0">
+                <div className="sticky top-8 space-y-8">
                   {/* Reading Time */}
                   {currentPost.readingTime && (
                     <div className="bg-muted/50 rounded-lg p-4">
@@ -595,6 +595,33 @@ const Blog = () => {
       <Footer />
     </>
   );
+};
+
+// Transform Contentful post to display format
+const transformContentfulPost = (item: ContentfulBlogPost): BlogPostDisplay => {
+  const authorEntry = item.fields.author as unknown as ContentfulAuthor;
+  const categoryEntries = item.fields.categories as unknown as ContentfulCategory[];
+
+  return {
+    id: item.sys.id,
+    title: item.fields.title,
+    slug: item.fields.slug,
+    excerpt: item.fields.excerpt,
+    content: item.fields.content,
+    featuredImage: (item.fields.featuredImage as any)?.fields?.file?.url,
+    publishDate: item.fields.publishDate || new Date().toISOString(),
+    seoTitle: item.fields.seoTitle,
+    seoDescription: item.fields.seoDescription,
+    tags: item.fields.tags || [],
+    authorName: authorEntry?.fields?.name,
+    authorEmail: authorEntry?.fields?.email,
+    categories: categoryEntries ? categoryEntries.map(cat => ({
+      name: cat.fields.name || '',
+      slug: cat.fields.slug || ''
+    })) : [],
+    readingTime: item.fields.readingTime,
+    status: item.fields.status || 'published'
+  };
 };
 
 // Table of Contents Component
