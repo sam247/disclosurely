@@ -163,10 +163,14 @@ const DashboardView = () => {
   const [teamMembers, setTeamMembers] = useState<any[]>([]);
 
   useEffect(() => {
-    if (user) {
+    console.log('DashboardView useEffect - user:', !!user, 'rolesLoading:', rolesLoading, 'isOrgAdmin:', isOrgAdmin);
+    if (user && !rolesLoading) {
+      console.log('DashboardView - Roles loaded, fetching data with isOrgAdmin:', isOrgAdmin);
       fetchData();
+    } else if (user && rolesLoading) {
+      console.log('DashboardView - Waiting for roles to load...');
     }
-  }, [user]);
+  }, [user, rolesLoading, isOrgAdmin]);
 
   const fetchData = async () => {
     if (!user) return;
@@ -211,11 +215,11 @@ const DashboardView = () => {
 
         // Add filtering for team members
         console.log('DashboardView - isOrgAdmin:', isOrgAdmin, 'rolesLoading:', rolesLoading);
-        if (!isOrgAdmin && !rolesLoading) {
+        if (isOrgAdmin === false && rolesLoading === false) {
           console.log('DashboardView - Filtering reports for team member:', user?.id);
           reportsQuery = reportsQuery.eq('assigned_to', user?.id);
         } else {
-          console.log('DashboardView - Showing all reports for org admin');
+          console.log('DashboardView - Showing all reports for org admin (isOrgAdmin:', isOrgAdmin, 'rolesLoading:', rolesLoading, ')');
         }
 
         const { data: reportsWithAI, error: reportsError } = await reportsQuery;
@@ -237,7 +241,7 @@ const DashboardView = () => {
           .limit(20);
 
         // Add filtering for archived reports
-        if (!isOrgAdmin && !rolesLoading) {
+        if (isOrgAdmin === false && rolesLoading === false) {
           console.log('DashboardView - Filtering archived reports for team member:', user?.id);
           // Note: We can't modify the query after it's executed, so we'll filter the results
           if (archivedWithAI) {
@@ -261,7 +265,7 @@ const DashboardView = () => {
           .limit(20);
 
         // Add filtering for team members in fallback query
-        if (!isOrgAdmin && !rolesLoading) {
+        if (isOrgAdmin === false && rolesLoading === false) {
           console.log('DashboardView - Fallback: Filtering reports for team member:', user?.id);
           reportsBasicQuery = reportsBasicQuery.eq('assigned_to', user?.id);
         }
@@ -283,7 +287,7 @@ const DashboardView = () => {
         if (archivedBasicError) throw archivedBasicError;
         
         // Add filtering for archived reports in fallback
-        if (!isOrgAdmin && !rolesLoading) {
+        if (isOrgAdmin === false && rolesLoading === false) {
           console.log('DashboardView - Fallback: Filtering archived reports for team member:', user?.id);
           archivedData = archivedBasic?.filter(report => report.assigned_to === user?.id) || [];
         } else {
