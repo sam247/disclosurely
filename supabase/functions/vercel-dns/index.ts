@@ -231,11 +231,18 @@ async function handleAutomatedDNS(supabaseClient: any, organizationId: string, v
   }
 
   try {
-    // Step 1: Add domain to Vercel (this triggers SSL provisioning)
-    console.log(`Adding domain ${domain.domain_name} to Vercel...`)
-    const vercelDomain = await vercelDNS.addDomain(domain.domain_name)
-    
-    console.log(`Domain added to Vercel:`, vercelDomain)
+    // Step 1: Check if domain already exists in Vercel
+    console.log(`Checking if domain ${domain.domain_name} exists in Vercel...`)
+    let vercelDomain
+    try {
+      vercelDomain = await vercelDNS.getDomain(domain.domain_name)
+      console.log(`Domain already exists in Vercel:`, vercelDomain)
+    } catch (error) {
+      // Domain doesn't exist, add it
+      console.log(`Adding domain ${domain.domain_name} to Vercel...`)
+      vercelDomain = await vercelDNS.addDomain(domain.domain_name)
+      console.log(`Domain added to Vercel:`, vercelDomain)
+    }
 
     // Step 2: Update domain status to active (since Vercel will handle SSL)
     const { data: updatedDomain, error: updateError } = await supabaseClient
@@ -257,7 +264,7 @@ async function handleAutomatedDNS(supabaseClient: any, organizationId: string, v
     return new Response(
       JSON.stringify({ 
         success: true,
-        message: 'Domain added to Vercel successfully. SSL certificate will be provisioned automatically.',
+        message: 'Domain configured in Vercel successfully. SSL certificate will be provisioned automatically.',
         domain: updatedDomain,
         vercel_domain: vercelDomain
       }),
