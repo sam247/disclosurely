@@ -540,10 +540,6 @@ const Blog = () => {
                             {post.authorName && (
                               <span>By {post.authorName}</span>
                             )}
-                            <div className="flex items-center gap-1">
-                              <Calendar className="h-4 w-4" />
-                              {formatDistanceToNow(new Date(post.publishDate), { addSuffix: true })}
-                            </div>
                             {post.readingTime && (
                               <div className="flex items-center gap-1">
                                 <Clock className="h-4 w-4" />
