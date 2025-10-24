@@ -194,7 +194,7 @@ const Dashboard = () => {
     console.log('useEffect triggered - rolesLoading:', rolesLoading, 'isOrgAdmin:', isOrgAdmin, 'user:', !!user);
     if (!rolesLoading && user) {
       console.log('User roles loaded, refetching reports with isOrgAdmin:', isOrgAdmin);
-      fetchDashboardData();
+      fetchData();
     }
   }, [rolesLoading, isOrgAdmin, user]);
 
@@ -401,6 +401,9 @@ const Dashboard = () => {
 
       const { data: reportsData, error: reportsError } = await reportsQuery;
 
+      console.log('Reports query executed, results:', reportsData?.length || 0);
+      console.log('Query was filtered for team member:', shouldFilter);
+
       if (reportsError) {
         console.error('Error fetching reports:', reportsError);
       }
@@ -456,6 +459,7 @@ const Dashboard = () => {
         .eq('organization_id', profile.organization_id)
         .eq('is_active', true);
 
+      console.log('About to set reports:', reportsData?.length || 0, 'archived:', archivedData?.length || 0);
       setReports(reportsData || []);
       setArchivedReports(archivedData || []);
       setLinks(linksData || []);

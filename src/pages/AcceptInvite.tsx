@@ -226,7 +226,7 @@ const AcceptInvite = () => {
 
       // Verify the OTP
       if (otp !== storedOtp) {
-        log.warn(LogContext.AUTH, 'Invalid OTP provided', null, { userId, token, providedOtp: otp });
+        log.warn(LogContext.AUTH, 'Invalid OTP provided', { userId, token, providedOtp: otp });
         toast({
           title: "Verification Failed",
           description: "Invalid verification code. Please check and try again.",
@@ -261,7 +261,7 @@ const AcceptInvite = () => {
           break;
         }
         
-        log.warn(LogContext.AUTH, `Team invitation attempt ${attempt} failed`, acceptError, { userId, token });
+        log.error(LogContext.AUTH, `Team invitation attempt ${attempt} failed`, acceptError, { userId, token });
         await new Promise((r) => setTimeout(r, 300 * attempt));
       }
 
