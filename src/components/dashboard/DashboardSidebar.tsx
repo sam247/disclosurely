@@ -69,7 +69,7 @@ const DashboardSidebar = ({
     path: '/dashboard/integrations',
     locked: !isOrgAdmin
   }, {
-    title: t('settings'),
+    title: 'Settings',
     icon: Settings,
     path: '/dashboard/settings',
     locked: !isOrgAdmin

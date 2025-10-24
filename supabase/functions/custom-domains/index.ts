@@ -330,22 +330,73 @@ async function handleVerifyDomain(supabaseClient: any, organizationId: string, b
   }
 
   try {
-    // Check DNS record
-    const dnsResponse = await fetch(`https://dns.google/resolve?name=${domain.domain_name}&type=CNAME`)
-    const dnsData = await dnsResponse.json()
-
-    let isVerified = false
-    let errorMessage = ''
-
-    if (dnsData.Answer && dnsData.Answer.length > 0) {
-      const cnameRecord = dnsData.Answer.find((record: any) => record.type === 5)
-      if (cnameRecord && cnameRecord.data === domain.dns_record_value) {
-        isVerified = true
-      } else {
-        errorMessage = 'CNAME record does not point to correct value'
+    // Log verification attempt
+    await supabaseClient.functions.invoke('ai-logger', {
+      body: {
+        level: 'info',
+        context: 'custom-domains',
+        message: `Starting DNS verification for domain: ${domain.domain_name}`,
+        data: {
+          domainId: domain.id,
+          domainName: domain.domain_name,
+          organizationId: organizationId
+        }
       }
+    });
+
+    // Check DNS record using multiple methods for better compatibility
+    const verificationResults = await Promise.allSettled([
+      checkCnameRecordViaGoogleDNS(domain.domain_name, 'secure.disclosurely.com'),
+      checkCnameRecordViaCloudflareDNS(domain.domain_name, 'secure.disclosurely.com'),
+      checkCnameRecordViaQuad9DNS(domain.domain_name, 'secure.disclosurely.com')
+    ]);
+
+    // Check if any verification method succeeded
+    const successfulVerifications = verificationResults
+      .filter(result => result.status === 'fulfilled' && result.value === true)
+      .length;
+
+    const isVerified = successfulVerifications > 0;
+    let errorMessage = '';
+
+    if (!isVerified) {
+      const failureReasons = verificationResults
+        .map((result, index) => {
+          if (result.status === 'rejected') {
+            return `Method ${index + 1}: ${result.reason}`;
+          } else if (result.value === false) {
+            return `Method ${index + 1}: CNAME record not found or incorrect`;
+          }
+          return null;
+        })
+        .filter(Boolean);
+
+      errorMessage = `CNAME record not found. Please ensure the record points to secure.disclosurely.com. Checked ${verificationResults.length} DNS methods.`;
+      
+      // Log verification failure with details
+      await supabaseClient.functions.invoke('ai-logger', {
+        body: {
+          level: 'warn',
+          context: 'custom-domains',
+          message: `Domain verification failed: ${domain.domain_name}`,
+          data: { 
+            domainId, 
+            domainName: domain.domain_name, 
+            failureReasons,
+            successfulMethods: successfulVerifications
+          }
+        }
+      });
     } else {
-      errorMessage = 'CNAME record not found'
+      // Log successful verification
+      await supabaseClient.functions.invoke('ai-logger', {
+        body: {
+          level: 'info',
+          context: 'custom-domains',
+          message: `Domain verification successful: ${domain.domain_name}`,
+          data: { domainId, domainName: domain.domain_name, successfulMethods: successfulVerifications }
+        }
+      });
     }
 
     // Update domain status
@@ -403,5 +454,71 @@ async function handleVerifyDomain(supabaseClient: any, organizationId: string, b
       }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     )
+  }
+}
+
+// DNS verification functions for multiple providers
+async function checkCnameRecordViaGoogleDNS(domainName: string, expectedTarget: string): Promise<boolean> {
+  try {
+    const response = await fetch(`https://dns.google/resolve?name=${domainName}&type=CNAME`)
+    const data = await response.json()
+    
+    if (data.Answer && data.Answer.length > 0) {
+      const cnameRecord = data.Answer.find((record: any) => record.type === 5)
+      if (cnameRecord) {
+        const target = cnameRecord.data.replace(/\.$/, '') // Remove trailing dot
+        return target === expectedTarget
+      }
+    }
+    return false
+  } catch (error) {
+    console.error('Google DNS check failed:', error)
+    return false
+  }
+}
+
+async function checkCnameRecordViaCloudflareDNS(domainName: string, expectedTarget: string): Promise<boolean> {
+  try {
+    const response = await fetch(`https://cloudflare-dns.com/dns-query?name=${domainName}&type=CNAME`, {
+      headers: {
+        'Accept': 'application/dns-json'
+      }
+    })
+    const data = await response.json()
+    
+    if (data.Answer && data.Answer.length > 0) {
+      const cnameRecord = data.Answer.find((record: any) => record.type === 5)
+      if (cnameRecord) {
+        const target = cnameRecord.data.replace(/\.$/, '') // Remove trailing dot
+        return target === expectedTarget
+      }
+    }
+    return false
+  } catch (error) {
+    console.error('Cloudflare DNS check failed:', error)
+    return false
+  }
+}
+
+async function checkCnameRecordViaQuad9DNS(domainName: string, expectedTarget: string): Promise<boolean> {
+  try {
+    const response = await fetch(`https://dns.quad9.net:5053/dns-query?name=${domainName}&type=CNAME`, {
+      headers: {
+        'Accept': 'application/dns-json'
+      }
+    })
+    const data = await response.json()
+    
+    if (data.Answer && data.Answer.length > 0) {
+      const cnameRecord = data.Answer.find((record: any) => record.type === 5)
+      if (cnameRecord) {
+        const target = cnameRecord.data.replace(/\.$/, '') // Remove trailing dot
+        return target === expectedTarget
+      }
+    }
+    return false
+  } catch (error) {
+    console.error('Quad9 DNS check failed:', error)
+    return false
   }
 }

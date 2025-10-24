@@ -26,7 +26,6 @@ const CustomDomainSettings = () => {
   const [newDomain, setNewDomain] = useState('');
   const [isAdding, setIsAdding] = useState(false);
   const [verifyingDomains, setVerifyingDomains] = useState<Set<string>>(new Set());
-  const [automatingDomains, setAutomatingDomains] = useState<Set<string>>(new Set());
   const { toast } = useToast();
   
   const {
@@ -97,49 +96,6 @@ const CustomDomainSettings = () => {
       });
     } finally {
       setVerifyingDomains(prev => {
-        const newSet = new Set(prev);
-        newSet.delete(domainId);
-        return newSet;
-      });
-    }
-  };
-
-  const handleAutomatedDNS = async (domainId: string) => {
-    try {
-      setAutomatingDomains(prev => new Set(prev).add(domainId));
-      
-      const { data, error } = await supabase.functions.invoke('vercel-dns', {
-        method: 'POST',
-        body: { domainId },
-      });
-
-      if (error) {
-        throw error;
-      }
-
-      if (data.success) {
-        toast({
-          title: "DNS Automated",
-          description: "DNS record created automatically via Vercel",
-        });
-        
-        // Refresh domains list
-        await fetchDomains();
-      } else {
-        toast({
-          title: "Automation Failed",
-          description: data.message || "Failed to automate DNS setup",
-          variant: "destructive",
-        });
-      }
-    } catch (error: any) {
-      toast({
-        title: "Error",
-        description: error.message || "Failed to automate DNS setup",
-        variant: "destructive",
-      });
-    } finally {
-      setAutomatingDomains(prev => {
         const newSet = new Set(prev);
         newSet.delete(domainId);
         return newSet;
@@ -284,22 +240,35 @@ const CustomDomainSettings = () => {
             </Button>
           </div>
 
-          {/* Current Default */}
-          <Alert>
-            <AlertCircle className="h-4 w-4" />
-            <AlertDescription>
-              Current default: <code className="bg-muted px-1 rounded">secure.disclosurely.com</code>
-            </AlertDescription>
-          </Alert>
+                      {/* Current Default */}
+                      <Alert>
+                        <AlertCircle className="h-4 w-4" />
+                        <AlertDescription>
+                          Current default: <code className="bg-muted px-1 rounded">secure.disclosurely.com</code>
+                        </AlertDescription>
+                      </Alert>
 
-          {/* Automated DNS Info */}
-          <Alert>
-            <Zap className="h-4 w-4" />
-            <AlertDescription>
-              <strong>Automated Setup:</strong> Use "Auto Setup" to automatically create DNS records via Vercel. 
-              Manual setup is also available if you prefer to manage DNS yourself.
-            </AlertDescription>
-          </Alert>
+                      {/* DNS Setup Instructions */}
+                      <Alert>
+                        <AlertCircle className="h-4 w-4" />
+                        <AlertDescription>
+                          <strong>DNS Setup Instructions:</strong>
+                          <br />
+                          1. Go to your DNS provider's control panel (cPanel, Cloudflare, etc.)
+                          <br />
+                          2. Add a new CNAME record with these exact values:
+                          <br />
+                          • <strong>Name/Host:</strong> secure (or your subdomain)
+                          <br />
+                          • <strong>Type:</strong> CNAME
+                          <br />
+                          • <strong>Value/Target:</strong> secure.disclosurely.com
+                          <br />
+                          3. Save the record and wait 5-10 minutes for propagation
+                          <br />
+                          4. Click "Verify" to check if the record is working
+                        </AlertDescription>
+                      </Alert>
         </CardContent>
       </Card>
 
@@ -347,29 +316,38 @@ const CustomDomainSettings = () => {
                           <Button
                             size="sm"
                             variant="outline"
-                            onClick={() => handleAutomatedDNS(domain.id)}
-                            disabled={automatingDomains.has(domain.id)}
+                            onClick={() => handleVerifyDomain(domain.id)}
+                            disabled={verifyingDomains.has(domain.id)}
                             className="flex items-center gap-1"
                           >
-                            {automatingDomains.has(domain.id) ? (
+                            {verifyingDomains.has(domain.id) ? (
                               <RefreshCw className="h-4 w-4 animate-spin" />
                             ) : (
                               <>
-                                <Zap className="h-4 w-4" />
-                                Auto Setup
+                                <CheckCircle className="h-4 w-4" />
+                                Verify
                               </>
                             )}
                           </Button>
+                        </div>
+                      )}
+                      
+                      {domain.status === 'failed' && (
+                        <div className="flex gap-2">
                           <Button
                             size="sm"
                             variant="outline"
                             onClick={() => handleVerifyDomain(domain.id)}
                             disabled={verifyingDomains.has(domain.id)}
+                            className="flex items-center gap-1"
                           >
                             {verifyingDomains.has(domain.id) ? (
                               <RefreshCw className="h-4 w-4 animate-spin" />
                             ) : (
-                              'Verify'
+                              <>
+                                <RefreshCw className="h-4 w-4" />
+                                Retry Verification
+                              </>
                             )}
                           </Button>
                         </div>
@@ -400,20 +378,36 @@ const CustomDomainSettings = () => {
                   {domain.status === 'pending' && (
                     <div className="bg-muted/50 rounded p-3 space-y-2">
                       <div className="text-sm font-medium">DNS Setup Required:</div>
-                      <div className="flex items-center gap-2">
-                        <code className="bg-background px-2 py-1 rounded text-sm">
-                          CNAME {domain.domain_name} {domain.dns_record_value}
-                        </code>
+                      <div className="space-y-2">
+                        <div className="text-xs text-muted-foreground">
+                          Add this CNAME record to your DNS provider:
+                        </div>
+                        <div className="bg-background rounded p-2 space-y-1 text-sm font-mono">
+                          <div><strong>Name/Host:</strong> {domain.subdomain}</div>
+                          <div><strong>Type:</strong> CNAME</div>
+                          <div><strong>Value/Target:</strong> secure.disclosurely.com</div>
+                        </div>
                         <Button
                           size="sm"
                           variant="outline"
                           onClick={() => copyDNSToClipboard(domain)}
+                          className="flex items-center gap-1"
                         >
                           <Copy className="h-4 w-4" />
+                          Copy Record
                         </Button>
                       </div>
                       <div className="text-xs text-muted-foreground">
-                        Add this CNAME record to your DNS settings, then click Verify
+                        After adding the record, wait 5-10 minutes for DNS propagation, then click Verify
+                      </div>
+                    </div>
+                  )}
+                  
+                  {domain.status === 'failed' && (
+                    <div className="bg-destructive/10 border border-destructive/20 rounded p-3 space-y-2">
+                      <div className="text-sm font-medium text-destructive">Verification Failed</div>
+                      <div className="text-xs text-muted-foreground">
+                        CNAME record not found or incorrect. Please check your DNS settings and try again.
                       </div>
                     </div>
                   )}
