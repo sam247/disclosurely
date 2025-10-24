@@ -66,7 +66,7 @@ interface DomainVerification {
 
 const Dashboard = () => {
   const { user, signOut, subscriptionData, subscriptionLoading, refreshSubscription } = useAuth();
-  const { isOrgAdmin } = useUserRoles();
+  const { isOrgAdmin, loading: rolesLoading } = useUserRoles();
   const { customDomain, organizationId, isCustomDomain, refreshDomainInfo } = useCustomDomain();
   const { limits, hasAnySubscription, isAtCaseLimit } = useSubscriptionLimits();
   const navigate = useNavigate();
@@ -188,6 +188,14 @@ const Dashboard = () => {
 
     fetchUserProfile();
   }, [user]);
+
+  // Refetch reports when user roles are loaded (for proper filtering)
+  useEffect(() => {
+    if (!rolesLoading && user) {
+      console.log('User roles loaded, refetching reports with isOrgAdmin:', isOrgAdmin);
+      fetchDashboardData();
+    }
+  }, [rolesLoading, isOrgAdmin, user]);
 
   // Also decrypt categories for archived reports
   useEffect(() => {
@@ -378,7 +386,10 @@ const Dashboard = () => {
 
       // If user is not org admin, only show reports assigned to them
       if (!isOrgAdmin) {
+        console.log('Filtering reports for team member:', user.id);
         reportsQuery = reportsQuery.eq('assigned_to', user.id);
+      } else {
+        console.log('Showing all reports for org admin');
       }
 
       const { data: reportsData, error: reportsError } = await reportsQuery;
@@ -398,7 +409,10 @@ const Dashboard = () => {
 
       // If user is not org admin, only show reports assigned to them
       if (!isOrgAdmin) {
+        console.log('Filtering archived reports for team member:', user.id);
         archivedQuery = archivedQuery.eq('assigned_to', user.id);
+      } else {
+        console.log('Showing all archived reports for org admin');
       }
 
       const { data: archivedData, error: archivedError } = await archivedQuery;
@@ -975,7 +989,16 @@ const Dashboard = () => {
               {filtered.length === 0 ? (
                 <TableRow>
                   <TableCell colSpan={7} className="text-center py-8 text-gray-500">
-                    No {isArchived ? 'archived ' : ''}reports found
+                    {!isOrgAdmin ? (
+                      <div className="space-y-2">
+                        <div className="text-lg font-medium text-gray-700">Awaiting a Case</div>
+                        <div className="text-sm text-gray-500">
+                          When a case is assigned to you it will appear here
+                        </div>
+                      </div>
+                    ) : (
+                      `No ${isArchived ? 'archived ' : ''}reports found`
+                    )}
                   </TableCell>
                 </TableRow>
               ) : (

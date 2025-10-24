@@ -7,6 +7,7 @@ import { Label } from '@/components/ui/label';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { Loader2, UserPlus } from 'lucide-react';
+import { log, LogContext } from '@/utils/logger';
 
 const AcceptInvite = () => {
   const { token } = useParams();
@@ -46,6 +47,8 @@ const AcceptInvite = () => {
 
   const validateInvitation = async () => {
     try {
+      log.info(LogContext.AUTH, 'Starting invitation validation', { token });
+      
       const { data, error } = await supabase
         .from('user_invitations')
         .select(`
@@ -61,6 +64,7 @@ const AcceptInvite = () => {
         .single();
 
       if (error || !data) {
+        log.error(LogContext.AUTH, 'Failed to validate invitation', error, { token });
         toast({
           title: "Invalid Invitation",
           description: "This invitation link is invalid or has expired.",
@@ -70,8 +74,16 @@ const AcceptInvite = () => {
         return;
       }
 
+      log.info(LogContext.AUTH, 'Invitation validated successfully', { 
+        token, 
+        email: data.email, 
+        role: data.role,
+        organizationId: data.organization_id 
+      });
+
       setInvitation(data);
     } catch (error) {
+      log.error(LogContext.AUTH, 'Error validating invitation', error as Error, { token });
       console.error('Error validating invitation:', error);
       toast({
         title: "Error",
@@ -191,10 +203,18 @@ const AcceptInvite = () => {
     setSubmitting(true);
 
     try {
+      log.info(LogContext.AUTH, 'Starting team invitation verification', { 
+        userId, 
+        token, 
+        email: invitation.email,
+        role: invitation.role 
+      });
+
       // Get the stored OTP from sessionStorage
       const storedOtp = sessionStorage.getItem('pending_otp');
       
       if (!storedOtp) {
+        log.error(LogContext.AUTH, 'No stored OTP found', null, { userId, token });
         toast({
           title: "Verification Failed",
           description: "No verification code found. Please try signing up again.",
@@ -206,6 +226,7 @@ const AcceptInvite = () => {
 
       // Verify the OTP
       if (otp !== storedOtp) {
+        log.warn(LogContext.AUTH, 'Invalid OTP provided', null, { userId, token, providedOtp: otp });
         toast({
           title: "Verification Failed",
           description: "Invalid verification code. Please check and try again.",
@@ -215,6 +236,8 @@ const AcceptInvite = () => {
         return;
       }
 
+      log.info(LogContext.AUTH, 'OTP verification successful', { userId, token });
+
       // Clear the stored OTP
       sessionStorage.removeItem('pending_otp');
 
@@ -223,17 +246,27 @@ const AcceptInvite = () => {
       await new Promise((resolve) => setTimeout(resolve, 500));
 
       // Accept the invitation via edge function with retry (handles eventual consistency)
+      log.info(LogContext.AUTH, 'Attempting to accept team invitation', { userId, token });
+      
       let acceptError: any = null;
       for (let attempt = 1; attempt <= 3; attempt++) {
+        log.info(LogContext.AUTH, `Team invitation attempt ${attempt}/3`, { userId, token });
+        
         const { error } = await supabase.functions.invoke('accept-team-invitation', {
           body: { token, userId },
         });
         acceptError = error;
-        if (!acceptError) break;
+        if (!acceptError) {
+          log.info(LogContext.AUTH, 'Team invitation accepted successfully', { userId, token, attempt });
+          break;
+        }
+        
+        log.warn(LogContext.AUTH, `Team invitation attempt ${attempt} failed`, acceptError, { userId, token });
         await new Promise((r) => setTimeout(r, 300 * attempt));
       }
 
       if (acceptError) {
+        log.error(LogContext.AUTH, 'Failed to accept team invitation after all attempts', acceptError, { userId, token });
         console.error('Error accepting invitation:', acceptError);
         toast({
           title: "Warning",
@@ -245,12 +278,15 @@ const AcceptInvite = () => {
       }
 
       // Sign the user in after successful invitation acceptance
+      log.info(LogContext.AUTH, 'Attempting automatic sign-in after invitation acceptance', { userId, email: invitation.email });
+      
       const { error: signInError } = await supabase.auth.signInWithPassword({
         email: invitation.email,
         password: password,
       });
 
       if (signInError) {
+        log.error(LogContext.AUTH, 'Failed to sign in after invitation acceptance', signInError, { userId, email: invitation.email });
         console.error('Error signing in after invitation acceptance:', signInError);
         toast({
           title: "Success!",
@@ -262,6 +298,8 @@ const AcceptInvite = () => {
         }, 1500);
         return;
       }
+
+      log.info(LogContext.AUTH, 'Successfully signed in after invitation acceptance', { userId, email: invitation.email });
 
       toast({
         title: "Success!",

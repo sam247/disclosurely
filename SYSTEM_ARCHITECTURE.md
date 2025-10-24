@@ -479,7 +479,64 @@ ENCRYPTION_SALT=disclosurely-server-salt-2024-secure
 
 ---
 
-*Last Updated: October 23, 2025*
-*Version: 2.5*
+## 👥 **Team Management System**
+
+### **Team Invitation Process**
+The team invitation system allows organization admins to invite team members with specific roles. The process involves multiple steps with comprehensive logging for debugging.
+
+#### **Process Flow**
+1. **Invitation Creation**: Org admin sends invitation via `UserManagement.tsx`
+2. **Email Delivery**: Invitation email sent with unique token and OTP
+3. **User Registration**: Invited user creates account with email verification
+4. **Invitation Acceptance**: User verifies OTP and accepts invitation via `AcceptInvite.tsx`
+5. **Role Assignment**: User assigned to organization with specified role
+6. **Automatic Sign-in**: User automatically signed in and redirected to dashboard
+
+#### **Key Components**
+- **`src/components/UserManagement.tsx`**: Handles invitation sending and team management
+- **`src/pages/AcceptInvite.tsx`**: Handles invitation acceptance with AI logging
+- **`supabase/functions/accept-team-invitation`**: Edge function for invitation processing
+- **`user_invitations` table**: Stores invitation data with tokens and expiration
+- **`user_roles` table**: Manages user role assignments per organization
+
+#### **AI Logging Integration**
+The team invite process includes comprehensive AI logging for debugging:
+- **Invitation validation**: Logs token validation and expiration checks
+- **OTP verification**: Logs OTP validation and storage
+- **Edge function calls**: Logs retry attempts and success/failure
+- **Sign-in process**: Logs automatic sign-in attempts and results
+- **Error handling**: Detailed error logging with context
+
+#### **Role-Based Access Control**
+- **Org Admin**: Full access to all features and reports
+- **Team Member**: Limited access to assigned reports only
+- **Dashboard Filtering**: Team members only see reports assigned to them
+- **Empty State**: Team members see "Awaiting a Case" message when no assignments
+
+#### **Database Schema**
+```sql
+-- User invitations with tokens and expiration
+user_invitations (
+  id, organization_id, email, role, token, 
+  expires_at, accepted_at, created_at
+)
+
+-- User roles per organization
+user_roles (
+  id, user_id, organization_id, role, 
+  is_active, created_at, updated_at
+)
+```
+
+#### **Security Considerations**
+- **Token Expiration**: Invitations expire after 7 days
+- **Single Use**: Invitation tokens can only be used once
+- **Role Validation**: Server-side role validation in Edge Functions
+- **Audit Logging**: All invitation activities logged for compliance
+
+---
+
+*Last Updated: October 24, 2025*
+*Version: 2.6*
 *Architecture: React + Supabase + Contentful*
 *Status: Production Ready - All Critical Issues Resolved*
