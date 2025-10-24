@@ -1,4 +1,4 @@
-import { Shield, CheckCircle, BarChart3, X } from "lucide-react";
+import { Shield, CheckCircle, BarChart3, X, ShieldCheck } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
@@ -80,6 +80,14 @@ const Landing = () => {
       {/* Hero Section */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-[150px] pb-20">
         <div className="text-center">
+          {/* Security Badge */}
+          <div className="flex justify-center mb-6">
+            <div className="inline-flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-full">
+              <ShieldCheck className="w-5 h-5" />
+              <span className="text-sm font-medium">Military Grade AES-GCM Encryption</span>
+            </div>
+          </div>
+          
           <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold text-gray-900 mb-6">
             {t("landing.hero.title1")}
             <span className="block text-blue-600">{t("landing.hero.title2")}</span>
