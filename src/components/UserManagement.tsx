@@ -202,20 +202,26 @@ const UserManagement = () => {
 
       if (checkError) throw checkError;
 
-      // Check if user is already a team member
+      // Check if user is already a team member (more comprehensive check)
       const { data: existingMember, error: memberError } = await supabase
         .from('profiles')
-        .select('id, email, is_active')
+        .select(`
+          id, 
+          email, 
+          is_active,
+          user_roles!inner(role, is_active)
+        `)
         .eq('organization_id', organization.id)
         .eq('email', emailToInvite)
-        .single();
+        .eq('is_active', true)
+        .eq('user_roles.is_active', true);
 
       if (memberError && memberError.code !== 'PGRST116') throw memberError;
 
-      if (existingMember && existingMember.is_active) {
+      if (existingMember && existingMember.length > 0) {
         toast({
           title: "User Already Exists",
-          description: `${emailToInvite} is already a team member.`,
+          description: `${emailToInvite} is already an active team member.`,
           variant: "destructive",
         });
         return;
