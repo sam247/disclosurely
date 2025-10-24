@@ -44,8 +44,10 @@ export const Footer = () => {
                   Compliance Software
                 </Link>
               </li>
-              <li className="pt-2">
-                <SystemStatusIndicator />
+               <li>
+                <Link to={`${langPrefix}https://status.disclosurely.com/`} className="text-gray-400 hover:text-white">
+                  System Status
+                </Link>
               </li>
             </ul>
           </div>
