@@ -60,6 +60,10 @@ interface VerifyRequest {
   domain: string;
 }
 
+interface DeleteRequest {
+  domain: string;
+}
+
 // Simple Vercel API client
 class SimpleVercelClient {
   private apiToken: string;
@@ -244,6 +248,36 @@ class SimpleVercelClient {
         return { 
           success: false, 
           error: data.error?.message || 'Failed to verify domain' 
+        };
+      }
+    } catch (error) {
+      return { 
+        success: false, 
+        error: error.message 
+      };
+    }
+  }
+
+  async deleteDomain(domain: string): Promise<{ success: boolean; message?: string; error?: string }> {
+    try {
+      const url = `https://api.vercel.com/v10/projects/${this.projectId}/domains/${domain}`;
+      
+      const response = await fetch(url, {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${this.apiToken}`,
+          'Content-Type': 'application/json',
+        },
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        return { success: true, message: 'Domain deleted successfully!' };
+      } else {
+        return { 
+          success: false, 
+          error: data.error?.message || 'Failed to delete domain' 
         };
       }
     } catch (error) {
@@ -502,6 +536,72 @@ async function handleVerifyDomain(request: VerifyRequest): Promise<{ success: bo
   };
 }
 
+async function handleDeleteDomain(request: DeleteRequest): Promise<{ success: boolean; message: string }> {
+  const { domain } = request;
+
+  if (!domain) {
+    await logToAI('DELETE_ERROR', 'Domain is required for deletion')
+    return { success: false, message: 'Domain is required' };
+  }
+
+  await logToAI('DELETE_START', `Starting domain deletion for domain: ${domain}`)
+  console.log('Attempting to delete domain ' + domain + ' from Vercel...');
+  
+  const vercelClient = new SimpleVercelClient();
+  
+  // Step 1: Delete from Vercel
+  const vercelDeleteResult = await vercelClient.deleteDomain(domain);
+  
+  if (!vercelDeleteResult.success) {
+    await logToAI('DELETE_ERROR', `Vercel API deletion failed for domain: ${domain}`, { error: vercelDeleteResult.error })
+    console.error('Vercel API deletion failed:', vercelDeleteResult.error);
+    return {
+      success: false,
+      message: `Failed to delete domain from Vercel: ${vercelDeleteResult.error}`
+    };
+  }
+  
+  // Step 2: Delete from database
+  try {
+    const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
+    const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
+    
+    const deleteResponse = await fetch(`${supabaseUrl}/rest/v1/custom_domains?domain=eq.${domain}`, {
+      method: 'DELETE',
+      headers: {
+        'Authorization': `Bearer ${supabaseServiceKey}`,
+        'Content-Type': 'application/json',
+        'apikey': supabaseServiceKey
+      }
+    });
+
+    if (!deleteResponse.ok) {
+      await logToAI('DELETE_ERROR', `Database deletion failed for domain: ${domain}`, { status: deleteResponse.status })
+      console.error('Database deletion failed:', deleteResponse.status);
+      return {
+        success: false,
+        message: `Domain removed from Vercel but failed to remove from database. Please contact support.`
+      };
+    }
+    
+    await logToAI('DELETE_SUCCESS', `Domain successfully deleted: ${domain}`)
+    console.log('Domain successfully deleted from both Vercel and database.');
+    
+    return {
+      success: true,
+      message: `Domain ${domain} has been completely removed from the system!`
+    };
+    
+  } catch (error) {
+    await logToAI('DELETE_ERROR', `Database deletion error for domain: ${domain}`, { error: error.message })
+    console.error('Database deletion error:', error);
+    return {
+      success: false,
+      message: `Domain removed from Vercel but database cleanup failed: ${error.message}`
+    };
+  }
+}
+
 async function checkCnameRecord(domain: string): Promise<boolean> {
   try {
     console.log(`Checking CNAME record for secure.${domain}`);
@@ -585,6 +685,22 @@ serve(async (req) => {
       const result = await handleVerifyDomain(body);
       console.log('Verify result:', JSON.stringify(result));
       await logToAI('VERIFY_COMPLETE', `Domain verification completed for domain: ${domain}`, result)
+      
+      return new Response(
+        JSON.stringify(result),
+        { 
+          status: result.success ? 200 : 400,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+        }
+      );
+    }
+
+    if (action === 'delete') {
+      console.log('Handling delete action');
+      await logToAI('DELETE_START', `Starting domain deletion for domain: ${domain}`)
+      const result = await handleDeleteDomain(body);
+      console.log('Delete result:', JSON.stringify(result));
+      await logToAI('DELETE_COMPLETE', `Domain deletion completed for domain: ${domain}`, result)
       
       return new Response(
         JSON.stringify(result),

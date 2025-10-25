@@ -4,7 +4,7 @@ import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
-import { Copy, CheckCircle, AlertCircle, RefreshCw, Globe } from 'lucide-react';
+import { Copy, CheckCircle, AlertCircle, RefreshCw, Globe, Trash2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 
@@ -36,6 +36,7 @@ const CustomDomainSettings = () => {
   });
   const [isGenerating, setIsGenerating] = useState(false);
   const [isVerifying, setIsVerifying] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
   const [records, setRecords] = useState<DNSRecord[]>(() => {
     // Load records from localStorage on component mount
     if (typeof window !== 'undefined') {
@@ -214,6 +215,83 @@ const CustomDomainSettings = () => {
     }
   };
 
+  const handleDelete = async () => {
+    if (!domain.trim()) {
+      toast({
+        title: "Domain Required",
+        description: "Please enter a domain name to delete",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    // Confirm deletion
+    if (!confirm(`Are you sure you want to delete the domain "${domain}"? This action cannot be undone.`)) {
+      return;
+    }
+
+    setIsDeleting(true);
+
+    try {
+      toast({
+        title: "Deleting Domain",
+        description: "Removing domain from Vercel and database...",
+      });
+
+      const response = await supabase.functions.invoke('simple-domain', {
+        body: { 
+          action: 'delete',
+          domain: domain.trim() 
+        }
+      });
+
+      if (response.error) {
+        throw response.error;
+      }
+
+      const result = response.data;
+
+      if (result.success) {
+        toast({
+          title: "Domain Deleted",
+          description: result.message || "Domain has been completely removed!",
+        });
+        
+        // Clear all state
+        setDomain('');
+        setRecords([]);
+        setVerificationResult(null);
+        setVerificationProgress({
+          dnsCheck: false,
+          vercelVerification: false,
+          sslProvisioning: false,
+        });
+        
+        // Clear localStorage
+        if (typeof window !== 'undefined') {
+          localStorage.removeItem('custom-domain');
+          localStorage.removeItem('custom-domain-records');
+          localStorage.removeItem('custom-domain-verification');
+        }
+      } else {
+        toast({
+          title: "Deletion Failed",
+          description: result.message || "Failed to delete domain",
+          variant: "destructive",
+        });
+      }
+    } catch (error) {
+      console.error('Error deleting domain:', error);
+      toast({
+        title: "Error",
+        description: "Failed to delete domain",
+        variant: "destructive",
+      });
+    } finally {
+      setIsDeleting(false);
+    }
+  };
+
   const copyToClipboard = async (text: string, recordType: string) => {
     try {
       await navigator.clipboard.writeText(text);
@@ -373,6 +451,28 @@ const CustomDomainSettings = () => {
                 </>
               )}
             </Button>
+
+            {/* Delete Button */}
+            {domain && (
+              <Button
+                variant="destructive"
+                onClick={handleDelete}
+                disabled={isDeleting || isGenerating || isVerifying}
+                className="w-full"
+              >
+                {isDeleting ? (
+                  <>
+                    <RefreshCw className="mr-2 h-4 w-4 animate-spin" />
+                    Deleting Domain...
+                  </>
+                ) : (
+                  <>
+                    <Trash2 className="mr-2 h-4 w-4" />
+                    Delete Domain
+                  </>
+                )}
+              </Button>
+            )}
 
             {/* Progress Indicators */}
             {isVerifying && (
