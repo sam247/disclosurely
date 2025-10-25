@@ -18,7 +18,7 @@ async function logToAI(context: string, message: string, data?: any) {
       function: 'simple-domain'
     }
     
-    console.log(`🤖 AI LOG [${context}]: ${message}`, data ? JSON.stringify(data, null, 2) : '')
+    console.log('🤖 AI LOG [' + context + ']: ' + message, data ? JSON.stringify(data, null, 2) : '')
     
     // Store in system_logs table for AI analysis
     const supabaseUrl = Deno.env.get('SUPABASE_URL')!
@@ -480,7 +480,7 @@ async function handleVerifyDomain(request: VerifyRequest): Promise<{ success: bo
   }
 
   await logToAI('VERIFY_STEP1', `Starting Vercel API verification for domain: ${domain}`)
-  console.log(`Attempting to verify domain ${domain} with Vercel API...`);
+    console.log('Attempting to verify domain ' + domain + ' with Vercel API...');
   const vercelClient = new SimpleVercelClient();
   const vercelVerifyResult = await vercelClient.verifyDomain(domain);
 

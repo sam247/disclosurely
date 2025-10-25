@@ -403,54 +403,86 @@ ENCRYPTION_SALT=disclosurely-server-salt-2024-secure
 ## 🌐 **Custom Domain Management**
 
 ### **Overview**
-The platform supports custom branded secure links (e.g., `secure.company.com`) through automated Vercel integration. This allows organizations to maintain their brand identity while using the secure reporting platform.
+Custom domain functionality allows organizations to use their own branded domains for secure report submission links (e.g., `secure.company.com` instead of `app.disclosurely.com/secure/tool/submit/token`). This provides a seamless, branded experience for whistleblowers while maintaining security and compliance.
 
 ### **Architecture Components**
 
 #### **Database Schema**
-- **`custom_domains`** table: Stores domain verification status and configuration
-  - `domain`: The custom domain name (e.g., `secure.company.com`)
-  - `organization_id`: Links to the organization
-  - `is_primary`: Boolean flag for primary domain
-  - `is_active`: Domain activation status
+- **`custom_domains`** table: Stores domain configurations per organization
+  - `organization_id`: Links to organization
+  - `domain`: The custom domain (e.g., `secure.company.com`)
+  - `is_active`: Whether domain is verified and active
+  - `is_primary`: Whether this is the organization's primary domain
   - `verification_status`: Current verification state
-  - `vercel_domain_id`: Vercel's internal domain ID
+  - `created_at`, `updated_at`: Timestamps
 
 #### **Edge Functions**
-- **`simple-domain`** Edge Function: Handles the complete custom domain workflow
-  - **Generate Records**: Creates CNAME and TXT verification records
-  - **Verify Domain**: Triggers Vercel API verification
-  - **AI Logging**: Comprehensive logging for debugging and monitoring
+- **`simple-domain`**: Handles custom domain verification workflow
+  - `generate` action: Creates Vercel verification records and retrieves DNS configuration
+  - `verify` action: Validates DNS configuration and triggers Vercel verification
+  - Uses Vercel API v6/v10 for domain management
+  - Implements multi-DNS provider verification for reliability
+  - Comprehensive AI logging for debugging and monitoring
 
 #### **Frontend Components**
-- **`CustomDomainSettings.tsx`**: Complete UI for domain management
-  - 3-step process: Enter Domain → Add DNS Records → Verify
-  - Real-time progress indicators
-  - Copy buttons for DNS records
-  - Visual feedback for verification status
+- **`CustomDomainSettings.tsx`**: Main UI for domain management
+  - 3-step workflow: Enter domain → Generate records → Verify
+  - Real-time progress indicators (DNS check, Vercel verification, SSL provisioning)
+  - localStorage persistence for user experience across page reloads
+  - Copy-to-clipboard functionality for DNS records
+  - Toast notifications for user feedback
 
 ### **Workflow Process**
 
 1. **Domain Entry**: User enters custom domain (e.g., `secure.company.com`)
 2. **Record Generation**: System calls Vercel API to add domain and retrieve verification records
-3. **DNS Setup**: User adds two DNS records:
-   - **CNAME**: `secure` → `secure.disclosurely.com`
-   - **TXT**: `_vercel` → `vc-domain-verify=domain.com,verification-code`
-4. **Verification**: System triggers Vercel API verification
-5. **Activation**: Domain becomes active and ready for use
+   - Extracts subdomain (e.g., `secure` from `secure.company.com`)
+   - Retrieves Vercel's recommended CNAME record
+   - Gets TXT verification records from multiple API sources
+3. **DNS Configuration**: User adds provided CNAME and TXT records to their DNS provider
+4. **Verification**: System validates DNS records and triggers Vercel verification
+   - Uses multiple DNS providers (Google, Cloudflare, Quad9) for reliability
+   - Calls Vercel API to trigger domain verification
+5. **Activation**: Domain becomes active for secure link generation
 
 ### **Technical Implementation**
 
 #### **Vercel API Integration**
-- **API Version**: Uses Vercel API v10 for domain management
-- **Authentication**: Vercel API token stored in Supabase secrets
-- **Project ID**: Links domains to specific Vercel project
-- **Verification**: Automated domain ownership verification
+- **API Endpoints Used**:
+  - `POST /v10/projects/{projectId}/domains`: Add domain to project
+  - `GET /v6/domains/{domain}/config`: Get domain configuration and recommended CNAME
+  - `GET /v9/domains/{domain}`: Get detailed domain information
+  - `GET /v10/projects/{projectId}/domains`: List project domains
+  - `POST /v9/projects/{projectId}/domains/{domain}/verify`: Trigger verification
 
 #### **DNS Record Management**
-- **CNAME Record**: Points custom domain to platform's secure subdomain
-- **TXT Record**: Vercel's domain ownership verification
-- **Multiple DNS Providers**: Checks Google DNS, Cloudflare DNS, Quad9 DNS for reliability
+- **CNAME Records**: Uses Vercel's `recommendedCNAME` field for accurate multi-tenant SaaS operation
+- **TXT Records**: Extracts verification records from multiple Vercel API sources:
+  - Project domains verification array
+  - Domain config verification
+  - Domain info verification
+- **Multi-Provider DNS Check**: Uses Google DNS, Cloudflare DNS, and Quad9 for verification reliability
+- **Subdomain Extraction**: Dynamically extracts subdomain from full domain for CNAME naming
+
+#### **AI-Powered Logging**
+- Comprehensive logging throughout the custom domain workflow
+- Stores logs in `system_logs` table for AI analysis
+- Tracks generation, verification, and error states
+- Provides debugging visibility for troubleshooting
+- Context-aware logging with structured data
+
+#### **Error Handling & Resilience**
+- Graceful handling of existing domains ("already in use", "linked to another account")
+- Fallback mechanisms for DNS record retrieval
+- Multiple verification sources to ensure record availability
+- Comprehensive error messages for user guidance
+
+### **Security Considerations**
+- **API Token Management**: Vercel API tokens stored as Supabase secrets
+- **Domain Validation**: Server-side validation of domain formats
+- **DNS Verification**: Multiple DNS providers prevent single points of failure
+- **Error Handling**: Graceful handling of API failures and edge cases
+- **Format String Security**: Safe logging practices to prevent injection attacks
 
 #### **AI-Powered Logging**
 - **Comprehensive Logging**: Every step logged to `system_logs` table
