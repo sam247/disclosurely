@@ -22,69 +22,86 @@ import iso27001Badge from "/lovable-uploads/9762866a-d8d9-4860-bf30-3ffd178885a8
 import gdprBadge from "/lovable-uploads/70aa6ac0-c161-4167-921d-79f08f6f4b02.png";
 import aicpaBadge from "/lovable-uploads/a9716d48-ff27-4193-b51c-9b035d1692b0.png";
 // Business logos from /public/business_logos/
-const businessLogos = [{
-  src: "/business_logos/page-1.png",
-  alt: "Business Partner 1"
-}, {
-  src: "/business_logos/page-2.png",
-  alt: "Business Partner 2"
-}, {
-  src: "/business_logos/page-3.png",
-  alt: "Business Partner 3"
-}, {
-  src: "/business_logos/page-4.png",
-  alt: "Business Partner 4"
-}, {
-  src: "/business_logos/page-5.png",
-  alt: "Business Partner 5"
-}, {
-  src: "/business_logos/page-6.png",
-  alt: "Business Partner 6"
-}, {
-  src: "/business_logos/page-7.png",
-  alt: "Business Partner 7"
-}, {
-  src: "/business_logos/page-8.png",
-  alt: "Business Partner 8"
-}];
+const businessLogos = [
+  {
+    src: "/business_logos/page-1.png",
+    alt: "Business Partner 1",
+  },
+  {
+    src: "/business_logos/page-2.png",
+    alt: "Business Partner 2",
+  },
+  {
+    src: "/business_logos/page-3.png",
+    alt: "Business Partner 3",
+  },
+  {
+    src: "/business_logos/page-4.png",
+    alt: "Business Partner 4",
+  },
+  {
+    src: "/business_logos/page-5.png",
+    alt: "Business Partner 5",
+  },
+  {
+    src: "/business_logos/page-6.png",
+    alt: "Business Partner 6",
+  },
+  {
+    src: "/business_logos/page-7.png",
+    alt: "Business Partner 7",
+  },
+  {
+    src: "/business_logos/page-8.png",
+    alt: "Business Partner 8",
+  },
+];
 const Landing = () => {
-  const {
-    t,
-    i18n
-  } = useTranslation();
+  const { t, i18n } = useTranslation();
   const currentLanguage = i18n.language;
   const langPrefix = currentLanguage && currentLanguage !== "en" ? `/${currentLanguage}` : "";
-  return <div className="min-h-screen bg-white">
-        {/* Navigation */}
-        <nav className="bg-white shadow-sm sticky top-0 z-50">
-          <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8">
-            <div className="flex justify-between items-center py-3">
-              <div className="flex items-center">
-                <Link to="/" className="flex items-center">
-                  <img src="/lovable-uploads/c46ace0e-df58-4119-b5e3-8dcfa075ea2f.png" alt="Disclosurely" className="h-5 sm:h-6 md:h-8 w-auto" />
-                </Link>
-              </div>
-              <div className="hidden md:flex items-center space-x-4">
-                <PublicLanguageSelector />
-                <Link to={`${langPrefix}/pricing`} className="text-gray-600 hover:text-gray-900">
-                  {t("nav.pricing")}
-                </Link>
-                <Link to={`${langPrefix}/auth/signup`} className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors">
-                  {t("nav.getStarted")}
-                </Link>
-              </div>
-              <div className="md:hidden flex items-center gap-1.5">
-                <PublicLanguageSelector />
-                <Link to={`${langPrefix}/auth/login`} className="bg-blue-600 text-white px-2.5 py-1.5 rounded-lg hover:bg-blue-700 transition-colors text-xs whitespace-nowrap">
-                  {t("nav.signin")}
-                </Link>
-              </div>
+  return (
+    <div className="min-h-screen bg-white">
+      {/* Navigation */}
+      <nav className="bg-white shadow-sm sticky top-0 z-50">
+        <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8">
+          <div className="flex justify-between items-center py-3">
+            <div className="flex items-center">
+              <Link to="/" className="flex items-center">
+                <img
+                  src="/lovable-uploads/c46ace0e-df58-4119-b5e3-8dcfa075ea2f.png"
+                  alt="Disclosurely"
+                  className="h-5 sm:h-6 md:h-8 w-auto"
+                />
+              </Link>
+            </div>
+            <div className="hidden md:flex items-center space-x-4">
+              <PublicLanguageSelector />
+              <Link to={`${langPrefix}/pricing`} className="text-gray-600 hover:text-gray-900">
+                {t("nav.pricing")}
+              </Link>
+              <Link
+                to={`${langPrefix}/auth/signup`}
+                className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors"
+              >
+                {t("nav.getStarted")}
+              </Link>
+            </div>
+            <div className="md:hidden flex items-center gap-1.5">
+              <PublicLanguageSelector />
+              <Link
+                to={`${langPrefix}/auth/login`}
+                className="bg-blue-600 text-white px-2.5 py-1.5 rounded-lg hover:bg-blue-700 transition-colors text-xs whitespace-nowrap"
+              >
+                {t("nav.signin")}
+              </Link>
             </div>
           </div>
-        </nav>
+        </div>
+      </nav>
 
       {/* Hero Section */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-[150px] pb-20 py-[100px]">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-[100px] pb-20 py-[100px]">
         <div className="text-center">
           {/* Security Badge */}
           <div className="flex justify-center mb-6">
@@ -93,17 +110,23 @@ const Landing = () => {
               <span className="text-sm font-medium">Military Grade AES-GCM Encryption</span>
             </div>
           </div>
-          
+
           <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold text-gray-900 mb-6">
             {t("landing.hero.title1")}
             <span className="block text-blue-600">{t("landing.hero.title2")}</span>
           </h1>
           <p className="text-lg sm:text-xl text-gray-600 mb-8 max-w-3xl mx-auto px-4">{t("landing.hero.subtitle")}</p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center items-center px-4">
-            <Link to={`${langPrefix}/auth/signup`} className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-3 rounded-lg text-lg font-semibold w-full sm:w-auto text-center">
+            <Link
+              to={`${langPrefix}/auth/signup`}
+              className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-3 rounded-lg text-lg font-semibold w-full sm:w-auto text-center"
+            >
               {t("landing.hero.startFreeTrial")}
             </Link>
-            <Link to={`${langPrefix}/pricing`} className="border border-gray-300 hover:border-gray-400 text-gray-700 px-8 py-3 rounded-lg text-lg font-semibold w-full sm:w-auto text-center">
+            <Link
+              to={`${langPrefix}/pricing`}
+              className="border border-gray-300 hover:border-gray-400 text-gray-700 px-8 py-3 rounded-lg text-lg font-semibold w-full sm:w-auto text-center"
+            >
               {t("landing.hero.viewPricing")}
             </Link>
           </div>
@@ -119,16 +142,28 @@ const Landing = () => {
               <div className="flex animate-scroll items-center">
                 {/* First set of logos */}
                 <div className="flex items-center min-w-fit">
-                  {businessLogos.map((logo, index) => <div key={`first-${index}`} className="mx-8 flex-shrink-0">
-                      <img src={logo.src} alt={logo.alt} className="h-12 w-auto object-contain opacity-70 hover:opacity-100 transition-opacity" />
-                    </div>)}
+                  {businessLogos.map((logo, index) => (
+                    <div key={`first-${index}`} className="mx-8 flex-shrink-0">
+                      <img
+                        src={logo.src}
+                        alt={logo.alt}
+                        className="h-12 w-auto object-contain opacity-70 hover:opacity-100 transition-opacity"
+                      />
+                    </div>
+                  ))}
                 </div>
 
                 {/* Duplicate set for seamless loop */}
                 <div className="flex items-center min-w-fit">
-                  {businessLogos.map((logo, index) => <div key={`second-${index}`} className="mx-8 flex-shrink-0">
-                      <img src={logo.src} alt={logo.alt} className="h-12 w-auto object-contain opacity-70 hover:opacity-100 transition-opacity" />
-                    </div>)}
+                  {businessLogos.map((logo, index) => (
+                    <div key={`second-${index}`} className="mx-8 flex-shrink-0">
+                      <img
+                        src={logo.src}
+                        alt={logo.alt}
+                        className="h-12 w-auto object-contain opacity-70 hover:opacity-100 transition-opacity"
+                      />
+                    </div>
+                  ))}
                 </div>
               </div>
             </div>
@@ -148,7 +183,11 @@ const Landing = () => {
             <Card className="text-center">
               <CardHeader>
                 <div className="mx-auto mb-4 w-16 h-16">
-                  <img src={anonymousReportingIcon} alt="Anonymous Reporting" className="w-full h-full object-contain" />
+                  <img
+                    src={anonymousReportingIcon}
+                    alt="Anonymous Reporting"
+                    className="w-full h-full object-contain"
+                  />
                 </div>
                 <CardTitle className="text-xl sm:text-2xl">{t("landing.features.anonymousReporting.title")}</CardTitle>
               </CardHeader>
@@ -204,7 +243,11 @@ const Landing = () => {
             <Card className="text-center">
               <CardHeader>
                 <div className="mx-auto mb-4 w-16 h-16">
-                  <img src={regulatoryComplianceIcon} alt="Regulatory Compliance" className="w-full h-full object-contain" />
+                  <img
+                    src={regulatoryComplianceIcon}
+                    alt="Regulatory Compliance"
+                    className="w-full h-full object-contain"
+                  />
                 </div>
                 <CardTitle className="text-xl sm:text-2xl">
                   {t("landing.features.regulatoryCompliance.title")}
@@ -220,7 +263,11 @@ const Landing = () => {
             <Card className="text-center">
               <CardHeader>
                 <div className="mx-auto mb-4 w-16 h-16">
-                  <img src={enterpriseSecurityIcon} alt="Enterprise Security" className="w-full h-full object-contain" />
+                  <img
+                    src={enterpriseSecurityIcon}
+                    alt="Enterprise Security"
+                    className="w-full h-full object-contain"
+                  />
                 </div>
                 <CardTitle className="text-xl sm:text-2xl">{t("landing.features.enterpriseSecurity.title")}</CardTitle>
               </CardHeader>
@@ -301,7 +348,11 @@ const Landing = () => {
             </div>
             <div>
               <div className="w-full h-64 flex items-center justify-center rounded-lg">
-                <img src={anonymousReportingArtwork} alt="Anonymous Reporting Made Simple" className="w-full h-full object-contain" />
+                <img
+                  src={anonymousReportingArtwork}
+                  alt="Anonymous Reporting Made Simple"
+                  className="w-full h-full object-contain"
+                />
               </div>
             </div>
           </div>
@@ -314,7 +365,11 @@ const Landing = () => {
           <div className="grid lg:grid-cols-2 gap-12 items-center">
             <div className="order-2 lg:order-1">
               <div className="w-full h-64 flex items-center justify-center rounded-lg">
-                <img src={militaryGradeEncryptionArtwork} alt="Military-Grade Encryption" className="w-full h-full object-contain" />
+                <img
+                  src={militaryGradeEncryptionArtwork}
+                  alt="Military-Grade Encryption"
+                  className="w-full h-full object-contain"
+                />
               </div>
             </div>
             <div className="order-1 lg:order-2">
@@ -363,7 +418,11 @@ const Landing = () => {
             </div>
             <div>
               <div className="w-full h-64 flex items-center justify-center rounded-lg">
-                <img src={complianceMadeEasyArtwork} alt="Compliance Made Easy" className="w-full h-full object-contain" />
+                <img
+                  src={complianceMadeEasyArtwork}
+                  alt="Compliance Made Easy"
+                  className="w-full h-full object-contain"
+                />
               </div>
             </div>
           </div>
@@ -376,7 +435,11 @@ const Landing = () => {
           <div className="grid lg:grid-cols-2 gap-12 items-center">
             <div className="order-2 lg:order-1">
               <div className="w-full h-64 flex items-center justify-center rounded-lg">
-                <img src={secureTwoWayCommArtwork} alt="Secure Two-Way Communication" className="w-full h-full object-contain" />
+                <img
+                  src={secureTwoWayCommArtwork}
+                  alt="Secure Two-Way Communication"
+                  className="w-full h-full object-contain"
+                />
               </div>
             </div>
             <div className="order-1 lg:order-2">
@@ -425,7 +488,11 @@ const Landing = () => {
             </div>
             <div>
               <div className="w-full h-64 flex items-center justify-center rounded-lg">
-                <img src={aiPoweredCaseAnalysisArtwork} alt="AI-Powered Case Analysis" className="w-full h-full object-contain" />
+                <img
+                  src={aiPoweredCaseAnalysisArtwork}
+                  alt="AI-Powered Case Analysis"
+                  className="w-full h-full object-contain"
+                />
               </div>
             </div>
           </div>
@@ -595,9 +662,11 @@ const Landing = () => {
             <Card>
               <CardContent className="p-6">
                 <div className="flex mb-4">
-                  {[...Array(5)].map((_, i) => <span key={i} className="text-yellow-400 text-lg">
+                  {[...Array(5)].map((_, i) => (
+                    <span key={i} className="text-yellow-400 text-lg">
                       ★
-                    </span>)}
+                    </span>
+                  ))}
                 </div>
                 <p className="text-gray-600 mb-4">{t("landing.testimonials.testimonial1.quote")}</p>
                 <div className="font-medium text-gray-900">{t("landing.testimonials.testimonial1.name")}</div>
@@ -608,9 +677,11 @@ const Landing = () => {
             <Card>
               <CardContent className="p-6">
                 <div className="flex mb-4">
-                  {[...Array(5)].map((_, i) => <span key={i} className="text-yellow-400 text-lg">
+                  {[...Array(5)].map((_, i) => (
+                    <span key={i} className="text-yellow-400 text-lg">
                       ★
-                    </span>)}
+                    </span>
+                  ))}
                 </div>
                 <p className="text-gray-600 mb-4">{t("landing.testimonials.testimonial2.quote")}</p>
                 <div className="font-medium text-gray-900">{t("landing.testimonials.testimonial2.name")}</div>
@@ -621,9 +692,11 @@ const Landing = () => {
             <Card>
               <CardContent className="p-6">
                 <div className="flex mb-4">
-                  {[...Array(5)].map((_, i) => <span key={i} className="text-yellow-400 text-lg">
+                  {[...Array(5)].map((_, i) => (
+                    <span key={i} className="text-yellow-400 text-lg">
                       ★
-                    </span>)}
+                    </span>
+                  ))}
                 </div>
                 <p className="text-gray-600 mb-4">{t("landing.testimonials.testimonial3.quote")}</p>
                 <div className="font-medium text-gray-900">{t("landing.testimonials.testimonial3.name")}</div>
@@ -649,7 +722,11 @@ const Landing = () => {
           <div className="flex flex-col sm:flex-row items-center justify-center gap-8 sm:gap-12">
             <div className="text-center">
               <div className="bg-white border border-gray-200 rounded-2xl p-6 shadow-sm hover:shadow-lg transition-shadow">
-                <img src="/lovable-uploads/9762866a-d8d9-4860-bf30-3ffd178885a8.png" alt="ISO 27001 Certification" className="h-16 w-16 mx-auto mb-3" />
+                <img
+                  src="/lovable-uploads/9762866a-d8d9-4860-bf30-3ffd178885a8.png"
+                  alt="ISO 27001 Certification"
+                  className="h-16 w-16 mx-auto mb-3"
+                />
                 <h3 className="font-semibold text-gray-900 mb-1">ISO 27001</h3>
                 <p className="text-sm text-gray-600">Information Security Management</p>
               </div>
@@ -657,7 +734,11 @@ const Landing = () => {
 
             <div className="text-center">
               <div className="bg-white border border-gray-200 rounded-2xl p-6 shadow-sm hover:shadow-lg transition-shadow">
-                <img src="/lovable-uploads/70aa6ac0-c161-4167-921d-79f08f6f4b02.png" alt="GDPR Compliant" className="h-16 w-16 mx-auto mb-3" />
+                <img
+                  src="/lovable-uploads/70aa6ac0-c161-4167-921d-79f08f6f4b02.png"
+                  alt="GDPR Compliant"
+                  className="h-16 w-16 mx-auto mb-3"
+                />
                 <h3 className="font-semibold text-gray-900 mb-1">GDPR</h3>
                 <p className="text-sm text-gray-600">Data Protection Compliance</p>
               </div>
@@ -665,7 +746,11 @@ const Landing = () => {
 
             <div className="text-center">
               <div className="bg-white border border-gray-200 rounded-2xl p-6 shadow-sm hover:shadow-lg transition-shadow">
-                <img src="/lovable-uploads/a9716d48-ff27-4193-b51c-9b035d1692b0.png" alt="AICPA SOC" className="h-16 w-16 mx-auto mb-3" />
+                <img
+                  src="/lovable-uploads/a9716d48-ff27-4193-b51c-9b035d1692b0.png"
+                  alt="AICPA SOC"
+                  className="h-16 w-16 mx-auto mb-3"
+                />
                 <h3 className="font-semibold text-gray-900 mb-1">AICPA SOC</h3>
                 <p className="text-sm text-gray-600">Service Organization Controls</p>
               </div>
@@ -733,7 +818,10 @@ const Landing = () => {
         <div className="max-w-4xl mx-auto text-center px-4 sm:px-6 lg:px-8">
           <h2 className="text-2xl sm:text-3xl font-bold text-white mb-4">{t("landing.cta.title")}</h2>
           <p className="text-lg sm:text-xl text-blue-100 mb-6 sm:mb-8 px-4">{t("landing.cta.description")}</p>
-          <a href="https://app.disclosurely.com/auth/signup" className="bg-white hover:bg-gray-100 text-blue-600 px-6 sm:px-8 py-3 rounded-lg text-lg font-semibold inline-block">
+          <a
+            href="https://app.disclosurely.com/auth/signup"
+            className="bg-white hover:bg-gray-100 text-blue-600 px-6 sm:px-8 py-3 rounded-lg text-lg font-semibold inline-block"
+          >
             {t("landing.cta.button")}
           </a>
         </div>
@@ -741,6 +829,7 @@ const Landing = () => {
 
       <CookieConsentBanner />
       <Footer />
-      </div>;
+    </div>
+  );
 };
 export default Landing;
