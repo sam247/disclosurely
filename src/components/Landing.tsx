@@ -760,6 +760,9 @@ const Landing = () => {
         </div>
       </div>
 
+      {/* Blog Section */}
+      <BlogSection />
+
       {/* FAQ Section */}
       <div className="bg-white py-16 sm:py-20">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -813,9 +816,6 @@ const Landing = () => {
           </Accordion>
         </div>
       </div>
-
-      {/* Blog Section */}
-      <BlogSection />
 
       {/* CTA Section */}
       <div className="bg-blue-600 py-12 sm:py-16">
