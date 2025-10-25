@@ -134,6 +134,36 @@ class SimpleVercelClient {
     }
   }
 
+  async getDomainDNSRecords(domain: string): Promise<{ success: boolean; records?: any[]; error?: string }> {
+    try {
+      const url = `https://api.vercel.com/v10/projects/${this.projectId}/domains/${domain}`;
+      
+      const response = await fetch(url, {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${this.apiToken}`,
+          'Content-Type': 'application/json',
+        },
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        return { success: true, records: data.records || [] };
+      } else {
+        return { 
+          success: false, 
+          error: data.error?.message || 'Failed to get domain DNS records' 
+        };
+      }
+    } catch (error) {
+      return { 
+        success: false, 
+        error: error.message 
+      };
+    }
+  }
+
   async getDomainInfo(domain: string): Promise<{ success: boolean; domain?: any; error?: string }> {
     try {
       const url = `https://api.vercel.com/v10/domains/${domain}`;
@@ -252,10 +282,8 @@ async function handleGenerateRecords(request: GenerateRequest): Promise<{ succes
                     console.log('Domain already exists or linked to another account - continuing with verification records');
                   } else {
                     console.log('Failed to add domain:', addResult.error);
-                    return { 
-                      success: false, 
-                      message: `Failed to add domain to Vercel: ${addResult.error}` 
-                    };
+                    // Don't return error immediately - try to continue and get DNS records
+                    console.log('Continuing despite add domain failure...');
                   }
                 }
 
@@ -278,6 +306,18 @@ async function handleGenerateRecords(request: GenerateRequest): Promise<{ succes
                 const configResult = await vercelClient.getDomainConfig(domain);
                 console.log('Config result:', JSON.stringify(configResult));
                 
+                // Step 3.5: Get DNS records from Vercel project domains
+                console.log(`Getting DNS records for ${domain}...`);
+                const dnsRecordsResult = await vercelClient.getDomainDNSRecords(domain);
+                console.log('DNS records result:', JSON.stringify(dnsRecordsResult));
+                
+                // Also try to get the domain from project domains
+                console.log(`Getting domain from project domains...`);
+                const projectDomainResult = projectDomainsResult.success && projectDomainsResult.domains 
+                  ? projectDomainsResult.domains.find(d => d.name === domain)
+                  : null;
+                console.log('Project domain result:', JSON.stringify(projectDomainResult));
+                
                 if (!configResult.success) {
                   console.log('Failed to get domain config:', configResult.error);
                   return { 
@@ -288,14 +328,72 @@ async function handleGenerateRecords(request: GenerateRequest): Promise<{ succes
 
                 // Step 4: Generate DNS records
                 console.log('Generating DNS records...');
-                const records: DNSRecord[] = [
-                  {
-                    type: 'CNAME',
-                    name: 'secure',
-                    value: 'secure.disclosurely.com',
-                    ttl: 300
+                const records: DNSRecord[] = [];
+
+                // Add CNAME record from Vercel DNS records
+                console.log('Vercel config response:', JSON.stringify(configResult.config, null, 2));
+                console.log('Vercel DNS records response:', JSON.stringify(dnsRecordsResult, null, 2));
+                
+                // Extract subdomain from domain (e.g., 'link' from 'link.betterranking.co.uk')
+                const subdomain = domain.split('.')[0];
+                
+                // Look for CNAME record in various sources
+                let cnameValue = null;
+                
+                // Check project domain result first
+                if (projectDomainResult?.cname) {
+                  cnameValue = projectDomainResult.cname;
+                  console.log('Found CNAME in project domain:', cnameValue);
+                }
+                
+                // Check DNS records
+                if (!cnameValue && dnsRecordsResult.success && dnsRecordsResult.records && Array.isArray(dnsRecordsResult.records)) {
+                  const cnameRecord = dnsRecordsResult.records.find((record: any) => record.type === 'CNAME');
+                  if (cnameRecord) {
+                    cnameValue = cnameRecord.value;
+                    console.log('Found CNAME record in DNS records:', cnameRecord);
                   }
-                ];
+                }
+                
+                // Fallback: Check for CNAME in config.records array
+                if (!cnameValue && configResult.config?.records && Array.isArray(configResult.config.records)) {
+                  const cnameRecord = configResult.config.records.find((record: any) => record.type === 'CNAME');
+                  if (cnameRecord) {
+                    cnameValue = cnameRecord.value;
+                    console.log('Found CNAME record in config.records:', cnameRecord);
+                  }
+                }
+                
+                // Fallback: Check for CNAME in config directly
+                if (!cnameValue && configResult.config?.cname) {
+                  cnameValue = configResult.config.cname;
+                  console.log('Found CNAME in config.cname:', cnameValue);
+                }
+                
+                // Fallback: Check for CNAME in config.target
+                if (!cnameValue && configResult.config?.target) {
+                  cnameValue = configResult.config.target;
+                  console.log('Found CNAME in config.target:', cnameValue);
+                }
+                
+                // Use found CNAME or provide guidance
+                if (cnameValue) {
+                  console.log('Adding CNAME record from Vercel');
+                  records.push({
+                    type: 'CNAME',
+                    name: subdomain,
+                    value: cnameValue,
+                    ttl: 300
+                  });
+                } else {
+                  console.log('No CNAME record found - providing guidance');
+                  records.push({
+                    type: 'CNAME',
+                    name: subdomain,
+                    value: `⚠️ IMPORTANT: Go to Vercel Dashboard → Domains → ${domain} → Copy the CNAME value shown there`,
+                    ttl: 300
+                  });
+                }
 
                 // Add TXT verification record from project domains (this is the correct source)
                 if (projectDomainsResult.success && projectDomainsResult.domains) {
