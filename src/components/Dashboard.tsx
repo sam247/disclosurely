@@ -59,9 +59,10 @@ interface SubmissionLink {
 
 interface DomainVerification {
   id: string;
-  domain: string;
-  verification_type: string;
-  verified_at: string | null;
+  domain_name: string;
+  is_active: boolean;
+  is_primary: boolean;
+  status: string;
 }
 
 const Dashboard = () => {
@@ -1500,13 +1501,13 @@ const Dashboard = () => {
                            </div>
                           <div className="flex flex-col sm:flex-row sm:items-center gap-2">
                             <code className="text-xs bg-white px-2 py-1 rounded break-all border">
-                              https://{subdomain.domain}/secure/tool/submit
+                              https://{subdomain.domain_name}/secure/tool/submit
                               {links.length > 0 && `/${links[0].link_token}`}
                             </code>
                             <Button 
                               size="sm" 
                               onClick={() => {
-                                const fullUrl = `https://${subdomain.domain}/secure/tool/submit${links.length > 0 ? `/${links[0].link_token}` : ''}`;
+                                const fullUrl = `https://${subdomain.domain_name}/secure/tool/submit${links.length > 0 ? `/${links[0].link_token}` : ''}`;
                                 navigator.clipboard.writeText(fullUrl);
                                 toast({
                                   title: "Branded link copied!",
