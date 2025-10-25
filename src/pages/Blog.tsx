@@ -11,7 +11,7 @@ import DynamicHelmet from '@/components/DynamicHelmet';
 import DOMPurify from 'dompurify';
 import { useLanguageFromUrl } from '@/hooks/useLanguageFromUrl';
 import { useTranslation } from 'react-i18next';
-import { createClient } from 'contentful';
+import { createClient, Entry } from 'contentful';
 import { documentToHtmlString } from '@contentful/rich-text-html-renderer';
 
 // Contentful configuration
@@ -29,24 +29,25 @@ const client = createClient({
   accessToken: CONTENTFUL_DELIVERY_TOKEN,
 });
 
+interface ContentfulBlogPostFields {
+  title: string;
+  slug: string;
+  excerpt?: string;
+  content: any; // RichText type
+  featuredImage?: { sys: { id: string; linkType: 'Asset' } };
+  publishDate: string;
+  seoTitle?: string;
+  seoDescription?: string;
+  tags: string[];
+  author?: { sys: { id: string; linkType: 'Entry' } };
+  categories?: Array<{ sys: { id: string; linkType: 'Entry' } }>;
+  readingTime?: number;
+  status: string;
+}
+
 interface ContentfulBlogPost {
   contentTypeId: '9oYANGj5uBRT6UHsl5LxO';
-  sys: { id: string; createdAt: string; updatedAt: string };
-  fields: {
-    title: string;
-    slug: string;
-    excerpt?: string;
-    content: any; // RichText type
-    featuredImage?: { sys: { id: string; linkType: 'Asset' } };
-    publishDate: string;
-    seoTitle?: string;
-    seoDescription?: string;
-    tags: string[];
-    author?: { sys: { id: string; linkType: 'Entry' } };
-    categories?: Array<{ sys: { id: string; linkType: 'Entry' } }>;
-    readingTime?: number;
-    status: string;
-  };
+  fields: ContentfulBlogPostFields;
 }
 
 interface ContentfulAuthor {
@@ -598,29 +599,30 @@ const Blog = () => {
 };
 
 // Transform Contentful post to display format
-const transformContentfulPost = (item: ContentfulBlogPost): BlogPostDisplay => {
-  const authorEntry = item.fields.author as unknown as ContentfulAuthor;
-  const categoryEntries = item.fields.categories as unknown as ContentfulCategory[];
+const transformContentfulPost = (item: Entry<ContentfulBlogPost>): BlogPostDisplay => {
+  const fields = item.fields as unknown as ContentfulBlogPostFields;
+  const authorEntry = fields.author as unknown as ContentfulAuthor;
+  const categoryEntries = fields.categories as unknown as ContentfulCategory[];
 
   return {
     id: item.sys.id,
-    title: item.fields.title,
-    slug: item.fields.slug,
-    excerpt: item.fields.excerpt,
-    content: item.fields.content,
-    featuredImage: (item.fields.featuredImage as any)?.fields?.file?.url,
-    publishDate: item.fields.publishDate || new Date().toISOString(),
-    seoTitle: item.fields.seoTitle,
-    seoDescription: item.fields.seoDescription,
-    tags: item.fields.tags || [],
+    title: fields.title,
+    slug: fields.slug,
+    excerpt: fields.excerpt,
+    content: fields.content,
+    featuredImage: (fields.featuredImage as any)?.fields?.file?.url,
+    publishDate: fields.publishDate || new Date().toISOString(),
+    seoTitle: fields.seoTitle,
+    seoDescription: fields.seoDescription,
+    tags: fields.tags || [],
     authorName: authorEntry?.fields?.name,
     authorEmail: authorEntry?.fields?.email,
     categories: categoryEntries ? categoryEntries.map(cat => ({
       name: cat.fields.name || '',
       slug: cat.fields.slug || ''
     })) : [],
-    readingTime: item.fields.readingTime,
-    status: item.fields.status || 'published'
+    readingTime: fields.readingTime,
+    status: fields.status || 'published'
   };
 };
 
@@ -764,12 +766,12 @@ const RelatedArticles = ({ currentPost }: { currentPost: BlogPostDisplay }) => {
         console.log('Current post categories:', currentPost.categories);
         
         // Simplified query - just get recent posts, excluding current post
-        const response = await client.getEntries<ContentfulBlogPost>({
+        const response = await client.getEntries({
           content_type: '9oYANGj5uBRT6UHsl5LxO',
           'fields.status': 'published',
           limit: 5, // Get more to filter out current post
-          order: '-sys.createdAt'
-        });
+          order: ['-sys.createdAt'] as any
+        }) as any;
 
         console.log('Fetched posts:', response.items.length);
         

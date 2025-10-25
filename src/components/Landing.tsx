@@ -1,4 +1,4 @@
-import { Shield, CheckCircle, BarChart3, X } from "lucide-react";
+import { Shield, CheckCircle, BarChart3, X, ShieldCheck } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
@@ -23,63 +23,94 @@ import gdprBadge from "/lovable-uploads/70aa6ac0-c161-4167-921d-79f08f6f4b02.png
 import aicpaBadge from "/lovable-uploads/a9716d48-ff27-4193-b51c-9b035d1692b0.png";
 // Business logos from /public/business_logos/
 const businessLogos = [
-  { src: "/business_logos/page-1.png", alt: "Business Partner 1" },
-  { src: "/business_logos/page-2.png", alt: "Business Partner 2" },
-  { src: "/business_logos/page-3.png", alt: "Business Partner 3" },
-  { src: "/business_logos/page-4.png", alt: "Business Partner 4" },
-  { src: "/business_logos/page-5.png", alt: "Business Partner 5" },
-  { src: "/business_logos/page-6.png", alt: "Business Partner 6" },
-  { src: "/business_logos/page-7.png", alt: "Business Partner 7" },
-  { src: "/business_logos/page-8.png", alt: "Business Partner 8" }
+  {
+    src: "/business_logos/page-1.png",
+    alt: "Business Partner 1",
+  },
+  {
+    src: "/business_logos/page-2.png",
+    alt: "Business Partner 2",
+  },
+  {
+    src: "/business_logos/page-3.png",
+    alt: "Business Partner 3",
+  },
+  {
+    src: "/business_logos/page-4.png",
+    alt: "Business Partner 4",
+  },
+  {
+    src: "/business_logos/page-5.png",
+    alt: "Business Partner 5",
+  },
+  {
+    src: "/business_logos/page-6.png",
+    alt: "Business Partner 6",
+  },
+  {
+    src: "/business_logos/page-7.png",
+    alt: "Business Partner 7",
+  },
+  {
+    src: "/business_logos/page-8.png",
+    alt: "Business Partner 8",
+  },
 ];
 const Landing = () => {
   const { t, i18n } = useTranslation();
   const currentLanguage = i18n.language;
   const langPrefix = currentLanguage && currentLanguage !== "en" ? `/${currentLanguage}` : "";
-
   return (
     <div className="min-h-screen bg-white">
-        {/* Navigation */}
-        <nav className="bg-white shadow-sm sticky top-0 z-50">
-          <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8">
-            <div className="flex justify-between items-center py-3">
-              <div className="flex items-center">
-                <Link to="/" className="flex items-center">
-                  <img
-                    src="/lovable-uploads/c46ace0e-df58-4119-b5e3-8dcfa075ea2f.png"
-                    alt="Disclosurely"
-                    className="h-5 sm:h-6 md:h-8 w-auto"
-                  />
-                </Link>
-              </div>
-              <div className="hidden md:flex items-center space-x-4">
-                <PublicLanguageSelector />
-                <Link to={`${langPrefix}/pricing`} className="text-gray-600 hover:text-gray-900">
-                  {t("nav.pricing")}
-                </Link>
-                <Link
-                  to={`${langPrefix}/auth/signup`}
-                  className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors"
-                >
-                  {t("nav.getStarted")}
-                </Link>
-              </div>
-              <div className="md:hidden flex items-center gap-1.5">
-                <PublicLanguageSelector />
-                <Link
-                  to={`${langPrefix}/auth/login`}
-                  className="bg-blue-600 text-white px-2.5 py-1.5 rounded-lg hover:bg-blue-700 transition-colors text-xs whitespace-nowrap"
-                >
-                  {t("nav.signin")}
-                </Link>
-              </div>
+      {/* Navigation */}
+      <nav className="bg-white shadow-sm sticky top-0 z-50">
+        <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8">
+          <div className="flex justify-between items-center py-3">
+            <div className="flex items-center">
+              <Link to="/" className="flex items-center">
+                <img
+                  src="/lovable-uploads/c46ace0e-df58-4119-b5e3-8dcfa075ea2f.png"
+                  alt="Disclosurely"
+                  className="h-5 sm:h-6 md:h-8 w-auto"
+                />
+              </Link>
+            </div>
+            <div className="hidden md:flex items-center space-x-4">
+              <PublicLanguageSelector />
+              <Link to={`${langPrefix}/pricing`} className="text-gray-600 hover:text-gray-900">
+                {t("nav.pricing")}
+              </Link>
+              <Link
+                to={`${langPrefix}/auth/signup`}
+                className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors"
+              >
+                {t("nav.getStarted")}
+              </Link>
+            </div>
+            <div className="md:hidden flex items-center gap-1.5">
+              <PublicLanguageSelector />
+              <Link
+                to={`${langPrefix}/auth/login`}
+                className="bg-blue-600 text-white px-2.5 py-1.5 rounded-lg hover:bg-blue-700 transition-colors text-xs whitespace-nowrap"
+              >
+                {t("nav.signin")}
+              </Link>
             </div>
           </div>
-        </nav>
+        </div>
+      </nav>
 
       {/* Hero Section */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-[150px] pb-20">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-[100px] pb-20 py-[100px]">
         <div className="text-center">
+          {/* Security Badge */}
+          <div className="flex justify-center mb-6">
+            <div className="inline-flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-full">
+              <ShieldCheck className="w-5 h-5" />
+              <span className="text-sm font-medium">Military Grade AES-GCM Encryption</span>
+            </div>
+          </div>
+
           <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold text-gray-900 mb-6">
             {t("landing.hero.title1")}
             <span className="block text-blue-600">{t("landing.hero.title2")}</span>
@@ -798,7 +829,7 @@ const Landing = () => {
 
       <CookieConsentBanner />
       <Footer />
-      </div>
+    </div>
   );
 };
 export default Landing;

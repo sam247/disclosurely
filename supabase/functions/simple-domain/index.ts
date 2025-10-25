@@ -106,7 +106,7 @@ class SimpleVercelClient {
 
   async getDomainConfig(domain: string): Promise<{ success: boolean; config?: any; error?: string }> {
     try {
-      const url = `https://api.vercel.com/v10/domains/${domain}/config`;
+      const url = `https://api.vercel.com/v6/domains/${domain}/config`;
       
       const response = await fetch(url, {
         method: 'GET',
@@ -337,16 +337,22 @@ async function handleGenerateRecords(request: GenerateRequest): Promise<{ succes
                 // Extract subdomain from domain (e.g., 'link' from 'link.betterranking.co.uk')
                 const subdomain = domain.split('.')[0];
                 
-                // Look for CNAME record in various sources
+                // Look for CNAME record from Vercel API (this is the correct source for multi-tenant SaaS)
                 let cnameValue = null;
                 
-                // Check project domain result first
-                if (projectDomainResult?.cname) {
+                // Primary source: Vercel API v6 recommendedCNAME field
+                if (configResult.config?.recommendedCNAME) {
+                  cnameValue = configResult.config.recommendedCNAME;
+                  console.log('Found CNAME from Vercel API recommendedCNAME:', cnameValue);
+                }
+                
+                // Secondary source: Check project domain result
+                if (!cnameValue && projectDomainResult?.cname) {
                   cnameValue = projectDomainResult.cname;
                   console.log('Found CNAME in project domain:', cnameValue);
                 }
                 
-                // Check DNS records
+                // Tertiary source: Check DNS records
                 if (!cnameValue && dnsRecordsResult.success && dnsRecordsResult.records && Array.isArray(dnsRecordsResult.records)) {
                   const cnameRecord = dnsRecordsResult.records.find((record: any) => record.type === 'CNAME');
                   if (cnameRecord) {
@@ -355,30 +361,9 @@ async function handleGenerateRecords(request: GenerateRequest): Promise<{ succes
                   }
                 }
                 
-                // Fallback: Check for CNAME in config.records array
-                if (!cnameValue && configResult.config?.records && Array.isArray(configResult.config.records)) {
-                  const cnameRecord = configResult.config.records.find((record: any) => record.type === 'CNAME');
-                  if (cnameRecord) {
-                    cnameValue = cnameRecord.value;
-                    console.log('Found CNAME record in config.records:', cnameRecord);
-                  }
-                }
-                
-                // Fallback: Check for CNAME in config directly
-                if (!cnameValue && configResult.config?.cname) {
-                  cnameValue = configResult.config.cname;
-                  console.log('Found CNAME in config.cname:', cnameValue);
-                }
-                
-                // Fallback: Check for CNAME in config.target
-                if (!cnameValue && configResult.config?.target) {
-                  cnameValue = configResult.config.target;
-                  console.log('Found CNAME in config.target:', cnameValue);
-                }
-                
-                // Use found CNAME or provide guidance
+                // Use found CNAME or provide error
                 if (cnameValue) {
-                  console.log('Adding CNAME record from Vercel');
+                  console.log('Adding CNAME record from Vercel API');
                   records.push({
                     type: 'CNAME',
                     name: subdomain,
@@ -386,13 +371,11 @@ async function handleGenerateRecords(request: GenerateRequest): Promise<{ succes
                     ttl: 300
                   });
                 } else {
-                  console.log('No CNAME record found - providing guidance');
-                  records.push({
-                    type: 'CNAME',
-                    name: subdomain,
-                    value: `⚠️ IMPORTANT: Go to Vercel Dashboard → Domains → ${domain} → Copy the CNAME value shown there`,
-                    ttl: 300
-                  });
+                  console.log('No CNAME record found - this is a critical error for multi-tenant SaaS');
+                  return { 
+                    success: false, 
+                    message: `Failed to get CNAME record for ${domain}. This is required for multi-tenant SaaS operation.` 
+                  };
                 }
 
                 // Add TXT verification record from project domains (this is the correct source)
