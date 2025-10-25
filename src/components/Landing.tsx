@@ -6,6 +6,7 @@ import { Link } from "react-router-dom";
 import { Footer } from "@/components/ui/footer";
 import CookieConsentBanner from "@/components/CookieConsentBanner";
 import PublicLanguageSelector from "@/components/PublicLanguageSelector";
+import BlogSection from "@/components/BlogSection";
 import { useTranslation } from "react-i18next";
 import anonymousReportingIcon from "@/assets/icons/anonymous_reporting.png";
 import secureMessagingIcon from "@/assets/icons/secure_messaging.png";
@@ -812,6 +813,9 @@ const Landing = () => {
           </Accordion>
         </div>
       </div>
+
+      {/* Blog Section */}
+      <BlogSection />
 
       {/* CTA Section */}
       <div className="bg-blue-600 py-12 sm:py-16">

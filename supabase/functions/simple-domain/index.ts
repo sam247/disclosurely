@@ -553,12 +553,21 @@ async function handleDeleteDomain(request: DeleteRequest): Promise<{ success: bo
   const vercelDeleteResult = await vercelClient.deleteDomain(domain);
   
   if (!vercelDeleteResult.success) {
-    await logToAI('DELETE_ERROR', `Vercel API deletion failed for domain: ${domain}`, { error: vercelDeleteResult.error })
-    console.error('Vercel API deletion failed:', vercelDeleteResult.error);
-    return {
-      success: false,
-      message: `Failed to delete domain from Vercel: ${vercelDeleteResult.error}`
-    };
+    // If domain doesn't exist in Vercel, continue with database cleanup
+    if (vercelDeleteResult.error?.includes('not found') || vercelDeleteResult.error?.includes('does not exist')) {
+      await logToAI('DELETE_WARNING', `Domain not found in Vercel, continuing with database cleanup: ${domain}`, { error: vercelDeleteResult.error })
+      console.log('Domain not found in Vercel, continuing with database cleanup...');
+    } else {
+      await logToAI('DELETE_ERROR', `Vercel API deletion failed for domain: ${domain}`, { error: vercelDeleteResult.error })
+      console.error('Vercel API deletion failed:', vercelDeleteResult.error);
+      return {
+        success: false,
+        message: `Failed to delete domain from Vercel: ${vercelDeleteResult.error}`
+      };
+    }
+  } else {
+    await logToAI('DELETE_VERCEL_SUCCESS', `Domain successfully deleted from Vercel: ${domain}`)
+    console.log('Domain successfully deleted from Vercel.');
   }
   
   // Step 2: Delete from database
