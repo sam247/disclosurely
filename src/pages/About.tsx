@@ -28,7 +28,7 @@ const About: React.FC = () => {
             <span className="inline-block px-4 py-2 bg-blue-600 text-white rounded-full text-sm font-medium mb-6">
               {t('about.hero.subtitle')}
             </span>
-            <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-gray-900 mb-6">Changing  Secure Whistleblowing And Compliance With AI </h1>
+            <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6 lg:text-6xl">On a Mission to Change  Secure Whistleblowing and Compliance </h1>
             <p className="text-gray-600 max-w-3xl mx-auto text-xl">
               {t('about.hero.description')}
             </p>
