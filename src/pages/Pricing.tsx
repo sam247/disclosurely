@@ -1,10 +1,9 @@
-import { CheckCircle, X } from "lucide-react";
+import { CheckCircle, X, Zap } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Link } from "react-router-dom";
 import { Footer } from "@/components/ui/footer";
 import { StandardHeader } from "@/components/StandardHeader";
-import { StandardHero } from "@/components/StandardHero";
 import DynamicHelmet from "@/components/DynamicHelmet";
 import { useLanguageFromUrl } from "@/hooks/useLanguageFromUrl";
 import { useTranslation } from "react-i18next";
@@ -25,10 +24,130 @@ const Pricing = () => {
       <div className="min-h-screen bg-white">
         <StandardHeader currentLanguage={currentLanguage} />
 
-        <StandardHero
-          title={t("pricing.hero.title")}
-          subtitle={t("pricing.hero.subtitle")}
-        />
+        {/* Hero Section */}
+        <section className="pt-32 pb-16 px-4 sm:px-6 lg:px-8 bg-white">
+          <div className="max-w-7xl mx-auto">
+            <div className="text-center mb-12">
+              <span className="inline-block px-4 py-2 bg-blue-600 text-white rounded-full text-sm font-medium mb-6">
+                {t("pricing.hero.subtitle") || 'Transparent Pricing'}
+              </span>
+              <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-gray-900 mb-6">
+                {t("pricing.hero.title") || 'Simple, Transparent Pricing'}
+              </h1>
+              <p className="text-lg text-gray-600 max-w-3xl mx-auto">
+                Choose the perfect plan for your organization. All plans include a 14-day free trial with no credit card required.
+              </p>
+            </div>
+          </div>
+        </section>
+
+      {/* Comparison Section */}
+      <section className="py-16 px-4 sm:px-6 lg:px-8 bg-gray-50">
+        <div className="max-w-7xl mx-auto">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+              Why Choose Disclosurely?
+            </h2>
+            <p className="text-lg text-gray-600">
+              Better pricing and AI-powered case analysis
+            </p>
+          </div>
+
+          <div className="overflow-x-auto">
+            <table className="w-full border-collapse">
+              <thead>
+                <tr className="bg-white border-b-2 border-gray-200">
+                  <th className="px-6 py-4 text-left text-sm font-semibold text-gray-900">Feature</th>
+                  <th className="px-6 py-4 text-center text-sm font-semibold text-gray-900">Disclosurely Pro</th>
+                  <th className="px-6 py-4 text-center text-sm font-semibold text-gray-600">Competitor</th>
+                </tr>
+              </thead>
+              <tbody className="bg-white">
+                <tr className="border-b border-gray-100">
+                  <td className="px-6 py-4 text-gray-900">Monthly Price</td>
+                  <td className="px-6 py-4 text-center">
+                    <span className="text-2xl font-bold text-blue-600">£350</span>
+                    <span className="text-sm text-gray-600">/month</span>
+                  </td>
+                  <td className="px-6 py-4 text-center text-gray-500">£500+</td>
+                </tr>
+                <tr className="border-b border-gray-100 bg-gray-50">
+                  <td className="px-6 py-4 text-gray-900 font-semibold">AI Case Analysis</td>
+                  <td className="px-6 py-4 text-center">
+                    <CheckCircle className="w-6 h-6 text-blue-600 mx-auto" />
+                  </td>
+                  <td className="px-6 py-4 text-center">
+                    <X className="w-6 h-6 text-gray-400 mx-auto" />
+                  </td>
+                </tr>
+                <tr className="border-b border-gray-100">
+                  <td className="px-6 py-4 text-gray-900">Unlimited Reports</td>
+                  <td className="px-6 py-4 text-center">
+                    <CheckCircle className="w-6 h-6 text-blue-600 mx-auto" />
+                  </td>
+                  <td className="px-6 py-4 text-center">
+                    <CheckCircle className="w-6 h-6 text-gray-400 mx-auto" />
+                  </td>
+                </tr>
+                <tr className="border-b border-gray-100 bg-gray-50">
+                  <td className="px-6 py-4 text-gray-900">Military-Grade Encryption</td>
+                  <td className="px-6 py-4 text-center">
+                    <CheckCircle className="w-6 h-6 text-blue-600 mx-auto" />
+                  </td>
+                  <td className="px-6 py-4 text-center">
+                    <CheckCircle className="w-6 h-6 text-gray-400 mx-auto" />
+                  </td>
+                </tr>
+                <tr className="border-b border-gray-100">
+                  <td className="px-6 py-4 text-gray-900">GDPR Compliance</td>
+                  <td className="px-6 py-4 text-center">
+                    <CheckCircle className="w-6 h-6 text-blue-600 mx-auto" />
+                  </td>
+                  <td className="px-6 py-4 text-center">
+                    <CheckCircle className="w-6 h-6 text-gray-400 mx-auto" />
+                  </td>
+                </tr>
+                <tr className="border-b border-gray-100 bg-gray-50">
+                  <td className="px-6 py-4 text-gray-900">AI Risk Assessment</td>
+                  <td className="px-6 py-4 text-center">
+                    <CheckCircle className="w-6 h-6 text-blue-600 mx-auto" />
+                  </td>
+                  <td className="px-6 py-4 text-center">
+                    <X className="w-6 h-6 text-gray-400 mx-auto" />
+                  </td>
+                </tr>
+                <tr className="border-b border-gray-100">
+                  <td className="px-6 py-4 text-gray-900">Real-time Analytics</td>
+                  <td className="px-6 py-4 text-center">
+                    <CheckCircle className="w-6 h-6 text-blue-600 mx-auto" />
+                  </td>
+                  <td className="px-6 py-4 text-center">
+                    <CheckCircle className="w-6 h-6 text-gray-400 mx-auto" />
+                  </td>
+                </tr>
+                <tr className="border-b border-gray-100 bg-gray-50">
+                  <td className="px-6 py-4 text-gray-900">Custom Branding</td>
+                  <td className="px-6 py-4 text-center">
+                    <CheckCircle className="w-6 h-6 text-blue-600 mx-auto" />
+                  </td>
+                  <td className="px-6 py-4 text-center">
+                    <CheckCircle className="w-6 h-6 text-gray-400 mx-auto" />
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div className="mt-8 text-center">
+            <div className="inline-flex items-center gap-2 bg-blue-100 px-6 py-3 rounded-lg">
+              <Zap className="w-5 h-5 text-blue-600" />
+              <span className="text-gray-900 font-semibold">
+                AI Case Analysis - Exclusive to Disclosurely
+              </span>
+            </div>
+          </div>
+        </div>
+      </section>
 
       {/* Pricing Section */}
       <div className="bg-white py-16 sm:py-20">
