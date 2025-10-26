@@ -6,7 +6,7 @@ import { StandardHeader } from '@/components/StandardHeader';
 import { StandardHero } from '@/components/StandardHero';
 import { Footer } from '@/components/ui/footer';
 import { useLanguageFromUrl } from '@/hooks/useLanguageFromUrl';
-import { Shield, Eye, CheckCircle, Headphones, BarChart3, Users, Lock, Zap, TrendingUp, Star, Clock } from 'lucide-react';
+import { Shield, Eye, CheckCircle, Headphones, BarChart3, Users, Lock, Zap, TrendingUp, Star } from 'lucide-react';
 import { Link } from 'react-router-dom';
 const About: React.FC = () => {
   const {
@@ -31,7 +31,7 @@ const About: React.FC = () => {
             <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-gray-900 mb-6">
               Who we are
             </h1>
-            <p className="text-lg text-gray-600 max-w-3xl mx-auto">
+            <p className="text-gray-600 max-w-3xl mx-auto text-xl">
               {t('about.hero.description')}
             </p>
           </div>
@@ -39,11 +39,7 @@ const About: React.FC = () => {
           {/* Mission Card Section */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
             <div>
-              <img 
-                src="/abouthero.jpeg" 
-                alt="Our team working together"
-                className="rounded-2xl shadow-lg"
-              />
+              <img src="https://images.unsplash.com/photo-1552664730-d307ca884978?w=600&h=400&fit=crop" alt="Our team working together" className="rounded-2xl shadow-lg" />
             </div>
             <Card className="text-white p-8 rounded-2xl bg-blue-600">
               <h3 className="text-3xl font-bold mb-4">We're on a mission!</h3>
@@ -89,155 +85,6 @@ const About: React.FC = () => {
           </div>
         </div>
       </section>
-
-      {/* === SECTION OPTIONS FOR RED AREA === */}
-      {/* Comment/uncomment the sections below to choose which one you prefer */}
-
-      {/* OPTION 1: Two Column Content - Product Features */}
-      <section className="py-16 px-4 sm:px-6 lg:px-8 bg-white">
-        <div className="max-w-7xl mx-auto">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
-            <div>
-              <h3 className="text-2xl font-bold text-gray-900 mb-4">
-                Secure by Default
-              </h3>
-              <p className="text-gray-600 mb-6">
-                Every aspect of our platform is built with security and compliance at its core. From end-to-end encryption to zero-knowledge architecture, we ensure your data remains protected at all times.
-              </p>
-              <ul className="space-y-3">
-                <li className="flex items-start gap-3">
-                  <CheckCircle className="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5" />
-                  <span className="text-gray-600">Military-grade AES-GCM encryption</span>
-                </li>
-                <li className="flex items-start gap-3">
-                  <CheckCircle className="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5" />
-                  <span className="text-gray-600">Zero-knowledge architecture</span>
-                </li>
-                <li className="flex items-start gap-3">
-                  <CheckCircle className="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5" />
-                  <span className="text-gray-600">ISO 27001 certified infrastructure</span>
-                </li>
-              </ul>
-            </div>
-            <div>
-              <h3 className="text-2xl font-bold text-gray-900 mb-4">
-                Compliance Made Simple
-              </h3>
-              <p className="text-gray-600 mb-6">
-                Stay audit-ready with automated compliance reporting. Our platform helps you meet GDPR, SOX, and ISO 27001 requirements without the complexity.
-              </p>
-              <ul className="space-y-3">
-                <li className="flex items-start gap-3">
-                  <CheckCircle className="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5" />
-                  <span className="text-gray-600">Automated compliance dashboards</span>
-                </li>
-                <li className="flex items-start gap-3">
-                  <CheckCircle className="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5" />
-                  <span className="text-gray-600">Multi-jurisdictional support</span>
-                </li>
-                <li className="flex items-start gap-3">
-                  <CheckCircle className="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5" />
-                  <span className="text-gray-600">Real-time compliance monitoring</span>
-                </li>
-              </ul>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* OPTION 2: Timeline - Company Journey */}
-      {/* <section className="py-16 px-4 sm:px-6 lg:px-8 bg-white">
-        <div className="max-w-4xl mx-auto">
-          <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-12 text-center">
-            Our Journey
-          </h2>
-          <div className="space-y-8">
-            <div className="flex gap-6">
-              <div className="flex-shrink-0">
-                <div className="w-12 h-12 bg-blue-600 rounded-full flex items-center justify-center text-white font-bold text-xl">1</div>
-              </div>
-              <div>
-                <h3 className="text-xl font-bold text-gray-900 mb-2">Founded</h3>
-                <p className="text-gray-600">Disclosurely was founded with a simple mission: to make whistleblowing secure and accessible for organizations worldwide.</p>
-              </div>
-            </div>
-            <div className="flex gap-6">
-              <div className="flex-shrink-0">
-                <div className="w-12 h-12 bg-blue-600 rounded-full flex items-center justify-center text-white font-bold text-xl">2</div>
-              </div>
-              <div>
-                <h3 className="text-xl font-bold text-gray-900 mb-2">First 100 Customers</h3>
-                <p className="text-gray-600">We reached our first milestone with 100 organizations trusting us with their whistleblowing needs.</p>
-              </div>
-            </div>
-            <div className="flex gap-6">
-              <div className="flex-shrink-0">
-                <div className="w-12 h-12 bg-blue-600 rounded-full flex items-center justify-center text-white font-bold text-xl">3</div>
-              </div>
-              <div>
-                <h3 className="text-xl font-bold text-gray-900 mb-2">Global Expansion</h3>
-                <p className="text-gray-600">Expanded to serve organizations across 50+ countries with multi-language support and localized compliance features.</p>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section> */}
-
-      {/* OPTION 3: Stats Grid - Key Highlights */}
-      {/* <section className="py-16 px-4 sm:px-6 lg:px-8 bg-white">
-        <div className="max-w-7xl mx-auto">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            <Card className="p-6 text-center rounded-2xl">
-              <Lock className="w-12 h-12 text-blue-600 mx-auto mb-4" />
-              <div className="text-3xl font-bold text-gray-900 mb-2">AES-GCM</div>
-              <div className="text-gray-600">Encryption Standard</div>
-            </Card>
-            <Card className="p-6 text-center rounded-2xl">
-              <Shield className="w-12 h-12 text-blue-600 mx-auto mb-4" />
-              <div className="text-3xl font-bold text-gray-900 mb-2">ISO 27001</div>
-              <div className="text-gray-600">Certified Infrastructure</div>
-            </Card>
-            <Card className="p-6 text-center rounded-2xl">
-              <BarChart3 className="w-12 h-12 text-blue-600 mx-auto mb-4" />
-              <div className="text-3xl font-bold text-gray-900 mb-2">GDPR</div>
-              <div className="text-gray-600">Compliant by Design</div>
-            </Card>
-            <Card className="p-6 text-center rounded-2xl">
-              <CheckCircle className="w-12 h-12 text-blue-600 mx-auto mb-4" />
-              <div className="text-3xl font-bold text-gray-900 mb-2">SOX</div>
-              <div className="text-gray-600">Audit Ready</div>
-            </Card>
-          </div>
-        </div>
-      </section> */}
-
-      {/* OPTION 4: Image + Text Block */}
-      {/* <section className="py-16 px-4 sm:px-6 lg:px-8 bg-white">
-        <div className="max-w-7xl mx-auto">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
-            <div>
-              <img 
-                src="https://images.unsplash.com/photo-1531482615713-2afd69097998?w=600&h=400&fit=crop" 
-                alt="Secure collaboration"
-                className="rounded-2xl shadow-lg"
-              />
-            </div>
-            <div>
-              <h3 className="text-3xl font-bold text-gray-900 mb-6">
-                Building Trust Through Transparency
-              </h3>
-              <p className="text-lg text-gray-600 mb-6">
-                We believe that organizations thrive when employees feel safe to speak up. Our platform enables secure, anonymous reporting that protects both employees and organizations.
-              </p>
-              <p className="text-lg text-gray-600">
-                With over 500 organizations worldwide trusting our platform, we're proud to be at the forefront of the whistleblowing and compliance revolution.
-              </p>
-            </div>
-          </div>
-        </div>
-      </section> */}
-
-      {/* === END SECTION OPTIONS === */}
 
       {/* Company Values */}
       <section className="py-16 px-4 sm:px-6 lg:px-8 bg-white">
