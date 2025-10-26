@@ -8,19 +8,16 @@ import { Footer } from '@/components/ui/footer';
 import { useLanguageFromUrl } from '@/hooks/useLanguageFromUrl';
 import { Shield, Eye, CheckCircle, Headphones, BarChart3, Users, Lock, Zap, TrendingUp, Star, Clock } from 'lucide-react';
 import { Link } from 'react-router-dom';
-
 const About: React.FC = () => {
-  const { t } = useTranslation();
-  const { currentLanguage } = useLanguageFromUrl();
+  const {
+    t
+  } = useTranslation();
+  const {
+    currentLanguage
+  } = useLanguageFromUrl();
   const langPrefix = currentLanguage === 'en' ? '' : `/${currentLanguage}`;
-
-  return (
-    <>
-      <DynamicHelmet
-        pageIdentifier="about"
-        fallbackTitle={t('about.meta.title')}
-        fallbackDescription={t('about.meta.description')}
-      />
+  return <>
+      <DynamicHelmet pageIdentifier="about" fallbackTitle={t('about.meta.title')} fallbackDescription={t('about.meta.description')} />
       
       <StandardHeader currentLanguage={currentLanguage} />
       
@@ -48,7 +45,7 @@ const About: React.FC = () => {
                 className="rounded-2xl shadow-lg"
               />
             </div>
-            <Card className="bg-gray-900 text-white p-8 rounded-2xl">
+            <Card className="text-white p-8 rounded-2xl bg-blue-600">
               <h3 className="text-3xl font-bold mb-4">We're on a mission!</h3>
                 <p className="text-lg text-gray-200 leading-relaxed">
                   {t('about.mission.content') || 'At Disclosurely, we are dedicated to empowering organizations with secure, compliant whistleblowing solutions. Our mission is to create a safer, more transparent work environment where employees can report concerns without fear, and organizations can maintain the highest standards of compliance and ethics.'}
@@ -375,28 +372,45 @@ const About: React.FC = () => {
           </div>
           
           <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
-            {[
-              { name: 'Sarah Johnson', role: 'CRO & Founder', avatar: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=200&h=200&fit=crop&crop=faces' },
-              { name: 'Emily Kim', role: 'VP of Product', avatar: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=200&h=200&fit=crop&crop=faces' },
-              { name: 'David Lee', role: 'CEO & Co-Founder', avatar: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=200&h=200&fit=crop&crop=faces' },
-              { name: 'Michael Chen', role: 'VP of Marketing', avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=200&h=200&fit=crop&crop=faces' },
-              { name: 'Michael Brown', role: 'VP of Engineering', avatar: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=200&h=200&fit=crop&crop=faces' },
-              { name: 'Sophia Williams', role: 'Head of Design', avatar: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=200&h=200&fit=crop&crop=faces' },
-              { name: 'James Rodriguez', role: 'VP of Sales', avatar: 'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=200&h=200&fit=crop&crop=faces' },
-              { name: 'Lisa Anderson', role: 'Head of Customer Success', avatar: 'https://images.unsplash.com/photo-1573497019940-1c28c88b4f3e?w=200&h=200&fit=crop&crop=faces' },
-            ].map((person, idx) => (
-              <div key={idx} className="text-center">
+            {[{
+            name: 'Sarah Johnson',
+            role: 'CRO & Founder',
+            avatar: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=200&h=200&fit=crop&crop=faces'
+          }, {
+            name: 'Emily Kim',
+            role: 'VP of Product',
+            avatar: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=200&h=200&fit=crop&crop=faces'
+          }, {
+            name: 'David Lee',
+            role: 'CEO & Co-Founder',
+            avatar: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=200&h=200&fit=crop&crop=faces'
+          }, {
+            name: 'Michael Chen',
+            role: 'VP of Marketing',
+            avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=200&h=200&fit=crop&crop=faces'
+          }, {
+            name: 'Michael Brown',
+            role: 'VP of Engineering',
+            avatar: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=200&h=200&fit=crop&crop=faces'
+          }, {
+            name: 'Sophia Williams',
+            role: 'Head of Design',
+            avatar: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=200&h=200&fit=crop&crop=faces'
+          }, {
+            name: 'James Rodriguez',
+            role: 'VP of Sales',
+            avatar: 'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=200&h=200&fit=crop&crop=faces'
+          }, {
+            name: 'Lisa Anderson',
+            role: 'Head of Customer Success',
+            avatar: 'https://images.unsplash.com/photo-1573497019940-1c28c88b4f3e?w=200&h=200&fit=crop&crop=faces'
+          }].map((person, idx) => <div key={idx} className="text-center">
                 <div className="w-24 h-24 rounded-full mx-auto mb-4 overflow-hidden border-4 border-gray-200">
-                  <img 
-                    src={person.avatar} 
-                    alt={person.name}
-                    className="w-full h-full object-cover"
-                  />
+                  <img src={person.avatar} alt={person.name} className="w-full h-full object-cover" />
                 </div>
                 <h3 className="font-bold text-gray-900 mb-1">{person.name}</h3>
                 <p className="text-sm text-gray-600">{person.role}</p>
-              </div>
-            ))}
+              </div>)}
           </div>
         </div>
       </section>
@@ -414,34 +428,27 @@ const About: React.FC = () => {
           </div>
           
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {[
-              { 
-                stars: 5, 
-                title: 'Best-in-class security and compliance', 
-                review: 'The level of security and compliance features exceeded our expectations. Disclosurely has been a game-changer for our organization.',
-                author: 'Lisa Thompson',
-                role: 'Compliance Officer'
-              },
-              { 
-                stars: 5, 
-                title: 'Incredible ease of use', 
-                review: 'The intuitive dashboard and automated reporting make managing whistleblower reports effortless. Our team loves it!',
-                author: 'James Wilson',
-                role: 'HR Director'
-              },
-              { 
-                stars: 5, 
-                title: 'Outstanding customer support', 
-                review: 'The support team is incredibly responsive and helpful. They helped us customize the platform perfectly for our needs.',
-                author: 'Maria Garcia',
-                role: 'Operations Manager'
-              },
-            ].map((testimonial, idx) => (
-              <Card key={idx} className="p-6 rounded-2xl">
+            {[{
+            stars: 5,
+            title: 'Best-in-class security and compliance',
+            review: 'The level of security and compliance features exceeded our expectations. Disclosurely has been a game-changer for our organization.',
+            author: 'Lisa Thompson',
+            role: 'Compliance Officer'
+          }, {
+            stars: 5,
+            title: 'Incredible ease of use',
+            review: 'The intuitive dashboard and automated reporting make managing whistleblower reports effortless. Our team loves it!',
+            author: 'James Wilson',
+            role: 'HR Director'
+          }, {
+            stars: 5,
+            title: 'Outstanding customer support',
+            review: 'The support team is incredibly responsive and helpful. They helped us customize the platform perfectly for our needs.',
+            author: 'Maria Garcia',
+            role: 'Operations Manager'
+          }].map((testimonial, idx) => <Card key={idx} className="p-6 rounded-2xl">
                 <div className="flex gap-1 mb-4">
-                  {[...Array(testimonial.stars)].map((_, i) => (
-                    <Star key={i} className="w-5 h-5 text-yellow-400 fill-current" />
-                  ))}
+                  {[...Array(testimonial.stars)].map((_, i) => <Star key={i} className="w-5 h-5 text-yellow-400 fill-current" />)}
                 </div>
                 <h3 className="text-lg font-bold text-gray-900 mb-3">{testimonial.title}</h3>
                 <p className="text-gray-600 mb-4">{testimonial.review}</p>
@@ -452,15 +459,11 @@ const About: React.FC = () => {
                     <div className="text-sm text-gray-600">{testimonial.role}</div>
                   </div>
                 </div>
-              </Card>
-            ))}
+              </Card>)}
           </div>
           
           <div className="text-center mt-8">
-            <Link 
-              to={`${langPrefix}/pricing`}
-              className="inline-flex items-center px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-semibold"
-            >
+            <Link to={`${langPrefix}/pricing`} className="inline-flex items-center px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-semibold">
               View all reviews
             </Link>
           </div>
@@ -472,9 +475,7 @@ const About: React.FC = () => {
         <div className="max-w-7xl mx-auto">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
             <div>
-              <span className="inline-block px-4 py-2 bg-blue-700 text-white rounded-full text-sm font-medium mb-4">
-                Get Started
-              </span>
+              
               <h2 className="text-4xl font-bold text-white mb-6">
                 Build a culture of trust and compliance
               </h2>
@@ -482,16 +483,10 @@ const About: React.FC = () => {
                 Join hundreds of organizations worldwide who trust Disclosurely for secure, compliant whistleblowing. Start your free trial today.
               </p>
               <div className="flex gap-4">
-                <Link 
-                  to={`${langPrefix}/auth/signup`}
-                  className="inline-flex items-center px-6 py-3 bg-white text-blue-600 rounded-lg hover:bg-blue-50 transition-colors font-semibold"
-                >
+                <Link to={`${langPrefix}/auth/signup`} className="inline-flex items-center px-6 py-3 bg-white text-blue-600 rounded-lg hover:bg-blue-50 transition-colors font-semibold">
                   Start Free Trial
                 </Link>
-                <Link 
-                  to={`${langPrefix}/features`}
-                  className="inline-flex items-center px-6 py-3 bg-blue-700 text-white rounded-lg hover:bg-blue-800 transition-colors font-semibold border border-blue-500"
-                >
+                <Link to={`${langPrefix}/features`} className="inline-flex items-center px-6 py-3 bg-blue-700 text-white rounded-lg hover:bg-blue-800 transition-colors font-semibold border border-blue-500">
                   View Features
                 </Link>
               </div>
@@ -522,8 +517,6 @@ const About: React.FC = () => {
       </section>
 
       <Footer />
-    </>
-  );
+    </>;
 };
-
 export default About;
