@@ -98,9 +98,7 @@ const About: React.FC = () => {
               <div className="w-16 h-16 bg-blue-100 rounded-lg flex items-center justify-center mb-6">
                 <Shield className="w-8 h-8 text-blue-600" />
               </div>
-              <h3 className="text-2xl font-bold text-gray-900 mb-4">
-                Enterprise-Grade Security
-              </h3>
+              <h3 className="text-2xl font-bold text-gray-900 mb-4">Industry Leading Security</h3>
               <p className="text-gray-600">
                 Military-grade AES-GCM encryption ensures that every report is protected with the highest security standards. Your data is encrypted at rest and in transit, with zero-knowledge architecture.
               </p>
