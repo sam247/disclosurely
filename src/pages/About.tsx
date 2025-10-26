@@ -47,9 +47,9 @@ const About: React.FC = () => {
             </div>
             <Card className="bg-gray-900 text-white p-8 rounded-2xl">
               <h3 className="text-3xl font-bold mb-4">We're on a mission!</h3>
-              <p className="text-lg text-gray-200 leading-relaxed">
-                {t('about.mission.content') || 'At Disclosurely, we're dedicated to empowering organizations with secure, compliant whistleblowing solutions. Our mission is to create a safer, more transparent work environment where employees can report concerns without fear, and organizations can maintain the highest standards of compliance and ethics.'}
-              </p>
+                <p className="text-lg text-gray-200 leading-relaxed">
+                  {t('about.mission.content') || 'At Disclosurely, we are dedicated to empowering organizations with secure, compliant whistleblowing solutions. Our mission is to create a safer, more transparent work environment where employees can report concerns without fear, and organizations can maintain the highest standards of compliance and ethics.'}
+                </p>
             </Card>
           </div>
         </div>
