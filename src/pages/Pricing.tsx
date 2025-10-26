@@ -149,6 +149,26 @@ const Pricing = () => {
         </div>
       </section>
 
+      {/* Trust Indicators */}
+      <section className="py-12 px-4 sm:px-6 lg:px-8 bg-white">
+        <div className="max-w-7xl mx-auto">
+          <div className="flex flex-col md:flex-row justify-center items-center gap-8 mb-12">
+            <div className="flex items-center gap-2 text-blue-600">
+              <CheckCircle className="w-5 h-5" />
+              <span className="font-semibold text-gray-900">14-Day Free Trial</span>
+            </div>
+            <div className="flex items-center gap-2 text-blue-600">
+              <CheckCircle className="w-5 h-5" />
+              <span className="font-semibold text-gray-900">No Credit Card Required</span>
+            </div>
+            <div className="flex items-center gap-2 text-blue-600">
+              <CheckCircle className="w-5 h-5" />
+              <span className="font-semibold text-gray-900">Cancel Anytime</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* Pricing Section */}
       <div className="bg-white py-16 sm:py-20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -294,6 +314,170 @@ const Pricing = () => {
           </div>
         </div>
       </div>
+
+      {/* Detailed Feature Comparison */}
+      <section className="py-16 px-4 sm:px-6 lg:px-8 bg-gray-50">
+        <div className="max-w-7xl mx-auto">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+              Compare All Features
+            </h2>
+            <p className="text-lg text-gray-600">
+              See exactly what's included in each plan
+            </p>
+          </div>
+
+          <div className="overflow-x-auto">
+            <table className="w-full bg-white rounded-lg shadow-lg">
+              <thead className="bg-gray-50">
+                <tr>
+                  <th className="px-6 py-4 text-left text-sm font-semibold text-gray-900">Features</th>
+                  <th className="px-6 py-4 text-center text-sm font-semibold text-gray-900">Starter</th>
+                  <th className="px-6 py-4 text-center text-sm font-semibold text-blue-600">Pro</th>
+                  <th className="px-6 py-4 text-center text-sm font-semibold text-gray-900">Enterprise</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-gray-200">
+                <tr className="bg-gray-50">
+                  <td colSpan={4} className="px-6 py-3 text-sm font-semibold text-gray-900">Reporting</td>
+                </tr>
+                <tr className="hover:bg-gray-50">
+                  <td className="px-6 py-4 text-sm text-gray-900">Reports per Month</td>
+                  <td className="px-6 py-4 text-center text-sm text-gray-700">Up to 10</td>
+                  <td className="px-6 py-4 text-center text-sm text-gray-700 font-semibold">Unlimited</td>
+                  <td className="px-6 py-4 text-center text-sm text-gray-700 font-semibold">Unlimited</td>
+                </tr>
+                <tr className="hover:bg-gray-50 bg-white">
+                  <td className="px-6 py-4 text-sm text-gray-900">Storage per Report</td>
+                  <td className="px-6 py-4 text-center text-sm text-gray-700">500 MB</td>
+                  <td className="px-6 py-4 text-center text-sm text-gray-700 font-semibold">Unlimited</td>
+                  <td className="px-6 py-4 text-center text-sm text-gray-700 font-semibold">Unlimited</td>
+                </tr>
+                <tr className="bg-gray-50">
+                  <td colSpan={4} className="px-6 py-3 text-sm font-semibold text-gray-900">Security & Compliance</td>
+                </tr>
+                <tr className="hover:bg-gray-50">
+                  <td className="px-6 py-4 text-sm text-gray-900">Military-Grade Encryption (AES-GCM)</td>
+                  <td className="px-6 py-4 text-center"><CheckCircle className="w-5 h-5 text-green-600 mx-auto" /></td>
+                  <td className="px-6 py-4 text-center"><CheckCircle className="w-5 h-5 text-green-600 mx-auto" /></td>
+                  <td className="px-6 py-4 text-center"><CheckCircle className="w-5 h-5 text-green-600 mx-auto" /></td>
+                </tr>
+                <tr className="hover:bg-gray-50 bg-white">
+                  <td className="px-6 py-4 text-sm text-gray-900">GDPR Compliant</td>
+                  <td className="px-6 py-4 text-center"><CheckCircle className="w-5 h-5 text-green-600 mx-auto" /></td>
+                  <td className="px-6 py-4 text-center"><CheckCircle className="w-5 h-5 text-green-600 mx-auto" /></td>
+                  <td className="px-6 py-4 text-center"><CheckCircle className="w-5 h-5 text-green-600 mx-auto" /></td>
+                </tr>
+                <tr className="hover:bg-gray-50">
+                  <td className="px-6 py-4 text-sm text-gray-900">Audit Trail</td>
+                  <td className="px-6 py-4 text-center"><CheckCircle className="w-5 h-5 text-green-600 mx-auto" /></td>
+                  <td className="px-6 py-4 text-center"><CheckCircle className="w-5 h-5 text-green-600 mx-auto" /></td>
+                  <td className="px-6 py-4 text-center"><CheckCircle className="w-5 h-5 text-green-600 mx-auto" /></td>
+                </tr>
+                <tr className="bg-gray-50">
+                  <td colSpan={4} className="px-6 py-3 text-sm font-semibold text-gray-900">AI Features</td>
+                </tr>
+                <tr className="hover:bg-gray-50">
+                  <td className="px-6 py-4 text-sm text-gray-900 font-semibold">AI Case Analysis (DeepSeek)</td>
+                  <td className="px-6 py-4 text-center"><X className="w-5 h-5 text-gray-400 mx-auto" /></td>
+                  <td className="px-6 py-4 text-center"><CheckCircle className="w-5 h-5 text-blue-600 mx-auto" /></td>
+                  <td className="px-6 py-4 text-center"><CheckCircle className="w-5 h-5 text-blue-600 mx-auto" /></td>
+                </tr>
+                <tr className="hover:bg-gray-50 bg-white">
+                  <td className="px-6 py-4 text-sm text-gray-900">AI Risk Assessment</td>
+                  <td className="px-6 py-4 text-center"><X className="w-5 h-5 text-gray-400 mx-auto" /></td>
+                  <td className="px-6 py-4 text-center"><CheckCircle className="w-5 h-5 text-blue-600 mx-auto" /></td>
+                  <td className="px-6 py-4 text-center"><CheckCircle className="w-5 h-5 text-blue-600 mx-auto" /></td>
+                </tr>
+                <tr className="bg-gray-50">
+                  <td colSpan={4} className="px-6 py-3 text-sm font-semibold text-gray-900">Communication</td>
+                </tr>
+                <tr className="hover:bg-gray-50">
+                  <td className="px-6 py-4 text-sm text-gray-900">Two-Way Messaging</td>
+                  <td className="px-6 py-4 text-center"><X className="w-5 h-5 text-gray-400 mx-auto" /></td>
+                  <td className="px-6 py-4 text-center"><CheckCircle className="w-5 h-5 text-green-600 mx-auto" /></td>
+                  <td className="px-6 py-4 text-center"><CheckCircle className="w-5 h-5 text-green-600 mx-auto" /></td>
+                </tr>
+                <tr className="hover:bg-gray-50 bg-white">
+                  <td className="px-6 py-4 text-sm text-gray-900">Anonymous Messaging</td>
+                  <td className="px-6 py-4 text-center"><CheckCircle className="w-5 h-5 text-green-600 mx-auto" /></td>
+                  <td className="px-6 py-4 text-center"><CheckCircle className="w-5 h-5 text-green-600 mx-auto" /></td>
+                  <td className="px-6 py-4 text-center"><CheckCircle className="w-5 h-5 text-green-600 mx-auto" /></td>
+                </tr>
+                <tr className="bg-gray-50">
+                  <td colSpan={4} className="px-6 py-3 text-sm font-semibold text-gray-900">Team & Collaboration</td>
+                </tr>
+                <tr className="hover:bg-gray-50">
+                  <td className="px-6 py-4 text-sm text-gray-900">Team Members</td>
+                  <td className="px-6 py-4 text-center text-sm text-gray-700">1</td>
+                  <td className="px-6 py-4 text-center text-sm text-gray-700 font-semibold">Unlimited</td>
+                  <td className="px-6 py-4 text-center text-sm text-gray-700 font-semibold">Unlimited</td>
+                </tr>
+                <tr className="hover:bg-gray-50 bg-white">
+                  <td className="px-6 py-4 text-sm text-gray-900">Role-Based Access Control</td>
+                  <td className="px-6 py-4 text-center"><X className="w-5 h-5 text-gray-400 mx-auto" /></td>
+                  <td className="px-6 py-4 text-center"><CheckCircle className="w-5 h-5 text-green-600 mx-auto" /></td>
+                  <td className="px-6 py-4 text-center"><CheckCircle className="w-5 h-5 text-green-600 mx-auto" /></td>
+                </tr>
+                <tr className="hover:bg-gray-50">
+                  <td className="px-6 py-4 text-sm text-gray-900">Team Assignments</td>
+                  <td className="px-6 py-4 text-center"><X className="w-5 h-5 text-gray-400 mx-auto" /></td>
+                  <td className="px-6 py-4 text-center"><CheckCircle className="w-5 h-5 text-green-600 mx-auto" /></td>
+                  <td className="px-6 py-4 text-center"><CheckCircle className="w-5 h-5 text-green-600 mx-auto" /></td>
+                </tr>
+                <tr className="bg-gray-50">
+                  <td colSpan={4} className="px-6 py-3 text-sm font-semibold text-gray-900">Customization</td>
+                </tr>
+                <tr className="hover:bg-gray-50">
+                  <td className="px-6 py-4 text-sm text-gray-900">Custom Branding</td>
+                  <td className="px-6 py-4 text-center"><X className="w-5 h-5 text-gray-400 mx-auto" /></td>
+                  <td className="px-6 py-4 text-center"><CheckCircle className="w-5 h-5 text-green-600 mx-auto" /></td>
+                  <td className="px-6 py-4 text-center"><CheckCircle className="w-5 h-5 text-green-600 mx-auto" /></td>
+                </tr>
+                <tr className="hover:bg-gray-50 bg-white">
+                  <td className="px-6 py-4 text-sm text-gray-900">Custom Domain (CNAME)</td>
+                  <td className="px-6 py-4 text-center"><X className="w-5 h-5 text-gray-400 mx-auto" /></td>
+                  <td className="px-6 py-4 text-center"><X className="w-5 h-5 text-gray-400 mx-auto" /></td>
+                  <td className="px-6 py-4 text-center"><CheckCircle className="w-5 h-5 text-blue-600 mx-auto" /></td>
+                </tr>
+                <tr className="hover:bg-gray-50">
+                  <td className="px-6 py-4 text-sm text-gray-900">Custom Reports & Analytics</td>
+                  <td className="px-6 py-4 text-center"><X className="w-5 h-5 text-gray-400 mx-auto" /></td>
+                  <td className="px-6 py-4 text-center"><CheckCircle className="w-5 h-5 text-green-600 mx-auto" /></td>
+                  <td className="px-6 py-4 text-center"><CheckCircle className="w-5 h-5 text-green-600 mx-auto" /></td>
+                </tr>
+                <tr className="bg-gray-50">
+                  <td colSpan={4} className="px-6 py-3 text-sm font-semibold text-gray-900">Support</td>
+                </tr>
+                <tr className="hover:bg-gray-50">
+                  <td className="px-6 py-4 text-sm text-gray-900">Email Support</td>
+                  <td className="px-6 py-4 text-center"><CheckCircle className="w-5 h-5 text-green-600 mx-auto" /></td>
+                  <td className="px-6 py-4 text-center"><CheckCircle className="w-5 h-5 text-green-600 mx-auto" /></td>
+                  <td className="px-6 py-4 text-center"><CheckCircle className="w-5 h-5 text-green-600 mx-auto" /></td>
+                </tr>
+                <tr className="hover:bg-gray-50 bg-white">
+                  <td className="px-6 py-4 text-sm text-gray-900">Priority Support</td>
+                  <td className="px-6 py-4 text-center"><X className="w-5 h-5 text-gray-400 mx-auto" /></td>
+                  <td className="px-6 py-4 text-center"><CheckCircle className="w-5 h-5 text-blue-600 mx-auto" /></td>
+                  <td className="px-6 py-4 text-center"><CheckCircle className="w-5 h-5 text-blue-600 mx-auto" /></td>
+                </tr>
+                <tr className="hover:bg-gray-50">
+                  <td className="px-6 py-4 text-sm text-gray-900">Dedicated Account Manager</td>
+                  <td className="px-6 py-4 text-center"><X className="w-5 h-5 text-gray-400 mx-auto" /></td>
+                  <td className="px-6 py-4 text-center"><X className="w-5 h-5 text-gray-400 mx-auto" /></td>
+                  <td className="px-6 py-4 text-center"><CheckCircle className="w-5 h-5 text-blue-600 mx-auto" /></td>
+                </tr>
+                <tr className="hover:bg-gray-50 bg-white">
+                  <td className="px-6 py-4 text-sm text-gray-900">SLA Guarantee</td>
+                  <td className="px-6 py-4 text-center"><X className="w-5 h-5 text-gray-400 mx-auto" /></td>
+                  <td className="px-6 py-4 text-center"><X className="w-5 h-5 text-gray-400 mx-auto" /></td>
+                  <td className="px-6 py-4 text-center"><CheckCircle className="w-5 h-5 text-blue-600 mx-auto" /></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
 
       {/* FAQ Section */}
       <div className="bg-gray-50 py-16 sm:py-20">

@@ -26,23 +26,28 @@ const About: React.FC = () => {
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-12 py-0">
             <span className="inline-block px-4 py-2 bg-blue-600 text-white rounded-full text-sm font-medium mb-6">
-              {t('about.hero.subtitle')}
+              About Disclosurely
             </span>
-            <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6 lg:text-6xl">On a Mission to Change  Secure Whistleblowing and Compliance </h1>
+            <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6 lg:text-6xl">
+              Making Compliance Simple, Secure, and Built for Trust
+            </h1>
             <p className="text-gray-600 max-w-3xl mx-auto text-xl">
-              {t('about.hero.description')}
+              Disclosurely helps organisations create safer, more transparent workplaces. We believe that ethical reporting should be effortless — not intimidating. Our platform makes it easy for employees to speak up, and for businesses to respond quickly, prevent risks, and build lasting cultures of integrity.
             </p>
           </div>
           
           {/* Mission Card Section */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
             <div>
-              <img src="https://images.unsplash.com/photo-1552664730-d307ca884978?w=600&h=400&fit=crop" alt="Our team working together" className="rounded-2xl shadow-lg" />
+              <img src="/abouthero.jpeg" alt="Our team working together" className="rounded-2xl shadow-lg" />
             </div>
             <Card className="text-white p-8 rounded-2xl bg-blue-600">
-              <h3 className="text-3xl font-bold mb-4">We're on a mission!</h3>
+              <h3 className="text-3xl font-bold mb-4">On a Mission to Make Whistleblowing Easier, Safer, and More Effective</h3>
+                <p className="text-lg text-gray-200 leading-relaxed mb-4">
+                  At Disclosurely, we're redefining how businesses handle ethics and compliance. Our mission is simple — to help organisations save time, reduce risk, and cut costs by making anonymous reporting faster, more secure, and easier for employees to adopt.
+                </p>
                 <p className="text-lg text-gray-200 leading-relaxed">
-                  {t('about.mission.content') || 'At Disclosurely, we are dedicated to empowering organizations with secure, compliant whistleblowing solutions. Our mission is to create a safer, more transparent work environment where employees can report concerns without fear, and organizations can maintain the highest standards of compliance and ethics.'}
+                  We believe transparency shouldn't be complicated. By empowering employees to speak up with confidence, we help companies detect issues early, prevent costly risks, and build stronger cultures of trust and accountability.
                 </p>
             </Card>
           </div>
