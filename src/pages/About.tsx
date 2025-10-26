@@ -41,7 +41,7 @@ const About: React.FC = () => {
             <div>
               <img src="https://images.unsplash.com/photo-1552664730-d307ca884978?w=600&h=400&fit=crop" alt="Our team working together" className="rounded-2xl shadow-lg" />
             </div>
-            <Card className="bg-gray-900 text-white p-8 rounded-2xl">
+            <Card className="text-white p-8 rounded-2xl bg-blue-600">
               <h3 className="text-3xl font-bold mb-4">We're on a mission!</h3>
                 <p className="text-lg text-gray-200 leading-relaxed">
                   {t('about.mission.content') || 'At Disclosurely, we are dedicated to empowering organizations with secure, compliant whistleblowing solutions. Our mission is to create a safer, more transparent work environment where employees can report concerns without fear, and organizations can maintain the highest standards of compliance and ethics.'}
