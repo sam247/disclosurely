@@ -574,14 +574,14 @@ const Features: React.FC = () => {
                     <div className="space-y-4">
                       <div>
                         <label className="text-sm font-medium text-gray-700 mb-2 block">Select New Case</label>
-                        <select className="w-full px-4 py-2 border border-gray-300 rounded-lg text-sm bg-white">
+                        <select className="w-full px-4 py-2 border border-gray-300 rounded-lg text-sm bg-white pointer-events-none" disabled>
                           <option>Choose a new case</option>
                           <option>DIS-YU3Z4XJ9 - Financial Issues</option>
                         </select>
                       </div>
                       <div>
                         <label className="text-sm font-medium text-gray-700 mb-2 block">Company Documents</label>
-                        <button className="w-full px-4 py-3 bg-blue-600 text-white rounded-lg text-sm font-medium flex items-center justify-center gap-2">
+                        <button className="w-full px-4 py-3 bg-blue-600 text-white rounded-lg text-sm font-medium flex items-center justify-center gap-2 pointer-events-none" disabled>
                           <Upload className="w-4 h-4" />
                           Upload Files
                         </button>
