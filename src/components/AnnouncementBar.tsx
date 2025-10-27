@@ -55,19 +55,31 @@ export const AnnouncementBar: React.FC<AnnouncementBarProps> = ({
     <div className="bg-blue-600 text-white py-2.5 px-3 sm:py-3 sm:px-4 relative z-50">
       <div className="max-w-7xl mx-auto flex items-center justify-between gap-3">
         <div className="flex-1 min-w-0">
-          <p className="text-xs sm:text-sm font-medium text-center break-words">
-            {announcement.message}
-              {announcement.linkUrl && announcement.linkText && (
-                <span className="ml-1 sm:ml-2 whitespace-nowrap">
-                  <a 
-                    href={announcement.linkUrl}
-                    className="underline hover:no-underline inline-flex items-center gap-1"
-                  >
-                    {announcement.linkText}
-                  </a>
-                </span>
-              )}
-          </p>
+          <div className="text-xs sm:text-sm font-medium text-center break-words">
+            {announcement.message && (
+              <>
+                {announcement.message}
+                {announcement.linkUrl && announcement.linkText && (
+                  <span className="ml-1 sm:ml-2 whitespace-nowrap">
+                    <a 
+                      href={announcement.linkUrl}
+                      className="underline hover:no-underline"
+                    >
+                      {announcement.linkText}
+                    </a>
+                  </span>
+                )}
+              </>
+            )}
+            {!announcement.message && announcement.linkUrl && (
+              <a 
+                href={announcement.linkUrl}
+                className="underline hover:no-underline"
+              >
+                {announcement.linkText || announcement.linkUrl}
+              </a>
+            )}
+          </div>
         </div>
         <button
           onClick={handleDismiss}
