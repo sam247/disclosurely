@@ -45,19 +45,56 @@ const Features: React.FC = () => {
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-12">
             <span className="inline-block px-4 py-2 bg-blue-600 text-white rounded-full text-sm font-medium mb-6">
-              {t('features.hero.subtitle') || 'Comprehensive Features'}
+              Anonymous Reporting Platform
             </span>
             <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-gray-900 mb-6">
-              Everything You Need
+              Powerful Features Built for Secure, Anonymous Reporting
             </h1>
             <p className="text-lg text-gray-600 max-w-3xl mx-auto">
-              {t('features.hero.description') || 'Powerful features designed to help you manage compliance, protect whistleblowers, and build a culture of integrity.'}
+              From encrypted submissions to real-time dashboards, Disclosurely gives compliance teams the tools they need to manage reports efficiently, protect employee identities, and resolve issues before they escalate.
             </p>
           </div>
         </div>
       </section>
 
       <div className="min-h-screen bg-white">
+
+        {/* Value Proposition Section */}
+        <section className="py-16 px-4 sm:px-6 lg:px-8 bg-gray-50">
+          <div className="max-w-7xl mx-auto">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+              <Card className="p-8 text-center hover:shadow-lg transition-shadow rounded-2xl bg-white">
+                <div className="w-16 h-16 bg-blue-600 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <Shield className="w-8 h-8 text-white" />
+                </div>
+                <h3 className="text-xl font-bold text-gray-900 mb-3">Anonymous by Default</h3>
+                <p className="text-gray-600">
+                  Every submission is encrypted end-to-end with zero-knowledge architecture. Employees can report concerns without revealing their identity, giving them confidence to speak up.
+                </p>
+              </Card>
+              
+              <Card className="p-8 text-center hover:shadow-lg transition-shadow rounded-2xl bg-white">
+                <div className="w-16 h-16 bg-blue-600 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <Activity className="w-8 h-8 text-white" />
+                </div>
+                <h3 className="text-xl font-bold text-gray-900 mb-3">Real-Time Insights</h3>
+                <p className="text-gray-600">
+                  Track case progress, monitor trends, and identify patterns with comprehensive dashboards. Make data-driven decisions with AI-powered risk assessment.
+                </p>
+              </Card>
+              
+              <Card className="p-8 text-center hover:shadow-lg transition-shadow rounded-2xl bg-white">
+                <div className="w-16 h-16 bg-blue-600 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <CheckCircle className="w-8 h-8 text-white" />
+                </div>
+                <h3 className="text-xl font-bold text-gray-900 mb-3">Compliance Ready</h3>
+                <p className="text-gray-600">
+                  Built for GDPR, SOX, ISO 27001, and more. Automated compliance reporting and audit trails ensure you're always ready for regulatory inspections.
+                </p>
+              </Card>
+            </div>
+          </div>
+        </section>
 
         {/* Core Features Section */}
         <section className="py-16 px-4 sm:px-6 lg:px-8 bg-white">
@@ -639,71 +676,48 @@ const Features: React.FC = () => {
           </div>
         </section>
 
-        {/* Analytics Section */}
+        {/* Sign-Off Section */}
         <section className="py-16 px-4 sm:px-6 lg:px-8 bg-white">
           <div className="max-w-7xl mx-auto">
-            <div className="text-center mb-16">
+            <div className="text-center mb-12">
               <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-6">
-                {t('features.analytics.title')}
+                Built for Compliance Teams Who Care About Details
               </h2>
+              <p className="text-lg text-gray-600 max-w-3xl mx-auto mb-8">
+                Disclosurely isn't just a platform—it's your partner in building a culture of integrity. Every feature is designed with your compliance team's workflow in mind, from encrypted submissions to comprehensive audit trails.
+              </p>
             </div>
             
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-              <Card className="p-6 hover:shadow-lg transition-shadow rounded-2xl">
-                <CardContent className="p-0">
-                  <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mb-4">
-                    <Activity className="w-8 h-8 text-blue-600" />
-                  </div>
-                  <h3 className="text-xl font-semibold text-gray-900 mb-3">
-                    {t('features.analytics.items.dashboard.title')}
-                  </h3>
-                  <p className="text-gray-600">
-                    {t('features.analytics.items.dashboard.description')}
-                  </p>
-                </CardContent>
-              </Card>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+              <div className="text-center">
+                <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <Shield className="w-8 h-8 text-blue-600" />
+                </div>
+                <h3 className="text-xl font-semibold text-gray-900 mb-2">Military-Grade Security</h3>
+                <p className="text-gray-600">
+                  AES-GCM encryption ensures your data is protected at all times, with zero-knowledge architecture so even we can't access your submissions.
+                </p>
+              </div>
 
-              <Card className="p-6 hover:shadow-lg transition-shadow rounded-2xl">
-                <CardContent className="p-0">
-                  <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mb-4">
-                    <FileSpreadsheet className="w-8 h-8 text-gray-700" />
-                  </div>
-                  <h3 className="text-xl font-semibold text-gray-900 mb-3">
-                    {t('features.analytics.items.reports.title')}
-                  </h3>
-                  <p className="text-gray-600">
-                    {t('features.analytics.items.reports.description')}
-                  </p>
-                </CardContent>
-              </Card>
+              <div className="text-center">
+                <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <Brain className="w-8 h-8 text-blue-600" />
+                </div>
+                <h3 className="text-xl font-semibold text-gray-900 mb-2">AI-Powered Analysis</h3>
+                <p className="text-gray-600">
+                  DeepSeek AI identifies risk patterns and provides actionable insights, helping you resolve issues faster and make data-driven compliance decisions.
+                </p>
+              </div>
 
-              <Card className="p-6 hover:shadow-lg transition-shadow rounded-2xl">
-                <CardContent className="p-0">
-                  <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mb-4">
-                    <TrendingUp className="w-8 h-8 text-blue-600" />
-                  </div>
-                  <h3 className="text-xl font-semibold text-gray-900 mb-3">
-                    {t('features.analytics.items.metrics.title')}
-                  </h3>
-                  <p className="text-gray-600">
-                    {t('features.analytics.items.metrics.description')}
-                  </p>
-                </CardContent>
-              </Card>
-
-              <Card className="p-6 hover:shadow-lg transition-shadow rounded-2xl">
-                <CardContent className="p-0">
-                  <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mb-4">
-                    <Download className="w-8 h-8 text-gray-700" />
-                  </div>
-                  <h3 className="text-xl font-semibold text-gray-900 mb-3">
-                    {t('features.analytics.items.export.title')}
-                  </h3>
-                  <p className="text-gray-600">
-                    {t('features.analytics.items.export.description')}
-                  </p>
-                </CardContent>
-              </Card>
+              <div className="text-center">
+                <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <Users className="w-8 h-8 text-blue-600" />
+                </div>
+                <h3 className="text-xl font-semibold text-gray-900 mb-2">Team Collaboration</h3>
+                <p className="text-gray-600">
+                  Role-based access control and team assignments ensure the right people see the right information, while maintaining complete confidentiality.
+                </p>
+              </div>
             </div>
           </div>
         </section>
