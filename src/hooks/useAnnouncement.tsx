@@ -31,6 +31,9 @@ export const useAnnouncement = () => {
 
         // Fetch published announcements (content type: 'announcement')
         console.log('Fetching announcements from Contentful...');
+        console.log('Space ID:', CONTENTFUL_SPACE_ID);
+        console.log('Token length:', CONTENTFUL_DELIVERY_TOKEN?.length);
+        
         const response = await client.getEntries({
           content_type: 'announcement',
           'fields.status': 'published',
