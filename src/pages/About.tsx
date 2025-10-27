@@ -28,9 +28,9 @@ const About: React.FC = () => {
             <span className="inline-block px-4 py-2 bg-blue-600 text-white rounded-full text-sm font-medium mb-6">
               About Disclosurely
             </span>
-            <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6 lg:text-6xl">
-              Making Compliance Simple, Secure, and Built for Trust
-            </h1>
+            <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6 lg:text-6xl">Making Compliance Simple, Secure 
+and Built for Trust
+          </h1>
             <p className="text-gray-600 max-w-3xl mx-auto text-xl">
               Disclosurely helps organisations create safer, more transparent workplaces. We believe that ethical reporting should be effortless — not intimidating. Our platform makes it easy for employees to speak up, and for businesses to respond quickly, prevent risks, and build lasting cultures of integrity.
             </p>
