@@ -47,34 +47,32 @@ export const AnnouncementBar: React.FC<AnnouncementBarProps> = ({
   }
 
   return (
-    <div className="bg-blue-600 text-white py-3 px-4 relative z-50">
-      <div className="max-w-7xl mx-auto flex items-center justify-between">
-        <div className="flex items-center gap-3 flex-1">
-          <div className="flex-1 text-center md:text-left">
-            <p className="text-sm font-medium">
-              {announcement.message}
-              {announcement.linkUrl && announcement.linkText && (
-                <span className="ml-2">
-                  <a 
-                    href={announcement.linkUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="underline hover:no-underline inline-flex items-center gap-1"
-                  >
-                    {announcement.linkText}
-                    <ExternalLink className="w-3 h-3 inline" />
-                  </a>
-                </span>
-              )}
-            </p>
-          </div>
+    <div className="bg-blue-600 text-white py-2.5 px-3 sm:py-3 sm:px-4 relative z-50">
+      <div className="max-w-7xl mx-auto flex items-center justify-between gap-3">
+        <div className="flex-1 min-w-0">
+          <p className="text-xs sm:text-sm font-medium text-center md:text-left break-words">
+            {announcement.message}
+            {announcement.linkUrl && announcement.linkText && (
+              <span className="ml-1 sm:ml-2 whitespace-nowrap">
+                <a 
+                  href={announcement.linkUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="underline hover:no-underline inline-flex items-center gap-1"
+                >
+                  {announcement.linkText}
+                  <ExternalLink className="w-3 h-3 inline" />
+                </a>
+              </span>
+            )}
+          </p>
         </div>
         <button
           onClick={handleDismiss}
-          className="text-white hover:text-gray-200 transition-colors flex-shrink-0 ml-4"
+          className="text-white hover:text-gray-200 transition-colors flex-shrink-0 ml-2"
           aria-label="Dismiss announcement"
         >
-          <X className="w-5 h-5" />
+          <X className="w-4 h-4 sm:w-5 sm:h-5" />
         </button>
       </div>
     </div>
