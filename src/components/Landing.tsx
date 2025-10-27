@@ -7,6 +7,7 @@ import { Footer } from "@/components/ui/footer";
 import CookieConsentBanner from "@/components/CookieConsentBanner";
 import PublicLanguageSelector from "@/components/PublicLanguageSelector";
 import BlogSection from "@/components/BlogSection";
+import { AnnouncementBar } from "@/components/AnnouncementBar";
 import { useTranslation } from "react-i18next";
 import anonymousReportingIcon from "@/assets/icons/anonymous_reporting.png";
 import secureMessagingIcon from "@/assets/icons/secure_messaging.png";
@@ -63,6 +64,9 @@ const Landing = () => {
   const langPrefix = currentLanguage && currentLanguage !== "en" ? `/${currentLanguage}` : "";
   return (
     <div className="min-h-screen bg-white">
+      {/* Announcement Bar */}
+      <AnnouncementBar />
+      
       {/* Navigation */}
       <nav className="bg-white shadow-sm sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8">

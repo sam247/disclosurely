@@ -2,6 +2,7 @@ import { Footer } from "@/components/ui/footer";
 import { Link } from "react-router-dom";
 import PublicLanguageSelector from "@/components/PublicLanguageSelector";
 import DynamicHelmet from "@/components/DynamicHelmet";
+import { AnnouncementBar } from "@/components/AnnouncementBar";
 import { useLanguageFromUrl } from "@/hooks/useLanguageFromUrl";
 import { useTranslation } from "react-i18next";
 
@@ -19,6 +20,9 @@ const Terms = () => {
       />
 
       <div className="min-h-screen bg-white">
+        {/* Announcement Bar */}
+        <AnnouncementBar />
+        
         {/* Navigation */}
         <nav className="bg-white shadow-sm sticky top-0 z-50">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">

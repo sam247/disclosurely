@@ -55,7 +55,7 @@ export const AnnouncementBar: React.FC<AnnouncementBarProps> = ({
     <div className="bg-blue-600 text-white py-2.5 px-3 sm:py-3 sm:px-4 relative z-50">
       <div className="max-w-7xl mx-auto flex items-center justify-between gap-3">
         <div className="flex-1 min-w-0">
-          <p className="text-xs sm:text-sm font-medium text-center md:text-left break-words">
+          <p className="text-xs sm:text-sm font-medium text-center break-words">
             {announcement.message}
             {announcement.linkUrl && announcement.linkText && (
               <span className="ml-1 sm:ml-2 whitespace-nowrap">
