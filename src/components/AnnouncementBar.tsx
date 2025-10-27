@@ -1,6 +1,6 @@
 import React from 'react';
 import { useAnnouncement } from '@/hooks/useAnnouncement';
-import { X, ExternalLink } from 'lucide-react';
+import { X } from 'lucide-react';
 
 interface AnnouncementBarProps {
   showOnDashboard?: boolean;
@@ -57,19 +57,16 @@ export const AnnouncementBar: React.FC<AnnouncementBarProps> = ({
         <div className="flex-1 min-w-0">
           <p className="text-xs sm:text-sm font-medium text-center break-words">
             {announcement.message}
-            {announcement.linkUrl && announcement.linkText && (
-              <span className="ml-1 sm:ml-2 whitespace-nowrap">
-                <a 
-                  href={announcement.linkUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="underline hover:no-underline inline-flex items-center gap-1"
-                >
-                  {announcement.linkText}
-                  <ExternalLink className="w-3 h-3 inline" />
-                </a>
-              </span>
-            )}
+              {announcement.linkUrl && announcement.linkText && (
+                <span className="ml-1 sm:ml-2 whitespace-nowrap">
+                  <a 
+                    href={announcement.linkUrl}
+                    className="underline hover:no-underline inline-flex items-center gap-1"
+                  >
+                    {announcement.linkText}
+                  </a>
+                </span>
+              )}
           </p>
         </div>
         <button

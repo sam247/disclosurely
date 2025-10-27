@@ -29,17 +29,55 @@ const Pricing = () => {
           <div className="max-w-7xl mx-auto">
             <div className="text-center mb-12">
               <span className="inline-block px-4 py-2 bg-blue-600 text-white rounded-full text-sm font-medium mb-6">
-                {t("pricing.hero.subtitle") || 'Transparent Pricing'}
+                Start Free. Get Secure Whistleblowing.
               </span>
               <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-gray-900 mb-6">
-                {t("pricing.hero.title") || 'Simple, Transparent Pricing'}
+                Start Free. Get Secure Whistleblowing.
               </h1>
+              <p className="text-xl text-gray-600 max-w-3xl mx-auto mb-4">
+                14-day free trial • Unlimited reports included • No credit card required
+              </p>
               <p className="text-lg text-gray-600 max-w-3xl mx-auto">
-                Choose the perfect plan for your organization. All plans include a 14-day free trial with no credit card required.
+                All plans include military-grade encryption, GDPR compliance, and real-time analytics. Choose the plan that matches your compliance needs and scale as you grow.
               </p>
             </div>
           </div>
         </section>
+
+      {/* Trust Indicators */}
+      <section className="py-12 px-4 sm:px-6 lg:px-8 bg-gray-50 border-b border-gray-200">
+        <div className="max-w-7xl mx-auto">
+          <div className="flex flex-col md:flex-row justify-center items-center gap-6 md:gap-12">
+            <div className="flex items-center gap-3">
+              <div className="w-12 h-12 bg-blue-600 rounded-full flex items-center justify-center">
+                <CheckCircle className="w-7 h-7 text-white" />
+              </div>
+              <div>
+                <div className="font-bold text-gray-900 text-lg">14-Day Money-Back Guarantee</div>
+                <div className="text-sm text-gray-600">Try risk-free, cancel anytime</div>
+              </div>
+            </div>
+            <div className="flex items-center gap-3">
+              <div className="w-12 h-12 bg-blue-600 rounded-full flex items-center justify-center">
+                <CheckCircle className="w-7 h-7 text-white" />
+              </div>
+              <div>
+                <div className="font-bold text-gray-900 text-lg">Trusted by UK Businesses</div>
+                <div className="text-sm text-gray-600">ISO 27001, GDPR, SOX compliant</div>
+              </div>
+            </div>
+            <div className="flex items-center gap-3">
+              <div className="w-12 h-12 bg-blue-600 rounded-full flex items-center justify-center">
+                <CheckCircle className="w-7 h-7 text-white" />
+              </div>
+              <div>
+                <div className="font-bold text-gray-900 text-lg">Highly Rated on G2</div>
+                <div className="text-sm text-gray-600">100+ verified reviews from compliance teams</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
 
       {/* Comparison Section */}
       <section className="py-16 px-4 sm:px-6 lg:px-8 bg-gray-50">
