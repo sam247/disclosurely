@@ -13,6 +13,7 @@ import ProfileSettings from './ProfileSettings';
 import { supabase } from '@/integrations/supabase/client';
 import NotificationSystem from '@/components/NotificationSystem';
 import { useTranslation } from 'react-i18next';
+import { AnnouncementBar } from '@/components/AnnouncementBar';
 
 interface DashboardLayoutProps {
   children: ReactNode;
@@ -112,6 +113,9 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
               </Button>
             </div>
           </header>
+
+          {/* Announcement Bar */}
+          <AnnouncementBar showOnDashboard={true} />
 
           {/* Main Content */}
           <main className="flex-1 overflow-auto p-4 md:p-6">

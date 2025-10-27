@@ -35,7 +35,7 @@ export const useLatestBlogPosts = (limit: number = 3) => {
         const response = await client.getEntries({
           content_type: '9oYANGj5uBRT6UHsl5LxO', // Blog Post content type ID
           'fields.status': 'published',
-          order: '-fields.publishDate',
+          order: '-fields.publishDate' as any,
           limit: limit,
           include: 2, // Include linked author and categories
         });
