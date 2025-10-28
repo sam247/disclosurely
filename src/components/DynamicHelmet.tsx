@@ -204,10 +204,15 @@ const DynamicHelmet: React.FC<DynamicHelmetProps> = ({
     }
   };
 
+  // Always use the current page URL as canonical unless explicitly set
+  const currentPageUrl = typeof window !== 'undefined' 
+    ? window.location.href.split('?')[0] // Remove query params for cleaner URLs
+    : 'https://disclosurely.com';
+    
   const finalCanonicalUrl = normalizeCanonicalUrl(
+    canonicalUrl ||  // If explicitly provided, use it
     seoData?.canonical_url || 
-    canonicalUrl || 
-    (typeof window !== 'undefined' ? window.location.href : 'https://disclosurely.com')
+    currentPageUrl
   );
 
   const finalRobots = seoData?.robots_directive || 'index,follow';
