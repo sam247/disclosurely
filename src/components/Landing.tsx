@@ -71,7 +71,7 @@ const Landing = () => {
             </div>
             <div className="hidden md:flex items-center space-x-4">
               <PublicLanguageSelector />
-              <Link to={`${langPrefix}/pricing`} className="text-gray-600 hover:text-gray-900">
+              <Link to={`${langPrefix}/pricing`} className="text-gray-700 hover:text-gray-900">
                 {t("nav.pricing")}
               </Link>
               <Link to={`${langPrefix}/auth/signup`} className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors">
@@ -103,7 +103,7 @@ const Landing = () => {
             {t("landing.hero.title1")}
             <span className="block text-blue-600">{t("landing.hero.title2")}</span>
           </h1>
-          <p className="text-lg sm:text-xl text-gray-600 mb-8 max-w-3xl mx-auto px-4">{t("landing.hero.subtitle")}</p>
+          <p className="text-lg sm:text-xl text-gray-700 mb-8 max-w-3xl mx-auto px-4">{t("landing.hero.subtitle")}</p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center items-center px-4">
             <Link to={`${langPrefix}/auth/signup`} className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-3 rounded-lg text-lg font-semibold w-full sm:w-auto text-center">
               {t("landing.hero.startFreeTrial")}
@@ -116,7 +116,7 @@ const Landing = () => {
           {/* Trusted by Section - moved to hero area */}
           <div className="mt-16 mb-8">
             <div className="text-center mb-12">
-              <p className="text-lg font-medium text-gray-600">{t("landing.trusted")}</p>
+              <p className="text-lg font-medium text-gray-700">{t("landing.trusted")}</p>
             </div>
 
             {/* Logo Carousel */}
@@ -146,7 +146,7 @@ const Landing = () => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">
             <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-4">{t("landing.features.title")}</h2>
-            <p className="text-lg sm:text-xl text-gray-600 max-w-3xl mx-auto px-4">{t("landing.features.subtitle")}</p>
+            <p className="text-lg sm:text-xl text-gray-700 max-w-3xl mx-auto px-4">{t("landing.features.subtitle")}</p>
           </div>
 
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-8">
@@ -244,7 +244,7 @@ const Landing = () => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
             <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-4">{t("landing.howItWorks.title")}</h2>
-            <p className="text-lg sm:text-xl text-gray-600 max-w-3xl mx-auto px-4">
+            <p className="text-lg sm:text-xl text-gray-700 max-w-3xl mx-auto px-4">
               {t("landing.howItWorks.subtitle")}
             </p>
           </div>
@@ -256,7 +256,7 @@ const Landing = () => {
                 <span className="text-2xl font-bold text-blue-600">1</span>
               </div>
               <h3 className="text-xl font-semibold text-gray-900 mb-3">{t("landing.howItWorks.step1.title")}</h3>
-              <p className="text-gray-600">{t("landing.howItWorks.step1.description")}</p>
+              <p className="text-gray-700">{t("landing.howItWorks.step1.description")}</p>
             </div>
 
             {/* Step 2 */}
@@ -265,7 +265,7 @@ const Landing = () => {
                 <span className="text-2xl font-bold text-blue-600">2</span>
               </div>
               <h3 className="text-xl font-semibold text-gray-900 mb-3">{t("landing.howItWorks.step2.title")}</h3>
-              <p className="text-gray-600">{t("landing.howItWorks.step2.description")}</p>
+              <p className="text-gray-700">{t("landing.howItWorks.step2.description")}</p>
             </div>
 
             {/* Step 3 */}
@@ -733,28 +733,28 @@ const Landing = () => {
               <AccordionTrigger className="text-left text-lg font-semibold hover:no-underline">
                 {t("landing.faq.question1.question")}
               </AccordionTrigger>
-              <AccordionContent className="text-gray-600 pt-2">{t("landing.faq.question1.answer")}</AccordionContent>
+              <AccordionContent className="text-gray-700 pt-2">{t("landing.faq.question1.answer")}</AccordionContent>
             </AccordionItem>
 
             <AccordionItem value="item-2" className="border rounded-lg px-6 bg-white">
               <AccordionTrigger className="text-left text-lg font-semibold hover:no-underline">
                 {t("landing.faq.question2.question")}
               </AccordionTrigger>
-              <AccordionContent className="text-gray-600 pt-2">{t("landing.faq.question2.answer")}</AccordionContent>
+              <AccordionContent className="text-gray-700 pt-2">{t("landing.faq.question2.answer")}</AccordionContent>
             </AccordionItem>
 
             <AccordionItem value="item-3" className="border rounded-lg px-6 bg-white">
               <AccordionTrigger className="text-left text-lg font-semibold hover:no-underline">
                 {t("landing.faq.question3.question")}
               </AccordionTrigger>
-              <AccordionContent className="text-gray-600 pt-2">{t("landing.faq.question3.answer")}</AccordionContent>
+              <AccordionContent className="text-gray-700 pt-2">{t("landing.faq.question3.answer")}</AccordionContent>
             </AccordionItem>
 
             <AccordionItem value="item-4" className="border rounded-lg px-6 bg-white">
               <AccordionTrigger className="text-left text-lg font-semibold hover:no-underline">
                 {t("landing.faq.question4.question")}
               </AccordionTrigger>
-              <AccordionContent className="text-gray-600 pt-2">{t("landing.faq.question4.answer")}</AccordionContent>
+              <AccordionContent className="text-gray-700 pt-2">{t("landing.faq.question4.answer")}</AccordionContent>
             </AccordionItem>
 
             <AccordionItem value="item-5" className="border rounded-lg px-6 bg-white">
