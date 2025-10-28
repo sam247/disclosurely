@@ -66,7 +66,7 @@ const Landing = () => {
           <div className="flex justify-between items-center py-3">
             <div className="flex items-center">
               <Link to="/" className="flex items-center">
-                <img src="/lovable-uploads/c46ace0e-df58-4119-b5e3-8dcfa075ea2f.png" alt="Disclosurely" className="h-5 sm:h-6 md:h-8 w-auto" />
+                <img src="/lovable-uploads/c46ace0e-df58-4119-b5e3-8dcfa075ea2f.png" alt="Disclosurely" className="h-5 sm:h-6 md:h-8 w-auto" loading="eager" fetchPriority="high" />
               </Link>
             </div>
             <div className="hidden md:flex items-center space-x-4">
@@ -125,14 +125,14 @@ const Landing = () => {
                 {/* First set of logos */}
                 <div className="flex items-center min-w-fit">
                   {businessLogos.map((logo, index) => <div key={`first-${index}`} className="mx-8 flex-shrink-0">
-                      <img src={logo.src} alt={logo.alt} className="h-12 w-auto object-contain opacity-70 hover:opacity-100 transition-opacity" />
+                      <img src={logo.src} alt={logo.alt} loading="lazy" className="h-12 w-auto object-contain opacity-70 hover:opacity-100 transition-opacity" />
                     </div>)}
                 </div>
 
                 {/* Duplicate set for seamless loop */}
                 <div className="flex items-center min-w-fit">
                   {businessLogos.map((logo, index) => <div key={`second-${index}`} className="mx-8 flex-shrink-0">
-                      <img src={logo.src} alt={logo.alt} className="h-12 w-auto object-contain opacity-70 hover:opacity-100 transition-opacity" />
+                      <img src={logo.src} alt={logo.alt} loading="lazy" className="h-12 w-auto object-contain opacity-70 hover:opacity-100 transition-opacity" />
                     </div>)}
                 </div>
               </div>
@@ -153,7 +153,7 @@ const Landing = () => {
             <Card className="text-center">
               <CardHeader>
                 <div className="mx-auto mb-4 w-16 h-16">
-                  <img src={anonymousReportingIcon} alt="Anonymous Reporting" className="w-full h-full object-contain" />
+                  <img src={anonymousReportingIcon} alt="Anonymous Reporting" loading="lazy" className="w-full h-full object-contain" />
                 </div>
                 <CardTitle className="text-xl sm:text-2xl">{t("landing.features.anonymousReporting.title")}</CardTitle>
               </CardHeader>
@@ -167,7 +167,7 @@ const Landing = () => {
             <Card className="text-center">
               <CardHeader>
                 <div className="mx-auto mb-4 w-16 h-16">
-                  <img src={secureMessagingIcon} alt="Secure Messaging" className="w-full h-full object-contain" />
+                  <img src={secureMessagingIcon} alt="Secure Messaging" loading="lazy" className="w-full h-full object-contain" />
                 </div>
                 <CardTitle className="text-xl sm:text-2xl">{t("landing.features.secureMessaging.title")}</CardTitle>
               </CardHeader>
@@ -181,7 +181,7 @@ const Landing = () => {
             <Card className="text-center">
               <CardHeader>
                 <div className="mx-auto mb-4 w-16 h-16">
-                  <img src={caseManagementIcon} alt="Case Management" className="w-full h-full object-contain" />
+                  <img src={caseManagementIcon} alt="Case Management" loading="lazy" className="w-full h-full object-contain" />
                 </div>
                 <CardTitle className="text-xl sm:text-2xl">{t("landing.features.caseManagement.title")}</CardTitle>
               </CardHeader>
@@ -195,7 +195,7 @@ const Landing = () => {
             <Card className="text-center">
               <CardHeader>
                 <div className="mx-auto mb-4 w-16 h-16">
-                  <img src={multiUserAccessIcon} alt="Multi-User Access" className="w-full h-full object-contain" />
+                  <img src={multiUserAccessIcon} alt="Multi-User Access" loading="lazy" className="w-full h-full object-contain" />
                 </div>
                 <CardTitle className="text-xl sm:text-2xl">{t("landing.features.multiUserAccess.title")}</CardTitle>
               </CardHeader>
@@ -209,7 +209,7 @@ const Landing = () => {
             <Card className="text-center">
               <CardHeader>
                 <div className="mx-auto mb-4 w-16 h-16">
-                  <img src={regulatoryComplianceIcon} alt="Regulatory Compliance" className="w-full h-full object-contain" />
+                  <img src={regulatoryComplianceIcon} alt="Regulatory Compliance" loading="lazy" className="w-full h-full object-contain" />
                 </div>
                 <CardTitle className="text-xl sm:text-2xl">
                   {t("landing.features.regulatoryCompliance.title")}
@@ -225,7 +225,7 @@ const Landing = () => {
             <Card className="text-center">
               <CardHeader>
                 <div className="mx-auto mb-4 w-16 h-16">
-                  <img src={enterpriseSecurityIcon} alt="Enterprise Security" className="w-full h-full object-contain" />
+                  <img src={enterpriseSecurityIcon} alt="Enterprise Security" loading="lazy" className="w-full h-full object-contain" />
                 </div>
                 <CardTitle className="text-xl sm:text-2xl">{t("landing.features.enterpriseSecurity.title")}</CardTitle>
               </CardHeader>
@@ -306,7 +306,7 @@ const Landing = () => {
             </div>
             <div>
               <div className="w-full h-64 flex items-center justify-center rounded-lg">
-                <img src={anonymousReportingArtwork} alt="Anonymous Reporting Made Simple" className="w-full h-full object-contain" />
+                <img src={anonymousReportingArtwork} alt="Anonymous Reporting Made Simple" loading="lazy" className="w-full h-full object-contain" />
               </div>
             </div>
           </div>
@@ -319,7 +319,7 @@ const Landing = () => {
           <div className="grid lg:grid-cols-2 gap-12 items-center">
             <div className="order-2 lg:order-1">
               <div className="w-full h-64 flex items-center justify-center rounded-lg">
-                <img src={militaryGradeEncryptionArtwork} alt="Military-Grade Encryption" className="w-full h-full object-contain" />
+                <img src={militaryGradeEncryptionArtwork} alt="Military-Grade Encryption" loading="lazy" className="w-full h-full object-contain" />
               </div>
             </div>
             <div className="order-1 lg:order-2">
@@ -368,7 +368,7 @@ const Landing = () => {
             </div>
             <div>
               <div className="w-full h-64 flex items-center justify-center rounded-lg">
-                <img src={complianceMadeEasyArtwork} alt="Compliance Made Easy" className="w-full h-full object-contain" />
+                <img src={complianceMadeEasyArtwork} alt="Compliance Made Easy" loading="lazy" className="w-full h-full object-contain" />
               </div>
             </div>
           </div>
@@ -381,7 +381,7 @@ const Landing = () => {
           <div className="grid lg:grid-cols-2 gap-12 items-center">
             <div className="order-2 lg:order-1">
               <div className="w-full h-64 flex items-center justify-center rounded-lg">
-                <img src={secureTwoWayCommArtwork} alt="Secure Two-Way Communication" className="w-full h-full object-contain" />
+                <img src={secureTwoWayCommArtwork} alt="Secure Two-Way Communication" loading="lazy" className="w-full h-full object-contain" />
               </div>
             </div>
             <div className="order-1 lg:order-2">
@@ -430,7 +430,7 @@ const Landing = () => {
             </div>
             <div>
               <div className="w-full h-64 flex items-center justify-center rounded-lg">
-                <img src={aiPoweredCaseAnalysisArtwork} alt="AI-Powered Case Analysis" className="w-full h-full object-contain" />
+                <img src={aiPoweredCaseAnalysisArtwork} alt="AI-Powered Case Analysis" loading="lazy" className="w-full h-full object-contain" />
               </div>
             </div>
           </div>
@@ -443,7 +443,7 @@ const Landing = () => {
           <div className="grid lg:grid-cols-2 gap-12 items-center">
             <div className="order-2 lg:order-1">
               <div className="w-full h-80 flex items-center justify-center rounded-lg">
-                <img src="/custom_branding.jpeg" alt="Custom Branding" className="w-full h-full object-contain" />
+                <img src="/custom_branding.jpeg" alt="Custom Branding" loading="lazy" className="w-full h-full object-contain" />
               </div>
             </div>
             <div className="order-1 lg:order-2">
@@ -692,7 +692,7 @@ const Landing = () => {
           <div className="flex flex-col sm:flex-row items-center justify-center gap-8 sm:gap-12">
             <div className="text-center">
               <div className="bg-white border border-gray-200 rounded-2xl p-6 shadow-sm hover:shadow-lg transition-shadow">
-                <img src="/lovable-uploads/9762866a-d8d9-4860-bf30-3ffd178885a8.png" alt="ISO 27001 Certification" className="h-16 w-16 mx-auto mb-3" />
+                <img src="/lovable-uploads/9762866a-d8d9-4860-bf30-3ffd178885a8.png" alt="ISO 27001 Certification" loading="lazy" className="h-16 w-16 mx-auto mb-3" />
                 <h3 className="font-semibold text-gray-900 mb-1">ISO 27001</h3>
                 <p className="text-sm text-gray-600">Information Security Management</p>
               </div>
@@ -700,7 +700,7 @@ const Landing = () => {
 
             <div className="text-center">
               <div className="bg-white border border-gray-200 rounded-2xl p-6 shadow-sm hover:shadow-lg transition-shadow">
-                <img src="/lovable-uploads/70aa6ac0-c161-4167-921d-79f08f6f4b02.png" alt="GDPR Compliant" className="h-16 w-16 mx-auto mb-3" />
+                <img src="/lovable-uploads/70aa6ac0-c161-4167-921d-79f08f6f4b02.png" alt="GDPR Compliant" loading="lazy" className="h-16 w-16 mx-auto mb-3" />
                 <h3 className="font-semibold text-gray-900 mb-1">GDPR</h3>
                 <p className="text-sm text-gray-600">Data Protection Compliance</p>
               </div>
@@ -708,7 +708,7 @@ const Landing = () => {
 
             <div className="text-center">
               <div className="bg-white border border-gray-200 rounded-2xl p-6 shadow-sm hover:shadow-lg transition-shadow">
-                <img src="/lovable-uploads/a9716d48-ff27-4193-b51c-9b035d1692b0.png" alt="AICPA SOC" className="h-16 w-16 mx-auto mb-3" />
+                <img src="/lovable-uploads/a9716d48-ff27-4193-b51c-9b035d1692b0.png" alt="AICPA SOC" loading="lazy" className="h-16 w-16 mx-auto mb-3" />
                 <h3 className="font-semibold text-gray-900 mb-1">AICPA SOC</h3>
                 <p className="text-sm text-gray-600">Service Organization Controls</p>
               </div>
