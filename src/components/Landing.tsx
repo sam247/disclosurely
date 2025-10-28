@@ -443,7 +443,7 @@ const Landing = () => {
           <div className="grid lg:grid-cols-2 gap-12 items-center">
             <div className="order-2 lg:order-1">
               <div className="w-full h-80 flex items-center justify-center rounded-lg">
-                <img src="/custom_branding.jpeg" alt="Custom Branding" className="w-full h-full object-contain rounded-lg shadow-lg" />
+                <img src=/custom_branding.jpeg alt="Custom Branding" className="w-full h-full object-contain" />
               </div>
             </div>
             <div className="order-1 lg:order-2">
