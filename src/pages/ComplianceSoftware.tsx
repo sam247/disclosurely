@@ -42,7 +42,7 @@ const ComplianceSoftware = () => {
       {/* Hero Section */}
         <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-20 pb-16">
         <div className="text-center">
-            <span className="inline-block px-4 py-2 bg-blue-100 text-blue-800 rounded-full text-sm font-medium mb-6">
+            <span className="inline-block px-4 py-2 bg-blue-600 rounded-full text-sm font-medium mb-6 text-white">
               Trusted by hundreds of UK organisations
             </span>
             <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-gray-900 mb-6">
