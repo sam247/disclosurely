@@ -141,7 +141,7 @@ const ComplianceSoftware = () => {
         {/* Section 2: Why Whistleblowing Matters */}
         <section className="bg-white py-16">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="grid lg:grid-cols-2 gap-12 items-center">
+            <div className="grid lg:grid-cols-2 gap-12 items-start max-w-6xl mx-auto">
               <div>
                 <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-6">Why Whistleblowing and Anonymous Reporting Matter</h2>
                 <div className="space-y-4 text-lg text-gray-600">
@@ -487,7 +487,7 @@ const ComplianceSoftware = () => {
         {/* Section 6: Implementation */}
         <section className="bg-white py-16">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="grid lg:grid-cols-2 gap-12 items-center">
+            <div className="grid lg:grid-cols-2 gap-12 items-start max-w-6xl mx-auto">
               <div>
                 <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-6">Implementing Your Compliance Software Successfully</h2>
                 
