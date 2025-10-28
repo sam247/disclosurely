@@ -478,13 +478,7 @@ const Landing = () => {
       </div>
 
       {/* View Full Features Button */}
-      <div className="bg-white py-8">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <Button asChild size="lg" variant="outline" className="text-lg">
-            <Link to="/features">View Full Features</Link>
-          </Button>
-        </div>
-      </div>
+      
 
       {/* Pricing Section */}
       <div className="bg-white py-16 sm:py-20">
