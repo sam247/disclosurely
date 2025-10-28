@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Link } from "react-router-dom";
 import { Footer } from "@/components/ui/footer";
-import { DynamicHelmet } from "@/components/DynamicHelmet";
+import DynamicHelmet from "@/components/DynamicHelmet";
 import PublicLanguageSelector from "@/components/PublicLanguageSelector";
 import { AnnouncementBar } from "@/components/AnnouncementBar";
 
