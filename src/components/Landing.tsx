@@ -464,14 +464,7 @@ const Landing = () => {
                   <span>White-label options for complete brand control</span>
                 </li>
               </ul>
-              <div className="flex flex-col sm:flex-row gap-4">
-                <Button asChild className="bg-blue-600 hover:bg-blue-700">
-                  <a href="https://app.disclosurely.com/auth/signup">Start Free Trial</a>
-                </Button>
-                <Button asChild variant="outline">
-                  <Link to="/pricing">View Pricing</Link>
-                </Button>
-              </div>
+              
             </div>
           </div>
         </div>
