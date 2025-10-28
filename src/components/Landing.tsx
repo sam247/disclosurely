@@ -144,7 +144,7 @@ const Landing = () => {
 
             {/* Logo Carousel */}
             <div className="relative overflow-hidden">
-              <div className="flex animate-scroll items-center">
+              <div className="flex animate-scroll-infinite items-center">
                 {/* First set of logos */}
                 <div className="flex items-center min-w-fit">
                   {businessLogos.map((logo, index) => (
@@ -497,6 +497,57 @@ const Landing = () => {
                   src={aiPoweredCaseAnalysisArtwork}
                   alt="AI-Powered Case Analysis"
                   className="w-full h-full object-contain"
+                />
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Custom Branding Section */}
+      <div className="bg-gray-50 py-16 sm:py-20">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="grid lg:grid-cols-2 gap-12 items-center">
+            <div>
+              <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-6">Custom Branding</h2>
+              <p className="text-lg text-gray-600 mb-6">
+                Create a fully branded whistleblowing experience that matches your organization's identity. 
+                With custom domain support, logo integration, and branded submission portals, your reporting 
+                system looks and feels like a native part of your infrastructure.
+              </p>
+              <ul className="space-y-3 mb-6">
+                <li className="flex items-center">
+                  <CheckCircle className="h-5 w-5 text-blue-600 mr-3" />
+                  <span>Custom CNAME support for branded secure links (e.g., secure.yourcompany.com)</span>
+                </li>
+                <li className="flex items-center">
+                  <CheckCircle className="h-5 w-5 text-blue-600 mr-3" />
+                  <span>Your logo and branding on all submission portals</span>
+                </li>
+                <li className="flex items-center">
+                  <CheckCircle className="h-5 w-5 text-blue-600 mr-3" />
+                  <span>Customizable email templates and notifications</span>
+                </li>
+                <li className="flex items-center">
+                  <CheckCircle className="h-5 w-5 text-blue-600 mr-3" />
+                  <span>White-label options for complete brand control</span>
+                </li>
+              </ul>
+              <div className="flex gap-4">
+                <Button asChild className="bg-blue-600 hover:bg-blue-700">
+                  <a href="https://app.disclosurely.com/auth/signup">Start Free Trial</a>
+                </Button>
+                <Button asChild variant="outline">
+                  <Link to="/pricing">View Pricing</Link>
+                </Button>
+              </div>
+            </div>
+            <div>
+              <div className="w-full h-64 flex items-center justify-center rounded-lg bg-white shadow-lg">
+                <img
+                  src="/lovable-uploads/c46ace0e-df58-4119-b5e3-8dcfa075ea2f.png"
+                  alt="Custom Branding"
+                  className="w-64 h-64 object-contain"
                 />
               </div>
             </div>
