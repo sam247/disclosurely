@@ -241,6 +241,25 @@ const DynamicHelmet: React.FC<DynamicHelmetProps> = ({
       )}
       <meta name="robots" content={finalRobots} />
       <link rel="canonical" href={finalCanonicalUrl} />
+      
+      {/* Hreflang Tags for All Language Versions */}
+      {typeof window !== 'undefined' && (
+        <>
+          <link rel="alternate" hreflang="x-default" href="https://disclosurely.com/" />
+          <link rel="alternate" hreflang="en" href="https://disclosurely.com/" />
+          <link rel="alternate" hreflang="es" href="https://disclosurely.com/es/" />
+          <link rel="alternate" hreflang="fr" href="https://disclosurely.com/fr/" />
+          <link rel="alternate" hreflang="de" href="https://disclosurely.com/de/" />
+          <link rel="alternate" hreflang="pl" href="https://disclosurely.com/pl/" />
+          <link rel="alternate" hreflang="sv" href="https://disclosurely.com/sv/" />
+          <link rel="alternate" hreflang="no" href="https://disclosurely.com/no/" />
+          <link rel="alternate" hreflang="pt" href="https://disclosurely.com/pt/" />
+          <link rel="alternate" hreflang="it" href="https://disclosurely.com/it/" />
+          <link rel="alternate" hreflang="nl" href="https://disclosurely.com/nl/" />
+          <link rel="alternate" hreflang="da" href="https://disclosurely.com/da/" />
+          <link rel="alternate" hreflang="el" href="https://disclosurely.com/el/" />
+        </>
+      )}
 
       {/* Open Graph Tags */}
       <meta property="og:title" content={seoData?.og_title || finalTitle} />
