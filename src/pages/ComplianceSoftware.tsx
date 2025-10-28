@@ -15,65 +15,65 @@ const ComplianceSoftware = () => {
         fallbackTitle="Compliance Software for Whistleblowing & Anonymous Reporting | Disclosurely"
         fallbackDescription="Simplify whistleblowing compliance with secure anonymous reporting software. GDPR compliant, EU Directive ready, ISO 27001 certified. Start free trial today."
       />
-      <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-white">
         {/* Navigation */}
-        <nav className="bg-white shadow-sm sticky top-0 z-50">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="flex justify-between items-center py-4">
-              <div className="flex items-center">
-                <Link to="/" className="flex items-center space-x-3">
-                  <img
-                    src="/lovable-uploads/c46ace0e-df58-4119-b5e3-8dcfa075ea2f.png"
-                    alt="Disclosurely"
-                    className="h-6 md:h-8 w-auto"
-                  />
-                </Link>
-              </div>
-              <div className="hidden md:flex items-center space-x-4">
-                <PublicLanguageSelector />
-                <Link to="/pricing" className="text-gray-600 hover:text-gray-900">
-                  Pricing
-                </Link>
-                <a
-                  href="https://app.disclosurely.com/auth/signup"
-                  className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors"
-                >
-                  Get Started
-                </a>
-              </div>
-              <div className="md:hidden">
-                <a
-                  href="https://app.disclosurely.com/auth/login"
-                  className="bg-blue-600 text-white px-3 py-2 rounded-lg hover:bg-blue-700 transition-colors text-sm"
-                >
-                  Sign In
-                </a>
-              </div>
+      <nav className="bg-white shadow-sm sticky top-0 z-50">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex justify-between items-center py-4">
+            <div className="flex items-center">
+              <Link to="/" className="flex items-center space-x-3">
+                <img
+                  src="/lovable-uploads/c46ace0e-df58-4119-b5e3-8dcfa075ea2f.png"
+                  alt="Disclosurely"
+                  className="h-6 md:h-8 w-auto"
+                />
+              </Link>
+            </div>
+            <div className="hidden md:flex items-center space-x-4">
+              <PublicLanguageSelector />
+              <Link to="/pricing" className="text-gray-600 hover:text-gray-900">
+                Pricing
+              </Link>
+              <a
+                href="https://app.disclosurely.com/auth/signup"
+                className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors"
+              >
+                Get Started
+              </a>
+            </div>
+            <div className="md:hidden">
+              <a
+                href="https://app.disclosurely.com/auth/login"
+                className="bg-blue-600 text-white px-3 py-2 rounded-lg hover:bg-blue-700 transition-colors text-sm"
+              >
+                Sign In
+              </a>
             </div>
           </div>
-        </nav>
+        </div>
+      </nav>
 
         <AnnouncementBar />
 
-        {/* Hero Section */}
+      {/* Hero Section */}
         <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-20 pb-16">
-          <div className="text-center">
+        <div className="text-center">
             <span className="inline-block px-4 py-2 bg-blue-100 text-blue-800 rounded-full text-sm font-medium mb-6">
               Trusted by hundreds of UK organisations
             </span>
             <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-gray-900 mb-6">
               Compliance Software That Makes Whistleblowing Simple and Secure
-            </h1>
-            <p className="text-xl text-gray-600 mb-8 max-w-3xl mx-auto">
+          </h1>
+            <p className="text-xl text-gray-600 mb-8 max-w-4xl mx-auto">
               Streamline regulatory obligations, protect whistleblowers, and build an ethical workplace culture with Disclosurely's anonymous reporting platform
-            </p>
+          </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center mb-8">
-              <a
-                href="https://app.disclosurely.com/auth/signup"
+            <a
+              href="https://app.disclosurely.com/auth/signup"
                 className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-4 rounded-lg text-lg font-semibold inline-flex items-center justify-center"
-              >
-                Start Free Trial
-              </a>
+            >
+              Start Free Trial
+            </a>
               <a
                 href="#how-it-works"
                 className="border border-gray-300 hover:border-gray-400 text-gray-700 px-8 py-4 rounded-lg text-lg font-semibold inline-flex items-center justify-center"
@@ -93,17 +93,17 @@ const ComplianceSoftware = () => {
               <div className="flex items-center gap-2">
                 <BadgeCheck className="h-5 w-5 text-blue-600" />
                 <span>End-to-End Encrypted</span>
-              </div>
-            </div>
           </div>
+        </div>
+      </div>
         </section>
 
         {/* Section 1: What Is Compliance Software? */}
         <section className="bg-gray-50 py-16">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="text-center mb-12">
               <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-6">What Is Compliance Software?</h2>
-              <div className="max-w-3xl mx-auto text-lg text-gray-600 space-y-4">
+              <div className="max-w-6xl mx-auto text-lg text-gray-600 space-y-4">
                 <p>
                   Compliance software is a digital platform that centralises whistleblowing, anonymous reporting, and regulatory management into a single, secure system. Instead of relying on fragmented email threads, anonymous hotlines, or manual documentation, organisations use compliance software to create professional, confidential reporting channels that protect both employees and the business.
                 </p>
@@ -130,7 +130,7 @@ const ComplianceSoftware = () => {
               <div className="text-center">
                 <div className="w-16 h-16 bg-blue-600 rounded-full flex items-center justify-center mx-auto mb-4">
                   <BadgeCheck className="h-8 w-8 text-white" />
-                </div>
+            </div>
                 <h3 className="text-lg font-semibold text-gray-900 mb-2">Regulatory Compliance</h3>
                 <p className="text-gray-600">Built-in compliance with EU, UK, and GDPR requirements</p>
               </div>
@@ -187,7 +187,7 @@ const ComplianceSoftware = () => {
                       <p className="text-gray-600 text-sm">Prevents reporting without protection</p>
                     </div>
                   </div>
-                </div>
+            </div>
               </div>
             </div>
           </div>
@@ -198,7 +198,7 @@ const ComplianceSoftware = () => {
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="text-center mb-12">
               <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-6">Meeting Your Regulatory Obligations</h2>
-              <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+              <p className="text-xl text-gray-600 max-w-4xl mx-auto">
                 Disclosurely ensures your organisation meets complex regulatory requirements across jurisdictions
               </p>
             </div>
@@ -238,7 +238,7 @@ const ComplianceSoftware = () => {
                 <CardHeader>
                   <div className="w-12 h-12 bg-blue-600 rounded-full flex items-center justify-center mb-4">
                     <Lock className="h-6 w-6 text-white" />
-                  </div>
+              </div>
                   <CardTitle className="text-2xl mb-4">GDPR and Data Protection</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-3">
@@ -254,13 +254,13 @@ const ComplianceSoftware = () => {
 
         {/* Section 4: Essential Features */}
         <section className="bg-white py-16">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="text-center mb-12">
               <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-6">Essential Features of Effective Compliance Software</h2>
-              <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+              <p className="text-xl text-gray-600 max-w-4xl mx-auto">
                 Disclosurely provides everything you need for secure, compliant whistleblowing
-              </p>
-            </div>
+            </p>
+          </div>
 
             <div className="grid md:grid-cols-2 gap-8 mb-8">
               <Card>
@@ -319,7 +319,7 @@ const ComplianceSoftware = () => {
                 <CardHeader>
                   <div className="w-12 h-12 bg-blue-600 rounded-full flex items-center justify-center mb-4">
                     <FileText className="h-6 w-6 text-white" />
-                  </div>
+                </div>
                   <CardTitle className="text-xl">Comprehensive Case Management</CardTitle>
                 </CardHeader>
                 <CardContent>
@@ -338,14 +338,14 @@ const ComplianceSoftware = () => {
                       <span>Evidence storage with complete audit trails</span>
                     </li>
                   </ul>
-                </CardContent>
-              </Card>
+              </CardContent>
+            </Card>
 
               <Card>
                 <CardHeader>
                   <div className="w-12 h-12 bg-blue-600 rounded-full flex items-center justify-center mb-4">
                     <Globe className="h-6 w-6 text-white" />
-                  </div>
+                </div>
                   <CardTitle className="text-xl">Multi-Language Support</CardTitle>
                 </CardHeader>
                 <CardContent>
@@ -364,14 +364,14 @@ const ComplianceSoftware = () => {
                       <span>Critical for multinational operations</span>
                     </li>
                   </ul>
-                </CardContent>
-              </Card>
+              </CardContent>
+            </Card>
 
               <Card>
                 <CardHeader>
                   <div className="w-12 h-12 bg-blue-600 rounded-full flex items-center justify-center mb-4">
                     <BarChart3 className="h-6 w-6 text-white" />
-                  </div>
+                </div>
                   <CardTitle className="text-xl">Real-Time Analytics and Dashboards</CardTitle>
                 </CardHeader>
                 <CardContent>
@@ -390,14 +390,14 @@ const ComplianceSoftware = () => {
                       <span>ROI tracking and compliance metrics</span>
                     </li>
                   </ul>
-                </CardContent>
-              </Card>
+              </CardContent>
+            </Card>
 
               <Card>
                 <CardHeader>
                   <div className="w-12 h-12 bg-blue-600 rounded-full flex items-center justify-center mb-4">
                     <Lock className="h-6 w-6 text-white" />
-                  </div>
+                </div>
                   <CardTitle className="text-xl">GDPR-Compliant Data Protection</CardTitle>
                 </CardHeader>
                 <CardContent>
@@ -416,21 +416,21 @@ const ComplianceSoftware = () => {
                       <span>Full audit trail for regulatory compliance</span>
                     </li>
                   </ul>
-                </CardContent>
-              </Card>
-            </div>
+              </CardContent>
+            </Card>
+          </div>
 
             <div className="text-center mt-8">
               <Button asChild size="lg" className="text-lg">
                 <a href="https://app.disclosurely.com/auth/signup">See Disclosurely in Action</a>
               </Button>
-            </div>
-          </div>
+        </div>
+      </div>
         </section>
 
         {/* Section 5: Business Benefits */}
         <section className="bg-gray-50 py-16">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="text-center mb-12">
               <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-6">The Business Impact of Compliance Software</h2>
             </div>
@@ -497,23 +497,23 @@ const ComplianceSoftware = () => {
                     <p className="text-gray-600">
                       Evaluate security certifications, user experience, customisation capabilities, and vendor support. Ensure scalability for growing organisations and verify compliance with your specific regulatory requirements.
                     </p>
-                  </div>
+                </div>
 
                   <div>
                     <h3 className="text-xl font-semibold text-gray-900 mb-3">Promoting Your Reporting System</h3>
                     <p className="text-gray-600">
                       Regular communications, training sessions, and leadership messaging demonstrate organisational commitment. Visible placement of reporting information across workplaces addresses scepticism—42% believe no action will be taken, so prove otherwise through transparency.
                     </p>
-                  </div>
+                </div>
 
                   <div>
                     <h3 className="text-xl font-semibold text-gray-900 mb-3">Establishing Clear Policies</h3>
                     <p className="text-gray-600">
                       Define what can be reported, how reports are handled, and protection measures. Document investigation procedures and timelines. Make policies easily accessible in plain language to encourage reporting.
                     </p>
-                  </div>
                 </div>
               </div>
+            </div>
 
               <div className="bg-blue-50 p-8 rounded-lg">
                 <h3 className="text-xl font-bold text-gray-900 mb-6">Implementation Checklist</h3>
@@ -525,7 +525,7 @@ const ComplianceSoftware = () => {
                   <div className="flex items-center gap-3">
                     <CheckCircle className="h-5 w-5 text-blue-600 flex-shrink-0" />
                     <span className="text-gray-700">Configure automated workflows</span>
-                  </div>
+                </div>
                   <div className="flex items-center gap-3">
                     <CheckCircle className="h-5 w-5 text-blue-600 flex-shrink-0" />
                     <span className="text-gray-700">Train investigation teams</span>
@@ -533,7 +533,7 @@ const ComplianceSoftware = () => {
                   <div className="flex items-center gap-3">
                     <CheckCircle className="h-5 w-5 text-blue-600 flex-shrink-0" />
                     <span className="text-gray-700">Launch communication campaign</span>
-                  </div>
+                </div>
                   <div className="flex items-center gap-3">
                     <CheckCircle className="h-5 w-5 text-blue-600 flex-shrink-0" />
                     <span className="text-gray-700">Monitor and refine processes</span>
@@ -547,7 +547,7 @@ const ComplianceSoftware = () => {
         {/* Section 7: Why Choose Disclosurely */}
         <section className="bg-gray-50 py-16">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="max-w-3xl mx-auto text-center">
+            <div className="max-w-4xl mx-auto text-center">
               <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-6">Why Organisations Choose Disclosurely</h2>
               <div className="text-lg text-gray-600 space-y-4">
                 <p>
@@ -556,8 +556,8 @@ const ComplianceSoftware = () => {
                 <p>
                   Unlike generic ticketing systems or complex GRC platforms, Disclosurely is designed specifically for whistleblowing. This means faster setup, lower costs, and superior protection of whistleblower anonymity. Plus, our <strong className="text-gray-900">white-glove customer support</strong> ensures compliance teams have dedicated experts helping them succeed, not just documentation.
                 </p>
-              </div>
-            </div>
+        </div>
+      </div>
 
             <div className="grid md:grid-cols-3 gap-8 mt-12">
               <div className="text-center">
@@ -579,7 +579,7 @@ const ComplianceSoftware = () => {
         {/* Section 8: Future of Compliance */}
         <section className="bg-white py-16">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="max-w-3xl mx-auto">
+            <div className="max-w-4xl mx-auto">
               <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-6 text-center">The Future of Compliance Software</h2>
               <div className="text-lg text-gray-600 space-y-4">
                 <p>
@@ -589,31 +589,28 @@ const ComplianceSoftware = () => {
                   However, <strong className="text-gray-900">human judgment remains essential</strong> for sensitive whistleblowing matters. Disclosurely balances AI-powered efficiency with human decision-making, ensuring technology enhances rather than replaces the empathy and discernment required when employees trust us with their concerns. We're continuously improving our platform while keeping whistleblower protection at the centre of everything we build.
                 </p>
               </div>
-            </div>
-          </div>
+        </div>
+      </div>
         </section>
 
         {/* Final CTA Section */}
-        <section className="bg-blue-600 py-16">
+        <section className="bg-blue-600 py-12 sm:py-16">
           <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-            <h2 className="text-3xl sm:text-4xl font-bold text-white mb-6">Ready to Transform Your Compliance Programme?</h2>
-            <p className="text-xl text-blue-100 mb-8">
-              Non-compliance risks fines, legal action, and reputational damage. Disclosurely helps organisations build ethical cultures while meeting regulatory obligations. Get started today with a free trial—no credit card required, setup in minutes, cancel anytime.
+            <h2 className="text-2xl sm:text-3xl font-bold text-white mb-4">Ready to Transform Your Compliance Programme?</h2>
+            <p className="text-lg sm:text-xl text-blue-100 mb-6 sm:mb-8 px-4">
+              Join hundreds of organizations who trust Disclosurely for secure whistleblowing and compliance management.
             </p>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center mb-6">
-              <Button asChild size="lg" className="bg-white text-blue-600 hover:bg-gray-100 text-lg">
-                <a href="https://app.disclosurely.com/auth/signup">Start Your Free Trial</a>
-              </Button>
-              <Button asChild size="lg" variant="outline" className="text-white border-white hover:bg-blue-700 text-lg">
-                <a href="#how-it-works">See How It Works</a>
-              </Button>
-            </div>
-            <p className="text-sm text-blue-200">✓ No credit card required • ✓ Setup in minutes • ✓ Cancel anytime</p>
+            <a
+              href="https://app.disclosurely.com/auth/signup"
+              className="bg-white hover:bg-gray-100 text-blue-600 px-6 sm:px-8 py-3 rounded-lg text-lg font-semibold inline-block"
+            >
+              Start Free Trial
+            </a>
           </div>
         </section>
 
-        <Footer />
-      </div>
+      <Footer />
+    </div>
     </>
   );
 };
