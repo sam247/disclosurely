@@ -10,6 +10,8 @@ const ComplianceSoftware = () => {
   return <>
       <DynamicHelmet pageIdentifier="/compliance-software" fallbackTitle="Compliance Software for Whistleblowing & Anonymous Reporting | Disclosurely" fallbackDescription="Simplify whistleblowing compliance with secure anonymous reporting software. GDPR compliant, EU Directive ready, ISO 27001 certified. Start free trial today." />
     <div className="min-h-screen bg-white">
+      <AnnouncementBar />
+
         {/* Navigation */}
       <nav className="bg-white shadow-sm sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -28,16 +30,15 @@ const ComplianceSoftware = () => {
                 Get Started
               </a>
             </div>
-            <div className="md:hidden">
-              <a href="https://app.disclosurely.com/auth/login" className="bg-blue-600 text-white px-3 py-2 rounded-lg hover:bg-blue-700 transition-colors text-sm">
+            <div className="md:hidden flex items-center gap-1.5">
+              <PublicLanguageSelector />
+              <a href="https://app.disclosurely.com/auth/login" className="bg-blue-600 text-white px-2.5 py-1.5 rounded-lg hover:bg-blue-700 transition-colors text-xs whitespace-nowrap">
                 Sign In
               </a>
             </div>
           </div>
         </div>
       </nav>
-
-        <AnnouncementBar />
 
       {/* Hero Section */}
         <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-20 pb-16">
