@@ -6,15 +6,9 @@ import { Footer } from "@/components/ui/footer";
 import DynamicHelmet from "@/components/DynamicHelmet";
 import PublicLanguageSelector from "@/components/PublicLanguageSelector";
 import { AnnouncementBar } from "@/components/AnnouncementBar";
-
 const ComplianceSoftware = () => {
-  return (
-    <>
-      <DynamicHelmet
-        pageIdentifier="/compliance-software"
-        fallbackTitle="Compliance Software for Whistleblowing & Anonymous Reporting | Disclosurely"
-        fallbackDescription="Simplify whistleblowing compliance with secure anonymous reporting software. GDPR compliant, EU Directive ready, ISO 27001 certified. Start free trial today."
-      />
+  return <>
+      <DynamicHelmet pageIdentifier="/compliance-software" fallbackTitle="Compliance Software for Whistleblowing & Anonymous Reporting | Disclosurely" fallbackDescription="Simplify whistleblowing compliance with secure anonymous reporting software. GDPR compliant, EU Directive ready, ISO 27001 certified. Start free trial today." />
     <div className="min-h-screen bg-white">
         {/* Navigation */}
       <nav className="bg-white shadow-sm sticky top-0 z-50">
@@ -22,11 +16,7 @@ const ComplianceSoftware = () => {
           <div className="flex justify-between items-center py-4">
             <div className="flex items-center">
               <Link to="/" className="flex items-center space-x-3">
-                <img
-                  src="/lovable-uploads/c46ace0e-df58-4119-b5e3-8dcfa075ea2f.png"
-                  alt="Disclosurely"
-                  className="h-6 md:h-8 w-auto"
-                />
+                <img src="/lovable-uploads/c46ace0e-df58-4119-b5e3-8dcfa075ea2f.png" alt="Disclosurely" className="h-6 md:h-8 w-auto" />
               </Link>
             </div>
             <div className="hidden md:flex items-center space-x-4">
@@ -34,18 +24,12 @@ const ComplianceSoftware = () => {
               <Link to="/pricing" className="text-gray-600 hover:text-gray-900">
                 Pricing
               </Link>
-              <a
-                href="https://app.disclosurely.com/auth/signup"
-                className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors"
-              >
+              <a href="https://app.disclosurely.com/auth/signup" className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors">
                 Get Started
               </a>
             </div>
             <div className="md:hidden">
-              <a
-                href="https://app.disclosurely.com/auth/login"
-                className="bg-blue-600 text-white px-3 py-2 rounded-lg hover:bg-blue-700 transition-colors text-sm"
-              >
+              <a href="https://app.disclosurely.com/auth/login" className="bg-blue-600 text-white px-3 py-2 rounded-lg hover:bg-blue-700 transition-colors text-sm">
                 Sign In
               </a>
             </div>
@@ -68,16 +52,10 @@ const ComplianceSoftware = () => {
               Streamline regulatory obligations, protect whistleblowers, and build an ethical workplace culture with Disclosurely's anonymous reporting platform
           </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center mb-8">
-            <a
-              href="https://app.disclosurely.com/auth/signup"
-                className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-4 rounded-lg text-lg font-semibold inline-flex items-center justify-center"
-            >
+            <a href="https://app.disclosurely.com/auth/signup" className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-4 rounded-lg text-lg font-semibold inline-flex items-center justify-center">
               Start Free Trial
             </a>
-              <a
-                href="#how-it-works"
-                className="border border-gray-300 hover:border-gray-400 text-gray-700 px-8 py-4 rounded-lg text-lg font-semibold inline-flex items-center justify-center"
-              >
+              <a href="#how-it-works" className="border border-gray-300 hover:border-gray-400 text-gray-700 px-8 py-4 rounded-lg text-lg font-semibold inline-flex items-center justify-center">
                 See How It Works
               </a>
             </div>
@@ -582,10 +560,10 @@ const ComplianceSoftware = () => {
             <div className="max-w-4xl mx-auto">
               <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-6 text-center">The Future of Compliance Software</h2>
               <div className="text-lg text-gray-600 space-y-4">
-                <p>
+                <p className="text-center">
                   The future of compliance software lies in intelligent automation. AI and machine learning already support report triage, risk scoring, and predictive analytics—helping compliance teams prioritise urgent matters while maintaining oversight of all concerns. These technologies work behind the scenes to surface patterns and anomalies humans might miss.
                 </p>
-                <p>
+                <p className="text-center">
                   However, <strong className="text-gray-900">human judgment remains essential</strong> for sensitive whistleblowing matters. Disclosurely balances AI-powered efficiency with human decision-making, ensuring technology enhances rather than replaces the empathy and discernment required when employees trust us with their concerns. We're continuously improving our platform while keeping whistleblower protection at the centre of everything we build.
                 </p>
               </div>
@@ -600,10 +578,7 @@ const ComplianceSoftware = () => {
             <p className="text-lg sm:text-xl text-blue-100 mb-6 sm:mb-8 px-4">
               Join hundreds of organizations who trust Disclosurely for secure whistleblowing and compliance management.
             </p>
-            <a
-              href="https://app.disclosurely.com/auth/signup"
-              className="bg-white hover:bg-gray-100 text-blue-600 px-6 sm:px-8 py-3 rounded-lg text-lg font-semibold inline-block"
-            >
+            <a href="https://app.disclosurely.com/auth/signup" className="bg-white hover:bg-gray-100 text-blue-600 px-6 sm:px-8 py-3 rounded-lg text-lg font-semibold inline-block">
               Start Free Trial
             </a>
           </div>
@@ -611,8 +586,6 @@ const ComplianceSoftware = () => {
 
       <Footer />
     </div>
-    </>
-  );
+    </>;
 };
-
 export default ComplianceSoftware;
