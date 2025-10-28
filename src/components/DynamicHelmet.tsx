@@ -245,19 +245,19 @@ const DynamicHelmet: React.FC<DynamicHelmetProps> = ({
       {/* Hreflang Tags for All Language Versions */}
       {typeof window !== 'undefined' && (
         <>
-          <link rel="alternate" hreflang="x-default" href="https://disclosurely.com/" />
-          <link rel="alternate" hreflang="en" href="https://disclosurely.com/" />
-          <link rel="alternate" hreflang="es" href="https://disclosurely.com/es/" />
-          <link rel="alternate" hreflang="fr" href="https://disclosurely.com/fr/" />
-          <link rel="alternate" hreflang="de" href="https://disclosurely.com/de/" />
-          <link rel="alternate" hreflang="pl" href="https://disclosurely.com/pl/" />
-          <link rel="alternate" hreflang="sv" href="https://disclosurely.com/sv/" />
-          <link rel="alternate" hreflang="no" href="https://disclosurely.com/no/" />
-          <link rel="alternate" hreflang="pt" href="https://disclosurely.com/pt/" />
-          <link rel="alternate" hreflang="it" href="https://disclosurely.com/it/" />
-          <link rel="alternate" hreflang="nl" href="https://disclosurely.com/nl/" />
-          <link rel="alternate" hreflang="da" href="https://disclosurely.com/da/" />
-          <link rel="alternate" hreflang="el" href="https://disclosurely.com/el/" />
+          <link rel="alternate" hrefLang="x-default" href="https://disclosurely.com/" />
+          <link rel="alternate" hrefLang="en" href="https://disclosurely.com/" />
+          <link rel="alternate" hrefLang="es" href="https://disclosurely.com/es/" />
+          <link rel="alternate" hrefLang="fr" href="https://disclosurely.com/fr/" />
+          <link rel="alternate" hrefLang="de" href="https://disclosurely.com/de/" />
+          <link rel="alternate" hrefLang="pl" href="https://disclosurely.com/pl/" />
+          <link rel="alternate" hrefLang="sv" href="https://disclosurely.com/sv/" />
+          <link rel="alternate" hrefLang="no" href="https://disclosurely.com/no/" />
+          <link rel="alternate" hrefLang="pt" href="https://disclosurely.com/pt/" />
+          <link rel="alternate" hrefLang="it" href="https://disclosurely.com/it/" />
+          <link rel="alternate" hrefLang="nl" href="https://disclosurely.com/nl/" />
+          <link rel="alternate" hrefLang="da" href="https://disclosurely.com/da/" />
+          <link rel="alternate" hrefLang="el" href="https://disclosurely.com/el/" />
         </>
       )}
 
