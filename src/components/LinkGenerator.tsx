@@ -317,140 +317,69 @@ const LinkGenerator = () => {
             </Badge>
           </div>
         </CardHeader>
-        <CardContent className="space-y-4">
-          {/* Unbranded Link - Always show */}
-          <div className="flex items-center justify-between p-4 bg-muted/50 rounded-lg border">
-            <div className="flex-1 min-w-0">
-              <p className="text-sm font-medium mb-1">{t('unbrandedSubmissionPortal')}</p>
-              <p className="text-xs text-muted-foreground">
-                {t('usedTimes', { count: primaryLink.usage_count || 0 })}
-              </p>
-              <div className="mt-2">
-                <p className="text-xs text-muted-foreground mb-1">Your secure link URL:</p>
-                <code className="text-xs bg-background px-2 py-1 rounded border font-mono break-all">
+        <CardContent className="space-y-3">
+          {/* Default Link - Always show first */}
+          <div className="p-4 bg-muted/30 rounded-lg border">
+            <div className="flex items-start justify-between gap-4">
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-semibold mb-1">Default Secure Link</p>
+                <p className="text-xs text-muted-foreground mb-2">
+                  Used {primaryLink.usage_count || 0} times
+                </p>
+                <code className="text-sm bg-background px-3 py-2 rounded border font-mono break-all block">
                   {unbrandedUrl}
                 </code>
               </div>
-            </div>
-            <div className="flex items-center gap-2 ml-4">
-              <code className="text-sm bg-background px-3 py-1.5 rounded border font-mono">
-                /{primaryLink.link_token}
-              </code>
               <Button
                 size="sm"
                 onClick={() => copyToClipboard(unbrandedUrl)}
-                className="whitespace-nowrap"
+                className="whitespace-nowrap shrink-0"
               >
                 {t('copyLink')}
               </Button>
             </div>
           </div>
 
-          {/* Branded Link - Show if domain exists and is verified */}
-          {brandedUrl && primaryDomain && (
-            <div className="flex items-center justify-between p-4 bg-blue-50 rounded-lg border border-blue-200">
-              <div className="flex-1 min-w-0">
-                <div className="flex items-center gap-2 mb-1">
-                  <p className="text-sm font-medium">{t('brandedSubmissionPortal')}</p>
-                  {brandedLinkStatus === 'checking' && (
-                    <Badge variant="outline" className="text-xs">
-                      Checking...
-                    </Badge>
-                  )}
-                  {brandedLinkStatus === 'accessible' && (
-                    <Badge variant="default" className="bg-green-600 text-xs">
-                      ✓ Verified
-                    </Badge>
-                  )}
-                  {brandedLinkStatus === 'inaccessible' && (
-                    <Badge variant="destructive" className="text-xs">
-                      ⚠ Configuration Issue
-                    </Badge>
-                  )}
-                </div>
-                <p className="text-xs text-muted-foreground mb-2">
-                  Your branded secure link using your custom domain
-                </p>
-                <div className="mt-2">
-                  <p className="text-xs text-muted-foreground mb-1">Your branded secure link URL:</p>
-                  <code className="text-xs bg-background px-2 py-1 rounded border font-mono break-all">
+          {/* Branded Link - Show if available */}
+          {brandedUrl && primaryDomain ? (
+            <div className="p-4 bg-blue-50/50 rounded-lg border border-blue-200">
+              <div className="flex items-start justify-between gap-4">
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2 mb-1">
+                    <p className="text-sm font-semibold">Your Branded Secure Link</p>
+                    {brandedLinkStatus === 'accessible' && (
+                      <Badge variant="default" className="bg-green-600 text-xs h-5">
+                        ✓ Active
+                      </Badge>
+                    )}
+                  </div>
+                  <p className="text-xs text-muted-foreground mb-2">
+                    Custom domain: {primaryDomain}
+                  </p>
+                  <code className="text-sm bg-background px-3 py-2 rounded border font-mono break-all block">
                     {brandedUrl}
                   </code>
                 </div>
-              </div>
-              <div className="flex items-center gap-2 ml-4">
                 <Button
                   size="sm"
                   onClick={() => copyToClipboard(brandedUrl)}
-                  className="whitespace-nowrap"
+                  className="whitespace-nowrap shrink-0"
                   disabled={brandedLinkStatus === 'inaccessible'}
                 >
                   {t('copyLink')}
                 </Button>
               </div>
             </div>
-          )}
-        </CardContent>
-      </Card>
-
-      {/* Custom Domain Information */}
-      {primaryDomain && (
-        <Alert>
-          <Info className="h-4 w-4" />
-          <AlertDescription>
-            <strong>Custom Domain Active:</strong> Your secure links now use <code className="bg-muted px-1 rounded">{primaryDomain}</code> instead of the default domain. 
-            Make sure this domain is properly configured in your DNS provider.
-          </AlertDescription>
-        </Alert>
-      )}
-
-      {/* How Custom Domains Work */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-lg">How Custom Domains Work</CardTitle>
-          <CardDescription>
-            Understanding how your secure links are structured
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="space-y-2">
-            <h4 className="font-medium">Default Setup:</h4>
-            <code className="block bg-muted p-2 rounded text-sm">
-              https://secure.disclosurely.com/secure/tool/submit/{primaryLink.link_token}
-            </code>
-          </div>
-          
-          {primaryDomain ? (
-            <div className="space-y-2">
-              <h4 className="font-medium">With Your Custom Domain:</h4>
-              <code className="block bg-muted p-2 rounded text-sm">
-                https://{primaryDomain}/secure/tool/submit/{primaryLink.link_token}
-              </code>
-              <p className="text-sm text-muted-foreground">
-                Your custom domain replaces the default domain entirely. The path structure remains the same.
+          ) : (
+            <div className="p-4 bg-gray-50 rounded-lg border border-dashed">
+              <p className="text-xs text-muted-foreground">
+                <strong>Want a branded link?</strong> Go to <a href="/dashboard/settings" className="text-blue-600 hover:underline">Settings → Custom Domains</a> to set up your own domain.
               </p>
             </div>
-          ) : (
-            <div className="space-y-2">
-              <h4 className="font-medium">To Use a Custom Domain:</h4>
-              <ol className="text-sm text-muted-foreground space-y-1 ml-4">
-                <li>1. Go to <a href="/dashboard/settings" className="text-blue-600 hover:underline">Settings → Custom Domains</a></li>
-                <li>2. Add your domain (e.g., secure.yourcompany.com)</li>
-                <li>3. Set up DNS CNAME record pointing to secure.disclosurely.com</li>
-                <li>4. Verify and activate the domain</li>
-                <li>5. Set it as primary to use for all secure links</li>
-              </ol>
-            </div>
           )}
-          
-          <div className="pt-2 border-t">
-            <p className="text-sm text-muted-foreground">
-              <strong>Note:</strong> Once you add a custom domain to our system and configure DNS, 
-              we automatically handle the technical setup on our end.
-            </p>
-          </div>
         </CardContent>
       </Card>
+
     </>
   );
 };

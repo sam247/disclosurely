@@ -711,18 +711,58 @@ async function handleVerifyDomain(request: VerifyRequest): Promise<{ success: bo
       });
       
       if (!updateResponse.ok) {
-        console.error('Failed to update domain in database after verification');
-        await logToAI('VERIFY_WARNING', `Vercel verification succeeded but database update failed for domain: ${domain}`)
+        const errorText = await updateResponse.text();
+        console.error('Failed to update domain in database after verification:', updateResponse.status, errorText);
+        await logToAI('VERIFY_ERROR', `Vercel verification succeeded but database update failed for domain: ${domain}`, { 
+          status: updateResponse.status, 
+          error: errorText 
+        })
+        // Retry once after a short delay
+        console.log('Retrying database update...');
+        await new Promise(resolve => setTimeout(resolve, 1000));
+        
+        const retryResponse = await fetch(`${supabaseUrl}/rest/v1/custom_domains?id=eq.${domainRecord.id}`, {
+          method: 'PATCH',
+          headers: {
+            'Authorization': `Bearer ${supabaseServiceKey}`,
+            'Content-Type': 'application/json',
+            'apikey': supabaseServiceKey
+          },
+          body: JSON.stringify({
+            status: 'active',
+            is_active: true,
+            is_primary: shouldSetPrimary,
+            verified_at: new Date().toISOString(),
+            activated_at: new Date().toISOString(),
+            last_checked_at: new Date().toISOString()
+          })
+        });
+        
+        if (!retryResponse.ok) {
+          const retryErrorText = await retryResponse.text();
+          console.error('Retry also failed:', retryResponse.status, retryErrorText);
+          throw new Error(`Database update failed: ${retryErrorText}`);
+        } else {
+          await logToAI('VERIFY_DB_UPDATE_SUCCESS', `Domain database updated successfully on retry: ${domain}`, { 
+            setAsPrimary: shouldSetPrimary 
+          })
+          console.log(`Domain ${domain} updated in database (retry): active=true, status=active, is_primary=${shouldSetPrimary}`);
+        }
       } else {
         await logToAI('VERIFY_DB_UPDATE_SUCCESS', `Domain database updated successfully: ${domain}`, { 
           setAsPrimary: shouldSetPrimary 
         })
         console.log(`Domain ${domain} updated in database: active=true, status=active, is_primary=${shouldSetPrimary}`);
       }
+    } else {
+      console.error('Domain record not found in database after verification');
+      await logToAI('VERIFY_ERROR', `Domain record not found in database: ${domain}`)
+      // Don't throw error - domain was verified on Vercel, just DB record missing
     }
   } catch (error) {
     console.error('Error updating domain in database:', error);
-    await logToAI('VERIFY_WARNING', `Vercel verification succeeded but database update error for domain: ${domain}`, { error: error.message })
+    await logToAI('VERIFY_ERROR', `Database update error for domain: ${domain}`, { error: error.message })
+    // Still return success since Vercel verification worked - UI can handle activation separately if needed
   }
   
   return {

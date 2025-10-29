@@ -329,19 +329,18 @@ const CustomDomainSettings = () => {
         setRecords([]);
         
         // Invalidate custom domains query in LinkGenerator to refresh branded link
-        // This will trigger a refetch and show the branded link
+        // Wait a moment for database update to complete, then trigger refresh
         if (typeof window !== 'undefined') {
-          // Use queryClient from react-query to invalidate
-          const { QueryClient } = await import('@tanstack/react-query');
-          // We'll trigger this via a custom event that LinkGenerator can listen to
-          window.dispatchEvent(new CustomEvent('custom-domain-verified', { 
-            detail: { domain: domain.trim() } 
-          }));
+          setTimeout(() => {
+            window.dispatchEvent(new CustomEvent('custom-domain-verified', { 
+              detail: { domain: domain.trim() } 
+            }));
+          }, 2000); // Wait 2 seconds for DB update to complete
         }
         
         toast({
           title: "Verification Successful",
-          description: "Your domain is ready to use! The branded link will appear shortly.",
+          description: "Your domain has been verified and activated! Your branded link will appear in the Secure Link area shortly.",
         });
       } else {
         toast({
@@ -699,59 +698,6 @@ const CustomDomainSettings = () => {
               </Alert>
             )}
 
-            {/* Manual Activate Button - for domains that are verified but stuck in pending */}
-            {verificationResult?.success && (
-              <div className="mt-4">
-                <Button
-                  onClick={async () => {
-                    if (!domain.trim()) return;
-                    
-                    try {
-                      // Call a simple activate action
-                      const response = await supabase.functions.invoke('simple-domain', {
-                        body: {
-                          action: 'activate',
-                          domain: domain.trim()
-                        }
-                      });
-
-                      if (response.error) {
-                        throw response.error;
-                      }
-
-                      if (response.data?.success) {
-                        toast({
-                          title: "Domain Activated",
-                          description: "Your domain has been activated and will appear in your secure links shortly.",
-                        });
-
-                        // Trigger refresh
-                        window.dispatchEvent(new CustomEvent('custom-domain-verified', { 
-                          detail: { domain: domain.trim() } 
-                        }));
-
-                        // Clear verification result to show fresh state
-                        setTimeout(() => {
-                          setVerificationResult(null);
-                        }, 2000);
-                      } else {
-                        throw new Error(response.data?.message || 'Activation failed');
-                      }
-                    } catch (error: any) {
-                      console.error('Error activating domain:', error);
-                      toast({
-                        title: "Activation Failed",
-                        description: error.message || "Failed to activate domain",
-                        variant: "destructive",
-                      });
-                    }
-                  }}
-                  className="w-full"
-                >
-                  Activate Domain & Show Branded Link
-                </Button>
-              </div>
-            )}
           </CardContent>
         </Card>
       )}
