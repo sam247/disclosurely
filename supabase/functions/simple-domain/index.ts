@@ -1011,7 +1011,7 @@ async function handleListDomainsForUser(req: Request): Promise<{ success: boolea
   }
 }
 
-async function handleDeleteDomain(request: DeleteRequest): Promise<{ success: boolean; message: string }> {
+async function handleDeleteDomain(request: DeleteRequest, req: Request): Promise<{ success: boolean; message: string }> {
   const { domain } = request;
 
   if (!domain) {
@@ -1021,6 +1021,69 @@ async function handleDeleteDomain(request: DeleteRequest): Promise<{ success: bo
 
   await logToAI('DELETE_START', `Starting domain deletion for domain: ${domain}`)
   console.log('Attempting to delete domain ' + domain + ' from Vercel...');
+  
+  // Step 0: Verify user authentication and ownership
+  try {
+    const authHeader = req.headers.get('Authorization');
+    if (!authHeader) {
+      await logToAI('DELETE_ERROR', 'Authorization header missing for domain deletion')
+      return { success: false, message: 'Authorization required' };
+    }
+
+    const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
+    const supabaseAnonKey = Deno.env.get('SUPABASE_ANON_KEY') ?? '';
+    
+    const authClient = createClient(supabaseUrl, supabaseAnonKey, {
+      global: {
+        headers: { Authorization: authHeader },
+      },
+    });
+
+    const { data: { user }, error: authError } = await authClient.auth.getUser();
+    if (authError || !user) {
+      await logToAI('DELETE_ERROR', 'Could not authenticate user for domain deletion', { error: authError?.message });
+      return { success: false, message: 'Unauthorized' };
+    }
+
+    const { data: profile, error: profileError } = await authClient
+      .from('profiles')
+      .select('organization_id')
+      .eq('id', user.id)
+      .single();
+
+    if (profileError || !profile?.organization_id) {
+      await logToAI('DELETE_ERROR', 'No organization found for user when deleting domain', { userId: user.id, error: profileError?.message });
+      return { success: false, message: 'No organization found' };
+    }
+
+    // Verify domain belongs to user's organization
+    const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
+    const serviceClient = createClient(supabaseUrl, supabaseServiceKey);
+    const { data: domainRecord, error: domainError } = await serviceClient
+      .from('custom_domains')
+      .select('id, domain_name, organization_id')
+      .eq('domain_name', domain)
+      .single();
+
+    if (domainError || !domainRecord) {
+      await logToAI('DELETE_ERROR', `Domain not found in database: ${domain}`, { error: domainError?.message });
+      return { success: false, message: `Domain ${domain} not found in your account` };
+    }
+
+    if (domainRecord.organization_id !== profile.organization_id) {
+      await logToAI('DELETE_ERROR', `Domain ownership mismatch: ${domain}`, { 
+        userOrgId: profile.organization_id,
+        domainOrgId: domainRecord.organization_id 
+      });
+      return { success: false, message: 'You do not have permission to delete this domain' };
+    }
+
+    console.log(`Verified ownership: Domain ${domain} belongs to organization ${profile.organization_id}`);
+    await logToAI('DELETE_OWNERSHIP_VERIFIED', `Domain ownership verified for deletion: ${domain}`, { organizationId: profile.organization_id });
+  } catch (error) {
+    await logToAI('DELETE_ERROR', `Error verifying domain ownership: ${domain}`, { error: error.message });
+    return { success: false, message: `Error verifying domain ownership: ${error.message}` };
+  }
   
   const vercelClient = new SimpleVercelClient();
   
@@ -1071,8 +1134,27 @@ async function handleDeleteDomain(request: DeleteRequest): Promise<{ success: bo
       };
     }
     
-    const deletedData = await deleteResponse.json();
-    console.log(`Deleted ${deletedData?.length || 0} record(s) from database for domain: ${domain}`);
+    // Check if anything was deleted
+    let deletedCount = 0;
+    try {
+      const deletedData = await deleteResponse.json();
+      deletedCount = Array.isArray(deletedData) ? deletedData.length : 0;
+    } catch {
+      // DELETE might return empty body, check status
+      if (deleteResponse.status === 204 || deleteResponse.status === 200) {
+        deletedCount = 1; // Assume success if 204 No Content
+      }
+    }
+    
+    console.log(`Deleted ${deletedCount} record(s) from database for domain: ${domain}`);
+    
+    if (deletedCount === 0) {
+      await logToAI('DELETE_WARNING', `No records deleted from database for domain: ${domain}`);
+      return {
+        success: false,
+        message: `Domain removed from Vercel but was not found in database.`
+      };
+    }
     
     await logToAI('DELETE_SUCCESS', `Domain successfully deleted: ${domain}`)
     console.log('Domain successfully deleted from both Vercel and database.');
@@ -1188,7 +1270,7 @@ serve(async (req) => {
     if (action === 'delete') {
       console.log('Handling delete action');
       await logToAI('DELETE_START', `Starting domain deletion for domain: ${domain}`)
-      const result = await handleDeleteDomain(body);
+      const result = await handleDeleteDomain(body, req);
       console.log('Delete result:', JSON.stringify(result));
       await logToAI('DELETE_COMPLETE', `Domain deletion completed for domain: ${domain}`, result)
       
