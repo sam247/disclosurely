@@ -61,9 +61,17 @@ const LinkGenerator = () => {
         .select('domain_name, is_active, is_primary, status, organization_id')
         .eq('organization_id', profile.organization_id);
 
-      console.log('🔍 LinkGenerator: All domains (unfiltered):', allDomains);
+      console.log('🔍 LinkGenerator: All domains (unfiltered):', JSON.stringify(allDomains, null, 2));
       if (allDomainsError) {
         console.error('🔍 LinkGenerator: Error fetching all domains:', allDomainsError);
+      }
+
+      // Log each domain's status for debugging
+      if (allDomains && allDomains.length > 0) {
+        console.log('🔍 LinkGenerator: Domain status breakdown:');
+        allDomains.forEach((domain: any) => {
+          console.log(`  - ${domain.domain_name}: is_active=${domain.is_active}, is_primary=${domain.is_primary}, status="${domain.status}"`);
+        });
       }
 
       // Now fetch with active filter - include both 'active' and 'verified' status
@@ -78,7 +86,29 @@ const LinkGenerator = () => {
         console.error('🔍 LinkGenerator: Error fetching active domains:', domainsError);
       }
 
-      console.log('🔍 LinkGenerator: Active domains (filtered):', domains);
+      console.log('🔍 LinkGenerator: Active domains (filtered):', JSON.stringify(domains, null, 2));
+
+      // Also try a less strict query to see what we're missing
+      const { data: lessStrictDomains } = await supabase
+        .from('custom_domains')
+        .select('domain_name, is_active, is_primary, status')
+        .eq('organization_id', profile.organization_id);
+
+      console.log('🔍 LinkGenerator: Less strict query (any is_active or status):', JSON.stringify(lessStrictDomains, null, 2));
+
+      // If no domains match strict filter, try less strict: include verified domains even if is_active is false
+      if ((!domains || domains.length === 0) && lessStrictDomains && lessStrictDomains.length > 0) {
+        console.log('🔍 LinkGenerator: No domains matched strict filter, checking for verified domains...');
+        const verifiedDomains = lessStrictDomains.filter((d: any) => 
+          d.status === 'verified' || d.status === 'active'
+        );
+        
+        if (verifiedDomains.length > 0) {
+          console.log('🔍 LinkGenerator: Found verified domains that aren\'t marked active:', verifiedDomains);
+          // Return these with a note that they might need activation
+          return verifiedDomains;
+        }
+      }
 
       return domains || [];
     },
