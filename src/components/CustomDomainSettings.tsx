@@ -105,17 +105,20 @@ const CustomDomainSettings = () => {
 
   // Clear input and localStorage when no domains exist in the database
   React.useEffect(() => {
-    if (existingDomains.length === 0 && domain) {
-      // No domains in database but input field has a value - clear it
-      console.log('No domains in database, clearing cached domain from input');
-      setDomain('');
-      setRecords([]);
-      setVerificationResult(null);
-      localStorage.removeItem('custom-domain');
-      localStorage.removeItem('custom-domain-records');
-      localStorage.removeItem('custom-domain-verification');
+    if (existingDomains.length === 0) {
+      // No domains in database - clear ALL cached data
+      const hasCachedData = domain || records.length > 0 || verificationResult;
+      if (hasCachedData) {
+        console.log('No domains in database, clearing all cached domain data');
+        setDomain('');
+        setRecords([]);
+        setVerificationResult(null);
+        localStorage.removeItem('custom-domain');
+        localStorage.removeItem('custom-domain-records');
+        localStorage.removeItem('custom-domain-verification');
+      }
     }
-  }, [existingDomains, domain]);
+  }, [existingDomains, domain, records.length, verificationResult]);
 
   // Track previous domain to detect changes
   const prevDomainRef = React.useRef<string>('');
