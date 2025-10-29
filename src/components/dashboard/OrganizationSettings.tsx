@@ -1,6 +1,6 @@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Palette, Globe } from 'lucide-react';
-import BrandingView from '@/components/dashboard/BrandingView';
+import OrganizationSettingsBranding from '@/components/OrganizationSettings';
 import CustomDomainSettings from '@/components/CustomDomainSettings';
 import { useTranslation } from 'react-i18next';
 
@@ -27,7 +27,7 @@ const OrganizationSettings = () => {
         </TabsList>
 
         <TabsContent value="branding">
-          <BrandingView />
+          <OrganizationSettingsBranding />
         </TabsContent>
 
         <TabsContent value="domains">
