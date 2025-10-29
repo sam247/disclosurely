@@ -134,20 +134,17 @@ const LinkGenerator = () => {
     }
   };
 
-  if (isLoading || !primaryLink) {
-    return null;
-  }
-
-  // Generate both branded and unbranded URLs
-  const unbrandedUrl = `${window.location.origin}/secure/tool/submit/${primaryLink.link_token}`;
-  const brandedUrl = primaryDomain ? `https://${primaryDomain}/secure/tool/submit/${primaryLink.link_token}` : null;
-  
-  // State for checking if branded link is accessible
+  // State for checking if branded link is accessible - MUST be before early returns (React rules)
   const [brandedLinkStatus, setBrandedLinkStatus] = useState<'checking' | 'accessible' | 'inaccessible' | null>(null);
+  
+  // Generate branded URL if we have primary domain and link
+  const brandedUrl = primaryDomain && primaryLink 
+    ? `https://${primaryDomain}/secure/tool/submit/${primaryLink.link_token}` 
+    : null;
   
   // Check if branded link is actually accessible via edge function
   useEffect(() => {
-    if (brandedUrl && primaryDomain && user) {
+    if (brandedUrl && primaryDomain && user && primaryLink) {
       setBrandedLinkStatus('checking');
       
       // Use edge function to check domain accessibility
@@ -197,6 +194,13 @@ const LinkGenerator = () => {
       setBrandedLinkStatus(null);
     }
   }, [brandedUrl, primaryDomain, primaryLink?.link_token, customDomains, user]);
+
+  if (isLoading || !primaryLink) {
+    return null;
+  }
+
+  // Generate unbranded URL - after early return check
+  const unbrandedUrl = `${window.location.origin}/secure/tool/submit/${primaryLink.link_token}`;
 
   return (
     <>
