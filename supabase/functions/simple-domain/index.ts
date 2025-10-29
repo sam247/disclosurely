@@ -1204,17 +1204,28 @@ async function checkCnameRecord(domain: string): Promise<boolean> {
   }
 }
 
-console.log('[simple-domain] Function module loaded successfully');
+console.log('[simple-domain] Starting function initialization...');
+
+try {
+  console.log('[simple-domain] Module loaded successfully');
+} catch (initError) {
+  console.error('[simple-domain] Initialization error:', initError);
+}
 
 serve(async (req) => {
   console.log(`[simple-domain] Received ${req.method} request from ${req.headers.get('origin') || 'unknown'}`);
   
-  // Handle CORS preflight requests FIRST
+  // Handle CORS preflight requests FIRST - with explicit headers
   if (req.method === 'OPTIONS') {
-    console.log('[simple-domain] Returning 204 No Content with CORS headers');
-    return new Response(null, { 
-      status: 204,
-      headers: corsHeaders 
+    console.log('[simple-domain] Returning 200 OK with CORS headers');
+    return new Response('OK', { 
+      status: 200,
+      headers: {
+        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Methods': 'POST, GET, OPTIONS, DELETE',
+        'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+        'Access-Control-Max-Age': '86400',
+      }
     });
   }
 
