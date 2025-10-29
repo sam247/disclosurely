@@ -831,12 +831,20 @@ async function handleVerifyDomain(request: VerifyRequest, req?: Request): Promis
       }
     } else {
       console.error('Domain record not found or could not be created after verification');
-      await logToAI('VERIFY_ERROR', `Domain record not found/created for domain: ${domain}`)
+      await logToAI('VERIFY_ERROR', `Domain record not found/created for domain: ${domain}`, { organizationId: organizationId || 'missing' })
+      // If we can't create/update the database record, this is a problem
+      return {
+        success: false,
+        message: `Domain verified with Vercel but failed to save to database. Please contact support.`
+      };
     }
   } catch (error) {
     console.error('Error updating domain in database:', error);
     await logToAI('VERIFY_ERROR', `Database update error for domain: ${domain}`, { error: error.message })
-    // Still return success since Vercel verification worked - UI can handle activation separately if needed
+    return {
+      success: false,
+      message: `Domain verified with Vercel but database update failed: ${error.message}`
+    };
   }
   
   return {
@@ -1012,18 +1020,18 @@ async function handleListDomainsForUser(req: Request): Promise<{ success: boolea
 }
 
 async function handleDeleteDomain(request: DeleteRequest, req: Request): Promise<{ success: boolean; message: string }> {
-  const { domain } = request;
-
-  if (!domain) {
-    await logToAI('DELETE_ERROR', 'Domain is required for deletion')
-    return { success: false, message: 'Domain is required' };
-  }
-
-  await logToAI('DELETE_START', `Starting domain deletion for domain: ${domain}`)
-  console.log('Attempting to delete domain ' + domain + ' from Vercel...');
-  
-  // Step 0: Verify user authentication and ownership
   try {
+    const { domain } = request;
+
+    if (!domain) {
+      await logToAI('DELETE_ERROR', 'Domain is required for deletion')
+      return { success: false, message: 'Domain is required' };
+    }
+
+    await logToAI('DELETE_START', `Starting domain deletion for domain: ${domain}`)
+    console.log('Attempting to delete domain ' + domain + ' from Vercel...');
+    
+    // Step 0: Verify user authentication and ownership
     const authHeader = req.headers.get('Authorization');
     if (!authHeader) {
       await logToAI('DELETE_ERROR', 'Authorization header missing for domain deletion')
@@ -1080,14 +1088,10 @@ async function handleDeleteDomain(request: DeleteRequest, req: Request): Promise
 
     console.log(`Verified ownership: Domain ${domain} belongs to organization ${profile.organization_id}`);
     await logToAI('DELETE_OWNERSHIP_VERIFIED', `Domain ownership verified for deletion: ${domain}`, { organizationId: profile.organization_id });
-  } catch (error) {
-    await logToAI('DELETE_ERROR', `Error verifying domain ownership: ${domain}`, { error: error.message });
-    return { success: false, message: `Error verifying domain ownership: ${error.message}` };
-  }
-  
-  const vercelClient = new SimpleVercelClient();
-  
-  // Step 1: Delete from Vercel
+    
+    const vercelClient = new SimpleVercelClient();
+    
+    // Step 1: Delete from Vercel
   const vercelDeleteResult = await vercelClient.deleteDomain(domain);
   
   if (!vercelDeleteResult.success) {
@@ -1164,12 +1168,20 @@ async function handleDeleteDomain(request: DeleteRequest, req: Request): Promise
       message: `Domain ${domain} has been completely removed from the system!`
     };
     
-  } catch (error) {
-    await logToAI('DELETE_ERROR', `Database deletion error for domain: ${domain}`, { error: error.message })
+  } catch (error: any) {
+    await logToAI('DELETE_ERROR', `Database deletion error for domain: ${domain}`, { error: error?.message || String(error) })
     console.error('Database deletion error:', error);
     return {
       success: false,
-      message: `Domain removed from Vercel but database cleanup failed: ${error.message}`
+      message: `Domain removal failed: ${error?.message || 'Unexpected error occurred'}`
+    };
+  }
+  } catch (outerError: any) {
+    await logToAI('DELETE_ERROR', `Outer error in delete function: ${domain}`, { error: outerError?.message || String(outerError) })
+    console.error('Outer delete error:', outerError);
+    return {
+      success: false,
+      message: `Domain deletion failed: ${outerError?.message || 'Unexpected error occurred'}`
     };
   }
 }
