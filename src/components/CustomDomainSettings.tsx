@@ -139,10 +139,38 @@ const CustomDomainSettings = () => {
           ? result.records 
           : (result.records ? [result.records] : []);
         
-        // Validate record structure
+        // Validate record structure and ensure all values are strings/primitives
         const validRecords = recordsArray.filter((record: any) => {
-          return record && typeof record === 'object' && record.type && record.name && record.value;
-        });
+          if (!record || typeof record !== 'object') return false;
+          
+          // Check required fields exist
+          if (!record.type || !record.name || !record.value) return false;
+          
+          // Ensure all fields are primitives (not objects)
+          if (typeof record.type !== 'string') return false;
+          if (typeof record.name !== 'string') return false;
+          if (typeof record.value !== 'string') return false;
+          
+          // Handle potential nested objects in value field
+          if (typeof record.value === 'object') {
+            // If value is an object, try to extract string value
+            if (record.value.value) {
+              record.value = String(record.value.value);
+            } else if (record.value.rank) {
+              // Handle {rank, value} structure
+              record.value = String(record.value.value || '');
+            } else {
+              return false;
+            }
+          }
+          
+          return true;
+        }).map((record: any) => ({
+          type: String(record.type),
+          name: String(record.name),
+          value: String(record.value),
+          ttl: record.ttl ? Number(record.ttl) : 300
+        }));
         
         if (validRecords.length === 0) {
           throw new Error('No valid DNS records returned from server');
@@ -154,9 +182,14 @@ const CustomDomainSettings = () => {
           description: "Add these DNS records to your domain provider",
         });
       } else {
+        // Ensure message is always a string
+        const errorMessage = typeof result.message === 'string' 
+          ? result.message 
+          : (result.message?.message || JSON.stringify(result.message) || "Failed to generate verification records");
+        
         toast({
           title: "Generation Failed",
-          description: result.message || "Failed to generate verification records",
+          description: errorMessage,
           variant: "destructive",
         });
       }

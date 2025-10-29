@@ -440,22 +440,34 @@ async function handleGenerateRecords(request: GenerateRequest): Promise<{ succes
                     // Handle array of verification records
                     existingDomain.verification.forEach((verification: any) => {
                       if (verification.type === 'TXT') {
+                        // Extract string value from potential {rank, value} structure
+                        let verificationValue = verification.value;
+                        if (typeof verificationValue === 'object' && verificationValue.value) {
+                          verificationValue = verificationValue.value;
+                        }
+                        
                         console.log('Adding TXT verification record from project domains');
                         records.push({
                           type: 'TXT',
                           name: verification.domain || '_vercel',
-                          value: verification.value,
+                          value: String(verificationValue || ''),
                           ttl: 300
                         });
                       }
                     });
                   } else if (existingDomain?.verification?.value) {
                     // Handle single verification record
+                    // Extract string value from potential {rank, value} structure
+                    let verificationValue = existingDomain.verification.value;
+                    if (typeof verificationValue === 'object' && verificationValue.value) {
+                      verificationValue = verificationValue.value;
+                    }
+                    
                     console.log('Adding single TXT verification record from project domains');
                     records.push({
                       type: 'TXT',
                       name: '_vercel',
-                      value: existingDomain.verification.value,
+                      value: String(verificationValue || ''),
                       ttl: 300
                     });
                   }
@@ -463,22 +475,34 @@ async function handleGenerateRecords(request: GenerateRequest): Promise<{ succes
 
                 // Add TXT verification record from config (fallback)
                 if (configResult.config?.verification) {
+                  // Extract string value from potential {rank, value} structure
+                  let verificationValue = configResult.config.verification.value;
+                  if (typeof verificationValue === 'object' && verificationValue.value) {
+                    verificationValue = verificationValue.value;
+                  }
+                  
                   console.log('Adding TXT verification record from config (fallback)');
                   records.push({
                     type: 'TXT',
                     name: domain,
-                    value: configResult.config.verification.value,
+                    value: String(verificationValue || ''),
                     ttl: 300
                   });
                 }
 
                 // Add TXT verification record from domain info (fallback)
                 if (domainInfoResult?.domain?.verification) {
+                  // Extract string value from potential {rank, value} structure
+                  let verificationValue = domainInfoResult.domain.verification.value;
+                  if (typeof verificationValue === 'object' && verificationValue.value) {
+                    verificationValue = verificationValue.value;
+                  }
+                  
                   console.log('Adding TXT verification record from domain info (fallback)');
                   records.push({
                     type: 'TXT',
                     name: domain,
-                    value: domainInfoResult.domain.verification.value,
+                    value: String(verificationValue || ''),
                     ttl: 300
                   });
                 }
