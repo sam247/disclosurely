@@ -723,18 +723,18 @@ async function handleVerifyDomain(request: VerifyRequest, req?: Request): Promis
       }
     }
     
-    // Get the domain record
-    const domainResponse = await fetch(`${supabaseUrl}/rest/v1/custom_domains?domain_name=eq.${encodeURIComponent(domain)}`, {
-      method: 'GET',
-      headers: {
-        'Authorization': `Bearer ${supabaseServiceKey}`,
-        'Content-Type': 'application/json',
-        'apikey': supabaseServiceKey
-      }
-    });
+    // Get the domain record using serviceClient
+    const { data: domainRecords, error: fetchError } = await serviceClient
+      .from('custom_domains')
+      .select('*')
+      .eq('domain_name', domain);
     
-    const domainData = await domainResponse.json();
-    let domainRecord = domainData && domainData.length > 0 ? domainData[0] : null;
+    if (fetchError) {
+      console.error('Failed to fetch domain record:', fetchError);
+      await logToAI('VERIFY_ERROR', `Failed to fetch domain record: ${domain}`, { error: fetchError.message });
+    }
+    
+    let domainRecord = domainRecords && domainRecords.length > 0 ? domainRecords[0] : null;
 
     // If no domain record exists yet, create one now (since verification succeeded)
     if (!domainRecord && organizationId) {
@@ -1112,52 +1112,30 @@ async function handleDeleteDomain(request: DeleteRequest, req: Request): Promise
     console.log('Domain successfully deleted from Vercel.');
   }
   
-  // Step 2: Delete from database
-  try {
+    // Step 2: Delete from database using serviceClient (properly bypasses RLS)
     const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
     const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
+    const serviceClient = createClient(supabaseUrl, supabaseServiceKey);
     
-    // Use domain_name column (as per database schema)
-    const encodedDomain = encodeURIComponent(domain);
-    const deleteResponse = await fetch(`${supabaseUrl}/rest/v1/custom_domains?domain_name=eq.${encodedDomain}`, {
-      method: 'DELETE',
-      headers: {
-        'Authorization': `Bearer ${supabaseServiceKey}`,
-        'Content-Type': 'application/json',
-        'apikey': supabaseServiceKey
-      }
-    });
+    const { error: dbError, count } = await serviceClient
+      .from('custom_domains')
+      .delete({ count: 'exact' })
+      .eq('domain_name', domain);
 
-    if (!deleteResponse.ok) {
-      const errorText = await deleteResponse.text();
-      await logToAI('DELETE_ERROR', `Database deletion failed for domain: ${domain}`, { status: deleteResponse.status, error: errorText })
-      console.error('Database deletion failed:', deleteResponse.status, errorText);
+    if (dbError) {
+      await logToAI('DELETE_ERROR', `Database deletion failed for domain: ${domain}`, { error: dbError.message })
+      console.error('Database deletion failed:', dbError);
       return {
         success: false,
-        message: `Domain removed from Vercel but failed to remove from database. Please contact support.`
+        message: `Domain removed from Vercel but failed to remove from database: ${dbError.message}`
       };
     }
     
-    // Check if anything was deleted
-    let deletedCount = 0;
-    try {
-      const deletedData = await deleteResponse.json();
-      deletedCount = Array.isArray(deletedData) ? deletedData.length : 0;
-    } catch {
-      // DELETE might return empty body, check status
-      if (deleteResponse.status === 204 || deleteResponse.status === 200) {
-        deletedCount = 1; // Assume success if 204 No Content
-      }
-    }
+    console.log(`Deleted ${count || 0} record(s) from database for domain: ${domain}`);
     
-    console.log(`Deleted ${deletedCount} record(s) from database for domain: ${domain}`);
-    
-    if (deletedCount === 0) {
+    if (count === 0) {
       await logToAI('DELETE_WARNING', `No records deleted from database for domain: ${domain}`);
-      return {
-        success: false,
-        message: `Domain removed from Vercel but was not found in database.`
-      };
+      console.log('Domain was not in database, but Vercel cleanup succeeded');
     }
     
     await logToAI('DELETE_SUCCESS', `Domain successfully deleted: ${domain}`)
@@ -1167,15 +1145,6 @@ async function handleDeleteDomain(request: DeleteRequest, req: Request): Promise
       success: true,
       message: `Domain ${domain} has been completely removed from the system!`
     };
-    
-  } catch (error: any) {
-    await logToAI('DELETE_ERROR', `Database deletion error for domain: ${domain}`, { error: error?.message || String(error) })
-    console.error('Database deletion error:', error);
-    return {
-      success: false,
-      message: `Domain removal failed: ${error?.message || 'Unexpected error occurred'}`
-    };
-  }
   } catch (outerError: any) {
     await logToAI('DELETE_ERROR', `Outer error in delete function: ${domain}`, { error: outerError?.message || String(outerError) })
     console.error('Outer delete error:', outerError);
