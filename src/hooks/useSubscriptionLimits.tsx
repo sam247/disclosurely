@@ -29,26 +29,26 @@ export const useSubscriptionLimits = () => {
     const tier = subscriptionData.subscription_tier;
     const isSubscribed = subscriptionData.subscribed;
     
-    // Only allow features if user has an active subscription
+    // Simplified feature-based tiers (no usage limits to track!)
     if (isSubscribed && tier === 'basic') {
       setLimits({
-        maxCasesPerMonth: 5,
-        maxStorageGB: 1,
-        hasMessaging: false,
-        hasAIHelper: false,
-        hasCustomBranding: false,
-        hasCustomDomain: false,
+        maxCasesPerMonth: -1, // Unlimited cases - no tracking needed!
+        maxStorageGB: -1, // Unlimited storage - no tracking needed!
+        hasMessaging: false, // ❌ Pro only
+        hasAIHelper: false, // ❌ Pro only
+        hasCustomBranding: false, // ❌ Pro only
+        hasCustomDomain: false, // ❌ Pro only
         maxCustomDomains: 0,
       });
     } else if (isSubscribed && tier === 'pro') {
       setLimits({
-        maxCasesPerMonth: -1, // -1 means unlimited
-        maxStorageGB: -1, // -1 means unlimited
-        hasMessaging: true,
-        hasAIHelper: true,
-        hasCustomBranding: true,
-        hasCustomDomain: true,
-        maxCustomDomains: 1, // Pro tier: 1 custom domain
+        maxCasesPerMonth: -1, // Unlimited cases
+        maxStorageGB: -1, // Unlimited storage
+        hasMessaging: true, // ✅ Two-way secure messaging
+        hasAIHelper: true, // ✅ AI case analysis
+        hasCustomBranding: true, // ✅ Custom branding
+        hasCustomDomain: true, // ✅ Custom domain
+        maxCustomDomains: 1, // 1 custom domain per Pro subscription
       });
     } else {
       // No subscription - no features allowed

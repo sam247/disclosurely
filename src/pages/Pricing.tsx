@@ -104,10 +104,10 @@ const Pricing = () => {
                 <tr className="border-b border-gray-100">
                   <td className="px-6 py-4 text-gray-900">Monthly Price</td>
                   <td className="px-6 py-4 text-center">
-                    <span className="text-2xl font-bold text-blue-600">£350</span>
+                    <span className="text-2xl font-bold text-blue-600">£39.99</span>
                     <span className="text-sm text-gray-600">/month</span>
                   </td>
-                  <td className="px-6 py-4 text-center text-gray-500">£500+</td>
+                  <td className="px-6 py-4 text-center text-gray-500">£80+</td>
                 </tr>
                 <tr className="border-b border-gray-100 bg-gray-50">
                   <td className="px-6 py-4 text-gray-900 font-semibold">AI Case Analysis</td>
@@ -381,7 +381,7 @@ const Pricing = () => {
                 </tr>
                 <tr className="hover:bg-gray-50">
                   <td className="px-6 py-4 text-sm text-gray-900">Reports per Month</td>
-                  <td className="px-6 py-4 text-center text-sm text-gray-700">Up to 10</td>
+                  <td className="px-6 py-4 text-center text-sm text-gray-700 font-semibold">Unlimited</td>
                   <td className="px-6 py-4 text-center text-sm text-gray-700 font-semibold">Unlimited</td>
                   <td className="px-6 py-4 text-center text-sm text-gray-700 font-semibold">Unlimited</td>
                 </tr>
