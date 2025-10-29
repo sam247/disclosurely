@@ -76,31 +76,62 @@ serve(async (req) => {
 
     // GENERATE RECORDS
     if (action === 'generate') {
+      console.log(`Adding domain ${domain} to Vercel project...`);
       const result = await vercel.addDomain(domain);
+      console.log(`Vercel result:`, JSON.stringify(result, null, 2));
       
-      if (!result.success) {
+      // If domain already exists, that's OK - we just need the verification records
+      if (!result.success && result.error && !result.error.includes('already exists')) {
+        const errorMsg = result.error || 'Failed to add domain to Vercel';
+        console.error(`Domain addition failed: ${errorMsg}`);
         return new Response(
-          JSON.stringify({ success: false, message: result.error || 'Failed to add domain' }),
+          JSON.stringify({ success: false, message: errorMsg }),
           { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
         );
       }
 
-      // Extract records from verification
+      // Extract records from verification (will exist even if domain already exists)
       const records = [];
-      if (result.verification) {
-        for (const [key, value] of Object.entries(result.verification)) {
-          if (key === 'type' || key === 'domain' || key === 'reason') continue;
-          
-          const recordValue = typeof value === 'object' && value !== null && 'value' in value 
-            ? String((value as any).value) 
-            : String(value);
-          
+      const verification = result.verification;
+      
+      if (verification) {
+        // Handle TXT record
+        if (verification.txt) {
+          const txtValue = typeof verification.txt === 'object' && verification.txt.value 
+            ? verification.txt.value 
+            : verification.txt;
           records.push({
-            type: key.toUpperCase(),
-            name: domain,
-            value: recordValue,
+            type: 'TXT',
+            name: '_vercel',
+            value: txtValue,
           });
         }
+        
+        // Handle A record
+        if (verification.value) {
+          records.push({
+            type: 'A',
+            name: '@',
+            value: verification.value,
+          });
+        }
+        
+        // Handle CNAME
+        if (verification.cname) {
+          records.push({
+            type: 'CNAME',
+            name: domain.split('.')[0],
+            value: 'cname.vercel-dns.com',
+          });
+        }
+      }
+      
+      if (records.length === 0) {
+        records.push({
+          type: 'CNAME',
+          name: domain.split('.')[0],
+          value: 'cname.vercel-dns.com',
+        });
       }
 
       return new Response(
