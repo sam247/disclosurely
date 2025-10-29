@@ -6,10 +6,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Alert, AlertDescription } from '@/components/ui/alert';
-import { useSubscriptionLimits } from '@/hooks/useSubscriptionLimits';
 import { useTranslation } from 'react-i18next';
-import { Info, ExternalLink } from 'lucide-react';
 import { auditLogger } from '@/utils/auditLogger';
 
 interface OrganizationLink {
@@ -21,100 +18,54 @@ interface OrganizationLink {
   created_at: string;
 }
 
+interface CustomDomainRecord {
+  id: string;
+  domain_name: string;
+  status: string;
+  is_active: boolean;
+  is_primary: boolean;
+  activated_at?: string | null;
+  verified_at?: string | null;
+  last_checked_at?: string | null;
+  created_at?: string | null;
+}
+
 const LinkGenerator = () => {
   const { user } = useAuth();
   const { toast } = useToast();
   const { t } = useTranslation();
   const queryClient = useQueryClient();
-  const limits = useSubscriptionLimits();
 
-  // Fetch active custom domains - refetch when needed
-  const { data: customDomains, refetch: refetchDomains } = useQuery({
+  // Fetch custom domains via edge function (handles RLS/service role logic)
+  const { data: customDomains = [], refetch: refetchDomains } = useQuery<CustomDomainRecord[]>({
     queryKey: ['custom-domains', user?.id],
+    enabled: !!user,
+    refetchOnWindowFocus: true,
+    staleTime: 5000,
     queryFn: async () => {
       if (!user) {
         console.log('🔍 LinkGenerator: No user, returning empty domains');
         return [];
       }
 
-      const { data: profile, error: profileError } = await supabase
-        .from('profiles')
-        .select('organization_id')
-        .eq('id', user.id)
-        .single();
+      const response = await supabase.functions.invoke('simple-domain', {
+        body: { action: 'list-domains' },
+      });
 
-      if (profileError) {
-        console.error('🔍 LinkGenerator: Profile fetch error:', profileError);
+      if (response.error) {
+        console.error('🔍 LinkGenerator: list-domains edge function error:', response.error);
         return [];
       }
 
-      if (!profile?.organization_id) {
-        console.log('🔍 LinkGenerator: No organization_id found for user');
-        return [];
+      const result = response.data;
+      if (result?.success) {
+        console.log('🔍 LinkGenerator: Domains fetched from edge function:', result.domains);
+        return (result.domains || []) as CustomDomainRecord[];
       }
 
-      console.log('🔍 LinkGenerator: Fetching domains for organization:', profile.organization_id);
-
-      // First, try to get all domains (less strict) to see what we have
-      const { data: allDomains, error: allDomainsError } = await supabase
-        .from('custom_domains')
-        .select('domain_name, is_active, is_primary, status, organization_id')
-        .eq('organization_id', profile.organization_id);
-
-      console.log('🔍 LinkGenerator: All domains (unfiltered):', JSON.stringify(allDomains, null, 2));
-      if (allDomainsError) {
-        console.error('🔍 LinkGenerator: Error fetching all domains:', allDomainsError);
-      }
-
-      // Log each domain's status for debugging
-      if (allDomains && allDomains.length > 0) {
-        console.log('🔍 LinkGenerator: Domain status breakdown:');
-        allDomains.forEach((domain: any) => {
-          console.log(`  - ${domain.domain_name}: is_active=${domain.is_active}, is_primary=${domain.is_primary}, status="${domain.status}"`);
-        });
-      }
-
-      // Now fetch with active filter - include both 'active' and 'verified' status
-      const { data: domains, error: domainsError } = await supabase
-        .from('custom_domains')
-        .select('domain_name, is_active, is_primary, status')
-        .eq('organization_id', profile.organization_id)
-        .eq('is_active', true)
-        .in('status', ['active', 'verified']);
-
-      if (domainsError) {
-        console.error('🔍 LinkGenerator: Error fetching active domains:', domainsError);
-      }
-
-      console.log('🔍 LinkGenerator: Active domains (filtered):', JSON.stringify(domains, null, 2));
-
-      // Also try a less strict query to see what we're missing
-      const { data: lessStrictDomains } = await supabase
-        .from('custom_domains')
-        .select('domain_name, is_active, is_primary, status')
-        .eq('organization_id', profile.organization_id);
-
-      console.log('🔍 LinkGenerator: Less strict query (any is_active or status):', JSON.stringify(lessStrictDomains, null, 2));
-
-      // If no domains match strict filter, try less strict: include verified domains even if is_active is false
-      if ((!domains || domains.length === 0) && lessStrictDomains && lessStrictDomains.length > 0) {
-        console.log('🔍 LinkGenerator: No domains matched strict filter, checking for verified domains...');
-        const verifiedDomains = lessStrictDomains.filter((d: any) => 
-          d.status === 'verified' || d.status === 'active'
-        );
-        
-        if (verifiedDomains.length > 0) {
-          console.log('🔍 LinkGenerator: Found verified domains that aren\'t marked active:', verifiedDomains);
-          // Return these with a note that they might need activation
-          return verifiedDomains;
-        }
-      }
-
-      return domains || [];
+      console.warn('🔍 LinkGenerator: list-domains returned without success', result);
+      return [];
     },
-    enabled: !!user,
-    refetchOnWindowFocus: true,
-    staleTime: 5000, // Refetch every 5 seconds to catch domain updates quickly
   });
 
   // Listen for domain verification events to immediately refetch
@@ -132,16 +83,17 @@ const LinkGenerator = () => {
     };
   }, [refetchDomains, queryClient, user?.id]);
 
-  // Get the primary domain (prefer primary custom domain, then any active domain)
-  // First try: primary + active + status active
-  // Second try: primary + active (any status)
-  // Third try: any active + status active
-  // Fourth try: any active domain (any status)
-  const primaryDomain = customDomains?.find(d => d.is_primary && d.is_active && d.status === 'active')?.domain_name 
-    || customDomains?.find(d => d.is_primary && d.is_active)?.domain_name
-    || customDomains?.find(d => d.is_active && d.status === 'active')?.domain_name 
-    || customDomains?.find(d => d.is_active)?.domain_name
-    || null;
+  // Determine primary domain from domain list
+  const activeDomains = (customDomains || []).filter((domain) => domain.is_active);
+  const primaryDomainRecord =
+    activeDomains.find((domain) => domain.is_primary && domain.status === 'active') ||
+    activeDomains.find((domain) => domain.is_primary) ||
+    activeDomains.find((domain) => domain.status === 'active') ||
+    activeDomains[0] ||
+    (customDomains || [])[0];
+
+  const primaryDomain = primaryDomainRecord?.domain_name ?? null;
+  const primaryDomainStatus = primaryDomainRecord?.status ?? null;
 
   // Fetch the primary active link
   const { data: primaryLink, isLoading } = useQuery({
@@ -347,9 +299,24 @@ const LinkGenerator = () => {
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 mb-1">
                     <p className="text-sm font-semibold">Your Branded Secure Link</p>
+                    {primaryDomainStatus && (
+                      <Badge variant="outline" className="text-xs h-5 capitalize">
+                        {primaryDomainStatus}
+                      </Badge>
+                    )}
                     {brandedLinkStatus === 'accessible' && (
                       <Badge variant="default" className="bg-green-600 text-xs h-5">
                         ✓ Active
+                      </Badge>
+                    )}
+                    {brandedLinkStatus === 'checking' && (
+                      <Badge variant="outline" className="text-xs h-5">
+                        Checking DNS…
+                      </Badge>
+                    )}
+                    {brandedLinkStatus === 'inaccessible' && (
+                      <Badge variant="destructive" className="text-xs h-5">
+                        ⚠ Needs attention
                       </Badge>
                     )}
                   </div>
@@ -373,7 +340,7 @@ const LinkGenerator = () => {
           ) : (
             <div className="p-4 bg-gray-50 rounded-lg border border-dashed">
               <p className="text-xs text-muted-foreground">
-                <strong>Want a branded link?</strong> Go to <a href="/dashboard/settings" className="text-blue-600 hover:underline">Settings → Custom Domains</a> to set up your own domain.
+                <strong>Want a branded link?</strong> Go to <a href="/dashboard/settings" className="text-blue-600 hover:underline">Settings → Custom Domains</a> to set up your own domain. It will appear here automatically after verification.
               </p>
             </div>
           )}

@@ -352,6 +352,7 @@ async function handleGenerateRecords(request: GenerateRequest, req?: Request): P
             .single();
           organizationId = profile?.organization_id;
           console.log(`Successfully authenticated user ${userId} with organization ${organizationId}`);
+          await logToAI('GENERATE_CONTEXT', `Resolved user context for domain generation`, { userId, organizationId });
         } else {
           console.log('Authentication failed:', authError?.message);
         }
@@ -371,12 +372,11 @@ async function handleGenerateRecords(request: GenerateRequest, req?: Request): P
                   const subdomain = domainParts[0];
                   const rootDomain = domainParts.slice(1).join('.');
                   
-                  // Check if domain already exists
-                  const { data: existingDomain } = await supabaseClient
+                  const { data: existingDomain, error: existingDomainError } = await supabaseClient
                     .from('custom_domains')
-                    .select('id')
+                    .select('id, organization_id, status, is_active')
                     .eq('domain_name', domain)
-                    .single();
+                    .maybeSingle();
                   
                   if (!existingDomain) {
                     // Create new domain record
@@ -391,17 +391,42 @@ async function handleGenerateRecords(request: GenerateRequest, req?: Request): P
                         dns_record_type: 'CNAME',
                         dns_record_value: 'secure.disclosurely.com',
                         created_by: userId,
-                        status: 'pending'
+                        status: 'pending',
+                        is_active: false,
+                        is_primary: false
                       });
                     
                     if (insertError) {
                       console.log('Could not create domain record (may already exist):', insertError);
                     } else {
                       console.log(`Created domain record in database for ${domain}`);
-                      await logToAI('GENERATE_DB_CREATE', `Created domain record in database: ${domain}`)
+                      await logToAI('GENERATE_DB_CREATE', `Created domain record in database: ${domain}`, { organizationId })
                     }
                   } else {
-                    console.log(`Domain record already exists in database: ${domain}`);
+                    console.log(`Domain record already exists in database: ${domain}`, existingDomain);
+                    // Ensure domain is linked to current organization and reset status to pending
+                    const updatePayload: Record<string, any> = {
+                      organization_id: organizationId,
+                      subdomain,
+                      root_domain,
+                      status: 'pending',
+                      is_active: false,
+                      is_primary: existingDomain.organization_id === organizationId ? existingDomain.is_active && existingDomain.status === 'active' : false,
+                      dns_record_type: 'CNAME',
+                      dns_record_value: 'secure.disclosurely.com'
+                    };
+                    
+                    const { error: updateExistingError } = await supabaseClient
+                      .from('custom_domains')
+                      .update(updatePayload)
+                      .eq('id', existingDomain.id);
+                    
+                    if (updateExistingError) {
+                      console.log('Could not update existing domain record:', updateExistingError);
+                    } else {
+                      console.log(`Updated existing domain record for ${domain} and reset status to pending`);
+                      await logToAI('GENERATE_DB_UPDATE', `Reset domain to pending for new verification: ${domain}`, { organizationId })
+                    }
                   }
                 }
 
@@ -877,6 +902,66 @@ async function handleActivateDomain(request: VerifyRequest): Promise<{ success: 
   }
 }
 
+async function handleListDomainsForUser(req: Request): Promise<{ success: boolean; domains?: any[]; message?: string; organizationId?: string }> {
+  try {
+    const authHeader = req.headers.get('Authorization');
+    if (!authHeader) {
+      return { success: false, message: 'Authorization header missing' };
+    }
+
+    const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
+    const supabaseAnonKey = Deno.env.get('SUPABASE_ANON_KEY') ?? '';
+    const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
+
+    const authClient = createClient(supabaseUrl, supabaseAnonKey, {
+      global: {
+        headers: { Authorization: authHeader },
+      },
+    });
+
+    const { data: { user }, error: authError } = await authClient.auth.getUser();
+    if (authError || !user) {
+      await logToAI('LIST_DOMAINS_ERROR', 'Could not authenticate user for domain listing', { error: authError?.message });
+      return { success: false, message: 'Unauthorized' };
+    }
+
+    const { data: profile, error: profileError } = await authClient
+      .from('profiles')
+      .select('organization_id')
+      .eq('id', user.id)
+      .single();
+
+    if (profileError || !profile?.organization_id) {
+      await logToAI('LIST_DOMAINS_ERROR', 'No organization found for user when listing domains', { userId: user.id, error: profileError?.message });
+      return { success: false, message: 'No organization found' };
+    }
+
+    const serviceClient = createClient(supabaseUrl, supabaseServiceKey);
+    const { data: domains, error: domainError } = await serviceClient
+      .from('custom_domains')
+      .select('id, domain_name, status, is_active, is_primary, activated_at, verified_at, last_checked_at, created_at')
+      .eq('organization_id', profile.organization_id)
+      .order('created_at', { ascending: false });
+
+    if (domainError) {
+      await logToAI('LIST_DOMAINS_ERROR', 'Failed to fetch domains for organization', { organizationId: profile.organization_id, error: domainError.message });
+      return { success: false, message: 'Failed to fetch domains' };
+    }
+
+    await logToAI('LIST_DOMAINS_SUCCESS', 'Fetched custom domains for organization', { organizationId: profile.organization_id, domainCount: domains?.length || 0 });
+
+    return {
+      success: true,
+      domains: domains || [],
+      organizationId: profile.organization_id,
+    };
+  } catch (error) {
+    console.error('Error listing domains for user:', error);
+    await logToAI('LIST_DOMAINS_ERROR', 'Unexpected error listing domains', { error: error.message });
+    return { success: false, message: `Unexpected error: ${error.message}` };
+  }
+}
+
 async function handleDeleteDomain(request: DeleteRequest): Promise<{ success: boolean; message: string }> {
   const { domain } = request;
 
@@ -1062,6 +1147,18 @@ serve(async (req) => {
         JSON.stringify(result),
         { 
           status: result.success ? 200 : 400,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+        }
+      );
+    }
+
+    if (action === 'list-domains') {
+      console.log('Handling list-domains action');
+      const result = await handleListDomainsForUser(req);
+      return new Response(
+        JSON.stringify(result),
+        {
+          status: result.success ? 200 : 401,
           headers: { ...corsHeaders, 'Content-Type': 'application/json' }
         }
       );
