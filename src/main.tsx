@@ -6,6 +6,80 @@ import { I18nextProvider } from 'react-i18next'
 import './index.css'
 import i18n from './i18n/config'
 import ErrorBoundary from './components/forms/ErrorBoundary'
+import * as Sentry from "@sentry/react"
+
+// Initialize Sentry BEFORE React
+if (import.meta.env.VITE_SENTRY_DSN) {
+  Sentry.init({
+    dsn: import.meta.env.VITE_SENTRY_DSN,
+    environment: import.meta.env.VITE_SENTRY_ENVIRONMENT || 'development',
+    release: import.meta.env.VITE_SENTRY_RELEASE || 'unknown',
+    
+    // Performance Monitoring
+    integrations: [
+      Sentry.browserTracingIntegration(),
+      Sentry.replayIntegration({
+        maskAllText: true,
+        blockAllMedia: true,
+      }),
+    ],
+    
+    // Performance Monitoring sample rate
+    tracesSampleRate: import.meta.env.PROD ? 0.1 : 1.0, // 10% in prod, 100% in dev
+    
+    // Session Replay sample rate
+    replaysSessionSampleRate: 0.1, // 10% of sessions
+    replaysOnErrorSampleRate: 1.0, // 100% of sessions with errors
+    
+    // Filter out sensitive data
+    beforeSend(event, hint) {
+      // Skip localhost errors in development
+      if (window.location.hostname === 'localhost' && !import.meta.env.PROD) {
+        return null
+      }
+      
+      // Redact sensitive information from error messages
+      if (event.message) {
+        event.message = event.message
+          .replace(/Bearer\s+[^\s]+/g, 'Bearer [REDACTED]')
+          .replace(/password=\S+/gi, 'password=[REDACTED]')
+          .replace(/token=\S+/gi, 'token=[REDACTED]')
+          .replace(/apikey=\S+/gi, 'apikey=[REDACTED]')
+      }
+      
+      // Redact sensitive data from request/response bodies
+      if (event.request) {
+        delete event.request.cookies
+        if (event.request.data && typeof event.request.data === 'object') {
+          const sanitized = { ...event.request.data }
+          delete sanitized.password
+          delete sanitized.token
+          delete sanitized.apiKey
+          event.request.data = sanitized
+        }
+      }
+      
+      return event
+    },
+    
+    // Ignore specific errors
+    ignoreErrors: [
+      // Network errors (handled by app retry logic)
+      'NetworkError',
+      'Failed to fetch',
+      'Load failed',
+      // Browser extension errors
+      'chrome-extension://',
+      'moz-extension://',
+      // React hydration errors (non-critical)
+      'Hydration failed',
+    ],
+  })
+  
+  console.log('✅ Sentry initialized:', import.meta.env.VITE_SENTRY_ENVIRONMENT)
+} else {
+  console.warn('⚠️ Sentry DSN not found - error monitoring disabled')
+}
 
 const queryClient = new QueryClient({
   defaultOptions: {

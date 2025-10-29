@@ -2,6 +2,7 @@ import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react-swc";
 import path from "path";
 import { componentTagger } from "lovable-tagger";
+import { sentryVitePlugin } from "@sentry/vite-plugin";
 
 // https://vitejs.dev/config/
 export default defineConfig(({ mode }) => ({
@@ -12,8 +13,22 @@ export default defineConfig(({ mode }) => ({
   },
   plugins: [
     react(),
-    mode === 'development' &&
-    componentTagger(),
+    mode === 'development' && componentTagger(),
+    mode === 'production' && process.env.SENTRY_AUTH_TOKEN && sentryVitePlugin({
+      org: process.env.SENTRY_ORG || "disclosurely",
+      project: process.env.SENTRY_PROJECT || "disclosurely-production",
+      authToken: process.env.SENTRY_AUTH_TOKEN,
+      sourcemaps: {
+        assets: "./dist/**",
+        filesToDeleteAfterUpload: ["./dist/**/*.map"],
+      },
+      release: {
+        name: process.env.VITE_SENTRY_RELEASE || process.env.VERCEL_GIT_COMMIT_SHA || "unknown",
+        deploy: {
+          env: process.env.VITE_SENTRY_ENVIRONMENT || "production",
+        },
+      },
+    }),
   ].filter(Boolean),
   resolve: {
     alias: {
@@ -21,6 +36,8 @@ export default defineConfig(({ mode }) => ({
     },
   },
   build: {
+    // Generate source maps for Sentry
+    sourcemap: true,
     // Optimize chunk splitting
     rollupOptions: {
       output: {
