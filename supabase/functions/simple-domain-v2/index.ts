@@ -173,8 +173,15 @@ serve(async (req) => {
               
               const isPrimary = !existingPrimary; // Only set as primary if no other primary exists
               
+              // Parse subdomain and root domain
+              const domainParts = domain.split('.');
+              const subdomain = domainParts[0];
+              const rootDomain = domainParts.slice(1).join('.');
+              
               const { data: savedDomain, error: dbError } = await db.from('custom_domains').upsert({
                 domain_name: domain,
+                subdomain: subdomain,
+                root_domain: rootDomain,
                 organization_id: profile.organization_id,
                 status: 'active',
                 is_active: true,
