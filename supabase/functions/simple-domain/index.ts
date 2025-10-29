@@ -774,30 +774,32 @@ async function handleVerifyDomain(request: VerifyRequest, req?: Request): Promis
     }
 
     if (domainRecord) {
-      const organizationIdForDomain = domainRecord.organization_id || organizationId;
+      let organizationIdForDomain = domainRecord.organization_id || organizationId;
+      const existingOrg = domainRecord.organization_id;
 
+      // If we couldn't resolve the organization, we still proceed but won't try to set primary
       if (!organizationIdForDomain) {
-        console.error('Domain record has no organization associated and user context unavailable');
-        await logToAI('VERIFY_ERROR', `Domain record missing organization_id and user context unavailable: ${domain}`);
-        return {
-          success: true,
-          message: `Domain ${domain} verified with Vercel, but organization context was missing. Please regenerate DNS records from the dashboard.`
-        };
+        console.warn(`Domain ${domain} has no organization context; proceeding with status update without primary assignment.`);
       }
 
-      // Check if there's already a primary domain for this org
-      const { data: primaryDomains, error: primaryError } = await serviceClient
-        .from('custom_domains')
-        .select('id')
-        .eq('organization_id', organizationIdForDomain)
-        .eq('is_primary', true);
+      let shouldSetPrimary = false;
+      if (organizationIdForDomain) {
+        const { data: primaryDomains, error: primaryError } = await serviceClient
+          .from('custom_domains')
+          .select('id')
+          .eq('organization_id', organizationIdForDomain)
+          .eq('is_primary', true);
 
-      if (primaryError) {
-        console.error('Failed to check existing primary domains:', primaryError);
-        await logToAI('VERIFY_ERROR', `Failed to check existing primary domains for ${domain}`, { organizationId: organizationIdForDomain, error: primaryError.message });
+        if (primaryError) {
+          console.error('Failed to check existing primary domains:', primaryError);
+          await logToAI('VERIFY_ERROR', `Failed to check existing primary domains for ${domain}`, { organizationId: organizationIdForDomain, error: primaryError.message });
+        } else {
+          shouldSetPrimary = !primaryDomains || primaryDomains.length === 0;
+        }
+      } else {
+        // Preserve existing primary flag if no organization context
+        shouldSetPrimary = !!domainRecord.is_primary;
       }
-
-      const shouldSetPrimary = !primaryDomains || primaryDomains.length === 0;
 
       const updatePayload: Record<string, any> = {
         status: 'active',
@@ -808,8 +810,7 @@ async function handleVerifyDomain(request: VerifyRequest, req?: Request): Promis
         last_checked_at: new Date().toISOString(),
       };
 
-      // If the domain was previously associated with another organization, move it
-      if (!domainRecord.organization_id && organizationIdForDomain) {
+      if (!existingOrg && organizationIdForDomain) {
         updatePayload.organization_id = organizationIdForDomain;
       }
 
@@ -826,7 +827,7 @@ async function handleVerifyDomain(request: VerifyRequest, req?: Request): Promis
           organizationId: organizationIdForDomain,
           setAsPrimary: shouldSetPrimary 
         })
-        console.log(`Domain ${domain} updated in database: active=true, status=active, is_primary=${shouldSetPrimary}`);
+        console.log(`Domain ${domain} updated in database: active=true, status=active, is_primary=${shouldSetPrimary}, organization=${organizationIdForDomain}`);
       }
     } else {
       console.error('Domain record not found or could not be created after verification');
