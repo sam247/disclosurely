@@ -10,39 +10,6 @@ const corsHeaders = {
 
 console.log('[simple-domain-v2] Loaded');
 
-// Domain validation - basic format check
-function isValidDomain(domain: string): boolean {
-  // RFC-compliant domain regex (allows subdomains, hyphens, but not underscores or spaces)
-  const domainRegex = /^(?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\.)+[a-z]{2,}$/i;
-  return domainRegex.test(domain);
-}
-
-// Domain parsing helper - handles apex domains and multi-level subdomains
-function parseDomain(fullDomain: string): { subdomain: string; rootDomain: string } {
-  const parts = fullDomain.split('.');
-  
-  // Handle apex domains (e.g., "example.com")
-  if (parts.length === 2) {
-    return {
-      subdomain: '@', // @ represents apex/root
-      rootDomain: fullDomain,
-    };
-  }
-  
-  // Handle subdomains (e.g., "app.example.com", "team.app.example.com")
-  if (parts.length >= 3) {
-    const subdomain = parts[0];
-    const rootDomain = parts.slice(1).join('.');
-    return { subdomain, rootDomain };
-  }
-  
-  // Fallback for single-part domains (shouldn't happen but be safe)
-  return {
-    subdomain: fullDomain,
-    rootDomain: fullDomain,
-  };
-}
-
 // Vercel API helper
 class VercelClient {
   private token: string;
@@ -109,30 +76,6 @@ serve(async (req) => {
 
     // GENERATE RECORDS
     if (action === 'generate') {
-      // Validate domain format
-      if (!isValidDomain(domain)) {
-        console.error(`Invalid domain format: ${domain}`);
-        return new Response(
-          JSON.stringify({ success: false, message: 'Invalid domain format. Please enter a valid domain (e.g., app.example.com)' }),
-          { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-        );
-      }
-      
-      // Check if domain already exists in another organization
-      const { data: existingDomain } = await db
-        .from('custom_domains')
-        .select('id, organization_id')
-        .eq('domain_name', domain)
-        .single();
-      
-      if (existingDomain) {
-        console.error(`Domain ${domain} already registered to another organization`);
-        return new Response(
-          JSON.stringify({ success: false, message: 'This domain is already registered. Please use a different domain.' }),
-          { status: 409, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-        );
-      }
-      
       console.log(`Adding domain ${domain} to Vercel project...`);
       const result = await vercel.addDomain(domain);
       console.log(`Vercel result:`, JSON.stringify(result, null, 2));
@@ -230,8 +173,10 @@ serve(async (req) => {
               
               const isPrimary = !existingPrimary; // Only set as primary if no other primary exists
               
-              // Parse subdomain and root domain using helper function
-              const { subdomain, rootDomain } = parseDomain(domain);
+              // Parse subdomain and root domain
+              const domainParts = domain.split('.');
+              const subdomain = domainParts[0];
+              const rootDomain = domainParts.slice(1).join('.');
               
               const { data: savedDomain, error: dbError } = await db.from('custom_domains').upsert({
                 domain_name: domain,
@@ -248,13 +193,7 @@ serve(async (req) => {
               }).select().single();
               
               if (dbError) {
-                console.error('Database save failed, rolling back from Vercel:', dbError);
-                // ROLLBACK: Delete from Vercel since DB save failed
-                await vercel.deleteDomain(domain);
-                return new Response(
-                  JSON.stringify({ success: false, message: 'Failed to save domain configuration. Please try again.' }),
-                  { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-                );
+                console.error('Database error:', dbError);
               } else {
                 console.log('Domain saved successfully:', savedDomain);
               }
