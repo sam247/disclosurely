@@ -76,18 +76,6 @@ const LinkGenerator = () => {
     || customDomains?.find(d => d.is_active && d.status === 'active')?.domain_name 
     || null;
 
-  // Debug logging
-  useEffect(() => {
-    if (user) {
-      console.log('🔍 LinkGenerator Debug:', {
-        customDomains,
-        primaryDomain,
-        brandedUrl: primaryDomain && primaryLink ? `https://${primaryDomain}/secure/tool/submit/${primaryLink.link_token}` : null,
-        user: user.id
-      });
-    }
-  }, [customDomains, primaryDomain, primaryLink, user]);
-
   // Fetch the primary active link
   const { data: primaryLink, isLoading } = useQuery({
     queryKey: ['primary-link'],
@@ -173,6 +161,18 @@ const LinkGenerator = () => {
   const brandedUrl = primaryDomain && primaryLink 
     ? `https://${primaryDomain}/secure/tool/submit/${primaryLink.link_token}` 
     : null;
+
+  // Debug logging - MUST be after primaryLink is defined
+  useEffect(() => {
+    if (user) {
+      console.log('🔍 LinkGenerator Debug:', {
+        customDomains,
+        primaryDomain,
+        brandedUrl: primaryDomain && primaryLink ? `https://${primaryDomain}/secure/tool/submit/${primaryLink.link_token}` : null,
+        user: user.id
+      });
+    }
+  }, [customDomains, primaryDomain, primaryLink, user, brandedUrl]);
   
   // Check if branded link is actually accessible via edge function
   useEffect(() => {
