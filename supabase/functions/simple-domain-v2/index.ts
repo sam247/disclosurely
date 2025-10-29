@@ -142,9 +142,12 @@ serve(async (req) => {
 
     // VERIFY DOMAIN
     if (action === 'verify') {
+      console.log(`Verifying domain ${domain} with Vercel...`);
       const result = await vercel.verifyDomain(domain);
+      console.log(`Vercel verification result:`, JSON.stringify(result, null, 2));
       
       if (result.success && result.verified) {
+        console.log('Domain verified! Updating database...');
         // Update database
         const authHeader = req.headers.get('Authorization');
         if (authHeader) {
@@ -157,21 +160,43 @@ serve(async (req) => {
             const { data: profile } = await authClient.from('profiles').select('organization_id').eq('id', user.id).single();
             
             if (profile?.organization_id) {
-              await db.from('custom_domains').upsert({
+              console.log(`Saving domain for organization ${profile.organization_id}`);
+              
+              // Check if there are any other primary domains
+              const { data: existingPrimary } = await db
+                .from('custom_domains')
+                .select('id')
+                .eq('organization_id', profile.organization_id)
+                .eq('is_primary', true)
+                .neq('domain_name', domain)
+                .single();
+              
+              const isPrimary = !existingPrimary; // Only set as primary if no other primary exists
+              
+              const { data: savedDomain, error: dbError } = await db.from('custom_domains').upsert({
                 domain_name: domain,
                 organization_id: profile.organization_id,
                 status: 'active',
                 is_active: true,
-                is_primary: true,
+                is_primary: isPrimary,
                 verified_at: new Date().toISOString(),
-              });
+              }, {
+                onConflict: 'domain_name',
+                ignoreDuplicates: false
+              }).select().single();
+              
+              if (dbError) {
+                console.error('Database error:', dbError);
+              } else {
+                console.log('Domain saved successfully:', savedDomain);
+              }
             }
           }
         }
       }
 
       return new Response(
-        JSON.stringify({ success: result.verified, message: result.verified ? 'Domain verified!' : 'Verification pending' }),
+        JSON.stringify({ success: result.verified, message: result.verified ? 'Domain verified and activated!' : 'Verification pending' }),
         { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
