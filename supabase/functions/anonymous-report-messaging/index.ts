@@ -1,6 +1,7 @@
 import "https://deno.land/x/xhr@0.1.0/mod.ts";
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.50.0";
+import { checkRateLimit, rateLimiters, rateLimitResponse } from '../_shared/rateLimit.ts'
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -44,6 +45,13 @@ serve(async (req) => {
   // CORS preflight
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
+  }
+
+  // 🔒 Rate limiting: 20 messages per hour per tracking ID (extracted later)
+  const rateLimit = await checkRateLimit(req, rateLimiters.messaging)
+  if (!rateLimit.success) {
+    console.warn('⚠️ Rate limit exceeded for messaging')
+    return rateLimitResponse(rateLimit, corsHeaders)
   }
 
   const SUPABASE_URL = Deno.env.get("SUPABASE_URL");

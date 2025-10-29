@@ -3,6 +3,7 @@ console.log('submit-anonymous-report: module loaded')
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.50.0'
 import { Resend } from "https://esm.sh/resend@4.0.0"
+import { checkRateLimit, rateLimiters, rateLimitResponse } from '../_shared/rateLimit.ts'
 
 const DISCLOSURELY_PRIMARY_COLOR = '#2563eb'
 const DISCLOSURELY_LOGO_URL = 'https://app.disclosurely.com/lovable-uploads/416d39db-53ff-402e-a2cf-26d1a3618601.png'
@@ -267,6 +268,13 @@ serve(async (req) => {
     if (req.method === 'OPTIONS') {
       console.log('OPTIONS request')
       return new Response('ok', { headers: corsHeaders })
+    }
+
+    // 🔒 Rate limiting: 5 submissions per 15 minutes per IP
+    const rateLimit = await checkRateLimit(req, rateLimiters.reportSubmission)
+    if (!rateLimit.success) {
+      console.warn('⚠️ Rate limit exceeded for report submission')
+      return rateLimitResponse(rateLimit, corsHeaders)
     }
 
     console.log('Processing POST request')

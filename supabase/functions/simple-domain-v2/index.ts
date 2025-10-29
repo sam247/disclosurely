@@ -1,5 +1,6 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
+import { checkRateLimit, rateLimiters, rateLimitResponse } from '../_shared/rateLimit.ts'
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -95,6 +96,13 @@ class VercelClient {
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response('OK', { status: 200, headers: corsHeaders });
+  }
+
+  // 🔒 Rate limiting: 10 domain operations per 10 seconds per IP
+  const rateLimit = await checkRateLimit(req, rateLimiters.domainOperations)
+  if (!rateLimit.success) {
+    console.warn('⚠️ Rate limit exceeded for domain operations')
+    return rateLimitResponse(rateLimit, corsHeaders)
   }
 
   try {

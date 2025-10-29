@@ -1,6 +1,7 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.50.0";
 import { Resend } from "npm:resend@2.0.0";
+import { checkRateLimit, rateLimiters, rateLimitResponse } from '../_shared/rateLimit.ts'
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -75,6 +76,13 @@ const createEmailTemplate = (options: {
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response('ok', { headers: corsHeaders });
+  }
+
+  // 🔒 Rate limiting: 5 OTP emails per 15 minutes per IP
+  const rateLimit = await checkRateLimit(req, rateLimiters.auth)
+  if (!rateLimit.success) {
+    console.warn('⚠️ Rate limit exceeded for OTP email')
+    return rateLimitResponse(rateLimit, corsHeaders)
   }
 
   try {
