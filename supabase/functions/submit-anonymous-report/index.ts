@@ -2,6 +2,7 @@ console.log('submit-anonymous-report: module loaded')
 
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.50.0'
+import { Resend } from "https://esm.sh/resend@4.0.0"
 
 // Enhanced logging function
 async function logToSystem(supabase: any, level: string, context: string, message: string, data?: any, error?: any) {
@@ -57,6 +58,139 @@ async function logAuditEvent(supabase: any, event: any) {
     }
   } catch (error) {
     console.error('Error logging audit event:', error)
+  }
+}
+
+async function sendReportNotificationEmails(supabase: any, report: any, organizationId: string) {
+  try {
+    // Fetch organization info for branding / fallback email
+    const { data: organization } = await supabase
+      .from('organizations')
+      .select('name, brand_color, notification_email, settings')
+      .eq('id', organizationId)
+      .maybeSingle()
+
+    // Fetch org members with roles that should receive notifications
+    const { data: members } = await supabase
+      .from('profiles')
+      .select(`
+        id,
+        email,
+        first_name,
+        user_roles!inner(role, is_active)
+      `)
+      .eq('organization_id', organizationId)
+      .eq('is_active', true)
+      .in('user_roles.role', ['admin', 'case_handler', 'org_admin'])
+      .eq('user_roles.is_active', true)
+
+    const recipients: { email: string; name: string; source: string; userId: string | null }[] = []
+
+    if (members && members.length > 0) {
+      for (const member of members) {
+        if (member.email) {
+          recipients.push({
+            email: member.email,
+            name: member.first_name || 'Team Member',
+            source: 'org_member',
+            userId: member.id
+          })
+        }
+      }
+    }
+
+    // Fallback to organization notification email if defined
+    if (recipients.length === 0) {
+      const fallbackEmail = organization?.notification_email || organization?.settings?.notification_email
+      if (fallbackEmail) {
+        recipients.push({
+          email: fallbackEmail,
+          name: organization?.name || 'Administrator',
+          source: 'org_notification',
+          userId: null
+        })
+      }
+    }
+
+    if (recipients.length === 0) {
+      console.warn('No email recipients found for organization', organizationId)
+      return
+    }
+
+    const subject = `New Report Submitted - ${report.tracking_id}`
+    const brandColor = organization?.brand_color || '#2563eb'
+
+    for (const recipient of recipients) {
+      try {
+        const emailResponse = await resend.emails.send({
+          from: 'Disclosurely <notifications@disclosurely.com>',
+          to: [recipient.email],
+          subject,
+          html: `
+            <div style="font-family: Arial, sans-serif; max-width:600px; margin:0 auto;">
+              <div style="background:${brandColor}; color:white; padding:20px; border-radius:8px 8px 0 0;">
+                <h1 style="margin:0; font-size:22px;">New Report Submitted</h1>
+                <p style="margin:6px 0 0 0; font-size:14px; opacity:0.9;">${organization?.name || 'Disclosurely'} Compliance Team</p>
+              </div>
+              <div style="background:#f9fafb; padding:24px; border:1px solid #e5e7eb; border-top:none; border-radius:0 0 8px 8px;">
+                <p style="font-size:15px; color:#1f2937;">Hello ${recipient.name},</p>
+                <p style="font-size:15px; color:#374151;">A new report has been submitted and needs your attention:</p>
+                <div style="background:white; border:1px solid #e5e7eb; border-radius:6px; padding:16px; margin:18px 0;">
+                  <p style="margin:0 0 8px 0; font-size:14px;"><strong>Title:</strong> ${report.title}</p>
+                  <p style="margin:0 0 8px 0; font-size:14px;"><strong>Tracking ID:</strong> ${report.tracking_id}</p>
+                  <p style="margin:0 0 8px 0; font-size:14px;"><strong>Type:</strong> ${report.report_type}</p>
+                  <p style="margin:0; font-size:14px;"><strong>Submitted:</strong> ${new Date(report.created_at).toLocaleString()}</p>
+                </div>
+                <p style="font-size:14px; color:#374151;">Please log in to the dashboard to review and take action.</p>
+                <div style="text-align:center; margin:26px 0;">
+                  <a href="https://app.disclosurely.com/dashboard" style="background:${brandColor}; color:white; padding:12px 28px; border-radius:6px; text-decoration:none; display:inline-block; font-weight:600;">View Dashboard</a>
+                </div>
+                <p style="font-size:12px; color:#6b7280;">This is an automated notification from ${organization?.name || 'Disclosurely'}. If you believe you received this in error, please contact your administrator.</p>
+              </div>
+            </div>
+          `
+        })
+
+        console.log('Notification email sent to', recipient.email, emailResponse?.data?.id)
+
+        await supabase
+          .from('email_notifications')
+          .insert({
+            user_id: recipient.userId,
+            organization_id: organizationId,
+            report_id: report.id,
+            notification_type: 'new_report',
+            email_address: recipient.email,
+            subject,
+            status: emailResponse?.data?.id ? 'sent' : 'unknown',
+            metadata: {
+              tracking_id: report.tracking_id,
+              resend_id: emailResponse?.data?.id || null,
+              recipient_source: recipient.source
+            }
+          })
+      } catch (emailError) {
+        console.error('Failed to send notification email to', recipient.email, emailError)
+        await supabase
+          .from('email_notifications')
+          .insert({
+            user_id: recipient.userId,
+            organization_id: organizationId,
+            report_id: report.id,
+            notification_type: 'new_report',
+            email_address: recipient.email,
+            subject,
+            status: 'failed',
+            metadata: {
+              tracking_id: report.tracking_id,
+              error: (emailError as Error).message,
+              recipient_source: recipient.source
+            }
+          })
+      }
+    }
+  } catch (error) {
+    console.error('Failed to send report notification emails:', error)
   }
 }
 
@@ -168,28 +302,9 @@ serve(async (req) => {
     
     console.log('✅ Report created successfully:', report.id)
     
-    // Trigger notification email processing (non-blocking)
-    try {
-      console.log('🛎️ Triggering notification email processing...')
-      await fetch(
-        `${Deno.env.get('SUPABASE_URL')}/functions/v1/process-notifications-to-emails`,
-        {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')}`
-          },
-          body: JSON.stringify({ trigger: 'report_created', reportId: report.id })
-        }
-      )
-    } catch (notificationError) {
-      console.error('⚠️ Failed to trigger notification email processing:', notificationError)
-      await logToSystem(supabase, 'warn', 'submission', 'Failed to trigger notification emails', {
-        error: notificationError.message,
-        reportId: report.id
-      });
-    }
-    
+    // Trigger email notifications directly (no bridge)
+    await sendReportNotificationEmails(supabase, report, linkData.organization_id)
+
     // Log audit event
     console.log('📋 Logging audit event...')
     await logAuditEvent(supabase, {
