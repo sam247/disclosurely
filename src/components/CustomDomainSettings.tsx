@@ -80,7 +80,7 @@ const CustomDomainSettings = () => {
   const fetchExistingDomains = useCallback(async () => {
     try {
       const { data: { session } } = await supabase.auth.getSession();
-      const response = await supabase.functions.invoke('simple-domain', {
+      const response = await supabase.functions.invoke('simple-domain-v2', {
         body: { action: 'list-domains' },
         headers: session?.access_token ? {
           Authorization: `Bearer ${session.access_token}`
@@ -184,7 +184,7 @@ const CustomDomainSettings = () => {
     try {
       // Call our simple Edge Function to generate verification records
       const { data: { session } } = await supabase.auth.getSession();
-      const response = await supabase.functions.invoke('simple-domain-test', {
+      const response = await supabase.functions.invoke('simple-domain-v2', {
         body: { 
           action: 'generate',
           domain: domain.trim() 
@@ -336,7 +336,7 @@ const CustomDomainSettings = () => {
 
       const { data: { session } } = await supabase.auth.getSession();
 
-      const response = await supabase.functions.invoke('simple-domain', {
+      const response = await supabase.functions.invoke('simple-domain-v2', {
         body: { 
           action: 'verify',
           domain: domain.trim() 
@@ -456,7 +456,7 @@ const CustomDomainSettings = () => {
 
       const { data: { session } } = await supabase.auth.getSession();
 
-      const response = await supabase.functions.invoke('simple-domain', {
+      const response = await supabase.functions.invoke('simple-domain-v2', {
         body: {
           action: 'delete',
           domain: domainToDelete

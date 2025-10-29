@@ -50,7 +50,7 @@ const LinkGenerator = () => {
 
       const { data: { session } } = await supabase.auth.getSession();
 
-      const response = await supabase.functions.invoke('simple-domain', {
+      const response = await supabase.functions.invoke('simple-domain-v2', {
         body: { action: 'list-domains' },
         headers: session?.access_token ? {
           Authorization: `Bearer ${session.access_token}`
@@ -209,7 +209,7 @@ const LinkGenerator = () => {
         const { data: { session } } = await supabase.auth.getSession();
 
         try {
-          const response = await supabase.functions.invoke('simple-domain', {
+          const response = await supabase.functions.invoke('simple-domain-v2', {
             body: {
               action: 'check-accessibility',
               domain: primaryDomain,
