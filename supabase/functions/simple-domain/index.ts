@@ -1264,11 +1264,15 @@ serve(async (req) => {
     }
 
     if (action === 'verify') {
-      console.log('Handling verify action');
+      console.log('Handling verify action for domain:', domain);
       await logToAI('VERIFY_START', `Starting domain verification for domain: ${domain}`)
       const result = await handleVerifyDomain(body, req);
       console.log('Verify result:', JSON.stringify(result));
-      await logToAI('VERIFY_COMPLETE', `Domain verification completed for domain: ${domain}`, result)
+      await logToAI('VERIFY_COMPLETE', `Domain verification completed for domain: ${domain}`, { success: result.success, message: result.message })
+      
+      if (!result.success) {
+        console.error('Verification failed:', result.message);
+      }
       
       return new Response(
         JSON.stringify(result),
@@ -1280,11 +1284,15 @@ serve(async (req) => {
     }
 
     if (action === 'delete') {
-      console.log('Handling delete action');
+      console.log('Handling delete action for domain:', domain);
       await logToAI('DELETE_START', `Starting domain deletion for domain: ${domain}`)
       const result = await handleDeleteDomain(body, req);
       console.log('Delete result:', JSON.stringify(result));
-      await logToAI('DELETE_COMPLETE', `Domain deletion completed for domain: ${domain}`, result)
+      await logToAI('DELETE_COMPLETE', `Domain deletion completed for domain: ${domain}`, { success: result.success, message: result.message })
+      
+      if (!result.success) {
+        console.error('Deletion failed:', result.message);
+      }
       
       return new Response(
         JSON.stringify(result),

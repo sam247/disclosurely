@@ -41,15 +41,20 @@ const LinkGenerator = () => {
     queryKey: ['custom-domains', user?.id],
     enabled: !!user,
     refetchOnWindowFocus: true,
-    staleTime: 5000,
+    staleTime: 0, // Don't cache - always fetch fresh
     queryFn: async () => {
       if (!user) {
         console.log('🔍 LinkGenerator: No user, returning empty domains');
         return [];
       }
 
+      const { data: { session } } = await supabase.auth.getSession();
+
       const response = await supabase.functions.invoke('simple-domain', {
         body: { action: 'list-domains' },
+        headers: session?.access_token ? {
+          Authorization: `Bearer ${session.access_token}`
+        } : undefined
       });
 
       if (response.error) {
