@@ -195,55 +195,72 @@ const LinkGenerator = () => {
   
   // Check if branded link is actually accessible via edge function
   useEffect(() => {
-    if (brandedUrl && primaryDomain && user && primaryLink) {
-      setBrandedLinkStatus('checking');
-      
-      // Use edge function to check domain accessibility
-      supabase.functions.invoke('simple-domain', {
-        body: {
-          action: 'check-accessibility',
-          domain: primaryDomain,
-          linkToken: primaryLink.link_token
-        }
-      })
-        .then((response) => {
+    let isCancelled = false;
+
+    async function runAccessibilityCheck() {
+      if (brandedUrl && primaryDomain && user && primaryLink) {
+        setBrandedLinkStatus('checking');
+
+        const { data: { session } } = await supabase.auth.getSession();
+
+        try {
+          const response = await supabase.functions.invoke('simple-domain', {
+            body: {
+              action: 'check-accessibility',
+              domain: primaryDomain,
+              linkToken: primaryLink.link_token
+            },
+            headers: session?.access_token ? {
+              Authorization: `Bearer ${session.access_token}`
+            } : undefined
+          });
+
           if (response.error) {
             console.error('Domain check error:', response.error);
-            // If domain is active in DB, assume accessible
             const primaryDomainData = customDomains?.find(d => d.domain_name === primaryDomain && d.is_active && d.status === 'active');
-            setBrandedLinkStatus(primaryDomainData ? 'accessible' : 'inaccessible');
+            if (!isCancelled) {
+              setBrandedLinkStatus(primaryDomainData ? 'accessible' : 'inaccessible');
+            }
             return;
           }
-          
+
           const result = response.data;
-          if (result.accessible) {
-            setBrandedLinkStatus('accessible');
-            // Log successful accessibility check
-            if (user?.id && result.organizationId) {
-              auditLogger.log({
-                eventType: 'custom_domain.checked',
-                category: 'system',
-                action: 'check_branded_link_accessibility',
-                actorType: 'user',
-                actorId: user.id,
-                organizationId: result.organizationId,
-                summary: `Branded link accessibility checked for ${primaryDomain}`,
-                metadata: { domain: primaryDomain, accessible: true }
-              }).catch(console.error);
+          if (!isCancelled) {
+            if (result.accessible) {
+              setBrandedLinkStatus('accessible');
+              if (user?.id && result.organizationId) {
+                auditLogger.log({
+                  eventType: 'custom_domain.checked',
+                  category: 'system',
+                  action: 'check_branded_link_accessibility',
+                  actorType: 'user',
+                  actorId: user.id,
+                  organizationId: result.organizationId,
+                  summary: `Branded link accessibility checked for ${primaryDomain}`,
+                  metadata: { domain: primaryDomain, accessible: true }
+                }).catch(console.error);
+              }
+            } else {
+              setBrandedLinkStatus('inaccessible');
             }
-          } else {
-            setBrandedLinkStatus('inaccessible');
           }
-        })
-        .catch((error) => {
+        } catch (error) {
           console.error('Domain accessibility check failed:', error);
-          // If domain is active and verified, assume it's working (optimistic)
           const primaryDomainData = customDomains?.find(d => d.domain_name === primaryDomain && d.is_active && d.status === 'active');
-          setBrandedLinkStatus(primaryDomainData ? 'accessible' : 'checking');
-        });
-    } else {
-      setBrandedLinkStatus(null);
+          if (!isCancelled) {
+            setBrandedLinkStatus(primaryDomainData ? 'accessible' : 'checking');
+          }
+        }
+      } else {
+        setBrandedLinkStatus(null);
+      }
     }
+
+    runAccessibilityCheck();
+
+    return () => {
+      isCancelled = true;
+    };
   }, [brandedUrl, primaryDomain, primaryLink?.link_token, customDomains, user]);
 
   if (isLoading || !primaryLink) {

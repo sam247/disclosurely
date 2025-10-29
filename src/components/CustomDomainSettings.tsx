@@ -128,7 +128,10 @@ const CustomDomainSettings = () => {
         body: { 
           action: 'generate',
           domain: domain.trim() 
-        }
+        },
+        headers: session?.access_token ? {
+          Authorization: `Bearer ${session.access_token}`
+        } : undefined
       });
 
       if (response.error) {
@@ -269,11 +272,16 @@ const CustomDomainSettings = () => {
         description: "Triggering Vercel verification...",
       });
 
+      const { data: { session } } = await supabase.auth.getSession();
+
       const response = await supabase.functions.invoke('simple-domain', {
         body: { 
           action: 'verify',
           domain: domain.trim() 
-        }
+        },
+        headers: session?.access_token ? {
+          Authorization: `Bearer ${session.access_token}`
+        } : undefined
       });
 
       if (response.error) {
@@ -384,11 +392,16 @@ const CustomDomainSettings = () => {
         description: "Removing domain from Vercel and database...",
       });
 
+      const { data: { session } } = await supabase.auth.getSession();
+
       const response = await supabase.functions.invoke('simple-domain', {
-        body: { 
+        body: {
           action: 'delete',
-          domain: domain.trim() 
-        }
+          domain: domain.trim()
+        },
+        headers: session?.access_token ? {
+          Authorization: `Bearer ${session.access_token}`
+        } : undefined
       });
 
       if (response.error) {
