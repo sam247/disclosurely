@@ -197,33 +197,8 @@ const OrganizationSettings = () => {
   }
 
   return (
-    <div className="p-6 space-y-6">
-      <div className="mb-6">
-        <h2 className="text-2xl font-bold">Organization Settings</h2>
-        <p className="text-muted-foreground">Manage your organization's branding and appearance</p>
-      </div>
-
-      {/* Custom Domains Notice */}
-      <Alert>
-        <ExternalLink className="h-4 w-4" />
-        <AlertDescription>
-          <strong>Custom Domains:</strong> To set up custom domains for your secure links (e.g., secure.yourcompany.com), 
-          please visit the <a href="/dashboard/settings" className="text-blue-600 hover:underline">Settings page</a> 
-          in your dashboard.
-        </AlertDescription>
-      </Alert>
-
-      {/* Organization Branding */}
+    <div className="space-y-6">
       <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Palette className="h-5 w-5" />
-            Organization Branding
-          </CardTitle>
-          <CardDescription>
-            Customize your organization's appearance and branding
-          </CardDescription>
-        </CardHeader>
         <CardContent className="space-y-6">
           {/* Organization Name */}
           <div className="space-y-2">

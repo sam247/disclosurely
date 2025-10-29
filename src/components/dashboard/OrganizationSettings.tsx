@@ -5,9 +5,9 @@ import { Separator } from '@/components/ui/separator';
 
 const OrganizationSettings = () => {
   return (
-    <div className="p-6 space-y-8 max-w-4xl">
+    <div className="p-6 space-y-8 max-w-6xl">
       <div>
-        <h2 className="text-2xl font-bold mb-2">Organization Settings</h2>
+        <h1 className="text-3xl font-bold mb-2">Settings</h1>
         <p className="text-muted-foreground">Manage your organization's branding and custom domains</p>
       </div>
 
@@ -15,9 +15,9 @@ const OrganizationSettings = () => {
 
       {/* Branding Section */}
       <div className="space-y-4">
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 mb-4">
           <Palette className="h-5 w-5 text-primary" />
-          <h3 className="text-xl font-semibold">Organization Branding</h3>
+          <h2 className="text-2xl font-semibold">Branding</h2>
         </div>
         <OrganizationSettingsBranding />
       </div>
@@ -26,9 +26,9 @@ const OrganizationSettings = () => {
 
       {/* Custom Domains Section */}
       <div className="space-y-4">
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 mb-4">
           <Globe className="h-5 w-5 text-primary" />
-          <h3 className="text-xl font-semibold">Custom Domains</h3>
+          <h2 className="text-2xl font-semibold">Custom Domains</h2>
         </div>
         <CustomDomainSettings />
       </div>
