@@ -304,7 +304,7 @@ class SimpleVercelClient {
   }
 }
 
-async function handleGenerateRecords(request: GenerateRequest): Promise<{ success: boolean; records?: DNSRecord[]; message?: string }> {
+async function handleGenerateRecords(request: GenerateRequest, req?: Request): Promise<{ success: boolean; records?: DNSRecord[]; message?: string }> {
   const { domain } = request;
 
   console.log('handleGenerateRecords called with:', { domain });
@@ -322,18 +322,28 @@ async function handleGenerateRecords(request: GenerateRequest): Promise<{ succes
   // Get user info for database operations
   const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
   const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
-  const supabaseClient = createClient(supabaseUrl, supabaseServiceKey);
   
   // Get auth token from request to find user (if req is provided)
   let userId = null;
   let organizationId = null;
   if (req) {
     try {
-      const authHeader = req.headers.get('Authorization') || '';
+      const authHeader = req.headers.get('Authorization');
       if (authHeader) {
-        const token = authHeader.replace('Bearer ', '');
-        const { data: { user } } = await supabaseClient.auth.getUser(token);
-        if (user) {
+        // Use ANON_KEY with Authorization header for proper RLS support
+        const supabaseClient = createClient(
+          supabaseUrl,
+          Deno.env.get('SUPABASE_ANON_KEY') ?? '',
+          {
+            global: {
+              headers: { Authorization: authHeader },
+            },
+          }
+        );
+        
+        const { data: { user }, error: authError } = await supabaseClient.auth.getUser();
+        
+        if (!authError && user) {
           userId = user.id;
           const { data: profile } = await supabaseClient
             .from('profiles')
@@ -341,12 +351,18 @@ async function handleGenerateRecords(request: GenerateRequest): Promise<{ succes
             .eq('id', user.id)
             .single();
           organizationId = profile?.organization_id;
+          console.log(`Successfully authenticated user ${userId} with organization ${organizationId}`);
+        } else {
+          console.log('Authentication failed:', authError?.message);
         }
       }
     } catch (error) {
       console.log('Could not get user info, will create/update domain without user:', error);
     }
   }
+  
+  // Use service role key for database operations (bypasses RLS)
+  const supabaseClient = createClient(supabaseUrl, supabaseServiceKey);
 
               try {
                 // Step 0.5: Create or update domain record in database if we have org info

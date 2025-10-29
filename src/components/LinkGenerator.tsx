@@ -32,22 +32,53 @@ const LinkGenerator = () => {
   const { data: customDomains, refetch: refetchDomains } = useQuery({
     queryKey: ['custom-domains', user?.id],
     queryFn: async () => {
-      if (!user) return [];
+      if (!user) {
+        console.log('🔍 LinkGenerator: No user, returning empty domains');
+        return [];
+      }
 
-      const { data: profile } = await supabase
+      const { data: profile, error: profileError } = await supabase
         .from('profiles')
         .select('organization_id')
         .eq('id', user.id)
         .single();
 
-      if (!profile?.organization_id) return [];
+      if (profileError) {
+        console.error('🔍 LinkGenerator: Profile fetch error:', profileError);
+        return [];
+      }
 
-      const { data: domains } = await supabase
+      if (!profile?.organization_id) {
+        console.log('🔍 LinkGenerator: No organization_id found for user');
+        return [];
+      }
+
+      console.log('🔍 LinkGenerator: Fetching domains for organization:', profile.organization_id);
+
+      // First, try to get all domains (less strict) to see what we have
+      const { data: allDomains, error: allDomainsError } = await supabase
+        .from('custom_domains')
+        .select('domain_name, is_active, is_primary, status, organization_id')
+        .eq('organization_id', profile.organization_id);
+
+      console.log('🔍 LinkGenerator: All domains (unfiltered):', allDomains);
+      if (allDomainsError) {
+        console.error('🔍 LinkGenerator: Error fetching all domains:', allDomainsError);
+      }
+
+      // Now fetch with active filter - include both 'active' and 'verified' status
+      const { data: domains, error: domainsError } = await supabase
         .from('custom_domains')
         .select('domain_name, is_active, is_primary, status')
         .eq('organization_id', profile.organization_id)
         .eq('is_active', true)
-        .eq('status', 'active');
+        .in('status', ['active', 'verified']);
+
+      if (domainsError) {
+        console.error('🔍 LinkGenerator: Error fetching active domains:', domainsError);
+      }
+
+      console.log('🔍 LinkGenerator: Active domains (filtered):', domains);
 
       return domains || [];
     },
@@ -72,8 +103,14 @@ const LinkGenerator = () => {
   }, [refetchDomains, queryClient, user?.id]);
 
   // Get the primary domain (prefer primary custom domain, then any active domain)
+  // First try: primary + active + status active
+  // Second try: primary + active (any status)
+  // Third try: any active + status active
+  // Fourth try: any active domain (any status)
   const primaryDomain = customDomains?.find(d => d.is_primary && d.is_active && d.status === 'active')?.domain_name 
+    || customDomains?.find(d => d.is_primary && d.is_active)?.domain_name
     || customDomains?.find(d => d.is_active && d.status === 'active')?.domain_name 
+    || customDomains?.find(d => d.is_active)?.domain_name
     || null;
 
   // Fetch the primary active link
