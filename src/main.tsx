@@ -51,7 +51,7 @@ if (import.meta.env.VITE_SENTRY_DSN) {
       if (event.request) {
         delete event.request.cookies
         if (event.request.data && typeof event.request.data === 'object') {
-          const sanitized = { ...event.request.data }
+          const sanitized = { ...event.request.data } as any
           delete sanitized.password
           delete sanitized.token
           delete sanitized.apiKey

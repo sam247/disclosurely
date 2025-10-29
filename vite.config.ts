@@ -13,8 +13,8 @@ export default defineConfig(({ mode }) => ({
   },
   plugins: [
     react(),
-    mode === 'development' && componentTagger(),
-    mode === 'production' && process.env.SENTRY_AUTH_TOKEN && sentryVitePlugin({
+    ...(mode === 'development' ? [componentTagger()] : []),
+    ...(mode === 'production' && process.env.SENTRY_AUTH_TOKEN ? [sentryVitePlugin({
       org: process.env.SENTRY_ORG || "disclosurely",
       project: process.env.SENTRY_PROJECT || "disclosurely-production",
       authToken: process.env.SENTRY_AUTH_TOKEN,
@@ -28,8 +28,8 @@ export default defineConfig(({ mode }) => ({
           env: process.env.VITE_SENTRY_ENVIRONMENT || "production",
         },
       },
-    }),
-  ].filter(Boolean),
+    })] : []),
+  ],
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "./src"),
