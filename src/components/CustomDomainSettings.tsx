@@ -105,8 +105,9 @@ const CustomDomainSettings = () => {
 
   // Clear input and localStorage when no domains exist in the database
   // This should only run when existingDomains changes (on mount and after domain operations)
+  // BUT NOT when user is actively generating records or has just generated them
   React.useEffect(() => {
-    if (existingDomains.length === 0) {
+    if (existingDomains.length === 0 && !isGenerating && records.length === 0) {
       // Check localStorage directly to see if we have stale data
       const hasStaleLocalStorage = 
         localStorage.getItem('custom-domain') ||
@@ -116,14 +117,13 @@ const CustomDomainSettings = () => {
       if (hasStaleLocalStorage) {
         console.log('No domains in database, clearing stale localStorage data');
         setDomain('');
-        setRecords([]);
         setVerificationResult(null);
         localStorage.removeItem('custom-domain');
         localStorage.removeItem('custom-domain-records');
         localStorage.removeItem('custom-domain-verification');
       }
     }
-  }, [existingDomains]); // Only run when existingDomains changes
+  }, [existingDomains, isGenerating, records]); // Include isGenerating and records to prevent clearing during active operations
 
   // Track previous domain to detect changes
   const prevDomainRef = React.useRef<string>('');
