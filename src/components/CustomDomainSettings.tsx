@@ -7,6 +7,8 @@ import { Badge } from '@/components/ui/badge';
 import { Copy, CheckCircle, AlertCircle, RefreshCw, Globe, Trash2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from '@/hooks/useAuth';
+import { auditLogger } from '@/utils/auditLogger';
 
 interface DNSRecord {
   type: string;
@@ -27,6 +29,8 @@ interface VerificationResult {
 }
 
 const CustomDomainSettings = () => {
+  const { user } = useAuth();
+  
   const [domain, setDomain] = useState(() => {
     // Load domain from localStorage on component mount
     if (typeof window !== 'undefined') {
@@ -177,6 +181,33 @@ const CustomDomainSettings = () => {
         }
         
         setRecords(validRecords);
+        
+        // AI Logging
+        if (user?.id) {
+          const { data: profile } = await supabase
+            .from('profiles')
+            .select('organization_id')
+            .eq('id', user.id)
+            .single();
+          
+          if (profile?.organization_id) {
+            auditLogger.log({
+              eventType: 'custom_domain.records_generated',
+              category: 'system',
+              action: 'generate_dns_records',
+              actorType: 'user',
+              actorId: user.id,
+              organizationId: profile.organization_id,
+              summary: `DNS records generated for domain: ${domain.trim()}`,
+              metadata: { 
+                domain: domain.trim(), 
+                recordCount: validRecords.length,
+                recordTypes: validRecords.map(r => r.type)
+              }
+            }).catch(console.error);
+          }
+        }
+        
         toast({
           title: "Verification Records Generated",
           description: "Add these DNS records to your domain provider",
@@ -269,6 +300,34 @@ const CustomDomainSettings = () => {
       });
 
       if (result.success) {
+        // AI Logging for successful verification
+        if (user?.id) {
+          const { data: profile } = await supabase
+            .from('profiles')
+            .select('organization_id')
+            .eq('id', user.id)
+            .single();
+          
+          if (profile?.organization_id) {
+            auditLogger.log({
+              eventType: 'custom_domain.verified',
+              category: 'system',
+              action: 'verify_domain',
+              actorType: 'user',
+              actorId: user.id,
+              organizationId: profile.organization_id,
+              summary: `Domain successfully verified: ${domain.trim()}`,
+              metadata: { 
+                domain: domain.trim(),
+                verificationSuccess: true
+              }
+            }).catch(console.error);
+          }
+        }
+        
+        // Clear records once verified successfully
+        setRecords([]);
+        
         toast({
           title: "Verification Successful",
           description: "Your domain is ready to use!",
@@ -329,6 +388,31 @@ const CustomDomainSettings = () => {
       const result = response.data;
 
       if (result.success) {
+        // AI Logging for domain deletion
+        if (user?.id) {
+          const { data: profile } = await supabase
+            .from('profiles')
+            .select('organization_id')
+            .eq('id', user.id)
+            .single();
+          
+          if (profile?.organization_id) {
+            auditLogger.log({
+              eventType: 'custom_domain.deleted',
+              category: 'system',
+              action: 'delete_domain',
+              actorType: 'user',
+              actorId: user.id,
+              organizationId: profile.organization_id,
+              summary: `Domain deleted: ${domain.trim()}`,
+              metadata: { 
+                domain: domain.trim(),
+                deletionSuccess: true
+              }
+            }).catch(console.error);
+          }
+        }
+        
         toast({
           title: "Domain Deleted",
           description: result.message || "Domain has been completely removed!",
@@ -433,7 +517,8 @@ const CustomDomainSettings = () => {
       </Card>
 
       {/* Step 2: DNS Records */}
-      {records.length > 0 && (
+      {/* Hide records once domain is successfully verified */}
+      {records.length > 0 && !verificationResult?.success && (
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">

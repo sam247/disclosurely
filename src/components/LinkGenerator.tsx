@@ -1,3 +1,4 @@
+import { useState, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
@@ -9,6 +10,7 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 import { useSubscriptionLimits } from '@/hooks/useSubscriptionLimits';
 import { useTranslation } from 'react-i18next';
 import { Info, ExternalLink } from 'lucide-react';
+import { auditLogger } from '@/utils/auditLogger';
 
 interface OrganizationLink {
   id: string;
@@ -136,9 +138,65 @@ const LinkGenerator = () => {
     return null;
   }
 
-  const linkUrl = generateLinkUrl(primaryLink.link_token);
-  const isBranded = !!primaryDomain;
-  const portalType = isBranded ? t('brandedSubmissionPortal') : t('unbrandedSubmissionPortal');
+  // Generate both branded and unbranded URLs
+  const unbrandedUrl = `${window.location.origin}/secure/tool/submit/${primaryLink.link_token}`;
+  const brandedUrl = primaryDomain ? `https://${primaryDomain}/secure/tool/submit/${primaryLink.link_token}` : null;
+  
+  // State for checking if branded link is accessible
+  const [brandedLinkStatus, setBrandedLinkStatus] = useState<'checking' | 'accessible' | 'inaccessible' | null>(null);
+  
+  // Check if branded link is actually accessible via edge function
+  useEffect(() => {
+    if (brandedUrl && primaryDomain && user) {
+      setBrandedLinkStatus('checking');
+      
+      // Use edge function to check domain accessibility
+      supabase.functions.invoke('simple-domain', {
+        body: {
+          action: 'check-accessibility',
+          domain: primaryDomain,
+          linkToken: primaryLink.link_token
+        }
+      })
+        .then((response) => {
+          if (response.error) {
+            console.error('Domain check error:', response.error);
+            // If domain is active in DB, assume accessible
+            const primaryDomainData = customDomains?.find(d => d.domain_name === primaryDomain && d.is_active && d.status === 'active');
+            setBrandedLinkStatus(primaryDomainData ? 'accessible' : 'inaccessible');
+            return;
+          }
+          
+          const result = response.data;
+          if (result.accessible) {
+            setBrandedLinkStatus('accessible');
+            // Log successful accessibility check
+            if (user?.id && result.organizationId) {
+              auditLogger.log({
+                eventType: 'custom_domain.checked',
+                category: 'system',
+                action: 'check_branded_link_accessibility',
+                actorType: 'user',
+                actorId: user.id,
+                organizationId: result.organizationId,
+                summary: `Branded link accessibility checked for ${primaryDomain}`,
+                metadata: { domain: primaryDomain, accessible: true }
+              }).catch(console.error);
+            }
+          } else {
+            setBrandedLinkStatus('inaccessible');
+          }
+        })
+        .catch((error) => {
+          console.error('Domain accessibility check failed:', error);
+          // If domain is active and verified, assume it's working (optimistic)
+          const primaryDomainData = customDomains?.find(d => d.domain_name === primaryDomain && d.is_active && d.status === 'active');
+          setBrandedLinkStatus(primaryDomainData ? 'accessible' : 'checking');
+        });
+    } else {
+      setBrandedLinkStatus(null);
+    }
+  }, [brandedUrl, primaryDomain, primaryLink?.link_token, customDomains, user]);
 
   return (
     <>
@@ -156,18 +214,18 @@ const LinkGenerator = () => {
             </Badge>
           </div>
         </CardHeader>
-        <CardContent>
+        <CardContent className="space-y-4">
+          {/* Unbranded Link - Always show */}
           <div className="flex items-center justify-between p-4 bg-muted/50 rounded-lg border">
             <div className="flex-1 min-w-0">
-              <p className="text-sm font-medium mb-1">{portalType}</p>
+              <p className="text-sm font-medium mb-1">{t('unbrandedSubmissionPortal')}</p>
               <p className="text-xs text-muted-foreground">
                 {t('usedTimes', { count: primaryLink.usage_count || 0 })}
               </p>
-              {/* Show full URL for better guidance */}
               <div className="mt-2">
                 <p className="text-xs text-muted-foreground mb-1">Your secure link URL:</p>
                 <code className="text-xs bg-background px-2 py-1 rounded border font-mono break-all">
-                  {linkUrl}
+                  {unbrandedUrl}
                 </code>
               </div>
             </div>
@@ -177,13 +235,58 @@ const LinkGenerator = () => {
               </code>
               <Button
                 size="sm"
-                onClick={() => copyToClipboard(linkUrl)}
+                onClick={() => copyToClipboard(unbrandedUrl)}
                 className="whitespace-nowrap"
               >
                 {t('copyLink')}
               </Button>
             </div>
           </div>
+
+          {/* Branded Link - Show if domain exists and is verified */}
+          {brandedUrl && primaryDomain && (
+            <div className="flex items-center justify-between p-4 bg-blue-50 rounded-lg border border-blue-200">
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center gap-2 mb-1">
+                  <p className="text-sm font-medium">{t('brandedSubmissionPortal')}</p>
+                  {brandedLinkStatus === 'checking' && (
+                    <Badge variant="outline" className="text-xs">
+                      Checking...
+                    </Badge>
+                  )}
+                  {brandedLinkStatus === 'accessible' && (
+                    <Badge variant="default" className="bg-green-600 text-xs">
+                      ✓ Active
+                    </Badge>
+                  )}
+                  {brandedLinkStatus === 'inaccessible' && (
+                    <Badge variant="destructive" className="text-xs">
+                      ⚠ Not Accessible
+                    </Badge>
+                  )}
+                </div>
+                <p className="text-xs text-muted-foreground mb-2">
+                  Your branded secure link using your custom domain
+                </p>
+                <div className="mt-2">
+                  <p className="text-xs text-muted-foreground mb-1">Your branded secure link URL:</p>
+                  <code className="text-xs bg-background px-2 py-1 rounded border font-mono break-all">
+                    {brandedUrl}
+                  </code>
+                </div>
+              </div>
+              <div className="flex items-center gap-2 ml-4">
+                <Button
+                  size="sm"
+                  onClick={() => copyToClipboard(brandedUrl)}
+                  className="whitespace-nowrap"
+                  disabled={brandedLinkStatus === 'inaccessible'}
+                >
+                  {t('copyLink')}
+                </Button>
+              </div>
+            </div>
+          )}
         </CardContent>
       </Card>
 

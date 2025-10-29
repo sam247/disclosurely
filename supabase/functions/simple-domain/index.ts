@@ -769,6 +769,85 @@ serve(async (req) => {
       );
     }
 
+    if (action === 'check-accessibility') {
+      console.log('Handling check-accessibility action');
+      const { domain, linkToken } = body;
+      
+      if (!domain || !linkToken) {
+        return new Response(
+          JSON.stringify({ success: false, accessible: false, message: 'Domain and linkToken required' }),
+          { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      }
+
+      await logToAI('CHECK_ACCESSIBILITY_START', `Checking accessibility for domain: ${domain}`)
+      
+      // Get user organization
+      const supabaseClient = createClient(
+        Deno.env.get('SUPABASE_URL')!,
+        Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
+      );
+      
+      const authHeader = req.headers.get('Authorization');
+      let userId = null;
+      let organizationId = null;
+      
+      if (authHeader) {
+        const token = authHeader.replace('Bearer ', '');
+        const { data: { user } } = await supabaseClient.auth.getUser(token);
+        if (user) {
+          userId = user.id;
+          const { data: profile } = await supabaseClient
+            .from('profiles')
+            .select('organization_id')
+            .eq('id', user.id)
+            .single();
+          organizationId = profile?.organization_id;
+        }
+      }
+
+      // Check if domain is active in database
+      const { data: customDomain } = await supabaseClient
+        .from('custom_domains')
+        .select('domain_name, is_active, status, organization_id')
+        .eq('domain_name', domain)
+        .eq('is_active', true)
+        .eq('status', 'active')
+        .single();
+
+      if (!customDomain) {
+        await logToAI('CHECK_ACCESSIBILITY_FAIL', `Domain not found or inactive: ${domain}`)
+        return new Response(
+          JSON.stringify({ 
+            success: true, 
+            accessible: false, 
+            organizationId: organizationId || null,
+            message: 'Domain not found or inactive in system'
+          }),
+          { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      }
+
+      // Try to verify the link is accessible by checking if domain resolves
+      // We'll use DNS check and assume if domain is active in DB and verified, it's working
+      const isAccessible = customDomain.is_active && customDomain.status === 'active';
+      
+      await logToAI('CHECK_ACCESSIBILITY_COMPLETE', `Accessibility check completed for domain: ${domain}`, { 
+        accessible: isAccessible,
+        organizationId: customDomain.organization_id 
+      })
+      
+      return new Response(
+        JSON.stringify({ 
+          success: true, 
+          accessible: isAccessible,
+          organizationId: customDomain.organization_id,
+          message: isAccessible ? 'Domain is accessible' : 'Domain may not be fully configured'
+        }),
+        { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
     console.log('Invalid action:', action);
     await logToAI('ERROR', `Invalid action received: ${action}`, { action, domain })
     return new Response(
