@@ -48,31 +48,21 @@
 
 ## ⚠️ CRITICAL GAPS - Must Fix Before 200+ Customers
 
-### 1. **Rate Limiting** (BLOCKER)
-**Problem**: Only client-side rate limiting exists
-- ❌ No server-side rate limiting on Edge Functions
-- ❌ No API endpoint rate limiting
-- ❌ No IP-based throttling
-- ❌ Client-side limits can be bypassed by clearing localStorage
+### 1. **Rate Limiting** ✅ COMPLETE (BLOCKER 1 - October 29, 2025)
+**Status**: ✅ Upstash Redis rate limiting deployed to production
 
-**Risk**: API abuse, DDoS vulnerability, resource exhaustion
+**Implementation**:
+- ✅ `submit-anonymous-report`: 5 submissions/15min per IP
+- ✅ `simple-domain-v2`: 10 operations/10sec per IP
+- ✅ `anonymous-report-messaging`: 20 messages/hour per IP
+- ✅ `send-otp-email`: 5 emails/15min per IP
+- ✅ Shared middleware: `supabase/functions/_shared/rateLimit.ts`
+- ✅ Fail-open architecture (availability > strict enforcement)
+- ✅ Returns HTTP 429 with `Retry-After` and `X-RateLimit-*` headers
 
-**Solution**:
-```typescript
-// Add to ALL Edge Functions
-import { Ratelimit } from "@upstash/ratelimit"
-import { Redis } from "@upstash/redis"
+**Protection**: API abuse, DDoS, resource exhaustion, cost explosion
 
-const ratelimit = new Ratelimit({
-  redis: Redis.fromEnv(),
-  limiter: Ratelimit.slidingWindow(10, "10 s"),
-})
-
-// In each Edge Function
-const identifier = req.headers.get("x-forwarded-for") || "anonymous"
-const { success } = await ratelimit.limit(identifier)
-if (!success) return new Response("Too Many Requests", { status: 429 })
-```
+**Documentation**: See `RATE_LIMITING_IMPLEMENTATION.md`
 
 ### 2. **Error Monitoring & Alerting** (HIGH)
 **Problem**: No external error tracking or alerting
