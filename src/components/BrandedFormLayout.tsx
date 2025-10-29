@@ -1,5 +1,6 @@
 
 import React from 'react';
+import { Helmet } from 'react-helmet-async';
 import { Card, CardContent } from '@/components/ui/card';
 import { Shield } from 'lucide-react';
 import disclosurelyIcon from "@/assets/logos/disclosurely-icon.png";
@@ -23,8 +24,18 @@ const BrandedFormLayout = ({
   subscriptionTier,
   children 
 }: BrandedFormLayoutProps) => {
+  // Dynamic page title: "{Company Name} Secure Reporting Portal"
+  const pageTitle = organizationName 
+    ? `${organizationName} Secure Reporting Portal`
+    : 'Secure Reporting Portal';
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100">
+    <>
+      <Helmet>
+        <title>{pageTitle}</title>
+        <meta name="description" content={description || "Submit your report securely and confidentially"} />
+      </Helmet>
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100">
       {/* Header with Organization Branding - Matching CompanyStatusPage */}
       <header className="bg-white shadow-sm border-t-4 w-full" style={{ borderTopColor: brandColor }}>
         <div className="w-full px-4 sm:px-6 lg:px-8">
@@ -81,6 +92,7 @@ const BrandedFormLayout = ({
         </div>
       </div>
     </div>
+    </>
   );
 };
 

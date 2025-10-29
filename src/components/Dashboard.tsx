@@ -832,7 +832,8 @@ const Dashboard = () => {
   };
 
   const copyLink = (token: string) => {
-    const link = `${window.location.origin}/secure/tool/submit/${token}`;
+    // Always use secure.disclosurely.com for default (never app.disclosurely.com)
+    const link = `https://secure.disclosurely.com/secure/tool/submit/${token}`;
     navigator.clipboard.writeText(link);
     toast({
       title: "Link copied!",

@@ -28,9 +28,9 @@ const LinkGenerator = () => {
   const queryClient = useQueryClient();
   const limits = useSubscriptionLimits();
 
-  // Fetch active custom domains
-  const { data: customDomains } = useQuery({
-    queryKey: ['custom-domains'],
+  // Fetch active custom domains - refetch when needed
+  const { data: customDomains, refetch: refetchDomains } = useQuery({
+    queryKey: ['custom-domains', user?.id],
     queryFn: async () => {
       if (!user) return [];
 
@@ -52,10 +52,14 @@ const LinkGenerator = () => {
       return domains || [];
     },
     enabled: !!user,
+    refetchOnWindowFocus: true,
+    staleTime: 30000, // Refetch every 30 seconds to catch domain updates
   });
 
-  // Get the primary domain (prefer primary custom domain)
-  const primaryDomain = customDomains?.find(d => d.is_primary)?.domain_name || null;
+  // Get the primary domain (prefer primary custom domain, then any active domain)
+  const primaryDomain = customDomains?.find(d => d.is_primary && d.is_active && d.status === 'active')?.domain_name 
+    || customDomains?.find(d => d.is_active && d.status === 'active')?.domain_name 
+    || null;
 
   // Fetch the primary active link
   const { data: primaryLink, isLoading } = useQuery({
@@ -114,7 +118,8 @@ const LinkGenerator = () => {
     if (primaryDomain) {
       return `https://${primaryDomain}/secure/tool/submit/${linkToken}`;
     }
-    return `${window.location.origin}/secure/tool/submit/${linkToken}`;
+    // Always use secure.disclosurely.com for default (never app.disclosurely.com)
+    return `https://secure.disclosurely.com/secure/tool/submit/${linkToken}`;
   };
 
   const copyToClipboard = (text: string) => {
@@ -199,8 +204,8 @@ const LinkGenerator = () => {
     return null;
   }
 
-  // Generate unbranded URL - after early return check
-  const unbrandedUrl = `${window.location.origin}/secure/tool/submit/${primaryLink.link_token}`;
+  // Generate unbranded URL - always use secure.disclosurely.com (not app.disclosurely.com)
+  const unbrandedUrl = `https://secure.disclosurely.com/secure/tool/submit/${primaryLink.link_token}`;
 
   return (
     <>
