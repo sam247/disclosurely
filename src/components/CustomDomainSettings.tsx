@@ -550,9 +550,20 @@ const CustomDomainSettings = () => {
       <div>
         <h2 className="text-2xl font-bold">Custom Domain Setup</h2>
         <p className="text-muted-foreground">
-          Add your own domain for branded secure links
+          Add your own domain for branded secure links (Pro tier: 1 domain per subscription)
         </p>
       </div>
+
+      {/* Domain Limit Reached Alert */}
+      {existingDomains.length >= limits.maxCustomDomains && limits.maxCustomDomains > 0 && (
+        <Alert className="border-blue-200 bg-blue-50">
+          <Lock className="h-4 w-4 text-blue-600" />
+          <AlertDescription className="text-blue-800">
+            <strong>Domain Limit Reached:</strong> You've added {existingDomains.length} of {limits.maxCustomDomains} allowed custom domain{limits.maxCustomDomains !== 1 ? 's' : ''}. 
+            To add a new domain, please delete an existing one first.
+          </AlertDescription>
+        </Alert>
+      )}
 
       {/* Step 1: Enter Domain */}
       <Card>
@@ -564,6 +575,8 @@ const CustomDomainSettings = () => {
           <CardDescription>
             {existingDomains.length === 0 
               ? "Add your first custom domain to create branded secure links for your organization"
+              : existingDomains.length >= limits.maxCustomDomains && limits.maxCustomDomains > 0
+              ? "You've reached your custom domain limit. Delete an existing domain to add a new one."
               : "Enter the domain you want to use for your secure links"
             }
           </CardDescription>
@@ -575,16 +588,22 @@ const CustomDomainSettings = () => {
               value={domain}
               onChange={(e) => setDomain(e.target.value)}
               className="flex-1"
+              disabled={existingDomains.length >= limits.maxCustomDomains && limits.maxCustomDomains > 0}
             />
             <Button 
               onClick={handleGenerateRecords}
-              disabled={isGenerating || !domain.trim()}
+              disabled={isGenerating || !domain.trim() || (existingDomains.length >= limits.maxCustomDomains && limits.maxCustomDomains > 0)}
               className="flex items-center gap-2"
             >
               {isGenerating ? (
                 <>
                   <RefreshCw className="h-4 w-4 animate-spin" />
                   Generating...
+                </>
+              ) : existingDomains.length >= limits.maxCustomDomains && limits.maxCustomDomains > 0 ? (
+                <>
+                  <Lock className="h-4 w-4" />
+                  Limit Reached
                 </>
               ) : (
                 <>
