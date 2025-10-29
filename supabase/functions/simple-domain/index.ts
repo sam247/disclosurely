@@ -260,7 +260,11 @@ class SimpleVercelClient {
 
   async deleteDomain(domain: string): Promise<{ success: boolean; message?: string; error?: string }> {
     try {
-      const url = `https://api.vercel.com/v10/projects/${this.projectId}/domains/${domain}`;
+      // URL encode the domain for the API path
+      const encodedDomain = encodeURIComponent(domain);
+      const url = `https://api.vercel.com/v10/projects/${this.projectId}/domains/${encodedDomain}`;
+      
+      console.log(`Deleting domain from Vercel: ${domain} (URL: ${url})`);
       
       const response = await fetch(url, {
         method: 'DELETE',
@@ -270,20 +274,31 @@ class SimpleVercelClient {
         },
       });
 
-      const data = await response.json();
-
-      if (response.ok) {
-        return { success: true, message: 'Domain deleted successfully!' };
-      } else {
-        return { 
-          success: false, 
-          error: data.error?.message || 'Failed to delete domain' 
-        };
+      // Vercel DELETE may return 204 No Content for successful deletions
+      if (response.status === 204 || response.ok) {
+        console.log(`Domain ${domain} successfully deleted from Vercel`);
+        return { success: true, message: 'Domain deleted successfully from Vercel!' };
       }
-    } catch (error) {
+      
+      // Try to parse error response
+      let errorMessage = 'Failed to delete domain';
+      try {
+        const data = await response.json();
+        errorMessage = data.error?.message || data.message || `HTTP ${response.status}: ${response.statusText}`;
+      } catch {
+        errorMessage = `HTTP ${response.status}: ${response.statusText}`;
+      }
+      
+      console.error(`Failed to delete domain from Vercel: ${errorMessage}`);
       return { 
         success: false, 
-        error: error.message 
+        error: errorMessage
+      };
+    } catch (error: any) {
+      console.error(`Exception deleting domain from Vercel: ${error.message}`);
+      return { 
+        success: false, 
+        error: error.message || 'Network error while deleting domain'
       };
     }
   }
@@ -579,7 +594,9 @@ async function handleDeleteDomain(request: DeleteRequest): Promise<{ success: bo
     const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
     const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
     
-    const deleteResponse = await fetch(`${supabaseUrl}/rest/v1/custom_domains?domain=eq.${domain}`, {
+    // Use domain_name column (as per database schema)
+    const encodedDomain = encodeURIComponent(domain);
+    const deleteResponse = await fetch(`${supabaseUrl}/rest/v1/custom_domains?domain_name=eq.${encodedDomain}`, {
       method: 'DELETE',
       headers: {
         'Authorization': `Bearer ${supabaseServiceKey}`,
@@ -589,13 +606,17 @@ async function handleDeleteDomain(request: DeleteRequest): Promise<{ success: bo
     });
 
     if (!deleteResponse.ok) {
-      await logToAI('DELETE_ERROR', `Database deletion failed for domain: ${domain}`, { status: deleteResponse.status })
-      console.error('Database deletion failed:', deleteResponse.status);
+      const errorText = await deleteResponse.text();
+      await logToAI('DELETE_ERROR', `Database deletion failed for domain: ${domain}`, { status: deleteResponse.status, error: errorText })
+      console.error('Database deletion failed:', deleteResponse.status, errorText);
       return {
         success: false,
         message: `Domain removed from Vercel but failed to remove from database. Please contact support.`
       };
     }
+    
+    const deletedData = await deleteResponse.json();
+    console.log(`Deleted ${deletedData?.length || 0} record(s) from database for domain: ${domain}`);
     
     await logToAI('DELETE_SUCCESS', `Domain successfully deleted: ${domain}`)
     console.log('Domain successfully deleted from both Vercel and database.');
