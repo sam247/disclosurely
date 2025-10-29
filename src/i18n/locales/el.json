@@ -334,13 +334,13 @@
       "perMonth": "/μήνα",
       "starter": {
         "name": "Starter",
-        "price": "£9.99",
-        "description": "Τέλειο για μικρούς οργανισμούς"
+        "price": "£19.99",
+        "description": "Τέλειο για μικρούς οργανισμούς που ξεκινούν"
       },
       "pro": {
         "name": "Pro",
-        "price": "£19.99",
-        "description": "Για αναπτυσσόμενους οργανισμούς"
+        "price": "£39.99",
+        "description": "Για αναπτυσσόμενους οργανισμούς με προηγμένες ανάγκες"
       },
       "enterprise": {
         "name": "Enterprise",

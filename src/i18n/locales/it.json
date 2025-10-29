@@ -334,13 +334,13 @@
       "perMonth": "/mese",
       "starter": {
         "name": "Starter",
-        "price": "£9.99",
-        "description": "Perfetto per organizzazioni piccole"
+        "price": "£19.99",
+        "description": "Perfetto per organizzazioni piccole che iniziano"
       },
       "pro": {
         "name": "Pro",
-        "price": "£19.99",
-        "description": "Per organizzazioni in crescita"
+        "price": "£39.99",
+        "description": "Per organizzazioni in crescita con esigenze avanzate"
       },
       "enterprise": {
         "name": "Enterprise",

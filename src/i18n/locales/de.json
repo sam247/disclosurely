@@ -191,13 +191,13 @@
       "perMonth": "/Monat",
       "starter": {
         "name": "Starter",
-        "price": "9,99 €",
-        "description": "Perfekt für kleine Organisationen"
+        "price": "19,99 €",
+        "description": "Perfekt für kleine Organisationen, die anfangen"
       },
       "pro": {
         "name": "Pro",
-        "price": "19,99 €",
-        "description": "Für wachsende Organisationen"
+        "price": "39,99 €",
+        "description": "Für wachsende Organisationen mit erweiterten Anforderungen"
       },
       "enterprise": {
         "name": "Enterprise",
