@@ -24,8 +24,8 @@ if (import.meta.env.VITE_SENTRY_DSN) {
       }),
     ],
     
-    // Performance Monitoring sample rate
-    tracesSampleRate: import.meta.env.PROD ? 0.1 : 1.0, // 10% in prod, 100% in dev
+    // Performance Monitoring sample rate (set to 0 to stay 100% in free tier)
+    tracesSampleRate: 0, // Disabled to guarantee free tier (only errors tracked)
     
     // Session Replay sample rate
     replaysSessionSampleRate: 0.1, // 10% of sessions
