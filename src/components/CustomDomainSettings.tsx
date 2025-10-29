@@ -698,6 +698,60 @@ const CustomDomainSettings = () => {
                 </AlertDescription>
               </Alert>
             )}
+
+            {/* Manual Activate Button - for domains that are verified but stuck in pending */}
+            {verificationResult?.success && (
+              <div className="mt-4">
+                <Button
+                  onClick={async () => {
+                    if (!domain.trim()) return;
+                    
+                    try {
+                      // Call a simple activate action
+                      const response = await supabase.functions.invoke('simple-domain', {
+                        body: {
+                          action: 'activate',
+                          domain: domain.trim()
+                        }
+                      });
+
+                      if (response.error) {
+                        throw response.error;
+                      }
+
+                      if (response.data?.success) {
+                        toast({
+                          title: "Domain Activated",
+                          description: "Your domain has been activated and will appear in your secure links shortly.",
+                        });
+
+                        // Trigger refresh
+                        window.dispatchEvent(new CustomEvent('custom-domain-verified', { 
+                          detail: { domain: domain.trim() } 
+                        }));
+
+                        // Clear verification result to show fresh state
+                        setTimeout(() => {
+                          setVerificationResult(null);
+                        }, 2000);
+                      } else {
+                        throw new Error(response.data?.message || 'Activation failed');
+                      }
+                    } catch (error: any) {
+                      console.error('Error activating domain:', error);
+                      toast({
+                        title: "Activation Failed",
+                        description: error.message || "Failed to activate domain",
+                        variant: "destructive",
+                      });
+                    }
+                  }}
+                  className="w-full"
+                >
+                  Activate Domain & Show Branded Link
+                </Button>
+              </div>
+            )}
           </CardContent>
         </Card>
       )}

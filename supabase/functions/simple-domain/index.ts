@@ -731,6 +731,112 @@ async function handleVerifyDomain(request: VerifyRequest): Promise<{ success: bo
   };
 }
 
+async function handleActivateDomain(request: VerifyRequest): Promise<{ success: boolean; message: string }> {
+  const { domain } = request;
+
+  if (!domain) {
+    await logToAI('ACTIVATE_ERROR', 'Domain is required for activation')
+    return { success: false, message: 'Domain is required' };
+  }
+
+  await logToAI('ACTIVATE_START', `Manually activating domain: ${domain}`)
+  console.log('Manually activating domain ' + domain + '...');
+  
+  // Update database: set domain as active, verified, and primary (if no other primary exists)
+  try {
+    const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
+    const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
+    
+    // Get the domain record
+    const domainResponse = await fetch(`${supabaseUrl}/rest/v1/custom_domains?domain_name=eq.${encodeURIComponent(domain)}`, {
+      method: 'GET',
+      headers: {
+        'Authorization': `Bearer ${supabaseServiceKey}`,
+        'Content-Type': 'application/json',
+        'apikey': supabaseServiceKey
+      }
+    });
+    
+    const domainData = await domainResponse.json();
+    if (!domainData || domainData.length === 0) {
+      await logToAI('ACTIVATE_ERROR', `Domain not found in database: ${domain}`)
+      return {
+        success: false,
+        message: `Domain ${domain} not found in database. Please generate records first.`
+      };
+    }
+
+    const domainRecord = domainData[0];
+    const organizationId = domainRecord.organization_id;
+    
+    if (!organizationId) {
+      await logToAI('ACTIVATE_ERROR', `Domain has no organization_id: ${domain}`)
+      return {
+        success: false,
+        message: `Domain ${domain} is not associated with an organization.`
+      };
+    }
+    
+    // Check if there's already a primary domain for this org
+    const primaryCheckResponse = await fetch(`${supabaseUrl}/rest/v1/custom_domains?organization_id=eq.${organizationId}&is_primary=eq.true&select=id`, {
+      method: 'GET',
+      headers: {
+        'Authorization': `Bearer ${supabaseServiceKey}`,
+        'Content-Type': 'application/json',
+        'apikey': supabaseServiceKey
+      }
+    });
+    
+    const primaryDomains = await primaryCheckResponse.json();
+    const shouldSetPrimary = !primaryDomains || primaryDomains.length === 0;
+    
+    // Update domain to active, verified, and set as primary if no primary exists
+    const updateResponse = await fetch(`${supabaseUrl}/rest/v1/custom_domains?id=eq.${domainRecord.id}`, {
+      method: 'PATCH',
+      headers: {
+        'Authorization': `Bearer ${supabaseServiceKey}`,
+        'Content-Type': 'application/json',
+        'apikey': supabaseServiceKey
+      },
+      body: JSON.stringify({
+        status: 'active',
+        is_active: true,
+        is_primary: shouldSetPrimary,
+        verified_at: domainRecord.verified_at || new Date().toISOString(),
+        activated_at: new Date().toISOString(),
+        last_checked_at: new Date().toISOString()
+      })
+    });
+    
+    if (!updateResponse.ok) {
+      const errorText = await updateResponse.text();
+      console.error('Failed to activate domain in database:', updateResponse.status, errorText);
+      await logToAI('ACTIVATE_ERROR', `Database update failed for domain: ${domain}`, { status: updateResponse.status, error: errorText })
+      return {
+        success: false,
+        message: `Failed to activate domain in database. Status: ${updateResponse.status}`
+      };
+    }
+
+    await logToAI('ACTIVATE_SUCCESS', `Domain activated successfully: ${domain}`, { 
+      setAsPrimary: shouldSetPrimary 
+    })
+    console.log(`Domain ${domain} activated in database: active=true, status=active, is_primary=${shouldSetPrimary}`);
+    
+    return {
+      success: true,
+      message: `Domain ${domain} has been activated and will appear in your secure links shortly.`
+    };
+  } catch (error) {
+    console.error('Error activating domain in database:', error);
+    await logToAI('ACTIVATE_ERROR', `Database activation error for domain: ${domain}`, { error: error.message })
+    return {
+      success: false,
+      message: `Failed to activate domain: ${error.message}`
+    };
+  }
+}
+
 async function handleDeleteDomain(request: DeleteRequest): Promise<{ success: boolean; message: string }> {
   const { domain } = request;
 
@@ -911,6 +1017,22 @@ serve(async (req) => {
       const result = await handleDeleteDomain(body);
       console.log('Delete result:', JSON.stringify(result));
       await logToAI('DELETE_COMPLETE', `Domain deletion completed for domain: ${domain}`, result)
+      
+      return new Response(
+        JSON.stringify(result),
+        { 
+          status: result.success ? 200 : 400,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+        }
+      );
+    }
+
+    if (action === 'activate') {
+      console.log('Handling activate action');
+      await logToAI('ACTIVATE_START', `Starting manual domain activation for domain: ${domain}`)
+      const result = await handleActivateDomain(body);
+      console.log('Activate result:', JSON.stringify(result));
+      await logToAI('ACTIVATE_COMPLETE', `Domain activation completed for domain: ${domain}`, result)
       
       return new Response(
         JSON.stringify(result),
