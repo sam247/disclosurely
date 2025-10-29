@@ -61,10 +61,31 @@ const CustomDomainSettings = () => {
   });
   const { toast } = useToast();
 
+  // Track previous domain to detect changes
+  const prevDomainRef = React.useRef<string>('');
+  
   // Save domain to localStorage whenever it changes
+  // Also clear old records/verification when domain changes
   React.useEffect(() => {
-    if (typeof window !== 'undefined' && domain) {
-      localStorage.setItem('custom-domain', domain);
+    if (typeof window !== 'undefined') {
+      // Check if domain actually changed
+      if (domain && domain !== prevDomainRef.current && prevDomainRef.current !== '') {
+        // Domain changed - clear old records and verification
+        localStorage.removeItem('custom-domain-records');
+        localStorage.removeItem('custom-domain-verification');
+        setRecords([]);
+        setVerificationResult(null);
+      }
+      
+      // Update previous domain reference
+      prevDomainRef.current = domain;
+      
+      // Save to localStorage
+      if (domain) {
+        localStorage.setItem('custom-domain', domain);
+      } else {
+        localStorage.removeItem('custom-domain');
+      }
     }
   }, [domain]);
 
@@ -113,7 +134,21 @@ const CustomDomainSettings = () => {
       const result = response.data;
 
       if (result.success) {
-        setRecords(result.records);
+        // Ensure records is always an array and properly structured
+        const recordsArray = Array.isArray(result.records) 
+          ? result.records 
+          : (result.records ? [result.records] : []);
+        
+        // Validate record structure
+        const validRecords = recordsArray.filter((record: any) => {
+          return record && typeof record === 'object' && record.type && record.name && record.value;
+        });
+        
+        if (validRecords.length === 0) {
+          throw new Error('No valid DNS records returned from server');
+        }
+        
+        setRecords(validRecords);
         toast({
           title: "Verification Records Generated",
           description: "Add these DNS records to your domain provider",
@@ -182,7 +217,16 @@ const CustomDomainSettings = () => {
       }
 
       const result = response.data;
-      setVerificationResult(result);
+      
+      // Ensure verification result is properly structured (handle if it contains objects)
+      const cleanResult = {
+        success: result.success || false,
+        message: typeof result.message === 'string' ? result.message : JSON.stringify(result.message || 'Verification completed'),
+        records: Array.isArray(result.records) ? result.records : undefined,
+        steps: result.steps && typeof result.steps === 'object' ? result.steps : undefined,
+      };
+      
+      setVerificationResult(cleanResult);
 
       // Step 3: SSL Provisioning (simulated)
       setVerificationProgress(prev => ({ ...prev, sslProvisioning: true }));
@@ -521,7 +565,7 @@ const CustomDomainSettings = () => {
                   <AlertCircle className="h-4 w-4 text-red-600" />
                 )}
                 <AlertDescription className={verificationResult.success ? "text-green-800" : "text-red-800"}>
-                  {verificationResult.message}
+                  {typeof verificationResult.message === 'string' ? verificationResult.message : String(verificationResult.message || 'Verification completed')}
                 </AlertDescription>
               </Alert>
             )}

@@ -368,8 +368,11 @@ async function handleGenerateRecords(request: GenerateRequest): Promise<{ succes
                 console.log('Vercel config response:', JSON.stringify(configResult.config, null, 2));
                 console.log('Vercel DNS records response:', JSON.stringify(dnsRecordsResult, null, 2));
                 
-                // Extract subdomain from domain (e.g., 'link' from 'link.betterranking.co.uk')
-                const subdomain = domain.split('.')[0];
+                // Extract subdomain and root domain from full domain
+                // e.g., 'links.yourdomain.com' -> subdomain: 'links', root: 'yourdomain.com'
+                const domainParts = domain.split('.');
+                const subdomain = domainParts[0];
+                const rootDomain = domainParts.slice(1).join('.');
                 
                 // Look for CNAME record from Vercel API (this is the correct source for multi-tenant SaaS)
                 let cnameValue = null;
@@ -398,9 +401,10 @@ async function handleGenerateRecords(request: GenerateRequest): Promise<{ succes
                 // Use found CNAME or provide error
                 if (cnameValue) {
                   console.log('Adding CNAME record from Vercel API');
+                  // Use full domain name for CNAME record (e.g., 'links.yourdomain.com')
                   records.push({
                     type: 'CNAME',
-                    name: subdomain,
+                    name: domain,
                     value: cnameValue,
                     ttl: 300
                   });
