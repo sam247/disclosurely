@@ -103,6 +103,20 @@ const CustomDomainSettings = () => {
     fetchExistingDomains();
   }, [fetchExistingDomains]);
 
+  // Clear input and localStorage when no domains exist in the database
+  React.useEffect(() => {
+    if (existingDomains.length === 0 && domain) {
+      // No domains in database but input field has a value - clear it
+      console.log('No domains in database, clearing cached domain from input');
+      setDomain('');
+      setRecords([]);
+      setVerificationResult(null);
+      localStorage.removeItem('custom-domain');
+      localStorage.removeItem('custom-domain-records');
+      localStorage.removeItem('custom-domain-verification');
+    }
+  }, [existingDomains, domain]);
+
   // Track previous domain to detect changes
   const prevDomainRef = React.useRef<string>('');
   
@@ -545,7 +559,10 @@ const CustomDomainSettings = () => {
             Enter Your Domain
           </CardTitle>
           <CardDescription>
-            Enter the domain you want to use for your secure links
+            {existingDomains.length === 0 
+              ? "Add your first custom domain to create branded secure links for your organization"
+              : "Enter the domain you want to use for your secure links"
+            }
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
