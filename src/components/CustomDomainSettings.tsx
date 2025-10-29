@@ -104,12 +104,17 @@ const CustomDomainSettings = () => {
   }, [fetchExistingDomains]);
 
   // Clear input and localStorage when no domains exist in the database
+  // This should only run when existingDomains changes (on mount and after domain operations)
   React.useEffect(() => {
     if (existingDomains.length === 0) {
-      // No domains in database - clear ALL cached data
-      const hasCachedData = domain || records.length > 0 || verificationResult;
-      if (hasCachedData) {
-        console.log('No domains in database, clearing all cached domain data');
+      // Check localStorage directly to see if we have stale data
+      const hasStaleLocalStorage = 
+        localStorage.getItem('custom-domain') ||
+        localStorage.getItem('custom-domain-records') ||
+        localStorage.getItem('custom-domain-verification');
+      
+      if (hasStaleLocalStorage) {
+        console.log('No domains in database, clearing stale localStorage data');
         setDomain('');
         setRecords([]);
         setVerificationResult(null);
@@ -118,7 +123,7 @@ const CustomDomainSettings = () => {
         localStorage.removeItem('custom-domain-verification');
       }
     }
-  }, [existingDomains, domain, records.length, verificationResult]);
+  }, [existingDomains]); // Only run when existingDomains changes
 
   // Track previous domain to detect changes
   const prevDomainRef = React.useRef<string>('');
