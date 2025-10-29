@@ -8,6 +8,8 @@ interface SubscriptionLimits {
   hasMessaging: boolean;
   hasAIHelper: boolean;
   hasCustomBranding: boolean;
+  hasCustomDomain: boolean;
+  maxCustomDomains: number;
 }
 
 export const useSubscriptionLimits = () => {
@@ -19,6 +21,8 @@ export const useSubscriptionLimits = () => {
     hasMessaging: false,
     hasAIHelper: false,
     hasCustomBranding: false,
+    hasCustomDomain: false,
+    maxCustomDomains: 0,
   });
 
   useEffect(() => {
@@ -33,6 +37,8 @@ export const useSubscriptionLimits = () => {
         hasMessaging: false,
         hasAIHelper: false,
         hasCustomBranding: false,
+        hasCustomDomain: false,
+        maxCustomDomains: 0,
       });
     } else if (isSubscribed && tier === 'pro') {
       setLimits({
@@ -41,6 +47,8 @@ export const useSubscriptionLimits = () => {
         hasMessaging: true,
         hasAIHelper: true,
         hasCustomBranding: true,
+        hasCustomDomain: true,
+        maxCustomDomains: 1, // Pro tier: 1 custom domain
       });
     } else {
       // No subscription - no features allowed
@@ -50,6 +58,8 @@ export const useSubscriptionLimits = () => {
         hasMessaging: false,
         hasAIHelper: false,
         hasCustomBranding: false,
+        hasCustomDomain: false,
+        maxCustomDomains: 0,
       });
     }
   }, [subscriptionData.subscription_tier, subscriptionData.subscribed]);

@@ -4,10 +4,11 @@ import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
-import { Copy, CheckCircle, AlertCircle, RefreshCw, Globe, Trash2 } from 'lucide-react';
+import { Copy, CheckCircle, AlertCircle, RefreshCw, Globe, Trash2, Lock } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
+import { useSubscriptionLimits } from '@/hooks/useSubscriptionLimits';
 import { auditLogger } from '@/utils/auditLogger';
 
 interface DNSRecord {
@@ -41,6 +42,7 @@ interface CustomDomainRecord {
 
 const CustomDomainSettings = () => {
   const { user } = useAuth();
+  const { limits } = useSubscriptionLimits();
   
   const [domain, setDomain] = useState(() => {
     // Load domain from sessionStorage (auto-clears on tab close for security)
