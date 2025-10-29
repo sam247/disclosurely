@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -28,6 +28,17 @@ interface VerificationResult {
   };
 }
 
+interface CustomDomainRecord {
+  id: string;
+  domain_name: string;
+  status: string;
+  is_active: boolean;
+  is_primary: boolean;
+  created_at?: string | null;
+  verified_at?: string | null;
+  activated_at?: string | null;
+}
+
 const CustomDomainSettings = () => {
   const { user } = useAuth();
   
@@ -40,7 +51,6 @@ const CustomDomainSettings = () => {
   });
   const [isGenerating, setIsGenerating] = useState(false);
   const [isVerifying, setIsVerifying] = useState(false);
-  const [isDeleting, setIsDeleting] = useState(false);
   const [records, setRecords] = useState<DNSRecord[]>(() => {
     // Load records from localStorage on component mount
     if (typeof window !== 'undefined') {
@@ -63,7 +73,35 @@ const CustomDomainSettings = () => {
     vercelVerification: false,
     sslProvisioning: false,
   });
+  const [existingDomains, setExistingDomains] = useState<CustomDomainRecord[]>([]);
+  const [deletingDomain, setDeletingDomain] = useState<string | null>(null);
   const { toast } = useToast();
+
+  const fetchExistingDomains = useCallback(async () => {
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      const response = await supabase.functions.invoke('simple-domain', {
+        body: { action: 'list-domains' },
+        headers: session?.access_token ? {
+          Authorization: `Bearer ${session.access_token}`
+        } : undefined
+      });
+
+      if (response.error) {
+        throw response.error;
+      }
+
+      if (response.data?.success) {
+        setExistingDomains(response.data.domains || []);
+      }
+    } catch (error) {
+      console.error('Failed to fetch existing domains:', error);
+    }
+  }, []);
+
+  React.useEffect(() => {
+    fetchExistingDomains();
+  }, [fetchExistingDomains]);
 
   // Track previous domain to detect changes
   const prevDomainRef = React.useRef<string>('');
@@ -215,6 +253,8 @@ const CustomDomainSettings = () => {
           title: "Verification Records Generated",
           description: "Add these DNS records to your domain provider",
         });
+
+        await fetchExistingDomains();
       } else {
         // Ensure message is always a string
         const errorMessage = typeof result.message === 'string' 
@@ -335,6 +375,12 @@ const CustomDomainSettings = () => {
         
         // Clear records once verified successfully
         setRecords([]);
+        localStorage.removeItem('custom-domain-records');
+        localStorage.removeItem('custom-domain-verification');
+        setVerificationResult(null);
+        setDomain('');
+
+        await fetchExistingDomains();
         
         // Invalidate custom domains query in LinkGenerator to refresh branded link
         // Wait a moment for database update to complete, then trigger refresh
@@ -369,27 +415,21 @@ const CustomDomainSettings = () => {
     }
   };
 
-  const handleDelete = async () => {
-    if (!domain.trim()) {
-      toast({
-        title: "Domain Required",
-        description: "Please enter a domain name to delete",
-        variant: "destructive",
-      });
+  const handleDeleteDomain = async (domainToDelete: string) => {
+    if (!domainToDelete) {
       return;
     }
 
-    // Confirm deletion
-    if (!confirm(`Are you sure you want to delete the domain "${domain}"? This action cannot be undone.`)) {
+    if (!confirm(`Are you sure you want to delete the domain "${domainToDelete}"? This action cannot be undone.`)) {
       return;
     }
 
-    setIsDeleting(true);
+    setDeletingDomain(domainToDelete);
 
     try {
       toast({
         title: "Deleting Domain",
-        description: "Removing domain from Vercel and database...",
+        description: `Removing ${domainToDelete} from Vercel and Disclosurely...`,
       });
 
       const { data: { session } } = await supabase.auth.getSession();
@@ -397,7 +437,7 @@ const CustomDomainSettings = () => {
       const response = await supabase.functions.invoke('simple-domain', {
         body: {
           action: 'delete',
-          domain: domain.trim()
+          domain: domainToDelete
         },
         headers: session?.access_token ? {
           Authorization: `Bearer ${session.access_token}`
@@ -411,7 +451,6 @@ const CustomDomainSettings = () => {
       const result = response.data;
 
       if (result.success) {
-        // AI Logging for domain deletion
         if (user?.id) {
           const { data: profile } = await supabase
             .from('profiles')
@@ -427,40 +466,38 @@ const CustomDomainSettings = () => {
               actorType: 'user',
               actorId: user.id,
               organizationId: profile.organization_id,
-              summary: `Domain deleted: ${domain.trim()}`,
+              summary: `Domain deleted: ${domainToDelete}`,
               metadata: { 
-                domain: domain.trim(),
+                domain: domainToDelete,
                 deletionSuccess: true
               }
             }).catch(console.error);
           }
         }
-        
+
         toast({
           title: "Domain Deleted",
-          description: result.message || "Domain has been completely removed!",
+          description: result.message || `${domainToDelete} has been completely removed!`,
         });
-        
-        // Clear all state
-        setDomain('');
+
+        if (domain === domainToDelete) {
+          setDomain('');
+          localStorage.removeItem('custom-domain');
+        }
+        localStorage.removeItem('custom-domain-records');
+        localStorage.removeItem('custom-domain-verification');
         setRecords([]);
         setVerificationResult(null);
-        setVerificationProgress({
-          dnsCheck: false,
-          vercelVerification: false,
-          sslProvisioning: false,
-        });
-        
-        // Clear localStorage
+
+        await fetchExistingDomains();
+
         if (typeof window !== 'undefined') {
-          localStorage.removeItem('custom-domain');
-          localStorage.removeItem('custom-domain-records');
-          localStorage.removeItem('custom-domain-verification');
+          window.dispatchEvent(new CustomEvent('custom-domain-verified', { detail: { domain: domainToDelete } }));
         }
       } else {
         toast({
           title: "Deletion Failed",
-          description: result.message || "Failed to delete domain",
+          description: result.message || `Failed to delete ${domainToDelete}`,
           variant: "destructive",
         });
       }
@@ -468,13 +505,14 @@ const CustomDomainSettings = () => {
       console.error('Error deleting domain:', error);
       toast({
         title: "Error",
-        description: "Failed to delete domain",
+        description: `Failed to delete ${domainToDelete}`,
         variant: "destructive",
       });
     } finally {
-      setIsDeleting(false);
+      setDeletingDomain(null);
     }
   };
+
 
   const copyToClipboard = async (text: string, recordType: string) => {
     try {
@@ -637,28 +675,6 @@ const CustomDomainSettings = () => {
               )}
             </Button>
 
-            {/* Delete Button */}
-            {domain && (
-              <Button
-                variant="destructive"
-                onClick={handleDelete}
-                disabled={isDeleting || isGenerating || isVerifying}
-                className="w-full"
-              >
-                {isDeleting ? (
-                  <>
-                    <RefreshCw className="mr-2 h-4 w-4 animate-spin" />
-                    Deleting Domain...
-                  </>
-                ) : (
-                  <>
-                    <Trash2 className="mr-2 h-4 w-4" />
-                    Delete Domain
-                  </>
-                )}
-              </Button>
-            )}
-
             {/* Progress Indicators */}
             {isVerifying && (
               <div className="space-y-3">
@@ -712,6 +728,68 @@ const CustomDomainSettings = () => {
             )}
 
           </CardContent>
+        </Card>
+      )}
+
+      {existingDomains.length > 0 && (
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <span className="bg-blue-100 text-blue-800 rounded-full w-6 h-6 flex items-center justify-center text-sm font-bold">4</span>
+              Manage Existing Domains
+            </CardTitle>
+            <CardDescription>
+              View, monitor, or remove domains currently connected to your account
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-3">
+            {existingDomains.map((existingDomain) => (
+              <div key={existingDomain.id} className="border rounded-lg p-4 flex items-center justify-between gap-4">
+                <div className="space-y-1">
+                  <div className="flex items-center gap-2">
+                    <span className="font-medium text-sm sm:text-base">{existingDomain.domain_name}</span>
+                    {existingDomain.is_primary && (
+                      <Badge variant="default" className="bg-blue-600">Primary</Badge>
+                    )}
+                    <Badge variant={existingDomain.is_active ? "default" : "outline"} className="capitalize">
+                      {existingDomain.status}
+                    </Badge>
+                  </div>
+                  <p className="text-xs text-muted-foreground">
+                    {existingDomain.is_active ? 'Active and verified' : 'Awaiting verification or inactive'}
+                  </p>
+                </div>
+                <Button
+                  variant="destructive"
+                  size="sm"
+                  disabled={deletingDomain === existingDomain.domain_name}
+                  onClick={() => handleDeleteDomain(existingDomain.domain_name)}
+                  className="whitespace-nowrap"
+                >
+                  {deletingDomain === existingDomain.domain_name ? (
+                    <>
+                      <RefreshCw className="mr-2 h-4 w-4 animate-spin" />
+                      Removing...
+                    </>
+                  ) : (
+                    <>
+                      <Trash2 className="mr-2 h-4 w-4" />
+                      Remove
+                    </>
+                  )}
+                </Button>
+              </div>
+            ))}
+          </CardContent>
+        </Card>
+      )}
+
+      {existingDomains.length === 0 && (
+        <Card>
+          <CardHeader>
+            <CardTitle>Manage Existing Domains</CardTitle>
+            <CardDescription>No custom domains have been added yet.</CardDescription>
+          </CardHeader>
         </Card>
       )}
     </div>

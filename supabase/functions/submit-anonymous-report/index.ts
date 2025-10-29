@@ -4,6 +4,66 @@ import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.50.0'
 import { Resend } from "https://esm.sh/resend@4.0.0"
 
+const DISCLOSURELY_PRIMARY_COLOR = '#2563eb'
+const DISCLOSURELY_LOGO_URL = 'https://app.disclosurely.com/lovable-uploads/416d39db-53ff-402e-a2cf-26d1a3618601.png'
+
+// Disclosurely brand email template builder
+function buildDisclosurelyEmailTemplate(options: {
+  title: string
+  subtitle?: string
+  bodyHtml: string
+  cta?: { text: string; url: string }
+  footerText?: string
+}) {
+  const { title, subtitle, bodyHtml, cta, footerText } = options
+
+  return `
+    <!DOCTYPE html>
+    <html>
+      <head>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>${title}</title>
+      </head>
+      <body style="margin:0;background-color:#f3f4f6;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif;color:#111827;">
+        <table role="presentation" style="width:100%;border-collapse:collapse;">
+          <tr>
+            <td align="center" style="padding:32px 16px;">
+              <table role="presentation" style="max-width:600px;width:100%;border-collapse:collapse;background:white;border-radius:12px;overflow:hidden;box-shadow:0 15px 35px rgba(15,23,42,.08);">
+                <tr>
+                  <td style="background:${DISCLOSURELY_PRIMARY_COLOR};padding:32px 24px;text-align:center;">
+                    <img src="${DISCLOSURELY_LOGO_URL}" alt="Disclosurely" width="160" style="display:block;margin:0 auto 16px auto;" />
+                    <h1 style="margin:0;font-size:24px;line-height:1.3;color:#ffffff;font-weight:700;">${title}</h1>
+                    ${subtitle ? `<p style=\"margin:12px 0 0 0;font-size:15px;color:rgba(255,255,255,0.9);\">${subtitle}</p>` : ''}
+                  </td>
+                </tr>
+                <tr>
+                  <td style="padding:32px 28px;">
+                    ${bodyHtml}
+                    ${cta ? `
+                      <div style=\"text-align:center;margin:36px 0 8px 0;\">
+                        <a href=\"${cta.url}\" style=\"display:inline-block;background:${DISCLOSURELY_PRIMARY_COLOR};color:#ffffff;font-weight:600;padding:14px 36px;text-decoration:none;border-radius:8px;box-shadow:0 10px 20px rgba(37,99,235,0.22);\">${cta.text}</a>
+                      </div>
+                    ` : ''}
+                    <p style="margin:40px 0 0 0;font-size:13px;line-height:1.6;color:#6b7280;text-align:center;">
+                      ${footerText || 'This is an automated notification from Disclosurely. If you believe you received this email in error, please contact your administrator.'}
+                    </p>
+                  </td>
+                </tr>
+                <tr>
+                  <td style="background:#f9fafb;text-align:center;padding:20px 24px;border-top:1px solid #e5e7eb;font-size:12px;color:#9ca3af;">
+                    © ${new Date().getFullYear()} Disclosurely. Secure whistleblowing & compliance management platform.
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+        </table>
+      </body>
+    </html>
+  `
+}
+
 // Enhanced logging function
 async function logToSystem(supabase: any, level: string, context: string, message: string, data?: any, error?: any) {
   try {
@@ -120,37 +180,36 @@ async function sendReportNotificationEmails(supabase: any, report: any, organiza
     }
 
     const subject = `New Report Submitted - ${report.tracking_id}`
-    const brandColor = organization?.brand_color || '#2563eb'
 
     for (const recipient of recipients) {
+      const bodyHtml = `
+        <p style=\"font-size:15px;line-height:1.7;color:#1f2937;margin:0 0 18px 0;\">Hello ${recipient.name},</p>
+        <p style=\"font-size:15px;line-height:1.7;color:#1f2937;margin:0 0 18px 0;\">A new report has been submitted and needs your attention:</p>
+        <div style=\"background:#f3f4f6;border:1px solid #e5e7eb;border-radius:10px;padding:18px 20px;margin:24px 0;\">
+          <p style=\"margin:0 0 8px 0;font-size:14px;color:#111827;\"><strong>Title:</strong> ${report.title}</p>
+          <p style=\"margin:0 0 8px 0;font-size:14px;color:#111827;\"><strong>Tracking ID:</strong> ${report.tracking_id}</p>
+          <p style=\"margin:0 0 8px 0;font-size:14px;color:#111827;\"><strong>Type:</strong> ${report.report_type}</p>
+          <p style=\"margin:0;font-size:14px;color:#111827;\"><strong>Submitted:</strong> ${new Date(report.created_at).toLocaleString()}</p>
+        </div>
+        <p style=\"font-size:15px;line-height:1.7;color:#1f2937;margin:0;\">Please log in to your dashboard to review and take action.</p>
+      `
+
       try {
+        const emailHtml = buildDisclosurelyEmailTemplate({
+          title: 'New Report Submitted',
+          subtitle: organization?.name ? `${organization.name} Compliance Team` : undefined,
+          bodyHtml,
+          cta: {
+            text: 'View Dashboard',
+            url: 'https://app.disclosurely.com/dashboard'
+          }
+        })
+
         const emailResponse = await resendClient.emails.send({
           from: 'Disclosurely <notifications@disclosurely.com>',
           to: [recipient.email],
           subject,
-          html: `
-            <div style="font-family: Arial, sans-serif; max-width:600px; margin:0 auto;">
-              <div style="background:${brandColor}; color:white; padding:20px; border-radius:8px 8px 0 0;">
-                <h1 style="margin:0; font-size:22px;">New Report Submitted</h1>
-                <p style="margin:6px 0 0 0; font-size:14px; opacity:0.9;">${organization?.name || 'Disclosurely'} Compliance Team</p>
-              </div>
-              <div style="background:#f9fafb; padding:24px; border:1px solid #e5e7eb; border-top:none; border-radius:0 0 8px 8px;">
-                <p style="font-size:15px; color:#1f2937;">Hello ${recipient.name},</p>
-                <p style="font-size:15px; color:#374151;">A new report has been submitted and needs your attention:</p>
-                <div style="background:white; border:1px solid #e5e7eb; border-radius:6px; padding:16px; margin:18px 0;">
-                  <p style="margin:0 0 8px 0; font-size:14px;"><strong>Title:</strong> ${report.title}</p>
-                  <p style="margin:0 0 8px 0; font-size:14px;"><strong>Tracking ID:</strong> ${report.tracking_id}</p>
-                  <p style="margin:0 0 8px 0; font-size:14px;"><strong>Type:</strong> ${report.report_type}</p>
-                  <p style="margin:0; font-size:14px;"><strong>Submitted:</strong> ${new Date(report.created_at).toLocaleString()}</p>
-                </div>
-                <p style="font-size:14px; color:#374151;">Please log in to the dashboard to review and take action.</p>
-                <div style="text-align:center; margin:26px 0;">
-                  <a href="https://app.disclosurely.com/dashboard" style="background:${brandColor}; color:white; padding:12px 28px; border-radius:6px; text-decoration:none; display:inline-block; font-weight:600;">View Dashboard</a>
-                </div>
-                <p style="font-size:12px; color:#6b7280;">This is an automated notification from ${organization?.name || 'Disclosurely'}. If you believe you received this in error, please contact your administrator.</p>
-              </div>
-            </div>
-          `
+          html: emailHtml,
         })
 
         console.log('Notification email sent to', recipient.email, emailResponse?.data?.id)
@@ -168,7 +227,8 @@ async function sendReportNotificationEmails(supabase: any, report: any, organiza
             metadata: {
               tracking_id: report.tracking_id,
               resend_id: emailResponse?.data?.id || null,
-              recipient_source: recipient.source
+              recipient_source: recipient.source,
+              template: 'disclosurely-default'
             }
           })
       } catch (emailError) {
@@ -186,7 +246,8 @@ async function sendReportNotificationEmails(supabase: any, report: any, organiza
             metadata: {
               tracking_id: report.tracking_id,
               error: (emailError as Error).message,
-              recipient_source: recipient.source
+              recipient_source: recipient.source,
+              template: 'disclosurely-default'
             }
           })
       }
