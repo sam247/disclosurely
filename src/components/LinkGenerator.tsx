@@ -53,13 +53,40 @@ const LinkGenerator = () => {
     },
     enabled: !!user,
     refetchOnWindowFocus: true,
-    staleTime: 30000, // Refetch every 30 seconds to catch domain updates
+    staleTime: 5000, // Refetch every 5 seconds to catch domain updates quickly
   });
+
+  // Listen for domain verification events to immediately refetch
+  useEffect(() => {
+    const handleDomainVerified = () => {
+      console.log('Domain verified event received, refetching custom domains...');
+      refetchDomains();
+      // Also invalidate the query cache
+      queryClient.invalidateQueries({ queryKey: ['custom-domains', user?.id] });
+    };
+
+    window.addEventListener('custom-domain-verified', handleDomainVerified);
+    return () => {
+      window.removeEventListener('custom-domain-verified', handleDomainVerified);
+    };
+  }, [refetchDomains, queryClient, user?.id]);
 
   // Get the primary domain (prefer primary custom domain, then any active domain)
   const primaryDomain = customDomains?.find(d => d.is_primary && d.is_active && d.status === 'active')?.domain_name 
     || customDomains?.find(d => d.is_active && d.status === 'active')?.domain_name 
     || null;
+
+  // Debug logging
+  useEffect(() => {
+    if (user) {
+      console.log('🔍 LinkGenerator Debug:', {
+        customDomains,
+        primaryDomain,
+        brandedUrl: primaryDomain && primaryLink ? `https://${primaryDomain}/secure/tool/submit/${primaryLink.link_token}` : null,
+        user: user.id
+      });
+    }
+  }, [customDomains, primaryDomain, primaryLink, user]);
 
   // Fetch the primary active link
   const { data: primaryLink, isLoading } = useQuery({

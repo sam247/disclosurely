@@ -319,7 +319,76 @@ async function handleGenerateRecords(request: GenerateRequest): Promise<{ succes
   console.log('Creating Vercel client...');
   const vercelClient = new SimpleVercelClient();
 
+  // Get user info for database operations
+  const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
+  const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
+  const supabaseClient = createClient(supabaseUrl, supabaseServiceKey);
+  
+  // Get auth token from request to find user (if req is provided)
+  let userId = null;
+  let organizationId = null;
+  if (req) {
+    try {
+      const authHeader = req.headers.get('Authorization') || '';
+      if (authHeader) {
+        const token = authHeader.replace('Bearer ', '');
+        const { data: { user } } = await supabaseClient.auth.getUser(token);
+        if (user) {
+          userId = user.id;
+          const { data: profile } = await supabaseClient
+            .from('profiles')
+            .select('organization_id')
+            .eq('id', user.id)
+            .single();
+          organizationId = profile?.organization_id;
+        }
+      }
+    } catch (error) {
+      console.log('Could not get user info, will create/update domain without user:', error);
+    }
+  }
+
               try {
+                // Step 0.5: Create or update domain record in database if we have org info
+                if (organizationId) {
+                  const domainParts = domain.split('.');
+                  const subdomain = domainParts[0];
+                  const rootDomain = domainParts.slice(1).join('.');
+                  
+                  // Check if domain already exists
+                  const { data: existingDomain } = await supabaseClient
+                    .from('custom_domains')
+                    .select('id')
+                    .eq('domain_name', domain)
+                    .single();
+                  
+                  if (!existingDomain) {
+                    // Create new domain record
+                    const { error: insertError } = await supabaseClient
+                      .from('custom_domains')
+                      .insert({
+                        organization_id: organizationId,
+                        domain_name: domain,
+                        subdomain: subdomain,
+                        root_domain: rootDomain,
+                        verification_method: 'dns',
+                        dns_record_type: 'CNAME',
+                        dns_record_value: 'secure.disclosurely.com',
+                        created_by: userId,
+                        status: 'pending'
+                      });
+                    
+                    if (insertError) {
+                      console.log('Could not create domain record (may already exist):', insertError);
+                    } else {
+                      console.log(`Created domain record in database for ${domain}`);
+                      await logToAI('GENERATE_DB_CREATE', `Created domain record in database: ${domain}`)
+                    }
+                  } else {
+                    console.log(`Domain record already exists in database: ${domain}`);
+                  }
+                }
+
                 // Step 1: Add domain to Vercel project (or get existing domain info)
                 console.log(`Adding domain ${domain} to Vercel project...`);
                 const addResult = await vercelClient.addDomainToProject(domain);
@@ -557,7 +626,8 @@ async function handleVerifyDomain(request: VerifyRequest): Promise<{ success: bo
   }
 
   await logToAI('VERIFY_STEP1', `Starting Vercel API verification for domain: ${domain}`)
-    console.log('Attempting to verify domain ' + domain + ' with Vercel API...');
+  console.log('Attempting to verify domain ' + domain + ' with Vercel API...');
+  
   const vercelClient = new SimpleVercelClient();
   const vercelVerifyResult = await vercelClient.verifyDomain(domain);
 
@@ -572,6 +642,72 @@ async function handleVerifyDomain(request: VerifyRequest): Promise<{ success: bo
   
   await logToAI('VERIFY_SUCCESS', `Vercel API verification successful for domain: ${domain}`)
   console.log('Vercel API verification successful.');
+  
+  // Update database: set domain as active, verified, and primary (if no other primary exists)
+  try {
+    const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
+    const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
+    
+    // Get the domain record
+    const domainResponse = await fetch(`${supabaseUrl}/rest/v1/custom_domains?domain_name=eq.${encodeURIComponent(domain)}`, {
+      method: 'GET',
+      headers: {
+        'Authorization': `Bearer ${supabaseServiceKey}`,
+        'Content-Type': 'application/json',
+        'apikey': supabaseServiceKey
+      }
+    });
+    
+    const domainData = await domainResponse.json();
+    if (domainData && domainData.length > 0) {
+      const domainRecord = domainData[0];
+      const organizationId = domainRecord.organization_id;
+      
+      // Check if there's already a primary domain for this org
+      const primaryCheckResponse = await fetch(`${supabaseUrl}/rest/v1/custom_domains?organization_id=eq.${organizationId}&is_primary=eq.true&select=id`, {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${supabaseServiceKey}`,
+          'Content-Type': 'application/json',
+          'apikey': supabaseServiceKey
+        }
+      });
+      
+      const primaryDomains = await primaryCheckResponse.json();
+      const shouldSetPrimary = !primaryDomains || primaryDomains.length === 0;
+      
+      // Update domain to active, verified, and set as primary if no primary exists
+      const updateResponse = await fetch(`${supabaseUrl}/rest/v1/custom_domains?id=eq.${domainRecord.id}`, {
+        method: 'PATCH',
+        headers: {
+          'Authorization': `Bearer ${supabaseServiceKey}`,
+          'Content-Type': 'application/json',
+          'apikey': supabaseServiceKey
+        },
+        body: JSON.stringify({
+          status: 'active',
+          is_active: true,
+          is_primary: shouldSetPrimary,
+          verified_at: new Date().toISOString(),
+          activated_at: new Date().toISOString(),
+          last_checked_at: new Date().toISOString()
+        })
+      });
+      
+      if (!updateResponse.ok) {
+        console.error('Failed to update domain in database after verification');
+        await logToAI('VERIFY_WARNING', `Vercel verification succeeded but database update failed for domain: ${domain}`)
+      } else {
+        await logToAI('VERIFY_DB_UPDATE_SUCCESS', `Domain database updated successfully: ${domain}`, { 
+          setAsPrimary: shouldSetPrimary 
+        })
+        console.log(`Domain ${domain} updated in database: active=true, status=active, is_primary=${shouldSetPrimary}`);
+      }
+    }
+  } catch (error) {
+    console.error('Error updating domain in database:', error);
+    await logToAI('VERIFY_WARNING', `Vercel verification succeeded but database update error for domain: ${domain}`, { error: error.message })
+  }
   
   return {
     success: true,
@@ -724,7 +860,7 @@ serve(async (req) => {
     if (action === 'generate') {
       console.log('Handling generate action');
       await logToAI('GENERATE_START', `Starting record generation for domain: ${domain}`)
-      const result = await handleGenerateRecords(body);
+      const result = await handleGenerateRecords(body, req);
       console.log('Generate result:', JSON.stringify(result));
       await logToAI('GENERATE_COMPLETE', `Record generation completed for domain: ${domain}`, result)
       

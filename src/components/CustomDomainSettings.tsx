@@ -328,9 +328,20 @@ const CustomDomainSettings = () => {
         // Clear records once verified successfully
         setRecords([]);
         
+        // Invalidate custom domains query in LinkGenerator to refresh branded link
+        // This will trigger a refetch and show the branded link
+        if (typeof window !== 'undefined') {
+          // Use queryClient from react-query to invalidate
+          const { QueryClient } = await import('@tanstack/react-query');
+          // We'll trigger this via a custom event that LinkGenerator can listen to
+          window.dispatchEvent(new CustomEvent('custom-domain-verified', { 
+            detail: { domain: domain.trim() } 
+          }));
+        }
+        
         toast({
           title: "Verification Successful",
-          description: "Your domain is ready to use!",
+          description: "Your domain is ready to use! The branded link will appear shortly.",
         });
       } else {
         toast({
