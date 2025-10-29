@@ -63,6 +63,8 @@ async function logAuditEvent(supabase: any, event: any) {
 
 async function sendReportNotificationEmails(supabase: any, report: any, organizationId: string) {
   try {
+    const resendClient = new Resend(Deno.env.get('RESEND_API_KEY') || '')
+
     // Fetch organization info for branding / fallback email
     const { data: organization } = await supabase
       .from('organizations')
@@ -122,7 +124,7 @@ async function sendReportNotificationEmails(supabase: any, report: any, organiza
 
     for (const recipient of recipients) {
       try {
-        const emailResponse = await resend.emails.send({
+        const emailResponse = await resendClient.emails.send({
           from: 'Disclosurely <notifications@disclosurely.com>',
           to: [recipient.email],
           subject,
