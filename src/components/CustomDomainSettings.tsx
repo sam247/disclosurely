@@ -184,7 +184,7 @@ const CustomDomainSettings = () => {
     try {
       // Call our simple Edge Function to generate verification records
       const { data: { session } } = await supabase.auth.getSession();
-      const response = await supabase.functions.invoke('simple-domain', {
+      const response = await supabase.functions.invoke('simple-domain-test', {
         body: { 
           action: 'generate',
           domain: domain.trim() 
