@@ -168,6 +168,28 @@ serve(async (req) => {
     
     console.log('✅ Report created successfully:', report.id)
     
+    // Trigger notification email processing (non-blocking)
+    try {
+      console.log('🛎️ Triggering notification email processing...')
+      await fetch(
+        `${Deno.env.get('SUPABASE_URL')}/functions/v1/process-notifications-to-emails`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')}`
+          },
+          body: JSON.stringify({ trigger: 'report_created', reportId: report.id })
+        }
+      )
+    } catch (notificationError) {
+      console.error('⚠️ Failed to trigger notification email processing:', notificationError)
+      await logToSystem(supabase, 'warn', 'submission', 'Failed to trigger notification emails', {
+        error: notificationError.message,
+        reportId: report.id
+      });
+    }
+    
     // Log audit event
     console.log('📋 Logging audit event...')
     await logAuditEvent(supabase, {
