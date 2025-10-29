@@ -1204,10 +1204,18 @@ async function checkCnameRecord(domain: string): Promise<boolean> {
   }
 }
 
+console.log('[simple-domain] Function module loaded successfully');
+
 serve(async (req) => {
-  // Handle CORS preflight requests
+  console.log(`[simple-domain] Received ${req.method} request from ${req.headers.get('origin') || 'unknown'}`);
+  
+  // Handle CORS preflight requests FIRST
   if (req.method === 'OPTIONS') {
-    return new Response('ok', { headers: corsHeaders })
+    console.log('[simple-domain] Returning 204 No Content with CORS headers');
+    return new Response(null, { 
+      status: 204,
+      headers: corsHeaders 
+    });
   }
 
   try {
