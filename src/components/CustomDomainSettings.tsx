@@ -104,9 +104,12 @@ const CustomDomainSettings = () => {
   }, [fetchExistingDomains]);
 
   // Clear input and localStorage when no domains exist in the database
-  // This should only run when existingDomains changes (on mount and after domain operations)
-  // BUT NOT when user is actively generating records or has just generated them
+  // This should only run ONCE on mount if there's stale data
+  const hasRunCleanupRef = React.useRef(false);
+  
   React.useEffect(() => {
+    if (hasRunCleanupRef.current) return; // Only run once
+    
     if (existingDomains.length === 0 && !isGenerating && records.length === 0) {
       // Check localStorage directly to see if we have stale data
       const hasStaleLocalStorage = 
@@ -116,11 +119,11 @@ const CustomDomainSettings = () => {
       
       if (hasStaleLocalStorage) {
         console.log('No domains in database, clearing stale localStorage data');
-        setDomain('');
         setVerificationResult(null);
         localStorage.removeItem('custom-domain');
         localStorage.removeItem('custom-domain-records');
         localStorage.removeItem('custom-domain-verification');
+        hasRunCleanupRef.current = true; // Mark as run
       }
     }
   }, [existingDomains, isGenerating, records]); // Include isGenerating and records to prevent clearing during active operations
