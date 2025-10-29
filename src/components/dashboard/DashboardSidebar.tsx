@@ -59,11 +59,6 @@ const DashboardSidebar = ({
     path: '/dashboard/team',
     locked: !isOrgAdmin
   }, {
-    title: t('branding'),
-    icon: Palette,
-    path: '/dashboard/branding',
-    locked: !limits.hasCustomBranding || !isOrgAdmin
-  }, {
     title: 'Integrations',
     icon: Zap,
     path: '/dashboard/integrations',

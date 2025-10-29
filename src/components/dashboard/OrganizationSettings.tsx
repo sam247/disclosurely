@@ -1,39 +1,37 @@
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Palette, Globe } from 'lucide-react';
 import OrganizationSettingsBranding from '@/components/OrganizationSettings';
 import CustomDomainSettings from '@/components/CustomDomainSettings';
-import { useTranslation } from 'react-i18next';
+import { Separator } from '@/components/ui/separator';
 
 const OrganizationSettings = () => {
-  const { t } = useTranslation();
-  
   return (
-    <div className="p-6">
-      <div className="mb-6">
-        <h2 className="text-2xl font-bold">Organization Settings</h2>
+    <div className="p-6 space-y-8 max-w-4xl">
+      <div>
+        <h2 className="text-2xl font-bold mb-2">Organization Settings</h2>
         <p className="text-muted-foreground">Manage your organization's branding and custom domains</p>
       </div>
 
-      <Tabs defaultValue="branding" className="space-y-6">
-        <TabsList className="grid w-full grid-cols-2">
-          <TabsTrigger value="branding" className="flex items-center gap-2">
-            <Palette className="h-4 w-4" />
-            Branding
-          </TabsTrigger>
-          <TabsTrigger value="domains" className="flex items-center gap-2">
-            <Globe className="h-4 w-4" />
-            Custom Domains
-          </TabsTrigger>
-        </TabsList>
+      <Separator />
 
-        <TabsContent value="branding">
-          <OrganizationSettingsBranding />
-        </TabsContent>
+      {/* Branding Section */}
+      <div className="space-y-4">
+        <div className="flex items-center gap-2">
+          <Palette className="h-5 w-5 text-primary" />
+          <h3 className="text-xl font-semibold">Organization Branding</h3>
+        </div>
+        <OrganizationSettingsBranding />
+      </div>
 
-        <TabsContent value="domains">
-          <CustomDomainSettings />
-        </TabsContent>
-      </Tabs>
+      <Separator />
+
+      {/* Custom Domains Section */}
+      <div className="space-y-4">
+        <div className="flex items-center gap-2">
+          <Globe className="h-5 w-5 text-primary" />
+          <h3 className="text-xl font-semibold">Custom Domains</h3>
+        </div>
+        <CustomDomainSettings />
+      </div>
     </div>
   );
 };
