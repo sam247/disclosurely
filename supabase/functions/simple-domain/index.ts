@@ -658,7 +658,7 @@ async function handleGenerateRecords(request: GenerateRequest, req?: Request): P
   }
 }
 
-async function handleVerifyDomain(request: VerifyRequest): Promise<{ success: boolean; message: string }> {
+async function handleVerifyDomain(request: VerifyRequest, req?: Request): Promise<{ success: boolean; message: string }> {
   const { domain } = request;
 
   if (!domain) {
@@ -688,6 +688,40 @@ async function handleVerifyDomain(request: VerifyRequest): Promise<{ success: bo
   try {
     const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
     const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
+    const supabaseAnonKey = Deno.env.get('SUPABASE_ANON_KEY') ?? '';
+
+    const serviceClient = createClient(supabaseUrl, supabaseServiceKey);
+
+    // Resolve the organization/user context from the request, if possible
+    let organizationId: string | null = null;
+    let userId: string | null = null;
+
+    if (req) {
+      try {
+        const authHeader = req.headers.get('Authorization');
+        if (authHeader) {
+          const authClient = createClient(supabaseUrl, supabaseAnonKey, {
+            global: {
+              headers: { Authorization: authHeader },
+            },
+          });
+
+          const { data: { user }, error: authError } = await authClient.auth.getUser();
+          if (!authError && user) {
+            userId = user.id;
+            const { data: profile } = await authClient
+              .from('profiles')
+              .select('organization_id')
+              .eq('id', user.id)
+              .single();
+            organizationId = profile?.organization_id ?? null;
+            await logToAI('VERIFY_CONTEXT', `Resolved user context during verification`, { userId, organizationId });
+          }
+        }
+      } catch (contextError) {
+        console.log('Failed to resolve user context during verification:', contextError);
+      }
+    }
     
     // Get the domain record
     const domainResponse = await fetch(`${supabaseUrl}/rest/v1/custom_domains?domain_name=eq.${encodeURIComponent(domain)}`, {
@@ -700,89 +734,103 @@ async function handleVerifyDomain(request: VerifyRequest): Promise<{ success: bo
     });
     
     const domainData = await domainResponse.json();
-    if (domainData && domainData.length > 0) {
-      const domainRecord = domainData[0];
-      const organizationId = domainRecord.organization_id;
-      
-      // Check if there's already a primary domain for this org
-      const primaryCheckResponse = await fetch(`${supabaseUrl}/rest/v1/custom_domains?organization_id=eq.${organizationId}&is_primary=eq.true&select=id`, {
-        method: 'GET',
-        headers: {
-          'Authorization': `Bearer ${supabaseServiceKey}`,
-          'Content-Type': 'application/json',
-          'apikey': supabaseServiceKey
-        }
-      });
-      
-      const primaryDomains = await primaryCheckResponse.json();
-      const shouldSetPrimary = !primaryDomains || primaryDomains.length === 0;
-      
-      // Update domain to active, verified, and set as primary if no primary exists
-      const updateResponse = await fetch(`${supabaseUrl}/rest/v1/custom_domains?id=eq.${domainRecord.id}`, {
-        method: 'PATCH',
-        headers: {
-          'Authorization': `Bearer ${supabaseServiceKey}`,
-          'Content-Type': 'application/json',
-          'apikey': supabaseServiceKey
-        },
-        body: JSON.stringify({
+    let domainRecord = domainData && domainData.length > 0 ? domainData[0] : null;
+
+    // If no domain record exists yet, create one now (since verification succeeded)
+    if (!domainRecord && organizationId) {
+      const domainParts = domain.split('.');
+      const subdomain = domainParts[0];
+      const rootDomain = domainParts.slice(1).join('.');
+      const timestamp = new Date().toISOString();
+
+      const { data: insertedDomain, error: insertError } = await serviceClient
+        .from('custom_domains')
+        .insert({
+          organization_id: organizationId,
+          domain_name: domain,
+          subdomain,
+          root_domain,
           status: 'active',
           is_active: true,
-          is_primary: shouldSetPrimary,
-          verified_at: new Date().toISOString(),
-          activated_at: new Date().toISOString(),
-          last_checked_at: new Date().toISOString()
+          is_primary: false,
+          verification_method: 'dns',
+          dns_record_type: 'CNAME',
+          dns_record_value: 'secure.disclosurely.com',
+          created_by: userId,
+          verified_at: timestamp,
+          activated_at: timestamp,
+          last_checked_at: timestamp,
         })
-      });
+        .select()
+        .single();
+
+      if (insertError) {
+        console.error('Failed to insert new domain record after verification:', insertError);
+        await logToAI('VERIFY_ERROR', `Failed to insert domain after Vercel verification: ${domain}`, { organizationId, error: insertError.message });
+      } else {
+        domainRecord = insertedDomain;
+        await logToAI('VERIFY_DB_CREATE', `Inserted new domain record after verification: ${domain}`, { organizationId });
+      }
+    }
+
+    if (domainRecord) {
+      const organizationIdForDomain = domainRecord.organization_id || organizationId;
+
+      if (!organizationIdForDomain) {
+        console.error('Domain record has no organization associated and user context unavailable');
+        await logToAI('VERIFY_ERROR', `Domain record missing organization_id and user context unavailable: ${domain}`);
+        return {
+          success: true,
+          message: `Domain ${domain} verified with Vercel, but organization context was missing. Please regenerate DNS records from the dashboard.`
+        };
+      }
+
+      // Check if there's already a primary domain for this org
+      const { data: primaryDomains, error: primaryError } = await serviceClient
+        .from('custom_domains')
+        .select('id')
+        .eq('organization_id', organizationIdForDomain)
+        .eq('is_primary', true);
+
+      if (primaryError) {
+        console.error('Failed to check existing primary domains:', primaryError);
+        await logToAI('VERIFY_ERROR', `Failed to check existing primary domains for ${domain}`, { organizationId: organizationIdForDomain, error: primaryError.message });
+      }
+
+      const shouldSetPrimary = !primaryDomains || primaryDomains.length === 0;
+
+      const updatePayload: Record<string, any> = {
+        status: 'active',
+        is_active: true,
+        is_primary: shouldSetPrimary,
+        verified_at: new Date().toISOString(),
+        activated_at: new Date().toISOString(),
+        last_checked_at: new Date().toISOString(),
+      };
+
+      // If the domain was previously associated with another organization, move it
+      if (!domainRecord.organization_id && organizationIdForDomain) {
+        updatePayload.organization_id = organizationIdForDomain;
+      }
+
+      const { error: updateError } = await serviceClient
+        .from('custom_domains')
+        .update(updatePayload)
+        .eq('id', domainRecord.id);
       
-      if (!updateResponse.ok) {
-        const errorText = await updateResponse.text();
-        console.error('Failed to update domain in database after verification:', updateResponse.status, errorText);
-        await logToAI('VERIFY_ERROR', `Vercel verification succeeded but database update failed for domain: ${domain}`, { 
-          status: updateResponse.status, 
-          error: errorText 
-        })
-        // Retry once after a short delay
-        console.log('Retrying database update...');
-        await new Promise(resolve => setTimeout(resolve, 1000));
-        
-        const retryResponse = await fetch(`${supabaseUrl}/rest/v1/custom_domains?id=eq.${domainRecord.id}`, {
-          method: 'PATCH',
-          headers: {
-            'Authorization': `Bearer ${supabaseServiceKey}`,
-            'Content-Type': 'application/json',
-            'apikey': supabaseServiceKey
-          },
-          body: JSON.stringify({
-            status: 'active',
-            is_active: true,
-            is_primary: shouldSetPrimary,
-            verified_at: new Date().toISOString(),
-            activated_at: new Date().toISOString(),
-            last_checked_at: new Date().toISOString()
-          })
-        });
-        
-        if (!retryResponse.ok) {
-          const retryErrorText = await retryResponse.text();
-          console.error('Retry also failed:', retryResponse.status, retryErrorText);
-          throw new Error(`Database update failed: ${retryErrorText}`);
-        } else {
-          await logToAI('VERIFY_DB_UPDATE_SUCCESS', `Domain database updated successfully on retry: ${domain}`, { 
-            setAsPrimary: shouldSetPrimary 
-          })
-          console.log(`Domain ${domain} updated in database (retry): active=true, status=active, is_primary=${shouldSetPrimary}`);
-        }
+      if (updateError) {
+        console.error('Failed to update domain in database after verification:', updateError.message);
+        await logToAI('VERIFY_ERROR', `Database update failed after Vercel verification: ${domain}`, { organizationId: organizationIdForDomain, error: updateError.message });
       } else {
         await logToAI('VERIFY_DB_UPDATE_SUCCESS', `Domain database updated successfully: ${domain}`, { 
+          organizationId: organizationIdForDomain,
           setAsPrimary: shouldSetPrimary 
         })
         console.log(`Domain ${domain} updated in database: active=true, status=active, is_primary=${shouldSetPrimary}`);
       }
     } else {
-      console.error('Domain record not found in database after verification');
-      await logToAI('VERIFY_ERROR', `Domain record not found in database: ${domain}`)
-      // Don't throw error - domain was verified on Vercel, just DB record missing
+      console.error('Domain record not found or could not be created after verification');
+      await logToAI('VERIFY_ERROR', `Domain record not found/created for domain: ${domain}`)
     }
   } catch (error) {
     console.error('Error updating domain in database:', error);
@@ -1123,7 +1171,7 @@ serve(async (req) => {
     if (action === 'verify') {
       console.log('Handling verify action');
       await logToAI('VERIFY_START', `Starting domain verification for domain: ${domain}`)
-      const result = await handleVerifyDomain(body);
+      const result = await handleVerifyDomain(body, req);
       console.log('Verify result:', JSON.stringify(result));
       await logToAI('VERIFY_COMPLETE', `Domain verification completed for domain: ${domain}`, result)
       
