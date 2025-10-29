@@ -256,12 +256,12 @@ const LinkGenerator = () => {
                   )}
                   {brandedLinkStatus === 'accessible' && (
                     <Badge variant="default" className="bg-green-600 text-xs">
-                      ✓ Active
+                      ✓ Verified
                     </Badge>
                   )}
                   {brandedLinkStatus === 'inaccessible' && (
                     <Badge variant="destructive" className="text-xs">
-                      ⚠ Not Accessible
+                      ⚠ Configuration Issue
                     </Badge>
                   )}
                 </div>
