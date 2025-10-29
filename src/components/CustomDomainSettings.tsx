@@ -43,28 +43,24 @@ const CustomDomainSettings = () => {
   const { user } = useAuth();
   
   const [domain, setDomain] = useState(() => {
-    // Load domain from localStorage on component mount
+    // Load domain from sessionStorage (auto-clears on tab close for security)
     if (typeof window !== 'undefined') {
-      return localStorage.getItem('custom-domain') || '';
+      return sessionStorage.getItem('custom-domain') || '';
     }
     return '';
   });
   const [isGenerating, setIsGenerating] = useState(false);
   const [isVerifying, setIsVerifying] = useState(false);
   const [records, setRecords] = useState<DNSRecord[]>(() => {
-    // Load records from localStorage on component mount
+    // Load records from sessionStorage (auto-clears on tab close for security)
     if (typeof window !== 'undefined') {
-      const saved = localStorage.getItem('custom-domain-records');
+      const saved = sessionStorage.getItem('custom-domain-records');
       return saved ? JSON.parse(saved) : [];
     }
     return [];
   });
   const [verificationResult, setVerificationResult] = useState<VerificationResult | null>(() => {
-    // Load verification result from localStorage on component mount
-    if (typeof window !== 'undefined') {
-      const saved = localStorage.getItem('custom-domain-verification');
-      return saved ? JSON.parse(saved) : null;
-    }
+    // Don't persist verification tokens - fetch fresh from server instead
     return null;
   });
   const [copiedRecord, setCopiedRecord] = useState<string | null>(null);
@@ -103,7 +99,7 @@ const CustomDomainSettings = () => {
     fetchExistingDomains();
   }, [fetchExistingDomains]);
 
-  // Clear input and localStorage when no domains exist in the database
+  // Clear input and sessionStorage when no domains exist in the database
   // This should only run ONCE on mount if there's stale data
   const hasRunCleanupRef = React.useRef(false);
   
@@ -111,18 +107,16 @@ const CustomDomainSettings = () => {
     if (hasRunCleanupRef.current) return; // Only run once
     
     if (existingDomains.length === 0 && !isGenerating && records.length === 0) {
-      // Check localStorage directly to see if we have stale data
-      const hasStaleLocalStorage = 
-        localStorage.getItem('custom-domain') ||
-        localStorage.getItem('custom-domain-records') ||
-        localStorage.getItem('custom-domain-verification');
+      // Check sessionStorage directly to see if we have stale data
+      const hasStaleSessionStorage = 
+        sessionStorage.getItem('custom-domain') ||
+        sessionStorage.getItem('custom-domain-records');
       
-      if (hasStaleLocalStorage) {
-        console.log('No domains in database, clearing stale localStorage data');
+      if (hasStaleSessionStorage) {
+        console.log('No domains in database, clearing stale sessionStorage data');
         setVerificationResult(null);
-        localStorage.removeItem('custom-domain');
-        localStorage.removeItem('custom-domain-records');
-        localStorage.removeItem('custom-domain-verification');
+        sessionStorage.removeItem('custom-domain');
+        sessionStorage.removeItem('custom-domain-records');
         hasRunCleanupRef.current = true; // Mark as run
       }
     }
@@ -131,15 +125,14 @@ const CustomDomainSettings = () => {
   // Track previous domain to detect changes
   const prevDomainRef = React.useRef<string>('');
   
-  // Save domain to localStorage whenever it changes
+  // Save domain to sessionStorage whenever it changes
   // Also clear old records/verification when domain changes
   React.useEffect(() => {
     if (typeof window !== 'undefined') {
       // Check if domain actually changed
       if (domain && domain !== prevDomainRef.current && prevDomainRef.current !== '') {
         // Domain changed - clear old records and verification
-        localStorage.removeItem('custom-domain-records');
-        localStorage.removeItem('custom-domain-verification');
+        sessionStorage.removeItem('custom-domain-records');
         setRecords([]);
         setVerificationResult(null);
       }
@@ -147,28 +140,27 @@ const CustomDomainSettings = () => {
       // Update previous domain reference
       prevDomainRef.current = domain;
       
-      // Save to localStorage
+      // Save to sessionStorage (auto-clears on tab close for security)
       if (domain) {
-        localStorage.setItem('custom-domain', domain);
+        sessionStorage.setItem('custom-domain', domain);
       } else {
-        localStorage.removeItem('custom-domain');
+        sessionStorage.removeItem('custom-domain');
       }
     }
   }, [domain]);
 
-  // Save records to localStorage whenever they change
+  // Save records to sessionStorage whenever they change (with TTL for security)
   React.useEffect(() => {
     if (typeof window !== 'undefined' && records.length > 0) {
-      localStorage.setItem('custom-domain-records', JSON.stringify(records));
+      const dataWithTTL = {
+        data: records,
+        expiry: Date.now() + (15 * 60 * 1000) // 15 minutes TTL
+      };
+      sessionStorage.setItem('custom-domain-records', JSON.stringify(dataWithTTL));
     }
   }, [records]);
 
-  // Save verification result to localStorage whenever it changes
-  React.useEffect(() => {
-    if (typeof window !== 'undefined' && verificationResult) {
-      localStorage.setItem('custom-domain-verification', JSON.stringify(verificationResult));
-    }
-  }, [verificationResult]);
+  // Verification tokens are no longer persisted for security
 
   const handleGenerateRecords = async () => {
     if (!domain.trim()) {
@@ -400,8 +392,7 @@ const CustomDomainSettings = () => {
         
         // Clear records once verified successfully
         setRecords([]);
-        localStorage.removeItem('custom-domain-records');
-        localStorage.removeItem('custom-domain-verification');
+        sessionStorage.removeItem('custom-domain-records');
         setVerificationResult(null);
         setDomain('');
 
@@ -507,10 +498,9 @@ const CustomDomainSettings = () => {
 
         if (domain === domainToDelete) {
           setDomain('');
-          localStorage.removeItem('custom-domain');
+          sessionStorage.removeItem('custom-domain');
         }
-        localStorage.removeItem('custom-domain-records');
-        localStorage.removeItem('custom-domain-verification');
+        sessionStorage.removeItem('custom-domain-records');
         setRecords([]);
         setVerificationResult(null);
 

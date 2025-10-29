@@ -38,11 +38,20 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
   const [loading, setLoading] = useState(true);
   const [subscriptionLoading, setSubscriptionLoading] = useState(false);
   
-  // Initialize subscription data from localStorage or default
+  // Initialize subscription data from sessionStorage with TTL (auto-clears on tab close)
   const [subscriptionData, setSubscriptionData] = useState<SubscriptionData>(() => {
     try {
-      const cached = localStorage.getItem('subscription_data');
-      return cached ? JSON.parse(cached) : { subscribed: false };
+      const cached = sessionStorage.getItem('subscription_data');
+      if (cached) {
+        const parsed = JSON.parse(cached);
+        // Check TTL (15 minutes)
+        if (parsed.expiry && parsed.expiry > Date.now()) {
+          return parsed.data;
+        }
+        // Expired - clear it
+        sessionStorage.removeItem('subscription_data');
+      }
+      return { subscribed: false };
     } catch {
       return { subscribed: false };
     }
@@ -86,8 +95,13 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
         };
         
         setSubscriptionData(mappedData);
-        localStorage.setItem('subscription_data', JSON.stringify(mappedData));
-        localStorage.setItem(cacheKey, now.toString());
+        // Store with TTL (15 minutes) for security
+        const dataWithTTL = {
+          data: mappedData,
+          expiry: now + (15 * 60 * 1000)
+        };
+        sessionStorage.setItem('subscription_data', JSON.stringify(dataWithTTL));
+        sessionStorage.setItem(cacheKey, now.toString());
         return;
       }
     } catch (error) {
@@ -115,9 +129,13 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
       
       setSubscriptionData(mappedData);
       
-      // Cache the subscription data and timestamp
-      localStorage.setItem('subscription_data', JSON.stringify(mappedData));
-      localStorage.setItem(cacheKey, now.toString());
+      // Cache the subscription data with TTL (15 minutes) for security
+      const dataWithTTL = {
+        data: mappedData,
+        expiry: now + (15 * 60 * 1000)
+      };
+      sessionStorage.setItem('subscription_data', JSON.stringify(dataWithTTL));
+      sessionStorage.setItem(cacheKey, now.toString());
     } catch (error) {
       // Set basic data on error - user exists but subscription check failed
       setSubscriptionData({ subscribed: false });

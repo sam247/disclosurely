@@ -5,7 +5,7 @@ import { Separator } from '@/components/ui/separator';
 
 const OrganizationSettings = () => {
   return (
-    <div className="p-6 space-y-8 max-w-6xl">
+    <div className="p-6 space-y-8">
       <div>
         <h1 className="text-3xl font-bold mb-2">Settings</h1>
         <p className="text-muted-foreground">Manage your organization's branding and custom domains</p>
