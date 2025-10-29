@@ -86,28 +86,36 @@ const Pricing = () => {
             <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
               Why Choose Disclosurely?
             </h2>
-            <p className="text-lg text-gray-600">
-              Better pricing and AI-powered case analysis
+            <p className="text-lg text-gray-600 mb-4">
+              Save £40+ per month compared to competitors, plus exclusive AI-powered features
+            </p>
+            <p className="text-sm text-gray-500 max-w-3xl mx-auto">
+              While our competitors charge £80-120/month for basic whistleblowing software, Disclosurely Pro delivers advanced AI case analysis, 
+              unlimited reports, and enterprise-grade security at just £39.99/month. Same protection, smarter technology, better value.
             </p>
           </div>
 
           <div className="overflow-x-auto">
-            <table className="w-full border-collapse">
+            <table className="w-full border-collapse shadow-xl">
               <thead>
-                <tr className="bg-white border-b-2 border-gray-200">
-                  <th className="px-6 py-4 text-left text-sm font-semibold text-gray-900">Feature</th>
-                  <th className="px-6 py-4 text-center text-sm font-semibold text-gray-900">Disclosurely Pro</th>
-                  <th className="px-6 py-4 text-center text-sm font-semibold text-gray-600">Competitor</th>
+                <tr className="bg-gradient-to-r from-blue-600 to-blue-700">
+                  <th className="px-6 py-4 text-left text-sm font-semibold text-white">Feature</th>
+                  <th className="px-6 py-4 text-center text-sm font-semibold text-white">Disclosurely Pro</th>
+                  <th className="px-6 py-4 text-center text-sm font-semibold text-blue-100">Typical Competitor</th>
                 </tr>
               </thead>
               <tbody className="bg-white">
                 <tr className="border-b border-gray-100">
-                  <td className="px-6 py-4 text-gray-900">Monthly Price</td>
+                  <td className="px-6 py-4 text-gray-900 font-medium">Monthly Price</td>
                   <td className="px-6 py-4 text-center">
                     <span className="text-2xl font-bold text-blue-600">£39.99</span>
                     <span className="text-sm text-gray-600">/month</span>
+                    <div className="text-xs text-green-600 font-semibold mt-1">Save £40-80/mo</div>
                   </td>
-                  <td className="px-6 py-4 text-center text-gray-500">£80+</td>
+                  <td className="px-6 py-4 text-center text-gray-500">
+                    <span className="text-xl font-semibold">£80-120</span>
+                    <span className="text-sm">/month</span>
+                  </td>
                 </tr>
                 <tr className="border-b border-gray-100 bg-gray-50">
                   <td className="px-6 py-4 text-gray-900 font-semibold">AI Case Analysis</td>
@@ -387,7 +395,7 @@ const Pricing = () => {
                 </tr>
                 <tr className="hover:bg-gray-50 bg-white">
                   <td className="px-6 py-4 text-sm text-gray-900">Storage per Report</td>
-                  <td className="px-6 py-4 text-center text-sm text-gray-700">500 MB</td>
+                  <td className="px-6 py-4 text-center text-sm text-gray-700 font-semibold">Unlimited</td>
                   <td className="px-6 py-4 text-center text-sm text-gray-700 font-semibold">Unlimited</td>
                   <td className="px-6 py-4 text-center text-sm text-gray-700 font-semibold">Unlimited</td>
                 </tr>
@@ -475,7 +483,7 @@ const Pricing = () => {
                 <tr className="hover:bg-gray-50 bg-white">
                   <td className="px-6 py-4 text-sm text-gray-900">Custom Domain (CNAME)</td>
                   <td className="px-6 py-4 text-center"><X className="w-5 h-5 text-gray-400 mx-auto" /></td>
-                  <td className="px-6 py-4 text-center"><X className="w-5 h-5 text-gray-400 mx-auto" /></td>
+                  <td className="px-6 py-4 text-center"><CheckCircle className="w-5 h-5 text-blue-600 mx-auto" /></td>
                   <td className="px-6 py-4 text-center"><CheckCircle className="w-5 h-5 text-blue-600 mx-auto" /></td>
                 </tr>
                 <tr className="hover:bg-gray-50">
@@ -508,7 +516,7 @@ const Pricing = () => {
                 <tr className="hover:bg-gray-50 bg-white">
                   <td className="px-6 py-4 text-sm text-gray-900">SLA Guarantee</td>
                   <td className="px-6 py-4 text-center"><X className="w-5 h-5 text-gray-400 mx-auto" /></td>
-                  <td className="px-6 py-4 text-center"><X className="w-5 h-5 text-gray-400 mx-auto" /></td>
+                  <td className="px-6 py-4 text-center"><CheckCircle className="w-5 h-5 text-blue-600 mx-auto" /></td>
                   <td className="px-6 py-4 text-center"><CheckCircle className="w-5 h-5 text-blue-600 mx-auto" /></td>
                 </tr>
               </tbody>
@@ -523,24 +531,43 @@ const Pricing = () => {
           <div className="text-center mb-12">
             <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-4">{t("pricing.faq.title")}</h2>
           </div>
-          <div className="space-y-8">
-            <div>
-              <h3 className="text-lg font-semibold text-gray-900 mb-2">{t("pricing.faq.trial.question")}</h3>
-              <p className="text-gray-600">{t("pricing.faq.trial.answer")}</p>
-            </div>
-            <div>
-              <h3 className="text-lg font-semibold text-gray-900 mb-2">{t("pricing.faq.limit.question")}</h3>
-              <p className="text-gray-600">{t("pricing.faq.limit.answer")}</p>
-            </div>
-            <div>
-              <h3 className="text-lg font-semibold text-gray-900 mb-2">{t("pricing.faq.change.question")}</h3>
-              <p className="text-gray-600">{t("pricing.faq.change.answer")}</p>
-            </div>
-            <div>
-              <h3 className="text-lg font-semibold text-gray-900 mb-2">{t("pricing.faq.security.question")}</h3>
-              <p className="text-gray-600">{t("pricing.faq.security.answer")}</p>
-            </div>
-          </div>
+          <Accordion type="single" collapsible className="space-y-4">
+            <AccordionItem value="item-1" className="border rounded-lg px-6 bg-white">
+              <AccordionTrigger className="text-left text-lg font-semibold hover:no-underline">
+                {t("pricing.faq.trial.question")}
+              </AccordionTrigger>
+              <AccordionContent className="text-gray-600 pt-2">
+                {t("pricing.faq.trial.answer")}
+              </AccordionContent>
+            </AccordionItem>
+
+            <AccordionItem value="item-2" className="border rounded-lg px-6 bg-white">
+              <AccordionTrigger className="text-left text-lg font-semibold hover:no-underline">
+                {t("pricing.faq.limit.question")}
+              </AccordionTrigger>
+              <AccordionContent className="text-gray-600 pt-2">
+                {t("pricing.faq.limit.answer")}
+              </AccordionContent>
+            </AccordionItem>
+
+            <AccordionItem value="item-3" className="border rounded-lg px-6 bg-white">
+              <AccordionTrigger className="text-left text-lg font-semibold hover:no-underline">
+                {t("pricing.faq.change.question")}
+              </AccordionTrigger>
+              <AccordionContent className="text-gray-600 pt-2">
+                {t("pricing.faq.change.answer")}
+              </AccordionContent>
+            </AccordionItem>
+
+            <AccordionItem value="item-4" className="border rounded-lg px-6 bg-white">
+              <AccordionTrigger className="text-left text-lg font-semibold hover:no-underline">
+                {t("pricing.faq.security.question")}
+              </AccordionTrigger>
+              <AccordionContent className="text-gray-600 pt-2">
+                {t("pricing.faq.security.answer")}
+              </AccordionContent>
+            </AccordionItem>
+          </Accordion>
         </div>
       </div>
 
