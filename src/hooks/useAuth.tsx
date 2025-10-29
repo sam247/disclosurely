@@ -66,16 +66,16 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
       // Clear cached subscription data when no session
       const defaultData = { subscribed: false };
       setSubscriptionData(defaultData);
-      localStorage.removeItem('subscription_data');
+      sessionStorage.removeItem('subscription_data');
       return;
     }
     
-    // Check cache freshness - refresh if older than 1 hour
+    // Check cache freshness - refresh if older than 15 minutes (reduced from 1 hour for security)
     const cacheKey = `subscription_check_${userToUse.id}`;
-    const lastCheck = localStorage.getItem(cacheKey);
+    const lastCheck = sessionStorage.getItem(cacheKey);
     const now = Date.now();
     
-    if (lastCheck && (now - parseInt(lastCheck)) < 3600000) { // 1 hour
+    if (lastCheck && (now - parseInt(lastCheck)) < 900000) { // 15 minutes
       return;
     }
 
