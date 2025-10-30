@@ -533,58 +533,49 @@ const Blog = () => {
               ) : (
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   {posts.map((post) => (
-                    <Card key={post.id} className="overflow-hidden hover:shadow-lg transition-shadow">
+                    <Card key={post.id} className="group hover:shadow-lg transition-shadow duration-300">
                       {post.featuredImage && (
-                        <div className="aspect-video overflow-hidden">
+                        <div className="aspect-video overflow-hidden rounded-t-lg">
                           <img 
                             src={post.featuredImage} 
                             alt={post.title}
-                            className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
+                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                           />
                         </div>
                       )}
-                      <div className="p-6">
-                        <div className="flex items-center gap-2 mb-3">
-                          {post.categories?.map((category) => (
-                            <Badge key={category.slug} variant="secondary" className="text-xs">
-                              {category.name}
-                            </Badge>
-                          ))}
+                      <CardHeader>
+                        <div className="flex items-center gap-2 text-sm text-gray-500 mb-2">
+                          <Calendar className="h-4 w-4" />
+                          <span>{new Date(post.publishDate).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}</span>
+                          {post.readingTime && (
+                            <>
+                              <span>•</span>
+                              <Clock className="h-4 w-4" />
+                              <span>{post.readingTime} min read</span>
+                            </>
+                          )}
                         </div>
-                        
-                        <CardTitle className="text-lg mb-3 line-clamp-2">
-                          <Link 
-                            to={`/blog/${post.slug}`}
-                            className="hover:text-primary transition-colors"
-                          >
-                            {post.title}
-                          </Link>
+                        <CardTitle className="text-xl font-semibold line-clamp-2 group-hover:text-blue-600 transition-colors">
+                          {post.title}
                         </CardTitle>
-                        
-                        <CardDescription className="text-gray-600 mb-4 line-clamp-3">
+                        {post.authorName && (
+                          <div className="flex items-center gap-2 text-sm text-gray-600">
+                            <span>By {post.authorName}</span>
+                          </div>
+                        )}
+                      </CardHeader>
+                      <CardContent>
+                        <CardDescription className="text-gray-600 line-clamp-3 mb-4">
                           {post.excerpt}
                         </CardDescription>
-                        
-                        <div className="flex items-center justify-between">
-                          <div className="flex items-center gap-3 text-sm text-muted-foreground">
-                            {post.authorName && (
-                              <span>By {post.authorName}</span>
-                            )}
-                            {post.readingTime && (
-                              <div className="flex items-center gap-1">
-                                <Clock className="h-4 w-4" />
-                                {post.readingTime} min read
-                              </div>
-                            )}
-                          </div>
-                          
-                          <Link to={`/blog/${post.slug}`}>
-                            <Button size="sm" className="bg-primary text-primary-foreground hover:bg-primary/90">
-                              Read More <ArrowRight className="h-4 w-4 ml-1" />
-                            </Button>
-                          </Link>
-                        </div>
-                      </div>
+                        <Link
+                          to={`/blog/${post.slug}`}
+                          className="inline-flex items-center gap-2 text-blue-600 hover:text-blue-700 font-medium group-hover:gap-3 transition-all"
+                        >
+                          Read More
+                          <ArrowRight className="h-4 w-4" />
+                        </Link>
+                      </CardContent>
                     </Card>
                   ))}
                 </div>

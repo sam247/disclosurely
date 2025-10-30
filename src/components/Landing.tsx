@@ -119,23 +119,18 @@ const Landing = () => {
               <p className="text-lg font-medium text-gray-700">{t("landing.trusted")}</p>
             </div>
 
-            {/* Logo Carousel */}
-            <div className="relative overflow-hidden">
-              <div className="flex animate-scroll-infinite items-center">
-                {/* First set of logos */}
-                <div className="flex items-center min-w-fit">
-                  {businessLogos.map((logo, index) => <div key={`first-${index}`} className="mx-8 flex-shrink-0">
-                      <img src={logo.src} alt={logo.alt} loading="lazy" className="h-12 w-auto object-contain opacity-70 hover:opacity-100 transition-opacity" />
-                    </div>)}
+            {/* Logo Grid - Static Display */}
+            <div className="flex flex-wrap justify-center items-center gap-8 max-w-5xl mx-auto">
+              {businessLogos.map((logo, index) => (
+                <div key={index} className="flex-shrink-0">
+                  <img 
+                    src={logo.src} 
+                    alt={logo.alt} 
+                    loading="lazy" 
+                    className="h-12 w-auto object-contain opacity-70 hover:opacity-100 transition-opacity" 
+                  />
                 </div>
-
-                {/* Duplicate set for seamless loop */}
-                <div className="flex items-center min-w-fit">
-                  {businessLogos.map((logo, index) => <div key={`second-${index}`} className="mx-8 flex-shrink-0">
-                      <img src={logo.src} alt={logo.alt} loading="lazy" className="h-12 w-auto object-contain opacity-70 hover:opacity-100 transition-opacity" />
-                    </div>)}
-                </div>
-              </div>
+              ))}
             </div>
           </div>
         </div>
