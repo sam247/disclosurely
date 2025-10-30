@@ -500,21 +500,21 @@ Case Details:
   };
 
   return (
-    <div className="flex flex-col h-[calc(100vh-8rem)]">
+    <div className="flex flex-col h-[calc(100vh-12rem)]">
       {/* Header */}
-      <div className="flex items-center justify-between p-4 border-b bg-white">
-        <div className="flex items-center gap-3">
+      <div className="flex items-center justify-between p-3 border-b bg-white">
+        <div className="flex items-center gap-2">
           <div className="p-2 bg-primary/10 rounded-lg">
-            <Brain className="h-5 w-5 text-primary" />
+            <Brain className="h-4 w-4 text-primary" />
           </div>
           <div>
-            <h1 className="text-xl font-semibold">AI Compliance Consultant</h1>
-            <p className="text-sm text-muted-foreground">Expert guidance for case analysis and compliance decisions</p>
+            <h1 className="text-lg font-semibold">AI Compliance Consultant</h1>
+            <p className="text-xs text-muted-foreground">Expert guidance for case analysis and compliance decisions</p>
           </div>
         </div>
-        <div className="flex items-center gap-2 text-sm">
+        <div className="flex items-center gap-2 text-xs">
           <span className="text-muted-foreground">AI Credits:</span>
-          <span className="font-mono text-lg">∞</span>
+          <span className="font-mono">∞</span>
         </div>
       </div>
 
