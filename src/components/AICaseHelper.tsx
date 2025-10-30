@@ -67,6 +67,8 @@ const AICaseHelper: React.FC<AICaseHelperProps> = ({ reportId, reportContent }) 
   const [isResizing, setIsResizing] = useState(false);
   const [savedAnalyses, setSavedAnalyses] = useState<SavedAnalysis[]>([]);
   const [isLoadingSaved, setIsLoadingSaved] = useState(false);
+  const [hasRunInitialAnalysis, setHasRunInitialAnalysis] = useState(false); // Track if initial analysis is done
+  const [currentSavedAnalysisId, setCurrentSavedAnalysisId] = useState<string | null>(null); // Track current saved analysis
   const containerRef = useRef<HTMLDivElement>(null);
   const chatMessagesEndRef = useRef<HTMLDivElement>(null);
   const { user } = useAuth();
@@ -85,7 +87,7 @@ const AICaseHelper: React.FC<AICaseHelperProps> = ({ reportId, reportContent }) 
   // Auto-scroll to bottom of chat when new messages arrive
   useEffect(() => {
     chatMessagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [chatMessages, isAnalyzing]);
+  }, [chatMessages]);
 
   // Handle resizing
   useEffect(() => {
@@ -380,11 +382,7 @@ Case Details:
       }
       setAnalysisProgress(70);
 
-      // Prepare chat context for follow-up questions
-      const chatContext = chatMessages.map(msg => `${msg.role}: ${msg.content}`).join('\n');
-      const isFollowUp = chatMessages.length > 0 || userMessage;
-
-      // Invoke AI analysis with decrypted content
+      // Invoke AI analysis with decrypted content (FULL analysis, no follow-up context)
       setAnalysisProgress(80);
       const { data, error } = await supabase.functions.invoke('analyze-case-with-ai', {
         body: {
@@ -399,9 +397,7 @@ Case Details:
           },
           caseContent: decryptedContent,
           companyDocuments,
-          customPrompt: isFollowUp ? 
-            `This is ${userMessage ? 'a new question' : 'a follow-up'} about the case. Previous conversation:\n${chatContext}\n\n${userMessage ? `User's question: ${userMessage}` : 'Please provide additional analysis or clarification.'}\n\nPlease provide a helpful response, keeping the same conversational tone.` :
-            undefined
+          customPrompt: undefined // No custom prompt for initial analysis
         }
       });
 
@@ -428,6 +424,9 @@ Case Details:
       if (!analysis) {
         setAnalysis(data.analysis);
       }
+
+      // Mark that initial analysis is complete
+      setHasRunInitialAnalysis(true);
 
       // Log AI analysis event
       if (user && organization?.id) {
@@ -542,21 +541,21 @@ Case Details:
       timestamp: new Date()
     }]);
 
-    setIsAnalyzing(true);
+    setIsChatting(true); // Use different state for chat vs analysis
 
     try {
-      // For follow-up questions, use a simpler prompt with chat history
-      const chatHistory = chatMessages.map(msg => 
-        `${msg.role === 'user' ? 'User' : 'AI Consultant'}: ${msg.content}`
+      // For follow-up questions, use a SHORT chat prompt
+      const chatHistory = chatMessages.slice(-4).map(msg => // Only last 4 messages for context
+        `${msg.role === 'user' ? 'User' : 'AI'}: ${msg.content}`
       ).join('\n\n');
 
-      const followUpPrompt = `Previous conversation about case ${selectedCaseData?.tracking_id}:
+      const followUpPrompt = `Previous conversation (last 2-4 messages):
 
 ${chatHistory}
 
 User's follow-up question: ${userMessage}
 
-Please provide a helpful, conversational response based on the case we've been discussing. Keep the same tone and reference our previous conversation.`;
+IMPORTANT: Provide a SHORT, conversational response (2-3 paragraphs max). Be direct and helpful, like chatting with a colleague. Don't repeat the full analysis - just answer the specific question.`;
 
       // Call AI with just the follow-up context (no re-analysis)
       const { data, error } = await supabase.functions.invoke('analyze-case-with-ai', {
@@ -593,7 +592,7 @@ Please provide a helpful, conversational response based on the case we've been d
         variant: "destructive"
       });
     } finally {
-      setIsAnalyzing(false);
+      setIsChatting(false);
     }
   };
 
@@ -628,7 +627,7 @@ Please provide a helpful, conversational response based on the case we've been d
             {savedAnalyses.length > 0 && (
               <div className="space-y-2">
                 <label className="text-sm font-semibold text-green-700">📁 Saved Analyses</label>
-                <Select value="" onValueChange={(value) => {
+                <Select value={currentSavedAnalysisId || ""} onValueChange={(value) => {
                   const saved = savedAnalyses.find(s => s.id === value);
                   if (saved) {
                     // Load the saved analysis into chat
@@ -644,6 +643,10 @@ Please provide a helpful, conversational response based on the case we've been d
                       setSelectedCaseId(relatedCase.id);
                       setSelectedCaseData(relatedCase);
                     }
+                    
+                    // Mark as having run initial analysis and track the saved ID
+                    setHasRunInitialAnalysis(true);
+                    setCurrentSavedAnalysisId(value);
                     
                     toast({
                       title: "✅ Loaded Saved Analysis",
@@ -681,6 +684,8 @@ Please provide a helpful, conversational response based on the case we've been d
                 if (value !== selectedCaseId) {
                   setAnalysis('');
                   setChatMessages([]);
+                  setHasRunInitialAnalysis(false);
+                  setCurrentSavedAnalysisId(null);
                 }
               }} disabled={isLoadingCases}>
                 <SelectTrigger>
@@ -783,41 +788,42 @@ Please provide a helpful, conversational response based on the case we've been d
               </div>
             </div>
 
-            {/* Quick Actions */}
-            <div className="pt-2">
-              <Button
-                onClick={() => analyzeCase()}
-                disabled={isAnalyzing || !selectedCaseId}
-                className="w-full"
-                size="lg"
-              >
-                {isAnalyzing ? (
-                  <>
-                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                    Analyzing...
-                  </>
-                ) : (
-                  <>
-                    <Brain className="h-4 w-4 mr-2" />
-                    Start Analysis
-                  </>
-                )}
-              </Button>
-              {isAnalyzing && (
-                <div className="mt-3 space-y-1">
-                  <div className="flex items-center justify-between text-xs">
-                    <span className="text-muted-foreground">Progress</span>
-                    <span className="font-medium">{analysisProgress}%</span>
-                  </div>
-                  <div className="h-1 bg-secondary rounded-full overflow-hidden">
-                    <div 
-                      className="h-full bg-primary transition-all duration-500 ease-out"
-                      style={{ width: `${analysisProgress}%` }}
-                    />
-                  </div>
-                </div>
+          </div>
+
+          {/* Analyze/Re-Analyze Button at Bottom */}
+          <div className="p-4 border-t bg-white">
+            <Button
+              onClick={() => analyzeCase()}
+              disabled={isAnalyzing || !selectedCaseId}
+              className="w-full"
+              size="lg"
+            >
+              {isAnalyzing ? (
+                <>
+                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                  Analyzing...
+                </>
+              ) : (
+                <>
+                  <Brain className="h-4 w-4 mr-2" />
+                  {hasRunInitialAnalysis ? 'Re-Analyze' : 'Start Analysis'}
+                </>
               )}
-            </div>
+            </Button>
+            {isAnalyzing && (
+              <div className="mt-3 space-y-1">
+                <div className="flex items-center justify-between text-xs">
+                  <span className="text-muted-foreground">Progress</span>
+                  <span className="font-medium">{analysisProgress}%</span>
+                </div>
+                <div className="h-1 bg-secondary rounded-full overflow-hidden">
+                  <div 
+                    className="h-full bg-primary transition-all duration-500 ease-out"
+                    style={{ width: `${analysisProgress}%` }}
+                  />
+                </div>
+              </div>
+            )}
           </div>
         </div>
 
@@ -901,7 +907,7 @@ Please provide a helpful, conversational response based on the case we've been d
                 placeholder="Ask a follow-up question or request specific guidance..."
                 value={chatInput}
                 onChange={(e) => setChatInput(e.target.value)}
-                disabled={isAnalyzing || !selectedCaseId}
+                disabled={isChatting || isAnalyzing || !selectedCaseId}
                 className="flex-1 min-h-[60px] max-h-[120px] resize-none bg-white"
                 rows={2}
                 onKeyDown={(e) => {
@@ -913,11 +919,11 @@ Please provide a helpful, conversational response based on the case we've been d
               />
               <Button
                 onClick={sendChatMessage}
-                disabled={isAnalyzing || !chatInput.trim() || !selectedCaseId}
+                disabled={isChatting || isAnalyzing || !chatInput.trim() || !selectedCaseId}
                 size="lg"
                 className="self-end"
               >
-                {isAnalyzing ? (
+                {isChatting ? (
                   <Loader2 className="h-4 w-4 animate-spin" />
                 ) : (
                   'Send'
