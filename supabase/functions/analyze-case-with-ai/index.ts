@@ -1,11 +1,12 @@
 import "https://deno.land/x/xhr@0.1.0/mod.ts";
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 
 const deepseekApiKey = Deno.env.get('DEEPSEEK_API_KEY');
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type, x-organization-id',
 };
 
 serve(async (req) => {
@@ -19,6 +20,35 @@ serve(async (req) => {
 
     if (!deepseekApiKey) {
       throw new Error('Deepseek API key not configured');
+    }
+
+    // ============================================================================
+    // FEATURE FLAG CHECK: AI Gateway
+    // ============================================================================
+    const authHeader = req.headers.get('Authorization');
+    const organizationId = caseData.organization_id;
+    
+    let useAIGateway = false;
+    
+    if (organizationId && authHeader) {
+      try {
+        const supabase = createClient(
+          Deno.env.get('SUPABASE_URL') ?? '',
+          Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
+        );
+
+        const { data: isEnabled } = await supabase.rpc('is_feature_enabled', {
+          p_feature_name: 'ai_gateway',
+          p_organization_id: organizationId
+        });
+
+        useAIGateway = isEnabled === true;
+        
+        console.log(`AI Gateway ${useAIGateway ? 'ENABLED' : 'DISABLED'} for org ${organizationId}`);
+      } catch (error) {
+        console.error('Error checking feature flag, falling back to direct DeepSeek:', error);
+        useAIGateway = false;
+      }
     }
 
     // Prepare the context for the AI
@@ -73,39 +103,95 @@ Keep it conversational, practical, and focused on what the compliance team needs
 
 IMPORTANT: End your analysis with 1-2 conversational questions that help the compliance team think through next steps or get clarification on specific aspects of the case. Make these questions helpful and practical, like a colleague asking for guidance.`;
 
-    const response = await fetch('https://api.deepseek.com/chat/completions', {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${deepseekApiKey}`,
-        'Content-Type': 'application/json',
+    const messages = [
+      { 
+        role: 'system', 
+        content: 'You are a helpful AI assistant for compliance teams. You provide practical, actionable guidance in a conversational tone. Focus on what compliance teams need to do next, use bullet points, and be direct about actions needed. Avoid formal report language - be more like a helpful colleague. Always end with 1-2 practical questions that help the team think through next steps.' 
       },
-      body: JSON.stringify({
-        model: 'deepseek-chat',
-        messages: [
-          { 
-            role: 'system', 
-            content: 'You are a helpful AI assistant for compliance teams. You provide practical, actionable guidance in a conversational tone. Focus on what compliance teams need to do next, use bullet points, and be direct about actions needed. Avoid formal report language - be more like a helpful colleague. Always end with 1-2 practical questions that help the team think through next steps.' 
-          },
-          { role: 'user', content: prompt }
-        ],
-        temperature: 0.3,
-        max_tokens: 2000,
-      }),
-    });
+      { role: 'user', content: prompt }
+    ];
 
-    if (!response.ok) {
-      const errorData = await response.text();
-      console.error('Deepseek API error:', errorData);
-      throw new Error(`Deepseek API error: ${response.status}`);
+    let analysis;
+    let metadata = {
+      timestamp: new Date().toISOString(),
+      documentsAnalyzed: companyDocuments?.length || 0,
+      routedVia: useAIGateway ? 'ai_gateway' : 'direct_deepseek',
+      piiRedacted: false
+    };
+
+    // ============================================================================
+    // ROUTE 1: AI Gateway (with PII protection)
+    // ============================================================================
+    if (useAIGateway) {
+      const gatewayResponse = await fetch(
+        `${Deno.env.get('SUPABASE_URL')}/functions/v1/ai-gateway-generate`,
+        {
+          method: 'POST',
+          headers: {
+            'Authorization': authHeader!,
+            'X-Organization-Id': organizationId,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            messages,
+            temperature: 0.3,
+            max_tokens: 2000,
+            context: {
+              purpose: 'case_analysis',
+              report_id: caseData.id
+            }
+          }),
+        }
+      );
+
+      if (!gatewayResponse.ok) {
+        console.error('AI Gateway error, falling back to direct DeepSeek');
+        // Fall through to direct DeepSeek below
+        useAIGateway = false;
+      } else {
+        const gatewayData = await gatewayResponse.json();
+        analysis = gatewayData.choices[0].message.content;
+        metadata.piiRedacted = gatewayData.metadata?.pii_redacted || false;
+        
+        // If PII was redacted, add a note
+        if (metadata.piiRedacted) {
+          analysis += '\n\n_🔒 Note: Sensitive information was automatically redacted for privacy during AI analysis._';
+        }
+      }
     }
 
-    const data = await response.json();
-    const analysis = data.choices[0].message.content;
+    // ============================================================================
+    // ROUTE 2: Direct DeepSeek (fallback or feature disabled)
+    // ============================================================================
+    if (!useAIGateway || !analysis) {
+      const response = await fetch('https://api.deepseek.com/chat/completions', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${deepseekApiKey}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          model: 'deepseek-chat',
+          messages,
+          temperature: 0.3,
+          max_tokens: 2000,
+        }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.text();
+        console.error('Deepseek API error:', errorData);
+        throw new Error(`Deepseek API error: ${response.status}`);
+      }
+
+      const data = await response.json();
+      analysis = data.choices[0].message.content;
+      metadata.routedVia = 'direct_deepseek';
+    }
 
     return new Response(JSON.stringify({ 
       analysis,
-      timestamp: new Date().toISOString(),
-      documentsAnalyzed: companyDocuments?.length || 0
+      ...metadata
     }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
