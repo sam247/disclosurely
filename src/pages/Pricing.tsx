@@ -8,19 +8,16 @@ import { StandardHeader } from "@/components/StandardHeader";
 import DynamicHelmet from "@/components/DynamicHelmet";
 import { useLanguageFromUrl } from "@/hooks/useLanguageFromUrl";
 import { useTranslation } from "react-i18next";
-
 const Pricing = () => {
-  const { currentLanguage } = useLanguageFromUrl();
-  const { t } = useTranslation();
+  const {
+    currentLanguage
+  } = useLanguageFromUrl();
+  const {
+    t
+  } = useTranslation();
   const langPrefix = currentLanguage && currentLanguage !== "en" ? `/${currentLanguage}` : "";
-
-  return (
-    <>
-      <DynamicHelmet
-        pageIdentifier="pricing"
-        fallbackTitle={t("pricing.meta.title")}
-        fallbackDescription={t("pricing.meta.description")}
-      />
+  return <>
+      <DynamicHelmet pageIdentifier="pricing" fallbackTitle={t("pricing.meta.title")} fallbackDescription={t("pricing.meta.description")} />
       
       <div className="min-h-screen bg-white">
         <StandardHeader currentLanguage={currentLanguage} />
@@ -29,9 +26,7 @@ const Pricing = () => {
         <section className="pt-32 pb-16 px-4 sm:px-6 lg:px-8 bg-white">
           <div className="max-w-7xl mx-auto">
             <div className="text-center mb-12">
-              <span className="inline-block px-4 py-2 bg-blue-600 text-white rounded-full text-sm font-medium mb-6">
-                Start Free. Get Secure Whistleblowing.
-              </span>
+              <span className="inline-block px-4 py-2 bg-blue-600 text-white rounded-full text-sm font-medium mb-6">Transparent Pricing Built For Business.</span>
               <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-gray-900 mb-6">
                 Start Free. Get Secure Whistleblowing.
               </h1>
@@ -577,10 +572,7 @@ const Pricing = () => {
         <div className="max-w-4xl mx-auto text-center px-4 sm:px-6 lg:px-8">
           <h2 className="text-2xl sm:text-3xl font-bold text-white mb-4">{t("pricing.cta.ready")}</h2>
           <p className="text-lg sm:text-xl text-blue-100 mb-6 sm:mb-8 px-4">{t("pricing.cta.join")}</p>
-          <a
-            href="https://app.disclosurely.com/auth/signup"
-            className="bg-white hover:bg-gray-100 text-blue-600 px-6 sm:px-8 py-3 rounded-lg text-lg font-semibold inline-block"
-          >
+          <a href="https://app.disclosurely.com/auth/signup" className="bg-white hover:bg-gray-100 text-blue-600 px-6 sm:px-8 py-3 rounded-lg text-lg font-semibold inline-block">
             {t("pricing.cta.startTrial")}
           </a>
         </div>
@@ -588,8 +580,6 @@ const Pricing = () => {
 
       <Footer />
     </div>
-    </>
-  );
+    </>;
 };
-
 export default Pricing;
