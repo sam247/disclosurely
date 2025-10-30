@@ -340,18 +340,32 @@ Case Details:
         const doc = documents.find(d => d.id === docId);
         if (doc && doc.content_type === 'application/pdf') {
           try {
+            console.log(`[PDF Extract] Starting extraction for: ${doc.name}`);
             const { data: extractData, error: extractError } = await supabase.functions.invoke('extract-pdf-text', {
               body: { filePath: doc.file_path }
             });
 
-            if (extractError) throw extractError;
+            if (extractError) {
+              console.error(`[PDF Extract] Error for ${doc.name}:`, extractError);
+              throw extractError;
+            }
+
+            const extractedText = extractData.text || '';
+            console.log(`[PDF Extract] SUCCESS! Extracted ${extractedText.length} chars from ${doc.name}`);
+            console.log(`[PDF Extract] Preview: ${extractedText.substring(0, 200)}...`);
 
             companyDocuments.push({
               name: doc.name,
-              content: extractData.text || `[PDF Document: ${doc.name}]`
+              content: extractedText || `[PDF Document: ${doc.name}]`
+            });
+
+            // Show toast to user
+            toast({
+              title: `📄 ${doc.name}`,
+              description: `Extracted ${extractedText.length.toLocaleString()} characters`
             });
           } catch (error) {
-            console.error(`Error extracting text from ${doc.name}:`, error);
+            console.error(`[PDF Extract] Failed for ${doc.name}:`, error);
             companyDocuments.push({
               name: doc.name,
               content: `[PDF Document: ${doc.name} - Text extraction failed]`
@@ -518,12 +532,69 @@ Case Details:
       return;
     }
 
-    // Set the custom prompt and trigger analysis
-    setCustomPrompt(chatInput.trim());
+    const userMessage = chatInput.trim();
     setChatInput('');
-    
-    // Trigger the analyzeCase function which will handle the chat
-    await analyzeCase();
+
+    // Add user message to chat
+    setChatMessages(prev => [...prev, {
+      role: 'user',
+      content: userMessage,
+      timestamp: new Date()
+    }]);
+
+    setIsAnalyzing(true);
+
+    try {
+      // For follow-up questions, use a simpler prompt with chat history
+      const chatHistory = chatMessages.map(msg => 
+        `${msg.role === 'user' ? 'User' : 'AI Consultant'}: ${msg.content}`
+      ).join('\n\n');
+
+      const followUpPrompt = `Previous conversation about case ${selectedCaseData?.tracking_id}:
+
+${chatHistory}
+
+User's follow-up question: ${userMessage}
+
+Please provide a helpful, conversational response based on the case we've been discussing. Keep the same tone and reference our previous conversation.`;
+
+      // Call AI with just the follow-up context (no re-analysis)
+      const { data, error } = await supabase.functions.invoke('analyze-case-with-ai', {
+        body: {
+          caseData: {
+            id: selectedCaseId,
+            title: selectedCaseData?.title || 'Case',
+            tracking_id: selectedCaseData?.tracking_id || 'Unknown',
+            status: selectedCaseData?.status || 'new',
+            created_at: selectedCaseData?.created_at || new Date().toISOString(),
+            priority: selectedCaseData?.priority || 3,
+            report_type: selectedCaseData?.report_type || 'general'
+          },
+          caseContent: followUpPrompt,
+          companyDocuments: [], // Don't re-process documents for follow-ups
+          customPrompt: userMessage
+        }
+      });
+
+      if (error) throw error;
+
+      // Add AI response to chat
+      setChatMessages(prev => [...prev, {
+        role: 'assistant',
+        content: data.analysis,
+        timestamp: new Date()
+      }]);
+
+    } catch (error) {
+      console.error('Error sending chat message:', error);
+      toast({
+        title: "Error",
+        description: "Failed to get AI response. Please try again.",
+        variant: "destructive"
+      });
+    } finally {
+      setIsAnalyzing(false);
+    }
   };
 
   return (
@@ -557,16 +628,25 @@ Case Details:
             {savedAnalyses.length > 0 && (
               <div className="space-y-2">
                 <label className="text-sm font-semibold text-green-700">📁 Saved Analyses</label>
-                <Select onValueChange={(value) => {
+                <Select value="" onValueChange={(value) => {
                   const saved = savedAnalyses.find(s => s.id === value);
                   if (saved) {
+                    // Load the saved analysis into chat
                     setChatMessages([{
                       role: 'assistant',
                       content: saved.analysis_content,
                       timestamp: new Date(saved.created_at)
                     }]);
+                    
+                    // Find and select the case it was for
+                    const relatedCase = newCases.find(c => c.tracking_id === saved.tracking_id);
+                    if (relatedCase) {
+                      setSelectedCaseId(relatedCase.id);
+                      setSelectedCaseData(relatedCase);
+                    }
+                    
                     toast({
-                      title: "Loaded Saved Analysis",
+                      title: "✅ Loaded Saved Analysis",
                       description: `${saved.tracking_id} - ${saved.case_title}`
                     });
                   }
@@ -597,9 +677,11 @@ Case Details:
                 setSelectedCaseId(value);
                 const selectedCase = newCases.find(c => c.id === value);
                 setSelectedCaseData(selectedCase || null);
-                // Clear previous analysis and chat when switching cases
-                setAnalysis('');
-                setChatMessages([]);
+                // Only clear if switching to a different case
+                if (value !== selectedCaseId) {
+                  setAnalysis('');
+                  setChatMessages([]);
+                }
               }} disabled={isLoadingCases}>
                 <SelectTrigger>
                   <SelectValue placeholder={isLoadingCases ? "Loading cases..." : "Choose a new case"} />
