@@ -334,7 +334,7 @@ Case Details:
       }
 
       // Process selected documents
-      setAnalysisProgress(50);
+      setAnalysisProgress(60);
       const companyDocuments = [];
       for (const docId of selectedDocs) {
         const doc = documents.find(d => d.id === docId);
@@ -348,7 +348,7 @@ Case Details:
 
             companyDocuments.push({
               name: doc.name,
-              content: extractData.textContent || `[PDF Document: ${doc.name}]`
+              content: extractData.text || `[PDF Document: ${doc.name}]`
             });
           } catch (error) {
             console.error(`Error extracting text from ${doc.name}:`, error);
