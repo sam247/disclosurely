@@ -19,7 +19,7 @@ import {
 } from 'lucide-react';
 import { useAllFeatureFlags, updateFeatureFlag } from '@/hooks/useFeatureFlag';
 import { useToast } from '@/hooks/use-toast';
-import { queryClient } from '@/lib/queryClient';
+import { useQueryClient } from '@tanstack/react-query';
 
 const featureIcons: Record<string, React.ReactNode> = {
   ai_gateway: <Shield className="h-5 w-5" />,
@@ -34,6 +34,7 @@ const featureIcons: Record<string, React.ReactNode> = {
 export const FeatureFlagManager: React.FC = () => {
   const { data: flags, isLoading } = useAllFeatureFlags();
   const { toast } = useToast();
+  const queryClient = useQueryClient();
   const [updating, setUpdating] = useState<string | null>(null);
 
   const handleToggle = async (featureName: string, enabled: boolean) => {
