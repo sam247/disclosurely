@@ -313,6 +313,7 @@ Case Details:
       const { data, error } = await supabase.functions.invoke('analyze-case-with-ai', {
         body: {
           caseData: {
+            id: caseData.id, // CRITICAL: needed for AI Gateway org lookup
             title: caseData.title,
             status: caseData.status,
             created_at: caseData.created_at,
