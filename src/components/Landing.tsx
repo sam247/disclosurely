@@ -42,12 +42,6 @@ const businessLogos = [{
 }, {
   src: "/business_logos/page-6.png",
   alt: "Business Partner 6"
-}, {
-  src: "/business_logos/page-7.png",
-  alt: "Business Partner 7"
-}, {
-  src: "/business_logos/page-8.png",
-  alt: "Business Partner 8"
 }];
 const Landing = () => {
   const {
