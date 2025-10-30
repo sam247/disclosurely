@@ -1,23 +1,51 @@
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts';
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+// @ts-ignore - pdfjs types not available
+import * as pdfjsLib from 'https://esm.sh/pdfjs-dist@3.11.174/build/pdf.mjs';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
-// Simple PDF text extraction using pdf-parse
-// Note: For production, consider using a dedicated service like AWS Textract or Azure Form Recognizer
+// PDF text extraction using Mozilla's PDF.js (Deno-compatible)
 async function extractTextFromPDF(fileBuffer: ArrayBuffer): Promise<string> {
   try {
-    // Import pdf-parse dynamically
-    const pdfParse = await import('https://esm.sh/pdf-parse@1.1.1');
+    console.log('[PDF Extract] Starting PDF.js extraction...');
     
-    const data = await pdfParse.default(Buffer.from(fileBuffer));
-    return data.text;
+    // Load PDF document
+    const loadingTask = pdfjsLib.getDocument({
+      data: new Uint8Array(fileBuffer),
+      useSystemFonts: true,
+      standardFontDataUrl: 'https://esm.sh/pdfjs-dist@3.11.174/standard_fonts/',
+    });
+    
+    const pdfDocument = await loadingTask.promise;
+    const numPages = pdfDocument.numPages;
+    console.log(`[PDF Extract] Document has ${numPages} pages`);
+    
+    let fullText = '';
+    
+    // Extract text from each page
+    for (let pageNum = 1; pageNum <= numPages; pageNum++) {
+      const page = await pdfDocument.getPage(pageNum);
+      const textContent = await page.getTextContent();
+      
+      // Combine text items
+      const pageText = textContent.items
+        .map((item: any) => item.str)
+        .join(' ');
+      
+      fullText += pageText + '\n\n';
+      console.log(`[PDF Extract] Page ${pageNum}/${numPages} extracted (${pageText.length} chars)`);
+    }
+    
+    console.log(`[PDF Extract] Total extracted: ${fullText.length} characters`);
+    return fullText.trim();
+    
   } catch (error) {
-    console.error('PDF parsing error:', error);
-    throw new Error('Failed to extract text from PDF');
+    console.error('[PDF Extract] PDF.js parsing error:', error);
+    throw new Error(`Failed to extract text from PDF: ${error.message}`);
   }
 }
 
