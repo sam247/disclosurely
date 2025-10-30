@@ -23,7 +23,7 @@ serve(async (req) => {
     }
 
     // ============================================================================
-    // FEATURE FLAG CHECK: AI Gateway
+    // AI GATEWAY - ALWAYS ON (no feature flags)
     // ============================================================================
     const authHeader = req.headers.get('Authorization');
     const supabase = createClient(
@@ -45,25 +45,8 @@ serve(async (req) => {
       organizationId = report?.organization_id;
     }
     
-    let useAIGateway = false;
-    
-    if (organizationId && authHeader) {
-      try {
-        const { data: isEnabled } = await supabase.rpc('is_feature_enabled', {
-          p_feature_name: 'ai_gateway',
-          p_organization_id: organizationId
-        });
-
-        useAIGateway = isEnabled === true;
-        
-        console.log(`[AI Gateway] ${useAIGateway ? 'ENABLED' : 'DISABLED'} for org ${organizationId}`);
-      } catch (error) {
-        console.error('[AI Gateway] Error checking feature flag:', error);
-        useAIGateway = false;
-      }
-    } else {
-      console.log('[AI Gateway] Skipped - missing org ID or auth header');
-    }
+    const useAIGateway = !!(organizationId && authHeader);
+    console.log(`[AI Gateway] ${useAIGateway ? 'ROUTING' : 'SKIPPING'} - org: ${organizationId || 'NONE'}`);
 
     // Prepare the context for the AI
     let documentContext = '';
@@ -161,9 +144,8 @@ IMPORTANT: End your analysis with 1-2 conversational questions that help the com
       if (!gatewayResponse.ok) {
         const errorBody = await gatewayResponse.text();
         console.error(`[AI Gateway] HTTP ${gatewayResponse.status} - ${errorBody}`);
-        console.error('[AI Gateway] Falling back to direct DeepSeek');
-        // Fall through to direct DeepSeek below
-        useAIGateway = false;
+        console.error('[AI Gateway] ERROR - Falling back to direct DeepSeek');
+        analysis = null; // Will fallback to direct DeepSeek below
       } else {
         const gatewayData = await gatewayResponse.json();
         analysis = gatewayData.choices[0].message.content;
