@@ -113,7 +113,13 @@ IMPORTANT: End your analysis with 1-2 conversational questions that help the com
       timestamp: new Date().toISOString(),
       documentsAnalyzed: companyDocuments?.length || 0,
       routedVia: useAIGateway ? 'ai_gateway' : 'direct_deepseek',
-      piiRedacted: false
+      piiRedacted: false,
+      debug: {
+        useAIGateway,
+        hasOrgId: !!organizationId,
+        hasAuthHeader: !!authHeader,
+        orgId: organizationId
+      }
     };
 
     // ============================================================================
@@ -145,6 +151,7 @@ IMPORTANT: End your analysis with 1-2 conversational questions that help the com
         const errorBody = await gatewayResponse.text();
         console.error(`[AI Gateway] HTTP ${gatewayResponse.status} - ${errorBody}`);
         console.error('[AI Gateway] ERROR - Falling back to direct DeepSeek');
+        metadata.debug.gatewayError = `HTTP ${gatewayResponse.status}: ${errorBody}`;
         analysis = null; // Will fallback to direct DeepSeek below
       } else {
         const gatewayData = await gatewayResponse.json();
