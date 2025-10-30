@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Textarea } from '@/components/ui/textarea';
@@ -7,7 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Checkbox } from '@/components/ui/checkbox';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
-import { Brain, Loader2, Upload, File, Trash2, FileText } from 'lucide-react';
+import { Brain, Loader2, Upload, File, Trash2, FileText, GripVertical } from 'lucide-react';
 import { sanitizeHtml } from '@/utils/sanitizer';
 import { formatMarkdownToHtml } from '@/utils/markdownFormatter';
 import { useAuth } from '@/hooks/useAuth';
@@ -63,6 +63,10 @@ const AICaseHelper: React.FC<AICaseHelperProps> = ({ reportId, reportContent }) 
   const [isSaving, setIsSaving] = useState(false);
   const [analysisProgress, setAnalysisProgress] = useState(0);
   const [currentAnalysisData, setCurrentAnalysisData] = useState<any>(null);
+  const [leftPanelWidth, setLeftPanelWidth] = useState(30); // Default 30% width
+  const [isResizing, setIsResizing] = useState(false);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const chatMessagesEndRef = useRef<HTMLDivElement>(null);
   const { user } = useAuth();
   const { organization } = useOrganization();
   const { toast } = useToast();
@@ -74,6 +78,40 @@ const AICaseHelper: React.FC<AICaseHelperProps> = ({ reportId, reportContent }) 
     loadNewCases();
     loadDocuments();
   }, [reportId]);
+
+  // Auto-scroll to bottom of chat when new messages arrive
+  useEffect(() => {
+    chatMessagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  }, [chatMessages, isAnalyzing]);
+
+  // Handle resizing
+  useEffect(() => {
+    const handleMouseMove = (e: MouseEvent) => {
+      if (!isResizing || !containerRef.current) return;
+      
+      const containerRect = containerRef.current.getBoundingClientRect();
+      const newWidth = ((e.clientX - containerRect.left) / containerRect.width) * 100;
+      
+      // Constrain between 20% and 50%
+      if (newWidth >= 20 && newWidth <= 50) {
+        setLeftPanelWidth(newWidth);
+      }
+    };
+
+    const handleMouseUp = () => {
+      setIsResizing(false);
+    };
+
+    if (isResizing) {
+      document.addEventListener('mousemove', handleMouseMove);
+      document.addEventListener('mouseup', handleMouseUp);
+    }
+
+    return () => {
+      document.removeEventListener('mousemove', handleMouseMove);
+      document.removeEventListener('mouseup', handleMouseUp);
+    };
+  }, [isResizing]);
 
   const loadNewCases = async () => {
     if (!user) return;
@@ -462,30 +500,35 @@ Case Details:
   };
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <Brain className="h-5 w-5" />
-            AI Case Analysis
+    <div className="flex flex-col h-[calc(100vh-8rem)]">
+      {/* Header */}
+      <div className="flex items-center justify-between p-4 border-b bg-white">
+        <div className="flex items-center gap-3">
+          <div className="p-2 bg-primary/10 rounded-lg">
+            <Brain className="h-5 w-5 text-primary" />
           </div>
-          <div className="flex items-center gap-2 text-sm font-normal">
-            <span className="text-muted-foreground">AI Credits:</span>
-            <span className="font-mono text-lg">∞</span>
+          <div>
+            <h1 className="text-xl font-semibold">AI Compliance Consultant</h1>
+            <p className="text-sm text-muted-foreground">Expert guidance for case analysis and compliance decisions</p>
           </div>
-        </CardTitle>
-        <CardDescription>
-          Select a new case and upload company documents for AI-powered analysis
-        </CardDescription>
-      </CardHeader>
-      <CardContent className="p-0">
-        {/* Two Column Layout */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 p-6">
-          {/* Left Column - Input Controls */}
-          <div className="space-y-6">
+        </div>
+        <div className="flex items-center gap-2 text-sm">
+          <span className="text-muted-foreground">AI Credits:</span>
+          <span className="font-mono text-lg">∞</span>
+        </div>
+      </div>
+
+      {/* Resizable Panel Layout */}
+      <div ref={containerRef} className="flex flex-1 overflow-hidden bg-gray-50" style={{ userSelect: isResizing ? 'none' : 'auto' }}>
+        {/* Left Panel - Controls */}
+        <div 
+          className="bg-white border-r overflow-y-auto"
+          style={{ width: `${leftPanelWidth}%` }}
+        >
+          <div className="p-4 space-y-4">
             {/* Case Selection */}
             <div className="space-y-2">
-              <label className="text-sm font-medium">Select New Case</label>
+              <label className="text-sm font-semibold">Select Case</label>
               <Select value={selectedCaseId} onValueChange={(value) => {
                 setSelectedCaseId(value);
                 const selectedCase = newCases.find(c => c.id === value);
@@ -511,9 +554,9 @@ Case Details:
             </div>
 
             {/* Document Upload */}
-            <div className="space-y-4">
+            <div className="space-y-3">
               <div className="flex items-center justify-between">
-                <label className="text-sm font-medium">Company Documents</label>
+                <label className="text-sm font-semibold">Company Documents</label>
                 <div className="relative">
                   <input
                     type="file"
@@ -541,27 +584,25 @@ Case Details:
 
               {/* Document List */}
               {isLoadingDocs ? (
-                <div className="text-sm text-muted-foreground">Loading documents...</div>
+                <div className="text-xs text-muted-foreground">Loading documents...</div>
               ) : documents.length > 0 ? (
-                <div className="space-y-2 max-h-48 overflow-y-auto">
+                <div className="space-y-2 max-h-32 overflow-y-auto">
                   {documents.map((doc) => (
-                    <div key={doc.id} className="flex items-center justify-between p-3 border rounded-lg">
-                      <div className="flex items-center space-x-3">
+                    <div key={doc.id} className="flex items-center justify-between p-2 border rounded hover:bg-gray-50">
+                      <div className="flex items-center space-x-2 flex-1 min-w-0">
                         <Checkbox
                           checked={selectedDocs.includes(doc.id)}
                           onCheckedChange={() => toggleDocSelection(doc.id)}
                         />
-                        <div className="flex items-center space-x-2">
-                          {doc.content_type === 'application/pdf' ? (
-                            <FileText className="h-4 w-4 text-red-500" />
-                          ) : (
-                            <File className="h-4 w-4 text-blue-500" />
-                          )}
-                          <div>
-                            <div className="text-sm font-medium">{doc.name}</div>
-                            <div className="text-xs text-muted-foreground">
-                              {(doc.file_size / 1024).toFixed(1)} KB
-                            </div>
+                        {doc.content_type === 'application/pdf' ? (
+                          <FileText className="h-3 w-3 text-red-500 flex-shrink-0" />
+                        ) : (
+                          <File className="h-3 w-3 text-blue-500 flex-shrink-0" />
+                        )}
+                        <div className="flex-1 min-w-0">
+                          <div className="text-xs font-medium truncate">{doc.name}</div>
+                          <div className="text-xs text-muted-foreground">
+                            {(doc.file_size / 1024).toFixed(1)} KB
                           </div>
                         </div>
                       </div>
@@ -569,69 +610,163 @@ Case Details:
                         size="sm"
                         variant="ghost"
                         onClick={() => deleteDocument(doc)}
-                        className="h-8 w-8 p-0"
+                        className="h-6 w-6 p-0 flex-shrink-0"
                       >
-                        <Trash2 className="h-4 w-4 text-destructive" />
+                        <Trash2 className="h-3 w-3 text-destructive" />
                       </Button>
                     </div>
                   ))}
                 </div>
               ) : (
-                <div className="text-sm text-muted-foreground text-center py-8">
-                  No documents uploaded yet. Upload PDFs, Word documents, or text files to include in analysis.
+                <div className="text-xs text-muted-foreground text-center py-4 bg-gray-50 rounded border border-dashed">
+                  Upload policy documents to provide context
                 </div>
               )}
             </div>
 
-            {/* Analysis Progress */}
-            {isAnalyzing && (
-              <div className="space-y-2">
-                <div className="flex items-center justify-between text-sm">
-                  <span className="text-muted-foreground">Analysis Progress</span>
-                  <span className="font-medium">{analysisProgress}%</span>
+            {/* Quick Actions */}
+            <div className="pt-4 border-t">
+              <Button
+                onClick={() => analyzeCase()}
+                disabled={isAnalyzing || !selectedCaseId}
+                className="w-full"
+                size="lg"
+              >
+                {isAnalyzing ? (
+                  <>
+                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                    Analyzing...
+                  </>
+                ) : (
+                  <>
+                    <Brain className="h-4 w-4 mr-2" />
+                    Start Analysis
+                  </>
+                )}
+              </Button>
+              {isAnalyzing && (
+                <div className="mt-3 space-y-1">
+                  <div className="flex items-center justify-between text-xs">
+                    <span className="text-muted-foreground">Progress</span>
+                    <span className="font-medium">{analysisProgress}%</span>
+                  </div>
+                  <div className="h-1 bg-secondary rounded-full overflow-hidden">
+                    <div 
+                      className="h-full bg-primary transition-all duration-500 ease-out"
+                      style={{ width: `${analysisProgress}%` }}
+                    />
+                  </div>
                 </div>
-                <div className="h-2 bg-secondary rounded-full overflow-hidden">
-                  <div 
-                    className="h-full bg-primary transition-all duration-500 ease-out"
-                    style={{ width: `${analysisProgress}%` }}
-                  />
-                </div>
-              </div>
-            )}
-
-            {/* Analysis Controls */}
-            <div className="space-y-4">
-              <div className="space-y-2">
-                <Textarea
-                  placeholder="Ask a specific question about this case or leave blank for general analysis..."
-                  value={customPrompt}
-                  onChange={(e) => setCustomPrompt(e.target.value)}
-                  disabled={isAnalyzing}
-                  className="min-h-[80px]"
-                />
-                <Button
-                  onClick={() => analyzeCase()}
-                  disabled={isAnalyzing || !selectedCaseId}
-                  className="w-full"
-                >
-                  {isAnalyzing ? (
-                    <>
-                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                      Analyzing...
-                    </>
-                  ) : (
-                    'Analyze Case'
-                  )}
-                </Button>
-              </div>
+              )}
             </div>
           </div>
+        </div>
 
-          {/* Right Column - Chat Interface */}
-          <div className="flex flex-col">
-            {/* Chat Header */}
-            {analysis && (
-              <div className="flex justify-end p-4 border-b">
+        {/* Resizer */}
+        <div
+          className="w-1 bg-gray-200 hover:bg-primary cursor-col-resize flex items-center justify-center group relative"
+          onMouseDown={() => setIsResizing(true)}
+        >
+          <div className="absolute inset-y-0 -inset-x-2" /> {/* Larger hit area */}
+          <GripVertical className="h-4 w-4 text-gray-400 group-hover:text-primary absolute" />
+        </div>
+
+        {/* Right Panel - Chat Interface */}
+        <div className="flex-1 flex flex-col bg-white">
+          {/* Chat Messages - Scrolling Area */}
+          <div className="flex-1 overflow-y-auto p-6 space-y-4">
+            {chatMessages.length === 0 ? (
+              <div className="flex items-center justify-center h-full">
+                <div className="text-center text-muted-foreground max-w-md">
+                  <div className="p-4 bg-gray-100 rounded-full w-fit mx-auto mb-4">
+                    <Brain className="h-12 w-12 text-gray-400" />
+                  </div>
+                  <h3 className="text-lg font-semibold mb-2">AI Compliance Consultant Ready</h3>
+                  <p className="text-sm mb-4">Select a case and click "Start Analysis" to begin. I'll provide expert guidance on compliance, risk assessment, and next steps.</p>
+                  <div className="text-xs text-left bg-blue-50 border border-blue-200 rounded-lg p-3 space-y-1">
+                    <p className="font-medium text-blue-900">I can help with:</p>
+                    <ul className="list-disc list-inside text-blue-800 space-y-1">
+                      <li>GDPR & data privacy compliance</li>
+                      <li>Risk assessment & mitigation</li>
+                      <li>Investigation procedures</li>
+                      <li>Regulatory guidance</li>
+                    </ul>
+                  </div>
+                </div>
+              </div>
+            ) : (
+              <>
+                {chatMessages.map((message, index) => (
+                  <div key={index} className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}>
+                    <div className={`max-w-[85%] rounded-xl shadow-sm ${
+                      message.role === 'user' 
+                        ? 'bg-primary text-primary-foreground' 
+                        : 'bg-white border'
+                    }`}>
+                      <div className="p-4">
+                        <div 
+                          className={`prose prose-sm max-w-none ${message.role === 'user' ? 'prose-invert' : ''}`}
+                          dangerouslySetInnerHTML={{ 
+                            __html: sanitizeHtml(formatMarkdownToHtml(message.content))
+                          }}
+                        />
+                      </div>
+                      <div className={`px-4 pb-2 text-xs ${
+                        message.role === 'user' ? 'text-primary-foreground/60' : 'text-muted-foreground'
+                      }`}>
+                        {message.role === 'assistant' && '🤖 AI Consultant • '}
+                        {message.timestamp.toLocaleTimeString()}
+                      </div>
+                    </div>
+                  </div>
+                ))}
+                {isAnalyzing && (
+                  <div className="flex justify-start">
+                    <div className="bg-white border rounded-xl shadow-sm p-4">
+                      <div className="flex items-center gap-3">
+                        <Loader2 className="h-4 w-4 animate-spin text-primary" />
+                        <span className="text-sm text-muted-foreground">Analyzing case and preparing guidance...</span>
+                      </div>
+                    </div>
+                  </div>
+                )}
+                <div ref={chatMessagesEndRef} />
+              </>
+            )}
+          </div>
+          
+          {/* Chat Input */}
+          <div className="p-4 border-t bg-gray-50">
+            <div className="flex gap-3">
+              <Textarea
+                placeholder="Ask a follow-up question or request specific guidance..."
+                value={chatInput}
+                onChange={(e) => setChatInput(e.target.value)}
+                disabled={isAnalyzing || !selectedCaseId}
+                className="flex-1 min-h-[60px] max-h-[120px] resize-none bg-white"
+                rows={2}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' && !e.shiftKey) {
+                    e.preventDefault();
+                    sendChatMessage();
+                  }
+                }}
+              />
+              <Button
+                onClick={sendChatMessage}
+                disabled={isAnalyzing || !chatInput.trim() || !selectedCaseId}
+                size="lg"
+                className="self-end"
+              >
+                {isAnalyzing ? (
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                ) : (
+                  'Send'
+                )}
+              </Button>
+            </div>
+            {chatMessages.length > 0 && (
+              <div className="mt-2 flex justify-end">
                 <Button
                   onClick={saveAnalysis}
                   disabled={isSaving}
@@ -640,7 +775,7 @@ Case Details:
                 >
                   {isSaving ? (
                     <>
-                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                      <Loader2 className="h-3 w-3 mr-2 animate-spin" />
                       Saving...
                     </>
                   ) : (
@@ -649,85 +784,10 @@ Case Details:
                 </Button>
               </div>
             )}
-            
-            {/* Chat Messages - Scrolling Area */}
-            <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-white">
-              {chatMessages.length === 0 ? (
-                <div className="text-center text-muted-foreground py-12">
-                  <Brain className="h-12 w-12 mx-auto mb-4 text-gray-400" />
-                  <h3 className="text-lg font-semibold mb-2">No Analysis Yet</h3>
-                  <p className="mb-4">Select a case and click "Analyze Case" to get started.</p>
-                  <p className="text-sm">You can ask specific questions or leave blank for general analysis.</p>
-                </div>
-              ) : (
-                chatMessages.map((message, index) => (
-                  <div key={index} className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}>
-                    <div className={`max-w-[85%] p-4 rounded-lg ${
-                      message.role === 'user' 
-                        ? 'bg-primary text-primary-foreground' 
-                        : 'bg-gray-100 border'
-                    }`}>
-                      <div 
-                        className="prose prose-sm max-w-none"
-                        dangerouslySetInnerHTML={{ 
-                          __html: sanitizeHtml(formatMarkdownToHtml(message.content))
-                        }}
-                      />
-                      <div className={`text-xs mt-2 ${
-                        message.role === 'user' ? 'text-primary-foreground/70' : 'text-muted-foreground'
-                      }`}>
-                        {message.timestamp.toLocaleTimeString()}
-                      </div>
-                    </div>
-                  </div>
-                ))
-              )}
-              {isAnalyzing && (
-                <div className="flex justify-start">
-                  <div className="bg-gray-100 border p-4 rounded-lg">
-                    <div className="flex items-center gap-2">
-                      <Loader2 className="h-4 w-4 animate-spin" />
-                      <span className="text-sm text-muted-foreground">AI is analyzing...</span>
-                    </div>
-                  </div>
-                </div>
-              )}
-            </div>
-            
-            {/* Chat Input */}
-            <div className="p-4 border-t">
-              <div className="flex gap-2">
-                <Textarea
-                  placeholder="Ask a follow-up question or leave blank for general analysis..."
-                  value={chatInput}
-                  onChange={(e) => setChatInput(e.target.value)}
-                  disabled={isAnalyzing}
-                  className="flex-1 min-h-[40px] max-h-[40px] resize-none"
-                  rows={1}
-                  onKeyDown={(e) => {
-                    if (e.key === 'Enter' && !e.shiftKey) {
-                      e.preventDefault();
-                      sendChatMessage();
-                    }
-                  }}
-                />
-                <Button
-                  onClick={sendChatMessage}
-                  disabled={isAnalyzing || !chatInput.trim()}
-                  className="self-end"
-                >
-                  {isAnalyzing ? (
-                    <Loader2 className="h-4 w-4 animate-spin" />
-                  ) : (
-                    'Send'
-                  )}
-                </Button>
-              </div>
-            </div>
           </div>
         </div>
-      </CardContent>
-    </Card>
+      </div>
+    </div>
   );
 };
 
