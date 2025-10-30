@@ -1,4 +1,4 @@
-# SOC 2 & ISO 27001 Certification Readiness
+ # SOC 2 & ISO 27001 Certification Readiness
 
 **Current Status**: ⚠️ Not Ready - Significant remediation required  
 **Readiness Score**: 65/100  
