@@ -401,7 +401,6 @@
       "description": "Kontakta oss så hjälper vi gärna till att svara på alla frågor om Disclosurely.",
       "email": {
         "title": "E-post",
-        "address": "sampettiford@googlemail.com",
         "response": "Vi svarar inom 24 timmar"
       },
       "phone": {

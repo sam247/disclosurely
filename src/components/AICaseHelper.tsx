@@ -446,7 +446,7 @@ Case Details:
           metadata: {
             has_custom_prompt: !!userMessage,
             documents_analyzed: companyDocuments.length,
-            is_follow_up: isFollowUp
+            is_follow_up: false // Initial analysis, not a follow-up
           }
         });
       }

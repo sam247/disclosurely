@@ -22,7 +22,7 @@ export const useFeatureFlag = (
   return useQuery({
     queryKey: ['feature-flag', featureName, organizationId],
     queryFn: async () => {
-      const { data, error } = await supabase.rpc('is_feature_enabled', {
+      const { data, error } = await (supabase.rpc as any)('is_feature_enabled', {
         p_feature_name: featureName,
         p_organization_id: organizationId || null
       });
@@ -47,7 +47,7 @@ export const useAllFeatureFlags = () => {
   return useQuery({
     queryKey: ['feature-flags'],
     queryFn: async () => {
-      const { data, error } = await supabase
+      const { data, error } = await (supabase as any)
         .from('feature_flags')
         .select('*')
         .order('feature_name');
@@ -56,7 +56,16 @@ export const useAllFeatureFlags = () => {
         throw error;
       }
 
-      return data;
+      return data as Array<{
+        id: string;
+        feature_name: string;
+        description: string;
+        is_enabled: boolean;
+        rollout_percentage: number;
+        organization_overrides: Record<string, boolean> | null;
+        created_at: string;
+        updated_at: string;
+      }>;
     },
     staleTime: 30000, // Cache for 30 seconds
   });
@@ -72,7 +81,7 @@ export const updateFeatureFlag = async (
     rollout_percentage?: number;
   }
 ) => {
-  const { data, error } = await supabase
+  const { data, error } = await (supabase as any)
     .from('feature_flags')
     .update({
       ...updates,
@@ -97,7 +106,7 @@ export const enableFeatureForOrg = async (
   organizationId: string,
   enabled: boolean = true
 ) => {
-  const { error } = await supabase.rpc('enable_feature_for_org', {
+  const { error } = await (supabase.rpc as any)('enable_feature_for_org', {
     p_feature_name: featureName,
     p_organization_id: organizationId,
     p_enabled: enabled

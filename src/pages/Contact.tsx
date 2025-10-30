@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Footer } from "@/components/ui/footer";
 import { Link } from "react-router-dom";
 import PublicLanguageSelector from "@/components/PublicLanguageSelector";
@@ -19,6 +20,7 @@ const Contact = () => {
     name: "",
     email: "",
     company: "",
+    department: "",
     message: "",
   });
 
@@ -40,7 +42,7 @@ const Contact = () => {
 
       if (response.ok) {
         alert(t("contact.form.success") || "Thank you for your message! We will get back to you within 24 hours.");
-        setFormData({ name: "", email: "", company: "", message: "" });
+        setFormData({ name: "", email: "", company: "", department: "", message: "" });
       } else {
         alert(
           t("contact.form.error") || "There was an error sending your message. Please try again or email us directly.",
@@ -58,6 +60,13 @@ const Contact = () => {
     setFormData({
       ...formData,
       [e.target.name]: e.target.value,
+    });
+  };
+
+  const handleDepartmentChange = (value: string) => {
+    setFormData({
+      ...formData,
+      department: value,
     });
   };
 
@@ -135,7 +144,6 @@ const Contact = () => {
                 </div>
                 <div>
                   <h3 className="font-semibold text-gray-900 mb-1">{t("contact.info.email.title")}</h3>
-                  <p className="text-gray-600">{t("contact.info.email.address")}</p>
                   <p className="text-sm text-gray-500">{t("contact.info.email.response")}</p>
                 </div>
               </div>
@@ -225,6 +233,24 @@ const Contact = () => {
                     onChange={handleChange}
                     placeholder={t("contact.form.company.placeholder")}
                   />
+                </div>
+
+                <div>
+                  <label htmlFor="department" className="block text-sm font-medium text-gray-700 mb-2">
+                    Department
+                  </label>
+                  <Select value={formData.department} onValueChange={handleDepartmentChange} required>
+                    <SelectTrigger className="w-full">
+                      <SelectValue placeholder="Select a department" />
+                    </SelectTrigger>
+                    <SelectContent className="bg-white z-50">
+                      <SelectItem value="sales">Sales</SelectItem>
+                      <SelectItem value="support">Support</SelectItem>
+                      <SelectItem value="accounts">Accounts</SelectItem>
+                      <SelectItem value="careers">Careers</SelectItem>
+                      <SelectItem value="privacy">Privacy</SelectItem>
+                    </SelectContent>
+                  </Select>
                 </div>
 
                 <div>

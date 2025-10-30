@@ -288,7 +288,7 @@ const Features: React.FC = () => {
                             Financial Misconduct
                           </span>
                         </td>
-                        <td className="px-3 sm:px-6 py-4 hidden md:table-cell text-xs sm:text-sm text-gray-600">sampettiford@...</td>
+                        <td className="px-3 sm:px-6 py-4 hidden md:table-cell text-xs sm:text-sm text-gray-600">admin@...</td>
                         <td className="px-3 sm:px-6 py-4 whitespace-nowrap text-xs sm:text-sm text-gray-600">23/10/2025</td>
                         <td className="px-3 sm:px-6 py-4 whitespace-nowrap">
                           <button className="text-blue-600 hover:text-blue-900 text-xs sm:text-sm font-medium">View</button>

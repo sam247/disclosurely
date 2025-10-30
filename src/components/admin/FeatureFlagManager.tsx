@@ -245,7 +245,7 @@ export const FeatureFlagManager: React.FC = () => {
                 setUpdating(null);
               }
             }}
-            disabled={isUpdating}
+            disabled={updating !== null}
           >
             <AlertTriangle className="mr-2 h-4 w-4" />
             Disable All Features (Emergency)

@@ -400,7 +400,6 @@
       "description": "Contactez-nous et nous serons heureux de répondre à vos questions sur Disclosurely.",
       "email": {
         "title": "E-mail",
-        "address": "sampettiford@googlemail.com",
         "response": "Nous répondons sous 24 heures"
       },
       "phone": {

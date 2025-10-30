@@ -402,7 +402,6 @@
       "description": "Get in touch with us and we'll be happy to help answer any questions about Disclosurely.",
       "email": {
         "title": "Email",
-        "address": "sampettiford@googlemail.com",
         "response": "We respond within 24 hours"
       },
       "phone": {
