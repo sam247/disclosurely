@@ -39,18 +39,24 @@ serve(async (req) => {
     );
 
     const organizationId = req.headers.get('X-Organization-Id');
+    console.log(`[AI Gateway] Received request for org: ${organizationId}`);
     
     // Check if AI Gateway is enabled
-    const { data: isEnabled } = await supabase.rpc('is_feature_enabled', {
+    const { data: isEnabled, error: flagError } = await supabase.rpc('is_feature_enabled', {
       p_feature_name: 'ai_gateway',
       p_organization_id: organizationId
     });
 
+    console.log(`[AI Gateway] Feature flag check: isEnabled=${isEnabled}, error=${flagError}`);
+
     if (!isEnabled) {
+      console.error(`[AI Gateway] REJECTED - Feature disabled for org ${organizationId}`);
       return new Response(
         JSON.stringify({ 
           error: 'AI Gateway not enabled for this organization',
-          code: 'FEATURE_DISABLED'
+          code: 'FEATURE_DISABLED',
+          organizationId: organizationId,
+          debug: { isEnabled, flagError }
         }),
         { 
           status: 503,
@@ -58,6 +64,8 @@ serve(async (req) => {
         }
       );
     }
+    
+    console.log(`[AI Gateway] ACCEPTED - Processing request for org ${organizationId}`);
 
     // ============================================================================
     // 2. AUTHENTICATION & AUTHORIZATION
