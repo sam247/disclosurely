@@ -6,92 +6,109 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
-// Simple PDF text extraction using regex (fallback method)
-// This extracts text streams from PDF without external dependencies
+// PDF text extraction using pdf.co API (handles complex PDFs with font encodings)
+// Free tier: 300 API calls/month
 async function extractTextFromPDF(fileBuffer: ArrayBuffer): Promise<string> {
   try {
     console.log('[PDF Extract] Starting extraction...');
     console.log('[PDF Extract] Buffer size:', fileBuffer.byteLength, 'bytes');
 
-    // Convert to string for regex processing
-    const decoder = new TextDecoder('latin1'); // PDFs often use latin1 encoding
-    const pdfString = decoder.decode(new Uint8Array(fileBuffer));
-
-    console.log('[PDF Extract] PDF decoded, searching for text streams...');
-
-    // Extract text from PDF streams
-    // This regex finds text between BT (Begin Text) and ET (End Text) operators
-    const textRegex = /BT\s*(.*?)\s*ET/gs;
-    const matches = pdfString.matchAll(textRegex);
-
-    let extractedText = '';
-    let streamCount = 0;
-
-    for (const match of matches) {
-      streamCount++;
-      const textStream = match[1];
-
-      // Extract text strings from the stream
-      // Look for text in parentheses () or hex strings <>
-      const stringRegex = /\(([^)]*)\)|<([0-9A-Fa-f]+)>/g;
-      const strings = textStream.matchAll(stringRegex);
-
-      for (const str of strings) {
-        if (str[1]) {
-          // Text in parentheses - decode PDF string encoding
-          let text = str[1]
-            .replace(/\\n/g, '\n')
-            .replace(/\\r/g, '\r')
-            .replace(/\\t/g, '\t')
-            .replace(/\\\(/g, '(')
-            .replace(/\\\)/g, ')')
-            .replace(/\\\\/g, '\\');
-          extractedText += text + ' ';
-        } else if (str[2]) {
-          // Hex string - convert to text
-          try {
-            const hexStr = str[2];
-            let text = '';
-            for (let i = 0; i < hexStr.length; i += 2) {
-              const byte = parseInt(hexStr.substring(i, i + 2), 16);
-              if (byte > 31 && byte < 127) { // Printable ASCII
-                text += String.fromCharCode(byte);
-              }
-            }
-            extractedText += text + ' ';
-          } catch (e) {
-            console.warn('[PDF Extract] Failed to decode hex string:', e);
-          }
-        }
-      }
+    const apiKey = Deno.env.get('PDFCO_API_KEY');
+    
+    if (!apiKey) {
+      console.warn('[PDF Extract] PDF.co API key not configured, using fallback parser');
+      return await extractTextFromPDFFallback(fileBuffer);
     }
 
-    console.log(`[PDF Extract] Processed ${streamCount} text streams`);
+    // Convert buffer to base64
+    const bytes = new Uint8Array(fileBuffer);
+    const base64 = btoa(String.fromCharCode(...bytes));
 
-    // Clean up extracted text
-    extractedText = extractedText
-      .replace(/\s+/g, ' ') // Normalize whitespace
-      .replace(/\n+/g, '\n') // Normalize newlines
-      .trim();
+    console.log('[PDF Extract] Calling pdf.co API...');
 
-    console.log(`[PDF Extract] SUCCESS! Extracted ${extractedText.length} characters`);
+    // Call pdf.co text extraction API
+    const response = await fetch('https://api.pdf.co/v1/pdf/convert/to/text', {
+      method: 'POST',
+      headers: {
+        'x-api-key': apiKey,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        file: base64,
+        inline: true,
+        pages: '0-', // All pages
+      }),
+    });
+
+    if (!response.ok) {
+      console.error('[PDF Extract] API error:', response.status, await response.text());
+      return await extractTextFromPDFFallback(fileBuffer);
+    }
+
+    const result = await response.json();
+    
+    if (!result.body) {
+      console.error('[PDF Extract] No text in API response, using fallback');
+      return await extractTextFromPDFFallback(fileBuffer);
+    }
+
+    const extractedText = result.body;
+    console.log(`[PDF Extract] SUCCESS via pdf.co! Extracted ${extractedText.length} characters`);
     console.log(`[PDF Extract] Preview: ${extractedText.substring(0, 200)}...`);
-
-    if (extractedText.length === 0) {
-      console.warn('[PDF Extract] No text extracted - PDF may be scanned/image-based');
-      return '[This PDF appears to be image-based or empty. No text could be extracted. Consider using OCR software to extract text first.]';
-    }
 
     return extractedText;
 
   } catch (error: any) {
-    console.error('[PDF Extract] Detailed error:', {
-      message: error.message,
-      stack: error.stack,
-      name: error.name
-    });
-    throw new Error(`Failed to extract text from PDF: ${error.message}`);
+    console.error('[PDF Extract] API error, using fallback:', error);
+    return await extractTextFromPDFFallback(fileBuffer);
   }
+}
+
+// Fallback: Simple regex-based extraction (works for simple PDFs only)
+async function extractTextFromPDFFallback(fileBuffer: ArrayBuffer): Promise<string> {
+  console.log('[PDF Extract] Using fallback regex parser...');
+  
+  const decoder = new TextDecoder('latin1');
+  const pdfString = decoder.decode(new Uint8Array(fileBuffer));
+
+  const textRegex = /BT\s*(.*?)\s*ET/gs;
+  const matches = pdfString.matchAll(textRegex);
+
+  let extractedText = '';
+  let streamCount = 0;
+
+  for (const match of matches) {
+    streamCount++;
+    const textStream = match[1];
+    const stringRegex = /\(([^)]*)\)|<([0-9A-Fa-f]+)>/g;
+    const strings = textStream.matchAll(stringRegex);
+
+    for (const str of strings) {
+      if (str[1]) {
+        let text = str[1]
+          .replace(/\\n/g, '\n')
+          .replace(/\\r/g, '\r')
+          .replace(/\\t/g, '\t')
+          .replace(/\\\(/g, '(')
+          .replace(/\\\)/g, ')')
+          .replace(/\\\\/g, '\\');
+        extractedText += text + ' ';
+      }
+    }
+  }
+
+  extractedText = extractedText
+    .replace(/\s+/g, ' ')
+    .trim();
+
+  console.log(`[PDF Extract] Fallback extracted ${extractedText.length} chars from ${streamCount} streams`);
+
+  if (extractedText.length === 0 || extractedText.length < 100 || /[^\x20-\x7E\n\r\t]/.test(extractedText.substring(0, 200))) {
+    console.warn('[PDF Extract] Extracted text appears garbled or empty');
+    return '[This PDF uses custom font encodings and requires a PDF.co API key to extract properly. Please add PDFCO_API_KEY to your environment variables, or convert the PDF to a simpler format.]';
+  }
+
+  return extractedText;
 }
 
 serve(async (req) => {
