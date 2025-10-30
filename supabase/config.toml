@@ -47,3 +47,6 @@ verify_jwt = true
 
 [functions.get-status-timeline]
 verify_jwt = false
+
+[functions.ai-gateway-generate]
+verify_jwt = true
