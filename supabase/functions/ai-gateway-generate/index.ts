@@ -90,11 +90,19 @@ serve(async (req) => {
     let piiDetected = false;
     
     if (policy.pii_protection?.enabled && !body.preserve_pii) {
-      // Simple PII detection patterns (MVP - will be enhanced with Presidio)
+      // Enhanced PII detection patterns
       const piiPatterns = [
         { type: 'EMAIL', regex: /\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b/g },
-        { type: 'PHONE', regex: /\b(\+\d{1,3}[- ]?)?\d{10,}\b/g },
+        { type: 'PHONE_UK', regex: /\b(?:0|\+44)\d{10}\b/g },
+        { type: 'PHONE_US', regex: /\b(?:\+1)?[\s.-]?\(?\d{3}\)?[\s.-]?\d{3}[\s.-]?\d{4}\b/g },
+        { type: 'PHONE_INTL', regex: /\b\+\d{1,3}[\s.-]?\d{6,14}\b/g },
         { type: 'SSN', regex: /\b\d{3}-\d{2}-\d{4}\b/g },
+        { type: 'NI_NUMBER', regex: /\b[A-CEGHJ-PR-TW-Z]{1}[A-CEGHJ-NPR-TW-Z]{1}\d{6}[A-D]{1}\b/g }, // UK National Insurance
+        { type: 'CREDIT_CARD', regex: /\b(?:\d{4}[\s-]?){3}\d{4}\b/g },
+        { type: 'IBAN', regex: /\b[A-Z]{2}\d{2}[A-Z0-9]{11,30}\b/g },
+        { type: 'PASSPORT', regex: /\b[A-Z]{1,2}\d{6,9}\b/g },
+        { type: 'POSTCODE_UK', regex: /\b[A-Z]{1,2}\d{1,2}[A-Z]?\s?\d[A-Z]{2}\b/g },
+        { type: 'IP_ADDRESS', regex: /\b(?:\d{1,3}\.){3}\d{1,3}\b/g },
       ];
 
       body.messages = body.messages.map(msg => {
@@ -117,7 +125,7 @@ serve(async (req) => {
     }
 
     // ============================================================================
-    // 7. ROUTE TO VENDOR (DeepSeek)
+    // 7. ROUTE TO VENDOR (Multi-Model Support)
     // ============================================================================
     const model = body.model || policy.routing?.default_model || 'deepseek-chat';
     const temperature = body.temperature ?? policy.routing?.purpose_routing?.[body.context?.purpose || 'default']?.temperature ?? 0.7;
@@ -126,18 +134,51 @@ serve(async (req) => {
     const startTime = Date.now();
     const requestId = crypto.randomUUID();
 
-    const deepseekResponse = await fetch('https://api.deepseek.com/v1/chat/completions', {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${Deno.env.get('DEEPSEEK_API_KEY')}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
+    // MODEL ROUTING - provision for future models
+    let apiEndpoint: string;
+    let apiKey: string;
+    let requestBody: any;
+
+    // Route based on model (currently only DeepSeek, but structured for future expansion)
+    if (model.startsWith('gpt-') || model.startsWith('o1-')) {
+      // OpenAI (future)
+      apiEndpoint = 'https://api.openai.com/v1/chat/completions';
+      apiKey = Deno.env.get('OPENAI_API_KEY') || '';
+      requestBody = {
         model,
         messages: body.messages,
         temperature,
         max_tokens: maxTokens,
-      }),
+      };
+    } else if (model.startsWith('claude-')) {
+      // Anthropic (future)
+      apiEndpoint = 'https://api.anthropic.com/v1/messages';
+      apiKey = Deno.env.get('ANTHROPIC_API_KEY') || '';
+      requestBody = {
+        model,
+        messages: body.messages,
+        max_tokens: maxTokens,
+        temperature,
+      };
+    } else {
+      // DeepSeek (current default)
+      apiEndpoint = 'https://api.deepseek.com/v1/chat/completions';
+      apiKey = Deno.env.get('DEEPSEEK_API_KEY') || '';
+      requestBody = {
+        model: 'deepseek-chat',
+        messages: body.messages,
+        temperature,
+        max_tokens: maxTokens,
+      };
+    }
+
+    const deepseekResponse = await fetch(apiEndpoint, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${apiKey}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(requestBody),
     });
 
     if (!deepseekResponse.ok) {

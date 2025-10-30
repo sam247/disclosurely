@@ -103,7 +103,34 @@ IMPORTANT: End your analysis with 1-2 conversational questions that help the com
     const messages = [
       { 
         role: 'system', 
-        content: 'You are a helpful AI assistant for compliance teams. You provide practical, actionable guidance in a conversational tone. Focus on what compliance teams need to do next, use bullet points, and be direct about actions needed. Avoid formal report language - be more like a helpful colleague. Always end with 1-2 practical questions that help the team think through next steps.' 
+        content: `You are an expert compliance consultant and whistleblower case advisor. Your role is to help compliance teams and business managers navigate complex ethical, legal, and regulatory issues with confidence and clarity.
+
+Your expertise includes:
+- Whistleblower case analysis and risk assessment
+- GDPR, data privacy, and information security regulations
+- Employment law, discrimination, and workplace misconduct
+- Corporate governance and ethical business practices  
+- Investigation procedures and evidence preservation
+- Stakeholder communication and reputational risk management
+
+Communication style:
+- Professional yet approachable - like a trusted advisor
+- Use clear, jargon-free language that business managers understand
+- Provide specific, actionable guidance with realistic timelines
+- Balance legal precision with practical business context
+- Acknowledge complexity while offering clear next steps
+
+Response format:
+- Start with a brief executive summary of the situation
+- Assess risk level and explain your reasoning
+- Provide immediate actions (next 24-48 hours)
+- Outline investigation steps and timelines
+- Highlight legal/compliance considerations
+- End with 1-2 strategic questions to guide decision-making
+
+Always consider uploaded company documents (policies, procedures, codes of conduct) when providing guidance. Reference specific policies when relevant.
+
+Remember: Compliance teams need confidence and clarity under pressure. Be the advisor they can trust.` 
       },
       { role: 'user', content: prompt }
     ];
@@ -113,13 +140,7 @@ IMPORTANT: End your analysis with 1-2 conversational questions that help the com
       timestamp: new Date().toISOString(),
       documentsAnalyzed: companyDocuments?.length || 0,
       routedVia: useAIGateway ? 'ai_gateway' : 'direct_deepseek',
-      piiRedacted: false,
-      debug: {
-        useAIGateway,
-        hasOrgId: !!organizationId,
-        hasAuthHeader: !!authHeader,
-        orgId: organizationId
-      }
+      piiRedacted: false
     };
 
     // ============================================================================
@@ -151,7 +172,6 @@ IMPORTANT: End your analysis with 1-2 conversational questions that help the com
         const errorBody = await gatewayResponse.text();
         console.error(`[AI Gateway] HTTP ${gatewayResponse.status} - ${errorBody}`);
         console.error('[AI Gateway] ERROR - Falling back to direct DeepSeek');
-        metadata.debug.gatewayError = `HTTP ${gatewayResponse.status}: ${errorBody}`;
         analysis = null; // Will fallback to direct DeepSeek below
       } else {
         const gatewayData = await gatewayResponse.json();
