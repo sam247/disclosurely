@@ -108,13 +108,13 @@ const Features: React.FC = () => {
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
               <Card className="p-6 hover:shadow-lg transition-shadow rounded-2xl">
                 <CardContent className="p-0">
-                  <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mb-4">
-                    <Shield className="w-8 h-8 text-blue-600" />
+                  <div className="w-12 h-12 sm:w-16 sm:h-16 bg-blue-100 rounded-full flex items-center justify-center mb-4">
+                    <Shield className="w-6 h-6 sm:w-8 sm:h-8 text-blue-600" />
                   </div>
-                  <h3 className="text-xl font-semibold text-gray-900 mb-3">
+                  <h3 className="text-lg sm:text-xl font-semibold text-gray-900 mb-3">
                     {t('features.core.items.anonymous.title')}
                   </h3>
-                  <p className="text-gray-600">
+                  <p className="text-sm sm:text-base text-gray-600">
                     {t('features.core.items.anonymous.description')}
                   </p>
                 </CardContent>
@@ -122,13 +122,13 @@ const Features: React.FC = () => {
 
               <Card className="p-6 hover:shadow-lg transition-shadow rounded-2xl">
                 <CardContent className="p-0">
-                  <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mb-4">
-                    <Brain className="w-8 h-8 text-blue-600" />
+                  <div className="w-12 h-12 sm:w-16 sm:h-16 bg-blue-100 rounded-full flex items-center justify-center mb-4">
+                    <Brain className="w-6 h-6 sm:w-8 sm:h-8 text-blue-600" />
                   </div>
-                  <h3 className="text-xl font-semibold text-gray-900 mb-3">
+                  <h3 className="text-lg sm:text-xl font-semibold text-gray-900 mb-3">
                     {t('features.core.items.ai.title') || 'AI Case Analysis'}
                   </h3>
-                  <p className="text-gray-600">
+                  <p className="text-sm sm:text-base text-gray-600">
                     {t('features.core.items.ai.description') || 'DeepSeek AI analyzes cases, identifies risk patterns, and provides actionable insights to help you resolve issues faster.'}
                   </p>
                 </CardContent>
@@ -136,13 +136,13 @@ const Features: React.FC = () => {
 
               <Card className="p-6 hover:shadow-lg transition-shadow rounded-2xl">
                 <CardContent className="p-0">
-                  <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mb-4">
-                    <BarChart3 className="w-8 h-8 text-gray-700" />
+                  <div className="w-12 h-12 sm:w-16 sm:h-16 bg-gray-100 rounded-full flex items-center justify-center mb-4">
+                    <BarChart3 className="w-6 h-6 sm:w-8 sm:h-8 text-gray-700" />
                   </div>
-                  <h3 className="text-xl font-semibold text-gray-900 mb-3">
+                  <h3 className="text-lg sm:text-xl font-semibold text-gray-900 mb-3">
                     {t('features.core.items.dashboard.title')}
                   </h3>
-                  <p className="text-gray-600">
+                  <p className="text-sm sm:text-base text-gray-600">
                     {t('features.core.items.dashboard.description')}
                   </p>
                 </CardContent>
@@ -150,13 +150,13 @@ const Features: React.FC = () => {
 
               <Card className="p-6 hover:shadow-lg transition-shadow rounded-2xl">
                 <CardContent className="p-0">
-                  <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mb-4">
-                    <CheckCircle className="w-8 h-8 text-blue-600" />
+                  <div className="w-12 h-12 sm:w-16 sm:h-16 bg-blue-100 rounded-full flex items-center justify-center mb-4">
+                    <CheckCircle className="w-6 h-6 sm:w-8 sm:h-8 text-blue-600" />
                   </div>
-                  <h3 className="text-xl font-semibold text-gray-900 mb-3">
+                  <h3 className="text-lg sm:text-xl font-semibold text-gray-900 mb-3">
                     {t('features.core.items.compliance.title')}
                   </h3>
-                  <p className="text-gray-600">
+                  <p className="text-sm sm:text-base text-gray-600">
                     {t('features.core.items.compliance.description')}
                   </p>
                 </CardContent>
@@ -164,13 +164,13 @@ const Features: React.FC = () => {
 
               <Card className="p-6 hover:shadow-lg transition-shadow rounded-2xl">
                 <CardContent className="p-0">
-                  <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mb-4">
-                    <Smartphone className="w-8 h-8 text-gray-700" />
+                  <div className="w-12 h-12 sm:w-16 sm:h-16 bg-gray-100 rounded-full flex items-center justify-center mb-4">
+                    <Smartphone className="w-6 h-6 sm:w-8 sm:h-8 text-gray-700" />
                   </div>
-                  <h3 className="text-xl font-semibold text-gray-900 mb-3">
+                  <h3 className="text-lg sm:text-xl font-semibold text-gray-900 mb-3">
                     {t('features.core.items.mobile.title')}
                   </h3>
-                  <p className="text-gray-600">
+                  <p className="text-sm sm:text-base text-gray-600">
                     {t('features.core.items.mobile.description')}
                   </p>
                 </CardContent>
@@ -178,13 +178,13 @@ const Features: React.FC = () => {
 
               <Card className="p-6 hover:shadow-lg transition-shadow rounded-2xl">
                 <CardContent className="p-0">
-                  <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mb-4">
-                    <Plug className="w-8 h-8 text-blue-600" />
+                  <div className="w-12 h-12 sm:w-16 sm:h-16 bg-blue-100 rounded-full flex items-center justify-center mb-4">
+                    <Plug className="w-6 h-6 sm:w-8 sm:h-8 text-blue-600" />
                   </div>
-                  <h3 className="text-xl font-semibold text-gray-900 mb-3">
+                  <h3 className="text-lg sm:text-xl font-semibold text-gray-900 mb-3">
                     {t('features.core.items.integration.title')}
                   </h3>
-                  <p className="text-gray-600">
+                  <p className="text-sm sm:text-base text-gray-600">
                     {t('features.core.items.integration.description')}
                   </p>
                 </CardContent>
@@ -247,70 +247,70 @@ const Features: React.FC = () => {
 
               {/* Reports Table Preview */}
               <div className="border border-gray-200 rounded-lg overflow-hidden mb-6">
-                <div className="bg-gray-50 px-6 py-4 border-b border-gray-200 flex items-center justify-between">
+                <div className="bg-gray-50 px-4 sm:px-6 py-4 border-b border-gray-200 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                   <div>
-                    <h3 className="text-lg font-semibold text-gray-900">Reports Overview</h3>
-                    <p className="text-sm text-gray-600">Manage and review all submitted reports</p>
+                    <h3 className="text-base sm:text-lg font-semibold text-gray-900">Reports Overview</h3>
+                    <p className="text-xs sm:text-sm text-gray-600">Manage and review all submitted reports</p>
                   </div>
-                  <div className="flex gap-2">
-                    <div className="px-4 py-2 bg-blue-600 text-white rounded-md text-sm font-medium">
+                  <div className="flex gap-2 flex-wrap">
+                    <div className="px-3 sm:px-4 py-1.5 sm:py-2 bg-blue-600 text-white rounded-md text-xs sm:text-sm font-medium">
                       Active Reports (9)
                     </div>
-                    <div className="px-4 py-2 bg-gray-200 text-gray-700 rounded-md text-sm font-medium">
+                    <div className="px-3 sm:px-4 py-1.5 sm:py-2 bg-gray-200 text-gray-700 rounded-md text-xs sm:text-sm font-medium">
                       Archived (0)
                     </div>
                   </div>
                 </div>
-                <div className="overflow-x-auto">
-                  <table className="w-full">
+                <div className="overflow-x-auto -mx-4 sm:mx-0">
+                  <table className="w-full min-w-[800px]">
                     <thead className="bg-gray-50">
                       <tr>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Tracking ID</th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Title</th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Category</th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Assigned To</th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                        <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Tracking ID</th>
+                        <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Title</th>
+                        <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                        <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider hidden lg:table-cell">Category</th>
+                        <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider hidden md:table-cell">Assigned To</th>
+                        <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
+                        <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
                       </tr>
                     </thead>
                     <tbody className="bg-white divide-y divide-gray-200">
                       <tr className="hover:bg-gray-50">
-                        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">DIS-YU3Z4XJ9</td>
-                        <td className="px-6 py-4 text-sm text-gray-900">Financial Issues With Department Head</td>
-                        <td className="px-6 py-4 whitespace-nowrap">
+                        <td className="px-3 sm:px-6 py-4 text-xs sm:text-sm font-medium text-gray-900">DIS-YU3Z4XJ9</td>
+                        <td className="px-3 sm:px-6 py-4 text-xs sm:text-sm text-gray-900 max-w-[200px] truncate">Financial Issues With Department Head</td>
+                        <td className="px-3 sm:px-6 py-4 whitespace-nowrap">
                           <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-blue-100 text-blue-800">
                             investigating
                           </span>
                         </td>
-                        <td className="px-6 py-4 whitespace-nowrap">
+                        <td className="px-3 sm:px-6 py-4 hidden lg:table-cell">
                           <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-gray-100 text-gray-800">
-                            Financial Misconduct - Kickbacks
+                            Financial Misconduct
                           </span>
                         </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">sampettiford@...</td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">23/10/2025</td>
-                        <td className="px-6 py-4 whitespace-nowrap">
-                          <button className="text-blue-600 hover:text-blue-900 text-sm font-medium">View</button>
+                        <td className="px-3 sm:px-6 py-4 hidden md:table-cell text-xs sm:text-sm text-gray-600">sampettiford@...</td>
+                        <td className="px-3 sm:px-6 py-4 whitespace-nowrap text-xs sm:text-sm text-gray-600">23/10/2025</td>
+                        <td className="px-3 sm:px-6 py-4 whitespace-nowrap">
+                          <button className="text-blue-600 hover:text-blue-900 text-xs sm:text-sm font-medium">View</button>
                         </td>
                       </tr>
                       <tr className="hover:bg-gray-50">
-                        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">DIS-5M0B79BF</td>
-                        <td className="px-6 py-4 text-sm text-gray-900">Discrimination in Promotion Decisions</td>
-                        <td className="px-6 py-4 whitespace-nowrap">
+                        <td className="px-3 sm:px-6 py-4 text-xs sm:text-sm font-medium text-gray-900">DIS-5M0B79BF</td>
+                        <td className="px-3 sm:px-6 py-4 text-xs sm:text-sm text-gray-900 max-w-[200px] truncate">Discrimination in Promotion Decisions</td>
+                        <td className="px-3 sm:px-6 py-4 whitespace-nowrap">
                           <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-blue-100 text-blue-800">
                             investigating
                           </span>
                         </td>
-                        <td className="px-6 py-4 whitespace-nowrap">
+                        <td className="px-3 sm:px-6 py-4 hidden lg:table-cell">
                           <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-gray-100 text-gray-800">
-                            Workplace Behaviour - Discrimination
+                            Discrimination
                           </span>
                         </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">Unassigned</td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">23/10/2025</td>
-                        <td className="px-6 py-4 whitespace-nowrap">
-                          <button className="text-blue-600 hover:text-blue-900 text-sm font-medium">View</button>
+                        <td className="px-3 sm:px-6 py-4 hidden md:table-cell text-xs sm:text-sm text-gray-600">Unassigned</td>
+                        <td className="px-3 sm:px-6 py-4 whitespace-nowrap text-xs sm:text-sm text-gray-600">23/10/2025</td>
+                        <td className="px-3 sm:px-6 py-4 whitespace-nowrap">
+                          <button className="text-blue-600 hover:text-blue-900 text-xs sm:text-sm font-medium">View</button>
                         </td>
                       </tr>
                     </tbody>

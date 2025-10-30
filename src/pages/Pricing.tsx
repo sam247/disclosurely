@@ -44,31 +44,31 @@ const Pricing = () => {
       <section className="py-12 px-4 sm:px-6 lg:px-8 bg-gray-50 border-b border-gray-200">
         <div className="max-w-7xl mx-auto">
           <div className="flex flex-col md:flex-row justify-center items-center gap-6 md:gap-12">
-            <div className="flex items-center gap-3">
-              <div className="w-12 h-12 bg-blue-600 rounded-full flex items-center justify-center">
-                <CheckCircle className="w-7 h-7 text-white" />
+            <div className="flex items-center gap-3 text-center md:text-left">
+              <div className="w-10 h-10 sm:w-12 sm:h-12 bg-blue-600 rounded-full flex items-center justify-center flex-shrink-0">
+                <CheckCircle className="w-5 h-5 sm:w-7 sm:h-7 text-white" />
               </div>
               <div>
-                <div className="font-bold text-gray-900 text-lg">14-Day Money-Back Guarantee</div>
-                <div className="text-sm text-gray-600">Try risk-free, cancel anytime</div>
+                <div className="font-bold text-gray-900 text-base sm:text-lg">14-Day Money-Back Guarantee</div>
+                <div className="text-xs sm:text-sm text-gray-600">Try risk-free, cancel anytime</div>
               </div>
             </div>
-            <div className="flex items-center gap-3">
-              <div className="w-12 h-12 bg-blue-600 rounded-full flex items-center justify-center">
-                <CheckCircle className="w-7 h-7 text-white" />
+            <div className="flex items-center gap-3 text-center md:text-left">
+              <div className="w-10 h-10 sm:w-12 sm:h-12 bg-blue-600 rounded-full flex items-center justify-center flex-shrink-0">
+                <CheckCircle className="w-5 h-5 sm:w-7 sm:h-7 text-white" />
               </div>
               <div>
-                <div className="font-bold text-gray-900 text-lg">Trusted by UK Businesses</div>
-                <div className="text-sm text-gray-600">ISO 27001, GDPR, SOX compliant</div>
+                <div className="font-bold text-gray-900 text-base sm:text-lg">Trusted by UK Businesses</div>
+                <div className="text-xs sm:text-sm text-gray-600">ISO 27001, GDPR, SOX compliant</div>
               </div>
             </div>
-            <div className="flex items-center gap-3">
-              <div className="w-12 h-12 bg-blue-600 rounded-full flex items-center justify-center">
-                <CheckCircle className="w-7 h-7 text-white" />
+            <div className="flex items-center gap-3 text-center md:text-left">
+              <div className="w-10 h-10 sm:w-12 sm:h-12 bg-blue-600 rounded-full flex items-center justify-center flex-shrink-0">
+                <CheckCircle className="w-5 h-5 sm:w-7 sm:h-7 text-white" />
               </div>
               <div>
-                <div className="font-bold text-gray-900 text-lg">Highly Rated on G2</div>
-                <div className="text-sm text-gray-600">100+ verified reviews from compliance teams</div>
+                <div className="font-bold text-gray-900 text-base sm:text-lg">Highly Rated on G2</div>
+                <div className="text-xs sm:text-sm text-gray-600">100+ verified reviews from compliance teams</div>
               </div>
             </div>
           </div>
@@ -91,89 +91,89 @@ const Pricing = () => {
             </p>
           </div>
 
-          <div className="overflow-x-auto">
-            <table className="w-full border-collapse shadow-xl">
+          <div className="overflow-x-auto -mx-4 sm:mx-0">
+            <table className="w-full border-collapse shadow-xl min-w-[600px] sm:min-w-0">
               <thead>
                 <tr className="bg-gradient-to-r from-blue-600 to-blue-700">
-                  <th className="px-6 py-4 text-left text-sm font-semibold text-white">Feature</th>
-                  <th className="px-6 py-4 text-center text-sm font-semibold text-white">Disclosurely Pro</th>
-                  <th className="px-6 py-4 text-center text-sm font-semibold text-blue-100">Typical Competitor</th>
+                  <th className="px-3 sm:px-6 py-3 sm:py-4 text-left text-xs sm:text-sm font-semibold text-white">Feature</th>
+                  <th className="px-3 sm:px-6 py-3 sm:py-4 text-center text-xs sm:text-sm font-semibold text-white">Disclosurely Pro</th>
+                  <th className="px-3 sm:px-6 py-3 sm:py-4 text-center text-xs sm:text-sm font-semibold text-blue-100">Typical Competitor</th>
                 </tr>
               </thead>
               <tbody className="bg-white">
                 <tr className="border-b border-gray-100">
-                  <td className="px-6 py-4 text-gray-900 font-medium">Monthly Price</td>
-                  <td className="px-6 py-4 text-center">
-                    <span className="text-2xl font-bold text-blue-600">£39.99</span>
-                    <span className="text-sm text-gray-600">/month</span>
+                  <td className="px-3 sm:px-6 py-3 sm:py-4 text-gray-900 font-medium text-sm sm:text-base">Monthly Price</td>
+                  <td className="px-3 sm:px-6 py-3 sm:py-4 text-center">
+                    <span className="text-xl sm:text-2xl font-bold text-blue-600">£39.99</span>
+                    <span className="text-xs sm:text-sm text-gray-600">/month</span>
                     <div className="text-xs text-green-600 font-semibold mt-1">Save £40-80/mo</div>
                   </td>
-                  <td className="px-6 py-4 text-center text-gray-500">
-                    <span className="text-xl font-semibold">£80-120</span>
-                    <span className="text-sm">/month</span>
+                  <td className="px-3 sm:px-6 py-3 sm:py-4 text-center text-gray-500">
+                    <span className="text-lg sm:text-xl font-semibold">£80-120</span>
+                    <span className="text-xs sm:text-sm">/month</span>
                   </td>
                 </tr>
                 <tr className="border-b border-gray-100 bg-gray-50">
-                  <td className="px-6 py-4 text-gray-900 font-semibold">AI Case Analysis</td>
-                  <td className="px-6 py-4 text-center">
-                    <CheckCircle className="w-6 h-6 text-blue-600 mx-auto" />
+                  <td className="px-3 sm:px-6 py-3 sm:py-4 text-gray-900 font-semibold text-sm sm:text-base">AI Case Analysis</td>
+                  <td className="px-3 sm:px-6 py-3 sm:py-4 text-center">
+                    <CheckCircle className="w-5 h-5 sm:w-6 sm:h-6 text-blue-600 mx-auto" />
                   </td>
-                  <td className="px-6 py-4 text-center">
-                    <X className="w-6 h-6 text-gray-400 mx-auto" />
+                  <td className="px-3 sm:px-6 py-3 sm:py-4 text-center">
+                    <X className="w-5 h-5 sm:w-6 sm:h-6 text-gray-400 mx-auto" />
                   </td>
                 </tr>
                 <tr className="border-b border-gray-100">
-                  <td className="px-6 py-4 text-gray-900">Unlimited Reports</td>
-                  <td className="px-6 py-4 text-center">
-                    <CheckCircle className="w-6 h-6 text-blue-600 mx-auto" />
+                  <td className="px-3 sm:px-6 py-3 sm:py-4 text-gray-900 text-sm sm:text-base">Unlimited Reports</td>
+                  <td className="px-3 sm:px-6 py-3 sm:py-4 text-center">
+                    <CheckCircle className="w-5 h-5 sm:w-6 sm:h-6 text-blue-600 mx-auto" />
                   </td>
-                  <td className="px-6 py-4 text-center">
-                    <CheckCircle className="w-6 h-6 text-gray-400 mx-auto" />
+                  <td className="px-3 sm:px-6 py-3 sm:py-4 text-center">
+                    <CheckCircle className="w-5 h-5 sm:w-6 sm:h-6 text-gray-400 mx-auto" />
                   </td>
                 </tr>
                 <tr className="border-b border-gray-100 bg-gray-50">
-                  <td className="px-6 py-4 text-gray-900">Military-Grade Encryption</td>
-                  <td className="px-6 py-4 text-center">
-                    <CheckCircle className="w-6 h-6 text-blue-600 mx-auto" />
+                  <td className="px-3 sm:px-6 py-3 sm:py-4 text-gray-900 text-sm sm:text-base">Military-Grade Encryption</td>
+                  <td className="px-3 sm:px-6 py-3 sm:py-4 text-center">
+                    <CheckCircle className="w-5 h-5 sm:w-6 sm:h-6 text-blue-600 mx-auto" />
                   </td>
-                  <td className="px-6 py-4 text-center">
-                    <CheckCircle className="w-6 h-6 text-gray-400 mx-auto" />
+                  <td className="px-3 sm:px-6 py-3 sm:py-4 text-center">
+                    <CheckCircle className="w-5 h-5 sm:w-6 sm:h-6 text-gray-400 mx-auto" />
                   </td>
                 </tr>
                 <tr className="border-b border-gray-100">
-                  <td className="px-6 py-4 text-gray-900">GDPR Compliance</td>
-                  <td className="px-6 py-4 text-center">
-                    <CheckCircle className="w-6 h-6 text-blue-600 mx-auto" />
+                  <td className="px-3 sm:px-6 py-3 sm:py-4 text-gray-900 text-sm sm:text-base">GDPR Compliance</td>
+                  <td className="px-3 sm:px-6 py-3 sm:py-4 text-center">
+                    <CheckCircle className="w-5 h-5 sm:w-6 sm:h-6 text-blue-600 mx-auto" />
                   </td>
-                  <td className="px-6 py-4 text-center">
-                    <CheckCircle className="w-6 h-6 text-gray-400 mx-auto" />
+                  <td className="px-3 sm:px-6 py-3 sm:py-4 text-center">
+                    <CheckCircle className="w-5 h-5 sm:w-6 sm:h-6 text-gray-400 mx-auto" />
                   </td>
                 </tr>
                 <tr className="border-b border-gray-100 bg-gray-50">
-                  <td className="px-6 py-4 text-gray-900">AI Risk Assessment</td>
-                  <td className="px-6 py-4 text-center">
-                    <CheckCircle className="w-6 h-6 text-blue-600 mx-auto" />
+                  <td className="px-3 sm:px-6 py-3 sm:py-4 text-gray-900 text-sm sm:text-base">AI Risk Assessment</td>
+                  <td className="px-3 sm:px-6 py-3 sm:py-4 text-center">
+                    <CheckCircle className="w-5 h-5 sm:w-6 sm:h-6 text-blue-600 mx-auto" />
                   </td>
-                  <td className="px-6 py-4 text-center">
-                    <X className="w-6 h-6 text-gray-400 mx-auto" />
+                  <td className="px-3 sm:px-6 py-3 sm:py-4 text-center">
+                    <X className="w-5 h-5 sm:w-6 sm:h-6 text-gray-400 mx-auto" />
                   </td>
                 </tr>
                 <tr className="border-b border-gray-100">
-                  <td className="px-6 py-4 text-gray-900">Real-time Analytics</td>
-                  <td className="px-6 py-4 text-center">
-                    <CheckCircle className="w-6 h-6 text-blue-600 mx-auto" />
+                  <td className="px-3 sm:px-6 py-3 sm:py-4 text-gray-900 text-sm sm:text-base">Real-time Analytics</td>
+                  <td className="px-3 sm:px-6 py-3 sm:py-4 text-center">
+                    <CheckCircle className="w-5 h-5 sm:w-6 sm:h-6 text-blue-600 mx-auto" />
                   </td>
-                  <td className="px-6 py-4 text-center">
-                    <CheckCircle className="w-6 h-6 text-gray-400 mx-auto" />
+                  <td className="px-3 sm:px-6 py-3 sm:py-4 text-center">
+                    <CheckCircle className="w-5 h-5 sm:w-6 sm:h-6 text-gray-400 mx-auto" />
                   </td>
                 </tr>
                 <tr className="border-b border-gray-100 bg-gray-50">
-                  <td className="px-6 py-4 text-gray-900">Custom Branding</td>
-                  <td className="px-6 py-4 text-center">
-                    <CheckCircle className="w-6 h-6 text-blue-600 mx-auto" />
+                  <td className="px-3 sm:px-6 py-3 sm:py-4 text-gray-900 text-sm sm:text-base">Custom Branding</td>
+                  <td className="px-3 sm:px-6 py-3 sm:py-4 text-center">
+                    <CheckCircle className="w-5 h-5 sm:w-6 sm:h-6 text-blue-600 mx-auto" />
                   </td>
-                  <td className="px-6 py-4 text-center">
-                    <CheckCircle className="w-6 h-6 text-gray-400 mx-auto" />
+                  <td className="px-3 sm:px-6 py-3 sm:py-4 text-center">
+                    <CheckCircle className="w-5 h-5 sm:w-6 sm:h-6 text-gray-400 mx-auto" />
                   </td>
                 </tr>
               </tbody>
