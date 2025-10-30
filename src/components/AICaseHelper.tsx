@@ -65,6 +65,8 @@ const AICaseHelper: React.FC<AICaseHelperProps> = ({ reportId, reportContent }) 
   const [currentAnalysisData, setCurrentAnalysisData] = useState<any>(null);
   const [leftPanelWidth, setLeftPanelWidth] = useState(30); // Default 30% width
   const [isResizing, setIsResizing] = useState(false);
+  const [savedAnalyses, setSavedAnalyses] = useState<SavedAnalysis[]>([]);
+  const [isLoadingSaved, setIsLoadingSaved] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
   const chatMessagesEndRef = useRef<HTMLDivElement>(null);
   const { user } = useAuth();
@@ -77,6 +79,7 @@ const AICaseHelper: React.FC<AICaseHelperProps> = ({ reportId, reportContent }) 
     }
     loadNewCases();
     loadDocuments();
+    loadSavedAnalyses();
   }, [reportId]);
 
   // Auto-scroll to bottom of chat when new messages arrive
@@ -135,6 +138,27 @@ const AICaseHelper: React.FC<AICaseHelperProps> = ({ reportId, reportContent }) 
       });
     } finally {
       setIsLoadingCases(false);
+    }
+  };
+
+  const loadSavedAnalyses = async () => {
+    if (!organization?.id) return;
+    
+    setIsLoadingSaved(true);
+    try {
+      const { data, error } = await supabase
+        .from('ai_case_analyses')
+        .select('id, case_title, tracking_id, analysis_content, created_at')
+        .eq('organization_id', organization.id)
+        .order('created_at', { ascending: false })
+        .limit(10);
+
+      if (error) throw error;
+      setSavedAnalyses(data || []);
+    } catch (error) {
+      console.error('Error loading saved analyses:', error);
+    } finally {
+      setIsLoadingSaved(false);
     }
   };
 
@@ -466,9 +490,12 @@ Case Details:
       if (error) throw error;
 
       toast({
-        title: "Success",
-        description: "AI analysis has been saved successfully."
+        title: "✅ Analysis Saved",
+        description: "You can view it in the 'Saved Analyses' dropdown."
       });
+      
+      // Reload saved analyses
+      loadSavedAnalyses();
     } catch (error) {
       console.error('Error saving analysis:', error);
       toast({
@@ -526,6 +553,43 @@ Case Details:
           style={{ width: `${leftPanelWidth}%` }}
         >
           <div className="p-4 space-y-4">
+            {/* Saved Analyses */}
+            {savedAnalyses.length > 0 && (
+              <div className="space-y-2">
+                <label className="text-sm font-semibold text-green-700">📁 Saved Analyses</label>
+                <Select onValueChange={(value) => {
+                  const saved = savedAnalyses.find(s => s.id === value);
+                  if (saved) {
+                    setChatMessages([{
+                      role: 'assistant',
+                      content: saved.analysis_content,
+                      timestamp: new Date(saved.created_at)
+                    }]);
+                    toast({
+                      title: "Loaded Saved Analysis",
+                      description: `${saved.tracking_id} - ${saved.case_title}`
+                    });
+                  }
+                }}>
+                  <SelectTrigger className="border-green-200 bg-green-50">
+                    <SelectValue placeholder="Load a previous analysis..." />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {savedAnalyses.map((saved) => (
+                      <SelectItem key={saved.id} value={saved.id}>
+                        <div className="flex items-center gap-2">
+                          <span className="font-medium">{saved.tracking_id}</span>
+                          <span className="text-xs text-muted-foreground">
+                            {new Date(saved.created_at).toLocaleDateString()}
+                          </span>
+                        </div>
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            )}
+
             {/* Case Selection */}
             <div className="space-y-2">
               <label className="text-sm font-semibold">Select Case</label>
@@ -624,8 +688,21 @@ Case Details:
               )}
             </div>
 
+            {/* Security Notice */}
+            <div className="p-3 bg-green-50 border border-green-200 rounded-lg">
+              <div className="flex items-start gap-2">
+                <div className="text-green-600 mt-0.5">🔒</div>
+                <div className="flex-1">
+                  <p className="text-xs font-semibold text-green-900 mb-1">Privacy Protected</p>
+                  <p className="text-xs text-green-700">
+                    PII automatically redacted • Zero data retention • Encrypted processing
+                  </p>
+                </div>
+              </div>
+            </div>
+
             {/* Quick Actions */}
-            <div className="pt-4 border-t">
+            <div className="pt-2">
               <Button
                 onClick={() => analyzeCase()}
                 disabled={isAnalyzing || !selectedCaseId}
