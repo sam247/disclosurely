@@ -180,7 +180,8 @@ const SecureMessaging = ({ report, onClose }: SecureMessagingProps) => {
       body: {
         action: 'send',
         trackingId: report.tracking_id,
-        message: data.message
+        message: data.message,
+        senderType: 'organization' // ✅ Dashboard user is organization/case handler
       }
     });
 

@@ -181,6 +181,10 @@ serve(async (req) => {
 
     if (action === 'send') {
       const message = String(body?.message || '').trim();
+      // Get sender type from request body (defaults to 'whistleblower' for backwards compatibility)
+      const senderType = body?.senderType === 'organization' ? 'organization' : 'whistleblower';
+      
+      console.log('📨 Sending message as:', senderType);
       
       // Validate message
       if (!message) {
@@ -259,7 +263,7 @@ serve(async (req) => {
         .from("report_messages")
         .insert({
           report_id: report.id,
-          sender_type: 'whistleblower',
+          sender_type: senderType, // ✅ Use dynamic sender type
           encrypted_message: encryptedMessage,
         })
         .select("id, sender_type, encrypted_message, created_at, is_read")
@@ -270,7 +274,7 @@ serve(async (req) => {
         // Log failed attempt
         await supabase.rpc('log_messaging_attempt', {
           p_report_id: report.id,
-          p_sender_type: 'whistleblower',
+          p_sender_type: senderType,
           p_success: false,
           p_failure_reason: error.message?.slice(0, 200) || 'insert_failed',
           p_ip_address: req.headers.get('x-forwarded-for') || null,
@@ -285,7 +289,7 @@ serve(async (req) => {
       // Log successful attempt
       await supabase.rpc('log_messaging_attempt', {
         p_report_id: report.id,
-        p_sender_type: 'whistleblower',
+        p_sender_type: senderType,
         p_success: true,
         p_failure_reason: null,
         p_ip_address: req.headers.get('x-forwarded-for') || null,
@@ -296,20 +300,20 @@ serve(async (req) => {
       await logAuditEvent(supabase, {
         eventType: 'report.message_sent',
         category: 'case_management',
-        action: 'Anonymous message sent via edge function',
+        action: senderType === 'organization' ? 'Organization message sent via edge function' : 'Anonymous message sent via edge function',
         severity: 'low',
         actorType: 'user',
-        actorEmail: 'anonymous_whistleblower',
+        actorEmail: senderType === 'organization' ? 'case_handler' : 'anonymous_whistleblower',
         actorIpAddress: req.headers.get('x-forwarded-for') || req.headers.get('x-real-ip') || null,
         actorUserAgent: req.headers.get('user-agent') || null,
         targetType: 'report',
         targetId: report.id,
         targetName: report.tracking_id,
-        summary: `Anonymous message sent on report ${report.tracking_id}`,
+        summary: `${senderType === 'organization' ? 'Organization' : 'Anonymous'} message sent on report ${report.tracking_id}`,
         description: 'Message sent via anonymous messaging edge function',
         metadata: {
           message_length: message.length,
-          sender_type: 'whistleblower',
+          sender_type: senderType,
           report_status: report.status,
         },
         organizationId: report.organization_id || (report as any).organizations?.id,
