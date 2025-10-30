@@ -159,7 +159,9 @@ IMPORTANT: End your analysis with 1-2 conversational questions that help the com
       );
 
       if (!gatewayResponse.ok) {
-        console.error('AI Gateway error, falling back to direct DeepSeek');
+        const errorBody = await gatewayResponse.text();
+        console.error(`[AI Gateway] HTTP ${gatewayResponse.status} - ${errorBody}`);
+        console.error('[AI Gateway] Falling back to direct DeepSeek');
         // Fall through to direct DeepSeek below
         useAIGateway = false;
       } else {
