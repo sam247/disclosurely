@@ -555,7 +555,12 @@ ${chatHistory}
 
 User's follow-up question: ${userMessage}
 
-IMPORTANT: Provide a SHORT, conversational response (2-3 paragraphs max). Be direct and helpful, like chatting with a colleague. Don't repeat the full analysis - just answer the specific question.`;
+IMPORTANT: 
+- Provide a SHORT, conversational response (2-3 paragraphs max)
+- NO HEADINGS, NO BULLET POINTS, NO EMOJIS - just natural conversational text
+- Be direct and helpful, like chatting with a colleague via messaging
+- Don't repeat the full analysis - just answer the specific question
+- Only use bullet points if the user explicitly asks you to list or formalize something`;
 
       // Call AI with just the follow-up context (no re-analysis)
       const { data, error } = await supabase.functions.invoke('analyze-case-with-ai', {
@@ -775,6 +780,10 @@ IMPORTANT: Provide a SHORT, conversational response (2-3 paragraphs max). Be dir
               )}
             </div>
 
+          </div>
+
+          {/* Analyze/Re-Analyze Button + Security Notice at Bottom */}
+          <div className="p-4 border-t bg-white space-y-3">
             {/* Security Notice */}
             <div className="p-3 bg-green-50 border border-green-200 rounded-lg">
               <div className="flex items-start gap-2">
@@ -788,10 +797,7 @@ IMPORTANT: Provide a SHORT, conversational response (2-3 paragraphs max). Be dir
               </div>
             </div>
 
-          </div>
-
-          {/* Analyze/Re-Analyze Button at Bottom */}
-          <div className="p-4 border-t bg-white">
+            {/* Analyze Button */}
             <Button
               onClick={() => analyzeCase()}
               disabled={isAnalyzing || !selectedCaseId}

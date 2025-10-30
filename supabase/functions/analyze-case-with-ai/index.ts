@@ -54,7 +54,7 @@ serve(async (req) => {
       documentContext = `\n\nCOMPANY POLICY CONTEXT:\n${companyDocuments.map((doc: any) => `- ${doc.name}: ${doc.content || 'Document uploaded but content not provided'}`).join('\n')}`;
     }
 
-    const prompt = `You are a helpful AI assistant for compliance teams. Analyze this whistleblower case and provide actionable guidance in a conversational, helpful format.
+    const prompt = `Analyze this whistleblower case and provide a structured compliance analysis.
 
 CASE DETAILS:
 - Title: ${caseData.title}
@@ -68,7 +68,9 @@ CASE CONTENT:
 ${caseContent || 'Case content not available'}
 ${documentContext}
 
-Please provide your analysis in this helpful format:
+START YOUR ANALYSIS WITH: "I've analyzed this case${companyDocuments && companyDocuments.length > 0 ? ' against your company documents' : ''} and here are my findings:"
+
+Then provide your analysis in this structured format:
 
 🚨 **What's the situation?**
 [Brief summary of what happened]
@@ -88,7 +90,7 @@ Please provide your analysis in this helpful format:
 
 ⚖️ **Legal & Compliance Notes**
 • [Key legal consideration]
-• [Policy compliance note]
+• [Policy compliance note]${companyDocuments && companyDocuments.length > 0 ? '\n• [Reference specific company policies from uploaded documents]' : ''}
 • [Stakeholder notification needed]
 
 💡 **My Recommendations**
@@ -96,9 +98,7 @@ Please provide your analysis in this helpful format:
 • [Strategic recommendation 2]
 • [Strategic recommendation 3]
 
-Keep it conversational, practical, and focused on what the compliance team needs to do next. Use bullet points and be direct about actions needed.
-
-IMPORTANT: End your analysis with 1-2 conversational questions that help the compliance team think through next steps or get clarification on specific aspects of the case. Make these questions helpful and practical, like a colleague asking for guidance.`;
+Be practical and focused on what the compliance team needs to do next. Use bullet points and be direct about actions needed.`;
 
     const messages = [
       { 
