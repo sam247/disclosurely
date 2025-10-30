@@ -26,17 +26,29 @@ serve(async (req) => {
     // FEATURE FLAG CHECK: AI Gateway
     // ============================================================================
     const authHeader = req.headers.get('Authorization');
-    const organizationId = caseData.organization_id;
+    const supabase = createClient(
+      Deno.env.get('SUPABASE_URL') ?? '',
+      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
+    );
+    
+    // Get organization_id - from caseData or lookup from report
+    let organizationId = caseData.organization_id;
+    
+    if (!organizationId && caseData.id) {
+      // Lookup org from report table
+      const { data: report } = await supabase
+        .from('reports')
+        .select('organization_id')
+        .eq('id', caseData.id)
+        .single();
+      
+      organizationId = report?.organization_id;
+    }
     
     let useAIGateway = false;
     
     if (organizationId && authHeader) {
       try {
-        const supabase = createClient(
-          Deno.env.get('SUPABASE_URL') ?? '',
-          Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
-        );
-
         const { data: isEnabled } = await supabase.rpc('is_feature_enabled', {
           p_feature_name: 'ai_gateway',
           p_organization_id: organizationId
@@ -44,11 +56,13 @@ serve(async (req) => {
 
         useAIGateway = isEnabled === true;
         
-        console.log(`AI Gateway ${useAIGateway ? 'ENABLED' : 'DISABLED'} for org ${organizationId}`);
+        console.log(`[AI Gateway] ${useAIGateway ? 'ENABLED' : 'DISABLED'} for org ${organizationId}`);
       } catch (error) {
-        console.error('Error checking feature flag, falling back to direct DeepSeek:', error);
+        console.error('[AI Gateway] Error checking feature flag:', error);
         useAIGateway = false;
       }
+    } else {
+      console.log('[AI Gateway] Skipped - missing org ID or auth header');
     }
 
     // Prepare the context for the AI
