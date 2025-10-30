@@ -2,15 +2,16 @@ import { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Settings, FileText, Globe, Users, ChevronRight } from 'lucide-react';
+import { Settings, FileText, Globe, Users, ChevronRight, Flag } from 'lucide-react';
 import { BlogEditor } from './BlogEditor';
 import { SEOSettings } from './SEOSettings';
+import { FeatureFlagManager } from './FeatureFlagManager';
 import { useOrganization } from '@/hooks/useOrganization';
 import { useTranslation } from 'react-i18next';
 import { useUserRoles } from '@/hooks/useUserRoles';
 import { cn } from '@/lib/utils';
 
-type AdminSection = 'blog' | 'seo';
+type AdminSection = 'blog' | 'seo' | 'features';
 
 interface AdminMenuItem {
   id: AdminSection;
@@ -20,6 +21,12 @@ interface AdminMenuItem {
 }
 
 const adminMenuItems: AdminMenuItem[] = [
+  {
+    id: 'features',
+    label: 'Feature Flags',
+    icon: Flag,
+    description: 'Control feature rollout and instant rollback'
+  },
   {
     id: 'blog',
     label: 'Blog Management',
@@ -37,7 +44,7 @@ const adminMenuItems: AdminMenuItem[] = [
 export const AdminPanel = () => {
   const { profile, loading } = useOrganization();
   const { t } = useTranslation();
-  const [activeSection, setActiveSection] = useState<AdminSection>('blog');
+  const [activeSection, setActiveSection] = useState<AdminSection>('features');
 
   const { isOrgAdmin, isAdmin: isSuperAdmin, loading: rolesLoading } = useUserRoles();
   
@@ -80,12 +87,14 @@ export const AdminPanel = () => {
 
   const renderContent = () => {
     switch (activeSection) {
+      case 'features':
+        return <FeatureFlagManager />;
       case 'blog':
         return <BlogEditor />;
       case 'seo':
         return <SEOSettings />;
       default:
-        return <BlogEditor />;
+        return <FeatureFlagManager />;
     }
   };
 
