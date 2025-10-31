@@ -42,6 +42,8 @@ import About from './pages/About';
 import Features from './pages/Features';
 import Careers from './pages/Careers';
 import ComplianceOverview from './pages/ComplianceOverview';
+import CompliancePolicies from './pages/CompliancePolicies';
+import ComplianceRisks from './pages/ComplianceRisks';
 
 // Component to handle session timeout only for authenticated users
 const SessionTimeoutManager = () => {
@@ -169,6 +171,26 @@ const AppContent = () => {
             <ProtectedRoute>
               <DashboardLayout>
                 <ComplianceOverview />
+              </DashboardLayout>
+            </ProtectedRoute>
+          } 
+        />
+        <Route 
+          path="/dashboard/compliance/policies" 
+          element={
+            <ProtectedRoute>
+              <DashboardLayout>
+                <CompliancePolicies />
+              </DashboardLayout>
+            </ProtectedRoute>
+          } 
+        />
+        <Route 
+          path="/dashboard/compliance/risks" 
+          element={
+            <ProtectedRoute>
+              <DashboardLayout>
+                <ComplianceRisks />
               </DashboardLayout>
             </ProtectedRoute>
           } 
