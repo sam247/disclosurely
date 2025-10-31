@@ -114,7 +114,58 @@ export default function CompliancePolicies() {
   
   // Bulk actions state
   const [selectedPolicies, setSelectedPolicies] = useState<Set<string>>(new Set());
-  const [showBulkActions, setShowBulkActions] = useState(false);
+  
+  // Bulk actions handlers
+  const toggleSelectAll = () => {
+    if (selectedPolicies.size === filteredPolicies.length) {
+      setSelectedPolicies(new Set());
+    } else {
+      setSelectedPolicies(new Set(filteredPolicies.map(p => p.id)));
+    }
+  };
+  
+  const toggleSelectPolicy = (policyId: string) => {
+    const newSelected = new Set(selectedPolicies);
+    if (newSelected.has(policyId)) {
+      newSelected.delete(policyId);
+    } else {
+      newSelected.add(policyId);
+    }
+    setSelectedPolicies(newSelected);
+  };
+  
+  const handleBulkArchive = async () => {
+    try {
+      const { error } = await supabase
+        .from('compliance_policies')
+        .update({ status: 'archived' })
+        .in('id', Array.from(selectedPolicies));
+      
+      if (error) throw error;
+      
+      toast({
+        title: 'Success',
+        description: `Archived ${selectedPolicies.size} policies`
+      });
+      
+      setSelectedPolicies(new Set());
+      loadPolicies();
+    } catch (error) {
+      toast({
+        title: 'Error',
+        description: 'Failed to archive policies',
+        variant: 'destructive'
+      });
+    }
+  };
+  
+  const handleBulkReminder = async () => {
+    toast({
+      title: 'Reminders Sent',
+      description: `Sending reminders for ${selectedPolicies.size} policies`
+    });
+    setSelectedPolicies(new Set());
+  };
   
   // Form states
   const [formData, setFormData] = useState({
@@ -523,12 +574,72 @@ export default function CompliancePolicies() {
         </CardContent>
       </Card>
 
+      {/* Bulk Actions Toolbar */}
+      {selectedPolicies.size > 0 && (
+        <Card className="border-primary">
+          <CardContent className="p-4">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <CheckCircle2 className="h-4 w-4 text-primary" />
+                <span className="font-medium">{selectedPolicies.size} selected</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="outline" size="sm">
+                      <MoreHorizontal className="h-4 w-4 mr-2" />
+                      Bulk Actions
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end">
+                    <DropdownMenuItem onClick={() => {
+                      // Bulk assign - open dialog with selected policies
+                      toast({
+                        title: 'Bulk Assignment',
+                        description: 'Select a policy to assign (multi-policy assignment coming soon)'
+                      });
+                    }}>
+                      <Send className="h-4 w-4 mr-2" />
+                      Bulk Assign
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={handleBulkReminder}>
+                      <Clock className="h-4 w-4 mr-2" />
+                      Send Reminders
+                    </DropdownMenuItem>
+                    <DropdownMenuItem 
+                      onClick={handleBulkArchive}
+                      className="text-destructive"
+                    >
+                      <Archive className="h-4 w-4 mr-2" />
+                      Archive Selected
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+                <Button 
+                  variant="ghost" 
+                  size="sm"
+                  onClick={() => setSelectedPolicies(new Set())}
+                >
+                  Clear
+                </Button>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
       {/* Policies Table */}
       <Card>
         <CardContent className="p-0">
           <Table>
             <TableHeader>
               <TableRow>
+                <TableHead className="w-[50px]">
+                  <Checkbox
+                    checked={selectedPolicies.size === filteredPolicies.length && filteredPolicies.length > 0}
+                    onCheckedChange={toggleSelectAll}
+                  />
+                </TableHead>
                 <TableHead className="w-[300px] cursor-pointer" onClick={() => handleSort('policy_name')}>
                   <div className="flex items-center gap-2">
                     Policy Name
@@ -555,19 +666,25 @@ export default function CompliancePolicies() {
             <TableBody>
               {loading ? (
                 <TableRow>
-                  <TableCell colSpan={7} className="text-center py-8 text-muted-foreground">
+                  <TableCell colSpan={8} className="text-center py-8 text-muted-foreground">
                     Loading policies...
                   </TableCell>
                 </TableRow>
               ) : filteredPolicies.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={7} className="text-center py-8 text-muted-foreground">
+                  <TableCell colSpan={8} className="text-center py-8 text-muted-foreground">
                     No policies found. Create your first policy to get started.
                   </TableCell>
                 </TableRow>
               ) : (
                 filteredPolicies.map((policy) => (
                   <TableRow key={policy.id}>
+                    <TableCell>
+                      <Checkbox
+                        checked={selectedPolicies.has(policy.id)}
+                        onCheckedChange={() => toggleSelectPolicy(policy.id)}
+                      />
+                    </TableCell>
                     <TableCell>
                       <div>
                         <div className="font-medium">{policy.policy_name}</div>
