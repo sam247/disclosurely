@@ -45,6 +45,7 @@ import ComplianceOverview from './pages/ComplianceOverview';
 import CompliancePolicies from './pages/CompliancePolicies';
 import ComplianceRisks from './pages/ComplianceRisks';
 import ComplianceCalendar from './pages/ComplianceCalendar';
+import PolicyAcknowledgment from './pages/PolicyAcknowledgment';
 import ComplianceInsights from './pages/ComplianceInsights';
 
 // Component to handle session timeout only for authenticated users
@@ -205,7 +206,17 @@ const AppContent = () => {
                 <ComplianceCalendar />
               </DashboardLayout>
             </ProtectedRoute>
-          } 
+          }
+        />
+        <Route 
+          path="/dashboard/my-policies" 
+          element={
+            <ProtectedRoute>
+              <DashboardLayout>
+                <PolicyAcknowledgment />
+              </DashboardLayout>
+            </ProtectedRoute>
+          }
         />
         <Route 
           path="/dashboard/compliance/insights" 
