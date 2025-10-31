@@ -18,6 +18,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
+import { Progress } from '@/components/ui/progress';
 import {
   Dialog,
   DialogContent,
@@ -591,22 +592,38 @@ export default function CompliancePolicies() {
                             </Button>
                           );
                         }
+                        const rate = Math.round(stats.acknowledgment_rate);
+                        const colorClass = rate === 100 
+                          ? 'text-green-600' 
+                          : rate >= 50 
+                          ? 'text-amber-600' 
+                          : 'text-red-600';
+                        
                         return (
-                          <div className="space-y-1">
-                            <div className="flex items-center gap-2">
-                              <div className="text-sm font-medium">
+                          <div className="space-y-2 min-w-[180px]">
+                            <div className="flex items-center justify-between gap-2">
+                              <span className="text-xs font-medium">
                                 {stats.total_acknowledged}/{stats.total_assigned}
+                              </span>
+                              <span className={`text-xs font-bold ${colorClass}`}>
+                                {rate}%
+                              </span>
+                            </div>
+                            <Progress 
+                              value={rate} 
+                              className={`h-2 ${
+                                rate === 100 
+                                  ? '[&>div]:bg-green-600' 
+                                  : rate >= 50 
+                                  ? '[&>div]:bg-amber-500' 
+                                  : '[&>div]:bg-red-500'
+                              }`}
+                            />
+                            {stats.pending_count > 0 && (
+                              <div className="text-xs text-muted-foreground">
+                                {stats.pending_count} pending
                               </div>
-                              <Badge 
-                                variant={stats.acknowledgment_rate === 100 ? "default" : "secondary"}
-                                className="text-xs"
-                              >
-                                {stats.acknowledgment_rate}%
-                              </Badge>
-                            </div>
-                            <div className="text-xs text-muted-foreground">
-                              {stats.pending_count} pending
-                            </div>
+                            )}
                           </div>
                         );
                       })()}
