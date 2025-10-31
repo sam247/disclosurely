@@ -214,9 +214,18 @@ async function handleReminderNotifications(supabase: any) {
       html: emailHTML
     });
 
-    // Mark reminder as sent
-    for (const policy of policies) {
-      await supabase.rpc('mark_reminder_sent', { assignment_id: policy.assignment_id });
+    // Mark reminder as sent - BATCH UPDATE to prevent N+1 query
+    const assignmentIds = policies.map(p => p.assignment_id);
+    const { error: updateError } = await supabase
+      .from('policy_assignments')
+      .update({ 
+        reminder_sent_at: new Date().toISOString(),
+        updated_at: new Date().toISOString()
+      })
+      .in('id', assignmentIds);
+    
+    if (updateError) {
+      console.error('Failed to mark reminders as sent:', updateError);
     }
   }
 }
