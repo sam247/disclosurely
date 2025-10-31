@@ -41,6 +41,7 @@ import WhistleblowerMessagingPage from './pages/WhistleblowerMessaging';
 import About from './pages/About';
 import Features from './pages/Features';
 import Careers from './pages/Careers';
+import ComplianceOverview from './pages/ComplianceOverview';
 
 // Component to handle session timeout only for authenticated users
 const SessionTimeoutManager = () => {
@@ -158,6 +159,16 @@ const AppContent = () => {
             <ProtectedRoute>
               <DashboardLayout>
                 <AIHelperView />
+              </DashboardLayout>
+            </ProtectedRoute>
+          } 
+        />
+        <Route 
+          path="/dashboard/compliance" 
+          element={
+            <ProtectedRoute>
+              <DashboardLayout>
+                <ComplianceOverview />
               </DashboardLayout>
             </ProtectedRoute>
           } 

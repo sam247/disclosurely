@@ -1,4 +1,4 @@
-import { Home, Bot, Users, Palette, Lock, BarChart3, ScrollText, Link as LinkIcon, MessageSquare, Info, FileText, Zap, Settings } from 'lucide-react';
+import { Home, Bot, Users, Palette, Lock, BarChart3, ScrollText, Link as LinkIcon, MessageSquare, Info, FileText, Zap, Settings, Shield } from 'lucide-react';
 import { Separator } from '@/components/ui/separator';
 import { Badge } from '@/components/ui/badge';
 import { useLocation, useNavigate } from 'react-router-dom';
@@ -38,6 +38,12 @@ const DashboardSidebar = ({
     icon: Bot,
     path: '/dashboard/ai-helper',
     locked: !limits.hasAIHelper || !isOrgAdmin
+  }, {
+    title: 'Compliance',
+    icon: Shield,
+    path: '/dashboard/compliance',
+    locked: !isOrgAdmin,
+    badge: 'New'
   }, {
     title: t('analytics'),
     icon: BarChart3,
@@ -106,6 +112,11 @@ const DashboardSidebar = ({
                       <div className="flex items-center gap-3 w-full">
                         <Icon className="flex-shrink-0 text-primary h-5 w-5" />
                         <span className="flex-1">{item.title}</span>
+                        {'badge' in item && item.badge && (
+                          <Badge variant="secondary" className="text-[10px] px-1.5 py-0">
+                            {item.badge}
+                          </Badge>
+                        )}
                         {item.locked && <Lock className="h-3 w-3 opacity-40" />}
                       </div>
                     </SidebarMenuButton>
