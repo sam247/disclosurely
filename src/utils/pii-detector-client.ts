@@ -88,6 +88,43 @@ interface PIIPattern {
 }
 
 /**
+ * Detect person names using heuristics
+ */
+function detectNames(text: string): Array<{ match: string; start: number; end: number }> {
+  const names: Array<{ match: string; start: number; end: number }> = [];
+  
+  // Pattern: Capitalized First Last (e.g., "John Smith", "Mark Rivers", "Jane Doe")
+  const namePattern = /\b([A-Z][a-z]{2,})\s+([A-Z][a-z]{2,})\b/g;
+  let match;
+
+  while ((match = namePattern.exec(text)) !== null) {
+    const fullName = match[0];
+    
+    // Exclude common false positives
+    const excludedWords = [
+      'United Kingdom', 'New York', 'San Francisco', 'Los Angeles',
+      'Data Protection', 'Human Resources', 'Chief Executive',
+      'United States', 'European Union', 'Dear Sir', 'Dear Madam',
+      'Client Services', 'Team Lead', 'Senior Account', 'Account Manager'
+    ];
+
+    if (!excludedWords.includes(fullName)) {
+      // Additional validation: Not after "at" or "in" (likely place names)
+      const beforeContext = text.substring(Math.max(0, match.index - 10), match.index);
+      if (!/\b(at|in|near|from|to)\s*$/i.test(beforeContext)) {
+        names.push({
+          match: fullName,
+          start: match.index,
+          end: match.index + fullName.length
+        });
+      }
+    }
+  }
+
+  return names;
+}
+
+/**
  * Get PII patterns (matches server-side enhanced detector)
  */
 function getPIIPatterns(): PIIPattern[] {
@@ -97,6 +134,11 @@ function getPIIPatterns(): PIIPattern[] {
       type: 'EMAIL',
       regex: /\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b/g,
       validator: validateEmail,
+      priority: 100
+    },
+    {
+      type: 'EMPLOYEE_ID',
+      regex: /\b(?:EMP|EMPL|ID|Employee\s*ID|Staff\s*ID|Personnel)[:\s#-]*([A-Z0-9]{4,12})\b/gi,
       priority: 100
     },
     {
@@ -141,7 +183,12 @@ function getPIIPatterns(): PIIPattern[] {
       priority: 80
     },
 
-    // Priority 70: Addresses
+    // Priority 75: Addresses
+    {
+      type: 'UK_ADDRESS',
+      regex: /\b\d+[\w\s,]*(?:Street|Road|Avenue|Lane|Drive|Close|Way|Court|Place|Square|Gardens|Terrace|Hill|Park|Crescent)[^.!?]*?[A-Z]{1,2}\d{1,2}[A-Z]?\s?\d[A-Z]{2}\b/gi,
+      priority: 75
+    },
     {
       type: 'POSTCODE_UK',
       regex: /\b[A-Z]{1,2}\d{1,2}[A-Z]?\s?\d[A-Z]{2}\b/gi,
@@ -156,10 +203,10 @@ function getPIIPatterns(): PIIPattern[] {
       priority: 60
     },
 
-    // Priority 50: Dates
+    // Priority 50: Dates (multiple formats)
     {
-      type: 'DATE_DDMMYYYY',
-      regex: /\b(?:0?[1-9]|[12]\d|3[01])[\/\.-](?:0?[1-9]|1[0-2])[\/\.-](?:19|20)\d{2}\b/g,
+      type: 'DATE',
+      regex: /\b(?:(?:19|20)\d{2}[-\/](?:0?[1-9]|1[0-2])[-\/](?:0?[1-9]|[12]\d|3[01])|(?:0?[1-9]|[12]\d|3[01])[-\/](?:0?[1-9]|1[0-2])[-\/](?:19|20)\d{2})\b/g,
       priority: 50
     }
   ];
@@ -218,6 +265,31 @@ export function detectPII(text: string): RedactionResult {
         end: matchEnd
       });
     }
+  });
+
+  // Detect names (enabled by default)
+  const names = detectNames(text);
+  names.forEach(name => {
+    // Check if overlaps with existing matches
+    const overlaps = matchedRanges.some(
+      range =>
+        (name.start >= range.start && name.start < range.end) ||
+        (name.end > range.start && name.end <= range.end)
+    );
+
+    if (overlaps) return;
+
+    matchedRanges.push({ start: name.start, end: name.end });
+    stats['NAME'] = (stats['NAME'] || 0) + 1;
+
+    const count = stats['NAME'];
+    detections.push({
+      type: 'NAME',
+      original: name.match,
+      placeholder: `[NAME_${count}]`,
+      start: name.start,
+      end: name.end
+    });
   });
 
   // Sort detections by start position (reverse for replacement)
@@ -293,7 +365,9 @@ export function highlightPIIForDisplay(
  */
 export function formatPIIType(type: string): string {
   const typeMap: Record<string, string> = {
+    'NAME': 'Person Name',
     'EMAIL': 'Email Address',
+    'EMPLOYEE_ID': 'Employee ID',
     'PHONE_UK_MOBILE': 'UK Mobile',
     'PHONE_UK_LANDLINE': 'UK Landline',
     'PHONE_US': 'US Phone',
@@ -301,8 +375,10 @@ export function formatPIIType(type: string): string {
     'NI_NUMBER': 'National Insurance',
     'CREDIT_CARD': 'Credit Card',
     'PASSPORT_UK': 'UK Passport',
+    'UK_ADDRESS': 'UK Address',
     'POSTCODE_UK': 'UK Postcode',
     'IP_ADDRESS': 'IP Address',
+    'DATE': 'Date',
     'DATE_DDMMYYYY': 'Date'
   };
 

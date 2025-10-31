@@ -117,8 +117,8 @@ function validateIPv4(ip: string): boolean {
  * Reduces false positives for malformed emails
  */
 function validateEmail(email: string): boolean {
-  // Check for valid TLD
-  const tldPattern = /\.(com|org|net|edu|gov|co\.uk|ac\.uk|io|ai|app|dev|tech)$/i;
+  // Check for valid TLD (expanded list)
+  const tldPattern = /\.(com|org|net|edu|gov|co\.uk|ac\.uk|io|ai|app|dev|tech|uk|us|ca|eu|de|fr|es|it|nl|au|nz|jp|cn|in|br|mx)$/i;
   return tldPattern.test(email);
 }
 
@@ -185,6 +185,11 @@ export function getPIIPatterns(): PIIPattern[] {
       type: 'EMAIL',
       regex: /\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b/g,
       validator: validateEmail,
+      priority: 100
+    },
+    {
+      type: 'EMPLOYEE_ID',
+      regex: /\b(?:EMP|EMPL|ID|Employee\s*ID|Staff\s*ID|Personnel)[:\s#-]*([A-Z0-9]{4,12})\b/gi,
       priority: 100
     },
     {
@@ -298,9 +303,14 @@ export function getPIIPatterns(): PIIPattern[] {
 
     // Priority 50: Dates (lower priority to avoid over-redaction)
     {
+      type: 'DATE',
+      regex: /\b(?:(?:19|20)\d{2}[-\/](?:0?[1-9]|1[0-2])[-\/](?:0?[1-9]|[12]\d|3[01])|(?:0?[1-9]|[12]\d|3[01])[-\/](?:0?[1-9]|1[0-2])[-\/](?:19|20)\d{2})\b/g,
+      priority: 50
+    },
+    {
       type: 'DATE_OF_BIRTH',
       regex: /\b(?:DOB|Date of Birth|Born)[\s:]+(\d{1,2}[-/]\d{1,2}[-/]\d{2,4})\b/gi,
-      priority: 50
+      priority: 49
     },
 
     // Priority 40: URLs containing PII
@@ -321,8 +331,8 @@ export function redactPII(content: string, options?: {
   customPatterns?: PIIPattern[];
 }): RedactionResult {
   const {
-    includeNames = false, // Disabled by default (high false positive rate)
-    includeAddresses = false, // Disabled by default (complex)
+    includeNames = true, // ENABLED by default - critical for privacy protection
+    includeAddresses = true, // ENABLED by default - addresses are sensitive
     customPatterns = []
   } = options || {};
 
