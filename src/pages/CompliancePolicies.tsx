@@ -19,6 +19,13 @@ import {
 } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
+import { Checkbox } from '@/components/ui/checkbox';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 import {
   Dialog,
   DialogContent,
@@ -45,7 +52,10 @@ import {
   Download,
   FileSpreadsheet,
   Users,
-  CheckCircle2
+  CheckCircle2,
+  MoreHorizontal,
+  Send,
+  Clock
 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useOrganization } from '@/hooks/useOrganization';
@@ -101,6 +111,10 @@ export default function CompliancePolicies() {
   const [isAssignDialogOpen, setIsAssignDialogOpen] = useState(false);
   const [selectedPolicy, setSelectedPolicy] = useState<Policy | null>(null);
   const [ackStats, setAckStats] = useState<Map<string, AcknowledgmentStats>>(new Map());
+  
+  // Bulk actions state
+  const [selectedPolicies, setSelectedPolicies] = useState<Set<string>>(new Set());
+  const [showBulkActions, setShowBulkActions] = useState(false);
   
   // Form states
   const [formData, setFormData] = useState({
