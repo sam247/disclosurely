@@ -71,6 +71,8 @@ const AICaseHelper: React.FC<AICaseHelperProps> = ({ reportId, reportContent }) 
   const [hasRunInitialAnalysis, setHasRunInitialAnalysis] = useState(false); // Track if initial analysis is done
   const [currentSavedAnalysisId, setCurrentSavedAnalysisId] = useState<string | null>(null); // Track current saved analysis
   const [showPIIPreview, setShowPIIPreview] = useState(false); // PII preview modal
+  const [previewContent, setPreviewContent] = useState<string>(''); // Content for PII preview
+  const [isLoadingPreview, setIsLoadingPreview] = useState(false); // Loading state for preview
   const containerRef = useRef<HTMLDivElement>(null);
   const chatMessagesEndRef = useRef<HTMLDivElement>(null);
   const { user } = useAuth();
@@ -523,6 +525,73 @@ Case Details:
     }
   };
 
+  const loadPreviewContent = async () => {
+    if (!selectedCaseId) return;
+
+    setIsLoadingPreview(true);
+    try {
+      // Fetch case data
+      const { data: caseData, error: caseError } = await supabase
+        .from('reports')
+        .select('*')
+        .eq('id', selectedCaseId)
+        .single();
+
+      if (caseError) throw caseError;
+
+      // Decrypt the report content
+      let decryptedContent = '';
+      if (caseData.encrypted_content && caseData.organization_id) {
+        try {
+          const { decryptReport } = await import('@/utils/encryption');
+          const decrypted = await decryptReport(caseData.encrypted_content, caseData.organization_id);
+          decryptedContent = `Category: ${decrypted.category || 'Not specified'}
+
+Description: ${decrypted.description || 'Not provided'}
+
+Location: ${decrypted.location || 'Not specified'}
+
+Date of Incident: ${decrypted.dateOfIncident || 'Not specified'}
+
+Witnesses: ${decrypted.witnesses || 'None mentioned'}
+
+Evidence: ${decrypted.evidence || 'No evidence provided'}
+
+Additional Details: ${decrypted.additionalDetails || 'None provided'}`;
+        } catch (decryptError) {
+          console.error('Error decrypting case content:', decryptError);
+          decryptedContent = '[Case content is encrypted and could not be decrypted]';
+        }
+      } else {
+        decryptedContent = '[No case content available]';
+      }
+
+      // Build preview content
+      let fullContent = `Case: ${caseData.title}\n\n${decryptedContent}`;
+      
+      // Add document info
+      if (selectedDocs.length > 0) {
+        const docNames = selectedDocs.map(docId => {
+          const doc = documents.find(d => d.id === docId);
+          return doc ? doc.name : 'Unknown';
+        }).join(', ');
+        fullContent += `\n\nDocuments to be analyzed: ${docNames}`;
+      }
+
+      setPreviewContent(fullContent);
+      setShowPIIPreview(true);
+    } catch (error) {
+      console.error('Error loading preview:', error);
+      toast({
+        title: "Preview Failed",
+        description: "Failed to load case content for preview.",
+        variant: "destructive"
+      });
+    } finally {
+      setIsLoadingPreview(false);
+    }
+  };
+
   const sendChatMessage = async () => {
     if (!chatInput.trim() || !selectedCaseId) {
       toast({
@@ -544,6 +613,8 @@ Case Details:
     }]);
 
     setIsChatting(true); // Use different state for chat vs analysis
+    
+    console.log('[Chat] Sending follow-up message:', userMessage);
 
     try {
       // For follow-up questions, use a SHORT chat prompt
@@ -582,7 +653,17 @@ IMPORTANT:
         }
       });
 
-      if (error) throw error;
+      if (error) {
+        console.error('[Chat] Edge Function error:', error);
+        throw error;
+      }
+
+      if (!data || !data.analysis) {
+        console.error('[Chat] No analysis in response:', data);
+        throw new Error('No analysis returned from AI');
+      }
+
+      console.log('[Chat] AI response received:', data.analysis.substring(0, 100) + '...');
 
       // Add AI response to chat
       setChatMessages(prev => [...prev, {
@@ -592,10 +673,10 @@ IMPORTANT:
       }]);
 
     } catch (error) {
-      console.error('Error sending chat message:', error);
+      console.error('[Chat] Error sending chat message:', error);
       toast({
-        title: "Error",
-        description: "Failed to get AI response. Please try again.",
+        title: "Chat Error",
+        description: error instanceof Error ? error.message : "Failed to get AI response. Please try again.",
         variant: "destructive"
       });
     } finally {
@@ -626,10 +707,11 @@ IMPORTANT:
       <div ref={containerRef} className="flex flex-1 overflow-hidden bg-gray-50" style={{ userSelect: isResizing ? 'none' : 'auto' }}>
         {/* Left Panel - Controls */}
         <div 
-          className="bg-white border-r overflow-y-auto"
+          className="bg-white border-r flex flex-col"
           style={{ width: `${leftPanelWidth}%` }}
         >
-          <div className="p-4 space-y-4">
+          {/* Scrollable content area */}
+          <div className="flex-1 overflow-y-auto p-4 space-y-4">
             {/* Saved Analyses */}
             {savedAnalyses.length > 0 && (
               <div className="space-y-2">
@@ -782,10 +864,10 @@ IMPORTANT:
               )}
             </div>
 
-          </div>
+          </div> {/* End scrollable area */}
 
-          {/* Analyze/Re-Analyze Button + Security Notice at Bottom */}
-          <div className="p-4 border-t bg-white space-y-3">
+          {/* Sticky Bottom Section - Security Notice + Buttons */}
+          <div className="p-4 border-t bg-white space-y-3 flex-shrink-0">
             {/* Security Notice */}
             <div className="p-3 bg-green-50 border border-green-200 rounded-lg">
               <div className="flex items-start gap-2">
@@ -802,14 +884,23 @@ IMPORTANT:
           {/* Preview + Analyze Buttons */}
           <div className="flex gap-2">
             <Button
-              onClick={() => setShowPIIPreview(true)}
-              disabled={!selectedCaseId}
+              onClick={loadPreviewContent}
+              disabled={!selectedCaseId || isLoadingPreview}
               variant="outline"
               className="flex-1"
               size="lg"
             >
-              <Eye className="h-4 w-4 mr-2" />
-              Preview
+              {isLoadingPreview ? (
+                <>
+                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                  Loading...
+                </>
+              ) : (
+                <>
+                  <Eye className="h-4 w-4 mr-2" />
+                  Preview
+                </>
+              )}
             </Button>
             <Button
               onClick={() => analyzeCase()}
@@ -976,22 +1067,7 @@ IMPORTANT:
       {/* PII Preview Modal */}
       {showPIIPreview && selectedCaseData && (
         <PIIPreviewModal
-          originalText={(() => {
-            // Build the text that will be analyzed
-            let content = `Case: ${selectedCaseData.title}\n\n`;
-            
-            // Add case content if available
-            if (reportContent) {
-              content += reportContent;
-            }
-            
-            // Add selected documents info
-            if (selectedDocs.length > 0) {
-              content += `\n\nDocuments to be analyzed: ${selectedDocs.length} file(s)`;
-            }
-            
-            return content;
-          })()}
+          originalText={previewContent}
           caseTitle={selectedCaseData.title}
           onConfirm={() => {
             setShowPIIPreview(false);
