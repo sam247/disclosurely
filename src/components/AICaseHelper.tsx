@@ -506,13 +506,13 @@ Case Details:
 
       if (error) throw error;
 
+      // Reload saved analyses first
+      await loadSavedAnalyses();
+      
       toast({
         title: "✅ Analysis Saved",
         description: "You can view it in the 'Saved Analyses' dropdown."
       });
-      
-      // Reload saved analyses
-      loadSavedAnalyses();
     } catch (error) {
       console.error('Error saving analysis:', error);
       toast({
@@ -617,39 +617,46 @@ Additional Details: ${decrypted.additionalDetails || 'None provided'}`;
     console.log('[Chat] Sending follow-up message:', userMessage);
 
     try {
-      // For follow-up questions, use a SHORT chat prompt
-      const chatHistory = chatMessages.slice(-4).map(msg => // Only last 4 messages for context
-        `${msg.role === 'user' ? 'User' : 'AI'}: ${msg.content}`
-      ).join('\n\n');
+      // Build chat context (last 4 messages for brevity)
+      const recentMessages = chatMessages.slice(-4).map(msg => ({
+        role: msg.role === 'user' ? 'user' : 'assistant',
+        content: msg.content
+      }));
 
-      const followUpPrompt = `Previous conversation (last 2-4 messages):
+      // Add current user message
+      recentMessages.push({
+        role: 'user',
+        content: userMessage
+      });
 
-${chatHistory}
-
-User's follow-up question: ${userMessage}
-
-IMPORTANT: 
-- Provide a SHORT, conversational response (2-3 paragraphs max)
-- NO HEADINGS, NO BULLET POINTS, NO EMOJIS - just natural conversational text
-- Be direct and helpful, like chatting with a colleague via messaging
-- Don't repeat the full analysis - just answer the specific question
-- Only use bullet points if the user explicitly asks you to list or formalize something`;
-
-      // Call AI with just the follow-up context (no re-analysis)
-      const { data, error } = await supabase.functions.invoke('analyze-case-with-ai', {
+      // Call AI Gateway directly for conversational follow-up
+      const { data, error } = await supabase.functions.invoke('ai-gateway-generate', {
         body: {
-          caseData: {
-            id: selectedCaseId,
-            title: selectedCaseData?.title || 'Case',
-            tracking_id: selectedCaseData?.tracking_id || 'Unknown',
-            status: selectedCaseData?.status || 'new',
-            created_at: selectedCaseData?.created_at || new Date().toISOString(),
-            priority: selectedCaseData?.priority || 3,
-            report_type: selectedCaseData?.report_type || 'general'
-          },
-          caseContent: followUpPrompt,
-          companyDocuments: [], // Don't re-process documents for follow-ups
-          customPrompt: userMessage
+          messages: [
+            {
+              role: 'system',
+              content: `You are a compliance consultant having a conversational chat with a case handler. 
+
+Context: You previously analyzed a case titled "${selectedCaseData?.title || 'a compliance case'}". The user is now asking follow-up questions.
+
+Guidelines:
+- Provide SHORT, conversational responses (2-3 paragraphs max)
+- NO headings, NO bullet points, NO structured analysis - just natural conversation
+- Be direct and helpful, like chatting with a colleague
+- Only structure information if the user explicitly asks you to list or format something
+- Reference the case context when relevant`
+            },
+            ...recentMessages
+          ],
+          temperature: 0.7,
+          max_tokens: 500, // Shorter for chat
+          context: {
+            purpose: 'chat_follow_up',
+            report_id: selectedCaseId
+          }
+        },
+        headers: {
+          'X-Organization-Id': organization?.id || ''
         }
       });
 
@@ -658,17 +665,24 @@ IMPORTANT:
         throw error;
       }
 
-      if (!data || !data.analysis) {
-        console.error('[Chat] No analysis in response:', data);
-        throw new Error('No analysis returned from AI');
+      // Parse AI Gateway response
+      if (!data || !data.choices || !data.choices[0]?.message?.content) {
+        console.error('[Chat] Invalid response format:', data);
+        throw new Error('No response from AI');
       }
 
-      console.log('[Chat] AI response received:', data.analysis.substring(0, 100) + '...');
+      const aiResponse = data.choices[0].message.content;
+      console.log('[Chat] AI response received:', aiResponse.substring(0, 100) + '...');
+      
+      // Log PII redaction if any
+      if (data.metadata?.pii_redacted) {
+        console.log('[Chat] PII redacted in chat:', data.metadata.pii_stats);
+      }
 
       // Add AI response to chat
       setChatMessages(prev => [...prev, {
         role: 'assistant',
-        content: data.analysis,
+        content: aiResponse,
         timestamp: new Date()
       }]);
 
@@ -712,11 +726,28 @@ IMPORTANT:
         >
           {/* Scrollable content area */}
           <div className="flex-1 overflow-y-auto p-4 space-y-4">
-            {/* Saved Analyses */}
-            {savedAnalyses.length > 0 && (
-              <div className="space-y-2">
-                <label className="text-sm font-semibold text-green-700">📁 Saved Analyses</label>
-                <Select value={currentSavedAnalysisId || ""} onValueChange={(value) => {
+            {/* Quick Start Guide */}
+            {!hasRunInitialAnalysis && chatMessages.length === 0 && (
+              <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 space-y-2">
+                <div className="flex items-start gap-2">
+                  <div className="text-blue-600 mt-0.5">ℹ️</div>
+                  <div className="flex-1">
+                    <p className="text-xs font-semibold text-blue-900 mb-1">Quick Start Guide</p>
+                    <ol className="text-xs text-blue-800 space-y-1 list-decimal list-inside">
+                      <li>Select a case from the dropdown below</li>
+                      <li>Click <strong>"Preview"</strong> to see what PII will be redacted</li>
+                      <li>Click <strong>"Analyze"</strong> to get AI compliance guidance</li>
+                      <li>Use the chat to ask follow-up questions</li>
+                    </ol>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Saved Analyses - Always visible */}
+            <div className="space-y-2">
+              <label className="text-sm font-semibold text-green-700">📁 Saved Analyses {savedAnalyses.length > 0 && `(${savedAnalyses.length})`}</label>
+              <Select value={currentSavedAnalysisId || ""} onValueChange={(value) => {
                   const saved = savedAnalyses.find(s => s.id === value);
                   if (saved) {
                     // Load the saved analysis into chat
@@ -742,12 +773,17 @@ IMPORTANT:
                       description: `${saved.tracking_id} - ${saved.case_title}`
                     });
                   }
-                }}>
+                }} disabled={savedAnalyses.length === 0}>
                   <SelectTrigger className="border-green-200 bg-green-50">
-                    <SelectValue placeholder="Load a previous analysis..." />
+                    <SelectValue placeholder={savedAnalyses.length === 0 ? "No saved analyses yet" : "Load a previous analysis..."} />
                   </SelectTrigger>
                   <SelectContent>
-                    {savedAnalyses.map((saved) => (
+                    {savedAnalyses.length === 0 ? (
+                      <div className="p-2 text-xs text-muted-foreground text-center">
+                        No saved analyses yet. Complete an analysis and click "Save Analysis" to save it.
+                      </div>
+                    ) : (
+                      savedAnalyses.map((saved) => (
                       <SelectItem key={saved.id} value={saved.id}>
                         <div className="flex items-center gap-2">
                           <span className="font-medium">{saved.tracking_id}</span>
@@ -756,11 +792,11 @@ IMPORTANT:
                           </span>
                         </div>
                       </SelectItem>
-                    ))}
+                    ))
+                    )}
                   </SelectContent>
                 </Select>
-              </div>
-            )}
+            </div>
 
             {/* Case Selection */}
             <div className="space-y-2">
