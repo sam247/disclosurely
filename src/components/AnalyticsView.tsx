@@ -532,16 +532,17 @@ const AnalyticsView: React.FC = () => {
   if (!analyticsData) return null;
 
   return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold">Analytics</h1>
-          <p className="text-muted-foreground mt-2">
-            Decision-ready insights for compliance teams
-          </p>
-        </div>
-        <div className="flex items-center gap-3">
+    <div className="flex flex-col h-[calc(100vh-4rem)] overflow-hidden">
+      {/* Fixed Header */}
+      <div className="flex-shrink-0 p-6 pb-4 border-b bg-background">
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-3xl font-bold">Analytics</h1>
+            <p className="text-muted-foreground">
+              Decision-ready insights for compliance teams
+            </p>
+          </div>
+          <div className="flex items-center gap-3">
           <div className="flex items-center gap-2">
             <label className="text-sm font-medium">Period:</label>
             <select 
@@ -566,8 +567,11 @@ const AnalyticsView: React.FC = () => {
             {exporting ? 'Exporting...' : 'Export CSV'}
           </Button>
         </div>
+        </div>
       </div>
 
+      {/* Scrollable Content */}
+      <div className="flex-1 overflow-y-auto p-6 space-y-6">
       {/* Overview Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         <Card>
@@ -847,6 +851,7 @@ const AnalyticsView: React.FC = () => {
             </CardContent>
           </Card>
         </div>
+      </div>
       </div>
     </div>
   );

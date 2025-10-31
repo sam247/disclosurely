@@ -5,32 +5,34 @@ import { Separator } from '@/components/ui/separator';
 
 const OrganizationSettings = () => {
   return (
-    <div className="p-6 space-y-8">
-      <div>
-        <h1 className="text-3xl font-bold mb-2">Settings</h1>
+    <div className="flex flex-col h-[calc(100vh-4rem)] overflow-hidden">
+      {/* Fixed Header */}
+      <div className="flex-shrink-0 p-6 pb-4 border-b bg-background">
+        <h1 className="text-3xl font-bold">Settings</h1>
         <p className="text-muted-foreground">Manage your organization's branding and custom domains</p>
       </div>
 
-      <Separator />
-
-      {/* Branding Section */}
-      <div className="space-y-4">
-        <div className="flex items-center gap-2 mb-4">
-          <Palette className="h-5 w-5 text-primary" />
-          <h2 className="text-2xl font-semibold">Branding</h2>
+      {/* Scrollable Content */}
+      <div className="flex-1 overflow-y-auto p-6 space-y-8">
+        {/* Branding Section */}
+        <div className="space-y-4">
+          <div className="flex items-center gap-2 mb-4">
+            <Palette className="h-5 w-5 text-primary" />
+            <h2 className="text-2xl font-semibold">Branding</h2>
+          </div>
+          <OrganizationSettingsBranding />
         </div>
-        <OrganizationSettingsBranding />
-      </div>
 
-      <Separator />
+        <Separator />
 
-      {/* Custom Domains Section */}
-      <div className="space-y-4">
-        <div className="flex items-center gap-2 mb-4">
-          <Globe className="h-5 w-5 text-primary" />
-          <h2 className="text-2xl font-semibold">Custom Domains</h2>
+        {/* Custom Domains Section */}
+        <div className="space-y-4">
+          <div className="flex items-center gap-2 mb-4">
+            <Globe className="h-5 w-5 text-primary" />
+            <h2 className="text-2xl font-semibold">Custom Domains</h2>
+          </div>
+          <CustomDomainSettings />
         </div>
-        <CustomDomainSettings />
       </div>
     </div>
   );
