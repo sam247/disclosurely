@@ -27,13 +27,16 @@ import {
   ChevronRight,
   CheckCircle2,
   Clock,
-  AlertCircle
+  AlertCircle,
+  Download,
+  FileSpreadsheet
 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useOrganization } from '@/hooks/useOrganization';
 import { useToast } from '@/hooks/use-toast';
 import { format, startOfMonth, endOfMonth, eachDayOfInterval, isSameMonth, isSameDay, addMonths, subMonths, isToday } from 'date-fns';
 import { cn } from '@/lib/utils';
+import { createBrandedPDF, addPDFSection, addPDFField, addPDFTable, downloadPDF, exportToCSV, formatExportDate } from '@/utils/export-utils';
 
 interface CalendarEvent {
   id: string;
@@ -220,6 +223,103 @@ export default function ComplianceCalendar() {
     return colors[type] || colors.other;
   };
 
+  // Export calendar events as PDF
+  const exportEventsToPDF = () => {
+    try {
+      if (events.length === 0) {
+        toast({
+          title: 'No Data',
+          description: 'No calendar events to export.',
+          variant: 'destructive'
+        });
+        return;
+      }
+
+      const doc = createBrandedPDF('Compliance Calendar', organization?.name || '');
+      
+      let y = 50;
+      y = addPDFSection(doc, 'Event Summary', y);
+      y = addPDFField(doc, 'Total Events', events.length.toString(), y);
+      y = addPDFField(doc, 'Pending Events', events.filter(e => e.status === 'pending').length.toString(), y);
+      y = addPDFField(doc, 'In Progress', events.filter(e => e.status === 'in_progress').length.toString(), y);
+      y = addPDFField(doc, 'Completed Events', events.filter(e => e.status === 'completed').length.toString(), y);
+      y = addPDFField(doc, 'Overdue Events', events.filter(e => e.status === 'overdue').length.toString(), y);
+      
+      y += 5;
+      
+      // Table headers
+      const headers = ['Event Title', 'Type', 'Due Date', 'Status', 'Assigned To'];
+      
+      // Table data (sorted by due date)
+      const sortedEvents = [...events].sort((a, b) => 
+        new Date(a.due_date).getTime() - new Date(b.due_date).getTime()
+      );
+      
+      const tableData = sortedEvents.map(event => [
+        event.event_title,
+        getEventTypeLabel(event.event_type),
+        formatExportDate(event.due_date),
+        event.status.toUpperCase(),
+        event.assigned_to_name || 'Unassigned'
+      ]);
+      
+      addPDFTable(doc, headers, tableData, y);
+      
+      downloadPDF(doc, `compliance-calendar-${new Date().toISOString().split('T')[0]}`);
+      
+      toast({
+        title: 'PDF Generated',
+        description: `${events.length} events exported successfully.`
+      });
+    } catch (error) {
+      console.error('Error generating PDF:', error);
+      toast({
+        title: 'Error',
+        description: 'Failed to generate PDF.',
+        variant: 'destructive'
+      });
+    }
+  };
+
+  // Export calendar events as CSV
+  const exportEventsToCSV = () => {
+    try {
+      if (events.length === 0) {
+        toast({
+          title: 'No Data',
+          description: 'No calendar events to export.',
+          variant: 'destructive'
+        });
+        return;
+      }
+
+      const csvData = events.map(event => ({
+        'Event Title': event.event_title,
+        'Description': event.event_description || '',
+        'Type': getEventTypeLabel(event.event_type),
+        'Due Date': formatExportDate(event.due_date),
+        'Status': event.status.toUpperCase(),
+        'Completed Date': event.completed_date ? formatExportDate(event.completed_date) : '',
+        'Assigned To': event.assigned_to_name || 'Unassigned',
+        'Created': formatExportDate(event.created_at)
+      }));
+
+      exportToCSV(csvData, `calendar-events-${new Date().toISOString().split('T')[0]}`);
+
+      toast({
+        title: 'CSV Generated',
+        description: `${events.length} events exported successfully.`
+      });
+    } catch (error) {
+      console.error('Error generating CSV:', error);
+      toast({
+        title: 'Error',
+        description: 'Failed to generate CSV.',
+        variant: 'destructive'
+      });
+    }
+  };
+
   const monthStart = startOfMonth(currentMonth);
   const monthEnd = endOfMonth(currentMonth);
   const calendarDays = eachDayOfInterval({ start: monthStart, end: monthEnd });
@@ -246,10 +346,20 @@ export default function ComplianceCalendar() {
           <h1 className="text-3xl font-bold">Compliance Calendar</h1>
           <p className="text-muted-foreground">Track deadlines, reviews, and compliance events</p>
         </div>
-        <Button onClick={() => setIsCreateDialogOpen(true)}>
-          <Plus className="h-4 w-4 mr-2" />
-          Add Event
-        </Button>
+        <div className="flex gap-2">
+          <Button variant="outline" size="sm" onClick={exportEventsToPDF}>
+            <Download className="h-4 w-4 mr-2" />
+            Export PDF
+          </Button>
+          <Button variant="outline" size="sm" onClick={exportEventsToCSV}>
+            <FileSpreadsheet className="h-4 w-4 mr-2" />
+            Export CSV
+          </Button>
+          <Button onClick={() => setIsCreateDialogOpen(true)}>
+            <Plus className="h-4 w-4 mr-2" />
+            Add Event
+          </Button>
+        </div>
       </div>
 
       {/* Stats Cards */}

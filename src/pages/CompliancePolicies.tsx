@@ -40,12 +40,15 @@ import {
   User,
   ChevronDown,
   ChevronUp,
-  AlertCircle
+  AlertCircle,
+  Download,
+  FileSpreadsheet
 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useOrganization } from '@/hooks/useOrganization';
 import { useToast } from '@/hooks/use-toast';
 import { format } from 'date-fns';
+import { createBrandedPDF, addPDFSection, addPDFField, addPDFTable, downloadPDF, exportToCSV, formatExportDate } from '@/utils/export-utils';
 
 interface Policy {
   id: string;
@@ -268,6 +271,101 @@ export default function CompliancePolicies() {
     return labels[type] || type;
   };
 
+  // Export policies as PDF
+  const exportPoliciesToPDF = () => {
+    try {
+      if (filteredPolicies.length === 0) {
+        toast({
+          title: 'No Data',
+          description: 'No policies to export.',
+          variant: 'destructive'
+        });
+        return;
+      }
+
+      const doc = createBrandedPDF('Policy Register', organization?.name || '');
+      
+      let y = 50;
+      y = addPDFSection(doc, 'Policy Summary', y);
+      y = addPDFField(doc, 'Total Policies', filteredPolicies.length.toString(), y);
+      y = addPDFField(doc, 'Active Policies', filteredPolicies.filter(p => p.status === 'active').length.toString(), y);
+      y = addPDFField(doc, 'Policies Under Review', filteredPolicies.filter(p => p.status === 'under_review').length.toString(), y);
+      y = addPDFField(doc, 'Draft Policies', filteredPolicies.filter(p => p.status === 'draft').length.toString(), y);
+      
+      y += 5;
+      
+      // Table headers
+      const headers = ['Policy Name', 'Type', 'Status', 'Version', 'Review Date', 'Owner'];
+      
+      // Table data
+      const tableData = filteredPolicies.map(policy => [
+        policy.policy_name,
+        getTypeBadge(policy.policy_type),
+        policy.status.toUpperCase(),
+        `v${policy.version}`,
+        policy.next_review_date ? formatExportDate(policy.next_review_date) : 'N/A',
+        policy.owner_name || 'Unassigned'
+      ]);
+      
+      addPDFTable(doc, headers, tableData, y);
+      
+      downloadPDF(doc, `policy-register-${new Date().toISOString().split('T')[0]}`);
+      
+      toast({
+        title: 'PDF Generated',
+        description: `${filteredPolicies.length} policies exported successfully.`
+      });
+    } catch (error) {
+      console.error('Error generating PDF:', error);
+      toast({
+        title: 'Error',
+        description: 'Failed to generate PDF.',
+        variant: 'destructive'
+      });
+    }
+  };
+
+  // Export policies as CSV
+  const exportPoliciesToCSV = () => {
+    try {
+      if (filteredPolicies.length === 0) {
+        toast({
+          title: 'No Data',
+          description: 'No policies to export.',
+          variant: 'destructive'
+        });
+        return;
+      }
+
+      const csvData = filteredPolicies.map(policy => ({
+        'Policy Name': policy.policy_name,
+        'Type': getTypeBadge(policy.policy_type),
+        'Status': policy.status.toUpperCase(),
+        'Version': `v${policy.version}`,
+        'Description': policy.policy_description || '',
+        'Effective Date': policy.effective_date ? formatExportDate(policy.effective_date) : 'N/A',
+        'Next Review Date': policy.next_review_date ? formatExportDate(policy.next_review_date) : 'N/A',
+        'Owner': policy.owner_name || 'Unassigned',
+        'Created': formatExportDate(policy.created_at),
+        'Last Updated': formatExportDate(policy.updated_at)
+      }));
+
+      exportToCSV(csvData, `policies-export-${new Date().toISOString().split('T')[0]}`);
+
+      toast({
+        title: 'CSV Generated',
+        description: `${filteredPolicies.length} policies exported successfully.`
+      });
+    } catch (error) {
+      console.error('Error generating CSV:', error);
+      toast({
+        title: 'Error',
+        description: 'Failed to generate CSV.',
+        variant: 'destructive'
+      });
+    }
+  };
+
   const isReviewDue = (reviewDate: string | null) => {
     if (!reviewDate) return false;
     const date = new Date(reviewDate);
@@ -293,7 +391,19 @@ export default function CompliancePolicies() {
       {/* Filters */}
       <Card>
         <CardHeader>
-          <CardTitle className="text-base">Filters</CardTitle>
+          <div className="flex items-center justify-between">
+            <CardTitle className="text-base">Filters</CardTitle>
+            <div className="flex gap-2">
+              <Button variant="outline" size="sm" onClick={exportPoliciesToPDF}>
+                <Download className="h-4 w-4 mr-2" />
+                Export PDF
+              </Button>
+              <Button variant="outline" size="sm" onClick={exportPoliciesToCSV}>
+                <FileSpreadsheet className="h-4 w-4 mr-2" />
+                Export CSV
+              </Button>
+            </div>
+          </div>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">

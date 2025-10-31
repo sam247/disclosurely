@@ -25,12 +25,15 @@ import {
   Plus, 
   Eye,
   TrendingUp,
-  Filter
+  Filter,
+  Download,
+  FileSpreadsheet
 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useOrganization } from '@/hooks/useOrganization';
 import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
+import { createBrandedPDF, addPDFSection, addPDFField, addPDFTable, downloadPDF, exportToCSV, formatExportDate } from '@/utils/export-utils';
 
 interface Risk {
   id: string;
@@ -206,6 +209,107 @@ export default function ComplianceRisks() {
     return 'Low';
   };
 
+  // Export risks as PDF
+  const exportRisksToPDF = () => {
+    try {
+      if (filteredRisks.length === 0) {
+        toast({
+          title: 'No Data',
+          description: 'No risks to export.',
+          variant: 'destructive'
+        });
+        return;
+      }
+
+      const doc = createBrandedPDF('Risk Register', organization?.name || '');
+      
+      let y = 50;
+      y = addPDFSection(doc, 'Risk Summary', y);
+      y = addPDFField(doc, 'Total Risks', filteredRisks.length.toString(), y);
+      y = addPDFField(doc, 'Critical Risks', filteredRisks.filter(r => r.risk_score >= 15).length.toString(), y);
+      y = addPDFField(doc, 'High Risks', filteredRisks.filter(r => r.risk_score >= 10 && r.risk_score < 15).length.toString(), y);
+      y = addPDFField(doc, 'Medium Risks', filteredRisks.filter(r => r.risk_score >= 5 && r.risk_score < 10).length.toString(), y);
+      y = addPDFField(doc, 'Low Risks', filteredRisks.filter(r => r.risk_score < 5).length.toString(), y);
+      
+      y += 5;
+      
+      // Table headers
+      const headers = ['Risk Title', 'Category', 'L', 'I', 'Score', 'Status', 'Owner'];
+      
+      // Table data
+      const tableData = filteredRisks.map(risk => [
+        risk.risk_title,
+        getCategoryLabel(risk.category),
+        risk.likelihood.toString(),
+        risk.impact.toString(),
+        `${risk.risk_score} (${getRiskLabel(risk.risk_score)})`,
+        risk.mitigation_status.toUpperCase(),
+        risk.owner_name || 'Unassigned'
+      ]);
+      
+      addPDFTable(doc, headers, tableData, y);
+      
+      downloadPDF(doc, `risk-register-${new Date().toISOString().split('T')[0]}`);
+      
+      toast({
+        title: 'PDF Generated',
+        description: `${filteredRisks.length} risks exported successfully.`
+      });
+    } catch (error) {
+      console.error('Error generating PDF:', error);
+      toast({
+        title: 'Error',
+        description: 'Failed to generate PDF.',
+        variant: 'destructive'
+      });
+    }
+  };
+
+  // Export risks as CSV
+  const exportRisksToCSV = () => {
+    try {
+      if (filteredRisks.length === 0) {
+        toast({
+          title: 'No Data',
+          description: 'No risks to export.',
+          variant: 'destructive'
+        });
+        return;
+      }
+
+      const csvData = filteredRisks.map(risk => ({
+        'Risk Title': risk.risk_title,
+        'Description': risk.risk_description || '',
+        'Category': getCategoryLabel(risk.category),
+        'Likelihood': risk.likelihood,
+        'Impact': risk.impact,
+        'Risk Score': risk.risk_score,
+        'Risk Level': getRiskLabel(risk.risk_score),
+        'Mitigation Status': risk.mitigation_status.toUpperCase(),
+        'Mitigation Plan': risk.mitigation_plan || '',
+        'Residual Likelihood': risk.residual_likelihood || '',
+        'Residual Impact': risk.residual_impact || '',
+        'Residual Score': risk.residual_score || '',
+        'Owner': risk.owner_name || 'Unassigned',
+        'Created': formatExportDate(risk.created_at)
+      }));
+
+      exportToCSV(csvData, `risks-export-${new Date().toISOString().split('T')[0]}`);
+
+      toast({
+        title: 'CSV Generated',
+        description: `${filteredRisks.length} risks exported successfully.`
+      });
+    } catch (error) {
+      console.error('Error generating CSV:', error);
+      toast({
+        title: 'Error',
+        description: 'Failed to generate CSV.',
+        variant: 'destructive'
+      });
+    }
+  };
+
   // Risk Matrix Component
   const RiskMatrix = () => {
     const matrixRisks: Record<string, Risk[]> = {};
@@ -332,7 +436,19 @@ export default function ComplianceRisks() {
       {/* Filters */}
       <Card>
         <CardHeader>
-          <CardTitle className="text-base">Filters</CardTitle>
+          <div className="flex items-center justify-between">
+            <CardTitle className="text-base">Filters</CardTitle>
+            <div className="flex gap-2">
+              <Button variant="outline" size="sm" onClick={exportRisksToPDF}>
+                <Download className="h-4 w-4 mr-2" />
+                Export PDF
+              </Button>
+              <Button variant="outline" size="sm" onClick={exportRisksToCSV}>
+                <FileSpreadsheet className="h-4 w-4 mr-2" />
+                Export CSV
+              </Button>
+            </div>
+          </div>
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">

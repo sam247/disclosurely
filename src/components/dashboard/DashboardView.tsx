@@ -11,7 +11,7 @@ import { useOrganization } from '@/hooks/useOrganization';
 import { useToast } from '@/hooks/use-toast';
 import { useTranslation } from 'react-i18next';
 import { log, LogContext } from '@/utils/logger';
-import { FileText, Eye, Archive, Trash2, RotateCcw, MoreVertical, XCircle, ChevronUp, ChevronDown, CheckCircle, Search } from 'lucide-react';
+import { FileText, Eye, Archive, Trash2, RotateCcw, MoreVertical, XCircle, ChevronUp, ChevronDown, CheckCircle, Search, Download, FileSpreadsheet } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import ReportMessaging from '@/components/ReportMessaging';
 import ReportContentDisplay from '@/components/ReportContentDisplay';
@@ -23,6 +23,8 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { createBrandedPDF, addPDFSection, addPDFField, downloadPDF, exportToCSV, formatExportDate, getStatusColor, addPDFTable } from '@/utils/export-utils';
+import { decryptReportContent } from '@/utils/encryption';
 
 // Risk Level Selector Component
 const RiskLevelSelector = ({ 
@@ -595,6 +597,169 @@ Additional Details: ${decryptedContent.additionalDetails || 'None provided'}
     }
   };
 
+  // Export individual report as PDF
+  const exportReportToPDF = async (report: Report) => {
+    try {
+      toast({ title: "Generating PDF...", description: "Please wait" });
+
+      // Get user's organization ID
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('organization_id, organizations(name)')
+        .eq('id', user?.id)
+        .single();
+
+      if (!profile?.organization_id) throw new Error('User organization not found');
+
+      // Decrypt the report content
+      const { decryptReport } = await import('@/utils/encryption');
+      const decryptedContent = await decryptReport(report.encrypted_content, profile.organization_id);
+
+      // Create PDF with organization name
+      const orgName = profile.organizations?.name || 'Unknown Organization';
+      const doc = createBrandedPDF('Case Report', orgName);
+
+      let y = 50;
+
+      // Report Header
+      y = addPDFSection(doc, 'Report Details', y);
+      y = addPDFField(doc, 'Tracking ID', report.tracking_id, y);
+      y = addPDFField(doc, 'Title', report.title, y);
+      y = addPDFField(doc, 'Status', report.status.toUpperCase(), y);
+      y = addPDFField(doc, 'Submitted Date', formatExportDate(report.created_at), y);
+      
+      if (report.manual_risk_level) {
+        const riskText = ['Critical', 'High', 'Medium', 'Low', 'Info'][report.manual_risk_level - 1] || 'Unknown';
+        y = addPDFField(doc, 'Risk Level', `${riskText} (${report.manual_risk_level}/5)`, y);
+      }
+
+      if (report.tags && report.tags.length > 0) {
+        y = addPDFField(doc, 'Tags', report.tags.join(', '), y);
+      }
+
+      // Report Content
+      y += 5;
+      y = addPDFSection(doc, 'Report Content', y);
+      y = addPDFField(doc, 'Category', decryptedContent.category || 'Not specified', y);
+      y = addPDFField(doc, 'Description', decryptedContent.description || 'Not provided', y);
+      y = addPDFField(doc, 'Location', decryptedContent.location || 'Not specified', y);
+      y = addPDFField(doc, 'Date of Incident', decryptedContent.dateOfIncident || 'Not specified', y);
+      y = addPDFField(doc, 'Witnesses', decryptedContent.witnesses || 'None mentioned', y);
+      y = addPDFField(doc, 'Evidence', decryptedContent.evidence || 'No evidence provided', y);
+      y = addPDFField(doc, 'Additional Details', decryptedContent.additionalDetails || 'None provided', y);
+
+      // AI Risk Assessment (if available)
+      if (report.ai_risk_assessment) {
+        y += 5;
+        y = addPDFSection(doc, 'AI Risk Assessment', y);
+        y = addPDFField(doc, 'Risk Level', report.ai_risk_level || 'N/A', y);
+        y = addPDFField(doc, 'Risk Score', `${report.ai_risk_score || 'N/A'}/10`, y);
+        y = addPDFField(doc, 'Likelihood', `${report.ai_likelihood_score || 'N/A'}/10`, y);
+        y = addPDFField(doc, 'Impact', `${report.ai_impact_score || 'N/A'}/10`, y);
+        if (report.ai_risk_assessment.key_concerns) {
+          y = addPDFField(doc, 'Key Concerns', report.ai_risk_assessment.key_concerns.join(', '), y);
+        }
+      }
+
+      // Download the PDF
+      downloadPDF(doc, `case-report-${report.tracking_id}`);
+
+      // Log export action
+      await log.info(LogContext.CASE_MANAGEMENT, 'Case report exported as PDF', {
+        reportId: report.id,
+        userId: user?.id,
+        userEmail: user?.email,
+        organizationId: profile.organization_id
+      });
+
+      toast({ 
+        title: "PDF Generated", 
+        description: "Case report downloaded successfully" 
+      });
+    } catch (error) {
+      console.error('Error generating PDF:', error);
+      toast({
+        title: "Error",
+        description: "Failed to generate PDF",
+        variant: "destructive",
+      });
+    }
+  };
+
+  // Export filtered reports as CSV
+  const exportReportsToCSV = async () => {
+    try {
+      toast({ title: "Generating CSV...", description: "Please wait" });
+
+      const filtered = filteredReports;
+      if (filtered.length === 0) {
+        toast({
+          title: "No Data",
+          description: "No reports to export",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      // Get assigned user names
+      const teamMemberMap = new Map(
+        teamMembers.map(member => [
+          member.id,
+          member.first_name && member.last_name
+            ? `${member.first_name} ${member.last_name}`
+            : member.email
+        ])
+      );
+
+      // Format data for CSV
+      const csvData = filtered.map(report => ({
+        'Tracking ID': report.tracking_id,
+        'Title': report.title,
+        'Status': report.status,
+        'Tags': report.tags ? report.tags.join('; ') : '',
+        'Risk Level': report.manual_risk_level 
+          ? `${['Critical', 'High', 'Medium', 'Low', 'Info'][report.manual_risk_level - 1]} (${report.manual_risk_level}/5)`
+          : '',
+        'AI Risk': report.ai_risk_level || '',
+        'AI Risk Score': report.ai_risk_score || '',
+        'Assigned To': report.assigned_to ? (teamMemberMap.get(report.assigned_to) || 'Unknown') : 'Unassigned',
+        'Submitted Date': formatExportDate(report.created_at),
+        'First Read': report.first_read_at ? formatExportDate(report.first_read_at) : 'Not read',
+        'Closed Date': report.closed_at ? formatExportDate(report.closed_at) : '',
+      }));
+
+      // Get user's organization ID for audit log
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('organization_id')
+        .eq('id', user?.id)
+        .single();
+
+      if (profile?.organization_id) {
+        await log.info(LogContext.CASE_MANAGEMENT, 'Cases exported as CSV', {
+          exportCount: csvData.length,
+          userId: user?.id,
+          userEmail: user?.email,
+          organizationId: profile.organization_id
+        });
+      }
+
+      exportToCSV(csvData, `cases-export-${new Date().toISOString().split('T')[0]}`);
+
+      toast({ 
+        title: "CSV Generated", 
+        description: `${csvData.length} cases exported successfully` 
+      });
+    } catch (error) {
+      console.error('Error generating CSV:', error);
+      toast({
+        title: "Error",
+        description: "Failed to generate CSV",
+        variant: "destructive",
+      });
+    }
+  };
+
   const updateManualRiskLevel = async (reportId: string, riskLevel: number) => {
     setUpdatingRiskLevel(reportId);
     try {
@@ -743,6 +908,14 @@ Additional Details: ${decryptedContent.additionalDetails || 'None provided'}
                   <SelectItem value="resolved">{t('resolved')}</SelectItem>
                 </SelectContent>
               </Select>
+              <Button
+                variant="outline"
+                onClick={exportReportsToCSV}
+                className="w-full sm:w-auto"
+              >
+                <FileSpreadsheet className="h-4 w-4 mr-2" />
+                Export CSV
+              </Button>
             </div>
           </div>
           <TabsContent value="active">
@@ -1024,6 +1197,10 @@ Additional Details: ${decryptedContent.additionalDetails || 'None provided'}
                                 >
                                   <CheckCircle className="h-4 w-4 mr-2" />
                                   Mark as Resolved
+                                </DropdownMenuItem>
+                                <DropdownMenuItem onClick={() => exportReportToPDF(report)}>
+                                  <Download className="h-4 w-4 mr-2" />
+                                  Export PDF
                                 </DropdownMenuItem>
                                 <DropdownMenuItem onClick={() => handleArchiveReport(report.id)}>
                                   <Archive className="h-4 w-4 mr-2" />
