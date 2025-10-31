@@ -739,23 +739,6 @@ Guidelines:
 
   return (
     <div className="flex flex-col h-[calc(100vh-12rem)]">
-      {/* Header */}
-      <div className="flex items-center justify-between p-3 border-b bg-white">
-        <div className="flex items-center gap-2">
-          <div className="p-2 bg-primary/10 rounded-lg">
-            <Brain className="h-4 w-4 text-primary" />
-          </div>
-          <div>
-            <h1 className="text-lg font-semibold">AI Compliance Consultant</h1>
-            <p className="text-xs text-muted-foreground">Expert guidance for case analysis and compliance decisions</p>
-          </div>
-        </div>
-        <div className="flex items-center gap-2 text-xs">
-          <span className="text-muted-foreground">AI Credits:</span>
-          <span className="font-mono">∞</span>
-        </div>
-      </div>
-
       {/* Resizable Panel Layout */}
       <div ref={containerRef} className="flex flex-1 overflow-hidden bg-gray-50" style={{ userSelect: isResizing ? 'none' : 'auto' }}>
         {/* Left Panel - Controls */}
