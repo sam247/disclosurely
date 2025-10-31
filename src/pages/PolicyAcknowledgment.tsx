@@ -73,49 +73,73 @@ export default function PolicyAcknowledgment() {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error('User not authenticated');
 
-      // Load pending policies
+      // Load pending policies with full policy details
       const { data: pendingData, error: pendingError } = await supabase
         .from('pending_policy_acknowledgments')
-        .select('*, compliance_policies(policy_description, policy_content)')
+        .select('*')
         .eq('organization_id', organization?.id)
         .eq('user_id', user.id)
         .order('due_date', { ascending: true, nullsFirst: false });
 
       if (pendingError) throw pendingError;
 
-      const pending = pendingData?.map((p: any) => ({
-        assignment_id: p.assignment_id,
-        policy_id: p.policy_id,
-        policy_name: p.policy_name,
-        policy_type: p.policy_type,
-        current_version: p.current_version,
-        assigned_at: p.assigned_at,
-        due_date: p.due_date,
-        status: p.status,
-        policy_description: p.compliance_policies?.policy_description,
-        policy_content: p.compliance_policies?.policy_content
-      })) || [];
+      // Get policy content for each pending policy
+      const policyIds = pendingData?.map((p: any) => p.policy_id) || [];
+      const { data: policiesData } = await supabase
+        .from('compliance_policies')
+        .select('id, policy_description, policy_content')
+        .in('id', policyIds);
+
+      const policiesMap = new Map(policiesData?.map(p => [p.id, p]) || []);
+
+      const pending = pendingData?.map((p: any) => {
+        const policyDetails = policiesMap.get(p.policy_id);
+        return {
+          assignment_id: p.assignment_id,
+          policy_id: p.policy_id,
+          policy_name: p.policy_name,
+          policy_type: p.policy_type,
+          current_version: p.current_version,
+          assigned_at: p.assigned_at,
+          due_date: p.due_date,
+          status: p.status,
+          policy_description: policyDetails?.policy_description,
+          policy_content: policyDetails?.policy_content
+        };
+      }) || [];
 
       setPendingPolicies(pending);
 
       // Load acknowledged policies
       const { data: ackData, error: ackError } = await supabase
         .from('policy_acknowledgments')
-        .select('id, policy_id, policy_version, acknowledged_at, compliance_policies(policy_name, policy_type, policy_description)')
+        .select('id, policy_id, policy_version, acknowledged_at')
         .eq('organization_id', organization?.id)
         .eq('user_id', user.id)
         .order('acknowledged_at', { ascending: false });
 
       if (ackError) throw ackError;
 
-      const acknowledged = ackData?.map((a: any) => ({
-        id: a.id,
-        policy_name: a.compliance_policies?.policy_name,
-        policy_type: a.compliance_policies?.policy_type,
-        policy_version: a.policy_version,
-        acknowledged_at: a.acknowledged_at,
-        policy_description: a.compliance_policies?.policy_description
-      })) || [];
+      // Get policy details for acknowledged policies
+      const ackPolicyIds = ackData?.map((a: any) => a.policy_id) || [];
+      const { data: ackPoliciesData } = await supabase
+        .from('compliance_policies')
+        .select('id, policy_name, policy_type, policy_description')
+        .in('id', ackPolicyIds);
+
+      const ackPoliciesMap = new Map(ackPoliciesData?.map(p => [p.id, p]) || []);
+
+      const acknowledged = ackData?.map((a: any) => {
+        const policyDetails = ackPoliciesMap.get(a.policy_id);
+        return {
+          id: a.id,
+          policy_name: policyDetails?.policy_name || 'Unknown Policy',
+          policy_type: policyDetails?.policy_type || 'other',
+          policy_version: a.policy_version,
+          acknowledged_at: a.acknowledged_at,
+          policy_description: policyDetails?.policy_description
+        };
+      }) || [];
 
       setAcknowledgedPolicies(acknowledged);
     } catch (error) {
