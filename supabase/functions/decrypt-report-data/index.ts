@@ -74,7 +74,14 @@ serve(async (req) => {
     }
 
     // Server-side decryption using Web Crypto API (same as anonymous-report-messaging)
-    const ENCRYPTION_SALT = Deno.env.get('ENCRYPTION_SALT') || 'disclosurely-server-salt-2024-secure';
+    const ENCRYPTION_SALT = Deno.env.get('ENCRYPTION_SALT');
+    if (!ENCRYPTION_SALT) {
+      console.error('❌ ENCRYPTION_SALT environment variable is not configured');
+      return new Response(
+        JSON.stringify({ error: 'Server configuration error' }),
+        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
     const keyMaterial = organizationId + ENCRYPTION_SALT;
     
     // Hash the key material using Web Crypto API

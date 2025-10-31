@@ -366,7 +366,7 @@ serve(async (req) => {
         }
       }, reportError);
       return new Response(
-        JSON.stringify({ error: 'Failed to create report', details: reportError.message }),
+        JSON.stringify({ error: 'Failed to create report. Please try again or contact support.' }),
         { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       )
     }
@@ -424,9 +424,7 @@ serve(async (req) => {
     
     return new Response(
       JSON.stringify({ 
-        error: 'Submit failed', 
-        details: error.message,
-        stack: error.stack
+        error: 'Submit failed. Please try again or contact support.'
       }),
       { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     )

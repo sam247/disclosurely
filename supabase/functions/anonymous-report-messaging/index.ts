@@ -124,7 +124,11 @@ serve(async (req) => {
         for (const message of messages) {
           try {
             // Decrypt message using organization-specific key
-            const ENCRYPTION_SALT = Deno.env.get('ENCRYPTION_SALT') || 'disclosurely-server-salt-2024-secure';
+            const ENCRYPTION_SALT = Deno.env.get('ENCRYPTION_SALT');
+            if (!ENCRYPTION_SALT) {
+              console.error('❌ ENCRYPTION_SALT environment variable is not configured');
+              throw new Error('Server configuration error');
+            }
             const keyMaterial = report.organization_id + ENCRYPTION_SALT;
             
             // Hash the key material using Web Crypto API
@@ -222,7 +226,14 @@ serve(async (req) => {
       console.log('🔐 Encrypting message for organization:', report.organization_id);
       
       // Use same encryption system as reports
-      const ENCRYPTION_SALT = Deno.env.get('ENCRYPTION_SALT') || 'disclosurely-server-salt-2024-secure';
+      const ENCRYPTION_SALT = Deno.env.get('ENCRYPTION_SALT');
+      if (!ENCRYPTION_SALT) {
+        console.error('❌ ENCRYPTION_SALT environment variable is not configured');
+        return new Response(
+          JSON.stringify({ error: 'Server configuration error' }),
+          { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      }
       const keyMaterial = report.organization_id + ENCRYPTION_SALT;
       
       // Hash the key material using Web Crypto API

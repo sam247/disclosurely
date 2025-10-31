@@ -48,8 +48,15 @@ serve(async (req) => {
     console.log('🔐 Using Deno Web Crypto API for encryption...')
     
     // Use server-side salt (protected from client access)
-    const ENCRYPTION_SALT = Deno.env.get('ENCRYPTION_SALT') || 'disclosurely-server-salt-2024-secure'
-    console.log('🔑 Using encryption salt:', ENCRYPTION_SALT.substring(0, 20) + '...')
+    const ENCRYPTION_SALT = Deno.env.get('ENCRYPTION_SALT');
+    if (!ENCRYPTION_SALT) {
+      console.error('❌ ENCRYPTION_SALT environment variable is not configured');
+      return new Response(
+        JSON.stringify({ error: 'Server configuration error' }),
+        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+    console.log('🔑 Encryption salt configured')
     
     // Create organization-specific key using Web Crypto API
     const keyMaterial = organizationId + ENCRYPTION_SALT
@@ -119,9 +126,7 @@ serve(async (req) => {
     
     return new Response(
       JSON.stringify({ 
-        error: 'Encryption failed', 
-        details: error.message,
-        stack: error.stack
+        error: 'Encryption failed. Please try again or contact support.'
       }),
       { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     )
