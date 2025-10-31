@@ -288,14 +288,22 @@ export default function CompliancePolicies() {
 
   const handleCreatePolicy = async () => {
     try {
+      // Safari fix: Ensure dates are in correct format or null
+      const policyData = {
+        organization_id: organization?.id,
+        ...formData,
+        effective_date: formData.effective_date || null,
+        next_review_date: formData.next_review_date || null
+      };
+
       const { error } = await supabase
         .from('compliance_policies')
-        .insert({
-          organization_id: organization?.id,
-          ...formData
-        });
+        .insert(policyData);
 
-      if (error) throw error;
+      if (error) {
+        console.error('Supabase error:', error);
+        throw error;
+      }
 
       toast({
         title: '✅ Policy Created',
@@ -305,11 +313,11 @@ export default function CompliancePolicies() {
       setIsCreateDialogOpen(false);
       resetForm();
       loadPolicies();
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error creating policy:', error);
       toast({
         title: 'Error',
-        description: 'Failed to create policy.',
+        description: error?.message || 'Failed to create policy. Please try again.',
         variant: 'destructive'
       });
     }
@@ -907,6 +915,8 @@ export default function CompliancePolicies() {
                   type="date"
                   value={formData.effective_date}
                   onChange={(e) => setFormData({ ...formData, effective_date: e.target.value })}
+                  min={new Date().toISOString().split('T')[0]}
+                  className="[&::-webkit-calendar-picker-indicator]:opacity-100"
                 />
               </div>
 
@@ -917,6 +927,8 @@ export default function CompliancePolicies() {
                   type="date"
                   value={formData.next_review_date}
                   onChange={(e) => setFormData({ ...formData, next_review_date: e.target.value })}
+                  min={new Date().toISOString().split('T')[0]}
+                  className="[&::-webkit-calendar-picker-indicator]:opacity-100"
                 />
               </div>
             </div>
