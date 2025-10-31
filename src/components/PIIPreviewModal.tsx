@@ -141,7 +141,6 @@ export const PIIPreviewModal: React.FC<PIIPreviewModalProps> = ({
             Go Back
           </Button>
           <Button onClick={onConfirm} className="bg-green-600 hover:bg-green-700">
-            <Shield className="h-4 w-4 mr-2" />
             Looks Good - Proceed with Analysis
           </Button>
         </DialogFooter>

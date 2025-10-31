@@ -73,6 +73,7 @@ const AICaseHelper: React.FC<AICaseHelperProps> = ({ reportId, reportContent }) 
   const [showPIIPreview, setShowPIIPreview] = useState(false); // PII preview modal
   const [previewContent, setPreviewContent] = useState<string>(''); // Content for PII preview
   const [isLoadingPreview, setIsLoadingPreview] = useState(false); // Loading state for preview
+  const [hasViewedPreview, setHasViewedPreview] = useState(false); // Track if user has previewed current case
   const containerRef = useRef<HTMLDivElement>(null);
   const chatMessagesEndRef = useRef<HTMLDivElement>(null);
   const { user } = useAuth();
@@ -85,8 +86,14 @@ const AICaseHelper: React.FC<AICaseHelperProps> = ({ reportId, reportContent }) 
     }
     loadNewCases();
     loadDocuments();
-    loadSavedAnalyses();
   }, [reportId]);
+
+  // Load saved analyses when organization is available
+  useEffect(() => {
+    if (organization?.id) {
+      loadSavedAnalyses();
+    }
+  }, [organization?.id]);
 
   // Auto-scroll to bottom of chat when new messages arrive
   useEffect(() => {
@@ -165,6 +172,37 @@ const AICaseHelper: React.FC<AICaseHelperProps> = ({ reportId, reportContent }) 
       console.error('Error loading saved analyses:', error);
     } finally {
       setIsLoadingSaved(false);
+    }
+  };
+
+  const deleteSavedAnalysis = async (analysisId: string, trackingId: string) => {
+    try {
+      const { error } = await supabase
+        .from('ai_case_analyses')
+        .delete()
+        .eq('id', analysisId);
+
+      if (error) throw error;
+
+      // Clear current selection if deleting the current one
+      if (currentSavedAnalysisId === analysisId) {
+        setCurrentSavedAnalysisId(null);
+      }
+
+      toast({
+        title: "✅ Analysis Deleted",
+        description: `Deleted analysis for ${trackingId}`
+      });
+
+      // Reload the list
+      loadSavedAnalyses();
+    } catch (error) {
+      console.error('Error deleting saved analysis:', error);
+      toast({
+        title: "Delete Failed",
+        description: "Failed to delete analysis. Please try again.",
+        variant: "destructive"
+      });
     }
   };
 
@@ -580,6 +618,7 @@ Additional Details: ${decrypted.additionalDetails || 'None provided'}`;
 
       setPreviewContent(fullContent);
       setShowPIIPreview(true);
+      setHasViewedPreview(true); // Mark preview as viewed for this case
     } catch (error) {
       console.error('Error loading preview:', error);
       toast({
@@ -785,11 +824,24 @@ Guidelines:
                     ) : (
                       savedAnalyses.map((saved) => (
                       <SelectItem key={saved.id} value={saved.id}>
-                        <div className="flex items-center gap-2">
-                          <span className="font-medium">{saved.tracking_id}</span>
-                          <span className="text-xs text-muted-foreground">
-                            {new Date(saved.created_at).toLocaleDateString()}
-                          </span>
+                        <div className="flex items-center justify-between w-full group">
+                          <div className="flex items-center gap-2">
+                            <span className="font-medium">{saved.tracking_id}</span>
+                            <span className="text-xs text-muted-foreground">
+                              {new Date(saved.created_at).toLocaleDateString()}
+                            </span>
+                          </div>
+                          <Button
+                            size="sm"
+                            variant="ghost"
+                            className="h-6 w-6 p-0 opacity-0 group-hover:opacity-100 transition-opacity"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              deleteSavedAnalysis(saved.id, saved.tracking_id);
+                            }}
+                          >
+                            <Trash2 className="h-3 w-3 text-destructive" />
+                          </Button>
                         </div>
                       </SelectItem>
                     ))
@@ -811,6 +863,7 @@ Guidelines:
                   setChatMessages([]);
                   setHasRunInitialAnalysis(false);
                   setCurrentSavedAnalysisId(null);
+                  setHasViewedPreview(false); // Reset preview flag when switching cases
                 }
               }} disabled={isLoadingCases}>
                 <SelectTrigger>
@@ -940,9 +993,10 @@ Guidelines:
             </Button>
             <Button
               onClick={() => analyzeCase()}
-              disabled={isAnalyzing || !selectedCaseId}
+              disabled={isAnalyzing || !selectedCaseId || !hasViewedPreview}
               className="flex-1"
               size="lg"
+              title={!hasViewedPreview ? "Please preview the case first" : ""}
             >
               {isAnalyzing ? (
                 <>
