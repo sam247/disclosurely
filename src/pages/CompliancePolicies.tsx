@@ -42,13 +42,16 @@ import {
   ChevronUp,
   AlertCircle,
   Download,
-  FileSpreadsheet
+  FileSpreadsheet,
+  Users,
+  CheckCircle2
 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useOrganization } from '@/hooks/useOrganization';
 import { useToast } from '@/hooks/use-toast';
 import { format } from 'date-fns';
 import { createBrandedPDF, addPDFSection, addPDFField, addPDFTable, downloadPDF, exportToCSV, formatExportDate } from '@/utils/export-utils';
+import { PolicyAssignmentDialog } from '@/components/PolicyAssignmentDialog';
 
 interface Policy {
   id: string;
@@ -63,6 +66,20 @@ interface Policy {
   policy_content: string | null;
   created_at: string;
   updated_at: string;
+}
+
+interface TeamMember {
+  id: string;
+  email: string;
+  first_name: string | null;
+  last_name: string | null;
+}
+
+interface AcknowledgmentStats {
+  total_assigned: number;
+  total_acknowledged: number;
+  pending_count: number;
+  acknowledgment_rate: number;
 }
 
 export default function CompliancePolicies() {
@@ -80,7 +97,9 @@ export default function CompliancePolicies() {
   // Dialog states
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const [isViewDialogOpen, setIsViewDialogOpen] = useState(false);
+  const [isAssignDialogOpen, setIsAssignDialogOpen] = useState(false);
   const [selectedPolicy, setSelectedPolicy] = useState<Policy | null>(null);
+  const [ackStats, setAckStats] = useState<Map<string, AcknowledgmentStats>>(new Map());
   
   // Form states
   const [formData, setFormData] = useState({
@@ -97,6 +116,7 @@ export default function CompliancePolicies() {
   useEffect(() => {
     if (organization?.id) {
       loadPolicies();
+      loadAcknowledgmentStats();
     }
   }, [organization?.id]);
 
@@ -124,6 +144,31 @@ export default function CompliancePolicies() {
       });
     } finally {
       setLoading(false);
+    }
+  };
+
+  const loadAcknowledgmentStats = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('policy_acknowledgment_summary')
+        .select('*')
+        .eq('organization_id', organization?.id);
+
+      if (error) throw error;
+
+      const statsMap = new Map<string, AcknowledgmentStats>();
+      data?.forEach((stat: any) => {
+        statsMap.set(stat.policy_id, {
+          total_assigned: stat.total_assigned || 0,
+          total_acknowledged: stat.total_acknowledged || 0,
+          pending_count: stat.pending_count || 0,
+          acknowledgment_rate: stat.acknowledgment_rate || 0
+        });
+      });
+
+      setAckStats(statsMap);
+    } catch (error) {
+      console.error('Error loading acknowledgment stats:', error);
     }
   };
 
@@ -480,6 +525,7 @@ export default function CompliancePolicies() {
                 <TableHead>Type</TableHead>
                 <TableHead>Status</TableHead>
                 <TableHead>Owner</TableHead>
+                <TableHead>Acknowledgments</TableHead>
                 <TableHead className="cursor-pointer" onClick={() => handleSort('next_review_date')}>
                   <div className="flex items-center gap-2">
                     Next Review
@@ -494,13 +540,13 @@ export default function CompliancePolicies() {
             <TableBody>
               {loading ? (
                 <TableRow>
-                  <TableCell colSpan={6} className="text-center py-8 text-muted-foreground">
+                  <TableCell colSpan={7} className="text-center py-8 text-muted-foreground">
                     Loading policies...
                   </TableCell>
                 </TableRow>
               ) : filteredPolicies.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={6} className="text-center py-8 text-muted-foreground">
+                  <TableCell colSpan={7} className="text-center py-8 text-muted-foreground">
                     No policies found. Create your first policy to get started.
                   </TableCell>
                 </TableRow>
@@ -528,6 +574,44 @@ export default function CompliancePolicies() {
                       </div>
                     </TableCell>
                     <TableCell>
+                      {(() => {
+                        const stats = ackStats.get(policy.id);
+                        if (!stats || stats.total_assigned === 0) {
+                          return (
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => {
+                                setSelectedPolicy(policy);
+                                setIsAssignDialogOpen(true);
+                              }}
+                            >
+                              <Users className="h-3 w-3 mr-1" />
+                              Assign
+                            </Button>
+                          );
+                        }
+                        return (
+                          <div className="space-y-1">
+                            <div className="flex items-center gap-2">
+                              <div className="text-sm font-medium">
+                                {stats.total_acknowledged}/{stats.total_assigned}
+                              </div>
+                              <Badge 
+                                variant={stats.acknowledgment_rate === 100 ? "default" : "secondary"}
+                                className="text-xs"
+                              >
+                                {stats.acknowledgment_rate}%
+                              </Badge>
+                            </div>
+                            <div className="text-xs text-muted-foreground">
+                              {stats.pending_count} pending
+                            </div>
+                          </div>
+                        );
+                      })()}
+                    </TableCell>
+                    <TableCell>
                       {policy.next_review_date ? (
                         <div className="flex items-center gap-2">
                           <Calendar className="h-3 w-3 text-muted-foreground" />
@@ -542,6 +626,19 @@ export default function CompliancePolicies() {
                     </TableCell>
                     <TableCell className="text-right">
                       <div className="flex items-center justify-end gap-2">
+                        {policy.status === 'active' && (
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => {
+                              setSelectedPolicy(policy);
+                              setIsAssignDialogOpen(true);
+                            }}
+                            title="Assign to team members"
+                          >
+                            <Users className="h-4 w-4" />
+                          </Button>
+                        )}
                         <Button
                           variant="ghost"
                           size="sm"
@@ -760,6 +857,23 @@ export default function CompliancePolicies() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {/* Policy Assignment Dialog */}
+      {selectedPolicy && (
+        <PolicyAssignmentDialog
+          isOpen={isAssignDialogOpen}
+          onClose={() => {
+            setIsAssignDialogOpen(false);
+            setSelectedPolicy(null);
+          }}
+          policyId={selectedPolicy.id}
+          policyName={selectedPolicy.policy_name}
+          onAssignmentComplete={() => {
+            loadAcknowledgmentStats();
+            loadPolicies();
+          }}
+        />
+      )}
     </div>
   );
 }
