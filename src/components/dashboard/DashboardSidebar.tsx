@@ -37,18 +37,19 @@ const DashboardSidebar = ({
     title: t('aiCaseHelper'),
     icon: Bot,
     path: '/dashboard/ai-helper',
-    locked: !limits.hasAIHelper || !isOrgAdmin
+    locked: !limits.hasAIHelper || !isOrgAdmin,
+    badge: 'AI'
+  }, {
+    title: t('analytics'),
+    icon: BarChart3,
+    path: '/dashboard/analytics',
+    locked: !isOrgAdmin
   }, {
     title: 'Compliance',
     icon: Shield,
     path: '/dashboard/compliance',
     locked: !isOrgAdmin,
     badge: 'New'
-  }, {
-    title: t('analytics'),
-    icon: BarChart3,
-    path: '/dashboard/analytics',
-    locked: !isOrgAdmin
   }, {
     title: t('audit'),
     icon: ScrollText,

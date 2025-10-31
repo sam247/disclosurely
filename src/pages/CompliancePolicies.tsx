@@ -375,19 +375,23 @@ export default function CompliancePolicies() {
   };
 
   return (
-    <div className="p-6 space-y-6">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold">Policy Tracker</h1>
-          <p className="text-muted-foreground">Manage compliance policies and documents</p>
+    <div className="flex flex-col h-[calc(100vh-4rem)] overflow-hidden">
+      {/* Fixed Header */}
+      <div className="flex-shrink-0 p-6 pb-4 border-b bg-background">
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-3xl font-bold">Policy Tracker</h1>
+            <p className="text-muted-foreground">Manage compliance policies and documents</p>
+          </div>
+          <Button onClick={() => setIsCreateDialogOpen(true)}>
+            <Plus className="h-4 w-4 mr-2" />
+            Create Policy
+          </Button>
         </div>
-        <Button onClick={() => setIsCreateDialogOpen(true)}>
-          <Plus className="h-4 w-4 mr-2" />
-          Create Policy
-        </Button>
       </div>
 
+      {/* Scrollable Content */}
+      <div className="flex-1 overflow-y-auto p-6 space-y-6">
       {/* Filters */}
       <Card>
         <CardHeader>
@@ -564,6 +568,7 @@ export default function CompliancePolicies() {
           </Table>
         </CardContent>
       </Card>
+      </div>
 
       {/* Create Policy Dialog */}
       <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>

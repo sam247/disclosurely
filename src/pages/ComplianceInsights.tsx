@@ -242,27 +242,32 @@ export default function ComplianceInsights() {
   }
 
   return (
-    <div className="p-6 space-y-6">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold">AI Insights</h1>
-          <p className="text-muted-foreground">AI-powered compliance analysis and recommendations</p>
+    <div className="flex flex-col h-[calc(100vh-4rem)] overflow-hidden">
+      {/* Fixed Header */}
+      <div className="flex-shrink-0 p-6 pb-4 border-b bg-background">
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-3xl font-bold">AI Insights</h1>
+            <p className="text-muted-foreground">AI-powered compliance analysis and recommendations</p>
+          </div>
+          <Button onClick={generateAIInsights} disabled={generatingInsights}>
+            {generatingInsights ? (
+              <>
+                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                Analyzing...
+              </>
+            ) : (
+              <>
+                <Sparkles className="h-4 w-4 mr-2" />
+                Generate AI Insights
+              </>
+            )}
+          </Button>
         </div>
-        <Button onClick={generateAIInsights} disabled={generatingInsights}>
-          {generatingInsights ? (
-            <>
-              <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-              Analyzing...
-            </>
-          ) : (
-            <>
-              <Sparkles className="h-4 w-4 mr-2" />
-              Generate AI Insights
-            </>
-          )}
-        </Button>
       </div>
+
+      {/* Scrollable Content */}
+      <div className="flex-1 overflow-y-auto p-6 space-y-6">
 
       {/* Compliance Score Card */}
       <Card className="border-2">
@@ -494,6 +499,7 @@ export default function ComplianceInsights() {
           </Button>
         </CardContent>
       </Card>
+      </div>
     </div>
   );
 }

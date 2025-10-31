@@ -407,19 +407,23 @@ export default function ComplianceRisks() {
   };
 
   return (
-    <div className="p-6 space-y-6">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold">Risk Register</h1>
-          <p className="text-muted-foreground">Track and manage organizational risks</p>
+    <div className="flex flex-col h-[calc(100vh-4rem)] overflow-hidden">
+      {/* Fixed Header */}
+      <div className="flex-shrink-0 p-6 pb-4 border-b bg-background">
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-3xl font-bold">Risk Register</h1>
+            <p className="text-muted-foreground">Track and manage organizational risks</p>
+          </div>
+          <Button onClick={() => setIsCreateDialogOpen(true)}>
+            <Plus className="h-4 w-4 mr-2" />
+            Register Risk
+          </Button>
         </div>
-        <Button onClick={() => setIsCreateDialogOpen(true)}>
-          <Plus className="h-4 w-4 mr-2" />
-          Register Risk
-        </Button>
       </div>
 
+      {/* Scrollable Content */}
+      <div className="flex-1 overflow-y-auto p-6 space-y-6">
       {/* Risk Matrix */}
       <Card>
         <CardHeader>
@@ -562,6 +566,7 @@ export default function ComplianceRisks() {
             </Card>
           ))
         )}
+      </div>
       </div>
 
       {/* Create Risk Dialog */}

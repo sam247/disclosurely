@@ -339,31 +339,35 @@ export default function ComplianceCalendar() {
   const overdueEvents = events.filter(e => e.status === 'overdue');
 
   return (
-    <div className="p-6 space-y-6">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold">Compliance Calendar</h1>
-          <p className="text-muted-foreground">Track deadlines, reviews, and compliance events</p>
-        </div>
-        <div className="flex gap-2">
-          <Button variant="outline" size="sm" onClick={exportEventsToPDF}>
-            <Download className="h-4 w-4 mr-2" />
-            Export PDF
-          </Button>
-          <Button variant="outline" size="sm" onClick={exportEventsToCSV}>
-            <FileSpreadsheet className="h-4 w-4 mr-2" />
-            Export CSV
-          </Button>
-          <Button onClick={() => setIsCreateDialogOpen(true)}>
-            <Plus className="h-4 w-4 mr-2" />
-            Add Event
-          </Button>
+    <div className="flex flex-col h-[calc(100vh-4rem)] overflow-hidden">
+      {/* Fixed Header */}
+      <div className="flex-shrink-0 p-6 pb-4 border-b bg-background">
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-3xl font-bold">Compliance Calendar</h1>
+            <p className="text-muted-foreground">Track deadlines, reviews, and compliance events</p>
+          </div>
+          <div className="flex gap-2">
+            <Button variant="outline" size="sm" onClick={exportEventsToPDF}>
+              <Download className="h-4 w-4 mr-2" />
+              Export PDF
+            </Button>
+            <Button variant="outline" size="sm" onClick={exportEventsToCSV}>
+              <FileSpreadsheet className="h-4 w-4 mr-2" />
+              Export CSV
+            </Button>
+            <Button onClick={() => setIsCreateDialogOpen(true)}>
+              <Plus className="h-4 w-4 mr-2" />
+              Add Event
+            </Button>
+          </div>
         </div>
       </div>
 
-      {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+      {/* Scrollable Content */}
+      <div className="flex-1 overflow-y-auto p-6 space-y-6">
+        {/* Stats Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <Card>
           <CardHeader className="pb-3">
             <CardTitle className="text-sm font-medium flex items-center gap-2">
@@ -572,6 +576,7 @@ export default function ComplianceCalendar() {
             </div>
           </CardContent>
         </Card>
+      </div>
       </div>
 
       {/* Create Event Dialog */}
