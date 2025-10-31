@@ -7,12 +7,13 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Checkbox } from '@/components/ui/checkbox';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
-import { Brain, Loader2, Upload, File, Trash2, FileText, GripVertical } from 'lucide-react';
+import { Brain, Loader2, Upload, File, Trash2, FileText, GripVertical, Eye } from 'lucide-react';
 import { sanitizeHtml } from '@/utils/sanitizer';
 import { formatMarkdownToHtml } from '@/utils/markdownFormatter';
 import { useAuth } from '@/hooks/useAuth';
 import { useOrganization } from '@/hooks/useOrganization';
 import { auditLogger } from '@/utils/auditLogger';
+import { PIIPreviewModal } from '@/components/PIIPreviewModal';
 
 interface NewCase {
   id: string;
@@ -69,6 +70,7 @@ const AICaseHelper: React.FC<AICaseHelperProps> = ({ reportId, reportContent }) 
   const [isLoadingSaved, setIsLoadingSaved] = useState(false);
   const [hasRunInitialAnalysis, setHasRunInitialAnalysis] = useState(false); // Track if initial analysis is done
   const [currentSavedAnalysisId, setCurrentSavedAnalysisId] = useState<string | null>(null); // Track current saved analysis
+  const [showPIIPreview, setShowPIIPreview] = useState(false); // PII preview modal
   const containerRef = useRef<HTMLDivElement>(null);
   const chatMessagesEndRef = useRef<HTMLDivElement>(null);
   const { user } = useAuth();
@@ -797,11 +799,22 @@ IMPORTANT:
               </div>
             </div>
 
-            {/* Analyze Button */}
+          {/* Preview + Analyze Buttons */}
+          <div className="flex gap-2">
+            <Button
+              onClick={() => setShowPIIPreview(true)}
+              disabled={!selectedCaseId}
+              variant="outline"
+              className="flex-1"
+              size="lg"
+            >
+              <Eye className="h-4 w-4 mr-2" />
+              Preview
+            </Button>
             <Button
               onClick={() => analyzeCase()}
               disabled={isAnalyzing || !selectedCaseId}
-              className="w-full"
+              className="flex-1"
               size="lg"
             >
               {isAnalyzing ? (
@@ -812,10 +825,11 @@ IMPORTANT:
               ) : (
                 <>
                   <Brain className="h-4 w-4 mr-2" />
-                  {hasRunInitialAnalysis ? 'Re-Analyze' : 'Start Analysis'}
+                  {hasRunInitialAnalysis ? 'Re-Analyze' : 'Analyze'}
                 </>
               )}
             </Button>
+          </div>
             {isAnalyzing && (
               <div className="mt-3 space-y-1">
                 <div className="flex items-center justify-between text-xs">
@@ -958,6 +972,34 @@ IMPORTANT:
           </div>
         </div>
       </div>
+
+      {/* PII Preview Modal */}
+      {showPIIPreview && selectedCaseData && (
+        <PIIPreviewModal
+          originalText={(() => {
+            // Build the text that will be analyzed
+            let content = `Case: ${selectedCaseData.title}\n\n`;
+            
+            // Add case content if available
+            if (reportContent) {
+              content += reportContent;
+            }
+            
+            // Add selected documents info
+            if (selectedDocs.length > 0) {
+              content += `\n\nDocuments to be analyzed: ${selectedDocs.length} file(s)`;
+            }
+            
+            return content;
+          })()}
+          caseTitle={selectedCaseData.title}
+          onConfirm={() => {
+            setShowPIIPreview(false);
+            analyzeCase(); // Proceed with actual analysis
+          }}
+          onCancel={() => setShowPIIPreview(false)}
+        />
+      )}
     </div>
   );
 };

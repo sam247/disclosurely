@@ -5,6 +5,7 @@
 
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts';
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+import { redactPII } from '../_shared/pii-detector.ts';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -84,44 +85,40 @@ serve(async (req) => {
     const policy = { pii_protection: { enabled: true } };
 
     // ============================================================================
-    // 6. PII REDACTION (Simple regex-based for MVP)
+    // 6. ENHANCED PII REDACTION (20+ patterns with validation)
     // ============================================================================
     let redactionMap: Record<string, string> = {};
     let piiDetected = false;
+    let detectionStats: Record<string, number> = {};
     
     if (policy.pii_protection?.enabled && !body.preserve_pii) {
-      // Enhanced PII detection patterns
-      const piiPatterns = [
-        { type: 'EMAIL', regex: /\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b/g },
-        { type: 'PHONE_UK', regex: /\b(?:0|\+44)\d{10}\b/g },
-        { type: 'PHONE_US', regex: /\b(?:\+1)?[\s.-]?\(?\d{3}\)?[\s.-]?\d{3}[\s.-]?\d{4}\b/g },
-        { type: 'PHONE_INTL', regex: /\b\+\d{1,3}[\s.-]?\d{6,14}\b/g },
-        { type: 'SSN', regex: /\b\d{3}-\d{2}-\d{4}\b/g },
-        { type: 'NI_NUMBER', regex: /\b[A-CEGHJ-PR-TW-Z]{1}[A-CEGHJ-NPR-TW-Z]{1}\d{6}[A-D]{1}\b/g }, // UK National Insurance
-        { type: 'CREDIT_CARD', regex: /\b(?:\d{4}[\s-]?){3}\d{4}\b/g },
-        { type: 'IBAN', regex: /\b[A-Z]{2}\d{2}[A-Z0-9]{11,30}\b/g },
-        { type: 'PASSPORT', regex: /\b[A-Z]{1,2}\d{6,9}\b/g },
-        { type: 'POSTCODE_UK', regex: /\b[A-Z]{1,2}\d{1,2}[A-Z]?\s?\d[A-Z]{2}\b/g },
-        { type: 'IP_ADDRESS', regex: /\b(?:\d{1,3}\.){3}\d{1,3}\b/g },
-      ];
-
+      console.log('[AI Gateway] PII redaction enabled - using enhanced detector');
+      
       body.messages = body.messages.map(msg => {
-        let redactedContent = msg.content;
+        // Use enhanced PII detector with validation
+        const redactionResult = redactPII(msg.content);
         
-        piiPatterns.forEach(({ type, regex }) => {
-          const matches = msg.content.match(regex);
-          if (matches) {
-            piiDetected = true;
-            matches.forEach((match, index) => {
-              const placeholder = `[${type}_${index + 1}]`;
-              redactionMap[match] = placeholder;
-              redactedContent = redactedContent.replace(match, placeholder);
-            });
-          }
-        });
+        if (redactionResult.piiDetected) {
+          piiDetected = true;
+          // Merge redaction maps (handle duplicates across messages)
+          Object.entries(redactionResult.redactionMap).forEach(([original, placeholder]) => {
+            redactionMap[original] = placeholder;
+          });
+          
+          // Merge detection stats
+          Object.entries(redactionResult.detectionStats).forEach(([type, count]) => {
+            detectionStats[type] = (detectionStats[type] || 0) + count;
+          });
+          
+          console.log(`[AI Gateway] Redacted ${Object.keys(redactionResult.redactionMap).length} PII items from message`);
+        }
 
-        return { ...msg, content: redactedContent };
+        return { ...msg, content: redactionResult.redactedContent };
       });
+      
+      if (piiDetected) {
+        console.log(`[AI Gateway] Total PII detected:`, detectionStats);
+      }
     }
 
     // ============================================================================
@@ -244,6 +241,7 @@ serve(async (req) => {
         usage: result.usage,
         metadata: {
           pii_redacted: piiDetected,
+          pii_stats: piiDetected ? detectionStats : undefined,
           redaction_map: piiDetected ? redactionMap : undefined,
           vendor: 'deepseek',
           latency_ms: latency,
