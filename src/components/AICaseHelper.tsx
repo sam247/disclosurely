@@ -130,16 +130,16 @@ const AICaseHelper: React.FC<AICaseHelperProps> = ({ reportId, reportContent }) 
       const { data, error } = await supabase
         .from('reports')
         .select('id, tracking_id, title, status, created_at, priority')
-        .eq('status', 'new')
+        .neq('status', 'archived') // Load all cases except archived
         .order('created_at', { ascending: false });
 
       if (error) throw error;
       setNewCases(data || []);
     } catch (error) {
-      console.error('Error loading new cases:', error);
+      console.error('Error loading cases:', error);
       toast({
         title: "Error",
-        description: "Failed to load new cases.",
+        description: "Failed to load cases.",
         variant: "destructive"
       });
     } finally {
