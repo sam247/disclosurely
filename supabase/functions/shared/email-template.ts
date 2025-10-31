@@ -27,14 +27,10 @@ export const createEmailTemplate = (options: {
               <table role="presentation" style="width: 600px; border-collapse: collapse; background: white; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); border-radius: 8px; overflow: hidden;">
                 <!-- Header with Disclosurely logo -->
                 <tr>
-                  <td style="background: #000000; padding: 20px 30px; text-align: center;">
-                    <div style="display: flex; align-items: center; justify-content: center; margin-bottom: 10px;">
-                      <div style="background: white; padding: 8px 12px; border-radius: 4px; margin-right: 12px;">
-                        <span style="color: #000000; font-weight: bold; font-size: 16px;">DISCLOSURELY</span>
-                      </div>
-                    </div>
-                    <h1 style="color: white; margin: 0; font-size: 24px; font-weight: 700;">${title}</h1>
-                    ${organizationName ? `<p style="color: rgba(255, 255, 255, 0.8); margin: 5px 0 0 0; font-size: 14px;">${organizationName}</p>` : ''}
+                  <td style="background: ${brandColor}; padding: 32px 30px; text-align: center;">
+                    <p style="color: white; margin: 0 0 8px 0; font-size: 14px; font-weight: 500; letter-spacing: 2px; text-transform: uppercase;">DISCLOSURELY</p>
+                    <h1 style="color: white; margin: 0 0 4px 0; font-size: 28px; font-weight: 700;">${title}</h1>
+                    ${organizationName ? `<p style="color: rgba(255, 255, 255, 0.9); margin: 0; font-size: 15px;">${organizationName}</p>` : ''}
                   </td>
                 </tr>
                 
