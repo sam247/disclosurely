@@ -4,7 +4,10 @@ export default defineConfig({
   title: "Disclosurely Docs",
   description: "Everything you need to build, manage, and optimize your whistleblowing and compliance platform.",
   
+  appearance: 'dark', // default to dark mode
+  
   themeConfig: {
+    siteTitle: false, // Hide "Disclosurely Docs" text
     logo: {
       light: '/logo-light.png',
       dark: '/logo-dark.png'
