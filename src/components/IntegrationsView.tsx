@@ -153,9 +153,7 @@ const IntegrationsView: React.FC = () => {
             <div className="flex gap-3 justify-center">
               <Button variant="outline" asChild>
                 <a 
-                  href="https://disclosurely.featurebase.app" 
-                  target="_blank" 
-                  rel="noopener noreferrer"
+                  href="mailto:support@disclosurely.com?subject=Integration Request" 
                   className="flex items-center gap-2"
                 >
                   <Zap className="h-4 w-4" />

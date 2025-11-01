@@ -33,7 +33,7 @@ import SubmissionFormWrapper from './components/forms/SubmissionFormWrapper';
 import ReportSuccess from './components/ReportSuccess';
 import TestAnonymousSubmission from './pages/TestAnonymousSubmission';
 import ScrollToTop from './components/ScrollToTop';
-import FeaturebaseMessenger from './components/FeaturebaseMessenger';
+// import FeaturebaseMessenger from './components/FeaturebaseMessenger'; // REMOVED
 import ReportStatusLookup from './components/ReportStatusLookup';
 import AdminDashboard from './pages/AdminDashboard';
 import Blog from './pages/Blog';
@@ -313,7 +313,7 @@ function App() {
     <BrowserRouter>
       <AuthProvider>
         <AppContent />
-        <FeaturebaseMessenger />
+        {/* <FeaturebaseMessenger /> REMOVED */}
       </AuthProvider>
     </BrowserRouter>
   );

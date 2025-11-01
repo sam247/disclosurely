@@ -144,9 +144,7 @@ const DashboardSidebar = ({
         {/* Footer links below the line */}
         <div className="space-y-1">
           <a 
-            href="https://disclosurely.featurebase.app" 
-            target="_blank" 
-            rel="noopener noreferrer"
+            href="mailto:support@disclosurely.com?subject=Feedback" 
             className="flex items-center gap-2 px-3 py-2 text-sm text-muted-foreground hover:text-foreground transition-colors rounded-md"
           >
             <MessageSquare className="h-4 w-4" />
