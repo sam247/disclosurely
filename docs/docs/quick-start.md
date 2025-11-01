@@ -58,9 +58,9 @@ You can also:
 ## What's Next?
 
 - [Set up AI Case Analysis](/features/ai-case-analysis)
-- [Configure the Compliance Module](/features/compliance-module)
-- [Enable two-factor authentication](/security/2fa)
-- [Integrate with your HR system](/integrations/hr-systems)
+- [Learn about Anonymous Reporting](/features/anonymous-reporting)
+- Explore the Compliance Module (coming soon)
+- Enable two-factor authentication (coming soon)
 
 ## Need Help?
 

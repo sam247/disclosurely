@@ -31,9 +31,7 @@ export default defineConfig({
         text: 'Features',
         items: [
           { text: 'Anonymous Reporting', link: '/features/anonymous-reporting' },
-          { text: 'AI Case Analysis', link: '/features/ai-case-analysis' },
-          { text: 'Compliance Module', link: '/features/compliance-module' },
-          { text: 'Custom Branding', link: '/features/custom-branding' }
+          { text: 'AI Case Analysis', link: '/features/ai-case-analysis' }
         ]
       }
     ],
