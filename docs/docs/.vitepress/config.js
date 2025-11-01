@@ -13,6 +13,11 @@ export default defineConfig({
       dark: '/logo-dark.png'
     },
     
+    // OVERRIDE DEFAULT COLORS AT CONFIG LEVEL
+    search: {
+      provider: 'local'
+    },
+    
     nav: [
       { text: 'Home', link: '/' },
       { text: 'Getting Started', link: '/getting-started' },
