@@ -10,11 +10,14 @@
   --vp-c-brand-3: #6366f1;
   --vp-c-brand-soft: rgba(99, 102, 241, 0.14);
   
-  /* Accent colors */
+  /* Accent colors - replace ALL greens with blue */
   --vp-c-green-1: #6366f1;
   --vp-c-green-2: #6366f1;
   --vp-c-green-3: #6366f1;
   --vp-c-green-soft: rgba(99, 102, 241, 0.14);
+  --vp-c-green-dimm-1: rgba(99, 102, 241, 0.5);
+  --vp-c-green-dimm-2: rgba(99, 102, 241, 0.25);
+  --vp-c-green-dimm-3: rgba(99, 102, 241, 0.05);
   
   /* Button colors */
   --vp-button-brand-bg: #6366f1;
@@ -24,6 +27,10 @@
   --vp-button-brand-hover-border: #4f46e5;
   --vp-button-brand-active-bg: #4338ca;
   --vp-button-brand-active-border: #4338ca;
+  
+  /* Home hero button */
+  --vp-home-hero-name-color: transparent;
+  --vp-home-hero-name-background: linear-gradient(135deg, #6366f1 10%, #818cf8 100%);
 }
 
 .dark {
@@ -33,14 +40,18 @@
   --vp-c-brand-3: #4f46e5;
   --vp-c-brand-soft: rgba(99, 102, 241, 0.16);
   
+  /* Dark mode greens -> blue */
+  --vp-c-green-1: #818cf8;
+  --vp-c-green-2: #6366f1;
+  --vp-c-green-3: #4f46e5;
+  --vp-c-green-soft: rgba(99, 102, 241, 0.16);
+  --vp-c-green-dimm-1: rgba(99, 102, 241, 0.5);
+  --vp-c-green-dimm-2: rgba(99, 102, 241, 0.25);
+  --vp-c-green-dimm-3: rgba(99, 102, 241, 0.05);
+  
   --vp-button-brand-bg: #6366f1;
   --vp-button-brand-border: #6366f1;
   --vp-button-brand-hover-bg: #818cf8;
   --vp-button-brand-hover-border: #818cf8;
-}
-
-/* Hide site title text, keep only logo */
-.VPNavBarTitle .title {
-  display: none;
 }
 

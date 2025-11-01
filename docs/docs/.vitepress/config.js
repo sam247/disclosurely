@@ -41,8 +41,8 @@ export default defineConfig({
     ],
 
     footer: {
-      message: 'Secure, compliant, and built for transparency',
-      copyright: 'Copyright © 2025 Disclosurely. All rights reserved.'
+      message: 'Built for compliance and transparency',
+      copyright: '© 2025 Disclosurely. All rights reserved.'
     }
   },
 
