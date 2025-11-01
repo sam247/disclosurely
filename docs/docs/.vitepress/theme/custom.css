@@ -59,20 +59,15 @@
   --vp-home-hero-name-background: #6366f1 !important;
 }
 
-/* Force hero title to use solid blue, no gradient - CRITICAL OVERRIDE */
+/* Force hero title to use solid blue, no gradient - PROPER FIX */
 .VPHero .name,
-.VPHomeHero .name {
-  background: #6366f1 !important;
+.VPHomeHero .name,
+.name .clip {
+  background: transparent !important;
   background-image: none !important;
-  -webkit-background-clip: text !important;
-  background-clip: text !important;
-  -webkit-text-fill-color: transparent !important;
+  -webkit-background-clip: unset !important;
+  background-clip: unset !important;
+  -webkit-text-fill-color: #6366f1 !important;
   color: #6366f1 !important;
-}
-
-/* Override VitePress default gradient */
-.clip {
-  background: #6366f1 !important;
-  background-image: none !important;
 }
 
