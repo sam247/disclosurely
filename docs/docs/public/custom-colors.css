@@ -1,0 +1,38 @@
+/**
+ * Disclosurely Brand Colors
+ * Primary Blue: #6366f1
+ */
+
+:root {
+  --vp-c-brand: #6366f1 !important;
+  --vp-c-brand-1: #6366f1 !important;
+  --vp-c-brand-2: #6366f1 !important;
+  --vp-c-brand-3: #6366f1 !important;
+  --vp-c-brand-light: #818cf8 !important;
+  --vp-c-brand-lighter: #a5b4fc !important;
+  --vp-c-brand-dark: #4f46e5 !important;
+  --vp-c-brand-darker: #4338ca !important;
+
+  /* Replace indigo references */
+  --vp-c-indigo-1: #6366f1 !important;
+  --vp-c-indigo-2: #6366f1 !important;
+  --vp-c-indigo-3: #6366f1 !important;
+
+  /* Hero name */
+  --vp-home-hero-name-color: transparent !important;
+  --vp-home-hero-name-background: #6366f1 !important;
+}
+
+.dark {
+  --vp-c-brand: #6366f1 !important;
+  --vp-c-brand-1: #6366f1 !important;
+  --vp-c-brand-2: #6366f1 !important;
+  --vp-c-brand-3: #4f46e5 !important;
+
+  --vp-c-indigo-1: #6366f1 !important;
+  --vp-c-indigo-2: #6366f1 !important;
+  --vp-c-indigo-3: #6366f1 !important;
+
+  --vp-home-hero-name-color: transparent !important;
+  --vp-home-hero-name-background: #6366f1 !important;
+}
