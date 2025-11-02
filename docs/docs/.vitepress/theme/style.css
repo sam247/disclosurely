@@ -1,23 +1,28 @@
 /**
- * NUCLEAR OPTION: Override VitePress colors at the absolute root level
+ * Override VitePress hero name color using official variables
  * Disclosurely Blue: #6366f1
+ * Reference: https://vitepress.dev/reference/default-theme-home-page
  */
 
-/* Light mode - set at :root level BEFORE VitePress loads */
 :root {
+  /* Brand colors */
   --vp-c-brand: #6366f1;
+  --vp-c-brand-1: #6366f1;
+  --vp-c-brand-2: #6366f1;
+  --vp-c-brand-3: #6366f1;
   --vp-c-brand-light: #6366f1;
   --vp-c-brand-lighter: #818cf8;
   --vp-c-brand-dark: #4f46e5;
   --vp-c-brand-darker: #4338ca;
+  
+  /* Hero name - set to solid blue (NOT transparent) */
+  --vp-home-hero-name-color: #6366f1;
+  --vp-home-hero-name-background: none;
 }
 
-/* Kill the hero gradient at its source */
-:root {
-  --vp-home-hero-name-background: -webkit-linear-gradient(120deg, #6366f1 30%, #6366f1);
-}
-
-html.dark {
-  --vp-home-hero-name-background: -webkit-linear-gradient(120deg, #6366f1 30%, #6366f1);
+.dark {
+  /* Hero name in dark mode */
+  --vp-home-hero-name-color: #6366f1;
+  --vp-home-hero-name-background: none;
 }
 
