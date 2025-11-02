@@ -1,0 +1,27 @@
+{
+  "id": "quick-start",
+  "title": "Quick Start Guide",
+  "description": "Get started with Disclosurely in minutes.",
+  "source": "@site/docs/quick-start.md",
+  "sourceDirName": ".",
+  "slug": "/quick-start",
+  "permalink": "/docs/quick-start",
+  "draft": false,
+  "unlisted": false,
+  "editUrl": "https://github.com/sam247/disclosurely/tree/main/docs/docs/quick-start.md",
+  "tags": [],
+  "version": "current",
+  "sidebarPosition": 2,
+  "frontMatter": {
+    "sidebar_position": 2
+  },
+  "sidebar": "tutorialSidebar",
+  "previous": {
+    "title": "Getting Started",
+    "permalink": "/docs/getting-started"
+  },
+  "next": {
+    "title": "Anonymous Reporting",
+    "permalink": "/docs/features/anonymous-reporting"
+  }
+}

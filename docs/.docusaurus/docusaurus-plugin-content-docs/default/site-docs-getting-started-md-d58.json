@@ -1,0 +1,23 @@
+{
+  "id": "getting-started",
+  "title": "Getting Started",
+  "description": "Welcome to Disclosurely! This guide will help you get up and running quickly.",
+  "source": "@site/docs/getting-started.md",
+  "sourceDirName": ".",
+  "slug": "/getting-started",
+  "permalink": "/docs/getting-started",
+  "draft": false,
+  "unlisted": false,
+  "editUrl": "https://github.com/sam247/disclosurely/tree/main/docs/docs/getting-started.md",
+  "tags": [],
+  "version": "current",
+  "sidebarPosition": 1,
+  "frontMatter": {
+    "sidebar_position": 1
+  },
+  "sidebar": "tutorialSidebar",
+  "next": {
+    "title": "Quick Start Guide",
+    "permalink": "/docs/quick-start"
+  }
+}

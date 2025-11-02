@@ -1,3 +1,7 @@
+---
+sidebar_position: 1
+---
+
 # Getting Started
 
 Welcome to Disclosurely! This guide will help you get up and running quickly.
@@ -52,4 +56,3 @@ Share your secure reporting URL with employees.
 ---
 
 **Ready to get started?** [Sign up now](https://disclosurely.com)
-
