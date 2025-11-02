@@ -46,10 +46,16 @@
 }
 
 /* Direct override for hero clip - bypasses variable cascade issues AND Vue scoped styles */
+/* Using attribute wildcard selector to match ANY Vue scoped hash */
 .VPHero .name .clip,
 .VPHomeHero .name .clip,
-.clip[data-v-0a0d4301],
-[data-v-0a0d4301] .clip {
+.clip[class*="clip"],
+span.clip,
+h1 .clip,
+.name > .clip,
+[class^="VPHero"] .clip,
+[data-v-0a0d4301] .clip,
+.clip[data-v-0a0d4301] {
   background: #6366f1 !important;
   -webkit-background-clip: text !important;
   background-clip: text !important;
