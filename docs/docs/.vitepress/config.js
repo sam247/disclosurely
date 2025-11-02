@@ -82,7 +82,9 @@ export default defineConfig({
         --vp-home-hero-name-color: transparent !important;
         --vp-home-hero-name-background: #6366f1 !important;
       }
-      /* Ultra-specific selectors to override VitePress scoped styles */
+      /* NUCLEAR OPTION: Override EVERYTHING related to hero text color */
+
+      /* Try solid color first (no background-clip) */
       .VPHero .name .clip[data-v-0a0d4301],
       .VPHomeHero .name .clip[data-v-0a0d4301],
       h1.name .clip[data-v-0a0d4301],
@@ -94,16 +96,21 @@ export default defineConfig({
       .VPHomeHero .name .clip,
       span.clip,
       h1 .clip {
+        /* Try solid color approach */
+        color: #6366f1 !important;
+        -webkit-text-fill-color: #6366f1 !important;
+
+        /* AND background-clip approach */
         background: #6366f1 !important;
         -webkit-background-clip: text !important;
         background-clip: text !important;
-        -webkit-text-fill-color: transparent !important;
-        color: transparent !important;
       }
 
-      /* Force the variables to override (even though they don't cascade through var()) */
+      /* Force the variables to override */
       html :root {
         --vp-home-hero-name-background: #6366f1 !important;
+        --vp-home-hero-name-color: #6366f1 !important;
+        --vp-c-brand: #6366f1 !important;
       }
     `]
   ]
