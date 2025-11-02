@@ -52,6 +52,28 @@ export default defineConfig({
 
   head: [
     ['link', { rel: 'icon', href: '/logo.png' }],
+    ['script', {}, `
+      // Force blue color on page load
+      if (typeof window !== 'undefined') {
+        window.addEventListener('DOMContentLoaded', () => {
+          // Wait for Vue to render
+          setTimeout(() => {
+            const clips = document.querySelectorAll('.clip, [class*="clip"]');
+            clips.forEach(el => {
+              el.style.setProperty('background', '#6366f1', 'important');
+              el.style.setProperty('-webkit-background-clip', 'text', 'important');
+              el.style.setProperty('background-clip', 'text', 'important');
+              el.style.setProperty('-webkit-text-fill-color', 'transparent', 'important');
+              el.style.setProperty('color', 'transparent', 'important');
+            });
+
+            // Set CSS variables too
+            document.documentElement.style.setProperty('--vp-c-brand-1', '#6366f1');
+            document.documentElement.style.setProperty('--vp-home-hero-name-background', '#6366f1');
+          }, 100);
+        });
+      }
+    `],
     ['style', {}, `
       /* Override CSS variables */
       :root {
