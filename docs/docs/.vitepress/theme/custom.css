@@ -1,69 +1,7 @@
 /**
- * Disclosurely Brand Colors
- * Primary Blue: #6366f1 (pure blue, no purple/indigo)
+ * Additional custom styles for Disclosurely docs
+ * (Brand colors are defined in style.css)
  */
 
-:root {
-  /* Override VitePress brand colors with Disclosurely blue */
-  --vp-c-brand-1: #6366f1 !important;
-  --vp-c-brand-2: #6366f1 !important;
-  --vp-c-brand-3: #6366f1 !important;
-  --vp-c-brand-soft: rgba(99, 102, 241, 0.14) !important;
-  
-  /* Accent colors - replace ALL greens with blue */
-  --vp-c-green-1: #6366f1 !important;
-  --vp-c-green-2: #6366f1 !important;
-  --vp-c-green-3: #6366f1 !important;
-  --vp-c-green-soft: rgba(99, 102, 241, 0.14) !important;
-  --vp-c-green-dimm-1: rgba(99, 102, 241, 0.5) !important;
-  --vp-c-green-dimm-2: rgba(99, 102, 241, 0.25) !important;
-  --vp-c-green-dimm-3: rgba(99, 102, 241, 0.05) !important;
-  
-  /* Button colors */
-  --vp-button-brand-bg: #6366f1 !important;
-  --vp-button-brand-border: #6366f1 !important;
-  --vp-button-brand-text: #fff !important;
-  --vp-button-brand-hover-bg: #4f46e5 !important;
-  --vp-button-brand-hover-border: #4f46e5 !important;
-  --vp-button-brand-active-bg: #4338ca !important;
-  --vp-button-brand-active-border: #4338ca !important;
-  
-  /* Home hero - solid blue (per VitePress docs, only set color for solid) */
-  --vp-home-hero-name-color: #6366f1 !important;
-}
-
-.dark {
-  /* Dark mode brand colors - pure blue, no purple/indigo */
-  --vp-c-brand-1: #6366f1 !important;
-  --vp-c-brand-2: #6366f1 !important;
-  --vp-c-brand-3: #4f46e5 !important;
-  --vp-c-brand-soft: rgba(99, 102, 241, 0.16) !important;
-  
-  /* Dark mode greens -> blue */
-  --vp-c-green-1: #6366f1 !important;
-  --vp-c-green-2: #6366f1 !important;
-  --vp-c-green-3: #4f46e5 !important;
-  --vp-c-green-soft: rgba(99, 102, 241, 0.16) !important;
-  --vp-c-green-dimm-1: rgba(99, 102, 241, 0.5) !important;
-  --vp-c-green-dimm-2: rgba(99, 102, 241, 0.25) !important;
-  --vp-c-green-dimm-3: rgba(99, 102, 241, 0.05) !important;
-  
-  --vp-button-brand-bg: #6366f1 !important;
-  --vp-button-brand-border: #6366f1 !important;
-  --vp-button-brand-hover-bg: #4f46e5 !important;
-  --vp-button-brand-hover-border: #4f46e5 !important;
-  
-  /* Home hero - solid blue (per VitePress docs, only set color for solid) */
-  --vp-home-hero-name-color: #6366f1 !important;
-}
-
-/* Remove gradient clip effect from hero title */
-.VPHero .name .clip,
-.VPHomeHero .name .clip {
-  -webkit-background-clip: text !important;
-  background-clip: text !important;
-  background-image: none !important;
-  color: #6366f1 !important;
-  -webkit-text-fill-color: #6366f1 !important;
-}
+/* Add any additional custom component styles here if needed */
 
