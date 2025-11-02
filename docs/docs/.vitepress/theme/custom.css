@@ -28,9 +28,8 @@
   --vp-button-brand-active-bg: #4338ca !important;
   --vp-button-brand-active-border: #4338ca !important;
   
-  /* Home hero - NO GRADIENT, solid blue */
+  /* Home hero - solid blue (per VitePress docs, only set color for solid) */
   --vp-home-hero-name-color: #6366f1 !important;
-  --vp-home-hero-name-background: #6366f1 !important;
 }
 
 .dark {
@@ -54,9 +53,8 @@
   --vp-button-brand-hover-bg: #4f46e5 !important;
   --vp-button-brand-hover-border: #4f46e5 !important;
   
-  /* Home hero - NO GRADIENT, solid blue */
+  /* Home hero - solid blue (per VitePress docs, only set color for solid) */
   --vp-home-hero-name-color: #6366f1 !important;
-  --vp-home-hero-name-background: #6366f1 !important;
 }
 
 /* Remove gradient clip effect from hero title */
