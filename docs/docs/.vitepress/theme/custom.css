@@ -45,3 +45,13 @@
   --vp-home-hero-name-background: #6366f1;
 }
 
+/* Direct override for hero clip - bypasses variable cascade issues */
+.VPHero .name .clip,
+.VPHomeHero .name .clip {
+  background: #6366f1 !important;
+  -webkit-background-clip: text !important;
+  background-clip: text !important;
+  -webkit-text-fill-color: transparent !important;
+  color: transparent !important;
+}
+
