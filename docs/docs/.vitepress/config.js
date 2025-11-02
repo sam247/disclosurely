@@ -52,6 +52,7 @@ export default defineConfig({
 
   head: [
     ['link', { rel: 'icon', href: '/logo.png' }],
+    ['link', { rel: 'stylesheet', href: 'data:text/css,:root{--vp-c-brand-1:%236366f1!important;--vp-c-brand-2:%236366f1!important;--vp-c-brand-3:%236366f1!important;--vp-c-brand:%236366f1!important;--vp-c-indigo-1:%236366f1!important;--vp-c-indigo-2:%236366f1!important;--vp-c-indigo-3:%236366f1!important;--vp-home-hero-name-background:%236366f1!important;}' }],
     ['script', {}, `
       // Force blue color on page load
       if (typeof window !== 'undefined') {
