@@ -52,6 +52,29 @@ export default defineConfig({
 
   head: [
     ['link', { rel: 'icon', href: '/logo.png' }],
-    ['link', { rel: 'stylesheet', href: '/custom-colors.css' }]
+    ['style', {}, `
+      :root {
+        --vp-c-brand: #6366f1 !important;
+        --vp-c-brand-1: #6366f1 !important;
+        --vp-c-brand-2: #6366f1 !important;
+        --vp-c-brand-3: #6366f1 !important;
+        --vp-c-indigo-1: #6366f1 !important;
+        --vp-c-indigo-2: #6366f1 !important;
+        --vp-c-indigo-3: #6366f1 !important;
+        --vp-home-hero-name-color: transparent !important;
+        --vp-home-hero-name-background: #6366f1 !important;
+      }
+      .dark {
+        --vp-c-brand: #6366f1 !important;
+        --vp-c-brand-1: #6366f1 !important;
+        --vp-c-brand-2: #6366f1 !important;
+        --vp-c-brand-3: #6366f1 !important;
+        --vp-c-indigo-1: #6366f1 !important;
+        --vp-c-indigo-2: #6366f1 !important;
+        --vp-c-indigo-3: #6366f1 !important;
+        --vp-home-hero-name-color: transparent !important;
+        --vp-home-hero-name-background: #6366f1 !important;
+      }
+    `]
   ]
 })
