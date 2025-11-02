@@ -53,6 +53,7 @@ export default defineConfig({
   head: [
     ['link', { rel: 'icon', href: '/logo.png' }],
     ['style', {}, `
+      /* Override CSS variables */
       :root {
         --vp-c-brand: #6366f1 !important;
         --vp-c-brand-1: #6366f1 !important;
@@ -74,6 +75,29 @@ export default defineConfig({
         --vp-c-indigo-3: #6366f1 !important;
         --vp-home-hero-name-color: transparent !important;
         --vp-home-hero-name-background: #6366f1 !important;
+      }
+
+      /* Target Vue scoped styles directly - THIS IS THE KEY! */
+      [data-v-0a0d4301] {
+        --vp-c-brand-1: #6366f1 !important;
+      }
+      .name[data-v-0a0d4301] .clip[data-v-0a0d4301] {
+        background: #6366f1 !important;
+        -webkit-background-clip: text !important;
+        background-clip: text !important;
+        -webkit-text-fill-color: transparent !important;
+      }
+      h1[data-v-0a0d4301] .clip[data-v-0a0d4301] {
+        background: #6366f1 !important;
+        -webkit-background-clip: text !important;
+        background-clip: text !important;
+        -webkit-text-fill-color: transparent !important;
+      }
+      .clip[data-v-0a0d4301] {
+        background: #6366f1 !important;
+        -webkit-background-clip: text !important;
+        background-clip: text !important;
+        -webkit-text-fill-color: transparent !important;
       }
     `]
   ]
