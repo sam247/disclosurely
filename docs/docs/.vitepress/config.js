@@ -82,20 +82,28 @@ export default defineConfig({
         --vp-home-hero-name-color: transparent !important;
         --vp-home-hero-name-background: #6366f1 !important;
       }
+      /* Ultra-specific selectors to override VitePress scoped styles */
+      .VPHero .name .clip[data-v-0a0d4301],
+      .VPHomeHero .name .clip[data-v-0a0d4301],
+      h1.name .clip[data-v-0a0d4301],
+      .VPHero h1 .clip,
+      .VPHomeHero h1 .clip,
+      .clip[data-v-0a0d4301],
+      [data-v-0a0d4301].clip,
       .VPHero .name .clip,
       .VPHomeHero .name .clip,
-      .clip[class*="clip"],
       span.clip,
-      h1 .clip,
-      .name > .clip,
-      [class^="VPHero"] .clip,
-      [data-v-0a0d4301] .clip,
-      .clip[data-v-0a0d4301] {
+      h1 .clip {
         background: #6366f1 !important;
         -webkit-background-clip: text !important;
         background-clip: text !important;
         -webkit-text-fill-color: transparent !important;
         color: transparent !important;
+      }
+
+      /* Force the variables to override (even though they don't cascade through var()) */
+      html :root {
+        --vp-home-hero-name-background: #6366f1 !important;
       }
     `]
   ]
