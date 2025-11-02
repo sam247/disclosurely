@@ -2,7 +2,7 @@
 layout: home
 
 hero:
-  name: "Disclosurely"
+  name: "Disclosurelyy"
   text: "Documentation"
   tagline: Everything you need to build, manage, and optimize your whistleblowing and compliance platform.
   actions:
