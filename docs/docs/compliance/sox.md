@@ -98,9 +98,9 @@ The **Sarbanes-Oxley Act of 2002 (SOX)** is a United States federal law that est
 **Section 301 Requirement**: Anonymous submission capability
 
 **Disclosurely Provides**:
-- ✅ **Anonymous reporting**: No identity collected, tracking ID only
+- ✅ **[Anonymous reporting](/reporting/report-types)**: No identity collected, tracking ID only
 - ✅ **Confidential reporting**: Identity encrypted, limited access
-- ✅ **Secure communication**: Two-way messaging without revealing identity
+- ✅ **[Secure communication](/reporting/secure-messaging)**: Two-way messaging without revealing identity
 - ✅ **Multiple submission methods**: Web form, email gateway, phone (Enterprise)
 - ✅ **Accessibility**: 24/7 availability, mobile-friendly
 
@@ -172,8 +172,8 @@ The **Sarbanes-Oxley Act of 2002 (SOX)** is a United States federal law that est
 **SOX Requirement**: 7-year retention for audit work papers
 
 **Disclosurely Compliance**:
-- ✅ **Tamper-evident audit trail**: Hash chain prevents alteration
-- ✅ **7+ year retention**: Configurable retention policies
+- ✅ **[Tamper-evident audit trail](/compliance/audit-trail)**: Hash chain prevents alteration
+- ✅ **[7+ year retention](/compliance/retention)**: Configurable retention policies
 - ✅ **Complete documentation**: All investigation activities logged
 - ✅ **Secure storage**: Encrypted, geographically redundant
 - ✅ **Audit export**: Provide records to auditors
@@ -287,7 +287,7 @@ The **Sarbanes-Oxley Act of 2002 (SOX)** is a United States federal law that est
 5. Enhanced documentation
 
 **Configure Routing**:
-1. Settings > Case Assignment
+1. Settings > [Case Assignment](/cases/assignment)
 2. Create rule for "Financial Misconduct"
 3. Assign to audit committee oversight
 4. Set priority level: High or Critical

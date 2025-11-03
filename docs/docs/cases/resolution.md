@@ -77,7 +77,7 @@ Choose the appropriate standard for your case:
    - Time period involved
 
 2. **Summarize Evidence**
-   - Evidence supporting allegation
+   - [Evidence supporting allegation](/cases/evidence)
    - Evidence contradicting allegation
    - Credibility of sources
    - Corroboration or lack thereof
@@ -347,7 +347,7 @@ Sometimes appropriate response is no action:
 - Implementation timeline
 
 **Appendices**:
-- Evidence index
+- [Evidence index](/cases/evidence)
 - List of interviews conducted
 - Relevant policies
 - Timeline of events
@@ -393,6 +393,8 @@ Sometimes appropriate response is no action:
 ## Communicating Outcomes
 
 ### To the Reporter
+
+Use [secure messaging](/reporting/secure-messaging) to communicate outcomes.
 
 **What to Share**:
 - Investigation completed

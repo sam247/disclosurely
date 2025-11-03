@@ -212,25 +212,25 @@ Each audit entry contains:
 
 ### Regulatory Compliance
 
-**EU Whistleblowing Directive**:
+**[EU Whistleblowing Directive](/compliance/eu-directive)**:
 - Demonstrates report handling timeline
 - Shows acknowledgment within 7 days
 - Proves feedback within 3 months
 - Documents confidentiality measures
 - Audit trail required for compliance
 
-**GDPR**:
+**[GDPR](/compliance/gdpr)**:
 - Track data access
 - Document data exports
 - Verify deletions occurred
 - Demonstrate consent handling
 - Support data subject requests
 
-**SOX (Sarbanes-Oxley)**:
+**[SOX (Sarbanes-Oxley)](/compliance/sox)**:
 - Audit trail of financial report investigations
 - Document controls and processes
 - Demonstrate segregation of duties
-- Prove data retention compliance
+- Prove [data retention compliance](/compliance/retention)
 
 **ISO 27001**:
 - Information security event logging
@@ -389,7 +389,7 @@ Each audit entry contains:
 - Administrative sanctions
 
 **Storage**:
-- Encrypted at rest
+- [Encrypted at rest](/security/overview)
 - Geographically redundant
 - Separate from case data
 - Highly available
