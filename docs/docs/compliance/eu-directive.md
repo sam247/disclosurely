@@ -62,7 +62,7 @@ Each EU member state has implemented the Directive through national legislation:
 
 **Disclosurely Compliance**:
 - ✅ Secure web-based reporting portal
-- ✅ Anonymous reporting via tracking ID
+- ✅ [Anonymous reporting](/reporting/report-types) via tracking ID
 - ✅ Confidential reporting with identity protection
 - ✅ Military-grade AES-256 encryption
 - ✅ Customizable reporting forms
@@ -109,14 +109,14 @@ Each EU member state has implemented the Directive through national legislation:
 **Requirement**: Provide feedback on investigation outcome within **3 months** (extendable to 6 months for complex cases)
 
 **Disclosurely Compliance**:
-- ✅ Secure messaging system for communication
+- ✅ [Secure messaging](/reporting/secure-messaging) system for communication
 - ✅ Case status updates
 - ✅ Investigation outcome notification
 - ✅ Timeline tracking with alerts
 - ✅ Automated compliance monitoring
 
 **Timeline Management**:
-1. Case created → 3-month timer starts
+1. [Case created](/cases/workflow) → 3-month timer starts
 2. Alerts at 60 days, 75 days, 85 days
 3. Extend to 6 months if needed (document reason)
 4. Provide feedback before deadline

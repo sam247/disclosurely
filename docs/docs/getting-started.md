@@ -6,10 +6,10 @@ Welcome to Disclosurely! This guide will help you get up and running quickly.
 
 Disclosurely is a modern whistleblowing and compliance platform designed to help organizations:
 
-- **Protect Whistleblowers** - Anonymous, encrypted reporting with secure two-way messaging
-- **Stay Compliant** - Meet EU Whistleblowing Directive, UK PIDA, SOX, and GDPR requirements
-- **Manage Risk** - Centralized compliance hub with policies, risks, and audit trails
-- **Leverage AI** - AI-powered case analysis with privacy-first architecture
+- **Protect Whistleblowers** - [Anonymous, encrypted reporting](/reporting/report-types) with [secure two-way messaging](/reporting/secure-messaging)
+- **Stay Compliant** - Meet [EU Whistleblowing Directive](/compliance/eu-directive), UK PIDA, [SOX](/compliance/sox), and [GDPR requirements](/compliance/gdpr)
+- **Manage Risk** - Centralized compliance hub with policies, risks, and [tamper-evident audit trails](/compliance/audit-trail)
+- **Leverage AI** - [AI-powered case analysis](/ai/case-helper) with privacy-first architecture
 
 ## Quick Start
 
@@ -19,12 +19,16 @@ Visit [disclosurely.com](https://disclosurely.com) and sign up for a free accoun
 
 ### 2. Set Up Your Organization
 
+Follow our [comprehensive initial setup guide](/admin/initial-setup) to configure your organization:
+
 1. Navigate to **Settings > Organization**
 2. Add your organization name and details
 3. Upload your logo for white-label branding
-4. Configure your custom domain (optional)
+4. Configure your [custom domain](/admin/custom-domains) (optional)
 
 ### 3. Customize Your Reporting Portal
+
+Learn how to [customize your branding](/admin/custom-branding) to match your organization:
 
 1. Go to **Settings > Branding**
 2. Upload your logo
@@ -32,6 +36,8 @@ Visit [disclosurely.com](https://disclosurely.com) and sign up for a free accoun
 4. Customize welcome messages
 
 ### 4. Invite Your Team
+
+Set up your [team members and assign roles](/admin/team-management):
 
 1. Navigate to **Team**
 2. Click **Invite Member**
@@ -42,7 +48,7 @@ Visit [disclosurely.com](https://disclosurely.com) and sign up for a free accoun
 
 ### 5. Launch Your Reporting Channel
 
-Share your secure reporting URL with employees.
+Share your secure reporting URL with employees. Learn more about [how employees can submit reports](/reporting/how-to-submit).
 
 ## Need Help?
 

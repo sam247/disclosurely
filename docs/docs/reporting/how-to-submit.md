@@ -61,10 +61,12 @@ Consider reporting if:
 
 ### Should You Report Anonymously or Confidentially?
 
+Learn more about the [differences between anonymous and confidential reporting](/reporting/report-types).
+
 **Anonymous Reporting** means:
 - No personal information collected or stored
 - Complete anonymity guaranteed
-- Use tracking ID to check status and communicate
+- Use [tracking ID to check status](/reporting/tracking-report) and communicate
 - Cannot be traced back to you
 - Organization cannot identify you
 
@@ -272,7 +274,7 @@ If you have documents, photos, or files that support your report, you can upload
 - Don't upload anything illegal or irrelevant
 
 **How Files Are Handled**:
-- Encrypted during upload
+- [Encrypted during upload](/reporting/encryption) using AES-256 encryption
 - Stored securely with your report
 - Only accessible to authorized case handlers
 - Can be viewed through the encrypted platform
@@ -325,7 +327,7 @@ Once you're satisfied, click **"Submit Report"**.
 
 ### Step 8: Save Your Tracking ID
 
-**CRITICAL STEP**: After submission, you'll be shown a unique tracking ID.
+**CRITICAL STEP**: After submission, you'll be shown a unique tracking ID. Learn more about [using your tracking ID](/reporting/tracking-report).
 
 **Format**: DIS-XXXXXXXX (e.g., DIS-A7B9C2D1)
 
@@ -389,7 +391,7 @@ Complex cases may take longer. You can check status anytime with your tracking I
 1. Visit the status lookup page (link provided after submission)
 2. Enter your tracking ID
 3. View current status and any messages
-4. Send and receive messages with investigators
+4. [Send and receive secure messages](/reporting/secure-messaging) with investigators
 
 ### Status Meanings
 

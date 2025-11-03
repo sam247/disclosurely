@@ -16,7 +16,7 @@ Effective data retention policies balance:
 
 ### Whistleblowing Regulations
 
-**EU Whistleblowing Directive (2019/1937)**:
+**[EU Whistleblowing Directive (2019/1937)](/compliance/eu-directive)**:
 - No specific retention period mandated
 - Must retain long enough to investigate and act
 - Member states may set requirements
@@ -28,7 +28,7 @@ Effective data retention policies balance:
 - Serious cases: Longer retention
 - Employment tribunal limitation: 3 months (but retain records longer)
 
-**US Sarbanes-Oxley (SOX)**:
+**[US Sarbanes-Oxley (SOX)](/compliance/sox)**:
 - Financial misconduct: 7 years minimum
 - Audit work papers: 7 years
 - Criminal penalties for destruction
@@ -60,7 +60,7 @@ Effective data retention policies balance:
 
 ### Data Protection
 
-**GDPR (Article 5)**:
+**[GDPR (Article 5)](/compliance/gdpr)**:
 - Storage limitation principle
 - Retain only as long as necessary
 - Define and document retention periods
@@ -111,7 +111,7 @@ Effective data retention policies balance:
 - Industry standard
 
 **Configure in Disclosurely**:
-1. Dashboard > Organization Settings
+1. Dashboard > [Organization Settings](/admin/organization-settings)
 2. Data Retention Policies
 3. Set "Default Retention Period"
 4. Enter years (e.g., 7)
@@ -493,7 +493,7 @@ Deletion Eligibility Date = Start Date + Retention Period
 - If persistent, support ticket
 - Document issue
 
-**Audit Trail**:
+**[Audit Trail](/compliance/audit-trail)**:
 - Every deletion logged
 - Cannot be altered
 - Shows what, when, who, why

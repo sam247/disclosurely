@@ -30,6 +30,8 @@ Every report receives a unique tracking ID in the format: **DIS-XXXXXXXX**
 
 ### Report Statuses
 
+Learn more about [case status management](/cases/status).
+
 **New**
 - Report just submitted
 - Awaiting initial review

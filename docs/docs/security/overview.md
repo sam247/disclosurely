@@ -28,8 +28,8 @@ Disclosurely is built security-first to protect whistleblowers, organizations, a
 - Regular security audits
 
 **Data Layer**:
-- AES-256 encryption at rest
-- End-to-end encryption for reports
+- [AES-256 encryption at rest](/reporting/encryption)
+- [End-to-end encryption for reports](/reporting/encryption)
 - Zero-knowledge encryption for anonymous reports
 - Encrypted database
 - Encrypted backups
@@ -113,7 +113,7 @@ Zero-knowledge architecture means Disclosurely cannot access the content of encr
 - **HSTS**: Enabled (forces HTTPS)
 - **Perfect forward secrecy**: Enabled
 
-**End-to-End Encryption**:
+**[End-to-End Encryption](/reporting/encryption)**:
 - **Reports**: Encrypted client-side
 - **Messages**: Encrypted before transmission
 - **Evidence**: Encrypted before upload
@@ -228,7 +228,7 @@ Zero-knowledge architecture means Disclosurely cannot access the content of encr
 - Cannot delete audit logs
 - Verifiable integrity
 - Retained permanently
-- Available for compliance
+- [Available for compliance](/compliance/audit-trail)
 
 **Monitoring**:
 - Unusual access patterns detected
@@ -408,13 +408,13 @@ Zero-knowledge architecture means Disclosurely cannot access the content of encr
 - Report available to customers
 - Independent attestation
 
-**GDPR Compliant**: General Data Protection Regulation
+**[GDPR Compliant](/compliance/gdpr)**: General Data Protection Regulation
 - Privacy by design
 - Data subject rights
 - Data protection impact assessments
 - Data processing agreements
 
-**EU Whistleblowing Directive**: Directive 2019/1937
+**[EU Whistleblowing Directive](/compliance/eu-directive)**: Directive 2019/1937
 - Built for full compliance
 - All requirements met
 - Documented controls
@@ -423,7 +423,7 @@ Zero-knowledge architecture means Disclosurely cannot access the content of encr
 ### Regulatory Compliance Support
 
 **Financial Services**:
-- SOX compliance features
+- [SOX compliance features](/compliance/sox)
 - SEC requirements
 - Financial services regulations
 - Audit committee oversight
