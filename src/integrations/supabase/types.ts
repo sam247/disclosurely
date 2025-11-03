@@ -2700,26 +2700,6 @@ export type Database = {
           message: string | null
           timestamp: string | null
         }
-        Insert: {
-          ai_analysis?: Json | null
-          ai_insights?: string[] | null
-          ai_recommendations?: string[] | null
-          context?: string | null
-          data?: Json | null
-          level?: string | null
-          message?: string | null
-          timestamp?: string | null
-        }
-        Update: {
-          ai_analysis?: Json | null
-          ai_insights?: string[] | null
-          ai_recommendations?: string[] | null
-          context?: string | null
-          data?: Json | null
-          level?: string | null
-          message?: string | null
-          timestamp?: string | null
-        }
         Relationships: []
       }
     }
