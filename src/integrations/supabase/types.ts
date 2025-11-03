@@ -53,6 +53,197 @@ export type Database = {
         }
         Relationships: []
       }
+      ai_gateway_logs: {
+        Row: {
+          completion_tokens: number
+          created_at: string | null
+          error_message: string | null
+          error_type: string | null
+          id: string
+          latency_ms: number
+          model: string
+          organization_id: string
+          pii_detected: boolean | null
+          pii_entity_count: number | null
+          prompt_tokens: number
+          purpose: string | null
+          redaction_applied: boolean | null
+          request_id: string
+          total_tokens: number
+          user_id: string | null
+          vendor: string
+        }
+        Insert: {
+          completion_tokens?: number
+          created_at?: string | null
+          error_message?: string | null
+          error_type?: string | null
+          id?: string
+          latency_ms: number
+          model: string
+          organization_id: string
+          pii_detected?: boolean | null
+          pii_entity_count?: number | null
+          prompt_tokens?: number
+          purpose?: string | null
+          redaction_applied?: boolean | null
+          request_id: string
+          total_tokens?: number
+          user_id?: string | null
+          vendor: string
+        }
+        Update: {
+          completion_tokens?: number
+          created_at?: string | null
+          error_message?: string | null
+          error_type?: string | null
+          id?: string
+          latency_ms?: number
+          model?: string
+          organization_id?: string
+          pii_detected?: boolean | null
+          pii_entity_count?: number | null
+          prompt_tokens?: number
+          purpose?: string | null
+          redaction_applied?: boolean | null
+          request_id?: string
+          total_tokens?: number
+          user_id?: string | null
+          vendor?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ai_gateway_logs_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      ai_gateway_policies: {
+        Row: {
+          created_at: string | null
+          created_by: string | null
+          id: string
+          is_active: boolean | null
+          organization_id: string
+          policy_data: Json
+          policy_version: string
+          updated_at: string | null
+          updated_by: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          created_by?: string | null
+          id?: string
+          is_active?: boolean | null
+          organization_id: string
+          policy_data: Json
+          policy_version?: string
+          updated_at?: string | null
+          updated_by?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          created_by?: string | null
+          id?: string
+          is_active?: boolean | null
+          organization_id?: string
+          policy_data?: Json
+          policy_version?: string
+          updated_at?: string | null
+          updated_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ai_gateway_policies_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      ai_gateway_redaction_maps: {
+        Row: {
+          created_at: string | null
+          expires_at: string
+          id: string
+          organization_id: string
+          redaction_map: Json
+          request_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          expires_at?: string
+          id?: string
+          organization_id: string
+          redaction_map: Json
+          request_id: string
+        }
+        Update: {
+          created_at?: string | null
+          expires_at?: string
+          id?: string
+          organization_id?: string
+          redaction_map?: Json
+          request_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ai_gateway_redaction_maps_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      ai_gateway_token_usage: {
+        Row: {
+          created_at: string | null
+          date: string
+          id: string
+          model: string
+          organization_id: string
+          total_cost_usd: number
+          total_requests: number
+          total_tokens: number
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          date?: string
+          id?: string
+          model: string
+          organization_id: string
+          total_cost_usd?: number
+          total_requests?: number
+          total_tokens?: number
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          date?: string
+          id?: string
+          model?: string
+          organization_id?: string
+          total_cost_usd?: number
+          total_requests?: number
+          total_tokens?: number
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ai_gateway_token_usage_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       ai_helper_documents: {
         Row: {
           content_type: string
@@ -310,6 +501,479 @@ export type Database = {
           updated_at?: string
         }
         Relationships: []
+      }
+      compliance_calendar: {
+        Row: {
+          assigned_to: string | null
+          assigned_to_name: string | null
+          completed_date: string | null
+          created_at: string | null
+          created_by: string | null
+          due_date: string
+          event_description: string | null
+          event_title: string
+          event_type: string
+          id: string
+          is_recurring: boolean | null
+          last_reminder_sent_at: string | null
+          organization_id: string
+          recurrence_end_date: string | null
+          recurrence_pattern: string | null
+          related_policy_id: string | null
+          related_risk_id: string | null
+          reminder_days_before: number[] | null
+          status: string
+          updated_at: string | null
+        }
+        Insert: {
+          assigned_to?: string | null
+          assigned_to_name?: string | null
+          completed_date?: string | null
+          created_at?: string | null
+          created_by?: string | null
+          due_date: string
+          event_description?: string | null
+          event_title: string
+          event_type: string
+          id?: string
+          is_recurring?: boolean | null
+          last_reminder_sent_at?: string | null
+          organization_id: string
+          recurrence_end_date?: string | null
+          recurrence_pattern?: string | null
+          related_policy_id?: string | null
+          related_risk_id?: string | null
+          reminder_days_before?: number[] | null
+          status?: string
+          updated_at?: string | null
+        }
+        Update: {
+          assigned_to?: string | null
+          assigned_to_name?: string | null
+          completed_date?: string | null
+          created_at?: string | null
+          created_by?: string | null
+          due_date?: string
+          event_description?: string | null
+          event_title?: string
+          event_type?: string
+          id?: string
+          is_recurring?: boolean | null
+          last_reminder_sent_at?: string | null
+          organization_id?: string
+          recurrence_end_date?: string | null
+          recurrence_pattern?: string | null
+          related_policy_id?: string | null
+          related_risk_id?: string | null
+          reminder_days_before?: number[] | null
+          status?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "compliance_calendar_assigned_to_fkey"
+            columns: ["assigned_to"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "compliance_calendar_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "compliance_calendar_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "compliance_calendar_related_policy_id_fkey"
+            columns: ["related_policy_id"]
+            isOneToOne: false
+            referencedRelation: "compliance_policies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "compliance_calendar_related_policy_id_fkey"
+            columns: ["related_policy_id"]
+            isOneToOne: false
+            referencedRelation: "policy_acknowledgment_summary"
+            referencedColumns: ["policy_id"]
+          },
+          {
+            foreignKeyName: "compliance_calendar_related_risk_id_fkey"
+            columns: ["related_risk_id"]
+            isOneToOne: false
+            referencedRelation: "compliance_risks"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      compliance_evidence: {
+        Row: {
+          content_type: string | null
+          description: string | null
+          evidence_name: string
+          evidence_type: string
+          file_path: string
+          file_size: number | null
+          id: string
+          organization_id: string
+          related_policy_id: string | null
+          related_report_id: string | null
+          related_risk_id: string | null
+          retention_period_months: number | null
+          scheduled_deletion_date: string | null
+          tags: string[] | null
+          uploaded_at: string | null
+          uploaded_by: string | null
+        }
+        Insert: {
+          content_type?: string | null
+          description?: string | null
+          evidence_name: string
+          evidence_type: string
+          file_path: string
+          file_size?: number | null
+          id?: string
+          organization_id: string
+          related_policy_id?: string | null
+          related_report_id?: string | null
+          related_risk_id?: string | null
+          retention_period_months?: number | null
+          scheduled_deletion_date?: string | null
+          tags?: string[] | null
+          uploaded_at?: string | null
+          uploaded_by?: string | null
+        }
+        Update: {
+          content_type?: string | null
+          description?: string | null
+          evidence_name?: string
+          evidence_type?: string
+          file_path?: string
+          file_size?: number | null
+          id?: string
+          organization_id?: string
+          related_policy_id?: string | null
+          related_report_id?: string | null
+          related_risk_id?: string | null
+          retention_period_months?: number | null
+          scheduled_deletion_date?: string | null
+          tags?: string[] | null
+          uploaded_at?: string | null
+          uploaded_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "compliance_evidence_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "compliance_evidence_related_policy_id_fkey"
+            columns: ["related_policy_id"]
+            isOneToOne: false
+            referencedRelation: "compliance_policies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "compliance_evidence_related_policy_id_fkey"
+            columns: ["related_policy_id"]
+            isOneToOne: false
+            referencedRelation: "policy_acknowledgment_summary"
+            referencedColumns: ["policy_id"]
+          },
+          {
+            foreignKeyName: "compliance_evidence_related_report_id_fkey"
+            columns: ["related_report_id"]
+            isOneToOne: false
+            referencedRelation: "reports"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "compliance_evidence_related_risk_id_fkey"
+            columns: ["related_risk_id"]
+            isOneToOne: false
+            referencedRelation: "compliance_risks"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "compliance_evidence_uploaded_by_fkey"
+            columns: ["uploaded_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      compliance_policies: {
+        Row: {
+          created_at: string | null
+          created_by: string | null
+          effective_date: string | null
+          file_path: string | null
+          id: string
+          next_review_date: string | null
+          organization_id: string
+          owner_id: string | null
+          owner_name: string | null
+          policy_content: string | null
+          policy_description: string | null
+          policy_name: string
+          policy_type: string
+          review_date: string | null
+          status: string
+          tags: string[] | null
+          updated_at: string | null
+          version: number
+        }
+        Insert: {
+          created_at?: string | null
+          created_by?: string | null
+          effective_date?: string | null
+          file_path?: string | null
+          id?: string
+          next_review_date?: string | null
+          organization_id: string
+          owner_id?: string | null
+          owner_name?: string | null
+          policy_content?: string | null
+          policy_description?: string | null
+          policy_name: string
+          policy_type: string
+          review_date?: string | null
+          status?: string
+          tags?: string[] | null
+          updated_at?: string | null
+          version?: number
+        }
+        Update: {
+          created_at?: string | null
+          created_by?: string | null
+          effective_date?: string | null
+          file_path?: string | null
+          id?: string
+          next_review_date?: string | null
+          organization_id?: string
+          owner_id?: string | null
+          owner_name?: string | null
+          policy_content?: string | null
+          policy_description?: string | null
+          policy_name?: string
+          policy_type?: string
+          review_date?: string | null
+          status?: string
+          tags?: string[] | null
+          updated_at?: string | null
+          version?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "compliance_policies_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "compliance_policies_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "compliance_policies_owner_id_fkey"
+            columns: ["owner_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      compliance_policy_versions: {
+        Row: {
+          changed_at: string | null
+          changed_by: string | null
+          changes_summary: string | null
+          file_path: string | null
+          id: string
+          policy_content: string | null
+          policy_id: string
+          version: number
+        }
+        Insert: {
+          changed_at?: string | null
+          changed_by?: string | null
+          changes_summary?: string | null
+          file_path?: string | null
+          id?: string
+          policy_content?: string | null
+          policy_id: string
+          version: number
+        }
+        Update: {
+          changed_at?: string | null
+          changed_by?: string | null
+          changes_summary?: string | null
+          file_path?: string | null
+          id?: string
+          policy_content?: string | null
+          policy_id?: string
+          version?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "compliance_policy_versions_changed_by_fkey"
+            columns: ["changed_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "compliance_policy_versions_policy_id_fkey"
+            columns: ["policy_id"]
+            isOneToOne: false
+            referencedRelation: "compliance_policies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "compliance_policy_versions_policy_id_fkey"
+            columns: ["policy_id"]
+            isOneToOne: false
+            referencedRelation: "policy_acknowledgment_summary"
+            referencedColumns: ["policy_id"]
+          },
+        ]
+      }
+      compliance_risks: {
+        Row: {
+          category: string
+          created_at: string | null
+          created_by: string | null
+          id: string
+          impact: number
+          last_reviewed_at: string | null
+          likelihood: number
+          mitigation_plan: string | null
+          mitigation_status: string
+          next_review_date: string | null
+          organization_id: string
+          owner_id: string | null
+          owner_name: string | null
+          related_policy_id: string | null
+          related_report_id: string | null
+          residual_impact: number | null
+          residual_likelihood: number | null
+          residual_score: number | null
+          risk_description: string | null
+          risk_score: number | null
+          risk_title: string
+          tags: string[] | null
+          updated_at: string | null
+        }
+        Insert: {
+          category: string
+          created_at?: string | null
+          created_by?: string | null
+          id?: string
+          impact: number
+          last_reviewed_at?: string | null
+          likelihood: number
+          mitigation_plan?: string | null
+          mitigation_status?: string
+          next_review_date?: string | null
+          organization_id: string
+          owner_id?: string | null
+          owner_name?: string | null
+          related_policy_id?: string | null
+          related_report_id?: string | null
+          residual_impact?: number | null
+          residual_likelihood?: number | null
+          residual_score?: number | null
+          risk_description?: string | null
+          risk_score?: number | null
+          risk_title: string
+          tags?: string[] | null
+          updated_at?: string | null
+        }
+        Update: {
+          category?: string
+          created_at?: string | null
+          created_by?: string | null
+          id?: string
+          impact?: number
+          last_reviewed_at?: string | null
+          likelihood?: number
+          mitigation_plan?: string | null
+          mitigation_status?: string
+          next_review_date?: string | null
+          organization_id?: string
+          owner_id?: string | null
+          owner_name?: string | null
+          related_policy_id?: string | null
+          related_report_id?: string | null
+          residual_impact?: number | null
+          residual_likelihood?: number | null
+          residual_score?: number | null
+          risk_description?: string | null
+          risk_score?: number | null
+          risk_title?: string
+          tags?: string[] | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "compliance_risks_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "compliance_risks_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "compliance_risks_owner_id_fkey"
+            columns: ["owner_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "compliance_risks_related_policy_id_fkey"
+            columns: ["related_policy_id"]
+            isOneToOne: false
+            referencedRelation: "compliance_policies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "compliance_risks_related_policy_id_fkey"
+            columns: ["related_policy_id"]
+            isOneToOne: false
+            referencedRelation: "policy_acknowledgment_summary"
+            referencedColumns: ["policy_id"]
+          },
+          {
+            foreignKeyName: "compliance_risks_related_report_id_fkey"
+            columns: ["related_report_id"]
+            isOneToOne: false
+            referencedRelation: "reports"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       cookie_consents: {
         Row: {
@@ -703,6 +1367,45 @@ export type Database = {
           },
         ]
       }
+      feature_flags: {
+        Row: {
+          created_at: string | null
+          created_by: string | null
+          description: string | null
+          feature_name: string
+          id: string
+          is_enabled: boolean | null
+          organization_overrides: Json | null
+          rollout_percentage: number | null
+          updated_at: string | null
+          updated_by: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          created_by?: string | null
+          description?: string | null
+          feature_name: string
+          id?: string
+          is_enabled?: boolean | null
+          organization_overrides?: Json | null
+          rollout_percentage?: number | null
+          updated_at?: string | null
+          updated_by?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          created_by?: string | null
+          description?: string | null
+          feature_name?: string
+          id?: string
+          is_enabled?: boolean | null
+          organization_overrides?: Json | null
+          rollout_percentage?: number | null
+          updated_at?: string | null
+          updated_by?: string | null
+        }
+        Relationships: []
+      }
       global_seo_settings: {
         Row: {
           created_at: string
@@ -1059,6 +1762,131 @@ export type Database = {
         }
         Relationships: []
       }
+      policy_acknowledgments: {
+        Row: {
+          acknowledged_at: string
+          created_at: string
+          id: string
+          ip_address: string | null
+          notes: string | null
+          organization_id: string
+          policy_id: string
+          policy_version: number
+          signature_data: Json | null
+          user_agent: string | null
+          user_id: string
+        }
+        Insert: {
+          acknowledged_at?: string
+          created_at?: string
+          id?: string
+          ip_address?: string | null
+          notes?: string | null
+          organization_id: string
+          policy_id: string
+          policy_version: number
+          signature_data?: Json | null
+          user_agent?: string | null
+          user_id: string
+        }
+        Update: {
+          acknowledged_at?: string
+          created_at?: string
+          id?: string
+          ip_address?: string | null
+          notes?: string | null
+          organization_id?: string
+          policy_id?: string
+          policy_version?: number
+          signature_data?: Json | null
+          user_agent?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "policy_acknowledgments_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "policy_acknowledgments_policy_id_fkey"
+            columns: ["policy_id"]
+            isOneToOne: false
+            referencedRelation: "compliance_policies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "policy_acknowledgments_policy_id_fkey"
+            columns: ["policy_id"]
+            isOneToOne: false
+            referencedRelation: "policy_acknowledgment_summary"
+            referencedColumns: ["policy_id"]
+          },
+        ]
+      }
+      policy_assignments: {
+        Row: {
+          assigned_at: string
+          assigned_by: string | null
+          created_at: string
+          due_date: string | null
+          id: string
+          organization_id: string
+          policy_id: string
+          reminder_sent_at: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          assigned_at?: string
+          assigned_by?: string | null
+          created_at?: string
+          due_date?: string | null
+          id?: string
+          organization_id: string
+          policy_id: string
+          reminder_sent_at?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          assigned_at?: string
+          assigned_by?: string | null
+          created_at?: string
+          due_date?: string | null
+          id?: string
+          organization_id?: string
+          policy_id?: string
+          reminder_sent_at?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "policy_assignments_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "policy_assignments_policy_id_fkey"
+            columns: ["policy_id"]
+            isOneToOne: false
+            referencedRelation: "compliance_policies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "policy_assignments_policy_id_fkey"
+            columns: ["policy_id"]
+            isOneToOne: false
+            referencedRelation: "policy_acknowledgment_summary"
+            referencedColumns: ["policy_id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           created_at: string
@@ -1369,6 +2197,39 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      role_permissions: {
+        Row: {
+          can_create: boolean | null
+          can_delete: boolean | null
+          can_read: boolean | null
+          can_update: boolean | null
+          created_at: string | null
+          id: string
+          resource: string
+          role: Database["public"]["Enums"]["app_role"]
+        }
+        Insert: {
+          can_create?: boolean | null
+          can_delete?: boolean | null
+          can_read?: boolean | null
+          can_update?: boolean | null
+          created_at?: string | null
+          id?: string
+          resource: string
+          role: Database["public"]["Enums"]["app_role"]
+        }
+        Update: {
+          can_create?: boolean | null
+          can_delete?: boolean | null
+          can_read?: boolean | null
+          can_update?: boolean | null
+          created_at?: string | null
+          id?: string
+          resource?: string
+          role?: Database["public"]["Enums"]["app_role"]
+        }
+        Relationships: []
       }
       security_alerts: {
         Row: {
@@ -1765,6 +2626,69 @@ export type Database = {
         }
         Relationships: []
       }
+      pending_policy_acknowledgments: {
+        Row: {
+          assigned_at: string | null
+          assignment_id: string | null
+          current_version: number | null
+          due_date: string | null
+          first_name: string | null
+          last_name: string | null
+          organization_id: string | null
+          policy_id: string | null
+          policy_name: string | null
+          policy_type: string | null
+          reminder_sent_at: string | null
+          status: string | null
+          user_email: string | null
+          user_id: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "policy_assignments_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "policy_assignments_policy_id_fkey"
+            columns: ["policy_id"]
+            isOneToOne: false
+            referencedRelation: "compliance_policies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "policy_assignments_policy_id_fkey"
+            columns: ["policy_id"]
+            isOneToOne: false
+            referencedRelation: "policy_acknowledgment_summary"
+            referencedColumns: ["policy_id"]
+          },
+        ]
+      }
+      policy_acknowledgment_summary: {
+        Row: {
+          acknowledgment_rate: number | null
+          organization_id: string | null
+          pending_count: number | null
+          policy_id: string | null
+          policy_name: string | null
+          policy_type: string | null
+          total_acknowledged: number | null
+          total_assigned: number | null
+          version: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "compliance_policies_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       recent_critical_issues: {
         Row: {
           ai_analysis: Json | null
@@ -1800,6 +2724,11 @@ export type Database = {
       }
     }
     Functions: {
+      check_token_limit: {
+        Args: { p_organization_id: string; p_requested_tokens: number }
+        Returns: boolean
+      }
+      cleanup_expired_redaction_maps: { Args: never; Returns: number }
       cleanup_old_logs: { Args: never; Returns: undefined }
       create_security_alert: {
         Args: {
@@ -1810,6 +2739,14 @@ export type Database = {
           p_severity?: string
         }
         Returns: string
+      }
+      enable_feature_for_org: {
+        Args: {
+          p_enabled?: boolean
+          p_feature_name: string
+          p_organization_id: string
+        }
+        Returns: undefined
       }
       encrypt_report_server_side: {
         Args: { p_organization_id: string; p_report_data: Json }
@@ -1823,6 +2760,10 @@ export type Database = {
       generate_invitation_token: { Args: never; Returns: string }
       generate_link_token: { Args: never; Returns: string }
       generate_tracking_id: { Args: never; Returns: string }
+      get_active_ai_policy: {
+        Args: { p_organization_id: string }
+        Returns: Json
+      }
       get_audit_logs_safe: {
         Args: never
         Returns: {
@@ -1924,6 +2865,10 @@ export type Database = {
           role: Database["public"]["Enums"]["user_role"]
         }[]
       }
+      get_user_role: {
+        Args: { p_user_id: string }
+        Returns: Database["public"]["Enums"]["app_role"]
+      }
       has_role:
         | { Args: { _role: string; _user_id: string }; Returns: boolean }
         | {
@@ -1933,6 +2878,10 @@ export type Database = {
             }
             Returns: boolean
           }
+      is_feature_enabled: {
+        Args: { p_feature_name: string; p_organization_id?: string }
+        Returns: boolean
+      }
       is_valid_domain: { Args: { domain: string }; Returns: boolean }
       log_link_validation_failure: {
         Args: {
@@ -2024,7 +2973,26 @@ export type Database = {
             }
             Returns: undefined
           }
+      mark_reminder_sent: {
+        Args: { assignment_id: string }
+        Returns: undefined
+      }
       process_notifications_manually: { Args: never; Returns: Json }
+      update_overdue_calendar_events: { Args: never; Returns: undefined }
+      upsert_token_usage: {
+        Args: {
+          p_cost: number
+          p_date: string
+          p_model: string
+          p_organization_id: string
+          p_tokens: number
+        }
+        Returns: undefined
+      }
+      user_has_permission: {
+        Args: { p_action: string; p_resource: string; p_user_id: string }
+        Returns: boolean
+      }
       user_has_role: {
         Args: {
           p_role: Database["public"]["Enums"]["user_role"]
@@ -2073,7 +3041,14 @@ export type Database = {
       }
     }
     Enums: {
-      app_role: "admin" | "org_admin" | "case_handler" | "reviewer"
+      app_role:
+        | "admin"
+        | "org_admin"
+        | "case_handler"
+        | "reviewer"
+        | "compliance_officer"
+        | "risk_manager"
+        | "policy_owner"
       report_status:
         | "new"
         | "in_review"
@@ -2213,7 +3188,15 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
-      app_role: ["admin", "org_admin", "case_handler", "reviewer"],
+      app_role: [
+        "admin",
+        "org_admin",
+        "case_handler",
+        "reviewer",
+        "compliance_officer",
+        "risk_manager",
+        "policy_owner",
+      ],
       report_status: [
         "new",
         "in_review",

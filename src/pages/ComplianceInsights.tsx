@@ -62,11 +62,11 @@ export default function ComplianceInsights() {
         .eq('organization_id', organization?.id)
         .order('risk_score', { ascending: false });
 
-      // Load reports (for trending issues)
+      // Load reports (for trending issues - using report_type instead of non-existent category)
       const threeMonthsAgo = subMonths(new Date(), 3).toISOString();
       const { data: recentReports } = await supabase
         .from('reports')
-        .select('category, status, created_at')
+        .select('report_type, status, created_at')
         .eq('organization_id', organization?.id)
         .gte('created_at', threeMonthsAgo);
 
@@ -112,15 +112,15 @@ export default function ComplianceInsights() {
         }
       });
 
-      // Trending issues from reports
-      const categoryCounts: Record<string, number> = {};
+      // Trending issues from reports (using report_type)
+      const typeCounts: Record<string, number> = {};
       recentReports?.forEach(r => {
-        if (r.category) {
-          categoryCounts[r.category] = (categoryCounts[r.category] || 0) + 1;
+        if (r.report_type) {
+          typeCounts[r.report_type] = (typeCounts[r.report_type] || 0) + 1;
         }
       });
 
-      const trendingIssues = Object.entries(categoryCounts)
+      const trendingIssues = Object.entries(typeCounts)
         .map(([category, count]) => ({ category, count }))
         .sort((a, b) => b.count - a.count)
         .slice(0, 3);

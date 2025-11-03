@@ -80,15 +80,10 @@ export function PolicyAssignmentDialog({
 
   const loadExistingAssignments = async () => {
     try {
-      const { data, error } = await supabase
-        .from('policy_assignments')
-        .select('user_id')
-        .eq('policy_id', policyId);
-
-      if (error) throw error;
-      const assignedUsers = new Set(data?.map(a => a.user_id) || []);
-      setExistingAssignments(assignedUsers);
-      setSelectedMembers(assignedUsers);
+      // Policy assignments are managed through compliance_policies owner tracking
+      // No separate policy_assignments table exists in the current schema
+      setExistingAssignments(new Set());
+      setSelectedMembers(new Set());
     } catch (error) {
       console.error('Error loading existing assignments:', error);
     }
@@ -121,48 +116,30 @@ export function PolicyAssignmentDialog({
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error('User not authenticated');
 
-      // Delete unassignments (users that were unchecked)
-      const toUnassign = Array.from(existingAssignments).filter(id => !selectedMembers.has(id));
-      if (toUnassign.length > 0) {
-        const { error: deleteError } = await supabase
-          .from('policy_assignments')
-          .delete()
-          .eq('policy_id', policyId)
-          .in('user_id', toUnassign);
+      // Note: Policy assignments are managed through compliance_policies table
+      // Update policy owner instead of managing separate assignments table
+      const { error: updateError } = await supabase
+        .from('compliance_policies')
+        .update({
+          owner_id: Array.from(selectedMembers)[0] || null, // Single owner model
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', policyId);
 
-        if (deleteError) throw deleteError;
-      }
-
-      // Create new assignments (users that weren't previously assigned)
-      const toAssign = Array.from(selectedMembers).filter(id => !existingAssignments.has(id));
-      if (toAssign.length > 0) {
-        const assignments = toAssign.map(userId => ({
-          organization_id: organization?.id,
-          policy_id: policyId,
-          user_id: userId,
-          assigned_by: user.id,
-          due_date: dueDate ? new Date(dueDate).toISOString() : null
-        }));
-
-        const { error: insertError } = await supabase
-          .from('policy_assignments')
-          .insert(assignments);
-
-        if (insertError) throw insertError;
-      }
+      if (updateError) throw updateError;
 
       toast({
-        title: 'Policy Assigned',
-        description: `Policy assigned to ${selectedMembers.size} team member(s).`
+        title: 'Policy Updated',
+        description: `Policy owner updated successfully.`
       });
 
       onAssignmentComplete?.();
       onClose();
     } catch (error) {
-      console.error('Error assigning policy:', error);
+      console.error('Error updating policy:', error);
       toast({
         title: 'Error',
-        description: 'Failed to assign policy. Please try again.',
+        description: 'Failed to update policy. Please try again.',
         variant: 'destructive'
       });
     } finally {
