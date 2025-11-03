@@ -49,10 +49,23 @@
   --vp-c-default-3: var(--vp-c-gray-3);
   --vp-c-default-soft: var(--vp-c-gray-soft);
 
+  /* Brand colors - Disclosurely blue */
   --vp-c-brand-1: #6366f1;
   --vp-c-brand-2: #6366f1;
   --vp-c-brand-3: #6366f1;
   --vp-c-brand-soft: #6366f150;
+
+  /* Override default indigo palette to prevent purple fallback */
+  --vp-c-indigo-1: #6366f1;
+  --vp-c-indigo-2: #6366f1;
+  --vp-c-indigo-3: #6366f1;
+  --vp-c-indigo-soft: #6366f150;
+
+  /* Override default purple palette to prevent purple fallback */
+  --vp-c-purple-1: #6366f1;
+  --vp-c-purple-2: #6366f1;
+  --vp-c-purple-3: #6366f1;
+  --vp-c-purple-soft: #6366f150;
 
   --vp-c-tip-1: var(--vp-c-brand-1);
   --vp-c-tip-2: var(--vp-c-brand-2);
@@ -93,6 +106,30 @@
 :root {
   --vp-home-hero-name-color: transparent;
   --vp-home-hero-name-background: #6366f1;
+}
+
+/**
+ * Dark mode color overrides
+ * -------------------------------------------------------------------------- */
+
+.dark {
+  /* Brand colors - Disclosurely blue for dark mode */
+  --vp-c-brand-1: #818cf8;
+  --vp-c-brand-2: #6366f1;
+  --vp-c-brand-3: #4f46e5;
+  --vp-c-brand-soft: #6366f150;
+
+  /* Override indigo palette in dark mode */
+  --vp-c-indigo-1: #818cf8;
+  --vp-c-indigo-2: #6366f1;
+  --vp-c-indigo-3: #4f46e5;
+  --vp-c-indigo-soft: #6366f150;
+
+  /* Override purple palette in dark mode */
+  --vp-c-purple-1: #818cf8;
+  --vp-c-purple-2: #6366f1;
+  --vp-c-purple-3: #4f46e5;
+  --vp-c-purple-soft: #6366f150;
 }
 
 @media (min-width: 640px) {
