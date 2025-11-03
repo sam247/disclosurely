@@ -98,12 +98,18 @@ const DynamicHelmet: React.FC<DynamicHelmetProps> = ({
           
           console.log('✅ DynamicHelmet: Found SEO data:', fields);
           
+          // Ensure OG image URL is absolute (add https: if missing)
+          let ogImageUrl = fields.ogImage?.fields?.file?.url;
+          if (ogImageUrl && !ogImageUrl.startsWith('http')) {
+            ogImageUrl = `https:${ogImageUrl}`;
+          }
+          
           setSeoData({
             meta_title: fields.pageTitle,
             meta_description: fields.metaDescription,
             og_title: fields.ogTitle,
             og_description: fields.ogDescription,
-            og_image_url: fields.ogImage?.fields?.file?.url,
+            og_image_url: ogImageUrl,
             canonical_url: fields.canonicalUrl,
             robots_directive: fields.robotsMeta,
           });
@@ -124,11 +130,17 @@ const DynamicHelmet: React.FC<DynamicHelmetProps> = ({
           
           console.log('✅ DynamicHelmet: Found site settings:', siteFields);
           
+          // Ensure default OG image URL is absolute (add https: if missing)
+          let defaultOgImageUrl = siteFields.defaultOgImage?.fields?.file?.url;
+          if (defaultOgImageUrl && !defaultOgImageUrl.startsWith('http')) {
+            defaultOgImageUrl = `https:${defaultOgImageUrl}`;
+          }
+          
           setGlobalSeoData({
             site_name: siteFields.siteName,
             default_meta_title: siteFields.siteName,
             default_meta_description: 'Secure whistleblowing platform',
-            default_og_image_url: siteFields.defaultOgImage?.fields?.file?.url,
+            default_og_image_url: defaultOgImageUrl,
             favicon_url: siteFields.faviconUrl,
             google_analytics_id: siteFields.googleAnalyticsId,
             google_tag_manager_id: siteFields.googleTagManagerId,
@@ -185,10 +197,16 @@ const DynamicHelmet: React.FC<DynamicHelmetProps> = ({
                           globalSeoData?.default_meta_description || 
                           'Secure whistleblowing platform';
 
-  const finalImage = seoData?.og_image_url || 
-                     fallbackImage || 
-                     globalSeoData?.default_og_image_url || 
-                     '/og-image.jpg';
+  // Ensure final image URL is absolute
+  let finalImage = seoData?.og_image_url || 
+                   fallbackImage || 
+                   globalSeoData?.default_og_image_url || 
+                   'https://images.ctfassets.net/rm7hib748uv7/7xYMw12dKqxkDUPMFQgmpR/c78422d28e231aa14167c2a1c1702068/Screenshot_2025-11-02_at_18.09.30.png';
+  
+  // Ensure absolute URL (add https: if Contentful returns protocol-relative URL)
+  if (finalImage && !finalImage.startsWith('http')) {
+    finalImage = finalImage.startsWith('//') ? `https:${finalImage}` : `https://disclosurely.com${finalImage}`;
+  }
 
   // Normalize URL to always use non-www version
   const normalizeCanonicalUrl = (url: string) => {

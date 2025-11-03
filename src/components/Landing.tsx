@@ -9,6 +9,7 @@ import PublicLanguageSelector from "@/components/PublicLanguageSelector";
 import BlogSection from "@/components/BlogSection";
 import { AnnouncementBar } from "@/components/AnnouncementBar";
 import { useTranslation } from "react-i18next";
+import DynamicHelmet from "@/components/DynamicHelmet";
 import anonymousReportingIcon from "@/assets/icons/anonymous_reporting.png";
 import secureMessagingIcon from "@/assets/icons/secure_messaging.png";
 import caseManagementIcon from "@/assets/icons/case_management.png";
@@ -50,7 +51,15 @@ const Landing = () => {
   } = useTranslation();
   const currentLanguage = i18n.language;
   const langPrefix = currentLanguage && currentLanguage !== "en" ? `/${currentLanguage}` : "";
-  return <div className="min-h-screen bg-white">
+  return (
+    <>
+          <DynamicHelmet
+            pageIdentifier="/"
+            fallbackTitle="Disclosurely | Whistleblowing Platform | Disclosure Management Software"
+            fallbackDescription="Secure whistleblowing platform for organizations. Anonymous reporting, end-to-end encryption, and compliance features."
+            fallbackImage="https://disclosurely.com/ogimage.png"
+          />
+      <div className="min-h-screen bg-white">
       {/* Announcement Bar */}
       <AnnouncementBar />
       
@@ -776,6 +785,8 @@ const Landing = () => {
 
       <CookieConsentBanner />
       <Footer />
-    </div>;
+      </div>
+    </>
+  );
 };
 export default Landing;
