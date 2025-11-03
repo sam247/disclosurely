@@ -85,6 +85,9 @@ export default defineConfig({
         --vp-c-indigo-1: #6366f1 !important;
         --vp-c-indigo-2: #6366f1 !important;
         --vp-c-indigo-3: #6366f1 !important;
+        --vp-c-purple-1: #6366f1 !important;
+        --vp-c-purple-2: #6366f1 !important;
+        --vp-c-purple-3: #6366f1 !important;
         --vp-home-hero-name-color: transparent !important;
         --vp-home-hero-name-background: #6366f1 !important;
       }
@@ -96,6 +99,9 @@ export default defineConfig({
         --vp-c-indigo-1: #6366f1 !important;
         --vp-c-indigo-2: #6366f1 !important;
         --vp-c-indigo-3: #6366f1 !important;
+        --vp-c-purple-1: #6366f1 !important;
+        --vp-c-purple-2: #6366f1 !important;
+        --vp-c-purple-3: #6366f1 !important;
         --vp-home-hero-name-color: transparent !important;
         --vp-home-hero-name-background: #6366f1 !important;
       }
