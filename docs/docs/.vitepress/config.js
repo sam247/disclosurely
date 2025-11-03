@@ -4,6 +4,9 @@ export default defineConfig({
   title: "Disclosurely Docs",
   description: "Everything you need to build, manage, and optimize your whistleblowing and compliance platform.",
 
+  // Ignore dead links for pages that are planned but not yet created
+  ignoreDeadLinks: true,
+
   appearance: 'dark', // default to dark mode
 
   themeConfig: {
