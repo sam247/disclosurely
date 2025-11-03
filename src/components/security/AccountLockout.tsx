@@ -1,220 +1,196 @@
 
 import { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
-import { Alert, AlertDescription } from '@/components/ui/alert';
-import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
-import { UserX, Shield, AlertTriangle, Clock } from 'lucide-react';
+import { Shield, Lock, AlertTriangle, Clock } from 'lucide-react';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 
 const AccountLockout = () => {
   const { user } = useAuth();
-  const { toast } = useToast();
-  const [failedAttempts, setFailedAttempts] = useState(0);
-  const [lockoutThreshold, setLockoutThreshold] = useState('5');
-  const [lockoutDuration, setLockoutDuration] = useState('30');
-  const [isLocked, setIsLocked] = useState(false);
-  const [lockoutEndsAt, setLockoutEndsAt] = useState<Date | null>(null);
+  const [lockoutInfo, setLockoutInfo] = useState<{
+    isLocked: boolean;
+    failedAttempts: number;
+    maxAttempts: number;
+    lockoutDuration: number;
+  }>({
+    isLocked: false,
+    failedAttempts: 0,
+    maxAttempts: 5,
+    lockoutDuration: 15
+  });
+  const [recentAttempts, setRecentAttempts] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    checkLockoutStatus();
+    if (user?.email) {
+      fetchLockoutStatus();
+      fetchRecentAttempts();
+    }
   }, [user]);
 
-  const checkLockoutStatus = async () => {
-    // In a real implementation, this would check the database for lockout status
-    // For demo purposes, we'll simulate this
-    const lastFailedAttempt = localStorage.getItem('lastFailedAttempt');
-    const attempts = parseInt(localStorage.getItem('failedAttempts') || '0');
-    
-    setFailedAttempts(attempts);
-    
-    if (attempts >= parseInt(lockoutThreshold)) {
-      const lockoutEnd = new Date(Date.now() + parseInt(lockoutDuration) * 60 * 1000);
-      setLockoutEndsAt(lockoutEnd);
-      setIsLocked(true);
+  const fetchLockoutStatus = async () => {
+    if (!user?.email) return;
+
+    try {
+      // Check if account is currently locked
+      const { data: isLocked, error: lockError } = await supabase.rpc('is_account_locked', {
+        p_email: user.email,
+        p_organization_id: null
+      });
+
+      // Get lockout settings
+      const { data: settings } = await supabase
+        .from('lockout_settings')
+        .select('max_attempts, lockout_duration_minutes')
+        .limit(1)
+        .maybeSingle();
+
+      // Count recent failed attempts
+      const { count } = await supabase
+        .from('login_attempts')
+        .select('*', { count: 'exact', head: true })
+        .eq('email', user.email)
+        .eq('success', false)
+        .gte('attempted_at', new Date(Date.now() - (settings?.lockout_duration_minutes || 15) * 60 * 1000).toISOString());
+
+      setLockoutInfo({
+        isLocked: isLocked || false,
+        failedAttempts: count || 0,
+        maxAttempts: settings?.max_attempts || 5,
+        lockoutDuration: settings?.lockout_duration_minutes || 15
+      });
+    } catch (error) {
+      console.error('Error fetching lockout status:', error);
+    } finally {
+      setLoading(false);
     }
   };
 
-  const simulateFailedAttempt = () => {
-    const newAttempts = failedAttempts + 1;
-    setFailedAttempts(newAttempts);
-    localStorage.setItem('failedAttempts', newAttempts.toString());
-    localStorage.setItem('lastFailedAttempt', new Date().toISOString());
+  const fetchRecentAttempts = async () => {
+    if (!user?.email) return;
 
-    if (newAttempts >= parseInt(lockoutThreshold)) {
-      const lockoutEnd = new Date(Date.now() + parseInt(lockoutDuration) * 60 * 1000);
-      setLockoutEndsAt(lockoutEnd);
-      setIsLocked(true);
-      
-      toast({
-        title: "Account Locked",
-        description: `Account locked due to ${newAttempts} failed login attempts`,
-        variant: "destructive",
-      });
-    } else {
-      toast({
-        title: "Failed Attempt Recorded",
-        description: `${newAttempts} of ${lockoutThreshold} attempts used`,
-        variant: "destructive",
-      });
+    try {
+      const { data, error } = await supabase
+        .from('login_attempts')
+        .select('*')
+        .eq('email', user.email)
+        .order('attempted_at', { ascending: false })
+        .limit(10);
+
+      if (!error && data) {
+        setRecentAttempts(data);
+      }
+    } catch (error) {
+      console.error('Error fetching login attempts:', error);
     }
   };
 
-  const resetAttempts = () => {
-    setFailedAttempts(0);
-    setIsLocked(false);
-    setLockoutEndsAt(null);
-    localStorage.removeItem('failedAttempts');
-    localStorage.removeItem('lastFailedAttempt');
-    
-    toast({
-      title: "Attempts Reset",
-      description: "Failed login attempts have been reset",
+  const formatDate = (dateString: string) => {
+    const date = new Date(dateString);
+    return date.toLocaleString('en-US', {
+      month: 'short',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
     });
   };
 
-  const updateLockoutSettings = () => {
-    toast({
-      title: "Settings Updated",
-      description: `Account will lock after ${lockoutThreshold} failed attempts for ${lockoutDuration} minutes`,
-    });
-  };
-
-  const getRemainingLockoutTime = () => {
-    if (!lockoutEndsAt) return '';
-    
-    const now = new Date();
-    const remaining = Math.max(0, lockoutEndsAt.getTime() - now.getTime());
-    const minutes = Math.ceil(remaining / (1000 * 60));
-    
-    return `${minutes} minutes`;
-  };
+  if (loading) {
+    return (
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Lock className="h-5 w-5" />
+            Account Lockout Protection
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <p className="text-sm text-muted-foreground">Loading lockout status...</p>
+        </CardContent>
+      </Card>
+    );
+  }
 
   return (
     <Card>
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
-          <UserX className="h-5 w-5" />
+          <Lock className="h-5 w-5" />
           Account Lockout Protection
         </CardTitle>
         <CardDescription>
-          Protect your account from brute force attacks
+          Server-side protection against brute-force attacks
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-6">
-        {isLocked && (
-          <Alert variant="destructive">
-            <AlertTriangle className="h-4 w-4" />
-            <AlertDescription>
-              Account is currently locked. Lockout expires in {getRemainingLockoutTime()}.
-            </AlertDescription>
-          </Alert>
-        )}
-
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div>
-            <h4 className="font-medium mb-2">Lockout Threshold</h4>
-            <Select value={lockoutThreshold} onValueChange={setLockoutThreshold}>
-              <SelectTrigger>
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="3">3 attempts</SelectItem>
-                <SelectItem value="5">5 attempts</SelectItem>
-                <SelectItem value="10">10 attempts</SelectItem>
-                <SelectItem value="15">15 attempts</SelectItem>
-              </SelectContent>
-            </Select>
-            <p className="text-sm text-gray-600 mt-1">
-              Lock account after this many failed attempts
-            </p>
-          </div>
-
-          <div>
-            <h4 className="font-medium mb-2">Lockout Duration</h4>
-            <Select value={lockoutDuration} onValueChange={setLockoutDuration}>
-              <SelectTrigger>
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="15">15 minutes</SelectItem>
-                <SelectItem value="30">30 minutes</SelectItem>
-                <SelectItem value="60">1 hour</SelectItem>
-                <SelectItem value="120">2 hours</SelectItem>
-                <SelectItem value="1440">24 hours</SelectItem>
-              </SelectContent>
-            </Select>
-            <p className="text-sm text-gray-600 mt-1">
-              How long to lock the account
-            </p>
-          </div>
-        </div>
-
-        <Button onClick={updateLockoutSettings} className="w-full">
-          <Shield className="h-4 w-4 mr-2" />
-          Update Lockout Settings
-        </Button>
-
-        <div className="border-t pt-4 space-y-4">
-          <h4 className="font-medium">Current Status</h4>
-          
+        <div className="space-y-4">
           <div className="flex items-center justify-between">
-            <span className="text-sm">Failed Attempts</span>
-            <Badge variant={failedAttempts > 0 ? "destructive" : "secondary"}>
-              {failedAttempts} / {lockoutThreshold}
+            <div>
+              <h4 className="font-medium">Account Status</h4>
+              <p className="text-sm text-gray-600">
+                {lockoutInfo.isLocked ? 'Account is temporarily locked' : 'Account is active'}
+              </p>
+            </div>
+            <Badge variant={lockoutInfo.isLocked ? "destructive" : "default"} className="flex items-center gap-1">
+              {lockoutInfo.isLocked ? <AlertTriangle className="h-3 w-3" /> : <Shield className="h-3 w-3" />}
+              {lockoutInfo.isLocked ? 'Locked' : 'Active'}
             </Badge>
           </div>
 
-          <div className="flex items-center justify-between">
-            <span className="text-sm">Account Status</span>
-            <Badge variant={isLocked ? "destructive" : "default"}>
-              {isLocked ? (
-                <>
-                  <UserX className="h-3 w-3 mr-1" />
-                  Locked
-                </>
-              ) : (
-                <>
-                  <Shield className="h-3 w-3 mr-1" />
-                  Active
-                </>
-              )}
-            </Badge>
+          <div className="grid grid-cols-2 gap-4">
+            <div className="p-3 border rounded-lg">
+              <p className="text-sm text-gray-600">Failed Attempts</p>
+              <p className="text-2xl font-bold text-red-600">
+                {lockoutInfo.failedAttempts} / {lockoutInfo.maxAttempts}
+              </p>
+            </div>
+            
+            <div className="p-3 border rounded-lg">
+              <p className="text-sm text-gray-600">Lockout Duration</p>
+              <p className="text-2xl font-bold text-orange-600">{lockoutInfo.lockoutDuration} min</p>
+            </div>
           </div>
 
-          {lockoutEndsAt && (
-            <div className="flex items-center justify-between">
-              <span className="text-sm">Lockout Expires</span>
-              <span className="text-sm text-gray-600 flex items-center gap-1">
-                <Clock className="h-3 w-3" />
-                {getRemainingLockoutTime()}
-              </span>
+          <div className="text-sm text-gray-600 bg-gray-50 p-3 rounded">
+            <strong>Server-Side Protection:</strong> After {lockoutInfo.maxAttempts} failed login attempts, accounts are temporarily locked for {lockoutInfo.lockoutDuration} minutes. All attempts are tracked server-side and cannot be bypassed.
+          </div>
+
+          {recentAttempts.length > 0 && (
+            <div className="space-y-2">
+              <h4 className="font-medium flex items-center gap-2">
+                <Clock className="h-4 w-4" />
+                Recent Login Attempts
+              </h4>
+              <div className="border rounded-lg overflow-hidden">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Time</TableHead>
+                      <TableHead>Status</TableHead>
+                      <TableHead>IP Address</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {recentAttempts.map((attempt) => (
+                      <TableRow key={attempt.id}>
+                        <TableCell className="text-sm">{formatDate(attempt.attempted_at)}</TableCell>
+                        <TableCell>
+                          <Badge variant={attempt.success ? "default" : "destructive"}>
+                            {attempt.success ? 'Success' : 'Failed'}
+                          </Badge>
+                        </TableCell>
+                        <TableCell className="text-sm text-gray-600">
+                          {attempt.ip_address || 'N/A'}
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </div>
             </div>
           )}
-        </div>
-
-        <div className="border-t pt-4 space-y-2">
-          <h4 className="font-medium text-sm">Testing (Demo Only)</h4>
-          <div className="flex gap-2">
-            <Button 
-              onClick={simulateFailedAttempt}
-              variant="outline"
-              size="sm"
-              disabled={isLocked}
-            >
-              Simulate Failed Login
-            </Button>
-            <Button 
-              onClick={resetAttempts}
-              variant="outline"
-              size="sm"
-            >
-              Reset Attempts
-            </Button>
-          </div>
         </div>
       </CardContent>
     </Card>

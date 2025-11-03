@@ -716,11 +716,13 @@ export type Database = {
       }
       compliance_policies: {
         Row: {
+          content: string | null
           created_at: string | null
           created_by: string | null
           effective_date: string | null
           file_path: string | null
           id: string
+          is_active: boolean
           next_review_date: string | null
           organization_id: string
           owner_id: string | null
@@ -729,18 +731,22 @@ export type Database = {
           policy_description: string | null
           policy_name: string
           policy_type: string
+          requires_acknowledgment: boolean
           review_date: string | null
           status: string
           tags: string[] | null
+          title: string
           updated_at: string | null
           version: number
         }
         Insert: {
+          content?: string | null
           created_at?: string | null
           created_by?: string | null
           effective_date?: string | null
           file_path?: string | null
           id?: string
+          is_active?: boolean
           next_review_date?: string | null
           organization_id: string
           owner_id?: string | null
@@ -749,18 +755,22 @@ export type Database = {
           policy_description?: string | null
           policy_name: string
           policy_type: string
+          requires_acknowledgment?: boolean
           review_date?: string | null
           status?: string
           tags?: string[] | null
+          title: string
           updated_at?: string | null
           version?: number
         }
         Update: {
+          content?: string | null
           created_at?: string | null
           created_by?: string | null
           effective_date?: string | null
           file_path?: string | null
           id?: string
+          is_active?: boolean
           next_review_date?: string | null
           organization_id?: string
           owner_id?: string | null
@@ -769,9 +779,11 @@ export type Database = {
           policy_description?: string | null
           policy_name?: string
           policy_type?: string
+          requires_acknowledgment?: boolean
           review_date?: string | null
           status?: string
           tags?: string[] | null
+          title?: string
           updated_at?: string | null
           version?: number
         }
@@ -1503,35 +1515,81 @@ export type Database = {
           },
         ]
       }
+      lockout_settings: {
+        Row: {
+          created_at: string
+          enabled: boolean
+          id: string
+          lockout_duration_minutes: number
+          max_attempts: number
+          organization_id: string | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          enabled?: boolean
+          id?: string
+          lockout_duration_minutes?: number
+          max_attempts?: number
+          organization_id?: string | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          enabled?: boolean
+          id?: string
+          lockout_duration_minutes?: number
+          max_attempts?: number
+          organization_id?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "lockout_settings_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: true
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       login_attempts: {
         Row: {
-          created_at: string | null
-          email: string | null
-          failure_reason: string | null
+          attempted_at: string
+          email: string
           id: string
           ip_address: unknown
-          success: boolean | null
+          organization_id: string | null
+          success: boolean
           user_agent: string | null
         }
         Insert: {
-          created_at?: string | null
-          email?: string | null
-          failure_reason?: string | null
+          attempted_at?: string
+          email: string
           id?: string
           ip_address?: unknown
-          success?: boolean | null
+          organization_id?: string | null
+          success?: boolean
           user_agent?: string | null
         }
         Update: {
-          created_at?: string | null
-          email?: string | null
-          failure_reason?: string | null
+          attempted_at?: string
+          email?: string
           id?: string
           ip_address?: unknown
-          success?: boolean | null
+          organization_id?: string | null
+          success?: boolean
           user_agent?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "login_attempts_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       notifications: {
         Row: {
@@ -1765,6 +1823,7 @@ export type Database = {
       policy_acknowledgments: {
         Row: {
           acknowledged_at: string
+          assignment_id: string | null
           created_at: string
           id: string
           ip_address: string | null
@@ -1778,6 +1837,7 @@ export type Database = {
         }
         Insert: {
           acknowledged_at?: string
+          assignment_id?: string | null
           created_at?: string
           id?: string
           ip_address?: string | null
@@ -1791,6 +1851,7 @@ export type Database = {
         }
         Update: {
           acknowledged_at?: string
+          assignment_id?: string | null
           created_at?: string
           id?: string
           ip_address?: string | null
@@ -1803,6 +1864,20 @@ export type Database = {
           user_id?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "policy_acknowledgments_assignment_id_fkey"
+            columns: ["assignment_id"]
+            isOneToOne: false
+            referencedRelation: "pending_policy_acknowledgments"
+            referencedColumns: ["assignment_id"]
+          },
+          {
+            foreignKeyName: "policy_acknowledgments_assignment_id_fkey"
+            columns: ["assignment_id"]
+            isOneToOne: false
+            referencedRelation: "policy_assignments"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "policy_acknowledgments_organization_id_fkey"
             columns: ["organization_id"]
@@ -2472,7 +2547,7 @@ export type Database = {
           request_id?: string | null
           session_id?: string | null
           stack_trace?: string | null
-          timestamp: string
+          timestamp?: string
           url?: string | null
           user_agent?: string | null
           user_id?: string | null
@@ -2851,6 +2926,10 @@ export type Database = {
             }
             Returns: boolean
           }
+      is_account_locked: {
+        Args: { p_email: string; p_organization_id?: string }
+        Returns: boolean
+      }
       is_feature_enabled: {
         Args: { p_feature_name: string; p_organization_id?: string }
         Returns: boolean
@@ -2863,16 +2942,6 @@ export type Database = {
           p_link_token: string
           p_organization_id?: string
           p_user_agent?: string
-        }
-        Returns: undefined
-      }
-      log_login_attempt: {
-        Args: {
-          p_email: string
-          p_failure_reason?: string
-          p_ip_address: string
-          p_success: boolean
-          p_user_agent: string
         }
         Returns: undefined
       }
@@ -2951,6 +3020,16 @@ export type Database = {
         Returns: undefined
       }
       process_notifications_manually: { Args: never; Returns: Json }
+      record_login_attempt: {
+        Args: {
+          p_email: string
+          p_ip_address?: unknown
+          p_organization_id?: string
+          p_success: boolean
+          p_user_agent?: string
+        }
+        Returns: undefined
+      }
       update_overdue_calendar_events: { Args: never; Returns: undefined }
       upsert_token_usage: {
         Args: {

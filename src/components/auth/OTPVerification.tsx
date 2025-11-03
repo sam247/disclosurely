@@ -40,12 +40,30 @@ const OTPVerification = ({ email, onSuccess, onBack }: OTPVerificationProps) => 
       });
 
       if (error) {
+        // Record failed login attempt
+        await supabase.rpc('record_login_attempt', {
+          p_email: email,
+          p_success: false,
+          p_ip_address: null,
+          p_user_agent: navigator.userAgent,
+          p_organization_id: null
+        });
+
         toast({
           title: "Verification Failed",
           description: error.message,
           variant: "destructive",
         });
       } else {
+        // Record successful login attempt
+        await supabase.rpc('record_login_attempt', {
+          p_email: email,
+          p_success: true,
+          p_ip_address: null,
+          p_user_agent: navigator.userAgent,
+          p_organization_id: null
+        });
+
         toast({
           title: "Success",
           description: "Successfully logged in!",
