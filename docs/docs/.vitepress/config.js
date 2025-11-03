@@ -75,33 +75,48 @@ export default defineConfig({
         text: 'AI & Automation',
         collapsed: false,
         items: [
-          { text: 'AI Case Helper', link: '/ai/case-helper' }
+          { text: 'AI Case Helper', link: '/ai/case-helper' },
+          { text: 'Pattern Detection', link: '/ai/pattern-detection' },
+          { text: 'Risk Assessment', link: '/ai/risk-assessment' },
+          { text: 'Content Generation', link: '/ai/content-generation' }
         ]
       },
       {
         text: 'Compliance Management',
         collapsed: false,
         items: [
+          { text: 'Compliance Overview', link: '/compliance/overview' },
           { text: 'Audit Trail', link: '/compliance/audit-trail' },
           { text: 'GDPR Compliance', link: '/compliance/gdpr' },
           { text: 'Data Retention', link: '/compliance/retention' },
           { text: 'EU Whistleblowing Directive', link: '/compliance/eu-directive' },
           { text: 'SOX Compliance', link: '/compliance/sox' },
-          { text: 'Compliance Reporting & Analytics', link: '/compliance/reporting-analytics' }
+          { text: 'Policy Management', link: '/compliance/policies' },
+          { text: 'Risk Management', link: '/compliance/risks' },
+          { text: 'Compliance Calendar', link: '/compliance/calendar' },
+          { text: 'Anti-Retaliation', link: '/compliance/anti-retaliation' },
+          { text: 'Reporting & Analytics', link: '/compliance/reporting-analytics' }
         ]
       },
       {
         text: 'Security',
         collapsed: false,
         items: [
-          { text: 'Security Overview', link: '/security/overview' }
+          { text: 'Security Overview', link: '/security/overview' },
+          { text: 'Authentication', link: '/security/authentication' },
+          { text: 'Multi-Factor Authentication', link: '/security/mfa' },
+          { text: 'Encryption & Privacy', link: '/security/encryption' },
+          { text: 'Access Control', link: '/security/access-control' },
+          { text: 'Security Monitoring', link: '/security/monitoring' },
+          { text: 'Best Practices', link: '/security/best-practices' }
         ]
       },
       {
         text: 'Analytics & Insights',
         collapsed: false,
         items: [
-          { text: 'Dashboard Overview', link: '/analytics/dashboard' },
+          { text: 'Analytics Overview', link: '/analytics/overview' },
+          { text: 'Dashboard', link: '/analytics/dashboard' },
           { text: 'Report Statistics', link: '/analytics/statistics' },
           { text: 'Compliance Analytics', link: '/analytics/compliance-analytics' }
         ]
