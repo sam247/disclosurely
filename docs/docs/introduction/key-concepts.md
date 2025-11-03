@@ -17,25 +17,25 @@ A **report** is a submission made through your organization's secure reporting c
 
 ### Report Types
 
-Disclosurely supports two types of reports:
+Disclosurely supports [two types of reports](/reporting/report-types):
 
 **Anonymous Reports**
 - No personal information collected
 - Fully encrypted end-to-end
-- Tracking ID provided for status checks
-- Two-way messaging available while maintaining anonymity
+- [Tracking ID provided](/reporting/tracking-report) for status checks
+- [Two-way messaging](/reporting/secure-messaging) available while maintaining anonymity
 - Cannot be traced back to the reporter
 
 **Confidential Reports**
 - Reporter identity known to organization
 - Higher level of trust
 - Easier follow-up communication
-- Still encrypted and secure
+- Still [encrypted and secure](/reporting/encryption)
 - Identity protected from unauthorized access
 
 ### Report Lifecycle
 
-Reports move through a standard lifecycle:
+Reports move through a [standard investigation lifecycle](/cases/workflow):
 
 1. **New** - Just submitted, awaiting review
 2. **In Review** - Initial assessment underway
@@ -43,6 +43,8 @@ Reports move through a standard lifecycle:
 4. **Resolved** - Investigation complete, resolution implemented
 5. **Closed** - Case closed with outcome documented
 6. **Archived** - Historical record, no longer active
+
+Learn more about [case status management](/cases/status).
 
 ### Tracking IDs
 
@@ -101,7 +103,7 @@ Read-only access:
 
 ### Team Invitations
 
-Adding team members requires sending an invitation:
+[Adding team members](/admin/team-management) requires sending an invitation:
 
 1. Admin or Org Admin sends invitation by email
 2. Invitation includes unique token and expires in 7 days
@@ -112,9 +114,9 @@ Adding team members requires sending an invitation:
 
 ### Zero-Knowledge Architecture
 
-Disclosurely is built on zero-knowledge principles:
+Disclosurely is built on [zero-knowledge security principles](/security/overview):
 
-- **Client-Side Encryption**: All sensitive report content is encrypted in the user's browser before transmission
+- **Client-Side Encryption**: All sensitive report content is [encrypted in the user's browser](/reporting/encryption) before transmission
 - **Server Cannot Decrypt**: Our servers never have access to encryption keys
 - **True Anonymity**: We cannot read report content or identify reporters
 - **You Control Keys**: Only users with proper access can decrypt reports

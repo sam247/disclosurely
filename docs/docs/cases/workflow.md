@@ -48,7 +48,7 @@ The investigation workflow in Disclosurely follows a structured process to ensur
    - What records need review?
 
 5. **Request Additional Information**
-   - Use secure messaging to ask reporter:
+   - Use [secure messaging](/reporting/secure-messaging) to ask reporter:
      - Specific dates and times
      - Names of witnesses
      - Location details
@@ -56,7 +56,7 @@ The investigation workflow in Disclosurely follows a structured process to ensur
    - Set reasonable deadline for response
 
 6. **Update Status**
-   - Change from "New" to "Under Review"
+   - Change from "New" to "Under Review" using [status management](/cases/status)
    - Add initial assessment notes
    - Set expected investigation timeline
    - Notify reporter of next steps
@@ -120,14 +120,14 @@ The investigation workflow in Disclosurely follows a structured process to ensur
    - Get receipt if taking from location
 
 4. **Organize Evidence**
-   - Upload all evidence to case
+   - Upload all [evidence to case](/cases/evidence)
    - Tag and categorize each item
    - Create evidence index
    - Link evidence to specific allegations
    - Note relevance and weight
 
 5. **Update Case Notes**
-   - Document investigation activities daily
+   - [Document investigation activities](/cases/evidence) daily
    - Note who interviewed when
    - Record evidence obtained
    - Track outstanding actions
@@ -188,7 +188,7 @@ The investigation workflow in Disclosurely follows a structured process to ensur
    - Regulatory implications
 
 6. **Document AI Assistance**
-   - If using AI Case Helper for analysis
+   - If using [AI Case Helper](/ai/case-helper) for analysis
    - Note which AI insights used
    - Verify AI conclusions independently
    - Document human review and decision
@@ -247,6 +247,8 @@ The investigation workflow in Disclosurely follows a structured process to ensur
 - Recommend appropriate actions
 - Ensure consistency and fairness
 - Document thoroughly
+
+Learn more about [determining findings and appropriate actions](/cases/resolution).
 
 **Actions:**
 
