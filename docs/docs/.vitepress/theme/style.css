@@ -49,23 +49,23 @@
   --vp-c-default-3: var(--vp-c-gray-3);
   --vp-c-default-soft: var(--vp-c-gray-soft);
 
-  /* Brand colors - Disclosurely blue */
-  --vp-c-brand-1: #6366f1;
-  --vp-c-brand-2: #6366f1;
-  --vp-c-brand-3: #6366f1;
-  --vp-c-brand-soft: #6366f150;
+  /* Brand colors - Disclosurely ACTUAL blue #1453DB */
+  --vp-c-brand-1: #1453DB;
+  --vp-c-brand-2: #0F3FA8;
+  --vp-c-brand-3: #0A2D7A;
+  --vp-c-brand-soft: rgba(20, 83, 219, 0.14);
 
   /* Override default indigo palette to prevent purple fallback */
-  --vp-c-indigo-1: #6366f1;
-  --vp-c-indigo-2: #6366f1;
-  --vp-c-indigo-3: #6366f1;
-  --vp-c-indigo-soft: #6366f150;
+  --vp-c-indigo-1: #1453DB;
+  --vp-c-indigo-2: #0F3FA8;
+  --vp-c-indigo-3: #0A2D7A;
+  --vp-c-indigo-soft: rgba(20, 83, 219, 0.14);
 
   /* Override default purple palette to prevent purple fallback */
-  --vp-c-purple-1: #6366f1;
-  --vp-c-purple-2: #6366f1;
-  --vp-c-purple-3: #6366f1;
-  --vp-c-purple-soft: #6366f150;
+  --vp-c-purple-1: #1453DB;
+  --vp-c-purple-2: #0F3FA8;
+  --vp-c-purple-3: #0A2D7A;
+  --vp-c-purple-soft: rgba(20, 83, 219, 0.14);
 
   --vp-c-tip-1: var(--vp-c-brand-1);
   --vp-c-tip-2: var(--vp-c-brand-2);
@@ -105,7 +105,7 @@
 
 :root {
   --vp-home-hero-name-color: transparent;
-  --vp-home-hero-name-background: #6366f1;
+  --vp-home-hero-name-background: #1453DB;
 }
 
 /**
@@ -113,23 +113,23 @@
  * -------------------------------------------------------------------------- */
 
 .dark {
-  /* Brand colors - Disclosurely blue for dark mode */
-  --vp-c-brand-1: #818cf8;
-  --vp-c-brand-2: #6366f1;
-  --vp-c-brand-3: #4f46e5;
-  --vp-c-brand-soft: #6366f150;
+  /* Brand colors - Disclosurely blue for dark mode (lighter variants) */
+  --vp-c-brand-1: #5F8CF0;
+  --vp-c-brand-2: #3B6FE8;
+  --vp-c-brand-3: #1453DB;
+  --vp-c-brand-soft: rgba(20, 83, 219, 0.16);
 
   /* Override indigo palette in dark mode */
-  --vp-c-indigo-1: #818cf8;
-  --vp-c-indigo-2: #6366f1;
-  --vp-c-indigo-3: #4f46e5;
-  --vp-c-indigo-soft: #6366f150;
+  --vp-c-indigo-1: #5F8CF0;
+  --vp-c-indigo-2: #3B6FE8;
+  --vp-c-indigo-3: #1453DB;
+  --vp-c-indigo-soft: rgba(20, 83, 219, 0.16);
 
   /* Override purple palette in dark mode */
-  --vp-c-purple-1: #818cf8;
-  --vp-c-purple-2: #6366f1;
-  --vp-c-purple-3: #4f46e5;
-  --vp-c-purple-soft: #6366f150;
+  --vp-c-purple-1: #5F8CF0;
+  --vp-c-purple-2: #3B6FE8;
+  --vp-c-purple-3: #1453DB;
+  --vp-c-purple-soft: rgba(20, 83, 219, 0.16);
 }
 
 @media (min-width: 640px) {

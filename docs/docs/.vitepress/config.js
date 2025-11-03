@@ -52,16 +52,16 @@ export default defineConfig({
 
   head: [
     ['link', { rel: 'icon', href: '/logo.png' }],
-    ['link', { rel: 'stylesheet', href: 'data:text/css,:root{--vp-c-brand-1:%236366f1!important;--vp-c-brand-2:%236366f1!important;--vp-c-brand-3:%236366f1!important;--vp-c-brand:%236366f1!important;--vp-c-indigo-1:%236366f1!important;--vp-c-indigo-2:%236366f1!important;--vp-c-indigo-3:%236366f1!important;--vp-home-hero-name-background:%236366f1!important;}' }],
+    ['link', { rel: 'stylesheet', href: 'data:text/css,:root{--vp-c-brand-1:%231453DB!important;--vp-c-brand-2:%230F3FA8!important;--vp-c-brand-3:%230A2D7A!important;--vp-c-brand:%231453DB!important;--vp-c-indigo-1:%231453DB!important;--vp-c-indigo-2:%230F3FA8!important;--vp-c-indigo-3:%230A2D7A!important;--vp-c-purple-1:%231453DB!important;--vp-c-purple-2:%230F3FA8!important;--vp-c-purple-3:%230A2D7A!important;--vp-home-hero-name-background:%231453DB!important;}' }],
     ['script', {}, `
-      // Force blue color on page load
+      // Force ACTUAL blue color on page load
       if (typeof window !== 'undefined') {
         window.addEventListener('DOMContentLoaded', () => {
           // Wait for Vue to render
           setTimeout(() => {
             const clips = document.querySelectorAll('.clip, [class*="clip"]');
             clips.forEach(el => {
-              el.style.setProperty('background', '#6366f1', 'important');
+              el.style.setProperty('background', '#1453DB', 'important');
               el.style.setProperty('-webkit-background-clip', 'text', 'important');
               el.style.setProperty('background-clip', 'text', 'important');
               el.style.setProperty('-webkit-text-fill-color', 'transparent', 'important');
@@ -69,61 +69,61 @@ export default defineConfig({
             });
 
             // Set CSS variables too
-            document.documentElement.style.setProperty('--vp-c-brand-1', '#6366f1');
-            document.documentElement.style.setProperty('--vp-home-hero-name-background', '#6366f1');
+            document.documentElement.style.setProperty('--vp-c-brand-1', '#1453DB');
+            document.documentElement.style.setProperty('--vp-home-hero-name-background', '#1453DB');
           }, 100);
         });
       }
     `],
     ['style', {}, `
-      /* Override CSS variables */
+      /* Override CSS variables with ACTUAL Disclosurely blue */
       :root {
-        --vp-c-brand: #6366f1 !important;
-        --vp-c-brand-1: #6366f1 !important;
-        --vp-c-brand-2: #6366f1 !important;
-        --vp-c-brand-3: #6366f1 !important;
-        --vp-c-indigo-1: #6366f1 !important;
-        --vp-c-indigo-2: #6366f1 !important;
-        --vp-c-indigo-3: #6366f1 !important;
-        --vp-c-purple-1: #6366f1 !important;
-        --vp-c-purple-2: #6366f1 !important;
-        --vp-c-purple-3: #6366f1 !important;
+        --vp-c-brand: #1453DB !important;
+        --vp-c-brand-1: #1453DB !important;
+        --vp-c-brand-2: #0F3FA8 !important;
+        --vp-c-brand-3: #0A2D7A !important;
+        --vp-c-indigo-1: #1453DB !important;
+        --vp-c-indigo-2: #0F3FA8 !important;
+        --vp-c-indigo-3: #0A2D7A !important;
+        --vp-c-purple-1: #1453DB !important;
+        --vp-c-purple-2: #0F3FA8 !important;
+        --vp-c-purple-3: #0A2D7A !important;
         --vp-home-hero-name-color: transparent !important;
-        --vp-home-hero-name-background: #6366f1 !important;
+        --vp-home-hero-name-background: #1453DB !important;
       }
       .dark {
-        --vp-c-brand: #6366f1 !important;
-        --vp-c-brand-1: #6366f1 !important;
-        --vp-c-brand-2: #6366f1 !important;
-        --vp-c-brand-3: #6366f1 !important;
-        --vp-c-indigo-1: #6366f1 !important;
-        --vp-c-indigo-2: #6366f1 !important;
-        --vp-c-indigo-3: #6366f1 !important;
-        --vp-c-purple-1: #6366f1 !important;
-        --vp-c-purple-2: #6366f1 !important;
-        --vp-c-purple-3: #6366f1 !important;
+        --vp-c-brand: #1453DB !important;
+        --vp-c-brand-1: #5F8CF0 !important;
+        --vp-c-brand-2: #3B6FE8 !important;
+        --vp-c-brand-3: #1453DB !important;
+        --vp-c-indigo-1: #5F8CF0 !important;
+        --vp-c-indigo-2: #3B6FE8 !important;
+        --vp-c-indigo-3: #1453DB !important;
+        --vp-c-purple-1: #5F8CF0 !important;
+        --vp-c-purple-2: #3B6FE8 !important;
+        --vp-c-purple-3: #1453DB !important;
         --vp-home-hero-name-color: transparent !important;
-        --vp-home-hero-name-background: #6366f1 !important;
+        --vp-home-hero-name-background: #1453DB !important;
       }
 
       /* Target Vue scoped styles directly - THIS IS THE KEY! */
       [data-v-0a0d4301] {
-        --vp-c-brand-1: #6366f1 !important;
+        --vp-c-brand-1: #1453DB !important;
       }
       .name[data-v-0a0d4301] .clip[data-v-0a0d4301] {
-        background: #6366f1 !important;
+        background: #1453DB !important;
         -webkit-background-clip: text !important;
         background-clip: text !important;
         -webkit-text-fill-color: transparent !important;
       }
       h1[data-v-0a0d4301] .clip[data-v-0a0d4301] {
-        background: #6366f1 !important;
+        background: #1453DB !important;
         -webkit-background-clip: text !important;
         background-clip: text !important;
         -webkit-text-fill-color: transparent !important;
       }
       .clip[data-v-0a0d4301] {
-        background: #6366f1 !important;
+        background: #1453DB !important;
         -webkit-background-clip: text !important;
         background-clip: text !important;
         -webkit-text-fill-color: transparent !important;
