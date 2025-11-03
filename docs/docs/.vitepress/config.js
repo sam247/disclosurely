@@ -4,6 +4,9 @@ export default defineConfig({
   title: "Disclosurely Docs",
   description: "Everything you need to build, manage, and optimize your whistleblowing and compliance platform.",
 
+  // Ignore dead links for pages that are planned but not yet created
+  ignoreDeadLinks: true,
+
   appearance: 'dark', // default to dark mode
 
   themeConfig: {
@@ -26,16 +29,132 @@ export default defineConfig({
     sidebar: [
       {
         text: 'Introduction',
+        collapsed: false,
         items: [
           { text: 'Getting Started', link: '/getting-started' },
-          { text: 'Quick Start Guide', link: '/quick-start' }
+          { text: 'Platform Overview', link: '/introduction/platform-overview' },
+          { text: 'Key Concepts', link: '/introduction/key-concepts' }
         ]
       },
       {
-        text: 'Features',
+        text: 'Setup & Administration',
+        collapsed: false,
         items: [
-          { text: 'Anonymous Reporting', link: '/features/anonymous-reporting' },
-          { text: 'AI Case Analysis', link: '/features/ai-case-analysis' }
+          { text: 'Initial Setup', link: '/admin/initial-setup' },
+          { text: 'Organization Settings', link: '/admin/organization-settings' },
+          { text: 'Team Management', link: '/admin/team-management' },
+          { text: 'Custom Branding', link: '/admin/custom-branding' },
+          { text: 'Custom Domains', link: '/admin/custom-domains' },
+          { text: 'Subscription & Billing', link: '/admin/subscription-billing' }
+        ]
+      },
+      {
+        text: 'Anonymous Reporting',
+        collapsed: false,
+        items: [
+          { text: 'How to Submit a Report', link: '/reporting/how-to-submit' },
+          { text: 'Report Types', link: '/reporting/report-types' },
+          { text: 'Tracking Your Report', link: '/reporting/tracking-report' },
+          { text: 'Secure Messaging', link: '/reporting/secure-messaging' },
+          { text: 'Report Encryption', link: '/reporting/encryption' }
+        ]
+      },
+      {
+        text: 'Case Management',
+        collapsed: false,
+        items: [
+          { text: 'Case Assignment', link: '/cases/assignment' },
+          { text: 'Investigation Workflow', link: '/cases/workflow' },
+          { text: 'Status Management', link: '/cases/status' },
+          { text: 'Case Notes & Evidence', link: '/cases/evidence' },
+          { text: 'Case Resolution', link: '/cases/resolution' },
+          { text: 'Case Archiving', link: '/cases/archiving' }
+        ]
+      },
+      {
+        text: 'AI & Automation',
+        collapsed: false,
+        items: [
+          { text: 'AI Case Helper', link: '/ai/case-helper' },
+          { text: 'Pattern Detection', link: '/ai/pattern-detection' },
+          { text: 'Risk Assessment', link: '/ai/risk-assessment' },
+          { text: 'Content Generation', link: '/ai/content-generation' }
+        ]
+      },
+      {
+        text: 'Compliance Management',
+        collapsed: false,
+        items: [
+          { text: 'Compliance Overview', link: '/compliance/overview' },
+          { text: 'Audit Trail', link: '/compliance/audit-trail' },
+          { text: 'GDPR Compliance', link: '/compliance/gdpr' },
+          { text: 'Data Retention', link: '/compliance/retention' },
+          { text: 'EU Whistleblowing Directive', link: '/compliance/eu-directive' },
+          { text: 'SOX Compliance', link: '/compliance/sox' },
+          { text: 'Policy Management', link: '/compliance/policies' },
+          { text: 'Risk Management', link: '/compliance/risks' },
+          { text: 'Compliance Calendar', link: '/compliance/calendar' },
+          { text: 'Anti-Retaliation', link: '/compliance/anti-retaliation' },
+          { text: 'Reporting & Analytics', link: '/compliance/reporting-analytics' }
+        ]
+      },
+      {
+        text: 'Security',
+        collapsed: false,
+        items: [
+          { text: 'Security Overview', link: '/security/overview' },
+          { text: 'Authentication', link: '/security/authentication' },
+          { text: 'Multi-Factor Authentication', link: '/security/mfa' },
+          { text: 'Encryption & Privacy', link: '/security/encryption' },
+          { text: 'Access Control', link: '/security/access-control' },
+          { text: 'Security Monitoring', link: '/security/monitoring' },
+          { text: 'Best Practices', link: '/security/best-practices' }
+        ]
+      },
+      {
+        text: 'Analytics & Insights',
+        collapsed: false,
+        items: [
+          { text: 'Analytics Overview', link: '/analytics/overview' },
+          { text: 'Dashboard', link: '/analytics/dashboard' },
+          { text: 'Report Statistics', link: '/analytics/statistics' },
+          { text: 'Compliance Analytics', link: '/analytics/compliance-analytics' }
+        ]
+      },
+      {
+        text: 'Regulatory Compliance',
+        collapsed: false,
+        items: [
+          { text: 'EU Whistleblowing Directive', link: '/regulatory/eu-directive' },
+          { text: 'GDPR Compliance', link: '/regulatory/gdpr' },
+          { text: 'SOX Compliance', link: '/regulatory/sox' },
+          { text: 'ISO 27001', link: '/regulatory/iso-27001' }
+        ]
+      },
+      {
+        text: 'User Guides',
+        collapsed: false,
+        items: [
+          { text: 'For Administrators', link: '/guides/administrators' },
+          { text: 'For Case Handlers', link: '/guides/case-handlers' },
+          { text: 'For Reviewers', link: '/guides/reviewers' },
+          { text: 'For Whistleblowers', link: '/guides/whistleblowers' }
+        ]
+      },
+      {
+        text: 'Integrations',
+        collapsed: false,
+        items: [
+          { text: 'Coming Soon', link: '/integrations/coming-soon' }
+        ]
+      },
+      {
+        text: 'Support',
+        collapsed: false,
+        items: [
+          { text: 'FAQs', link: '/support/faqs' },
+          { text: 'Troubleshooting', link: '/support/troubleshooting' },
+          { text: 'Contact Support', link: '/support/contact' }
         ]
       }
     ],
