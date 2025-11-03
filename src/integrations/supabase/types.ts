@@ -2728,13 +2728,6 @@ export type Database = {
         }
         Returns: undefined
       }
-      encrypt_report_server_side: {
-        Args: { p_organization_id: string; p_report_data: Json }
-        Returns: {
-          encrypted_data: string
-          key_hash: string
-        }[]
-      }
       generate_anonymous_access_token: { Args: never; Returns: string }
       generate_domain_verification_token: { Args: never; Returns: string }
       generate_invitation_token: { Args: never; Returns: string }
