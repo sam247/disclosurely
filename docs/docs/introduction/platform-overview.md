@@ -17,30 +17,30 @@ Disclosurely is a complete whistleblowing and compliance solution that enables o
 
 ### 1. Anonymous Reporting System
 
-Our anonymous reporting system is built on zero-knowledge architecture, meaning report content is encrypted client-side before it ever reaches our servers. Key features include:
+Our [anonymous reporting system](/reporting/report-types) is built on zero-knowledge architecture, meaning report content is encrypted client-side before it ever reaches our servers. Key features include:
 
-- **End-to-End Encryption**: Reports are encrypted using AES-256 encryption on the user's device
+- **End-to-End Encryption**: Reports are encrypted using [AES-256 encryption](/reporting/encryption) on the user's device
 - **Anonymous Submission**: No personal information is collected or stored
-- **Secure Tracking**: Unique tracking IDs (DIS-XXXXXXXX format) allow whistleblowers to check status
-- **Two-Way Messaging**: Encrypted messaging allows dialogue while maintaining anonymity
-- **File Attachments**: Support for uploading evidence securely
+- **Secure Tracking**: Unique [tracking IDs](/reporting/tracking-report) (DIS-XXXXXXXX format) allow whistleblowers to check status
+- **Two-Way Messaging**: [Encrypted messaging](/reporting/secure-messaging) allows dialogue while maintaining anonymity
+- **File Attachments**: Support for [uploading evidence](/reporting/how-to-submit) securely
 - **Multi-Language Support**: Interface available in multiple languages
 
 ### 2. Case Management
 
-Comprehensive case management tools help your team efficiently handle and resolve reports:
+Comprehensive [case management tools](/cases/workflow) help your team efficiently handle and resolve reports:
 
 - **Centralized Dashboard**: All reports in one place with powerful filtering and search
-- **Workflow Management**: Customizable workflows with status tracking
-- **Team Collaboration**: Assign cases, add notes, and collaborate securely
+- **Workflow Management**: Customizable workflows with [status tracking](/cases/status)
+- **Team Collaboration**: [Assign cases](/cases/assignment), add notes, and collaborate securely
 - **Priority Management**: Set priority levels and manage workload distribution
 - **Status Timeline**: Track complete history of case status changes
-- **Soft Delete**: Archive cases with restore capability
+- **Soft Delete**: [Archive cases](/cases/archiving) with restore capability
 - **Export Capabilities**: Export case data for analysis or reporting
 
 ### 3. AI-Powered Analysis
 
-Leverage artificial intelligence to enhance your compliance program:
+Leverage [artificial intelligence](/ai/case-helper) to enhance your compliance program:
 
 - **AI Case Helper**: Get AI-powered insights and recommendations for cases
 - **Pattern Detection**: Automatically identify patterns and trends across reports
@@ -56,13 +56,13 @@ Comprehensive compliance tools to manage policies, risks, and obligations:
 - **Policy Management**: Version-controlled policy library with acknowledgment tracking
 - **Risk Register**: Centralized risk assessment and mitigation tracking
 - **Compliance Calendar**: Deadline tracking for compliance obligations
-- **GDPR Automation**: Automated data export and erasure request processing
-- **Audit Logs**: Tamper-evident audit trails with hash chain integrity
+- **GDPR Automation**: Automated [data export and erasure request processing](/compliance/gdpr)
+- **Audit Logs**: [Tamper-evident audit trails](/compliance/audit-trail) with hash chain integrity
 - **Compliance Scoring**: Track and measure your compliance posture
 
 ### 5. Security & Privacy
 
-Enterprise-grade security protecting your most sensitive data:
+Enterprise-grade [security protecting your most sensitive data](/security/overview):
 
 - **Zero-Knowledge Architecture**: We cannot access report content - ever
 - **End-to-End Encryption**: AES-256 encryption for all sensitive data
