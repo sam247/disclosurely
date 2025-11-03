@@ -1,25 +1,58 @@
 ---
-layout: home
-
-hero:
-  name: "Disclosurely"
-  text: "Documentation"
-  tagline: Everything you need to build, manage, and optimize your whistleblowing and compliance platform.
-  actions:
-    - theme: brand
-      text: Get Started
-      link: /getting-started
-    - theme: alt
-      text: Go to App
-      link: https://disclosurely.com
-
-features:
-  - title: Secure Anonymous Reporting
-    details: End-to-end encrypted reporting with secure two-way messaging. Protect whistleblowers while maintaining compliance.
-  - title: AI-Powered Case Analysis
-    details: Leverage AI to analyze reports, detect patterns, and get actionable insights while maintaining data privacy.
-  - title: Compliance Module
-    details: Policy tracking, risk registers, compliance calendars, and automated reminders to keep your organization compliant.
-  - title: Custom Branding
-    details: White-label reporting portals with your logo, colors, and custom domains for a seamless brand experience.
+layout: doc
 ---
+
+# Getting Started
+
+Welcome to Disclosurely! This guide will help you get up and running quickly.
+
+## What is Disclosurely?
+
+Disclosurely is a modern whistleblowing and compliance platform designed to help organizations:
+
+- **Protect Whistleblowers** - Anonymous, encrypted reporting with secure two-way messaging
+- **Stay Compliant** - Meet EU Whistleblowing Directive, UK PIDA, SOX, and GDPR requirements
+- **Manage Risk** - Centralized compliance hub with policies, risks, and audit trails
+- **Leverage AI** - AI-powered case analysis with privacy-first architecture
+
+## Quick Start
+
+### 1. Create Your Account
+
+Visit [disclosurely.com](https://disclosurely.com) and sign up for a free account.
+
+### 2. Set Up Your Organization
+
+1. Navigate to **Settings > Organization**
+2. Add your organization name and details
+3. Upload your logo for white-label branding
+4. Configure your custom domain (optional)
+
+### 3. Customize Your Reporting Portal
+
+1. Go to **Settings > Branding**
+2. Upload your logo
+3. Choose your brand colors
+4. Customize welcome messages
+
+### 4. Invite Your Team
+
+1. Navigate to **Team**
+2. Click **Invite Member**
+3. Enter email and assign role:
+   - **Admin** - Full access
+   - **Case Handler** - Manage reports
+   - **Viewer** - Read-only access
+
+### 5. Launch Your Reporting Channel
+
+Share your secure reporting URL with employees.
+
+## Need Help?
+
+- **Email:** support@disclosurely.com
+- **Website:** [disclosurely.com](https://disclosurely.com)
+
+---
+
+**Ready to get started?** [Sign up now](https://disclosurely.com)
