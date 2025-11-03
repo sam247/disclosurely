@@ -1,67 +1,70 @@
----
-sidebar_position: 2
----
-
 # Quick Start Guide
 
-Get started with Disclosurely in minutes.
+Get your Disclosurely whistleblowing platform up and running in minutes.
 
-## Prerequisites
+## 1. Create Your Account
 
-Before you begin, you'll need:
-- A valid email address
-- Modern web browser (Chrome, Firefox, Safari, or Edge)
-
-## Step-by-Step Setup
-
-### 1. Sign Up
-
-1. Go to [disclosurely.com](https://disclosurely.com)
+1. Visit [disclosurely.com](https://disclosurely.com)
 2. Click **Get Started**
 3. Enter your email and create a password
 4. Verify your email address
 
-### 2. Create Your Organization
+## 2. Set Up Your Organization
 
-After signing in:
-1. Enter your organization name
-2. Select your industry
-3. Choose your organization size
-4. Select your primary compliance needs
+### Basic Information
+- **Organization Name**: Your company or entity name
+- **Industry**: Select your industry sector
+- **Team Size**: Approximate number of employees
 
-### 3. Configure Your Reporting Portal
+### Configure Settings
+Navigate to **Settings > Organization** to customize:
+- Contact information
+- Default timezone
+- Language preferences
 
-Customize your whistleblowing portal:
-1. Upload your logo
-2. Set your brand colors
-3. Configure welcome message
-4. Add reporting categories
+## 3. Customize Your Reporting Portal
 
-### 4. Set Up Team Members
+Make your reporting channel match your brand:
 
-Invite your team:
-1. Go to **Settings > Team**
-2. Add team members by email
-3. Assign appropriate roles
-4. Team members receive invitation emails
+1. Go to **Settings > Branding**
+2. Upload your logo (PNG, SVG recommended)
+3. Choose your brand colors
+4. Customize welcome messages
+5. Set up custom domain (optional)
 
-### 5. Launch Your Portal
+## 4. Invite Your Team
 
-You're ready to go!
-- Share your secure reporting URL
-- Embed the portal on your intranet
-- Add QR codes to physical locations
+1. Navigate to **Team** in the dashboard
+2. Click **Invite Member**
+3. Enter email address
+4. Assign a role:
+   - **Admin** - Full system access
+   - **Case Handler** - Manage and respond to reports
+   - **Compliance Officer** - View compliance data
+   - **Viewer** - Read-only access
 
-## Next Steps
+## 5. Share Your Reporting URL
 
-- Explore the [Features](/docs/features/anonymous-reporting)
-- Configure [AI Case Analysis](/docs/features/ai-case-analysis)
-- Set up integrations
-- Customize workflows
+Your secure reporting URL is available at:
+```
+https://yourorg.disclosurely.com/report
+```
 
-## Getting Help
+You can also:
+- Use your custom domain (e.g., `report.yourcompany.com`)
+- Embed the form on your website
+- Generate QR codes for physical locations
 
-Need assistance? We're here to help:
-- **Documentation**: Browse our guides
-- **Email Support**: support@disclosurely.com
+## What's Next?
+
+- [Set up AI Case Analysis](/features/ai-case-analysis)
+- [Learn about Anonymous Reporting](/features/anonymous-reporting)
+- Explore the Compliance Module (coming soon)
+- Enable two-factor authentication (coming soon)
+
+## Need Help?
+
+- **Email**: [support@disclosurely.com](mailto:support@disclosurely.com)
 - **Live Chat**: Available in-app
+- **Documentation**: You're already here! 📚
+

@@ -1,91 +1,98 @@
----
-sidebar_position: 1
----
-
 # Anonymous Reporting
 
-Disclosurely provides end-to-end encrypted anonymous reporting channels that protect whistleblower identities while enabling effective case management.
+Disclosurely's anonymous reporting system provides military-grade encryption and secure two-way communication to protect whistleblowers.
 
 ## Key Features
 
-### Complete Anonymity
-- No personal information required
-- Anonymous two-way messaging
-- Secure file uploads
-- No IP logging
-
 ### End-to-End Encryption
-All reports are encrypted from the moment they're submitted:
-- AES-256 encryption
-- Zero-knowledge architecture
-- Encrypted file storage
-- Secure messaging system
+- **AES-256-GCM encryption** for all report data
+- Organization-specific encryption keys
+- Zero-knowledge architecture - we cannot read your reports
 
-### Two-Way Communication
-Investigators can communicate with reporters without revealing identities:
-- Ask follow-up questions
-- Request additional information
-- Provide status updates
-- Maintain complete anonymity
+### Secure Two-Way Messaging
+- Communicate with reporters without revealing identities
+- Encrypted message threads
+- File attachments supported
+- Real-time notifications
+
+### Anonymous Access Codes
+When a report is submitted:
+1. Reporter receives a unique **8-character access code**
+2. Code is stored as a one-way hash (cannot be reversed)
+3. Reporter uses code to check status and respond to messages
+4. No personal information required
 
 ## How It Works
 
-1. **Reporter Submits**
-   - Fills out secure web form
-   - Uploads supporting documents
-   - Receives unique access code
+### For Whistleblowers
+1. Visit your organization's reporting portal
+2. Fill out the report form (no login required)
+3. Receive an access code via email or display
+4. Save the code securely
+5. Return anytime to check status or send messages
 
-2. **System Encrypts**
-   - Report encrypted client-side
-   - Stored securely
-   - Access code generated
-
-3. **Team Investigates**
-   - Receives encrypted report
-   - Can message reporter
-   - Manages case workflow
-
-4. **Follow-up**
-   - Reporter checks back with code
-   - Views responses
-   - Provides additional info
+### For Case Handlers
+1. New reports appear in your dashboard
+2. Review report details and attachments
+3. Assign to team members
+4. Communicate via secure messaging
+5. Update status and add internal notes
 
 ## Security Features
 
-- **No Email Required**: Reports don't require email addresses
-- **No Tracking**: No cookies, IP logging, or analytics
-- **Secure Links**: Unique access codes for each report
-- **Data Residency**: Choose where your data is stored
-- **GDPR Compliant**: Full compliance with privacy regulations
+### Data Protection
+- All data encrypted at rest and in transit
+- PII automatically redacted when using AI features
+- Server-side encryption keys separate from data
+- Regular security audits
+
+### Privacy Controls
+- IP address logging disabled by default
+- No cookies or tracking for reporters
+- Optional location data (if provided)
+- GDPR & SOC 2 compliant
+
+### Custom Domains
+Use your own domain for maximum trust:
+- `report.yourcompany.com`
+- `whistleblow.yourcompany.com`
+- Full SSL/TLS support
+- No visible Disclosurely branding
 
 ## Best Practices
 
-### For Administrators
-- Respond promptly to build trust
-- Use professional, reassuring language
-- Never request identifying information
-- Keep the reporter informed of progress
+### For Organizations
+1. **Promote awareness** - Share your reporting URL widely
+2. **Respond promptly** - Acknowledge reports within 24 hours
+3. **Maintain confidentiality** - Limit access to case handlers only
+4. **Follow up regularly** - Keep reporters informed of progress
 
-### For Reporters
-- Provide as much detail as possible
-- Check back regularly for updates
-- Save your access code securely
-- Report concerns promptly
-
-## Configuration Options
-
-Customize your anonymous reporting to fit your needs:
-- Custom reporting categories
-- Multilingual support
-- Branded portal
-- Custom domains
-- Workflow rules
+### For Whistleblowers
+1. **Save your access code** - Store it securely (password manager recommended)
+2. **Provide detail** - More information helps investigators
+3. **Include evidence** - Upload supporting documents/images
+4. **Check back** - Monitor for responses from case handlers
 
 ## Compliance
 
-Our anonymous reporting system helps you comply with:
-- EU Whistleblowing Directive
-- UK Public Interest Disclosure Act (PIDA)
-- Sarbanes-Oxley Act (SOX)
-- Dodd-Frank Act
-- Local regulations
+Disclosurely meets the requirements of:
+- **EU Whistleblowing Directive** (Directive 2019/1937)
+- **UK PIDA** (Public Interest Disclosure Act)
+- **SOX Section 301** (Sarbanes-Oxley)
+- **GDPR** (General Data Protection Regulation)
+- **ISO 27001** information security standards
+
+## FAQ
+
+**Can reports truly be anonymous?**  
+Yes. Our zero-knowledge encryption means we cannot identify reporters, even if compelled by law.
+
+**What if I lose my access code?**  
+Unfortunately, codes cannot be recovered. This ensures true anonymity. You can submit a new report if needed.
+
+**Can my IP address be traced?**  
+We do not log IP addresses for report submissions. For additional privacy, reporters can use VPN or Tor.
+
+**How long are reports stored?**  
+Reports are stored according to your organization's retention policy (default: 7 years for compliance).
+
