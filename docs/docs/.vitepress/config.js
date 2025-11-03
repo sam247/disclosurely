@@ -63,45 +63,38 @@ export default defineConfig({
         text: 'Case Management',
         collapsed: false,
         items: [
-          { text: 'Managing Reports', link: '/cases/managing-reports' },
-          { text: 'Report Workflow', link: '/cases/report-workflow' },
-          { text: 'Assignments & Roles', link: '/cases/assignments-roles' },
-          { text: 'Case Notes', link: '/cases/case-notes' },
-          { text: 'Messaging Whistleblowers', link: '/cases/messaging' },
-          { text: 'Report Archives', link: '/cases/archives' }
+          { text: 'Case Assignment', link: '/cases/assignment' },
+          { text: 'Investigation Workflow', link: '/cases/workflow' },
+          { text: 'Status Management', link: '/cases/status' },
+          { text: 'Case Notes & Evidence', link: '/cases/evidence' },
+          { text: 'Case Resolution', link: '/cases/resolution' },
+          { text: 'Case Archiving', link: '/cases/archiving' }
         ]
       },
       {
         text: 'AI & Automation',
         collapsed: false,
         items: [
-          { text: 'AI Case Helper', link: '/ai/case-helper' },
-          { text: 'Pattern Detection', link: '/ai/pattern-detection' },
-          { text: 'Risk Assessment', link: '/ai/risk-assessment' },
-          { text: 'Content Generation', link: '/ai/content-generation' }
+          { text: 'AI Case Helper', link: '/ai/case-helper' }
         ]
       },
       {
         text: 'Compliance Management',
         collapsed: false,
         items: [
-          { text: 'Compliance Overview', link: '/compliance/overview' },
-          { text: 'Policy Management', link: '/compliance/policies' },
-          { text: 'Risk Management', link: '/compliance/risks' },
-          { text: 'Compliance Calendar', link: '/compliance/calendar' },
+          { text: 'Audit Trail', link: '/compliance/audit-trail' },
           { text: 'GDPR Compliance', link: '/compliance/gdpr' },
-          { text: 'Audit Logs', link: '/compliance/audit-logs' }
+          { text: 'Data Retention', link: '/compliance/retention' },
+          { text: 'EU Whistleblowing Directive', link: '/compliance/eu-directive' },
+          { text: 'SOX Compliance', link: '/compliance/sox' },
+          { text: 'Compliance Reporting & Analytics', link: '/compliance/reporting-analytics' }
         ]
       },
       {
         text: 'Security',
         collapsed: false,
         items: [
-          { text: 'Authentication', link: '/security/authentication' },
-          { text: 'Multi-Factor Authentication', link: '/security/mfa' },
-          { text: 'Encryption & Privacy', link: '/security/encryption' },
-          { text: 'Access Control', link: '/security/access-control' },
-          { text: 'Security Monitoring', link: '/security/monitoring' }
+          { text: 'Security Overview', link: '/security/overview' }
         ]
       },
       {
