@@ -45,6 +45,86 @@ const STATIC_ROUTES = [
 const BASE_URL = 'https://disclosurely.com';
 const DOCS_URL = 'https://docs.disclosurely.com';
 
+// Docs pages - extracted from VitePress config sidebar
+// This ensures all docs content is included in main sitemap for unified SEO authority
+const DOCS_PAGES = [
+  // Introduction
+  '/getting-started',
+  '/introduction/platform-overview',
+  '/introduction/key-concepts',
+  // Admin
+  '/admin/initial-setup',
+  '/admin/organization-settings',
+  '/admin/team-management',
+  '/admin/custom-branding',
+  '/admin/custom-domains',
+  '/admin/subscription-billing',
+  // Reporting
+  '/reporting/how-to-submit',
+  '/reporting/report-types',
+  '/reporting/tracking-report',
+  '/reporting/secure-messaging',
+  '/reporting/encryption',
+  // Cases
+  '/cases/assignment',
+  '/cases/workflow',
+  '/cases/status',
+  '/cases/evidence',
+  '/cases/resolution',
+  '/cases/archiving',
+  // AI
+  '/ai/case-helper',
+  '/ai/pattern-detection',
+  '/ai/risk-assessment',
+  '/ai/content-generation',
+  // Compliance
+  '/compliance/overview',
+  '/compliance/audit-trail',
+  '/compliance/gdpr',
+  '/compliance/retention',
+  '/compliance/eu-directive',
+  '/compliance/sox',
+  '/compliance/policies',
+  '/compliance/risks',
+  '/compliance/calendar',
+  '/compliance/anti-retaliation',
+  '/compliance/reporting-analytics',
+  // Security
+  '/security/overview',
+  '/security/authentication',
+  '/security/mfa',
+  '/security/encryption',
+  '/security/access-control',
+  '/security/monitoring',
+  '/security/best-practices',
+  // Analytics
+  '/analytics/overview',
+  '/analytics/dashboard',
+  '/analytics/statistics',
+  '/analytics/compliance-analytics',
+  // Regulatory
+  '/regulatory/eu-directive',
+  '/regulatory/gdpr',
+  '/regulatory/sox',
+  '/regulatory/iso-27001',
+  // Guides
+  '/guides/administrators',
+  '/guides/case-handlers',
+  '/guides/reviewers',
+  '/guides/whistleblowers',
+  // Features
+  '/features/anonymous-reporting',
+  '/features/ai-case-analysis',
+  // Integrations
+  '/integrations/coming-soon',
+  // Support
+  '/support/faqs',
+  '/support/troubleshooting',
+  '/support/contact',
+  // Quick start
+  '/quick-start',
+];
+
 interface UrlEntry {
   loc: string;
   lastmod: string;
@@ -135,6 +215,31 @@ async function fetchBlogPosts(): Promise<UrlEntry[]> {
   }
 }
 
+function generateDocsEntries(): UrlEntry[] {
+  const entries: UrlEntry[] = [];
+  const now = new Date().toISOString().split('T')[0];
+
+  // Include homepage
+  entries.push({
+    loc: DOCS_URL,
+    lastmod: now,
+    changefreq: 'weekly',
+    priority: '0.9',
+  });
+
+  // Include all docs pages
+  DOCS_PAGES.forEach(path => {
+    entries.push({
+      loc: `${DOCS_URL}${path}`,
+      lastmod: now,
+      changefreq: 'monthly',
+      priority: '0.7', // High priority for docs - valuable SEO content
+    });
+  });
+
+  return entries;
+}
+
 function generateSitemapXML(entries: UrlEntry[]): string {
   const urlset = entries.map(entry => {
     const alternates = entry.alternates
@@ -165,8 +270,11 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     // Fetch blog posts from Contentful
     const blogEntries = await fetchBlogPosts();
     
-    // Combine all entries
-    const allEntries = [...staticEntries, ...blogEntries];
+    // Generate docs entries (unified in main sitemap for better SEO)
+    const docsEntries = generateDocsEntries();
+    
+    // Combine all entries - UNIFIED sitemap for consolidated SEO authority
+    const allEntries = [...staticEntries, ...blogEntries, ...docsEntries];
     
     // Generate XML
     const sitemap = generateSitemapXML(allEntries);
