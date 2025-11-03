@@ -19,3 +19,4 @@ Disallow: /dashboard/
 Disallow: /test/
 
 Sitemap: https://disclosurely.com/sitemap.xml
+Sitemap: https://disclosurely.com/sitemap-index.xml
