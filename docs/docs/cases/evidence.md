@@ -116,8 +116,8 @@ Talked to Jane. She said expenses were weird. Got some files.
 - **Interview Notes**: Witness interviews conducted
 - **Evidence**: Documents and files collected
 - **Analysis**: Your thinking and conclusions
-- **Communication**: Messages with reporter/subject
-- **Administrative**: Status changes, assignments
+- **Communication**: Messages with reporter/subject via [secure messaging](/reporting/secure-messaging)
+- **Administrative**: [Status changes](/cases/status), assignments
 - **Legal**: Consultations with legal counsel
 - **External**: Third party involvement
 - **Decision**: Key choices and reasoning
@@ -152,7 +152,7 @@ Talked to Jane. She said expenses were weird. Got some files.
 
 ### AI-Generated Notes
 
-If using AI Case Helper:
+If using [AI Case Helper](/ai/case-helper):
 
 **What AI Can Do**:
 - Summarize long interviews

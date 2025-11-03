@@ -72,7 +72,7 @@ Every organization gets a unique secure reporting link:
 
 **Format**: `https://disclosurely.com/secure/tool/submit/[your-unique-token]`
 
-This link is your organization's anonymous reporting portal where whistleblowers can:
+This link is your organization's anonymous reporting portal where whistleblowers can [submit anonymous reports](/reporting/how-to-submit):
 - Submit anonymous reports
 - Track report status
 - Communicate securely with your team
@@ -180,7 +180,7 @@ You can always add more team members as your program grows.
 
 ## Step 5: Customize Branding (Pro/Enterprise)
 
-If you're on a Pro or Enterprise plan, customize your reporting portal to match your brand.
+If you're on a Pro or Enterprise plan, [customize your reporting portal](/admin/custom-branding) to match your brand.
 
 ### Upload Your Logo
 
@@ -255,7 +255,7 @@ Navigate to **Settings > Notifications** and configure:
 - Customize email template if desired
 
 **Assignment Notifications**:
-- ✅ Notify team members when assigned to a case
+- ✅ Notify team members when [assigned to a case](/cases/assignment)
 - Immediate email notification
 - Include case summary in email
 
