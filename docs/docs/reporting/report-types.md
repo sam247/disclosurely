@@ -21,9 +21,9 @@ Disclosurely supports two types of report submissions: Anonymous and Confidentia
 - Concerns about investigation impartiality
 
 ### Features
-✅ End-to-end encryption
+✅ [End-to-end encryption](/reporting/encryption)
 ✅ Zero-knowledge architecture
-✅ Two-way secure messaging
+✅ [Two-way secure messaging](/reporting/secure-messaging)
 ✅ Status tracking
 ✅ File uploads supported
 ✅ Cannot be traced to you

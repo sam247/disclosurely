@@ -180,7 +180,7 @@ For security professionals:
 
 ## Compliance
 
-### GDPR
+### [GDPR](/compliance/gdpr)
 - Right to access: Encrypted data exportable
 - Right to erasure: Encryption keys destroyed
 - Data minimization: Only necessary data collected
@@ -192,8 +192,8 @@ For security professionals:
 - Access controls
 - Incident management
 
-### SOX
-- Audit trails maintained
+### [SOX](/compliance/sox)
+- [Audit trails maintained](/compliance/audit-trail)
 - Access logging
 - Data integrity
 - Non-repudiation
@@ -201,6 +201,6 @@ For security professionals:
 ---
 
 **Questions about encryption?**
-- [Security Overview](/security/encryption)
+- [Security Overview](/security/overview)
 - [Contact Support](/support/contact)
 - Email: security@disclosurely.com
