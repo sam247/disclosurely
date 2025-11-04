@@ -143,3 +143,34 @@
     --vp-home-hero-image-filter: blur(68px);
   }
 }
+
+/**
+ * Logo size reduction
+ * -------------------------------------------------------------------------- */
+
+/* Reduce logo size in navigation bar */
+.VPNavBarTitle .logo {
+  height: 28px !important;
+  max-height: 28px !important;
+  width: auto !important;
+}
+
+.VPNavBarTitle .logo img {
+  height: 28px !important;
+  max-height: 28px !important;
+  width: auto !important;
+  object-fit: contain;
+}
+
+/* Ensure logo doesn't overflow on mobile */
+@media (max-width: 768px) {
+  .VPNavBarTitle .logo {
+    height: 24px !important;
+    max-height: 24px !important;
+  }
+  
+  .VPNavBarTitle .logo img {
+    height: 24px !important;
+    max-height: 24px !important;
+  }
+}
