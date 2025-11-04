@@ -10,6 +10,7 @@ import BlogSection from "@/components/BlogSection";
 import { AnnouncementBar } from "@/components/AnnouncementBar";
 import { useTranslation } from "react-i18next";
 import DynamicHelmet from "@/components/DynamicHelmet";
+import TypingAnimation from "@/components/TypingAnimation";
 import anonymousReportingIcon from "@/assets/icons/anonymous_reporting.png";
 import secureMessagingIcon from "@/assets/icons/secure_messaging.png";
 import caseManagementIcon from "@/assets/icons/case_management.png";
@@ -104,7 +105,14 @@ const Landing = () => {
 
           <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold text-gray-900 mb-6">
             {t("landing.hero.title1")}
-            <span className="block text-blue-600">{t("landing.hero.title2")}</span>
+            <span className="block text-blue-600">
+              <TypingAnimation 
+                phrases={t("landing.hero.typingPhrases", { returnObjects: true }) as string[]}
+                typingSpeed={100}
+                deletingSpeed={50}
+                pauseDuration={2000}
+              />
+            </span>
           </h1>
           <p className="text-lg sm:text-xl text-gray-700 mb-8 max-w-3xl mx-auto px-4">{t("landing.hero.subtitle")}</p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center items-center px-4">

@@ -158,8 +158,18 @@
   },
   "landing": {
     "hero": {
-      "title1": "Transforming Compliance and Whistleblowing",
-      "title2": "With AI-Powered Workflows",
+      "title1": "Transforming Compliance and Whistleblowing With…",
+      "title2": "AI-Powered Workflows",
+      "typingPhrases": [
+        "AI-Powered Workflows",
+        "Anonymous Reporting",
+        "Real-Time Audit Trails",
+        "Private AI Assistance",
+        "Military-Grade Security",
+        "Automated Risk Scoring",
+        "Proactive Risk Detection",
+        "Trust-First Technology"
+      ],
       "subtitle": "Disclosurely helps compliance teams stay ahead by transforming ethics and compliance into a proactive advantage—building a culture of integrity, simplifying workflows, and reducing organisational risk.",
       "startFreeTrial": "Start Free Trial",
       "viewPricing": "View Pricing"

@@ -158,8 +158,18 @@
   },
   "landing": {
     "hero": {
-      "title1": "Transformer Compliance og Varsling",
-      "title2": "Med AI-Drevne Arbejdsgange",
+      "title1": "Transformer Compliance og Varsling Med…",
+      "title2": "AI-Drevne Arbejdsgange",
+      "typingPhrases": [
+        "AI-Drevne Arbejdsgange",
+        "Anonym Rapportering",
+        "Realtidsrevisionsspor",
+        "Privat AI-Assistance",
+        "Militær Sikkerhed",
+        "Automatiseret Risikovurdering",
+        "Proaktiv Risikodetectering",
+        "Tillidsbaseret Teknologi"
+      ],
       "subtitle": "Disclosurely hjælper compliance-teams med at holde sig i fronten ved at transformere etik og compliance til en proaktiv fordel: bygge en kultur af integritet, forenkle arbejdsgange og reducere organisationsrisiko.",
       "startFreeTrial": "Start gratis prøveperiode",
       "viewPricing": "Se priser"

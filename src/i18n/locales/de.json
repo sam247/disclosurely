@@ -15,8 +15,18 @@
   },
   "landing": {
     "hero": {
-      "title1": "Compliance und Whistleblowing Transformieren",
-      "title2": "Mit KI-Gestützten Workflows",
+      "title1": "Compliance und Whistleblowing Transformieren Mit…",
+      "title2": "KI-Gestützten Workflows",
+      "typingPhrases": [
+        "KI-Gestützten Workflows",
+        "Anonyme Meldungen",
+        "Echtzeit-Prüfpfade",
+        "Private KI-Assistenz",
+        "Militärische Sicherheit",
+        "Automatisierte Risikobewertung",
+        "Proaktive Risikoerkennung",
+        "Vertrauensbasierte Technologie"
+      ],
       "subtitle": "Disclosurely hilft Compliance-Teams, durch proaktive Ethik und Compliance einen Wettbewerbsvorteil zu schaffen.",
       "startFreeTrial": "Kostenlos Testen",
       "viewPricing": "Preise Ansehen"

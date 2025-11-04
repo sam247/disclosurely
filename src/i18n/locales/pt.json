@@ -158,8 +158,18 @@
   },
   "landing": {
     "hero": {
-      "title1": "Transformando Conformidade e Denúncias",
-      "title2": "Com Fluxos de Trabalho Alimentados por IA",
+      "title1": "Transformando Conformidade e Denúncias Com…",
+      "title2": "Fluxos de Trabalho Alimentados por IA",
+      "typingPhrases": [
+        "Fluxos de Trabalho Alimentados por IA",
+        "Denúncias Anónimas",
+        "Rastreios de Auditoria em Tempo Real",
+        "Assistência IA Privada",
+        "Segurança de Nível Militar",
+        "Avaliação Automática de Riscos",
+        "Deteção Proativa de Riscos",
+        "Tecnologia Baseada na Confiança"
+      ],
       "subtitle": "O Disclosurely ajuda as equipas de conformidade a manterem-se na vanguarda transformando a ética e conformidade numa vantagem proativa: construindo uma cultura de integridade, simplificando fluxos de trabalho e reduzindo o risco organizacional.",
       "startFreeTrial": "Iniciar teste gratuito",
       "viewPricing": "Ver preços"
