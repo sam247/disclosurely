@@ -8,6 +8,19 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 }
 
+// ⚠️ CRITICAL: Verify ENCRYPTION_SALT on module load (startup check)
+const ENCRYPTION_SALT_STARTUP = Deno.env.get('ENCRYPTION_SALT');
+if (!ENCRYPTION_SALT_STARTUP) {
+  console.error('🚨 CRITICAL: ENCRYPTION_SALT is missing on startup!');
+  console.error('🚨 This will cause all encryption operations to fail!');
+  console.error('🚨 Check Supabase Edge Function Secrets immediately!');
+  console.error('🚨 Location: Supabase Dashboard > Settings > Edge Functions > Secrets');
+  // Don't throw here - let individual requests fail with proper error messages
+  // This allows the function to deploy but will fail on actual use
+} else {
+  console.log('✅ ENCRYPTION_SALT verified on startup (length:', ENCRYPTION_SALT_STARTUP.length, 'chars)');
+}
+
 serve(async (req) => {
   console.log('encrypt-report-data request received')
   

@@ -336,6 +336,15 @@ npm run docs:build         # VitePress build
 3. **Error Messages**: Never expose stack traces or sensitive data in errors
 4. **CSP**: Content Security Policy in `vercel.json` must allow all required domains
 5. **Sentry**: Configured but not required for local development
+6. **⚠️ CRITICAL: ENCRYPTION_SALT**: 
+   - **Location**: Supabase Edge Function Secrets
+   - **Secret Name**: `ENCRYPTION_SALT`
+   - **⚠️ NEVER CHANGE WITHOUT MIGRATION PLAN**
+   - Changing this salt makes ALL encrypted reports/messages permanently unreadable
+   - Must be backed up securely (password manager)
+   - Edge Functions check salt on startup
+   - Audit table: `encryption_salt_audit` tracks changes
+   - See `ENCRYPTION_SALT_BACKUP.md` and `DISASTER_RECOVERY.md` for details
 
 ### Performance
 1. **N+1 Queries**: Previously fixed (batch operations for notifications)
