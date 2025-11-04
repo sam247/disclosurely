@@ -21,7 +21,7 @@ export default defineConfig({
     },
 
     nav: [
-      { text: 'Getting Started', link: '/getting-started' },
+      { text: 'Getting Started', link: '/' },
       { text: 'Go to Disclosurely', link: 'https://disclosurely.com' }
     ],
 
@@ -30,7 +30,7 @@ export default defineConfig({
         text: 'Introduction',
         collapsed: false,
         items: [
-          { text: 'Getting Started', link: '/getting-started' },
+          { text: 'Getting Started', link: '/' },
           { text: 'Platform Overview', link: '/introduction/platform-overview' },
           { text: 'Key Concepts', link: '/introduction/key-concepts' }
         ]

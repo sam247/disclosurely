@@ -1,13 +1,13 @@
-console.log('encrypt-report-data module import')
+// encrypt-report-data - Uses built-in Deno.serve and Web Crypto API
 
-import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
-import "https://deno.land/x/xhr@0.1.0/mod.ts"
+console.log('encrypt-report-data module import')
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 }
 
+<<<<<<< HEAD
 // ⚠️ CRITICAL: Verify ENCRYPTION_SALT on module load (startup check)
 const ENCRYPTION_SALT_STARTUP = Deno.env.get('ENCRYPTION_SALT');
 if (!ENCRYPTION_SALT_STARTUP) {
@@ -22,6 +22,9 @@ if (!ENCRYPTION_SALT_STARTUP) {
 }
 
 serve(async (req) => {
+=======
+Deno.serve(async (req: Request) => {
+>>>>>>> 6c183e5381b784d3b066fc7a6b4e921505c1cc64
   console.log('encrypt-report-data request received')
   
   try {
@@ -34,10 +37,10 @@ serve(async (req) => {
 
     console.log('Processing POST request')
     
-    const body = await req.json()
+    const body = await req.json().catch(() => null)
     console.log('Request body parsed:', Object.keys(body || {}))
     
-    const { reportData, organizationId } = body
+    const { reportData, organizationId } = body || {}
     console.log('Extracted data:', { organizationId, hasReportData: !!reportData })
     
     // Validate inputs
@@ -61,13 +64,24 @@ serve(async (req) => {
     console.log('🔐 Using Deno Web Crypto API for encryption...')
     
     // Use server-side salt (protected from client access)
-    const ENCRYPTION_SALT = Deno.env.get('ENCRYPTION_SALT');
+    let ENCRYPTION_SALT: string | undefined
+    try {
+      ENCRYPTION_SALT = Deno.env.get('ENCRYPTION_SALT') ?? undefined
+    } catch (e) {
+      // If permission to read env is blocked, surface a specific error
+      console.error('❌ Unable to read environment variables:', String(e))
+      return new Response(
+        JSON.stringify({ error: 'Server configuration error: env access denied' }),
+        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      )
+    }
+    
     if (!ENCRYPTION_SALT) {
-      console.error('❌ ENCRYPTION_SALT environment variable is not configured');
+      console.error('❌ ENCRYPTION_SALT environment variable is not configured')
       return new Response(
         JSON.stringify({ error: 'Server configuration error' }),
         { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
+      )
     }
     console.log('🔑 Encryption salt configured')
     
@@ -116,14 +130,15 @@ serve(async (req) => {
     combined.set(iv)
     combined.set(new Uint8Array(encryptedBuffer), iv.length)
     
-    // Convert to base64 for transport
-    // Use character-by-character approach to avoid any stack/argument limits
-    // This is the most reliable method for large data
-    let binaryString = ''
-    for (let i = 0; i < combined.length; i++) {
-      binaryString += String.fromCharCode(combined[i])
+    // Convert to base64 using chunked approach to avoid huge argument lists
+    // (this avoids potential stack/argument limits for very large arrays)
+    const CHUNK = 0x8000 // 32KB chunks
+    let binary = ''
+    for (let i = 0; i < combined.length; i += CHUNK) {
+      const slice = combined.subarray(i, Math.min(i + CHUNK, combined.length))
+      binary += String.fromCharCode.apply(null, Array.from(slice))
     }
-    const encryptedData = btoa(binaryString)
+    const encryptedData = typeof btoa === 'function' ? btoa(binary) : Buffer.from(binary, 'binary').toString('base64')
     const keyHash = organizationKey
     console.log('✅ AES-GCM encryption completed')
     console.log('🎉 Encryption process completed successfully')
@@ -140,8 +155,8 @@ serve(async (req) => {
 
   } catch (error) {
     console.error('❌ ERROR IN ENCRYPT FUNCTION:', error)
-    console.error('❌ Error message:', error.message)
-    console.error('❌ Error stack:', error.stack)
+    console.error('❌ Error message:', error?.message)
+    console.error('❌ Error stack:', error?.stack)
     
     return new Response(
       JSON.stringify({ 
