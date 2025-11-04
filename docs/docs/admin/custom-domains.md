@@ -1,3 +1,33 @@
+---
+title: Custom Domains - Disclosurely DNS Configuration Guide
+description: Configure custom domains for your whistleblowing portal (reports.yourcompany.com). SSL certificates, DNS setup, and domain verification included automatically.
+head:
+  - - meta
+    - property: og:title
+      content: Custom Domain Setup for Whistleblowing - Disclosurely
+  - - meta
+    - property: og:description
+      content: Configure custom domains for your whistleblowing portal (reports.yourcompany.com). SSL certificates, DNS setup, and domain verification included automatically.
+  - - meta
+    - property: og:type
+      content: website
+  - - meta
+    - property: og:image
+      content: https://docs.disclosurely.com/ogimage.png
+  - - meta
+    - name: twitter:card
+      content: summary_large_image
+  - - meta
+    - name: twitter:title
+      content: Custom Domains - Disclosurely
+  - - meta
+    - name: twitter:description
+      content: Configure custom domains for your whistleblowing portal (reports.yourcompany.com). SSL certificates, DNS setup, and domain verification included automatically.
+  - - meta
+    - name: twitter:image
+      content: https://docs.disclosurely.com/ogimage.png
+---
+
 # Custom Domains
 
 Use your own domain for your whistleblowing reporting portal. Create a professional, branded experience like reports.yourcompany.com.

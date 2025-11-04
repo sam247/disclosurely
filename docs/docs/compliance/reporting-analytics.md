@@ -1,3 +1,33 @@
+---
+title: Compliance Reporting & Analytics - Disclosurely
+description: Comprehensive compliance reports, EU Directive tracking, GDPR analytics, SOX reporting, data retention reports, and whistleblowing program analytics.
+head:
+  - - meta
+    - property: og:title
+      content: Compliance Reporting & Analytics - Disclosurely
+  - - meta
+    - property: og:description
+      content: Comprehensive compliance reports, EU Directive tracking, GDPR analytics, SOX reporting, data retention reports, and whistleblowing program analytics.
+  - - meta
+    - property: og:type
+      content: website
+  - - meta
+    - property: og:image
+      content: https://docs.disclosurely.com/ogimage.png
+  - - meta
+    - name: twitter:card
+      content: summary_large_image
+  - - meta
+    - name: twitter:title
+      content: Compliance Reporting & Analytics
+  - - meta
+    - name: twitter:description
+      content: Comprehensive compliance reports, EU Directive tracking, GDPR analytics, SOX reporting, data retention reports, and whistleblowing program analytics.
+  - - meta
+    - name: twitter:image
+      content: https://docs.disclosurely.com/ogimage.png
+---
+
 # Compliance Reporting & Analytics
 
 Generate comprehensive compliance reports and analytics to demonstrate regulatory adherence and drive improvements.

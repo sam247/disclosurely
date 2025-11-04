@@ -1,3 +1,33 @@
+---
+title: GDPR Compliance - Disclosurely Data Protection Guide
+description: Complete GDPR compliance guide for whistleblowing platforms. Data subject rights, retention policies, audit trails, and privacy by design for EU data protection regulations.
+head:
+  - - meta
+    - property: og:title
+      content: GDPR Compliance for Whistleblowing - Disclosurely
+  - - meta
+    - property: og:description
+      content: Complete GDPR compliance guide for whistleblowing platforms. Data subject rights, retention policies, audit trails, and privacy by design for EU data protection regulations.
+  - - meta
+    - property: og:type
+      content: website
+  - - meta
+    - property: og:image
+      content: https://docs.disclosurely.com/ogimage.png
+  - - meta
+    - name: twitter:card
+      content: summary_large_image
+  - - meta
+    - name: twitter:title
+      content: GDPR Compliance - Disclosurely
+  - - meta
+    - name: twitter:description
+      content: Complete GDPR compliance guide for whistleblowing platforms. Data subject rights, retention policies, audit trails, and privacy by design for EU data protection regulations.
+  - - meta
+    - name: twitter:image
+      content: https://docs.disclosurely.com/ogimage.png
+---
+
 # GDPR Compliance
 
 How Disclosurely helps you meet General Data Protection Regulation requirements.

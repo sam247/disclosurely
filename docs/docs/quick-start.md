@@ -1,3 +1,33 @@
+---
+title: Quick Start Guide - Disclosurely Getting Started
+description: Get your whistleblowing platform running in minutes. Set up your organization, customize reporting portal, invite team members, and share secure reporting URL.
+head:
+  - - meta
+    - property: og:title
+      content: Quick Start Guide - Disclosurely
+  - - meta
+    - property: og:description
+      content: Get your whistleblowing platform running in minutes. Set up your organization, customize reporting portal, invite team members, and share secure reporting URL.
+  - - meta
+    - property: og:type
+      content: website
+  - - meta
+    - property: og:image
+      content: https://docs.disclosurely.com/ogimage.png
+  - - meta
+    - name: twitter:card
+      content: summary_large_image
+  - - meta
+    - name: twitter:title
+      content: Quick Start Guide - Disclosurely
+  - - meta
+    - name: twitter:description
+      content: Get your whistleblowing platform running in minutes. Set up your organization, customize reporting portal, invite team members, and share secure reporting URL.
+  - - meta
+    - name: twitter:image
+      content: https://docs.disclosurely.com/ogimage.png
+---
+
 # Quick Start Guide
 
 Get your Disclosurely whistleblowing platform up and running in minutes.

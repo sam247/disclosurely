@@ -1,3 +1,33 @@
+---
+title: Key Concepts - Disclosurely Whistleblowing Platform
+description: Master essential whistleblowing concepts including anonymous reporting, case workflows, encryption, compliance, and audit trails. Complete guide for effective compliance.
+head:
+  - - meta
+    - property: og:title
+      content: Key Concepts - Disclosurely Whistleblowing Platform
+  - - meta
+    - property: og:description
+      content: Master essential whistleblowing concepts including anonymous reporting, case workflows, encryption, compliance, and audit trails. Complete guide for effective compliance.
+  - - meta
+    - property: og:type
+      content: website
+  - - meta
+    - property: og:image
+      content: https://docs.disclosurely.com/ogimage.png
+  - - meta
+    - name: twitter:card
+      content: summary_large_image
+  - - meta
+    - name: twitter:title
+      content: Key Concepts - Disclosurely Platform
+  - - meta
+    - name: twitter:description
+      content: Master essential whistleblowing concepts including anonymous reporting, case workflows, encryption, compliance, and audit trails. Complete guide for effective compliance.
+  - - meta
+    - name: twitter:image
+      content: https://docs.disclosurely.com/ogimage.png
+---
+
 # Key Concepts
 
 Understanding these key concepts will help you get the most out of Disclosurely and implement an effective whistleblowing and compliance program.
@@ -424,6 +454,6 @@ Real-time in-app notifications for:
 ---
 
 **Next Steps:**
-- [Getting Started Guide](/getting-started)
+- [Getting Started Guide](/)
 - [Platform Overview](/introduction/platform-overview)
 - [Initial Setup](/admin/initial-setup)

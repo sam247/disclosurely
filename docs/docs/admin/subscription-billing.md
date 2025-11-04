@@ -1,3 +1,33 @@
+---
+title: Subscription & Billing - Disclosurely Plans & Pricing
+description: Manage subscriptions, upgrade plans, update billing information, and track usage. Compare Basic, Pro, and Enterprise plans for your organization's needs.
+head:
+  - - meta
+    - property: og:title
+      content: Subscription & Billing Management - Disclosurely
+  - - meta
+    - property: og:description
+      content: Manage subscriptions, upgrade plans, update billing information, and track usage. Compare Basic, Pro, and Enterprise plans for your organization's needs.
+  - - meta
+    - property: og:type
+      content: website
+  - - meta
+    - property: og:image
+      content: https://docs.disclosurely.com/ogimage.png
+  - - meta
+    - name: twitter:card
+      content: summary_large_image
+  - - meta
+    - name: twitter:title
+      content: Subscription & Billing - Disclosurely
+  - - meta
+    - name: twitter:description
+      content: Manage subscriptions, upgrade plans, update billing information, and track usage. Compare Basic, Pro, and Enterprise plans for your organization's needs.
+  - - meta
+    - name: twitter:image
+      content: https://docs.disclosurely.com/ogimage.png
+---
+
 # Subscription & Billing
 
 Manage your Disclosurely subscription, billing information, and usage in one place.

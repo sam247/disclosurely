@@ -1,3 +1,33 @@
+---
+title: Status Management - Disclosurely Case Tracking Guide
+description: Track investigation progress with status updates from New to Resolved. Automate notifications, monitor compliance timeframes, and communicate effectively.
+head:
+  - - meta
+    - property: og:title
+      content: Case Status Management & Tracking - Disclosurely
+  - - meta
+    - property: og:description
+      content: Track investigation progress with status updates from New to Resolved. Automate notifications, monitor compliance timeframes, and communicate effectively.
+  - - meta
+    - property: og:type
+      content: website
+  - - meta
+    - property: og:image
+      content: https://docs.disclosurely.com/ogimage.png
+  - - meta
+    - name: twitter:card
+      content: summary_large_image
+  - - meta
+    - name: twitter:title
+      content: Status Management - Disclosurely
+  - - meta
+    - name: twitter:description
+      content: Track investigation progress with status updates from New to Resolved. Automate notifications, monitor compliance timeframes, and communicate effectively.
+  - - meta
+    - name: twitter:image
+      content: https://docs.disclosurely.com/ogimage.png
+---
+
 # Status Management
 
 Track and communicate investigation progress through clear, meaningful status updates.

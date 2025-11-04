@@ -1,3 +1,33 @@
+---
+title: Security Overview - Disclosurely Zero-Knowledge Platform
+description: Military-grade security with AES-256 encryption, zero-knowledge architecture, SOC 2 compliance, ISO 27001 certification, and comprehensive access controls.
+head:
+  - - meta
+    - property: og:title
+      content: Security Overview - Zero-Knowledge Whistleblowing Platform
+  - - meta
+    - property: og:description
+      content: Military-grade security with AES-256 encryption, zero-knowledge architecture, SOC 2 compliance, ISO 27001 certification, and comprehensive access controls.
+  - - meta
+    - property: og:type
+      content: website
+  - - meta
+    - property: og:image
+      content: https://docs.disclosurely.com/ogimage.png
+  - - meta
+    - name: twitter:card
+      content: summary_large_image
+  - - meta
+    - name: twitter:title
+      content: Security Overview - Disclosurely
+  - - meta
+    - name: twitter:description
+      content: Military-grade security with AES-256 encryption, zero-knowledge architecture, SOC 2 compliance, ISO 27001 certification, and comprehensive access controls.
+  - - meta
+    - name: twitter:image
+      content: https://docs.disclosurely.com/ogimage.png
+---
+
 # Security Overview
 
 Comprehensive overview of Disclosurely's security architecture and practices.

@@ -1,3 +1,33 @@
+---
+title: AI Case Helper - Disclosurely AI Features
+description: Intelligent AI assistant for case analysis, investigation support, pattern detection, risk assessment, and data-driven decision making for whistleblowing.
+head:
+  - - meta
+    - property: og:title
+      content: AI Case Helper - Disclosurely AI Features
+  - - meta
+    - property: og:description
+      content: Intelligent AI assistant for case analysis, investigation support, pattern detection, risk assessment, and data-driven decision making for whistleblowing.
+  - - meta
+    - property: og:type
+      content: website
+  - - meta
+    - property: og:image
+      content: https://docs.disclosurely.com/ogimage.png
+  - - meta
+    - name: twitter:card
+      content: summary_large_image
+  - - meta
+    - name: twitter:title
+      content: AI Case Helper - Disclosurely
+  - - meta
+    - name: twitter:description
+      content: Intelligent AI assistant for case analysis, investigation support, pattern detection, risk assessment, and data-driven decision making for whistleblowing.
+  - - meta
+    - name: twitter:image
+      content: https://docs.disclosurely.com/ogimage.png
+---
+
 # AI Case Helper
 
 The AI Case Helper is Disclosurely's intelligent assistant for case analysis and investigation. Powered by advanced AI, it helps case handlers analyze reports faster, identify key issues, and make data-driven decisions.

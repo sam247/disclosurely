@@ -14,7 +14,7 @@ This page is currently being written. We're creating comprehensive documentation
 
 **In the meantime:**
 - Check out [Compliance Reporting & Analytics](/compliance/reporting-analytics) for compliance-specific reporting
-- Visit [Getting Started](/getting-started) for general platform documentation
+- Visit [Getting Started](/) for general platform documentation
 - [Contact Support](/support/contact) if you need immediate assistance
 
 ---

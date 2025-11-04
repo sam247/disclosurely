@@ -1,3 +1,33 @@
+---
+title: Data Retention Policies - Disclosurely Compliance
+description: Data retention management, archiving, secure deletion, legal holds, retention periods, GDPR compliance, and automated data retention workflow policies.
+head:
+  - - meta
+    - property: og:title
+      content: Data Retention Policies - Disclosurely
+  - - meta
+    - property: og:description
+      content: Data retention management, archiving, secure deletion, legal holds, retention periods, GDPR compliance, and automated data retention workflow policies.
+  - - meta
+    - property: og:type
+      content: website
+  - - meta
+    - property: og:image
+      content: https://docs.disclosurely.com/ogimage.png
+  - - meta
+    - name: twitter:card
+      content: summary_large_image
+  - - meta
+    - name: twitter:title
+      content: Data Retention Policies - Disclosurely
+  - - meta
+    - name: twitter:description
+      content: Data retention management, archiving, secure deletion, legal holds, retention periods, GDPR compliance, and automated data retention workflow policies.
+  - - meta
+    - name: twitter:image
+      content: https://docs.disclosurely.com/ogimage.png
+---
+
 # Data Retention Policies
 
 Comprehensive guide to managing data retention, archiving, and secure deletion for compliance.

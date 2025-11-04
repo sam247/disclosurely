@@ -1,5 +1,32 @@
 ---
 layout: doc
+title: Getting Started with Disclosurely
+description: Complete guide to setting up your whistleblowing and compliance platform. Learn how to configure anonymous reporting, manage cases, and stay compliant.
+head:
+  - - meta
+    - property: og:title
+      content: Getting Started with Disclosurely - Whistleblowing Platform
+  - - meta
+    - property: og:description
+      content: Complete guide to setting up your whistleblowing and compliance platform. Learn how to configure anonymous reporting, manage cases, and stay compliant.
+  - - meta
+    - property: og:type
+      content: website
+  - - meta
+    - property: og:image
+      content: https://docs.disclosurely.com/ogimage.png
+  - - meta
+    - name: twitter:card
+      content: summary_large_image
+  - - meta
+    - name: twitter:title
+      content: Getting Started with Disclosurely
+  - - meta
+    - name: twitter:description
+      content: Complete guide to setting up your whistleblowing and compliance platform. Learn how to configure anonymous reporting, manage cases, and stay compliant.
+  - - meta
+    - name: twitter:image
+      content: https://docs.disclosurely.com/ogimage.png
 ---
 
 # Getting Started
