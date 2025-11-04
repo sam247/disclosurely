@@ -31,9 +31,14 @@ const TypingAnimation: React.FC<TypingAnimationProps> = ({
   }, [phrases]);
 
   useEffect(() => {
-    if (!phrases || phrases.length === 0) return;
+    if (!phrases || phrases.length === 0) {
+      // If no phrases, show nothing
+      return;
+    }
 
     const currentPhrase = phrases[currentPhraseIndex];
+    if (!currentPhrase) return;
+    
     const isLastPhrase = currentPhraseIndex === phrases.length - 1;
 
     // If we're on the last phrase and it's fully typed, mark as complete
@@ -74,7 +79,7 @@ const TypingAnimation: React.FC<TypingAnimationProps> = ({
       return;
     }
 
-    // Type next character
+    // Type next character (this handles the initial typing when currentText is empty)
     if (!isDeleting && !isPaused && currentText.length < currentPhrase.length) {
       const typeTimer = setTimeout(() => {
         setCurrentText(currentPhrase.slice(0, currentText.length + 1));
@@ -82,6 +87,20 @@ const TypingAnimation: React.FC<TypingAnimationProps> = ({
       return () => clearTimeout(typeTimer);
     }
   }, [currentText, currentPhraseIndex, isDeleting, isPaused, isComplete, phrases, typingSpeed, deletingSpeed, pauseDuration]);
+
+  // Start typing immediately on mount or when phrases change
+  useEffect(() => {
+    if (phrases && phrases.length > 0 && currentText === '' && !isDeleting && !isPaused && !isComplete) {
+      const firstPhrase = phrases[0];
+      if (firstPhrase) {
+        // Start typing the first character immediately
+        const initialTimer = setTimeout(() => {
+          setCurrentText(firstPhrase[0] || '');
+        }, typingSpeed);
+        return () => clearTimeout(initialTimer);
+      }
+    }
+  }, [phrases, currentText, isDeleting, isPaused, isComplete, typingSpeed]);
 
   return (
     <span className={className}>
