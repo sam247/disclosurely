@@ -1,3 +1,33 @@
+---
+title: Custom Branding - Disclosurely White-Label Customization
+description: White-label your whistleblowing portal with custom logos, colors, and messaging. Create a branded reporting experience matching your organization's identity.
+head:
+  - - meta
+    - property: og:title
+      content: Custom Branding & White-Label Portal - Disclosurely
+  - - meta
+    - property: og:description
+      content: White-label your whistleblowing portal with custom logos, colors, and messaging. Create a branded reporting experience matching your organization's identity.
+  - - meta
+    - property: og:type
+      content: website
+  - - meta
+    - property: og:image
+      content: https://docs.disclosurely.com/ogimage.png
+  - - meta
+    - name: twitter:card
+      content: summary_large_image
+  - - meta
+    - name: twitter:title
+      content: Custom Branding - Disclosurely
+  - - meta
+    - name: twitter:description
+      content: White-label your whistleblowing portal with custom logos, colors, and messaging. Create a branded reporting experience matching your organization's identity.
+  - - meta
+    - name: twitter:image
+      content: https://docs.disclosurely.com/ogimage.png
+---
+
 # Custom Branding
 
 Customize your Disclosurely reporting portal to match your organization's brand identity. Available on Pro and Enterprise plans.

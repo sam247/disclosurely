@@ -1,3 +1,33 @@
+---
+title: Organization Settings - Disclosurely Admin Configuration
+description: Manage organization settings including branding, notifications, retention policies, and automation rules. Centralized configuration for administrators.
+head:
+  - - meta
+    - property: og:title
+      content: Organization Settings & Configuration - Disclosurely
+  - - meta
+    - property: og:description
+      content: Manage organization settings including branding, notifications, retention policies, and automation rules. Centralized configuration for administrators.
+  - - meta
+    - property: og:type
+      content: website
+  - - meta
+    - property: og:image
+      content: https://docs.disclosurely.com/ogimage.png
+  - - meta
+    - name: twitter:card
+      content: summary_large_image
+  - - meta
+    - name: twitter:title
+      content: Organization Settings - Disclosurely
+  - - meta
+    - name: twitter:description
+      content: Manage organization settings including branding, notifications, retention policies, and automation rules. Centralized configuration for administrators.
+  - - meta
+    - name: twitter:image
+      content: https://docs.disclosurely.com/ogimage.png
+---
+
 # Organization Settings
 
 Manage your organization's core settings, branding, and configuration in one centralized location.

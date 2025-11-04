@@ -1,3 +1,33 @@
+---
+title: SOX Compliance - Sarbanes-Oxley Whistleblowing Guide
+description: Meet Sarbanes-Oxley Section 301 and 806 requirements with anonymous reporting, audit committee oversight, 7-year retention, and anti-retaliation protections.
+head:
+  - - meta
+    - property: og:title
+      content: SOX Compliance for Whistleblowing - Disclosurely
+  - - meta
+    - property: og:description
+      content: Meet Sarbanes-Oxley Section 301 and 806 requirements with anonymous reporting, audit committee oversight, 7-year retention, and anti-retaliation protections.
+  - - meta
+    - property: og:type
+      content: website
+  - - meta
+    - property: og:image
+      content: https://docs.disclosurely.com/ogimage.png
+  - - meta
+    - name: twitter:card
+      content: summary_large_image
+  - - meta
+    - name: twitter:title
+      content: SOX Compliance - Disclosurely
+  - - meta
+    - name: twitter:description
+      content: Meet Sarbanes-Oxley Section 301 and 806 requirements with anonymous reporting, audit committee oversight, 7-year retention, and anti-retaliation protections.
+  - - meta
+    - name: twitter:image
+      content: https://docs.disclosurely.com/ogimage.png
+---
+
 # SOX Compliance (Sarbanes-Oxley)
 
 How Disclosurely supports Sarbanes-Oxley Act compliance for financial reporting and audit requirements.

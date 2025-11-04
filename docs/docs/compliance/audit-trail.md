@@ -1,3 +1,33 @@
+---
+title: Audit Trail - Disclosurely Tamper-Evident Logging
+description: Tamper-evident audit trails with hash chain integrity for complete compliance. Track all user actions, system events, and investigations with immutable logging.
+head:
+  - - meta
+    - property: og:title
+      content: Audit Trail & Tamper-Evident Logging - Disclosurely
+  - - meta
+    - property: og:description
+      content: Tamper-evident audit trails with hash chain integrity for complete compliance. Track all user actions, system events, and investigations with immutable logging.
+  - - meta
+    - property: og:type
+      content: website
+  - - meta
+    - property: og:image
+      content: https://docs.disclosurely.com/ogimage.png
+  - - meta
+    - name: twitter:card
+      content: summary_large_image
+  - - meta
+    - name: twitter:title
+      content: Audit Trail - Disclosurely
+  - - meta
+    - name: twitter:description
+      content: Tamper-evident audit trails with hash chain integrity for complete compliance. Track all user actions, system events, and investigations with immutable logging.
+  - - meta
+    - name: twitter:image
+      content: https://docs.disclosurely.com/ogimage.png
+---
+
 # Audit Trail
 
 Complete, tamper-evident logging of all system activities for compliance and accountability.

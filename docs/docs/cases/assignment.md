@@ -1,3 +1,33 @@
+---
+title: Case Assignment - Disclosurely Team Management Guide
+description: Assign cases efficiently with auto-routing, round-robin distribution, and workload balancing. Configure assignment rules and track team performance metrics.
+head:
+  - - meta
+    - property: og:title
+      content: Case Assignment & Distribution - Disclosurely
+  - - meta
+    - property: og:description
+      content: Assign cases efficiently with auto-routing, round-robin distribution, and workload balancing. Configure assignment rules and track team performance metrics.
+  - - meta
+    - property: og:type
+      content: website
+  - - meta
+    - property: og:image
+      content: https://docs.disclosurely.com/ogimage.png
+  - - meta
+    - name: twitter:card
+      content: summary_large_image
+  - - meta
+    - name: twitter:title
+      content: Case Assignment - Disclosurely
+  - - meta
+    - name: twitter:description
+      content: Assign cases efficiently with auto-routing, round-robin distribution, and workload balancing. Configure assignment rules and track team performance metrics.
+  - - meta
+    - name: twitter:image
+      content: https://docs.disclosurely.com/ogimage.png
+---
+
 # Case Assignment
 
 Efficiently assign and distribute cases to the right team members for investigation.

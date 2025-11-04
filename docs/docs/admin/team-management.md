@@ -1,3 +1,33 @@
+---
+title: Team Management - Disclosurely User Roles & Access
+description: Invite team members, assign roles (Admin, Case Handler, Reviewer), and manage permissions. Configure role-based access control for your investigation team.
+head:
+  - - meta
+    - property: og:title
+      content: Team Management & User Roles - Disclosurely
+  - - meta
+    - property: og:description
+      content: Invite team members, assign roles (Admin, Case Handler, Reviewer), and manage permissions. Configure role-based access control for your investigation team.
+  - - meta
+    - property: og:type
+      content: website
+  - - meta
+    - property: og:image
+      content: https://docs.disclosurely.com/ogimage.png
+  - - meta
+    - name: twitter:card
+      content: summary_large_image
+  - - meta
+    - name: twitter:title
+      content: Team Management - Disclosurely
+  - - meta
+    - name: twitter:description
+      content: Invite team members, assign roles (Admin, Case Handler, Reviewer), and manage permissions. Configure role-based access control for your investigation team.
+  - - meta
+    - name: twitter:image
+      content: https://docs.disclosurely.com/ogimage.png
+---
+
 # Team Management
 
 Manage your team members, assign roles, send invitations, and control access to your Disclosurely organization.

@@ -1,3 +1,33 @@
+---
+title: Case Archiving - Disclosurely Data Retention Guide
+description: Manage case archiving, data retention, and secure deletion. Learn retention policies, legal holds, GDPR compliance, and best practices for long-term case management.
+head:
+  - - meta
+    - property: og:title
+      content: Case Archiving & Data Retention - Disclosurely
+  - - meta
+    - property: og:description
+      content: Manage case archiving, data retention, and secure deletion. Learn retention policies, legal holds, GDPR compliance, and best practices for long-term case management.
+  - - meta
+    - property: og:type
+      content: website
+  - - meta
+    - property: og:image
+      content: https://docs.disclosurely.com/ogimage.png
+  - - meta
+    - name: twitter:card
+      content: summary_large_image
+  - - meta
+    - name: twitter:title
+      content: Case Archiving - Disclosurely
+  - - meta
+    - name: twitter:description
+      content: Manage case archiving, data retention, and secure deletion. Learn retention policies, legal holds, GDPR compliance, and best practices for long-term case management.
+  - - meta
+    - name: twitter:image
+      content: https://docs.disclosurely.com/ogimage.png
+---
+
 # Case Archiving
 
 Long-term case management, data retention, and secure disposal practices.

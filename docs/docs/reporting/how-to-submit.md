@@ -1,3 +1,33 @@
+---
+title: How to Submit a Report - Disclosurely Reporting Guide
+description: Learn how to securely submit anonymous or confidential reports through Disclosurely. Step-by-step guide with evidence upload, tracking IDs, and privacy tips.
+head:
+  - - meta
+    - property: og:title
+      content: How to Submit a Secure Report - Disclosurely
+  - - meta
+    - property: og:description
+      content: Learn how to securely submit anonymous or confidential reports through Disclosurely. Step-by-step guide with evidence upload, tracking IDs, and privacy tips.
+  - - meta
+    - property: og:type
+      content: website
+  - - meta
+    - property: og:image
+      content: https://docs.disclosurely.com/ogimage.png
+  - - meta
+    - name: twitter:card
+      content: summary_large_image
+  - - meta
+    - name: twitter:title
+      content: How to Submit a Report - Disclosurely
+  - - meta
+    - name: twitter:description
+      content: Learn how to securely submit anonymous or confidential reports through Disclosurely. Step-by-step guide with evidence upload, tracking IDs, and privacy tips.
+  - - meta
+    - name: twitter:image
+      content: https://docs.disclosurely.com/ogimage.png
+---
+
 # How to Submit a Report
 
 This guide explains how to submit a secure, anonymous report through Disclosurely. Whether you're reporting workplace misconduct, safety concerns, or ethical violations, this step-by-step guide will help you submit your report safely and confidentially.

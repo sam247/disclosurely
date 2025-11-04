@@ -1,3 +1,33 @@
+---
+title: Report Encryption - Disclosurely Zero-Knowledge Security
+description: AES-256 encryption with zero-knowledge architecture protects whistleblower reports. Client-side encryption ensures complete privacy and military-grade security.
+head:
+  - - meta
+    - property: og:title
+      content: Report Encryption & Zero-Knowledge Security - Disclosurely
+  - - meta
+    - property: og:description
+      content: AES-256 encryption with zero-knowledge architecture protects whistleblower reports. Client-side encryption ensures complete privacy and military-grade security.
+  - - meta
+    - property: og:type
+      content: website
+  - - meta
+    - property: og:image
+      content: https://docs.disclosurely.com/ogimage.png
+  - - meta
+    - name: twitter:card
+      content: summary_large_image
+  - - meta
+    - name: twitter:title
+      content: Report Encryption - Disclosurely
+  - - meta
+    - name: twitter:description
+      content: AES-256 encryption with zero-knowledge architecture protects whistleblower reports. Client-side encryption ensures complete privacy and military-grade security.
+  - - meta
+    - name: twitter:image
+      content: https://docs.disclosurely.com/ogimage.png
+---
+
 # Report Encryption
 
 Understanding how Disclosurely protects your reports with military-grade encryption and zero-knowledge architecture.

@@ -175,4 +175,4 @@ Enterprise customers: Call emergency hotline (provided in dashboard)
 **Related:**
 - [FAQs](/support/faqs)
 - [Contact Support](/support/contact)
-- [Documentation Home](/getting-started)
+- [Documentation Home](/)

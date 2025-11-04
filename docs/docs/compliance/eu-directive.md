@@ -1,3 +1,33 @@
+---
+title: EU Whistleblowing Directive - Compliance Guide
+description: Complete EU Directive 2019/1937 compliance guide. 7-day acknowledgment, 3-month feedback, anonymous reporting, confidentiality protection, and anti-retaliation measures.
+head:
+  - - meta
+    - property: og:title
+      content: EU Whistleblowing Directive Compliance - Disclosurely
+  - - meta
+    - property: og:description
+      content: Complete EU Directive 2019/1937 compliance guide. 7-day acknowledgment, 3-month feedback, anonymous reporting, confidentiality protection, and anti-retaliation measures.
+  - - meta
+    - property: og:type
+      content: website
+  - - meta
+    - property: og:image
+      content: https://docs.disclosurely.com/ogimage.png
+  - - meta
+    - name: twitter:card
+      content: summary_large_image
+  - - meta
+    - name: twitter:title
+      content: EU Whistleblowing Directive - Disclosurely
+  - - meta
+    - name: twitter:description
+      content: Complete EU Directive 2019/1937 compliance guide. 7-day acknowledgment, 3-month feedback, anonymous reporting, confidentiality protection, and anti-retaliation measures.
+  - - meta
+    - name: twitter:image
+      content: https://docs.disclosurely.com/ogimage.png
+---
+
 # EU Whistleblowing Directive Compliance
 
 How Disclosurely helps you comply with EU Directive 2019/1937 on the protection of whistleblowers.

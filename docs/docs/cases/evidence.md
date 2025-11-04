@@ -1,3 +1,33 @@
+---
+title: Case Notes & Evidence - Disclosurely Investigation Guide
+description: Document investigations effectively with case notes and evidence management. Upload files, maintain chain of custody, and create defensible investigation records.
+head:
+  - - meta
+    - property: og:title
+      content: Case Notes & Evidence Management - Disclosurely
+  - - meta
+    - property: og:description
+      content: Document investigations effectively with case notes and evidence management. Upload files, maintain chain of custody, and create defensible investigation records.
+  - - meta
+    - property: og:type
+      content: website
+  - - meta
+    - property: og:image
+      content: https://docs.disclosurely.com/ogimage.png
+  - - meta
+    - name: twitter:card
+      content: summary_large_image
+  - - meta
+    - name: twitter:title
+      content: Case Notes & Evidence - Disclosurely
+  - - meta
+    - name: twitter:description
+      content: Document investigations effectively with case notes and evidence management. Upload files, maintain chain of custody, and create defensible investigation records.
+  - - meta
+    - name: twitter:image
+      content: https://docs.disclosurely.com/ogimage.png
+---
+
 # Case Notes and Evidence
 
 Comprehensive guide to documenting investigations and managing evidence properly.

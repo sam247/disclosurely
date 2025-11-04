@@ -1,3 +1,33 @@
+---
+title: Report Types - Anonymous vs Confidential Reporting
+description: Choose between anonymous or confidential whistleblowing. Compare features, security, and best practices for each reporting type with complete encryption protection.
+head:
+  - - meta
+    - property: og:title
+      content: Anonymous vs Confidential Whistleblowing - Disclosurely
+  - - meta
+    - property: og:description
+      content: Choose between anonymous or confidential whistleblowing. Compare features, security, and best practices for each reporting type with complete encryption protection.
+  - - meta
+    - property: og:type
+      content: website
+  - - meta
+    - property: og:image
+      content: https://docs.disclosurely.com/ogimage.png
+  - - meta
+    - name: twitter:card
+      content: summary_large_image
+  - - meta
+    - name: twitter:title
+      content: Report Types - Disclosurely
+  - - meta
+    - name: twitter:description
+      content: Choose between anonymous or confidential whistleblowing. Compare features, security, and best practices for each reporting type with complete encryption protection.
+  - - meta
+    - name: twitter:image
+      content: https://docs.disclosurely.com/ogimage.png
+---
+
 # Report Types
 
 Disclosurely supports two types of report submissions: Anonymous and Confidential. Understanding the difference helps you choose the right approach.

@@ -1,3 +1,33 @@
+---
+title: Case Resolution - Disclosurely Investigation Outcomes Guide
+description: Close investigations effectively with proper findings, disciplinary actions, and reporting. Learn standards of proof, communication, and resolution best practices.
+head:
+  - - meta
+    - property: og:title
+      content: Case Resolution & Investigation Outcomes - Disclosurely
+  - - meta
+    - property: og:description
+      content: Close investigations effectively with proper findings, disciplinary actions, and reporting. Learn standards of proof, communication, and resolution best practices.
+  - - meta
+    - property: og:type
+      content: website
+  - - meta
+    - property: og:image
+      content: https://docs.disclosurely.com/ogimage.png
+  - - meta
+    - name: twitter:card
+      content: summary_large_image
+  - - meta
+    - name: twitter:title
+      content: Case Resolution - Disclosurely
+  - - meta
+    - name: twitter:description
+      content: Close investigations effectively with proper findings, disciplinary actions, and reporting. Learn standards of proof, communication, and resolution best practices.
+  - - meta
+    - name: twitter:image
+      content: https://docs.disclosurely.com/ogimage.png
+---
+
 # Case Resolution
 
 Complete guide to concluding investigations and implementing outcomes appropriately.

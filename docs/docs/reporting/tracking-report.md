@@ -1,3 +1,33 @@
+---
+title: Tracking Your Report - Disclosurely Status Lookup
+description: Track whistleblower report status with unique tracking IDs. Check investigation progress, receive updates, and communicate securely with investigators anytime, anywhere.
+head:
+  - - meta
+    - property: og:title
+      content: Track Your Whistleblower Report Status - Disclosurely
+  - - meta
+    - property: og:description
+      content: Track whistleblower report status with unique tracking IDs. Check investigation progress, receive updates, and communicate securely with investigators anytime, anywhere.
+  - - meta
+    - property: og:type
+      content: website
+  - - meta
+    - property: og:image
+      content: https://docs.disclosurely.com/ogimage.png
+  - - meta
+    - name: twitter:card
+      content: summary_large_image
+  - - meta
+    - name: twitter:title
+      content: Tracking Your Report - Disclosurely
+  - - meta
+    - name: twitter:description
+      content: Track whistleblower report status with unique tracking IDs. Check investigation progress, receive updates, and communicate securely with investigators anytime, anywhere.
+  - - meta
+    - name: twitter:image
+      content: https://docs.disclosurely.com/ogimage.png
+---
+
 # Tracking Your Report
 
 Use your tracking ID to check the status of your report, receive updates, and communicate with investigators anytime.

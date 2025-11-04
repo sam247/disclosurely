@@ -1,3 +1,33 @@
+---
+title: Platform Overview - Disclosurely Whistleblowing Platform
+description: Enterprise whistleblowing and compliance platform with anonymous reporting, case management, and AI-powered risk assessment. Built for GDPR, SOX, and EU Directive compliance.
+head:
+  - - meta
+    - property: og:title
+      content: Disclosurely Platform Overview - Complete Whistleblowing Solution
+  - - meta
+    - property: og:description
+      content: Enterprise whistleblowing and compliance platform with anonymous reporting, case management, and AI-powered risk assessment. Built for GDPR, SOX, and EU Directive compliance.
+  - - meta
+    - property: og:type
+      content: website
+  - - meta
+    - property: og:image
+      content: https://docs.disclosurely.com/ogimage.png
+  - - meta
+    - name: twitter:card
+      content: summary_large_image
+  - - meta
+    - name: twitter:title
+      content: Disclosurely Platform Overview
+  - - meta
+    - name: twitter:description
+      content: Enterprise whistleblowing and compliance platform with anonymous reporting, case management, and AI-powered risk assessment. Built for GDPR, SOX, and EU Directive compliance.
+  - - meta
+    - name: twitter:image
+      content: https://docs.disclosurely.com/ogimage.png
+---
+
 # Platform Overview
 
 Disclosurely is an enterprise-grade whistleblowing and compliance management platform designed to help organizations protect whistleblowers, maintain regulatory compliance, and manage organizational risk effectively. Built with security and privacy at its core, Disclosurely provides a comprehensive suite of tools for modern compliance programs.

@@ -1,3 +1,33 @@
+---
+title: Secure Messaging - Disclosurely Anonymous Communication
+description: Encrypted two-way messaging for whistleblowers. Communicate with investigators anonymously using tracking IDs. Complete privacy protection with end-to-end encryption.
+head:
+  - - meta
+    - property: og:title
+      content: Secure Anonymous Messaging for Whistleblowers - Disclosurely
+  - - meta
+    - property: og:description
+      content: Encrypted two-way messaging for whistleblowers. Communicate with investigators anonymously using tracking IDs. Complete privacy protection with end-to-end encryption.
+  - - meta
+    - property: og:type
+      content: website
+  - - meta
+    - property: og:image
+      content: https://docs.disclosurely.com/ogimage.png
+  - - meta
+    - name: twitter:card
+      content: summary_large_image
+  - - meta
+    - name: twitter:title
+      content: Secure Messaging - Disclosurely
+  - - meta
+    - name: twitter:description
+      content: Encrypted two-way messaging for whistleblowers. Communicate with investigators anonymously using tracking IDs. Complete privacy protection with end-to-end encryption.
+  - - meta
+    - name: twitter:image
+      content: https://docs.disclosurely.com/ogimage.png
+---
+
 # Secure Messaging
 
 Communicate securely with investigators while maintaining your anonymity. Two-way encrypted messaging allows dialogue without compromising privacy.

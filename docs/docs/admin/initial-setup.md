@@ -1,3 +1,33 @@
+---
+title: Initial Setup - Disclosurely Configuration Guide
+description: Set up your whistleblowing platform in minutes. Configure organization settings, customize branding, invite team members, and launch your secure reporting portal.
+head:
+  - - meta
+    - property: og:title
+      content: Initial Setup & Configuration - Disclosurely
+  - - meta
+    - property: og:description
+      content: Set up your whistleblowing platform in minutes. Configure organization settings, customize branding, invite team members, and launch your secure reporting portal.
+  - - meta
+    - property: og:type
+      content: website
+  - - meta
+    - property: og:image
+      content: https://docs.disclosurely.com/ogimage.png
+  - - meta
+    - name: twitter:card
+      content: summary_large_image
+  - - meta
+    - name: twitter:title
+      content: Initial Setup - Disclosurely
+  - - meta
+    - name: twitter:description
+      content: Set up your whistleblowing platform in minutes. Configure organization settings, customize branding, invite team members, and launch your secure reporting portal.
+  - - meta
+    - name: twitter:image
+      content: https://docs.disclosurely.com/ogimage.png
+---
+
 # Initial Setup
 
 This guide will walk you through setting up your Disclosurely organization from scratch. Follow these steps to get your whistleblowing and compliance platform up and running quickly.

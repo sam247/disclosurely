@@ -1,3 +1,33 @@
+---
+title: Investigation Workflow - Disclosurely Process Guide
+description: Master the complete investigation lifecycle from assessment to resolution. Evidence gathering, analysis, findings, and compliance with regulatory timeframes.
+head:
+  - - meta
+    - property: og:title
+      content: Investigation Workflow & Process - Disclosurely
+  - - meta
+    - property: og:description
+      content: Master the complete investigation lifecycle from assessment to resolution. Evidence gathering, analysis, findings, and compliance with regulatory timeframes.
+  - - meta
+    - property: og:type
+      content: website
+  - - meta
+    - property: og:image
+      content: https://docs.disclosurely.com/ogimage.png
+  - - meta
+    - name: twitter:card
+      content: summary_large_image
+  - - meta
+    - name: twitter:title
+      content: Investigation Workflow - Disclosurely
+  - - meta
+    - name: twitter:description
+      content: Master the complete investigation lifecycle from assessment to resolution. Evidence gathering, analysis, findings, and compliance with regulatory timeframes.
+  - - meta
+    - name: twitter:image
+      content: https://docs.disclosurely.com/ogimage.png
+---
+
 # Investigation Workflow
 
 A comprehensive guide to managing the investigation lifecycle from initial review to resolution.
