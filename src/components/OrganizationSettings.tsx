@@ -214,9 +214,9 @@ const OrganizationSettings = () => {
           {/* Logo Upload */}
           <div className="space-y-2">
             <Label>Organization Logo</Label>
-            <div className="flex items-center gap-4">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
               {logoPreview && (
-                <div className="w-16 h-16 border rounded-lg overflow-hidden">
+                <div className="w-16 h-16 border rounded-lg overflow-hidden shrink-0">
                   <img
                     src={logoPreview}
                     alt="Organization logo"
@@ -224,14 +224,14 @@ const OrganizationSettings = () => {
                   />
                 </div>
               )}
-              <div className="flex-1">
+              <div className="flex-1 min-w-0 w-full">
                 <Input
                   type="file"
                   accept="image/*"
                   onChange={handleLogoUpload}
-                  className="file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
+                  className="file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 w-full"
                 />
-                <p className="text-sm text-muted-foreground mt-1">
+                <p className="text-sm text-muted-foreground mt-1 break-words">
                   Upload a logo (max 2MB, PNG/JPG recommended)
                 </p>
               </div>

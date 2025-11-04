@@ -123,19 +123,19 @@ export default function ComplianceOverview() {
   return (
     <div className="p-6 space-y-6">
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold">Compliance Management</h1>
-          <p className="text-muted-foreground">Track policies, risks, and compliance activities</p>
+          <h1 className="text-2xl sm:text-3xl font-bold">Compliance Management</h1>
+          <p className="text-muted-foreground text-sm sm:text-base">Track policies, risks, and compliance activities</p>
         </div>
-        <div className="flex gap-2">
-          <Button variant="outline" asChild>
+        <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
+          <Button variant="outline" asChild className="w-full sm:w-auto">
             <Link to="/dashboard/compliance/calendar">
               <Calendar className="h-4 w-4 mr-2" />
               View Calendar
             </Link>
           </Button>
-          <Button asChild>
+          <Button asChild className="w-full sm:w-auto">
             <Link to="/dashboard/compliance/policies">
               <Plus className="h-4 w-4 mr-2" />
               Add Policy
@@ -156,8 +156,8 @@ export default function ComplianceOverview() {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="flex items-center gap-6">
-            <div className="relative w-32 h-32">
+          <div className="flex flex-col sm:flex-row items-center gap-6">
+            <div className="relative w-24 h-24 sm:w-32 sm:h-32">
               <svg className="w-full h-full -rotate-90">
                 <circle
                   cx="64"

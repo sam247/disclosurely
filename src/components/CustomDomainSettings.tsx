@@ -582,18 +582,18 @@ const CustomDomainSettings = () => {
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
-          <div className="flex gap-2">
+          <div className="flex flex-col sm:flex-row gap-2">
             <Input
               placeholder="secure.yourdomain.com"
               value={domain}
               onChange={(e) => setDomain(e.target.value)}
-              className="flex-1"
+              className="flex-1 min-w-0"
               disabled={existingDomains.length >= limits.maxCustomDomains && limits.maxCustomDomains > 0}
             />
             <Button 
               onClick={handleGenerateRecords}
               disabled={isGenerating || !domain.trim() || (existingDomains.length >= limits.maxCustomDomains && limits.maxCustomDomains > 0)}
-              className="flex items-center gap-2"
+              className="flex items-center gap-2 w-full sm:w-auto shrink-0"
             >
               {isGenerating ? (
                 <>
@@ -608,7 +608,8 @@ const CustomDomainSettings = () => {
               ) : (
                 <>
                   <Globe className="h-4 w-4" />
-                  Generate Records
+                  <span className="hidden sm:inline">Generate Records</span>
+                  <span className="sm:hidden">Generate</span>
                 </>
               )}
             </Button>
@@ -783,18 +784,18 @@ const CustomDomainSettings = () => {
           </CardHeader>
           <CardContent className="space-y-3">
             {existingDomains.map((existingDomain) => (
-              <div key={existingDomain.id} className="border rounded-lg p-4 flex items-center justify-between gap-4">
-                <div className="space-y-1">
-                  <div className="flex items-center gap-2">
-                    <span className="font-medium text-sm sm:text-base">{existingDomain.domain_name}</span>
+              <div key={existingDomain.id} className="border rounded-lg p-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                <div className="space-y-1 flex-1 min-w-0">
+                  <div className="flex flex-wrap items-center gap-2">
+                    <span className="font-medium text-sm sm:text-base break-all">{existingDomain.domain_name}</span>
                     {existingDomain.is_primary && (
-                      <Badge variant="default" className="bg-blue-600">Primary</Badge>
+                      <Badge variant="default" className="bg-blue-600 shrink-0">Primary</Badge>
                     )}
-                    <Badge variant={existingDomain.is_active ? "default" : "outline"} className="capitalize">
+                    <Badge variant={existingDomain.is_active ? "default" : "outline"} className="capitalize shrink-0">
                       {existingDomain.status}
                     </Badge>
                   </div>
-                  <p className="text-xs text-muted-foreground">
+                  <p className="text-xs text-muted-foreground break-words">
                     {existingDomain.is_active ? 'Active and verified' : 'Awaiting verification or inactive'}
                   </p>
                 </div>
@@ -803,7 +804,7 @@ const CustomDomainSettings = () => {
                   size="sm"
                   disabled={deletingDomain === existingDomain.domain_name}
                   onClick={() => handleDeleteDomain(existingDomain.domain_name)}
-                  className="whitespace-nowrap"
+                  className="whitespace-nowrap shrink-0 w-full sm:w-auto"
                 >
                   {deletingDomain === existingDomain.domain_name ? (
                     <>

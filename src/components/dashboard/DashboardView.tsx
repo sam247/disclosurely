@@ -937,58 +937,400 @@ Additional Details: ${decryptedContent.additionalDetails || 'None provided'}
                   )}
                 </div>
               ) : (
-                  <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>{t('trackingId')}</TableHead>
-                      <TableHead>{t('title')}</TableHead>
-                      <TableHead>{t('status')}</TableHead>
-                      <TableHead>{t('category')}</TableHead>
-                      <TableHead>Risk Level</TableHead>
-                      <TableHead>{t('assignedTo')}</TableHead>
-                      <TableHead>{t('date')}</TableHead>
-                      <TableHead className="text-right">{t('actions')}</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
+                <>
+                  {/* Desktop Table View */}
+                  <div className="hidden md:block overflow-x-auto">
+                    <Table>
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead>{t('trackingId')}</TableHead>
+                          <TableHead>{t('title')}</TableHead>
+                          <TableHead>{t('status')}</TableHead>
+                          <TableHead>{t('category')}</TableHead>
+                          <TableHead>Risk Level</TableHead>
+                          <TableHead>{t('assignedTo')}</TableHead>
+                          <TableHead>{t('date')}</TableHead>
+                          <TableHead className="text-right">{t('actions')}</TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {filteredReports.map((report) => (
+                          <TableRow key={report.id}>
+                            <TableCell className="font-mono text-sm">{report.tracking_id}</TableCell>
+                            <TableCell className="font-medium">{report.title}</TableCell>
+                            <TableCell>
+                              <Badge variant={report.status === 'new' ? 'default' : 'secondary'}>
+                                {report.status}
+                              </Badge>
+                            </TableCell>
+                            <TableCell>
+                              {report.tags && report.tags.length > 0 ? (
+                                <div className="flex flex-wrap gap-1">
+                                  {report.tags.slice(0, 2).map((tag: string, idx: number) => (
+                                    <Badge key={idx} variant="outline" className="text-xs">
+                                      {tag}
+                                    </Badge>
+                                  ))}
+                                  {report.tags.length > 2 && (
+                                    <Badge variant="outline" className="text-xs">
+                                      +{report.tags.length - 2}
+                                    </Badge>
+                                  )}
+                                </div>
+                              ) : (
+                                <span className="text-sm text-muted-foreground">-</span>
+                              )}
+                            </TableCell>
+                            <TableCell>
+                              <div className="flex items-center gap-2 flex-wrap">
+                                {/* Manual Risk Level */}
+                                <RiskLevelSelector
+                                  reportId={report.id}
+                                  currentLevel={report.manual_risk_level}
+                                  onUpdate={(level) => updateManualRiskLevel(report.id, level)}
+                                  isUpdating={updatingRiskLevel === report.id}
+                                />
+                                
+                                {/* AI Risk Level (if available) */}
+                                {report.ai_risk_level && (
+                                  <Badge 
+                                    variant={
+                                      report.ai_risk_level === 'Critical' ? 'destructive' :
+                                      report.ai_risk_level === 'High' ? 'destructive' :
+                                      report.ai_risk_level === 'Medium' ? 'secondary' :
+                                      'outline'
+                                    }
+                                    className="text-xs"
+                                  >
+                                    AI: {report.ai_risk_level}
+                                  </Badge>
+                                )}
+                                
+                                {/* Legacy Priority (if no manual risk level) */}
+                                {!report.manual_risk_level && report.priority && report.ai_risk_level && (
+                                  <Badge 
+                                    variant={
+                                      report.priority >= 4 ? 'destructive' :
+                                      report.priority >= 3 ? 'secondary' :
+                                      'outline'
+                                    }
+                                    className="text-xs"
+                                  >
+                                    Legacy: {report.priority >= 4 ? 'High' : 
+                                     report.priority >= 3 ? 'Medium' : 'Low'} ({report.priority}/5)
+                                  </Badge>
+                                )}
+                                
+                                {/* Assess Button (if no risk level set) */}
+                                {!report.manual_risk_level && !report.ai_risk_level && !report.priority && (
+                                  <Button
+                                    variant="outline"
+                                    size="sm"
+                                    onClick={() => assessRisk(report.id)}
+                                    className="text-xs"
+                                    disabled={isAssessingRisk === report.id}
+                                  >
+                                    {isAssessingRisk === report.id ? 'Assessing...' : 'Assess'}
+                                  </Button>
+                                )}
+                              </div>
+                            </TableCell>
+                            <TableCell>
+                              <Select
+                                value={report.assigned_to || 'unassigned'}
+                                onValueChange={(value) => assignReport(report.id, value)}
+                              >
+                                <SelectTrigger className="w-40 h-8 text-xs">
+                                  <SelectValue placeholder="Assign to..." />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  <SelectItem value="unassigned">Unassigned</SelectItem>
+                                  {teamMembers.map((member) => (
+                                    <SelectItem key={member.id} value={member.id}>
+                                      {member.first_name && member.last_name 
+                                        ? `${member.first_name} ${member.last_name}`
+                                        : member.email
+                                      }
+                                    </SelectItem>
+                                  ))}
+                                </SelectContent>
+                              </Select>
+                            </TableCell>
+                            <TableCell className="text-sm text-muted-foreground">
+                              {new Date(report.created_at).toLocaleDateString()}
+                            </TableCell>
+                            <TableCell className="text-right">
+                               <div className="flex items-center justify-end gap-2">
+                                <Button 
+                                  variant="default" 
+                                  size="sm"
+                                  onClick={() => handleViewReport(report)}
+                                >
+                                  {t('viewReport')}
+                                </Button>
+                                <DropdownMenu>
+                                  <DropdownMenuTrigger asChild>
+                                    <Button variant="ghost" size="sm">
+                                      <MoreVertical className="h-4 w-4" />
+                                    </Button>
+                                  </DropdownMenuTrigger>
+                                  <DropdownMenuContent align="end" className="w-48">
+                                    <DropdownMenuItem 
+                                      onClick={async () => {
+                                        console.log('Dropdown clicked: Mark as Reviewing');
+                                        try {
+                                          console.log('DashboardView: Starting status change to reviewing for report:', report.id);
+                                          const { error } = await supabase
+                                            .from('reports')
+                                            .update({ 
+                                              status: 'reviewing',
+                                              updated_at: new Date().toISOString()
+                                            })
+                                            .eq('id', report.id);
+                                          
+                                          if (error) throw error;
+                                          
+                                          // Log audit event
+                                          console.log('DashboardView: Dropdown action - organizationId:', organizationId);
+                                          console.log('DashboardView: Dropdown action - effectiveOrganizationId:', effectiveOrganizationId);
+                                          console.log('DashboardView: User ID:', user?.id);
+                                          console.log('DashboardView: User email:', user?.email);
+                                          console.log('DashboardView: User metadata:', user?.user_metadata);
+                                          console.log('DashboardView: About to check if effectiveOrganizationId exists...');
+                                          if (effectiveOrganizationId) {
+                                            console.log('DashboardView: effectiveOrganizationId is valid, calling log.info...');
+                                            await log.info(LogContext.CASE_MANAGEMENT, 'Report status updated', {
+                                              reportId: report.id,
+                                              userId: user?.id,
+                                              userEmail: user?.email,
+                                              organizationId: effectiveOrganizationId
+                                            });
+                                            console.log('DashboardView: Audit event logged successfully');
+                                            // Small delay to ensure database transaction is committed
+                                            await new Promise(resolve => setTimeout(resolve, 100));
+                                          } else {
+                                            console.log('DashboardView: effectiveOrganizationId is null/undefined, cannot log audit event');
+                                            console.log('DashboardView: organizationId from useCustomDomain:', organizationId);
+                                            console.log('DashboardView: user?.user_metadata?.organization_id:', user?.user_metadata?.organization_id);
+                                          }
+                                          
+                                          toast({ title: 'Report marked as Reviewing' });
+                                          fetchData();
+                                        } catch (error) {
+                                          console.error('Error updating report status:', error);
+                                          toast({ 
+                                            title: 'Error updating report status',
+                                            variant: 'destructive'
+                                          });
+                                        }
+                                      }}
+                                    >
+                                      <Eye className="h-4 w-4 mr-2" />
+                                      Mark as Reviewing
+                                    </DropdownMenuItem>
+                                    <DropdownMenuItem 
+                                      onClick={async () => {
+                                        try {
+                                          console.log('DashboardView: Starting status change to investigating for report:', report.id);
+                                          const { error } = await supabase
+                                            .from('reports')
+                                            .update({ 
+                                              status: 'investigating',
+                                              updated_at: new Date().toISOString()
+                                            })
+                                            .eq('id', report.id);
+                                          
+                                          if (error) throw error;
+                                          
+                                          // Log audit event
+                                          if (organizationId) {
+                                            await log.info(LogContext.CASE_MANAGEMENT, 'Report status updated', {
+                                              reportId: report.id,
+                                              userId: user?.id,
+                                              userEmail: user?.email,
+                                              organizationId: organizationId
+                                            });
+                                          }
+                                          
+                                          toast({ title: 'Report marked as Investigating' });
+                                          fetchData();
+                                        } catch (error) {
+                                          console.error('Error updating report status:', error);
+                                          toast({ 
+                                            title: 'Error updating report status',
+                                            variant: 'destructive'
+                                          });
+                                        }
+                                      }}
+                                    >
+                                      <Search className="h-4 w-4 mr-2" />
+                                      Mark as Investigating
+                                    </DropdownMenuItem>
+                                    <DropdownMenuItem 
+                                      onClick={async () => {
+                                        try {
+                                          const { error } = await supabase
+                                            .from('reports')
+                                            .update({ 
+                                              status: 'resolved',
+                                              resolved_at: new Date().toISOString()
+                                            })
+                                            .eq('id', report.id);
+                                          
+                                          if (error) throw error;
+                                          
+                                          // Log audit event
+                                          if (organizationId) {
+                                            await log.info(LogContext.CASE_MANAGEMENT, 'Report resolved', {
+                                              reportId: report.id,
+                                              userId: user?.id,
+                                              userEmail: user?.email,
+                                              organizationId: organizationId
+                                            });
+                                          }
+                                          
+                                          toast({ title: 'Report marked as resolved' });
+                                          fetchData();
+                                        } catch (error) {
+                                          console.error('Error resolving report:', error);
+                                          toast({ 
+                                            title: 'Error resolving report',
+                                            variant: 'destructive'
+                                          });
+                                        }
+                                      }}
+                                    >
+                                      <CheckCircle className="h-4 w-4 mr-2" />
+                                      Mark as Resolved
+                                    </DropdownMenuItem>
+                                    <DropdownMenuItem onClick={() => exportReportToPDF(report)}>
+                                      <Download className="h-4 w-4 mr-2" />
+                                      Export PDF
+                                    </DropdownMenuItem>
+                                    <DropdownMenuItem onClick={() => handleArchiveReport(report.id)}>
+                                      <Archive className="h-4 w-4 mr-2" />
+                                      Archive
+                                    </DropdownMenuItem>
+                                    <DropdownMenuSeparator />
+                                    <DropdownMenuItem 
+                                      className="text-destructive"
+                                      onClick={async () => {
+                                        try {
+                                          log.info(LogContext.SYSTEM, 'Starting report deletion process', { 
+                                            reportId: report.id, 
+                                            trackingId: report.tracking_id,
+                                            userId: user?.id 
+                                          });
+                                          
+                                          // Use edge function for soft delete
+                                          const { data: { session } } = await supabase.auth.getSession();
+                                          
+                                          if (!session?.access_token) {
+                                            log.error(LogContext.SYSTEM, 'No valid session token for deletion', new Error('Missing session token'), { reportId: report.id });
+                                            throw new Error('No valid session token');
+                                          }
+                                          
+                                          log.info(LogContext.SYSTEM, 'Calling soft-delete-report Edge Function', { 
+                                            reportId: report.id,
+                                            hasToken: !!session?.access_token 
+                                          });
+                                          
+                                          const response = await fetch(
+                                            `https://cxmuzperkittvibslnff.supabase.co/functions/v1/soft-delete-report`,
+                                            {
+                                              method: 'POST',
+                                              headers: {
+                                                'Content-Type': 'application/json',
+                                                'Authorization': `Bearer ${session?.access_token}`
+                                              },
+                                              body: JSON.stringify({ reportId: report.id })
+                                            }
+                                          );
+
+                                          log.info(LogContext.SYSTEM, 'Soft-delete-report response received', { 
+                                            reportId: report.id,
+                                            status: response.status,
+                                            ok: response.ok 
+                                          });
+
+                                          if (!response.ok) {
+                                            const errorData = await response.json();
+                                            log.error(LogContext.SYSTEM, 'Soft-delete-report failed', new Error(errorData.error || 'Failed to delete report'), { 
+                                              reportId: report.id,
+                                              status: response.status,
+                                              errorData 
+                                            });
+                                            throw new Error(errorData.error || 'Failed to delete report');
+                                          }
+                                          
+                                          log.info(LogContext.SYSTEM, 'Report deleted successfully', { reportId: report.id });
+                                          toast({ title: 'Report deleted successfully' });
+                                          fetchData();
+                                        } catch (error: any) {
+                                          log.error(LogContext.SYSTEM, 'Report deletion failed', error, { 
+                                            reportId: report.id,
+                                            trackingId: report.tracking_id,
+                                            userId: user?.id 
+                                          });
+                                          console.error('Error deleting report:', error);
+                                          toast({ 
+                                            title: 'Error deleting report',
+                                            description: error.message,
+                                            variant: 'destructive'
+                                          });
+                                        }
+                                      }}
+                                    >
+                                      <Trash2 className="h-4 w-4 mr-2" />
+                                      Delete
+                                    </DropdownMenuItem>
+                                  </DropdownMenuContent>
+                                </DropdownMenu>
+                              </div>
+                            </TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
+                  </div>
+                  
+                  {/* Mobile Card View */}
+                  <div className="md:hidden space-y-4">
                     {filteredReports.map((report) => (
-                      <TableRow key={report.id}>
-                        <TableCell className="font-mono text-sm">{report.tracking_id}</TableCell>
-                        <TableCell className="font-medium">{report.title}</TableCell>
-                        <TableCell>
-                          <Badge variant={report.status === 'new' ? 'default' : 'secondary'}>
-                            {report.status}
-                          </Badge>
-                        </TableCell>
-                        <TableCell>
-                          {report.tags && report.tags.length > 0 ? (
+                      <Card key={report.id} className="overflow-hidden">
+                        <CardContent className="p-4 space-y-3">
+                          <div className="flex items-start justify-between gap-2">
+                            <div className="flex-1 min-w-0">
+                              <div className="font-mono text-xs text-muted-foreground mb-1">{report.tracking_id}</div>
+                              <h3 className="font-semibold text-sm break-words">{report.title}</h3>
+                            </div>
+                            <Badge variant={report.status === 'new' ? 'default' : 'secondary'} className="shrink-0">
+                              {report.status}
+                            </Badge>
+                          </div>
+                          
+                          {report.tags && report.tags.length > 0 && (
                             <div className="flex flex-wrap gap-1">
-                              {report.tags.slice(0, 2).map((tag: string, idx: number) => (
+                              {report.tags.slice(0, 3).map((tag: string, idx: number) => (
                                 <Badge key={idx} variant="outline" className="text-xs">
                                   {tag}
                                 </Badge>
                               ))}
-                              {report.tags.length > 2 && (
+                              {report.tags.length > 3 && (
                                 <Badge variant="outline" className="text-xs">
-                                  +{report.tags.length - 2}
+                                  +{report.tags.length - 3}
                                 </Badge>
                               )}
                             </div>
-                          ) : (
-                            <span className="text-sm text-muted-foreground">-</span>
                           )}
-                        </TableCell>
-                        <TableCell>
-                          <div className="flex items-center gap-2">
-                            {/* Manual Risk Level */}
+                          
+                          <div className="flex flex-wrap items-center gap-2">
                             <RiskLevelSelector
                               reportId={report.id}
                               currentLevel={report.manual_risk_level}
                               onUpdate={(level) => updateManualRiskLevel(report.id, level)}
                               isUpdating={updatingRiskLevel === report.id}
                             />
-                            
-                            {/* AI Risk Level (if available) */}
                             {report.ai_risk_level && (
                               <Badge 
                                 variant={
@@ -1002,81 +1344,50 @@ Additional Details: ${decryptedContent.additionalDetails || 'None provided'}
                                 AI: {report.ai_risk_level}
                               </Badge>
                             )}
-                            
-                            {/* Legacy Priority (if no manual risk level) */}
-                            {!report.manual_risk_level && report.priority && report.ai_risk_level && (
-                              <Badge 
-                                variant={
-                                  report.priority >= 4 ? 'destructive' :
-                                  report.priority >= 3 ? 'secondary' :
-                                  'outline'
-                                }
-                                className="text-xs"
-                              >
-                                Legacy: {report.priority >= 4 ? 'High' : 
-                                 report.priority >= 3 ? 'Medium' : 'Low'} ({report.priority}/5)
-                              </Badge>
-                            )}
-                            
-                            {/* Assess Button (if no risk level set) */}
-                            {!report.manual_risk_level && !report.ai_risk_level && !report.priority && (
-                              <Button
-                                variant="outline"
-                                size="sm"
-                                onClick={() => assessRisk(report.id)}
-                                className="text-xs"
-                                disabled={isAssessingRisk === report.id}
-                              >
-                                {isAssessingRisk === report.id ? 'Assessing...' : 'Assess'}
-                              </Button>
-                            )}
                           </div>
-                        </TableCell>
-                        <TableCell>
-                          <Select
-                            value={report.assigned_to || 'unassigned'}
-                            onValueChange={(value) => assignReport(report.id, value)}
-                          >
-                            <SelectTrigger className="w-40 h-8 text-xs">
-                              <SelectValue placeholder="Assign to..." />
-                            </SelectTrigger>
-                            <SelectContent>
-                              <SelectItem value="unassigned">Unassigned</SelectItem>
-                              {teamMembers.map((member) => (
-                                <SelectItem key={member.id} value={member.id}>
-                                  {member.first_name && member.last_name 
-                                    ? `${member.first_name} ${member.last_name}`
-                                    : member.email
-                                  }
-                                </SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
-                        </TableCell>
-                        <TableCell className="text-sm text-muted-foreground">
-                          {new Date(report.created_at).toLocaleDateString()}
-                        </TableCell>
-                        <TableCell className="text-right">
-                           <div className="flex items-center justify-end gap-2">
+                          
+                          <div className="flex items-center justify-between text-xs text-muted-foreground">
+                            <span>{new Date(report.created_at).toLocaleDateString()}</span>
+                            <Select
+                              value={report.assigned_to || 'unassigned'}
+                              onValueChange={(value) => assignReport(report.id, value)}
+                            >
+                              <SelectTrigger className="h-7 text-xs w-32">
+                                <SelectValue placeholder="Assign..." />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="unassigned">Unassigned</SelectItem>
+                                {teamMembers.map((member) => (
+                                  <SelectItem key={member.id} value={member.id}>
+                                    {member.first_name && member.last_name 
+                                      ? `${member.first_name} ${member.last_name}`
+                                      : member.email
+                                    }
+                                  </SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
+                          </div>
+                          
+                          <div className="flex gap-2 pt-2 border-t">
                             <Button 
                               variant="default" 
                               size="sm"
                               onClick={() => handleViewReport(report)}
+                              className="flex-1"
                             >
                               {t('viewReport')}
                             </Button>
                             <DropdownMenu>
                               <DropdownMenuTrigger asChild>
-                                <Button variant="ghost" size="sm">
+                                <Button variant="outline" size="sm">
                                   <MoreVertical className="h-4 w-4" />
                                 </Button>
                               </DropdownMenuTrigger>
                               <DropdownMenuContent align="end" className="w-48">
                                 <DropdownMenuItem 
                                   onClick={async () => {
-                                    console.log('Dropdown clicked: Mark as Reviewing');
                                     try {
-                                      console.log('DashboardView: Starting status change to reviewing for report:', report.id);
                                       const { error } = await supabase
                                         .from('reports')
                                         .update({ 
@@ -1084,33 +1395,15 @@ Additional Details: ${decryptedContent.additionalDetails || 'None provided'}
                                           updated_at: new Date().toISOString()
                                         })
                                         .eq('id', report.id);
-                                      
                                       if (error) throw error;
-                                      
-                                      // Log audit event
-                                      console.log('DashboardView: Dropdown action - organizationId:', organizationId);
-                                      console.log('DashboardView: Dropdown action - effectiveOrganizationId:', effectiveOrganizationId);
-                                      console.log('DashboardView: User ID:', user?.id);
-                                      console.log('DashboardView: User email:', user?.email);
-                                      console.log('DashboardView: User metadata:', user?.user_metadata);
-                                      console.log('DashboardView: About to check if effectiveOrganizationId exists...');
                                       if (effectiveOrganizationId) {
-                                        console.log('DashboardView: effectiveOrganizationId is valid, calling log.info...');
                                         await log.info(LogContext.CASE_MANAGEMENT, 'Report status updated', {
                                           reportId: report.id,
                                           userId: user?.id,
                                           userEmail: user?.email,
                                           organizationId: effectiveOrganizationId
                                         });
-                                        console.log('DashboardView: Audit event logged successfully');
-                                        // Small delay to ensure database transaction is committed
-                                        await new Promise(resolve => setTimeout(resolve, 100));
-                                      } else {
-                                        console.log('DashboardView: effectiveOrganizationId is null/undefined, cannot log audit event');
-                                        console.log('DashboardView: organizationId from useCustomDomain:', organizationId);
-                                        console.log('DashboardView: user?.user_metadata?.organization_id:', user?.user_metadata?.organization_id);
                                       }
-                                      
                                       toast({ title: 'Report marked as Reviewing' });
                                       fetchData();
                                     } catch (error) {
@@ -1128,7 +1421,6 @@ Additional Details: ${decryptedContent.additionalDetails || 'None provided'}
                                 <DropdownMenuItem 
                                   onClick={async () => {
                                     try {
-                                      console.log('DashboardView: Starting status change to investigating for report:', report.id);
                                       const { error } = await supabase
                                         .from('reports')
                                         .update({ 
@@ -1136,10 +1428,7 @@ Additional Details: ${decryptedContent.additionalDetails || 'None provided'}
                                           updated_at: new Date().toISOString()
                                         })
                                         .eq('id', report.id);
-                                      
                                       if (error) throw error;
-                                      
-                                      // Log audit event
                                       if (organizationId) {
                                         await log.info(LogContext.CASE_MANAGEMENT, 'Report status updated', {
                                           reportId: report.id,
@@ -1148,7 +1437,6 @@ Additional Details: ${decryptedContent.additionalDetails || 'None provided'}
                                           organizationId: organizationId
                                         });
                                       }
-                                      
                                       toast({ title: 'Report marked as Investigating' });
                                       fetchData();
                                     } catch (error) {
@@ -1173,10 +1461,7 @@ Additional Details: ${decryptedContent.additionalDetails || 'None provided'}
                                           resolved_at: new Date().toISOString()
                                         })
                                         .eq('id', report.id);
-                                      
                                       if (error) throw error;
-                                      
-                                      // Log audit event
                                       if (organizationId) {
                                         await log.info(LogContext.CASE_MANAGEMENT, 'Report resolved', {
                                           reportId: report.id,
@@ -1185,7 +1470,6 @@ Additional Details: ${decryptedContent.additionalDetails || 'None provided'}
                                           organizationId: organizationId
                                         });
                                       }
-                                      
                                       toast({ title: 'Report marked as resolved' });
                                       fetchData();
                                     } catch (error) {
@@ -1213,25 +1497,10 @@ Additional Details: ${decryptedContent.additionalDetails || 'None provided'}
                                   className="text-destructive"
                                   onClick={async () => {
                                     try {
-                                      log.info(LogContext.SYSTEM, 'Starting report deletion process', { 
-                                        reportId: report.id, 
-                                        trackingId: report.tracking_id,
-                                        userId: user?.id 
-                                      });
-                                      
-                                      // Use edge function for soft delete
                                       const { data: { session } } = await supabase.auth.getSession();
-                                      
                                       if (!session?.access_token) {
-                                        log.error(LogContext.SYSTEM, 'No valid session token for deletion', new Error('Missing session token'), { reportId: report.id });
                                         throw new Error('No valid session token');
                                       }
-                                      
-                                      log.info(LogContext.SYSTEM, 'Calling soft-delete-report Edge Function', { 
-                                        reportId: report.id,
-                                        hasToken: !!session?.access_token 
-                                      });
-                                      
                                       const response = await fetch(
                                         `https://cxmuzperkittvibslnff.supabase.co/functions/v1/soft-delete-report`,
                                         {
@@ -1243,32 +1512,13 @@ Additional Details: ${decryptedContent.additionalDetails || 'None provided'}
                                           body: JSON.stringify({ reportId: report.id })
                                         }
                                       );
-
-                                      log.info(LogContext.SYSTEM, 'Soft-delete-report response received', { 
-                                        reportId: report.id,
-                                        status: response.status,
-                                        ok: response.ok 
-                                      });
-
                                       if (!response.ok) {
                                         const errorData = await response.json();
-                                        log.error(LogContext.SYSTEM, 'Soft-delete-report failed', new Error(errorData.error || 'Failed to delete report'), { 
-                                          reportId: report.id,
-                                          status: response.status,
-                                          errorData 
-                                        });
                                         throw new Error(errorData.error || 'Failed to delete report');
                                       }
-                                      
-                                      log.info(LogContext.SYSTEM, 'Report deleted successfully', { reportId: report.id });
                                       toast({ title: 'Report deleted successfully' });
                                       fetchData();
                                     } catch (error: any) {
-                                      log.error(LogContext.SYSTEM, 'Report deletion failed', error, { 
-                                        reportId: report.id,
-                                        trackingId: report.tracking_id,
-                                        userId: user?.id 
-                                      });
                                       console.error('Error deleting report:', error);
                                       toast({ 
                                         title: 'Error deleting report',
@@ -1284,11 +1534,11 @@ Additional Details: ${decryptedContent.additionalDetails || 'None provided'}
                               </DropdownMenuContent>
                             </DropdownMenu>
                           </div>
-                        </TableCell>
-                      </TableRow>
+                        </CardContent>
+                      </Card>
                     ))}
-                  </TableBody>
-                </Table>
+                  </div>
+                </>
               )}
             </CardContent>
           </Card>
