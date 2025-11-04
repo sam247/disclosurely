@@ -249,13 +249,13 @@ export default defineConfig({
 
       /* Logo size - reduced from default but still visible */
       .VPNavBarTitle .logo {
-        height: 34px !important;
-        max-height: 34px !important;
+        height: 41px !important;
+        max-height: 41px !important;
         width: auto !important;
       }
       .VPNavBarTitle .logo img {
-        height: 34px !important;
-        max-height: 34px !important;
+        height: 41px !important;
+        max-height: 41px !important;
         width: auto !important;
         object-fit: contain;
       }
