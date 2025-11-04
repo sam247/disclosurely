@@ -7,7 +7,6 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 }
 
-<<<<<<< HEAD
 // ⚠️ CRITICAL: Verify ENCRYPTION_SALT on module load (startup check)
 const ENCRYPTION_SALT_STARTUP = Deno.env.get('ENCRYPTION_SALT');
 if (!ENCRYPTION_SALT_STARTUP) {
@@ -21,10 +20,7 @@ if (!ENCRYPTION_SALT_STARTUP) {
   console.log('✅ ENCRYPTION_SALT verified on startup (length:', ENCRYPTION_SALT_STARTUP.length, 'chars)');
 }
 
-serve(async (req) => {
-=======
 Deno.serve(async (req: Request) => {
->>>>>>> 6c183e5381b784d3b066fc7a6b4e921505c1cc64
   console.log('encrypt-report-data request received')
   
   try {
