@@ -133,24 +133,36 @@ interface UrlEntry {
   alternates?: { hreflang: string; href: string }[];
 }
 
+// Helper function to normalize path (remove trailing slash except for root)
+function normalizePath(path: string): string {
+  if (path === '/' || path === '') {
+    return '';
+  }
+  return path.endsWith('/') ? path.slice(0, -1) : path;
+}
+
 function generateSitemapEntries(): UrlEntry[] {
   const entries: UrlEntry[] = [];
   const now = new Date().toISOString().split('T')[0];
 
   // Generate entries for static routes with language variants
   STATIC_ROUTES.forEach(route => {
+    // Normalize path (remove trailing slash)
+    const normalizedPath = normalizePath(route.path);
+    const basePath = normalizedPath === '' ? '' : normalizedPath;
+    
     // Add default (English) version
     entries.push({
-      loc: `${BASE_URL}${route.path}`,
+      loc: `${BASE_URL}${basePath}`,
       lastmod: now,
       changefreq: route.changefreq,
       priority: route.priority,
       alternates: [
-        { hreflang: 'x-default', href: `${BASE_URL}${route.path}` },
-        { hreflang: 'en', href: `${BASE_URL}${route.path}` },
+        { hreflang: 'x-default', href: `${BASE_URL}${basePath}` },
+        { hreflang: 'en', href: `${BASE_URL}${basePath}` },
         ...LANGUAGES.map(lang => ({
           hreflang: lang,
-          href: `${BASE_URL}/${lang}${route.path}`,
+          href: `${BASE_URL}/${lang}${basePath}`,
         })),
       ],
     });
@@ -158,16 +170,16 @@ function generateSitemapEntries(): UrlEntry[] {
     // Add language-specific versions
     LANGUAGES.forEach(lang => {
       entries.push({
-        loc: `${BASE_URL}/${lang}${route.path}`,
+        loc: `${BASE_URL}/${lang}${basePath}`,
         lastmod: now,
         changefreq: route.changefreq,
         priority: (parseFloat(route.priority) * 0.9).toFixed(1), // Slightly lower priority for translations
         alternates: [
-          { hreflang: 'x-default', href: `${BASE_URL}${route.path}` },
-          { hreflang: 'en', href: `${BASE_URL}${route.path}` },
+          { hreflang: 'x-default', href: `${BASE_URL}${basePath}` },
+          { hreflang: 'en', href: `${BASE_URL}${basePath}` },
           ...LANGUAGES.map(l => ({
             hreflang: l,
-            href: `${BASE_URL}/${l}${route.path}`,
+            href: `${BASE_URL}/${l}${basePath}`,
           })),
         ],
       });

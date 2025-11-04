@@ -10,6 +10,12 @@
       ],
       "destination": "https://disclosurely.com/$1",
       "permanent": true
+    },
+    {
+      "source": "/:path+/",
+      "destination": "/:path+",
+      "permanent": true,
+      "statusCode": 301
     }
   ],
   "headers": [
