@@ -103,8 +103,14 @@ serve(async (req) => {
     combined.set(iv)
     combined.set(new Uint8Array(encryptedBuffer), iv.length)
     
-    // Convert to base64 for transport
-    const encryptedData = btoa(String.fromCharCode(...combined))
+    // Convert to base64 for transport (use chunked approach to avoid stack overflow)
+    // Convert Uint8Array to base64 safely for large arrays
+    // Use character-by-character approach to avoid stack overflow
+    let binaryString = ''
+    for (let i = 0; i < combined.length; i++) {
+      binaryString += String.fromCharCode(combined[i])
+    }
+    const encryptedData = btoa(binaryString)
     const keyHash = organizationKey
     console.log('✅ AES-GCM encryption completed')
     console.log('🎉 Encryption process completed successfully')
