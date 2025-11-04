@@ -1,3 +1,33 @@
+---
+title: Whistleblower Guide - Disclosurely User Guides
+description: Complete guide for whistleblowers on submitting reports safely, anonymous vs confidential reporting, tracking reports, and your rights and protections.
+head:
+  - - meta
+    - property: og:title
+      content: Guide for Whistleblowers - Disclosurely
+  - - meta
+    - property: og:description
+      content: Complete guide for whistleblowers on submitting reports safely, anonymous vs confidential reporting, tracking reports, and your rights and protections.
+  - - meta
+    - property: og:type
+      content: website
+  - - meta
+    - property: og:image
+      content: https://docs.disclosurely.com/ogimage.png
+  - - meta
+    - name: twitter:card
+      content: summary_large_image
+  - - meta
+    - name: twitter:title
+      content: Whistleblower Guide - Disclosurely
+  - - meta
+    - name: twitter:description
+      content: Complete guide for whistleblowers on submitting reports safely, anonymous vs confidential reporting, tracking reports, and your rights and protections.
+  - - meta
+    - name: twitter:image
+      content: https://docs.disclosurely.com/ogimage.png
+---
+
 # Guide for Whistleblowers
 
 ## Coming Soon

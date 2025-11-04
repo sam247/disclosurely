@@ -1,3 +1,33 @@
+---
+title: Compliance Calendar - Disclosurely Compliance
+description: Compliance deadlines, regulatory reporting dates, audit schedules, training schedules, policy reviews, and automated compliance reminder management.
+head:
+  - - meta
+    - property: og:title
+      content: Compliance Calendar - Disclosurely
+  - - meta
+    - property: og:description
+      content: Compliance deadlines, regulatory reporting dates, audit schedules, training schedules, policy reviews, and automated compliance reminder management.
+  - - meta
+    - property: og:type
+      content: website
+  - - meta
+    - property: og:image
+      content: https://docs.disclosurely.com/ogimage.png
+  - - meta
+    - name: twitter:card
+      content: summary_large_image
+  - - meta
+    - name: twitter:title
+      content: Compliance Calendar - Disclosurely
+  - - meta
+    - name: twitter:description
+      content: Compliance deadlines, regulatory reporting dates, audit schedules, training schedules, policy reviews, and automated compliance reminder management.
+  - - meta
+    - name: twitter:image
+      content: https://docs.disclosurely.com/ogimage.png
+---
+
 # Compliance Calendar
 
 ## Coming Soon

@@ -1,3 +1,33 @@
+---
+title: FAQs - Disclosurely Support
+description: Common questions answered about Disclosurely's secure whistleblowing platform, security features, pricing, compliance, reporting, and support options.
+head:
+  - - meta
+    - property: og:title
+      content: Frequently Asked Questions - Disclosurely
+  - - meta
+    - property: og:description
+      content: Common questions answered about Disclosurely's secure whistleblowing platform, security features, pricing, compliance, reporting, and support options.
+  - - meta
+    - property: og:type
+      content: website
+  - - meta
+    - property: og:image
+      content: https://docs.disclosurely.com/ogimage.png
+  - - meta
+    - name: twitter:card
+      content: summary_large_image
+  - - meta
+    - name: twitter:title
+      content: FAQs - Disclosurely Support
+  - - meta
+    - name: twitter:description
+      content: Common questions answered about Disclosurely's secure whistleblowing platform, security features, pricing, compliance, reporting, and support options.
+  - - meta
+    - name: twitter:image
+      content: https://docs.disclosurely.com/ogimage.png
+---
+
 # Frequently Asked Questions
 
 Common questions about Disclosurely answered.

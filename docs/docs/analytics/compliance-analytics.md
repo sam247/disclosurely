@@ -1,3 +1,33 @@
+---
+title: Compliance Analytics - Disclosurely Analytics
+description: Regulatory compliance metrics, EU Directive tracking, SOX monitoring, GDPR compliance analytics, audit reports, and whistleblowing compliance tracking tools.
+head:
+  - - meta
+    - property: og:title
+      content: Compliance Analytics - Disclosurely
+  - - meta
+    - property: og:description
+      content: Regulatory compliance metrics, EU Directive tracking, SOX monitoring, GDPR compliance analytics, audit reports, and whistleblowing compliance tracking tools.
+  - - meta
+    - property: og:type
+      content: website
+  - - meta
+    - property: og:image
+      content: https://docs.disclosurely.com/ogimage.png
+  - - meta
+    - name: twitter:card
+      content: summary_large_image
+  - - meta
+    - name: twitter:title
+      content: Compliance Analytics - Disclosurely
+  - - meta
+    - name: twitter:description
+      content: Regulatory compliance metrics, EU Directive tracking, SOX monitoring, GDPR compliance analytics, audit reports, and whistleblowing compliance tracking tools.
+  - - meta
+    - name: twitter:image
+      content: https://docs.disclosurely.com/ogimage.png
+---
+
 # Compliance Analytics
 
 ## Coming Soon

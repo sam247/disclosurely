@@ -1,3 +1,33 @@
+---
+title: Case Handler Guide - Disclosurely User Guides
+description: Comprehensive guide for case handlers on investigation workflows, caseload management, reporter communication, documentation, and daily case handling tasks.
+head:
+  - - meta
+    - property: og:title
+      content: Guide for Case Handlers - Disclosurely
+  - - meta
+    - property: og:description
+      content: Comprehensive guide for case handlers on investigation workflows, caseload management, reporter communication, documentation, and daily case handling tasks.
+  - - meta
+    - property: og:type
+      content: website
+  - - meta
+    - property: og:image
+      content: https://docs.disclosurely.com/ogimage.png
+  - - meta
+    - name: twitter:card
+      content: summary_large_image
+  - - meta
+    - name: twitter:title
+      content: Case Handler Guide - Disclosurely
+  - - meta
+    - name: twitter:description
+      content: Comprehensive guide for case handlers on investigation workflows, caseload management, reporter communication, documentation, and daily case handling tasks.
+  - - meta
+    - name: twitter:image
+      content: https://docs.disclosurely.com/ogimage.png
+---
+
 # Guide for Case Handlers
 
 ## Coming Soon

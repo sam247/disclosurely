@@ -1,3 +1,33 @@
+---
+title: Compliance Overview - Disclosurely Compliance
+description: Compliance framework, regulatory requirements, compliance workflows, best practices, risk management, and comprehensive whistleblowing policy management.
+head:
+  - - meta
+    - property: og:title
+      content: Compliance Overview - Disclosurely
+  - - meta
+    - property: og:description
+      content: Compliance framework, regulatory requirements, compliance workflows, best practices, risk management, and comprehensive whistleblowing policy management.
+  - - meta
+    - property: og:type
+      content: website
+  - - meta
+    - property: og:image
+      content: https://docs.disclosurely.com/ogimage.png
+  - - meta
+    - name: twitter:card
+      content: summary_large_image
+  - - meta
+    - name: twitter:title
+      content: Compliance Overview - Disclosurely
+  - - meta
+    - name: twitter:description
+      content: Compliance framework, regulatory requirements, compliance workflows, best practices, risk management, and comprehensive whistleblowing policy management.
+  - - meta
+    - name: twitter:image
+      content: https://docs.disclosurely.com/ogimage.png
+---
+
 # Compliance Overview
 
 ## Coming Soon

@@ -1,3 +1,33 @@
+---
+title: SOX Compliance - Regulatory Framework
+description: Sarbanes-Oxley Act regulatory requirements, SEC enforcement, whistleblower protection, financial misconduct reporting, and SOX compliance best practices.
+head:
+  - - meta
+    - property: og:title
+      content: SOX Compliance - Regulatory Framework
+  - - meta
+    - property: og:description
+      content: Sarbanes-Oxley Act regulatory requirements, SEC enforcement, whistleblower protection, financial misconduct reporting, and SOX compliance best practices.
+  - - meta
+    - property: og:type
+      content: website
+  - - meta
+    - property: og:image
+      content: https://docs.disclosurely.com/ogimage.png
+  - - meta
+    - name: twitter:card
+      content: summary_large_image
+  - - meta
+    - name: twitter:title
+      content: SOX Compliance - Disclosurely
+  - - meta
+    - name: twitter:description
+      content: Sarbanes-Oxley Act regulatory requirements, SEC enforcement, whistleblower protection, financial misconduct reporting, and SOX compliance best practices.
+  - - meta
+    - name: twitter:image
+      content: https://docs.disclosurely.com/ogimage.png
+---
+
 # SOX Compliance (Regulatory)
 
 ## Coming Soon

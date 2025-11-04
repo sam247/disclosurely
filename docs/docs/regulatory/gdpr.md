@@ -1,3 +1,33 @@
+---
+title: GDPR Compliance - Regulatory Framework
+description: GDPR regulatory context, supervisory authorities, enforcement, penalties, data protection compliance, and whistleblowing data protection requirements.
+head:
+  - - meta
+    - property: og:title
+      content: GDPR Compliance - Regulatory Framework
+  - - meta
+    - property: og:description
+      content: GDPR regulatory context, supervisory authorities, enforcement, penalties, data protection compliance, and whistleblowing data protection requirements.
+  - - meta
+    - property: og:type
+      content: website
+  - - meta
+    - property: og:image
+      content: https://docs.disclosurely.com/ogimage.png
+  - - meta
+    - name: twitter:card
+      content: summary_large_image
+  - - meta
+    - name: twitter:title
+      content: GDPR Compliance - Disclosurely
+  - - meta
+    - name: twitter:description
+      content: GDPR regulatory context, supervisory authorities, enforcement, penalties, data protection compliance, and whistleblowing data protection requirements.
+  - - meta
+    - name: twitter:image
+      content: https://docs.disclosurely.com/ogimage.png
+---
+
 # GDPR Compliance (Regulatory)
 
 ## Coming Soon

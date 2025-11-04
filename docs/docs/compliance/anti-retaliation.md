@@ -1,3 +1,33 @@
+---
+title: Anti-Retaliation Measures - Disclosurely Compliance
+description: Anti-retaliation policies, protection mechanisms, monitoring for retaliation, investigating claims, disciplinary actions, and whistleblower legal protections.
+head:
+  - - meta
+    - property: og:title
+      content: Anti-Retaliation Measures - Disclosurely
+  - - meta
+    - property: og:description
+      content: Anti-retaliation policies, protection mechanisms, monitoring for retaliation, investigating claims, disciplinary actions, and whistleblower legal protections.
+  - - meta
+    - property: og:type
+      content: website
+  - - meta
+    - property: og:image
+      content: https://docs.disclosurely.com/ogimage.png
+  - - meta
+    - name: twitter:card
+      content: summary_large_image
+  - - meta
+    - name: twitter:title
+      content: Anti-Retaliation Measures - Disclosurely
+  - - meta
+    - name: twitter:description
+      content: Anti-retaliation policies, protection mechanisms, monitoring for retaliation, investigating claims, disciplinary actions, and whistleblower legal protections.
+  - - meta
+    - name: twitter:image
+      content: https://docs.disclosurely.com/ogimage.png
+---
+
 # Anti-Retaliation Measures
 
 ## Coming Soon

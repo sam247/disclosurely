@@ -1,3 +1,33 @@
+---
+title: Integrations - Disclosurely Integrations
+description: Connect Disclosurely with webhooks, Zapier, API access, Microsoft Teams, Slack, SIEM integrations for powerful whistleblowing workflow automation.
+head:
+  - - meta
+    - property: og:title
+      content: Integrations - Disclosurely Coming Soon
+  - - meta
+    - property: og:description
+      content: Connect Disclosurely with webhooks, Zapier, API access, Microsoft Teams, Slack, SIEM integrations for powerful whistleblowing workflow automation.
+  - - meta
+    - property: og:type
+      content: website
+  - - meta
+    - property: og:image
+      content: https://docs.disclosurely.com/ogimage.png
+  - - meta
+    - name: twitter:card
+      content: summary_large_image
+  - - meta
+    - name: twitter:title
+      content: Integrations - Disclosurely
+  - - meta
+    - name: twitter:description
+      content: Connect Disclosurely with webhooks, Zapier, API access, Microsoft Teams, Slack, SIEM integrations for powerful whistleblowing workflow automation.
+  - - meta
+    - name: twitter:image
+      content: https://docs.disclosurely.com/ogimage.png
+---
+
 # Integrations - Coming Soon
 
 Powerful integrations to connect Disclosurely with your existing tools and workflows.

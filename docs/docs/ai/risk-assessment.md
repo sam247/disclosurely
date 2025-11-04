@@ -1,3 +1,33 @@
+---
+title: AI Risk Assessment - Disclosurely AI Features
+description: Automated risk scoring, severity assessment, impact prediction, risk prioritization, mitigation suggestions using AI-powered whistleblowing analysis.
+head:
+  - - meta
+    - property: og:title
+      content: AI Risk Assessment - Disclosurely
+  - - meta
+    - property: og:description
+      content: Automated risk scoring, severity assessment, impact prediction, risk prioritization, mitigation suggestions using AI-powered whistleblowing analysis.
+  - - meta
+    - property: og:type
+      content: website
+  - - meta
+    - property: og:image
+      content: https://docs.disclosurely.com/ogimage.png
+  - - meta
+    - name: twitter:card
+      content: summary_large_image
+  - - meta
+    - name: twitter:title
+      content: AI Risk Assessment - Disclosurely
+  - - meta
+    - name: twitter:description
+      content: Automated risk scoring, severity assessment, impact prediction, risk prioritization, mitigation suggestions using AI-powered whistleblowing analysis.
+  - - meta
+    - name: twitter:image
+      content: https://docs.disclosurely.com/ogimage.png
+---
+
 # Risk Assessment
 
 ## Coming Soon

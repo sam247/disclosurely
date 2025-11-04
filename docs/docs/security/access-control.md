@@ -1,3 +1,33 @@
+---
+title: Access Control - Disclosurely Security
+description: Role-based access control, user permissions, access levels, least privilege principle, access auditing, and security access management for whistleblowing.
+head:
+  - - meta
+    - property: og:title
+      content: Access Control - Disclosurely Security
+  - - meta
+    - property: og:description
+      content: Role-based access control, user permissions, access levels, least privilege principle, access auditing, and security access management for whistleblowing.
+  - - meta
+    - property: og:type
+      content: website
+  - - meta
+    - property: og:image
+      content: https://docs.disclosurely.com/ogimage.png
+  - - meta
+    - name: twitter:card
+      content: summary_large_image
+  - - meta
+    - name: twitter:title
+      content: Access Control - Disclosurely
+  - - meta
+    - name: twitter:description
+      content: Role-based access control, user permissions, access levels, least privilege principle, access auditing, and security access management for whistleblowing.
+  - - meta
+    - name: twitter:image
+      content: https://docs.disclosurely.com/ogimage.png
+---
+
 # Access Control
 
 ## Coming Soon

@@ -1,3 +1,33 @@
+---
+title: Reviewer Guide - Disclosurely User Guides
+description: Complete guide for reviewers on investigation oversight, quality assurance, approval workflows, access permissions, and reviewer role best practices.
+head:
+  - - meta
+    - property: og:title
+      content: Guide for Reviewers - Disclosurely
+  - - meta
+    - property: og:description
+      content: Complete guide for reviewers on investigation oversight, quality assurance, approval workflows, access permissions, and reviewer role best practices.
+  - - meta
+    - property: og:type
+      content: website
+  - - meta
+    - property: og:image
+      content: https://docs.disclosurely.com/ogimage.png
+  - - meta
+    - name: twitter:card
+      content: summary_large_image
+  - - meta
+    - name: twitter:title
+      content: Reviewer Guide - Disclosurely
+  - - meta
+    - name: twitter:description
+      content: Complete guide for reviewers on investigation oversight, quality assurance, approval workflows, access permissions, and reviewer role best practices.
+  - - meta
+    - name: twitter:image
+      content: https://docs.disclosurely.com/ogimage.png
+---
+
 # Guide for Reviewers
 
 ## Coming Soon
