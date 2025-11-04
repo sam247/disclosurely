@@ -14,8 +14,7 @@
     {
       "source": "/:path+/",
       "destination": "/:path+",
-      "permanent": true,
-      "statusCode": 301
+      "permanent": true
     }
   ],
   "headers": [
