@@ -103,15 +103,12 @@ serve(async (req) => {
     combined.set(iv)
     combined.set(new Uint8Array(encryptedBuffer), iv.length)
     
-    // Convert to base64 for transport (use efficient chunked approach)
-    // Process in chunks to avoid stack overflow and performance issues
-    const chunkSize = 8192
+    // Convert to base64 for transport
+    // Use character-by-character approach to avoid any stack/argument limits
+    // This is the most reliable method for large data
     let binaryString = ''
-    for (let i = 0; i < combined.length; i += chunkSize) {
-      const chunk = combined.slice(i, Math.min(i + chunkSize, combined.length))
-      // Convert chunk to string using Array.from to avoid spread operator issues
-      const chunkArray = Array.from(chunk)
-      binaryString += String.fromCharCode.apply(null, chunkArray)
+    for (let i = 0; i < combined.length; i++) {
+      binaryString += String.fromCharCode(combined[i])
     }
     const encryptedData = btoa(binaryString)
     const keyHash = organizationKey
