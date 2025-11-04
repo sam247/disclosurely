@@ -25,12 +25,33 @@ const TypingAnimation: React.FC<TypingAnimationProps> = ({
   useEffect(() => {
     if (timeoutRef.current) {
       clearTimeout(timeoutRef.current);
+      timeoutRef.current = null;
     }
     setCurrentPhraseIndex(0);
     setCurrentText('');
     setIsDeleting(false);
     setIsComplete(false);
   }, [phrases]);
+
+  // Start typing immediately when phrases are first loaded
+  useEffect(() => {
+    if (phrases && phrases.length > 0 && currentText === '' && !isDeleting && !isComplete && currentPhraseIndex === 0) {
+      const firstPhrase = phrases[0];
+      if (firstPhrase) {
+        // Start typing immediately
+        timeoutRef.current = setTimeout(() => {
+          setCurrentText(firstPhrase[0] || '');
+          timeoutRef.current = null;
+        }, typingSpeed);
+        return () => {
+          if (timeoutRef.current) {
+            clearTimeout(timeoutRef.current);
+            timeoutRef.current = null;
+          }
+        };
+      }
+    }
+  }, [phrases, currentText, isDeleting, isComplete, currentPhraseIndex, typingSpeed]);
 
   useEffect(() => {
     if (!phrases || phrases.length === 0) {
@@ -56,6 +77,7 @@ const TypingAnimation: React.FC<TypingAnimationProps> = ({
     // Clear any existing timeout
     if (timeoutRef.current) {
       clearTimeout(timeoutRef.current);
+      timeoutRef.current = null;
     }
 
     // Pause after typing is complete, then delete (except for last phrase)
@@ -66,9 +88,13 @@ const TypingAnimation: React.FC<TypingAnimationProps> = ({
         } else {
           setIsComplete(true);
         }
+        timeoutRef.current = null;
       }, pauseDuration);
       return () => {
-        if (timeoutRef.current) clearTimeout(timeoutRef.current);
+        if (timeoutRef.current) {
+          clearTimeout(timeoutRef.current);
+          timeoutRef.current = null;
+        }
       };
     }
 
@@ -76,9 +102,13 @@ const TypingAnimation: React.FC<TypingAnimationProps> = ({
     if (isDeleting && currentText.length > 0) {
       timeoutRef.current = setTimeout(() => {
         setCurrentText(currentText.slice(0, -1));
+        timeoutRef.current = null;
       }, deletingSpeed);
       return () => {
-        if (timeoutRef.current) clearTimeout(timeoutRef.current);
+        if (timeoutRef.current) {
+          clearTimeout(timeoutRef.current);
+          timeoutRef.current = null;
+        }
       };
     }
 
@@ -89,13 +119,18 @@ const TypingAnimation: React.FC<TypingAnimationProps> = ({
       return;
     }
 
-    // Type next character
+    // Type next character - this should trigger immediately when currentText is empty
     if (!isDeleting && currentText.length < currentPhrase.length) {
       timeoutRef.current = setTimeout(() => {
-        setCurrentText(currentPhrase.slice(0, currentText.length + 1));
+        const nextLength = currentText.length + 1;
+        setCurrentText(currentPhrase.slice(0, nextLength));
+        timeoutRef.current = null;
       }, typingSpeed);
       return () => {
-        if (timeoutRef.current) clearTimeout(timeoutRef.current);
+        if (timeoutRef.current) {
+          clearTimeout(timeoutRef.current);
+          timeoutRef.current = null;
+        }
       };
     }
   }, [currentText, currentPhraseIndex, isDeleting, isComplete, phrases, typingSpeed, deletingSpeed, pauseDuration]);
