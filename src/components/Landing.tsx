@@ -111,13 +111,14 @@ const Landing = () => {
                   try {
                     const phrases = t("landing.hero.typingPhrases", { returnObjects: true });
                     // Debug: log what we get
-                    console.log('Typing phrases from i18n:', phrases, 'Type:', typeof phrases, 'Is Array:', Array.isArray(phrases));
+                    console.log('🔍 Typing phrases from i18n:', phrases, 'Type:', typeof phrases, 'Is Array:', Array.isArray(phrases));
                     // Ensure we always have an array
                     if (Array.isArray(phrases) && phrases.length > 0) {
+                      console.log('✅ Using i18n phrases:', phrases);
                       return phrases;
                     }
                   } catch (error) {
-                    console.warn('Failed to load typing phrases:', error);
+                    console.warn('⚠️ Failed to load typing phrases:', error);
                   }
                   // Fallback to English phrases if translation fails
                   const fallback = [
@@ -130,7 +131,7 @@ const Landing = () => {
                     "Proactive Risk Detection",
                     "Trust-First Technology"
                   ];
-                  console.log('Using fallback phrases:', fallback);
+                  console.log('🔄 Using fallback phrases:', fallback);
                   return fallback;
                 })()}
                 typingSpeed={100}

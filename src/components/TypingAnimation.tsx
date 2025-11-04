@@ -35,15 +35,16 @@ const TypingAnimation: React.FC<TypingAnimationProps> = ({
 
   // Start typing immediately when phrases are first loaded
   useEffect(() => {
-    console.log('TypingAnimation - phrases:', phrases, 'currentText:', currentText, 'isDeleting:', isDeleting, 'isComplete:', isComplete);
+    console.log('🎬 TypingAnimation - phrases:', phrases, 'currentText:', currentText, 'isDeleting:', isDeleting, 'isComplete:', isComplete, 'currentPhraseIndex:', currentPhraseIndex);
     if (phrases && phrases.length > 0 && currentText === '' && !isDeleting && !isComplete && currentPhraseIndex === 0) {
       const firstPhrase = phrases[0];
-      console.log('Starting to type first phrase:', firstPhrase);
+      console.log('🚀 Starting to type first phrase:', firstPhrase);
       if (firstPhrase) {
         // Start typing immediately
         timeoutRef.current = setTimeout(() => {
-          console.log('Setting first character:', firstPhrase[0]);
-          setCurrentText(firstPhrase[0] || '');
+          const firstChar = firstPhrase[0] || '';
+          console.log('✏️ Setting first character:', firstChar);
+          setCurrentText(firstChar);
           timeoutRef.current = null;
         }, typingSpeed);
         return () => {
@@ -147,9 +148,10 @@ const TypingAnimation: React.FC<TypingAnimationProps> = ({
     };
   }, []);
 
+  // Show cursor even when text is empty to indicate animation is loading
   return (
     <span className={className}>
-      {currentText}
+      {currentText || (phrases && phrases.length > 0 ? '' : '')}
       {!isComplete && <span className="animate-pulse">|</span>}
     </span>
   );
