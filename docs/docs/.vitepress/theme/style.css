@@ -148,16 +148,16 @@
  * Logo size reduction
  * -------------------------------------------------------------------------- */
 
-/* Reduce logo size in navigation bar */
+/* Logo size - reduced from default but still visible */
 .VPNavBarTitle .logo {
-  height: 28px !important;
-  max-height: 28px !important;
+  height: 34px !important;
+  max-height: 34px !important;
   width: auto !important;
 }
 
 .VPNavBarTitle .logo img {
-  height: 28px !important;
-  max-height: 28px !important;
+  height: 34px !important;
+  max-height: 34px !important;
   width: auto !important;
   object-fit: contain;
 }
@@ -165,12 +165,12 @@
 /* Ensure logo doesn't overflow on mobile */
 @media (max-width: 768px) {
   .VPNavBarTitle .logo {
-    height: 24px !important;
-    max-height: 24px !important;
+    height: 29px !important;
+    max-height: 29px !important;
   }
   
   .VPNavBarTitle .logo img {
-    height: 24px !important;
-    max-height: 24px !important;
+    height: 29px !important;
+    max-height: 29px !important;
   }
 }

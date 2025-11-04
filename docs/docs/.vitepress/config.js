@@ -247,15 +247,15 @@ export default defineConfig({
         -webkit-text-fill-color: transparent !important;
       }
 
-      /* Reduce logo size */
+      /* Logo size - reduced from default but still visible */
       .VPNavBarTitle .logo {
-        height: 28px !important;
-        max-height: 28px !important;
+        height: 34px !important;
+        max-height: 34px !important;
         width: auto !important;
       }
       .VPNavBarTitle .logo img {
-        height: 28px !important;
-        max-height: 28px !important;
+        height: 34px !important;
+        max-height: 34px !important;
         width: auto !important;
         object-fit: contain;
       }
