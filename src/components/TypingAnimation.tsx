@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 
 interface TypingAnimationProps {
   phrases: string[];
@@ -18,21 +18,22 @@ const TypingAnimation: React.FC<TypingAnimationProps> = ({
   const [currentPhraseIndex, setCurrentPhraseIndex] = useState(0);
   const [currentText, setCurrentText] = useState('');
   const [isDeleting, setIsDeleting] = useState(false);
-  const [isPaused, setIsPaused] = useState(false);
   const [isComplete, setIsComplete] = useState(false);
+  const timeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   // Reset animation when phrases change (e.g., language change)
   useEffect(() => {
+    if (timeoutRef.current) {
+      clearTimeout(timeoutRef.current);
+    }
     setCurrentPhraseIndex(0);
     setCurrentText('');
     setIsDeleting(false);
-    setIsPaused(false);
     setIsComplete(false);
   }, [phrases]);
 
   useEffect(() => {
     if (!phrases || phrases.length === 0) {
-      // If no phrases, show nothing
       return;
     }
 
@@ -52,24 +53,33 @@ const TypingAnimation: React.FC<TypingAnimationProps> = ({
       return;
     }
 
-    // Pause after typing is complete
-    if (currentText === currentPhrase && !isDeleting && !isPaused) {
-      setIsPaused(true);
-      const pauseTimer = setTimeout(() => {
-        setIsPaused(false);
+    // Clear any existing timeout
+    if (timeoutRef.current) {
+      clearTimeout(timeoutRef.current);
+    }
+
+    // Pause after typing is complete, then delete (except for last phrase)
+    if (currentText === currentPhrase && !isDeleting) {
+      timeoutRef.current = setTimeout(() => {
         if (!isLastPhrase) {
           setIsDeleting(true);
+        } else {
+          setIsComplete(true);
         }
       }, pauseDuration);
-      return () => clearTimeout(pauseTimer);
+      return () => {
+        if (timeoutRef.current) clearTimeout(timeoutRef.current);
+      };
     }
 
     // Delete current text
     if (isDeleting && currentText.length > 0) {
-      const deleteTimer = setTimeout(() => {
+      timeoutRef.current = setTimeout(() => {
         setCurrentText(currentText.slice(0, -1));
       }, deletingSpeed);
-      return () => clearTimeout(deleteTimer);
+      return () => {
+        if (timeoutRef.current) clearTimeout(timeoutRef.current);
+      };
     }
 
     // Move to next phrase after deleting
@@ -79,28 +89,25 @@ const TypingAnimation: React.FC<TypingAnimationProps> = ({
       return;
     }
 
-    // Type next character (this handles the initial typing when currentText is empty)
-    if (!isDeleting && !isPaused && currentText.length < currentPhrase.length) {
-      const typeTimer = setTimeout(() => {
+    // Type next character
+    if (!isDeleting && currentText.length < currentPhrase.length) {
+      timeoutRef.current = setTimeout(() => {
         setCurrentText(currentPhrase.slice(0, currentText.length + 1));
       }, typingSpeed);
-      return () => clearTimeout(typeTimer);
+      return () => {
+        if (timeoutRef.current) clearTimeout(timeoutRef.current);
+      };
     }
-  }, [currentText, currentPhraseIndex, isDeleting, isPaused, isComplete, phrases, typingSpeed, deletingSpeed, pauseDuration]);
+  }, [currentText, currentPhraseIndex, isDeleting, isComplete, phrases, typingSpeed, deletingSpeed, pauseDuration]);
 
-  // Start typing immediately on mount or when phrases change
+  // Cleanup on unmount
   useEffect(() => {
-    if (phrases && phrases.length > 0 && currentText === '' && !isDeleting && !isPaused && !isComplete) {
-      const firstPhrase = phrases[0];
-      if (firstPhrase) {
-        // Start typing the first character immediately
-        const initialTimer = setTimeout(() => {
-          setCurrentText(firstPhrase[0] || '');
-        }, typingSpeed);
-        return () => clearTimeout(initialTimer);
+    return () => {
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
       }
-    }
-  }, [phrases, currentText, isDeleting, isPaused, isComplete, typingSpeed]);
+    };
+  }, []);
 
   return (
     <span className={className}>
