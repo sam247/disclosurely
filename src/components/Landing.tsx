@@ -108,10 +108,14 @@ const Landing = () => {
             <span className="block text-blue-600">
               <TypingAnimation 
                 phrases={(() => {
-                  const phrases = t("landing.hero.typingPhrases", { returnObjects: true });
-                  // Ensure we always have an array
-                  if (Array.isArray(phrases)) {
-                    return phrases;
+                  try {
+                    const phrases = t("landing.hero.typingPhrases", { returnObjects: true });
+                    // Ensure we always have an array
+                    if (Array.isArray(phrases) && phrases.length > 0) {
+                      return phrases;
+                    }
+                  } catch (error) {
+                    console.warn('Failed to load typing phrases:', error);
                   }
                   // Fallback to English phrases if translation fails
                   return [
