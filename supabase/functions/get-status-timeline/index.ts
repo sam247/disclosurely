@@ -1,10 +1,23 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.50.0";
 
-const corsHeaders = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+// Restrict CORS for authenticated endpoints
+const getAllowedOrigin = (req: Request): string => {
+  const origin = req.headers.get('origin');
+  const allowedOrigins = [
+    'https://5c8a3c05-42bc-4914-b492-275c4e4e75f4.lovableproject.com',
+    'http://localhost:8080',
+    'http://localhost:5173',
+  ];
+  
+  return origin && allowedOrigins.includes(origin) ? origin : allowedOrigins[0];
 };
+
+const getCorsHeaders = (req: Request) => ({
+  'Access-Control-Allow-Origin': getAllowedOrigin(req),
+  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+  'Access-Control-Allow-Credentials': 'true',
+});
 
 // UUID validation helper
 const isValidUUID = (uuid: string): boolean => {
@@ -13,6 +26,8 @@ const isValidUUID = (uuid: string): boolean => {
 };
 
 serve(async (req) => {
+  const corsHeaders = getCorsHeaders(req);
+  
   // Handle CORS preflight
   if (req.method === 'OPTIONS') {
     return new Response('ok', { headers: corsHeaders });

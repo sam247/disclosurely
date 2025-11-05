@@ -7,10 +7,23 @@ import { serve } from 'https://deno.land/std@0.168.0/http/server.ts';
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 import { redactPII } from '../_shared/pii-detector.ts';
 
-const corsHeaders = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type, x-organization-id',
+// Restrict CORS for authenticated endpoints
+const getAllowedOrigin = (req: Request): string => {
+  const origin = req.headers.get('origin');
+  const allowedOrigins = [
+    'https://5c8a3c05-42bc-4914-b492-275c4e4e75f4.lovableproject.com',
+    'http://localhost:8080',
+    'http://localhost:5173',
+  ];
+  
+  return origin && allowedOrigins.includes(origin) ? origin : allowedOrigins[0];
 };
+
+const getCorsHeaders = (req: Request) => ({
+  'Access-Control-Allow-Origin': getAllowedOrigin(req),
+  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type, x-organization-id',
+  'Access-Control-Allow-Credentials': 'true',
+});
 
 interface GenerateRequest {
   messages: Array<{ role: string; content: string }>;
@@ -25,6 +38,8 @@ interface GenerateRequest {
 }
 
 serve(async (req) => {
+  const corsHeaders = getCorsHeaders(req);
+  
   // Handle CORS preflight
   if (req.method === 'OPTIONS') {
     return new Response('ok', { headers: corsHeaders });
@@ -42,8 +57,34 @@ serve(async (req) => {
     const organizationId = req.headers.get('X-Organization-Id');
     console.log(`[AI Gateway] Received request for org: ${organizationId}`);
     
-    // TEMPORARILY BYPASSING FEATURE FLAG CHECK FOR DEBUGGING
-    console.log(`[AI Gateway] BYPASSING FEATURE CHECK - Always accepting requests`);
+    // Check if AI Gateway feature is enabled for this organization
+    const { data: featureEnabled, error: featureError } = await supabase
+      .rpc('is_feature_enabled', {
+        p_feature_name: 'ai_gateway',
+        p_organization_id: organizationId
+      });
+    
+    if (featureError) {
+      console.error('[AI Gateway] Feature flag check error:', featureError);
+      return new Response(
+        JSON.stringify({ error: 'Service temporarily unavailable' }),
+        { 
+          status: 503,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+        }
+      );
+    }
+    
+    if (!featureEnabled) {
+      console.log(`[AI Gateway] Feature disabled for org: ${organizationId}`);
+      return new Response(
+        JSON.stringify({ error: 'AI Gateway not enabled for this organization' }),
+        { 
+          status: 403,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+        }
+      );
+    }
 
     // ============================================================================
     // 2. AUTHENTICATION & AUTHORIZATION
@@ -81,8 +122,55 @@ serve(async (req) => {
       );
     }
 
-    // TEMPORARILY SKIPPING POLICY & TOKEN LIMIT CHECKS FOR DEBUGGING
-    const policy = { pii_protection: { enabled: true } };
+    // ============================================================================
+    // 4. LOAD AI POLICY
+    // ============================================================================
+    const { data: policy, error: policyError } = await supabase
+      .rpc('get_active_ai_policy', { p_organization_id: organizationId });
+    
+    if (policyError || !policy) {
+      console.error('[AI Gateway] Policy load error:', policyError);
+      return new Response(
+        JSON.stringify({ error: 'Configuration error' }),
+        { 
+          status: 500,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+        }
+      );
+    }
+    
+    // ============================================================================
+    // 5. CHECK TOKEN LIMITS
+    // ============================================================================
+    const maxTokens = body.max_tokens || policy.routing?.purpose_routing?.[body.context?.purpose || 'default']?.max_tokens || 2000;
+    
+    const { data: hasCapacity, error: limitError } = await supabase
+      .rpc('check_token_limit', {
+        p_organization_id: organizationId,
+        p_requested_tokens: maxTokens
+      });
+    
+    if (limitError) {
+      console.error('[AI Gateway] Token limit check error:', limitError);
+      return new Response(
+        JSON.stringify({ error: 'Service error' }),
+        { 
+          status: 500,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+        }
+      );
+    }
+    
+    if (!hasCapacity) {
+      console.log(`[AI Gateway] Token limit exceeded for org: ${organizationId}`);
+      return new Response(
+        JSON.stringify({ error: 'Daily token limit exceeded' }),
+        { 
+          status: 429,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+        }
+      );
+    }
 
     // ============================================================================
     // 6. ENHANCED PII REDACTION (20+ patterns with validation)
@@ -227,11 +315,21 @@ serve(async (req) => {
       redaction_applied: piiDetected,
     });
 
-    // TEMPORARILY SKIPPING TOKEN USAGE TRACKING
+    // ============================================================================
+    // 10. TRACK TOKEN USAGE
+    // ============================================================================
+    await supabase.rpc('upsert_token_usage', {
+      p_organization_id: organizationId,
+      p_date: new Date().toISOString().split('T')[0],
+      p_model: model,
+      p_tokens: result.usage?.total_tokens || 0,
+      p_cost: 0 // Cost calculation can be added based on model pricing
+    });
+    
     console.log(`[AI Gateway] Completed successfully - ${result.usage?.total_tokens || 0} tokens`);
 
     // ============================================================================
-    // 11. RETURN RESPONSE
+    // 12. RETURN RESPONSE
     // ============================================================================
     return new Response(
       JSON.stringify({
