@@ -65,7 +65,13 @@ export function PolicyAssignmentDialog({
         .order('first_name', { ascending: true });
 
       if (error) throw error;
-      setTeamMembers(data || []);
+      
+      // Deduplicate by ID to prevent duplicate entries
+      const uniqueMembers = Array.from(
+        new Map((data || []).map(m => [m.id, m])).values()
+      );
+      
+      setTeamMembers(uniqueMembers);
     } catch (error) {
       console.error('Error loading team members:', error);
       toast({
@@ -80,12 +86,23 @@ export function PolicyAssignmentDialog({
 
   const loadExistingAssignments = async () => {
     try {
-      // Policy assignments are managed through compliance_policies owner tracking
-      // No separate policy_assignments table exists in the current schema
-      setExistingAssignments(new Set());
-      setSelectedMembers(new Set());
+      const { data, error } = await supabase
+        .from('policy_assignments')
+        .select('user_id')
+        .eq('policy_id', policyId)
+        .eq('organization_id', organization?.id);
+
+      if (error) throw error;
+
+      const existingUserIds = new Set<string>((data || []).map(a => a.user_id));
+      setExistingAssignments(existingUserIds);
+      
+      // Pre-select existing assignments
+      setSelectedMembers(existingUserIds);
     } catch (error) {
       console.error('Error loading existing assignments:', error);
+      setExistingAssignments(new Set());
+      setSelectedMembers(new Set());
     }
   };
 
@@ -116,30 +133,73 @@ export function PolicyAssignmentDialog({
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error('User not authenticated');
 
-      // Note: Policy assignments are managed through compliance_policies table
-      // Update policy owner instead of managing separate assignments table
-      const { error: updateError } = await supabase
-        .from('compliance_policies')
-        .update({
-          owner_id: Array.from(selectedMembers)[0] || null, // Single owner model
-          updated_at: new Date().toISOString()
-        })
-        .eq('id', policyId);
+      // Convert due date to ISO string
+      const dueDateISO = dueDate ? new Date(dueDate).toISOString() : null;
 
-      if (updateError) throw updateError;
+      // Get list of user IDs to assign
+      const userIdsToAssign = Array.from(selectedMembers);
+      const existingUserIds = Array.from(existingAssignments);
+      
+      // Determine which users to add (new assignments)
+      const usersToAdd = userIdsToAssign.filter(id => !existingUserIds.includes(id));
+      // Determine which users to remove (unselected previously assigned)
+      const usersToRemove = existingUserIds.filter(id => !userIdsToAssign.includes(id));
+
+      // Remove assignments for users that were deselected
+      if (usersToRemove.length > 0) {
+        const { error: deleteError } = await supabase
+          .from('policy_assignments')
+          .delete()
+          .eq('policy_id', policyId)
+          .eq('organization_id', organization?.id)
+          .in('user_id', usersToRemove);
+
+        if (deleteError) throw deleteError;
+      }
+
+      // Create new assignments for newly selected users
+      if (usersToAdd.length > 0) {
+        const assignmentsToInsert = usersToAdd.map(userId => ({
+          organization_id: organization?.id,
+          policy_id: policyId,
+          user_id: userId,
+          assigned_by: user.id,
+          due_date: dueDateISO,
+          assigned_at: new Date().toISOString()
+        }));
+
+        const { error: insertError } = await supabase
+          .from('policy_assignments')
+          .insert(assignmentsToInsert);
+
+        if (insertError) throw insertError;
+      }
+
+      // Update existing assignments' due dates if changed
+      const usersToUpdate = userIdsToAssign.filter(id => existingUserIds.includes(id));
+      if (usersToUpdate.length > 0 && dueDateISO) {
+        const { error: updateError } = await supabase
+          .from('policy_assignments')
+          .update({ due_date: dueDateISO, updated_at: new Date().toISOString() })
+          .eq('policy_id', policyId)
+          .eq('organization_id', organization?.id)
+          .in('user_id', usersToUpdate);
+
+        if (updateError) throw updateError;
+      }
 
       toast({
-        title: 'Policy Updated',
-        description: `Policy owner updated successfully.`
+        title: '✅ Policy Assigned',
+        description: `Policy assigned to ${selectedMembers.size} team member(s) successfully.`
       });
 
       onAssignmentComplete?.();
       onClose();
     } catch (error) {
-      console.error('Error updating policy:', error);
+      console.error('Error assigning policy:', error);
       toast({
         title: 'Error',
-        description: 'Failed to update policy. Please try again.',
+        description: 'Failed to assign policy. Please try again.',
         variant: 'destructive'
       });
     } finally {

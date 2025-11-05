@@ -175,16 +175,49 @@ export default function CompliancePolicies() {
     policy_content: '',
     effective_date: '',
     next_review_date: '',
+    owner_id: '',
     owner_name: '',
     status: 'draft'
   });
+  
+  // Team members for Policy Owner dropdown
+  const [teamMembers, setTeamMembers] = useState<TeamMember[]>([]);
 
   useEffect(() => {
     if (organization?.id) {
       loadPolicies();
       loadAcknowledgmentStats();
+      loadTeamMembers();
     }
   }, [organization?.id]);
+  
+  const loadTeamMembers = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('id, email, first_name, last_name')
+        .eq('organization_id', organization?.id)
+        .order('first_name', { ascending: true });
+
+      if (error) throw error;
+      
+      // Deduplicate by ID to prevent duplicate entries
+      const uniqueMembers = Array.from(
+        new Map((data || []).map(m => [m.id, m])).values()
+      );
+      
+      setTeamMembers(uniqueMembers);
+    } catch (error) {
+      console.error('Error loading team members:', error);
+    }
+  };
+  
+  const getTeamMemberDisplayName = (member: TeamMember) => {
+    if (member.first_name && member.last_name) {
+      return `${member.first_name} ${member.last_name} (${member.email})`;
+    }
+    return member.email;
+  };
 
   useEffect(() => {
     filterAndSortPolicies();
@@ -288,13 +321,21 @@ export default function CompliancePolicies() {
 
   const handleCreatePolicy = async () => {
     try {
+      // Get owner name from selected team member
+      const selectedOwner = teamMembers.find(m => m.id === formData.owner_id);
+      const ownerName = selectedOwner 
+        ? getTeamMemberDisplayName(selectedOwner)
+        : formData.owner_name || null;
+      
       // Safari fix: Ensure dates are in correct format or null
       const policyData = {
         organization_id: organization?.id,
         ...formData,
         title: formData.policy_name, // Map policy_name to title field
         effective_date: formData.effective_date || null,
-        next_review_date: formData.next_review_date || null
+        next_review_date: formData.next_review_date || null,
+        owner_id: formData.owner_id || null,
+        owner_name: ownerName
       };
 
       const { error } = await supabase
@@ -357,6 +398,7 @@ export default function CompliancePolicies() {
       policy_content: '',
       effective_date: '',
       next_review_date: '',
+      owner_id: '',
       owner_name: '',
       status: 'draft'
     });
@@ -935,13 +977,29 @@ export default function CompliancePolicies() {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="owner_name">Policy Owner</Label>
-              <Input
-                id="owner_name"
-                placeholder="e.g., Jane Smith, Compliance Manager"
-                value={formData.owner_name}
-                onChange={(e) => setFormData({ ...formData, owner_name: e.target.value })}
-              />
+              <Label htmlFor="owner_id">Policy Owner</Label>
+              <Select 
+                value={formData.owner_id} 
+                onValueChange={(value) => setFormData({ ...formData, owner_id: value })}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select a team member" />
+                </SelectTrigger>
+                <SelectContent>
+                  {teamMembers.length === 0 ? (
+                    <SelectItem value="" disabled>No team members available</SelectItem>
+                  ) : (
+                    teamMembers.map((member) => (
+                      <SelectItem key={member.id} value={member.id}>
+                        {getTeamMemberDisplayName(member)}
+                      </SelectItem>
+                    ))
+                  )}
+                </SelectContent>
+              </Select>
+              <p className="text-xs text-muted-foreground">
+                The policy owner is responsible for maintaining and reviewing this policy
+              </p>
             </div>
           </div>
           <DialogFooter>
