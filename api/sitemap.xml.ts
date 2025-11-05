@@ -48,8 +48,9 @@ const DOCS_URL = 'https://docs.disclosurely.com';
 // Docs pages - extracted from VitePress config sidebar
 // This ensures all docs content is included in main sitemap for unified SEO authority
 const DOCS_PAGES = [
+  // Quick Start
+  '/quick-start',
   // Introduction
-  '/getting-started',
   '/introduction/platform-overview',
   '/introduction/key-concepts',
   // Admin

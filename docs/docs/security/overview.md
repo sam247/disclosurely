@@ -680,6 +680,6 @@ We understand you may need to complete security questionnaires for your procurem
 
 **Related:**
 - [Encryption & Privacy](/security/encryption)
-- [Access Controls](/security/access-controls)
+- [Access Controls](/security/access-control)
 - [Authentication & MFA](/security/authentication)
 - [Security Best Practices](/security/best-practices)
