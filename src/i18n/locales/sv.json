@@ -158,8 +158,18 @@
   },
   "landing": {
     "hero": {
-      "title1": "Transformera Compliance och Visselblåsning",
-      "title2": "Med AI-Drivna Arbetsflöden",
+      "title1": "Transformera Compliance och Visselblåsning Med…",
+      "title2": "AI-Drivna Arbetsflöden",
+      "typingPhrases": [
+        "AI-Drivna Arbetsflöden",
+        "Anonym Rapportering",
+        "Realtidsrevisionsspår",
+        "Privat AI-Assistans",
+        "Militär Säkerhet",
+        "Automatiserad Riskbedömning",
+        "Proaktiv Riskdetektering",
+        "Förtroendebaserad Teknologi"
+      ],
       "subtitle": "Disclosurely hjälper compliance-team att hålla sig i framkant genom att förvandla etik och compliance till en proaktiv fördel: bygga en kultur av integritet, förenkla arbetsflöden och minska organisationsrisk.",
       "startFreeTrial": "Starta gratis provperiod",
       "viewPricing": "Visa priser"

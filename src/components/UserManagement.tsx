@@ -682,7 +682,8 @@ const UserManagement = () => {
           </div>
         </CardHeader>
         <CardContent>
-          <div className="rounded-md border">
+          {/* Desktop Table View */}
+          <div className="hidden md:block rounded-md border overflow-x-auto">
             <Table>
               <TableHeader>
                 <TableRow>
@@ -725,7 +726,7 @@ const UserManagement = () => {
                         </div>
                       </TableCell>
                       <TableCell>
-                        <div className="text-sm">{member.email}</div>
+                        <div className="text-sm break-words">{member.email}</div>
                         <div className="text-xs text-gray-500">
                           {member.is_active ? 'Active' : 'Inactive'}
                         </div>
@@ -784,6 +785,93 @@ const UserManagement = () => {
                 )}
               </TableBody>
             </Table>
+          </div>
+          
+          {/* Mobile Card View */}
+          <div className="md:hidden space-y-4">
+            {teamMembers.length === 0 ? (
+              <div className="text-center py-8 text-gray-500">
+                No team members found
+              </div>
+            ) : (
+              teamMembers.map((member) => (
+                <Card key={member.id} className="overflow-hidden">
+                  <CardContent className="p-4 space-y-3">
+                    <div className="flex items-start gap-3">
+                      <div className="w-10 h-10 bg-gray-200 rounded-full flex items-center justify-center shrink-0">
+                        <span className="text-sm font-medium text-gray-600">
+                          {member.first_name ? member.first_name[0].toUpperCase() : 
+                           member.email ? member.email[0].toUpperCase() : '?'}
+                        </span>
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <div className="font-medium text-sm break-words">
+                          {member.first_name && member.last_name 
+                            ? `${member.first_name} ${member.last_name}`
+                            : 'Not provided'
+                          }
+                        </div>
+                        <div className="text-xs text-gray-500 break-all mt-1">
+                          {member.email}
+                        </div>
+                        <div className="text-xs text-gray-400 mt-1">
+                          ID: {member.id.slice(0, 8)}...
+                        </div>
+                      </div>
+                    </div>
+                    
+                    <div className="flex items-center justify-between pt-2 border-t">
+                      <div className="flex flex-col gap-2">
+                        {member.roles.length > 0 ? (
+                          <Badge className={`${getRoleColor(member.roles[0])} text-xs w-fit`}>
+                            {formatRole(member.roles[0])}
+                          </Badge>
+                        ) : (
+                          <Badge className="bg-gray-100 text-gray-800 text-xs w-fit">
+                            No Role
+                          </Badge>
+                        )}
+                        <div className="text-xs text-gray-500">
+                          Last login: {member.last_login 
+                            ? new Date(member.last_login).toLocaleDateString()
+                            : 'Never'
+                          }
+                        </div>
+                      </div>
+                      
+                      {member.id !== user?.id && (
+                        <div className="flex items-center gap-2">
+                          <Select
+                            value={member.roles[0] || 'case_handler'}
+                            onValueChange={(value: UserRole) => updateUserRole(member.id, value)}
+                          >
+                            <SelectTrigger className="w-32 h-8 text-xs">
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="case_handler">Case Handler</SelectItem>
+                              <SelectItem value="org_admin">Org Admin</SelectItem>
+                            </SelectContent>
+                          </Select>
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => deactivateUser(member.id)}
+                            className="h-8 w-8 p-0 text-red-600 hover:text-red-700 hover:bg-red-50"
+                            title="Deactivate user"
+                          >
+                            <XCircle className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      )}
+                      {member.id === user?.id && (
+                        <span className="text-xs text-gray-400 italic">You</span>
+                      )}
+                    </div>
+                  </CardContent>
+                </Card>
+              ))
+            )}
           </div>
         </CardContent>
       </Card>

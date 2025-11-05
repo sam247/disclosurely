@@ -10,6 +10,11 @@
       ],
       "destination": "https://disclosurely.com/$1",
       "permanent": true
+    },
+    {
+      "source": "/:path+/",
+      "destination": "/:path+",
+      "permanent": true
     }
   ],
   "headers": [
@@ -31,6 +36,8 @@
     }
   ],
   "rewrites": [
+    { "source": "/sitemap.xml", "destination": "/api/sitemap.xml" },
+    { "source": "/sitemap-index.xml", "destination": "/api/sitemap-index.xml" },
     { "source": "/((?!api/).*)", "destination": "/index.html" }
   ]
 }

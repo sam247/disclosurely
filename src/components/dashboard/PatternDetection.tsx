@@ -42,20 +42,32 @@ const PatternDetection = () => {
   const [lastAnalyzed, setLastAnalyzed] = useState<string | null>(null);
   const [isOpen, setIsOpen] = useState(true); // Collapsible state
 
-  // Load persisted analysis and collapsible state on component mount
+  // Load persisted analysis with TTL (auto-expires after 1 hour for security)
   useEffect(() => {
-    const savedAnalysis = localStorage.getItem('ai-analysis');
-    const savedTimestamp = localStorage.getItem('ai-analysis-timestamp');
-    const savedCollapsedState = localStorage.getItem('ai-analysis-collapsed');
+    const savedAnalysis = sessionStorage.getItem('ai-analysis');
+    const savedTimestamp = sessionStorage.getItem('ai-analysis-timestamp');
+    const savedCollapsedState = sessionStorage.getItem('ai-analysis-collapsed');
     
     if (savedAnalysis && savedTimestamp) {
       try {
-        setPatternAnalysis(JSON.parse(savedAnalysis));
-        setLastAnalyzed(savedTimestamp);
+        const parsed = JSON.parse(savedAnalysis);
+        const timestamp = new Date(savedTimestamp).getTime();
+        const age = Date.now() - timestamp;
+        const oneHour = 60 * 60 * 1000;
+        
+        // Check if data is less than 1 hour old
+        if (age < oneHour) {
+          setPatternAnalysis(parsed);
+          setLastAnalyzed(savedTimestamp);
+        } else {
+          // Clear expired data
+          sessionStorage.removeItem('ai-analysis');
+          sessionStorage.removeItem('ai-analysis-timestamp');
+        }
       } catch (error) {
         console.error('Failed to load saved analysis:', error);
-        localStorage.removeItem('ai-analysis');
-        localStorage.removeItem('ai-analysis-timestamp');
+        sessionStorage.removeItem('ai-analysis');
+        sessionStorage.removeItem('ai-analysis-timestamp');
       }
     }
     
@@ -65,9 +77,9 @@ const PatternDetection = () => {
     }
   }, []);
 
-  // Save collapsed state to localStorage
+  // Save collapsed state to sessionStorage (auto-clears on tab close for security)
   useEffect(() => {
-    localStorage.setItem('ai-analysis-collapsed', JSON.stringify(!isOpen));
+    sessionStorage.setItem('ai-analysis-collapsed', JSON.stringify(!isOpen));
   }, [isOpen]);
 
   const analyzePatterns = async () => {
@@ -113,9 +125,9 @@ const PatternDetection = () => {
       setPatternAnalysis(data.patternAnalysis);
       setLastAnalyzed(new Date().toISOString());
 
-      // Persist analysis to localStorage
-      localStorage.setItem('ai-analysis', JSON.stringify(data.patternAnalysis));
-      localStorage.setItem('ai-analysis-timestamp', new Date().toISOString());
+      // Persist analysis to sessionStorage (auto-clears on tab close, 1-hour TTL for security)
+      sessionStorage.setItem('ai-analysis', JSON.stringify(data.patternAnalysis));
+      sessionStorage.setItem('ai-analysis-timestamp', new Date().toISOString());
 
       toast({
         title: "Pattern Analysis Complete",

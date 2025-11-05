@@ -1,0 +1,6 @@
+---
+alwaysApply: true
+---
+- Always read CURSORREADME.md for project context
+- Always use available mcp servers for contentful, supabase, vercel, github and semgrep work
+- Push to git after code changes at https://github.com/sam247/disclosurely

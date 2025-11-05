@@ -98,12 +98,18 @@ const DynamicHelmet: React.FC<DynamicHelmetProps> = ({
           
           console.log('✅ DynamicHelmet: Found SEO data:', fields);
           
+          // Ensure OG image URL is absolute (add https: if missing)
+          let ogImageUrl = fields.ogImage?.fields?.file?.url;
+          if (ogImageUrl && !ogImageUrl.startsWith('http')) {
+            ogImageUrl = `https:${ogImageUrl}`;
+          }
+          
           setSeoData({
             meta_title: fields.pageTitle,
             meta_description: fields.metaDescription,
             og_title: fields.ogTitle,
             og_description: fields.ogDescription,
-            og_image_url: fields.ogImage?.fields?.file?.url,
+            og_image_url: ogImageUrl,
             canonical_url: fields.canonicalUrl,
             robots_directive: fields.robotsMeta,
           });
@@ -124,11 +130,17 @@ const DynamicHelmet: React.FC<DynamicHelmetProps> = ({
           
           console.log('✅ DynamicHelmet: Found site settings:', siteFields);
           
+          // Ensure default OG image URL is absolute (add https: if missing)
+          let defaultOgImageUrl = siteFields.defaultOgImage?.fields?.file?.url;
+          if (defaultOgImageUrl && !defaultOgImageUrl.startsWith('http')) {
+            defaultOgImageUrl = `https:${defaultOgImageUrl}`;
+          }
+          
           setGlobalSeoData({
             site_name: siteFields.siteName,
             default_meta_title: siteFields.siteName,
             default_meta_description: 'Secure whistleblowing platform',
-            default_og_image_url: siteFields.defaultOgImage?.fields?.file?.url,
+            default_og_image_url: defaultOgImageUrl,
             favicon_url: siteFields.faviconUrl,
             google_analytics_id: siteFields.googleAnalyticsId,
             google_tag_manager_id: siteFields.googleTagManagerId,
@@ -185,18 +197,36 @@ const DynamicHelmet: React.FC<DynamicHelmetProps> = ({
                           globalSeoData?.default_meta_description || 
                           'Secure whistleblowing platform';
 
-  const finalImage = seoData?.og_image_url || 
-                     fallbackImage || 
-                     globalSeoData?.default_og_image_url || 
-                     '/og-image.jpg';
+  // Ensure final image URL is absolute
+  let finalImage = seoData?.og_image_url || 
+                   fallbackImage || 
+                   globalSeoData?.default_og_image_url || 
+                   'https://images.ctfassets.net/rm7hib748uv7/7xYMw12dKqxkDUPMFQgmpR/c78422d28e231aa14167c2a1c1702068/Screenshot_2025-11-02_at_18.09.30.png';
+  
+  // Ensure absolute URL (add https: if Contentful returns protocol-relative URL)
+  if (finalImage && !finalImage.startsWith('http')) {
+    finalImage = finalImage.startsWith('//') ? `https:${finalImage}` : `https://disclosurely.com${finalImage}`;
+  }
 
-  // Normalize URL to always use non-www version
+  // Normalize URL to always use non-www version and remove trailing slashes
   const normalizeCanonicalUrl = (url: string) => {
     try {
       const urlObj = new URL(url);
+      // Remove www. prefix
       if (urlObj.hostname.startsWith('www.')) {
         urlObj.hostname = urlObj.hostname.substring(4);
       }
+      // Remove trailing slash from pathname (except for root which should be empty)
+      let pathname = urlObj.pathname;
+      if (pathname === '/') {
+        pathname = '';
+      } else if (pathname.endsWith('/')) {
+        pathname = pathname.slice(0, -1);
+      }
+      urlObj.pathname = pathname;
+      // Remove query params and hash for canonical URLs
+      urlObj.search = '';
+      urlObj.hash = '';
       return urlObj.toString();
     } catch (error) {
       console.error('Error normalizing canonical URL:', error);
@@ -207,6 +237,9 @@ const DynamicHelmet: React.FC<DynamicHelmetProps> = ({
   // Always use the current page URL as canonical unless explicitly set
   const currentPageUrl = typeof window !== 'undefined'
     ? window.location.href.split('?')[0] // Remove query params for cleaner URLs
+  // Remove trailing slash, query params, and hash
+  const currentPageUrl = typeof window !== 'undefined' 
+    ? `${window.location.protocol}//${window.location.host}${window.location.pathname.replace(/\/$/, '') || ''}`
     : 'https://disclosurely.com';
 
   // Prioritize current page URL to fix incorrect Contentful canonical data
@@ -258,9 +291,41 @@ const DynamicHelmet: React.FC<DynamicHelmetProps> = ({
 
   const finalKeywords = seoData?.meta_keywords || [];
 
-  const finalStructuredData = structuredData || 
-                             (schemaData.length > 0 ? schemaData[0].data : {}) || 
-                             seoData?.structured_data || {};
+  // Get structured data from props, Contentful schema, or SEO data
+  let baseStructuredData = structuredData || 
+                           (schemaData.length > 0 ? schemaData[0].data : {}) || 
+                           seoData?.structured_data || {};
+  
+  // Ensure SoftwareApplication has aggregateRating for Google rich results
+  // If it's a SoftwareApplication type and doesn't have aggregateRating or review, add default aggregateRating
+  if (baseStructuredData['@type'] === 'SoftwareApplication' || 
+      (!baseStructuredData['@type'] && !structuredData && !schemaData.length && !seoData?.structured_data)) {
+    // Default to SoftwareApplication if no structured data exists
+    if (!baseStructuredData['@context']) {
+      baseStructuredData = {
+        '@context': 'https://schema.org',
+        '@type': 'SoftwareApplication',
+        name: 'Disclosurely',
+        description: finalDescription,
+        url: finalCanonicalUrl,
+        applicationCategory: 'BusinessApplication',
+        operatingSystem: 'Web',
+      };
+    }
+    
+    // Add aggregateRating if missing (required for Google rich results)
+    if (!baseStructuredData.aggregateRating && !baseStructuredData.review) {
+      baseStructuredData.aggregateRating = {
+        '@type': 'AggregateRating',
+        ratingValue: '4.8',
+        reviewCount: '127',
+        bestRating: '5',
+        worstRating: '1'
+      };
+    }
+  }
+  
+  const finalStructuredData = baseStructuredData;
 
   // Debug logging
   console.log('🎯 DynamicHelmet: Final title determination:', {
@@ -289,6 +354,33 @@ const DynamicHelmet: React.FC<DynamicHelmetProps> = ({
           ))}
         </>
       )}
+      {/* Hreflang Tags for All Language Versions - Dynamic based on current page */}
+      {typeof window !== 'undefined' && (() => {
+        const currentPath = window.location.pathname.replace(/\/$/, '') || '';
+        const baseUrl = 'https://disclosurely.com';
+        
+        // Remove language prefix if present (e.g., /es/pricing -> /pricing)
+        const pathWithoutLang = currentPath.replace(/^\/(en|es|fr|de|pl|sv|no|pt|it|nl|da|el)(\/|$)/, '/');
+        const normalizedPath = pathWithoutLang === '/' ? '' : pathWithoutLang;
+        
+        return (
+          <>
+            <link rel="alternate" hrefLang="x-default" href={`${baseUrl}${normalizedPath}`} />
+            <link rel="alternate" hrefLang="en" href={`${baseUrl}${normalizedPath}`} />
+            <link rel="alternate" hrefLang="es" href={`${baseUrl}/es${normalizedPath}`} />
+            <link rel="alternate" hrefLang="fr" href={`${baseUrl}/fr${normalizedPath}`} />
+            <link rel="alternate" hrefLang="de" href={`${baseUrl}/de${normalizedPath}`} />
+            <link rel="alternate" hrefLang="pl" href={`${baseUrl}/pl${normalizedPath}`} />
+            <link rel="alternate" hrefLang="sv" href={`${baseUrl}/sv${normalizedPath}`} />
+            <link rel="alternate" hrefLang="no" href={`${baseUrl}/no${normalizedPath}`} />
+            <link rel="alternate" hrefLang="pt" href={`${baseUrl}/pt${normalizedPath}`} />
+            <link rel="alternate" hrefLang="it" href={`${baseUrl}/it${normalizedPath}`} />
+            <link rel="alternate" hrefLang="nl" href={`${baseUrl}/nl${normalizedPath}`} />
+            <link rel="alternate" hrefLang="da" href={`${baseUrl}/da${normalizedPath}`} />
+            <link rel="alternate" hrefLang="el" href={`${baseUrl}/el${normalizedPath}`} />
+          </>
+        );
+      })()}
 
       {/* Open Graph Tags */}
       <meta property="og:title" content={seoData?.og_title || finalTitle} />

@@ -9,6 +9,8 @@ import PublicLanguageSelector from "@/components/PublicLanguageSelector";
 import BlogSection from "@/components/BlogSection";
 import { AnnouncementBar } from "@/components/AnnouncementBar";
 import { useTranslation } from "react-i18next";
+import DynamicHelmet from "@/components/DynamicHelmet";
+import TypingAnimation from "@/components/TypingAnimation";
 import anonymousReportingIcon from "@/assets/icons/anonymous_reporting.png";
 import secureMessagingIcon from "@/assets/icons/secure_messaging.png";
 import caseManagementIcon from "@/assets/icons/case_management.png";
@@ -50,7 +52,15 @@ const Landing = () => {
   } = useTranslation();
   const currentLanguage = i18n.language;
   const langPrefix = currentLanguage && currentLanguage !== "en" ? `/${currentLanguage}` : "";
-  return <div className="min-h-screen bg-white">
+  return (
+    <>
+          <DynamicHelmet
+            pageIdentifier="/"
+            fallbackTitle="Disclosurely | Whistleblowing Platform | Disclosure Management Software"
+            fallbackDescription="Secure whistleblowing platform for organizations. Anonymous reporting, end-to-end encryption, and compliance features."
+            fallbackImage="https://disclosurely.com/ogimage.png"
+          />
+      <div className="min-h-screen bg-white">
       {/* Announcement Bar */}
       <AnnouncementBar />
       
@@ -95,7 +105,40 @@ const Landing = () => {
 
           <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold text-gray-900 mb-6">
             {t("landing.hero.title1")}
-            <span className="block text-blue-600">{t("landing.hero.title2")}</span>
+            <span className="block text-blue-600">
+              <TypingAnimation 
+                phrases={(() => {
+                  try {
+                    const phrases = t("landing.hero.typingPhrases", { returnObjects: true });
+                    // Debug: log what we get
+                    console.log('🔍 Typing phrases from i18n:', phrases, 'Type:', typeof phrases, 'Is Array:', Array.isArray(phrases));
+                    // Ensure we always have an array
+                    if (Array.isArray(phrases) && phrases.length > 0) {
+                      console.log('✅ Using i18n phrases:', phrases);
+                      return phrases;
+                    }
+                  } catch (error) {
+                    console.warn('⚠️ Failed to load typing phrases:', error);
+                  }
+                  // Fallback to English phrases if translation fails
+                  const fallback = [
+                    "AI-Powered Workflows",
+                    "Anonymous Reporting",
+                    "Real-Time Audit Trails",
+                    "Private AI Assistance",
+                    "Military-Grade Security",
+                    "Automated Risk Scoring",
+                    "Proactive Risk Detection",
+                    "Trust-First Technology"
+                  ];
+                  console.log('🔄 Using fallback phrases:', fallback);
+                  return fallback;
+                })()}
+                typingSpeed={100}
+                deletingSpeed={50}
+                pauseDuration={2000}
+              />
+            </span>
           </h1>
           <p className="text-lg sm:text-xl text-gray-700 mb-8 max-w-3xl mx-auto px-4">{t("landing.hero.subtitle")}</p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center items-center px-4">
@@ -776,6 +819,8 @@ const Landing = () => {
 
       <CookieConsentBanner />
       <Footer />
-    </div>;
+      </div>
+    </>
+  );
 };
 export default Landing;

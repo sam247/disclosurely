@@ -158,8 +158,18 @@
   },
   "landing": {
     "hero": {
-      "title1": "Transformando Cumplimiento y Denuncias",
-      "title2": "Con Flujos de Trabajo Impulsados por IA",
+      "title1": "Transformando Cumplimiento y Denuncias Con…",
+      "title2": "Flujos de Trabajo Impulsados por IA",
+      "typingPhrases": [
+        "Flujos de Trabajo Impulsados por IA",
+        "Denuncias Anónimas",
+        "Trazas de Auditoría en Tiempo Real",
+        "Asistencia IA Privada",
+        "Seguridad de Grado Militar",
+        "Puntuación de Riesgo Automatizada",
+        "Detección Proactiva de Riesgos",
+        "Tecnología Basada en la Confianza"
+      ],
       "subtitle": "Disclosurely ayuda a los equipos de cumplimiento a mantenerse a la vanguardia transformando la ética y el cumplimiento en una ventaja proactiva: construyendo una cultura de integridad, simplificando flujos de trabajo y reduciendo el riesgo organizacional.",
       "startFreeTrial": "Iniciar Prueba Gratuita",
       "viewPricing": "Ver Precios"

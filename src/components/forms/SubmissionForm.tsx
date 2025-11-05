@@ -7,7 +7,6 @@ import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { Shield, Search } from 'lucide-react';
-import { encryptReport } from '@/utils/encryption';
 import FileUpload from '../FileUpload';
 import { uploadReportFile } from '@/utils/fileUpload';
 import ReportTypeSelector from './ReportTypeSelector';
@@ -124,22 +123,14 @@ const SubmissionForm = ({ linkToken, linkData, brandColor }: SubmissionFormProps
       
       const trackingId = generateTrackingId();
       const finalCategory = getFinalCategory();
-      
-      const reportContent = {
-        title: formData.title,
-        description: formData.description,
-        category: finalCategory,
-        submission_method: 'web_form'
-      };
 
-      console.log('Encrypting report content...');
-      const { encryptedData, keyHash } = await encryptReport(reportContent, linkData.organization_id);
-
+      // Server will encrypt the data - send unencrypted
       const reportPayload = {
         tracking_id: trackingId,
         title: formData.title,
-        encrypted_content: encryptedData,
-        encryption_key_hash: keyHash,
+        description: formData.description,
+        category: finalCategory,
+        submission_method: 'web_form',
         report_type: 'anonymous' as const,
         submitted_by_email: null,
         status: 'new' as const,

@@ -327,6 +327,68 @@ serve(async (req) => {
     
     console.log('✅ Link token verified for organization:', linkData.organization_id)
     
+    // 🔐 SERVER-SIDE ENCRYPTION
+    console.log('🔐 Encrypting report data server-side...')
+    const ENCRYPTION_SALT = Deno.env.get('ENCRYPTION_SALT')
+    if (!ENCRYPTION_SALT) {
+      console.error('❌ ENCRYPTION_SALT not configured')
+      return new Response(
+        JSON.stringify({ error: 'Server configuration error' }),
+        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      )
+    }
+    
+    // Create organization-specific key
+    const keyMaterial = linkData.organization_id + ENCRYPTION_SALT
+    const keyBuffer = new TextEncoder().encode(keyMaterial)
+    const hashBuffer = await crypto.subtle.digest('SHA-256', keyBuffer)
+    const organizationKey = Array.from(new Uint8Array(hashBuffer))
+      .map(b => b.toString(16).padStart(2, '0'))
+      .join('')
+    
+    // Extract content to encrypt (everything except metadata fields)
+    const contentToEncrypt = {
+      description: reportData.description,
+      category: reportData.category,
+      submission_method: reportData.submission_method
+    }
+    
+    // Encrypt using Web Crypto API
+    const iv = crypto.getRandomValues(new Uint8Array(12))
+    const keyBytes = new Uint8Array(organizationKey.match(/.{1,2}/g)!.map(byte => parseInt(byte, 16)))
+    const cryptoKey = await crypto.subtle.importKey(
+      'raw',
+      keyBytes,
+      { name: 'AES-GCM' },
+      false,
+      ['encrypt']
+    )
+    
+    const dataString = JSON.stringify(contentToEncrypt)
+    const dataBuffer = new TextEncoder().encode(dataString)
+    const encryptedBuffer = await crypto.subtle.encrypt(
+      { name: 'AES-GCM', iv: iv },
+      cryptoKey,
+      dataBuffer
+    )
+    
+    // Combine IV and encrypted data
+    const combined = new Uint8Array(iv.length + encryptedBuffer.byteLength)
+    combined.set(iv)
+    combined.set(new Uint8Array(encryptedBuffer), iv.length)
+    
+    // Convert to base64
+    const CHUNK = 0x8000
+    let binary = ''
+    for (let i = 0; i < combined.length; i += CHUNK) {
+      const slice = combined.subarray(i, Math.min(i + CHUNK, combined.length))
+      binary += String.fromCharCode.apply(null, Array.from(slice))
+    }
+    const encryptedData = typeof btoa === 'function' ? btoa(binary) : Buffer.from(binary, 'binary').toString('base64')
+    const keyHash = organizationKey
+    
+    console.log('✅ Encryption completed server-side')
+    
     // Create the report
     console.log('📝 Creating report in database...')
     
@@ -342,8 +404,8 @@ serve(async (req) => {
       .insert({
         tracking_id: reportData.tracking_id,
         title: reportData.title,
-        encrypted_content: reportData.encrypted_content,
-        encryption_key_hash: reportData.encryption_key_hash,
+        encrypted_content: encryptedData,
+        encryption_key_hash: keyHash,
         report_type: reportData.report_type,
         submitted_by_email: reportData.submitted_by_email,
         status: reportData.status,

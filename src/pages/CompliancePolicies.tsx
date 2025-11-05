@@ -292,13 +292,14 @@ export default function CompliancePolicies() {
       const policyData = {
         organization_id: organization?.id,
         ...formData,
+        title: formData.policy_name, // Map policy_name to title field
         effective_date: formData.effective_date || null,
         next_review_date: formData.next_review_date || null
       };
 
       const { error } = await supabase
         .from('compliance_policies')
-        .insert(policyData);
+        .insert([policyData]);
 
       if (error) {
         console.error('Supabase error:', error);

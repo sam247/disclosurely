@@ -294,20 +294,20 @@ const LinkGenerator = () => {
         <CardContent className="space-y-3">
           {/* Default Link - Always show first */}
           <div className="p-4 bg-muted/30 rounded-lg border">
-            <div className="flex items-start justify-between gap-4">
-              <div className="flex-1 min-w-0">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+              <div className="flex-1 min-w-0 w-full">
                 <p className="text-sm font-semibold mb-1">Default Secure Link</p>
                 <p className="text-xs text-muted-foreground mb-2">
                   Used {primaryLink.usage_count || 0} times
                 </p>
-                <code className="text-sm bg-background px-3 py-2 rounded border font-mono break-all block">
+                <code className="text-xs sm:text-sm bg-background px-3 py-2 rounded border font-mono break-all block w-full">
                   {unbrandedUrl}
                 </code>
               </div>
               <Button
                 size="sm"
                 onClick={() => copyToClipboard(unbrandedUrl)}
-                className="whitespace-nowrap shrink-0"
+                className="whitespace-nowrap shrink-0 w-full sm:w-auto"
               >
                 {t('copyLink')}
               </Button>
@@ -317,42 +317,42 @@ const LinkGenerator = () => {
           {/* Branded Link - Show if available */}
           {brandedUrl && primaryDomain ? (
             <div className="p-4 bg-blue-50/50 rounded-lg border border-blue-200">
-              <div className="flex items-start justify-between gap-4">
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2 mb-1">
+              <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                <div className="flex-1 min-w-0 w-full">
+                  <div className="flex flex-wrap items-center gap-2 mb-1">
                     <p className="text-sm font-semibold">Your Branded Secure Link</p>
                     {primaryDomainStatus && (
-                      <Badge variant="outline" className="text-xs h-5 capitalize">
+                      <Badge variant="outline" className="text-xs h-5 capitalize shrink-0">
                         {primaryDomainStatus}
                       </Badge>
                     )}
                     {brandedLinkStatus === 'accessible' && (
-                      <Badge variant="default" className="bg-green-600 text-xs h-5">
+                      <Badge variant="default" className="bg-green-600 text-xs h-5 shrink-0">
                         ✓ Active
                       </Badge>
                     )}
                     {brandedLinkStatus === 'checking' && (
-                      <Badge variant="outline" className="text-xs h-5">
+                      <Badge variant="outline" className="text-xs h-5 shrink-0">
                         Checking DNS…
                       </Badge>
                     )}
                     {brandedLinkStatus === 'inaccessible' && (
-                      <Badge variant="destructive" className="text-xs h-5">
+                      <Badge variant="destructive" className="text-xs h-5 shrink-0">
                         ⚠ Needs attention
                       </Badge>
                     )}
                   </div>
-                  <p className="text-xs text-muted-foreground mb-2">
+                  <p className="text-xs text-muted-foreground mb-2 break-words">
                     Custom domain: {primaryDomain}
                   </p>
-                  <code className="text-sm bg-background px-3 py-2 rounded border font-mono break-all block">
+                  <code className="text-xs sm:text-sm bg-background px-3 py-2 rounded border font-mono break-all block w-full">
                     {brandedUrl}
                   </code>
                 </div>
                 <Button
                   size="sm"
                   onClick={() => copyToClipboard(brandedUrl)}
-                  className="whitespace-nowrap shrink-0"
+                  className="whitespace-nowrap shrink-0 w-full sm:w-auto"
                   disabled={brandedLinkStatus === 'inaccessible'}
                 >
                   {t('copyLink')}
@@ -361,7 +361,7 @@ const LinkGenerator = () => {
             </div>
           ) : (
             <div className="p-4 bg-gray-50 rounded-lg border border-dashed">
-              <p className="text-xs text-muted-foreground">
+              <p className="text-xs text-muted-foreground break-words">
                 <strong>Want a branded link?</strong> Go to <a href="/dashboard/settings" className="text-blue-600 hover:underline">Settings → Custom Domains</a> to set up your own domain. It will appear here automatically after verification.
               </p>
             </div>

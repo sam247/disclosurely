@@ -740,11 +740,11 @@ Guidelines:
   return (
     <div className="flex flex-col h-[calc(100vh-12rem)]">
       {/* Resizable Panel Layout */}
-      <div ref={containerRef} className="flex flex-1 overflow-hidden bg-gray-50" style={{ userSelect: isResizing ? 'none' : 'auto' }}>
+      <div ref={containerRef} className="flex flex-col md:flex-row flex-1 overflow-hidden bg-gray-50" style={{ userSelect: isResizing ? 'none' : 'auto' }}>
         {/* Left Panel - Controls */}
         <div 
-          className="bg-white border-r flex flex-col"
-          style={{ width: `${leftPanelWidth}%` }}
+          className="bg-white border-r flex flex-col w-full md:flex-col"
+          style={{ width: typeof window !== 'undefined' && window.innerWidth >= 768 ? `${leftPanelWidth}%` : undefined }}
         >
           {/* Scrollable content area */}
           <div className="flex-1 overflow-y-auto p-4 space-y-4">
@@ -1011,9 +1011,9 @@ Guidelines:
           </div>
         </div>
 
-        {/* Resizer */}
+        {/* Resizer - Hidden on mobile */}
         <div
-          className="w-1 bg-gray-200 hover:bg-primary cursor-col-resize flex items-center justify-center group relative"
+          className="hidden md:flex w-1 bg-gray-200 hover:bg-primary cursor-col-resize items-center justify-center group relative"
           onMouseDown={() => setIsResizing(true)}
         >
           <div className="absolute inset-y-0 -inset-x-2" /> {/* Larger hit area */}
@@ -1021,7 +1021,7 @@ Guidelines:
         </div>
 
         {/* Right Panel - Chat Interface */}
-        <div className="flex-1 flex flex-col bg-white">
+        <div className="flex-1 flex flex-col bg-white w-full md:w-auto">
           {/* Chat Messages - Scrolling Area */}
           <div className="flex-1 overflow-y-auto p-6 space-y-4">
             {chatMessages.length === 0 ? (

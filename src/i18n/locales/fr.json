@@ -158,8 +158,18 @@
   },
   "landing": {
     "hero": {
-      "title1": "Transformer la Conformité et le Signalement",
-      "title2": "Avec des Workflows Alimentés par l'IA",
+      "title1": "Transformer la Conformité et le Signalement Avec…",
+      "title2": "Des Workflows Alimentés par l'IA",
+      "typingPhrases": [
+        "Des Workflows Alimentés par l'IA",
+        "Signalement Anonyme",
+        "Traces d'Audit en Temps Réel",
+        "Assistance IA Privée",
+        "Sécurité de Niveau Militaire",
+        "Évaluation Automatique des Risques",
+        "Détection Proactive des Risques",
+        "Technologie Axée sur la Confiance"
+      ],
       "subtitle": "Disclosurely aide les équipes de conformité à garder une longueur d'avance en transformant l'éthique et la conformité en un avantage proactif.",
       "startFreeTrial": "Essai Gratuit",
       "viewPricing": "Voir les Tarifs"

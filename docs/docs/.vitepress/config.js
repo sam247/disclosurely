@@ -249,6 +249,19 @@ export default defineConfig({
         background-clip: text !important;
         -webkit-text-fill-color: transparent !important;
       }
+
+      /* Logo size - reduced from default but still visible */
+      .VPNavBarTitle .logo {
+        height: 41px !important;
+        max-height: 41px !important;
+        width: auto !important;
+      }
+      .VPNavBarTitle .logo img {
+        height: 41px !important;
+        max-height: 41px !important;
+        width: auto !important;
+        object-fit: contain;
+      }
     `]
   ]
 })
