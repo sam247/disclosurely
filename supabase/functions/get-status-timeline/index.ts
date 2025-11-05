@@ -6,6 +6,12 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
+// UUID validation helper
+const isValidUUID = (uuid: string): boolean => {
+  const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+  return uuidRegex.test(uuid);
+};
+
 serve(async (req) => {
   // Handle CORS preflight
   if (req.method === 'OPTIONS') {
@@ -13,10 +19,21 @@ serve(async (req) => {
   }
 
   try {
+    // Get authorization header
+    const authHeader = req.headers.get('Authorization');
+    if (!authHeader) {
+      return new Response(
+        JSON.stringify({ error: 'Authentication required' }),
+        { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    // Create supabase client with user's JWT
     const supabase = createClient(
       Deno.env.get('SUPABASE_URL') ?? '',
-      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '',
+      Deno.env.get('SUPABASE_ANON_KEY') ?? '',
       {
+        global: { headers: { Authorization: authHeader } },
         auth: {
           autoRefreshToken: false,
           persistSession: false
@@ -24,16 +41,59 @@ serve(async (req) => {
       }
     );
 
+    // Verify user authentication
+    const { data: { user }, error: authError } = await supabase.auth.getUser();
+    if (authError || !user) {
+      console.error('Authentication failed:', authError);
+      return new Response(
+        JSON.stringify({ error: 'Authentication required' }),
+        { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
     const { reportId } = await req.json();
 
-    if (!reportId) {
+    // Validate UUID format
+    if (!reportId || !isValidUUID(reportId)) {
       return new Response(
-        JSON.stringify({ error: 'Report ID is required' }),
+        JSON.stringify({ error: 'Invalid request' }),
         { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
 
-    // Fetch status changes from audit logs
+    // Verify user has access to this report through organization membership
+    const { data: report, error: reportError } = await supabase
+      .from('reports')
+      .select('id, organization_id')
+      .eq('id', reportId)
+      .single();
+
+    if (reportError || !report) {
+      console.error('Report access check failed:', reportError);
+      return new Response(
+        JSON.stringify({ error: 'Invalid request' }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    // Verify user is member of report's organization
+    const { data: profile, error: profileError } = await supabase
+      .from('profiles')
+      .select('id, organization_id')
+      .eq('id', user.id)
+      .eq('organization_id', report.organization_id)
+      .eq('is_active', true)
+      .single();
+
+    if (profileError || !profile) {
+      console.error('Organization membership check failed:', profileError);
+      return new Response(
+        JSON.stringify({ error: 'Access denied' }),
+        { status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    // Fetch status changes from audit logs - now protected by RLS
     const { data: statusChanges, error } = await supabase
       .from('audit_logs')
       .select(`
@@ -54,7 +114,7 @@ serve(async (req) => {
     if (error) {
       console.error('Error fetching status changes:', error);
       return new Response(
-        JSON.stringify({ error: 'Failed to fetch status changes' }),
+        JSON.stringify({ error: 'Unable to process request' }),
         { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
@@ -80,7 +140,7 @@ serve(async (req) => {
   } catch (error) {
     console.error('Error in get-status-timeline:', error);
     return new Response(
-      JSON.stringify({ error: 'Internal server error' }),
+      JSON.stringify({ error: 'Unable to process request' }),
       { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
   }
