@@ -235,16 +235,57 @@ const DynamicHelmet: React.FC<DynamicHelmetProps> = ({
   };
 
   // Always use the current page URL as canonical unless explicitly set
+  const currentPageUrl = typeof window !== 'undefined'
+    ? window.location.href.split('?')[0] // Remove query params for cleaner URLs
   // Remove trailing slash, query params, and hash
   const currentPageUrl = typeof window !== 'undefined' 
     ? `${window.location.protocol}//${window.location.host}${window.location.pathname.replace(/\/$/, '') || ''}`
     : 'https://disclosurely.com';
-    
+
+  // Prioritize current page URL to fix incorrect Contentful canonical data
   const finalCanonicalUrl = normalizeCanonicalUrl(
-    canonicalUrl ||  // If explicitly provided, use it
-    seoData?.canonical_url || 
-    currentPageUrl
+    canonicalUrl ||  // If explicitly provided via props, use it
+    currentPageUrl   // Use current page URL (correct behavior)
+    // Removed seoData?.canonical_url as it was incorrectly set to homepage for all pages
   );
+
+  // Generate dynamic hreflang URLs based on current page path
+  const getHrefLangUrls = () => {
+    if (typeof window === 'undefined') return {};
+
+    const currentPath = window.location.pathname;
+    const languages = ['en', 'es', 'fr', 'de', 'pl', 'sv', 'no', 'pt', 'it', 'nl', 'da', 'el'];
+
+    // Extract the page path without language prefix
+    let basePath = currentPath;
+    for (const lang of languages) {
+      if (currentPath.startsWith(`/${lang}/`)) {
+        basePath = currentPath.substring(lang.length + 1); // Remove /lang prefix
+        break;
+      } else if (currentPath === `/${lang}`) {
+        basePath = '/';
+        break;
+      }
+    }
+
+    // Generate URLs for all language versions
+    const hrefLangUrls: Record<string, string> = {};
+
+    // x-default and en both point to English version (without /en prefix)
+    hrefLangUrls['x-default'] = `https://disclosurely.com${basePath}`;
+    hrefLangUrls['en'] = `https://disclosurely.com${basePath}`;
+
+    // Other languages with their prefix
+    languages.forEach(lang => {
+      if (lang !== 'en') {
+        hrefLangUrls[lang] = `https://disclosurely.com/${lang}${basePath}`;
+      }
+    });
+
+    return hrefLangUrls;
+  };
+
+  const hrefLangUrls = getHrefLangUrls();
 
   const finalRobots = seoData?.robots_directive || 'index,follow';
 
@@ -305,6 +346,14 @@ const DynamicHelmet: React.FC<DynamicHelmetProps> = ({
       <meta name="robots" content={finalRobots} />
       <link rel="canonical" href={finalCanonicalUrl} />
       
+      {/* Dynamic Hreflang Tags for All Language Versions */}
+      {typeof window !== 'undefined' && Object.keys(hrefLangUrls).length > 0 && (
+        <>
+          {Object.entries(hrefLangUrls).map(([lang, url]) => (
+            <link key={lang} rel="alternate" hrefLang={lang} href={url} />
+          ))}
+        </>
+      )}
       {/* Hreflang Tags for All Language Versions - Dynamic based on current page */}
       {typeof window !== 'undefined' && (() => {
         const currentPath = window.location.pathname.replace(/\/$/, '') || '';
