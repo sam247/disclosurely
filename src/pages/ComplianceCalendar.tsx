@@ -365,7 +365,7 @@ export default function ComplianceCalendar() {
       </div>
 
       {/* Scrollable Content */}
-      <div className="flex-1 overflow-y-auto p-6 space-y-6">
+      <div className="flex-1 overflow-y-auto overflow-x-hidden p-6 space-y-6">
         {/* Stats Cards */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <Card>
@@ -415,9 +415,9 @@ export default function ComplianceCalendar() {
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Calendar */}
-        <Card className="lg:col-span-2">
-          <CardHeader>
-            <div className="flex items-center justify-between">
+        <Card className="lg:col-span-2 flex flex-col min-h-0">
+          <CardHeader className="flex-shrink-0">
+            <div className="flex items-center justify-between flex-wrap gap-2">
               <CardTitle>{format(currentMonth, 'MMMM yyyy')}</CardTitle>
               <div className="flex items-center gap-2">
                 <Button
@@ -444,11 +444,11 @@ export default function ComplianceCalendar() {
               </div>
             </div>
           </CardHeader>
-          <CardContent>
-            <div className="grid grid-cols-7 gap-2">
+          <CardContent className="flex-1 min-h-0 overflow-auto">
+            <div className="grid grid-cols-7 gap-1 sm:gap-2 min-w-0">
               {/* Day headers */}
               {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map(day => (
-                <div key={day} className="text-center text-xs font-medium text-muted-foreground py-2">
+                <div key={day} className="text-center text-xs font-medium text-muted-foreground py-1 sm:py-2">
                   {day}
                 </div>
               ))}
@@ -469,7 +469,7 @@ export default function ComplianceCalendar() {
                     key={day.toISOString()}
                     onClick={() => setSelectedDate(day)}
                     className={cn(
-                      "aspect-square p-2 rounded-lg border-2 transition-colors relative",
+                      "aspect-square p-1 sm:p-2 rounded-lg border-2 transition-colors relative text-xs sm:text-sm",
                       isSelected && "border-primary bg-primary/5",
                       !isSelected && "border-transparent hover:border-primary/50",
                       !isCurrentMonth && "opacity-40",
@@ -498,7 +498,7 @@ export default function ComplianceCalendar() {
             </div>
 
             {/* Legend */}
-            <div className="mt-4 pt-4 border-t">
+            <div className="mt-4 pt-4 border-t flex-shrink-0">
               <div className="text-xs font-medium text-muted-foreground mb-2">Event Types:</div>
               <div className="flex flex-wrap gap-3 text-xs">
                 {[
@@ -518,13 +518,13 @@ export default function ComplianceCalendar() {
         </Card>
 
         {/* Selected Date Events / Upcoming Events */}
-        <Card>
-          <CardHeader>
+        <Card className="flex flex-col min-h-0">
+          <CardHeader className="flex-shrink-0">
             <CardTitle className="text-base">
               {selectedDate ? format(selectedDate, 'MMMM d, yyyy') : 'Upcoming Events'}
             </CardTitle>
           </CardHeader>
-          <CardContent>
+          <CardContent className="flex-1 min-h-0 overflow-y-auto">
             <div className="space-y-3">
               {selectedDate && selectedDateEvents.length > 0 ? (
                 selectedDateEvents.map((event) => (

@@ -806,9 +806,19 @@ Guidelines:
                       </div>
                     ) : (
                       savedAnalyses.map((saved) => (
-                      <SelectItem key={saved.id} value={saved.id}>
+                      <SelectItem 
+                        key={saved.id} 
+                        value={saved.id}
+                        onSelect={(e) => {
+                          // Don't select if clicking the delete button
+                          if ((e.target as HTMLElement).closest('button')) {
+                            e.preventDefault();
+                            return;
+                          }
+                        }}
+                      >
                         <div className="flex items-center justify-between w-full group">
-                          <div className="flex items-center gap-2">
+                          <div className="flex items-center gap-2 flex-1 min-w-0">
                             <span className="font-medium">{saved.tracking_id}</span>
                             <span className="text-xs text-muted-foreground">
                               {new Date(saved.created_at).toLocaleDateString()}
@@ -817,8 +827,13 @@ Guidelines:
                           <Button
                             size="sm"
                             variant="ghost"
-                            className="h-6 w-6 p-0 opacity-0 group-hover:opacity-100 transition-opacity"
+                            className="h-6 w-6 p-0 opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0"
+                            onMouseDown={(e) => {
+                              e.preventDefault();
+                              e.stopPropagation();
+                            }}
                             onClick={(e) => {
+                              e.preventDefault();
                               e.stopPropagation();
                               deleteSavedAnalysis(saved.id, saved.tracking_id);
                             }}

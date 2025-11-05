@@ -1493,44 +1493,66 @@ Additional Details: ${decryptedContent.additionalDetails || 'None provided'}
                                   Archive
                                 </DropdownMenuItem>
                                 <DropdownMenuSeparator />
-                                <DropdownMenuItem 
-                                  className="text-destructive"
-                                  onClick={async () => {
-                                    try {
-                                      const { data: { session } } = await supabase.auth.getSession();
-                                      if (!session?.access_token) {
-                                        throw new Error('No valid session token');
-                                      }
-                                      const response = await fetch(
-                                        `https://cxmuzperkittvibslnff.supabase.co/functions/v1/soft-delete-report`,
-                                        {
-                                          method: 'POST',
-                                          headers: {
-                                            'Content-Type': 'application/json',
-                                            'Authorization': `Bearer ${session?.access_token}`
-                                          },
-                                          body: JSON.stringify({ reportId: report.id })
-                                        }
-                                      );
-                                      if (!response.ok) {
-                                        const errorData = await response.json();
-                                        throw new Error(errorData.error || 'Failed to delete report');
-                                      }
-                                      toast({ title: 'Report deleted successfully' });
-                                      fetchData();
-                                    } catch (error: any) {
-                                      console.error('Error deleting report:', error);
-                                      toast({ 
-                                        title: 'Error deleting report',
-                                        description: error.message,
-                                        variant: 'destructive'
-                                      });
-                                    }
-                                  }}
-                                >
-                                  <Trash2 className="h-4 w-4 mr-2" />
-                                  Delete
-                                </DropdownMenuItem>
+                                <AlertDialog>
+                                  <AlertDialogTrigger asChild>
+                                    <DropdownMenuItem 
+                                      className="text-destructive"
+                                      onSelect={(e) => e.preventDefault()}
+                                    >
+                                      <Trash2 className="h-4 w-4 mr-2" />
+                                      Delete
+                                    </DropdownMenuItem>
+                                  </AlertDialogTrigger>
+                                  <AlertDialogContent>
+                                    <AlertDialogHeader>
+                                      <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+                                      <AlertDialogDescription>
+                                        This action cannot be undone. This will permanently delete the report 
+                                        "{report.title}" (Tracking ID: {report.tracking_id}) and all associated messages, attachments, and data.
+                                      </AlertDialogDescription>
+                                    </AlertDialogHeader>
+                                    <AlertDialogFooter>
+                                      <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                      <AlertDialogAction 
+                                        onClick={async () => {
+                                          try {
+                                            const { data: { session } } = await supabase.auth.getSession();
+                                            if (!session?.access_token) {
+                                              throw new Error('No valid session token');
+                                            }
+                                            const response = await fetch(
+                                              `https://cxmuzperkittvibslnff.supabase.co/functions/v1/soft-delete-report`,
+                                              {
+                                                method: 'POST',
+                                                headers: {
+                                                  'Content-Type': 'application/json',
+                                                  'Authorization': `Bearer ${session?.access_token}`
+                                                },
+                                                body: JSON.stringify({ reportId: report.id })
+                                              }
+                                            );
+                                            if (!response.ok) {
+                                              const errorData = await response.json();
+                                              throw new Error(errorData.error || 'Failed to delete report');
+                                            }
+                                            toast({ title: '✅ Report deleted successfully' });
+                                            fetchData();
+                                          } catch (error: any) {
+                                            console.error('Error deleting report:', error);
+                                            toast({ 
+                                              title: '❌ Error deleting report',
+                                              description: error.message || 'Failed to delete report. Please try again.',
+                                              variant: 'destructive'
+                                            });
+                                          }
+                                        }}
+                                        className="bg-red-600 hover:bg-red-700"
+                                      >
+                                        Delete Report
+                                      </AlertDialogAction>
+                                    </AlertDialogFooter>
+                                  </AlertDialogContent>
+                                </AlertDialog>
                               </DropdownMenuContent>
                             </DropdownMenu>
                           </div>
