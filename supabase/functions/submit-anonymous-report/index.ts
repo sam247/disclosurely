@@ -410,6 +410,7 @@ serve(async (req) => {
         submitted_by_email: reportData.submitted_by_email,
         status: reportData.status,
         priority: priorityValue,
+        manual_risk_level: priorityValue, // Map priority to risk level
         tags: reportData.tags,
         organization_id: linkData.organization_id
       })

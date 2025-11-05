@@ -226,6 +226,7 @@ const SubmissionFormWrapper = () => {
       logoUrl={logoUrl}
       brandColor={brandColor}
       subscriptionTier={subscriptionTier}
+      linkToken={linkToken}
     >
       <SecureSubmissionForm
         linkToken={linkToken!}

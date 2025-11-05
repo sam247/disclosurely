@@ -1,13 +1,13 @@
 
 import { useState, useEffect } from 'react';
-import { useNavigate, useParams, Link } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import { useOrganizationData } from '@/contexts/OrganizationContext';
 import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { AlertCircle, Search, ArrowLeft } from 'lucide-react';
+import { AlertCircle, Search } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import BrandedFormLayout from '../BrandedFormLayout';
 import { useSecureForm } from '@/hooks/useSecureForm';
@@ -105,18 +105,9 @@ const SecureReportStatusLookup = () => {
       organizationName={organizationName}
       logoUrl={logoUrl}
       brandColor={brandColor}
+      linkToken={linkToken}
     >
       <div className="space-y-6">
-        {/* Back Link */}
-        <div className="flex items-center">
-          <Link 
-            to={`/secure/tool/submit/${linkToken}`}
-            className="flex items-center text-sm text-gray-600 hover:text-gray-900 transition-colors"
-          >
-            <ArrowLeft className="h-4 w-4 mr-1" />
-            ← Back to Secure Portal
-          </Link>
-        </div>
 
         <Card>
           <CardContent className="pt-6">

@@ -4,6 +4,7 @@ import { Helmet } from 'react-helmet-async';
 import { Card, CardContent } from '@/components/ui/card';
 import { Shield } from 'lucide-react';
 import disclosurelyIcon from "@/assets/logos/disclosurely-icon.png";
+import { useParams } from 'react-router-dom';
 
 interface BrandedFormLayoutProps {
   title: string;
@@ -12,6 +13,7 @@ interface BrandedFormLayoutProps {
   logoUrl?: string;
   brandColor?: string;
   subscriptionTier?: 'basic' | 'pro' | null;
+  linkToken?: string;
   children: React.ReactNode;
 }
 
@@ -22,8 +24,27 @@ const BrandedFormLayout = ({
   logoUrl,
   brandColor = '#2563eb',
   subscriptionTier,
+  linkToken,
   children 
 }: BrandedFormLayoutProps) => {
+  // Get linkToken from URL params if not provided
+  const params = useParams<{ linkToken?: string }>();
+  const token = linkToken || params.linkToken;
+  
+  // Determine the main secure page URL based on context
+  const getMainSecurePageUrl = () => {
+    if (token) {
+      return `/secure/tool/submit/${token}`;
+    }
+    // If no linkToken, try to extract from current path
+    const pathMatch = window.location.pathname.match(/\/secure\/tool\/(submit|status)\/([^\/]+)/);
+    if (pathMatch && pathMatch[2]) {
+      return `/secure/tool/submit/${pathMatch[2]}`;
+    }
+    // Fallback to status page
+    return '/secure/tool/status';
+  };
+  
   // Dynamic page title: "{Company Name} Secure Reporting Portal"
   const pageTitle = organizationName 
     ? `${organizationName} Secure Reporting Portal`
@@ -47,7 +68,7 @@ const BrandedFormLayout = ({
                      src={logoUrl} 
                      alt={`${organizationName || 'Organization'} logo`}
                      className="w-10 h-10 sm:w-12 sm:h-12 object-contain cursor-pointer"
-                     onClick={() => window.location.href = '/secure/tool/status'}
+                     onClick={() => window.location.href = getMainSecurePageUrl()}
                      onError={(e) => {
                        const target = e.target as HTMLImageElement;
                        target.style.display = 'none';
@@ -59,7 +80,7 @@ const BrandedFormLayout = ({
                      src={disclosurelyIcon} 
                      alt="Disclosurely logo"
                      className="w-10 h-10 sm:w-12 sm:h-12 object-contain cursor-pointer"
-                     onClick={() => window.location.href = '/secure/tool/status'}
+                     onClick={() => window.location.href = getMainSecurePageUrl()}
                    />
                  )}
                 {logoUrl && (
@@ -67,7 +88,7 @@ const BrandedFormLayout = ({
                     src={disclosurelyIcon} 
                     alt="Disclosurely logo"
                     className="w-10 h-10 sm:w-12 sm:h-12 object-contain cursor-pointer hidden"
-                    onClick={() => window.location.href = '/secure/tool/status'}
+                    onClick={() => window.location.href = getMainSecurePageUrl()}
                   />
                 )}
               </div>

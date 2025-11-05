@@ -439,16 +439,6 @@ const ReportStatus = () => {
                   </div>
                 )}
       </div>
-      
-      {/* Back to Submission Portal Link */}
-      <div className="text-center py-6">
-        <a 
-          href="/secure/tool/submit" 
-          className="text-sm text-gray-600 hover:text-gray-800 underline"
-        >
-          ← Back to Secure Submission Portal
-        </a>
-      </div>
     </BrandedFormLayout>
   );
 };
