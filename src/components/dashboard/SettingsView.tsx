@@ -9,7 +9,7 @@ const SettingsView = () => {
   const { t } = useTranslation();
   
   return (
-    <div className="p-6">
+    <div>
       <div className="mb-6">
         <h2 className="text-2xl font-bold">{t('profileSettingsTitle')}</h2>
         <p className="text-muted-foreground">{t('profileSettingsDescription')}</p>

@@ -244,7 +244,7 @@ export default function PolicyAcknowledgment() {
   return (
     <div className="flex flex-col h-[calc(100vh-4rem)] overflow-hidden">
       {/* Fixed Header */}
-      <div className="flex-shrink-0 p-6 pb-4 border-b bg-background">
+      <div className="flex-shrink-0 pb-4 border-b bg-background">
         <h1 className="text-3xl font-bold">Policy Acknowledgments</h1>
         <p className="text-muted-foreground mt-2">
           Review and acknowledge policies assigned to you
@@ -293,7 +293,7 @@ export default function PolicyAcknowledgment() {
       </div>
 
       {/* Scrollable Content */}
-      <div className="flex-1 overflow-y-auto p-6">
+      <div className="flex-1 overflow-y-auto">
         <Tabs defaultValue="pending" className="w-full">
           <TabsList className="grid w-full grid-cols-2 max-w-md">
             <TabsTrigger value="pending">
