@@ -205,14 +205,15 @@ const DynamicHelmet: React.FC<DynamicHelmetProps> = ({
   };
 
   // Always use the current page URL as canonical unless explicitly set
-  const currentPageUrl = typeof window !== 'undefined' 
+  const currentPageUrl = typeof window !== 'undefined'
     ? window.location.href.split('?')[0] // Remove query params for cleaner URLs
     : 'https://disclosurely.com';
-    
+
+  // Prioritize current page URL to fix incorrect Contentful canonical data
   const finalCanonicalUrl = normalizeCanonicalUrl(
-    canonicalUrl ||  // If explicitly provided, use it
-    seoData?.canonical_url || 
-    currentPageUrl
+    canonicalUrl ||  // If explicitly provided via props, use it
+    currentPageUrl   // Use current page URL (correct behavior)
+    // Removed seoData?.canonical_url as it was incorrectly set to homepage for all pages
   );
 
   const finalRobots = seoData?.robots_directive || 'index,follow';
