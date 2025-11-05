@@ -103,7 +103,6 @@ Regulatory overview of the **Sarbanes-Oxley Act of 2002 (SOX)** whistleblower pr
 - Broader definition of protected activity
 - Longer statute of limitations (extended from 90 to 180 days)
 - SEC whistleblower program with financial rewards
-- See also: [Dodd-Frank Whistleblower Program](/regulatory/dodd-frank)
 
 ## Comparison with Other Jurisdictions
 

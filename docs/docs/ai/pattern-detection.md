@@ -656,4 +656,4 @@ Generate comprehensive pattern reports for leadership:
 - [AI Risk Assessment](/ai/risk-assessment) - Automated risk scoring enhanced by pattern data
 - [Compliance Overview](/compliance/overview) - Use patterns to improve organizational compliance
 - [Case Assignment](/cases/assignment) - Assign pattern-related cases to appropriate investigators
-- [Analytics and Reporting](/reporting/analytics) - Visualize patterns and trends across your organization
+- [Analytics and Reporting](/analytics/overview) - Visualize patterns and trends across your organization

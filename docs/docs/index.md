@@ -81,6 +81,8 @@ Set up your [team members and assign roles](/admin/team-management):
 
 Share your secure reporting URL with employees. Learn more about [how employees can submit reports](/reporting/how-to-submit).
 
+**→ [View Full Quick Start Guide](/quick-start)** for step-by-step instructions.
+
 ## Need Help?
 
 - **Email:** support@disclosurely.com
