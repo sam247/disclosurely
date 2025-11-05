@@ -4,6 +4,9 @@ export default defineConfig({
   title: "Disclosurely Docs",
   description: "Everything you need to build, manage, and optimize your whistleblowing and compliance platform.",
 
+  // Remove .html extension from URLs (fixes 404s for clean URLs)
+  cleanUrls: true,
+
   // Ignore dead links for pages that are planned but not yet created
   ignoreDeadLinks: true,
 
