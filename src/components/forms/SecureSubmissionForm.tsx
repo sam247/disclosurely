@@ -9,7 +9,6 @@ import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { Shield, Search } from 'lucide-react';
-import { encryptReport } from '@/utils/encryption';
 import FileUpload from '../FileUpload';
 import { uploadReportFile } from '@/utils/fileUpload';
 import ReportTypeSelector from './ReportTypeSelector';
@@ -132,22 +131,14 @@ const SecureSubmissionForm = ({ linkToken, linkData, brandColor }: SecureSubmiss
     
     const trackingId = generateTrackingId();
     const finalCategory = getFinalCategory();
-    
-    const reportContent = {
-      title: sanitizedData.title,
-      description: sanitizedData.description,
-      category: finalCategory,
-      submission_method: 'web_form'
-    };
 
-    console.log('Encrypting report content via server...');
-    const { encryptedData, keyHash } = await encryptReport(reportContent, linkData.organization_id);
-
+    // Server will encrypt the data - send unencrypted
     const reportPayload = {
       tracking_id: trackingId,
       title: sanitizedData.title,
-      encrypted_content: encryptedData,
-      encryption_key_hash: keyHash,
+      description: sanitizedData.description,
+      category: finalCategory,
+      submission_method: 'web_form',
       report_type: 'anonymous' as const,
       submitted_by_email: null,
       status: 'new' as const,

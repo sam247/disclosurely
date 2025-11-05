@@ -27,9 +27,6 @@ verify_jwt = false
 [functions.translate-text]
 verify_jwt = true
 
-[functions.encrypt-report-data]
-verify_jwt = false
-
 [functions.decrypt-report-data]
 verify_jwt = true
 

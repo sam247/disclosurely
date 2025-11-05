@@ -1379,6 +1379,36 @@ export type Database = {
           },
         ]
       }
+      encryption_salt_audit: {
+        Row: {
+          action: string
+          changed_at: string
+          changed_by: string | null
+          id: string
+          impact_estimated: number | null
+          metadata: Json | null
+          notes: string | null
+        }
+        Insert: {
+          action: string
+          changed_at?: string
+          changed_by?: string | null
+          id?: string
+          impact_estimated?: number | null
+          metadata?: Json | null
+          notes?: string | null
+        }
+        Update: {
+          action?: string
+          changed_at?: string
+          changed_by?: string | null
+          id?: string
+          impact_estimated?: number | null
+          metadata?: Json | null
+          notes?: string | null
+        }
+        Relationships: []
+      }
       feature_flags: {
         Row: {
           created_at: string | null
@@ -2705,8 +2735,9 @@ export type Database = {
         Row: {
           assigned_at: string | null
           assignment_id: string | null
-          current_version: number | null
           due_date: string | null
+          effective_date: string | null
+          email: string | null
           first_name: string | null
           last_name: string | null
           organization_id: string | null
@@ -2714,9 +2745,8 @@ export type Database = {
           policy_name: string | null
           policy_type: string | null
           reminder_sent_at: string | null
-          status: string | null
-          user_email: string | null
           user_id: string | null
+          version: number | null
         }
         Relationships: [
           {
@@ -2746,7 +2776,6 @@ export type Database = {
         Row: {
           acknowledgment_rate: number | null
           organization_id: string | null
-          pending_count: number | null
           policy_id: string | null
           policy_name: string | null
           policy_type: string | null
@@ -2766,13 +2795,11 @@ export type Database = {
       }
       recent_critical_issues: {
         Row: {
-          ai_analysis: Json | null
-          ai_insights: string[] | null
-          ai_recommendations: string[] | null
           context: string | null
           data: Json | null
           level: string | null
           message: string | null
+          severity: string | null
           timestamp: string | null
         }
         Relationships: []
@@ -3091,6 +3118,7 @@ export type Database = {
           total_records: number
         }[]
       }
+      verify_encryption_salt: { Args: never; Returns: boolean }
     }
     Enums: {
       app_role:
