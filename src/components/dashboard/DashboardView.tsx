@@ -163,6 +163,8 @@ const DashboardView = () => {
   const [isAssessingRisk, setIsAssessingRisk] = useState<string | null>(null);
   const [updatingRiskLevel, setUpdatingRiskLevel] = useState<string | null>(null);
   const [teamMembers, setTeamMembers] = useState<any[]>([]);
+  const [deleteReportId, setDeleteReportId] = useState<string | null>(null);
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
 
   useEffect(() => {
     console.log('DashboardView useEffect - user:', !!user, 'rolesLoading:', rolesLoading, 'isOrgAdmin:', isOrgAdmin);
@@ -1493,66 +1495,17 @@ Additional Details: ${decryptedContent.additionalDetails || 'None provided'}
                                   Archive
                                 </DropdownMenuItem>
                                 <DropdownMenuSeparator />
-                                <AlertDialog>
-                                  <AlertDialogTrigger asChild>
-                                    <DropdownMenuItem 
-                                      className="text-destructive"
-                                      onSelect={(e) => e.preventDefault()}
-                                    >
-                                      <Trash2 className="h-4 w-4 mr-2" />
-                                      Delete
-                                    </DropdownMenuItem>
-                                  </AlertDialogTrigger>
-                                  <AlertDialogContent>
-                                    <AlertDialogHeader>
-                                      <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
-                                      <AlertDialogDescription>
-                                        This action cannot be undone. This will permanently delete the report 
-                                        "{report.title}" (Tracking ID: {report.tracking_id}) and all associated messages, attachments, and data.
-                                      </AlertDialogDescription>
-                                    </AlertDialogHeader>
-                                    <AlertDialogFooter>
-                                      <AlertDialogCancel>Cancel</AlertDialogCancel>
-                                      <AlertDialogAction 
-                                        onClick={async () => {
-                                          try {
-                                            const { data: { session } } = await supabase.auth.getSession();
-                                            if (!session?.access_token) {
-                                              throw new Error('No valid session token');
-                                            }
-                                            const response = await fetch(
-                                              `https://cxmuzperkittvibslnff.supabase.co/functions/v1/soft-delete-report`,
-                                              {
-                                                method: 'POST',
-                                                headers: {
-                                                  'Content-Type': 'application/json',
-                                                  'Authorization': `Bearer ${session?.access_token}`
-                                                },
-                                                body: JSON.stringify({ reportId: report.id })
-                                              }
-                                            );
-                                            if (!response.ok) {
-                                              const errorData = await response.json();
-                                              throw new Error(errorData.error || 'Failed to delete report');
-                                            }
-                                            toast({ title: '✅ Report deleted successfully' });
-                                            fetchData();
-                                          } catch (error: any) {
-                                            console.error('Error deleting report:', error);
-                                            toast({ 
-                                              title: '❌ Error deleting report',
-                                              description: error.message || 'Failed to delete report. Please try again.',
-                                              variant: 'destructive'
-                                            });
-                                          }
-                                        }}
-                                        className="bg-red-600 hover:bg-red-700"
-                                      >
-                                        Delete Report
-                                      </AlertDialogAction>
-                                    </AlertDialogFooter>
-                                  </AlertDialogContent>
-                                </AlertDialog>
+                                <DropdownMenuItem 
+                                  className="text-destructive"
+                                  onClick={(e) => {
+                                    e.preventDefault();
+                                    setDeleteReportId(report.id);
+                                    setIsDeleteDialogOpen(true);
+                                  }}
+                                >
+                                  <Trash2 className="h-4 w-4 mr-2" />
+                                  Delete
+                                </DropdownMenuItem>
                               </DropdownMenuContent>
                             </DropdownMenu>
                           </div>
@@ -1663,6 +1616,80 @@ Additional Details: ${decryptedContent.additionalDetails || 'None provided'}
       </Tabs>
       </div>
       </div>
+
+      {/* Delete Confirmation Dialog */}
+      <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+            <AlertDialogDescription>
+              {deleteReportId && (() => {
+                const reportToDelete = reports.find(r => r.id === deleteReportId) || 
+                                      archivedReports.find(r => r.id === deleteReportId);
+                return reportToDelete ? (
+                  <>
+                    This action cannot be undone. This will permanently delete the report 
+                    "{reportToDelete.title}" (Tracking ID: {reportToDelete.tracking_id}) and all associated messages, attachments, and data.
+                  </>
+                ) : (
+                  'This action cannot be undone. This will permanently delete the report and all associated data.'
+                );
+              })()}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={() => {
+              setDeleteReportId(null);
+              setIsDeleteDialogOpen(false);
+            }}>
+              Cancel
+            </AlertDialogCancel>
+            <AlertDialogAction 
+              onClick={async () => {
+                if (!deleteReportId) return;
+                
+                try {
+                  const { data: { session } } = await supabase.auth.getSession();
+                  if (!session?.access_token) {
+                    throw new Error('No valid session token');
+                  }
+                  const response = await fetch(
+                    `https://cxmuzperkittvibslnff.supabase.co/functions/v1/soft-delete-report`,
+                    {
+                      method: 'POST',
+                      headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${session?.access_token}`
+                      },
+                      body: JSON.stringify({ reportId: deleteReportId })
+                    }
+                  );
+                  if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.error || 'Failed to delete report');
+                  }
+                  toast({ title: '✅ Report deleted successfully' });
+                  setDeleteReportId(null);
+                  setIsDeleteDialogOpen(false);
+                  fetchData();
+                } catch (error: any) {
+                  console.error('Error deleting report:', error);
+                  toast({ 
+                    title: '❌ Error deleting report',
+                    description: error.message || 'Failed to delete report. Please try again.',
+                    variant: 'destructive'
+                  });
+                  setDeleteReportId(null);
+                  setIsDeleteDialogOpen(false);
+                }
+              }}
+              className="bg-red-600 hover:bg-red-700"
+            >
+              Delete Report
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
 
       {/* Report Details Dialog */}
       <Dialog open={isReportDialogOpen} onOpenChange={setIsReportDialogOpen}>
