@@ -747,6 +747,45 @@ const Features: React.FC = () => {
             </div>
           </div>
         </section>
+
+        {/* Related Pages */}
+        <section className="py-12 bg-gray-50">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="text-center mb-8">
+              <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-2">Next Steps</h2>
+              <p className="text-gray-600">Ready to get started with Disclosurely?</p>
+            </div>
+
+            <div className="grid md:grid-cols-3 gap-6">
+              <a href="https://app.disclosurely.com/auth/signup" className="block group">
+                <div className="bg-white p-6 rounded-lg shadow-sm hover:shadow-lg transition-shadow h-full">
+                  <h3 className="text-lg font-semibold text-gray-900 mb-2 group-hover:text-blue-600">Start Free Trial</h3>
+                  <p className="text-gray-600 text-sm">
+                    Try Disclosurely free for 14 days. No credit card required. Set up your secure reporting platform in minutes.
+                  </p>
+                </div>
+              </a>
+
+              <Link to={`${langPrefix}/pricing`} className="block group">
+                <div className="bg-white p-6 rounded-lg shadow-sm hover:shadow-lg transition-shadow h-full">
+                  <h3 className="text-lg font-semibold text-gray-900 mb-2 group-hover:text-blue-600">View Pricing</h3>
+                  <p className="text-gray-600 text-sm">
+                    Explore our transparent pricing plans starting at £19.99/month with unlimited reports and military-grade security.
+                  </p>
+                </div>
+              </Link>
+
+              <Link to={`${langPrefix}/contact`} className="block group">
+                <div className="bg-white p-6 rounded-lg shadow-sm hover:shadow-lg transition-shadow h-full">
+                  <h3 className="text-lg font-semibold text-gray-900 mb-2 group-hover:text-blue-600">Contact Sales</h3>
+                  <p className="text-gray-600 text-sm">
+                    Have questions? Our team is here to help you find the right solution for your organization.
+                  </p>
+                </div>
+              </Link>
+            </div>
+          </div>
+        </section>
       </div>
       <Footer />
     </>
