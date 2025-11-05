@@ -234,17 +234,39 @@ const DynamicHelmet: React.FC<DynamicHelmetProps> = ({
     }
   };
 
-  // Remove trailing slash, query params, and hash for clean canonical URLs
-  const currentPageUrl = typeof window !== 'undefined'
-    ? `${window.location.protocol}//${window.location.host}${window.location.pathname.replace(/\/$/, '') || ''}`
-    : 'https://disclosurely.com';
+  // Build canonical URL using pageIdentifier (works both server-side and client-side)
+  const buildCanonicalUrl = () => {
+    // If canonicalUrl is explicitly provided, use it
+    if (canonicalUrl) {
+      return canonicalUrl;
+    }
 
-  // Prioritize current page URL to fix incorrect Contentful canonical data
-  const finalCanonicalUrl = normalizeCanonicalUrl(
-    canonicalUrl ||  // If explicitly provided via props, use it
-    currentPageUrl   // Use current page URL (correct behavior)
-    // Removed seoData?.canonical_url as it was incorrectly set to homepage for all pages
-  );
+    // Build URL from pageIdentifier (works on both server and client)
+    const baseUrl = 'https://disclosurely.com';
+
+    // Normalize pageIdentifier to always start with /
+    let path = pageIdentifier;
+    if (!path.startsWith('/')) {
+      path = `/${path}`;
+    }
+
+    // Remove trailing slash except for root
+    if (path !== '/' && path.endsWith('/')) {
+      path = path.slice(0, -1);
+    }
+
+    // Handle root path specially
+    if (path === '/' || path === '') {
+      return baseUrl;
+    }
+
+    return `${baseUrl}${path}`;
+  };
+
+  const currentPageUrl = buildCanonicalUrl();
+
+  // Normalize the canonical URL (remove www, query params, etc.)
+  const finalCanonicalUrl = normalizeCanonicalUrl(currentPageUrl);
 
   // Generate dynamic hreflang URLs based on current page path
   const getHrefLangUrls = () => {
