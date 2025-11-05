@@ -179,7 +179,7 @@ const SubmissionForm = ({ linkToken, linkData, brandColor }: SubmissionFormProps
       }
 
       console.log('Success! Navigating to success page...');
-      navigate(`/secure/tool/success?trackingId=${encodeURIComponent(trackingId)}`);
+      navigate(`/secure/tool/success?trackingId=${encodeURIComponent(trackingId)}${linkToken ? `&linkToken=${encodeURIComponent(linkToken)}` : ''}`);
 
     } catch (error: any) {
       console.error('Submission error:', error);

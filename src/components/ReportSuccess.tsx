@@ -12,17 +12,20 @@ import { supabase } from '@/integrations/supabase/client';
 const ReportSuccess = () => {
   const [searchParams] = useSearchParams();
   const trackingId = searchParams.get('trackingId');
+  const linkTokenFromUrl = searchParams.get('linkToken');
   const { toast } = useToast();
   const { organizationData, loading, error, fetchOrganizationByTrackingId } = useOrganizationData();
-  const [linkToken, setLinkToken] = useState<string | null>(null);
+  const [linkToken, setLinkToken] = useState<string | null>(linkTokenFromUrl);
 
   useEffect(() => {
     if (trackingId) {
       fetchOrganizationByTrackingId(trackingId);
-      // Fetch linkToken from the report
-      fetchLinkTokenFromReport(trackingId);
+      // Only fetch linkToken from the report if not provided in URL
+      if (!linkTokenFromUrl) {
+        fetchLinkTokenFromReport(trackingId);
+      }
     }
-  }, [trackingId]);
+  }, [trackingId, linkTokenFromUrl]);
 
   const fetchLinkTokenFromReport = async (trackingId: string) => {
     try {

@@ -186,7 +186,7 @@ const SecureSubmissionForm = ({ linkToken, linkData, brandColor }: SecureSubmiss
     }
 
     console.log('Success! Navigating to success page...');
-    navigate(`/secure/tool/success?trackingId=${encodeURIComponent(trackingId)}`);
+    navigate(`/secure/tool/success?trackingId=${encodeURIComponent(trackingId)}${linkToken ? `&linkToken=${encodeURIComponent(linkToken)}` : ''}`);
   };
 
   const handleSubmit = (e: React.FormEvent) => {
