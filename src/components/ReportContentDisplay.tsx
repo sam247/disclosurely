@@ -148,34 +148,34 @@ const ReportContentDisplay = ({
   };
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-4 min-w-0">
       {/* Header with basic info */}
-      <div className="flex items-center space-x-3">
-        <FileText className="h-5 w-5 text-blue-600" />
-        <h3 className="text-lg font-semibold">{title}</h3>
+      <div className="flex items-center space-x-3 min-w-0">
+        <FileText className="h-5 w-5 text-blue-600 flex-shrink-0" />
+        <h3 className="text-lg font-semibold break-words min-w-0">{title}</h3>
       </div>
 
       {/* Meta information */}
-      <div className="grid grid-cols-2 gap-4 text-sm">
-        <div className="flex items-center space-x-2">
-          <User className="h-4 w-4 text-gray-400" />
-          <span className="text-gray-600">Report ID: {trackingId}</span>
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
+        <div className="flex items-center space-x-2 min-w-0">
+          <User className="h-4 w-4 text-gray-400 flex-shrink-0" />
+          <span className="text-gray-600 break-words min-w-0">Report ID: {trackingId}</span>
         </div>
-        <div className="flex items-center space-x-2">
-          <Calendar className="h-4 w-4 text-gray-400" />
-          <span className="text-gray-600">
+        <div className="flex items-center space-x-2 min-w-0">
+          <Calendar className="h-4 w-4 text-gray-400 flex-shrink-0" />
+          <span className="text-gray-600 break-words min-w-0">
             Submitted: {new Date(createdAt).toLocaleDateString()}
           </span>
         </div>
-        <div className="flex items-center space-x-2">
-          <AlertCircle className="h-4 w-4 text-gray-400" />
+        <div className="flex items-center space-x-2 min-w-0">
+          <AlertCircle className="h-4 w-4 text-gray-400 flex-shrink-0" />
           <Badge className={getStatusColor(status)}>
             {formatStatus(status)}
           </Badge>
         </div>
-        <div className="flex items-center space-x-2">
-          <FileText className="h-4 w-4 text-gray-400" />
-          <span className="text-gray-600">Type: Anonymous</span>
+        <div className="flex items-center space-x-2 min-w-0">
+          <FileText className="h-4 w-4 text-gray-400 flex-shrink-0" />
+          <span className="text-gray-600 break-words min-w-0">Type: Anonymous</span>
         </div>
       </div>
 
@@ -243,7 +243,7 @@ const ReportContentDisplay = ({
               </div>
             </div>
           ) : decryptedContent ? (
-            <ScrollArea className="h-80 w-full pr-4">
+            <ScrollArea className="h-80 w-full pr-4 overflow-x-hidden">
               <div className="space-y-4">
                 {/* Display the actual decrypted title */}
                 {decryptedContent.title && (
@@ -257,7 +257,7 @@ const ReportContentDisplay = ({
                 {decryptedContent.description && (
                   <div>
                     <h4 className="font-medium text-gray-900 mb-2">Description:</h4>
-                    <div className="text-gray-700 whitespace-pre-wrap">
+                    <div className="text-gray-700 whitespace-pre-wrap break-words overflow-wrap-anywhere">
                       {isTranslated && translatedContent ? translatedContent : decryptedContent.description}
                     </div>
                   </div>

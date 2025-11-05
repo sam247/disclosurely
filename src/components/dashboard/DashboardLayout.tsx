@@ -118,7 +118,7 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
           <AnnouncementBar showOnDashboard={true} />
 
           {/* Main Content */}
-          <main className="flex-1 overflow-auto p-4 md:p-6">
+          <main className="flex-1 overflow-y-auto overflow-x-hidden p-4 md:p-6">
             {children}
           </main>
         </div>
@@ -126,7 +126,7 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
 
       {/* Profile Modal */}
       <Dialog open={showProfileModal} onOpenChange={setShowProfileModal}>
-        <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
+        <DialogContent className="w-[calc(100vw-2rem)] sm:w-[calc(100vw-4rem)] max-w-2xl max-h-[80vh] overflow-y-auto overflow-x-hidden">
           <DialogHeader>
             <DialogTitle>Profile Settings</DialogTitle>
             <DialogDescription>
@@ -139,7 +139,7 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
 
       {/* Upgrade Modal */}
       <Dialog open={showUpgradeModal} onOpenChange={setShowUpgradeModal}>
-        <DialogContent className="max-w-md">
+        <DialogContent className="w-[calc(100vw-2rem)] sm:w-[calc(100vw-4rem)] max-w-md overflow-x-hidden">
           <DialogHeader>
             <DialogTitle>
               {isOrgAdmin ? t('upgradeRequired') : 'Feature Restricted'}

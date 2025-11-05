@@ -571,7 +571,7 @@ export default function ComplianceRisks() {
 
       {/* Create Risk Dialog */}
       <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
-        <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
+        <DialogContent className="w-[calc(100vw-2rem)] sm:w-[calc(100vw-4rem)] max-w-2xl max-h-[80vh] overflow-y-auto overflow-x-hidden">
           <DialogHeader>
             <DialogTitle>Register New Risk</DialogTitle>
             <DialogDescription>
@@ -726,7 +726,7 @@ export default function ComplianceRisks() {
 
       {/* View Risk Dialog */}
       <Dialog open={isViewDialogOpen} onOpenChange={setIsViewDialogOpen}>
-        <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
+        <DialogContent className="w-[calc(100vw-2rem)] sm:w-[calc(100vw-4rem)] max-w-2xl max-h-[80vh] overflow-y-auto overflow-x-hidden">
           <DialogHeader>
             <DialogTitle>{selectedRisk?.risk_title}</DialogTitle>
             <DialogDescription>Risk Details</DialogDescription>

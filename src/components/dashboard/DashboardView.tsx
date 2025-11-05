@@ -939,8 +939,8 @@ Additional Details: ${decryptedContent.additionalDetails || 'None provided'}
               ) : (
                 <>
                   {/* Desktop Table View */}
-                  <div className="hidden md:block overflow-x-auto">
-                    <Table>
+                  <div className="hidden md:block overflow-x-auto max-w-full">
+                    <Table className="min-w-full">
                       <TableHeader>
                         <TableRow>
                           <TableHead>{t('trackingId')}</TableHead>
@@ -1644,7 +1644,7 @@ Additional Details: ${decryptedContent.additionalDetails || 'None provided'}
 
       {/* Report Details Dialog */}
       <Dialog open={isReportDialogOpen} onOpenChange={setIsReportDialogOpen}>
-        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+        <DialogContent className="w-[calc(100vw-2rem)] sm:w-[calc(100vw-4rem)] max-w-4xl max-h-[90vh] overflow-y-auto overflow-x-hidden">
           {selectedReport && (
             <>
               <DialogHeader>
@@ -1653,7 +1653,7 @@ Additional Details: ${decryptedContent.additionalDetails || 'None provided'}
                   Tracking ID: {selectedReport.tracking_id}
                 </DialogDescription>
               </DialogHeader>
-              <div className="space-y-6">
+              <div className="space-y-6 min-w-0">
                 <ReportContentDisplay 
                   encryptedContent={selectedReport.encrypted_content}
                   title={selectedReport.title}

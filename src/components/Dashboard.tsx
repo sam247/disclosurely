@@ -1651,7 +1651,7 @@ const Dashboard = () => {
 
       {/* Report Details Dialog */}
       <Dialog open={isReportDialogOpen} onOpenChange={setIsReportDialogOpen}>
-        <DialogContent className="max-w-[95vw] sm:max-w-6xl max-h-[90vh] overflow-y-auto">
+        <DialogContent className="w-[calc(100vw-2rem)] sm:w-[calc(100vw-4rem)] max-w-6xl max-h-[90vh] overflow-y-auto overflow-x-hidden">
           <DialogHeader>
             <DialogTitle className="text-base sm:text-lg">Report Details: {selectedReport?.tracking_id}</DialogTitle>
             <DialogDescription>
@@ -1660,8 +1660,8 @@ const Dashboard = () => {
           </DialogHeader>
           
           {selectedReport && (
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              <div className="space-y-6">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 overflow-x-hidden">
+              <div className="space-y-6 min-w-0">
                 <ReportContentDisplay
                   encryptedContent={selectedReport.encrypted_content}
                   title={selectedReport.title}
@@ -1676,7 +1676,7 @@ const Dashboard = () => {
                 <ReportAttachments reportId={selectedReport.id} />
               </div>
               {limits.hasMessaging && (
-                <div>
+                <div className="min-w-0">
                   <ReportMessaging 
                     report={{
                       id: selectedReport.id,

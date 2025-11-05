@@ -868,7 +868,7 @@ export default function CompliancePolicies() {
 
       {/* Create Policy Dialog */}
       <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
-        <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
+        <DialogContent className="w-[calc(100vw-2rem)] sm:w-[calc(100vw-4rem)] max-w-2xl max-h-[80vh] overflow-y-auto overflow-x-hidden">
           <DialogHeader>
             <DialogTitle>Create New Policy</DialogTitle>
             <DialogDescription>
@@ -1015,7 +1015,7 @@ export default function CompliancePolicies() {
 
       {/* View Policy Dialog */}
       <Dialog open={isViewDialogOpen} onOpenChange={setIsViewDialogOpen}>
-        <DialogContent className="max-w-3xl max-h-[80vh] overflow-y-auto">
+        <DialogContent className="w-[calc(100vw-2rem)] sm:w-[calc(100vw-4rem)] max-w-3xl max-h-[80vh] overflow-y-auto overflow-x-hidden">
           <DialogHeader>
             <DialogTitle>{selectedPolicy?.policy_name}</DialogTitle>
             <DialogDescription>

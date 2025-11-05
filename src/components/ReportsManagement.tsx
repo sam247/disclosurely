@@ -934,7 +934,7 @@ const ReportsManagement = () => {
 
       {/* Report Details Dialog */}
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-        <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
+        <DialogContent className="w-[calc(100vw-2rem)] sm:w-[calc(100vw-4rem)] max-w-4xl max-h-[80vh] overflow-y-auto overflow-x-hidden">
           <DialogHeader>
             <DialogTitle>Report Details: {selectedReport?.tracking_id}</DialogTitle>
             <DialogDescription>
