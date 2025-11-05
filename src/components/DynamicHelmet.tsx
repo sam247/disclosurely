@@ -234,11 +234,8 @@ const DynamicHelmet: React.FC<DynamicHelmetProps> = ({
     }
   };
 
-  // Always use the current page URL as canonical unless explicitly set
+  // Remove trailing slash, query params, and hash for clean canonical URLs
   const currentPageUrl = typeof window !== 'undefined'
-    ? window.location.href.split('?')[0] // Remove query params for cleaner URLs
-  // Remove trailing slash, query params, and hash
-  const currentPageUrl = typeof window !== 'undefined' 
     ? `${window.location.protocol}//${window.location.host}${window.location.pathname.replace(/\/$/, '') || ''}`
     : 'https://disclosurely.com';
 
