@@ -6,6 +6,8 @@ const getAllowedOrigin = (req: Request): string => {
   const origin = req.headers.get('origin');
   const allowedOrigins = [
     'https://5c8a3c05-42bc-4914-b492-275c4e4e75f4.lovableproject.com',
+    'https://disclosurely.com',
+    'https://www.disclosurely.com',
     'http://localhost:8080',
     'http://localhost:5173',
   ];
