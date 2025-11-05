@@ -216,6 +216,44 @@ const DynamicHelmet: React.FC<DynamicHelmetProps> = ({
     // Removed seoData?.canonical_url as it was incorrectly set to homepage for all pages
   );
 
+  // Generate dynamic hreflang URLs based on current page path
+  const getHrefLangUrls = () => {
+    if (typeof window === 'undefined') return {};
+
+    const currentPath = window.location.pathname;
+    const languages = ['en', 'es', 'fr', 'de', 'pl', 'sv', 'no', 'pt', 'it', 'nl', 'da', 'el'];
+
+    // Extract the page path without language prefix
+    let basePath = currentPath;
+    for (const lang of languages) {
+      if (currentPath.startsWith(`/${lang}/`)) {
+        basePath = currentPath.substring(lang.length + 1); // Remove /lang prefix
+        break;
+      } else if (currentPath === `/${lang}`) {
+        basePath = '/';
+        break;
+      }
+    }
+
+    // Generate URLs for all language versions
+    const hrefLangUrls: Record<string, string> = {};
+
+    // x-default and en both point to English version (without /en prefix)
+    hrefLangUrls['x-default'] = `https://disclosurely.com${basePath}`;
+    hrefLangUrls['en'] = `https://disclosurely.com${basePath}`;
+
+    // Other languages with their prefix
+    languages.forEach(lang => {
+      if (lang !== 'en') {
+        hrefLangUrls[lang] = `https://disclosurely.com/${lang}${basePath}`;
+      }
+    });
+
+    return hrefLangUrls;
+  };
+
+  const hrefLangUrls = getHrefLangUrls();
+
   const finalRobots = seoData?.robots_directive || 'index,follow';
 
   const finalKeywords = seoData?.meta_keywords || [];
@@ -243,22 +281,12 @@ const DynamicHelmet: React.FC<DynamicHelmetProps> = ({
       <meta name="robots" content={finalRobots} />
       <link rel="canonical" href={finalCanonicalUrl} />
       
-      {/* Hreflang Tags for All Language Versions */}
-      {typeof window !== 'undefined' && (
+      {/* Dynamic Hreflang Tags for All Language Versions */}
+      {typeof window !== 'undefined' && Object.keys(hrefLangUrls).length > 0 && (
         <>
-          <link rel="alternate" hrefLang="x-default" href="https://disclosurely.com/" />
-          <link rel="alternate" hrefLang="en" href="https://disclosurely.com/" />
-          <link rel="alternate" hrefLang="es" href="https://disclosurely.com/es/" />
-          <link rel="alternate" hrefLang="fr" href="https://disclosurely.com/fr/" />
-          <link rel="alternate" hrefLang="de" href="https://disclosurely.com/de/" />
-          <link rel="alternate" hrefLang="pl" href="https://disclosurely.com/pl/" />
-          <link rel="alternate" hrefLang="sv" href="https://disclosurely.com/sv/" />
-          <link rel="alternate" hrefLang="no" href="https://disclosurely.com/no/" />
-          <link rel="alternate" hrefLang="pt" href="https://disclosurely.com/pt/" />
-          <link rel="alternate" hrefLang="it" href="https://disclosurely.com/it/" />
-          <link rel="alternate" hrefLang="nl" href="https://disclosurely.com/nl/" />
-          <link rel="alternate" hrefLang="da" href="https://disclosurely.com/da/" />
-          <link rel="alternate" hrefLang="el" href="https://disclosurely.com/el/" />
+          {Object.entries(hrefLangUrls).map(([lang, url]) => (
+            <link key={lang} rel="alternate" hrefLang={lang} href={url} />
+          ))}
         </>
       )}
 
