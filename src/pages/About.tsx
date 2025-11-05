@@ -364,6 +364,45 @@ and Built for Trust
         </div>
       </section>
 
+      {/* Related Pages */}
+      <section className="py-12 bg-gray-50">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-8">
+            <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-2">Explore More</h2>
+            <p className="text-gray-600">Learn more about our platform and solutions</p>
+          </div>
+
+          <div className="grid md:grid-cols-3 gap-6">
+            <Link to={`${langPrefix}/features`} className="block group">
+              <div className="bg-white p-6 rounded-lg shadow-sm hover:shadow-lg transition-shadow h-full">
+                <h3 className="text-lg font-semibold text-gray-900 mb-2 group-hover:text-blue-600">Platform Features</h3>
+                <p className="text-gray-600 text-sm">
+                  Discover our comprehensive whistleblowing features including anonymous reporting, AI-powered case analysis, and secure messaging.
+                </p>
+              </div>
+            </Link>
+
+            <Link to={`${langPrefix}/pricing`} className="block group">
+              <div className="bg-white p-6 rounded-lg shadow-sm hover:shadow-lg transition-shadow h-full">
+                <h3 className="text-lg font-semibold text-gray-900 mb-2 group-hover:text-blue-600">Pricing Plans</h3>
+                <p className="text-gray-600 text-sm">
+                  View our transparent pricing starting at £19.99/month. All plans include unlimited reports and military-grade encryption.
+                </p>
+              </div>
+            </Link>
+
+            <Link to={`${langPrefix}/whistleblowing-directive`} className="block group">
+              <div className="bg-white p-6 rounded-lg shadow-sm hover:shadow-lg transition-shadow h-full">
+                <h3 className="text-lg font-semibold text-gray-900 mb-2 group-hover:text-blue-600">EU Whistleblowing Directive</h3>
+                <p className="text-gray-600 text-sm">
+                  Learn about compliance requirements under the EU Whistleblowing Directive and how Disclosurely helps you stay compliant.
+                </p>
+              </div>
+            </Link>
+          </div>
+        </div>
+      </section>
+
       <Footer />
     </>;
 };

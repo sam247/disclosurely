@@ -265,6 +265,46 @@ What You Need to Know
             </div>
           </div>
         </div>
+
+        {/* Related Pages */}
+        <section className="py-12 bg-gray-50">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="text-center mb-8">
+              <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-2">Related Compliance Resources</h2>
+              <p className="text-gray-600">Learn more about compliance and regulations</p>
+            </div>
+
+            <div className="grid md:grid-cols-3 gap-6">
+              <Link to="/compliance-software" className="block group">
+                <div className="bg-white p-6 rounded-lg shadow-sm hover:shadow-lg transition-shadow h-full">
+                  <h3 className="text-lg font-semibold text-gray-900 mb-2 group-hover:text-blue-600">Compliance Software</h3>
+                  <p className="text-gray-600 text-sm">
+                    Explore our compliance software designed to help you meet EU Whistleblowing Directive requirements.
+                  </p>
+                </div>
+              </Link>
+
+              <Link to="/features" className="block group">
+                <div className="bg-white p-6 rounded-lg shadow-sm hover:shadow-lg transition-shadow h-full">
+                  <h3 className="text-lg font-semibold text-gray-900 mb-2 group-hover:text-blue-600">Platform Features</h3>
+                  <p className="text-gray-600 text-sm">
+                    Discover how our features help you stay compliant with secure reporting, encryption, and audit trails.
+                  </p>
+                </div>
+              </Link>
+
+              <Link to="/pricing" className="block group">
+                <div className="bg-white p-6 rounded-lg shadow-sm hover:shadow-lg transition-shadow h-full">
+                  <h3 className="text-lg font-semibold text-gray-900 mb-2 group-hover:text-blue-600">Get Started</h3>
+                  <p className="text-gray-600 text-sm">
+                    View pricing plans and start your compliance journey with a 14-day free trial. No credit card required.
+                  </p>
+                </div>
+              </Link>
+            </div>
+          </div>
+        </section>
+
         <Footer />
       </div>
     </>;

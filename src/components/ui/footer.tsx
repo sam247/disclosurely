@@ -11,7 +11,7 @@ export const Footer = () => {
   return (
     <footer className="bg-gray-900 text-white">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-5 gap-8">
           <div className="col-span-1">
             <div className="flex items-center space-x-3 mb-4">
               <img
@@ -44,10 +44,10 @@ export const Footer = () => {
                   Compliance Software
                 </Link>
               </li>
-               <li>
-                <Link to={`${langPrefix}https://status.disclosurely.com/`} className="text-gray-400 hover:text-white">
+              <li>
+                <a href="https://status.disclosurely.com/" target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-white">
                   System Status
-                </Link>
+                </a>
               </li>
             </ul>
           </div>
@@ -79,17 +79,12 @@ export const Footer = () => {
           </div>
 
           <div>
-            <h3 className="font-semibold mb-4">Resources</h3>
+            <h3 className="font-semibold mb-4">Compliance</h3>
             <ul className="space-y-2">
               <li>
-                <Link to="https://docs.disclosurely.com" className="text-gray-400 hover:text-white">
-                  Documentation
+                <Link to={`${langPrefix}/whistleblowing-directive`} className="text-gray-400 hover:text-white">
+                  EU Whistleblowing Directive
                 </Link>
-              </li>
-              <li>
-                <a href="#" className="text-gray-400 hover:text-white">
-                  Support
-                </a>
               </li>
               <li>
                 <Link to={`${langPrefix}/privacy`} className="text-gray-400 hover:text-white">
@@ -99,6 +94,37 @@ export const Footer = () => {
               <li>
                 <Link to={`${langPrefix}/terms`} className="text-gray-400 hover:text-white">
                   Terms of Service
+                </Link>
+              </li>
+              <li>
+                <a href="https://docs.disclosurely.com/compliance/gdpr" target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-white">
+                  GDPR Compliance
+                </a>
+              </li>
+            </ul>
+          </div>
+
+          <div>
+            <h3 className="font-semibold mb-4">Resources</h3>
+            <ul className="space-y-2">
+              <li>
+                <a href="https://docs.disclosurely.com" target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-white">
+                  Documentation
+                </a>
+              </li>
+              <li>
+                <Link to={`${langPrefix}/vs-speakup`} className="text-gray-400 hover:text-white">
+                  vs SpeakUp
+                </Link>
+              </li>
+              <li>
+                <Link to={`${langPrefix}/vs-whistleblower-software`} className="text-gray-400 hover:text-white">
+                  Compare Solutions
+                </Link>
+              </li>
+              <li>
+                <Link to={`${langPrefix}/contact`} className="text-gray-400 hover:text-white">
+                  Support
                 </Link>
               </li>
             </ul>
