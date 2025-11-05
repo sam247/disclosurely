@@ -7,18 +7,71 @@ import { Button } from '@/components/ui/button';
 import { CheckCircle, Copy, AlertTriangle } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import BrandedFormLayout from './BrandedFormLayout';
+import { supabase } from '@/integrations/supabase/client';
 
 const ReportSuccess = () => {
   const [searchParams] = useSearchParams();
   const trackingId = searchParams.get('trackingId');
   const { toast } = useToast();
   const { organizationData, loading, error, fetchOrganizationByTrackingId } = useOrganizationData();
+  const [linkToken, setLinkToken] = useState<string | null>(null);
 
   useEffect(() => {
     if (trackingId) {
       fetchOrganizationByTrackingId(trackingId);
+      // Fetch linkToken from the report
+      fetchLinkTokenFromReport(trackingId);
     }
   }, [trackingId]);
+
+  const fetchLinkTokenFromReport = async (trackingId: string) => {
+    try {
+      // First, get the report to find the organization_id
+      const { data: report, error: reportError } = await supabase
+        .from('reports')
+        .select('organization_id, submitted_via_link_id')
+        .eq('tracking_id', trackingId)
+        .maybeSingle();
+
+      if (reportError || !report) {
+        console.log('Could not find report for tracking ID:', trackingId);
+        return;
+      }
+
+      // If the report has a submitted_via_link_id, get the link_token from that
+      if (report.submitted_via_link_id) {
+        const { data: link, error: linkError } = await supabase
+          .from('organization_links')
+          .select('link_token')
+          .eq('id', report.submitted_via_link_id)
+          .eq('is_active', true)
+          .maybeSingle();
+
+        if (!linkError && link) {
+          setLinkToken(link.link_token);
+          return;
+        }
+      }
+
+      // Otherwise, get the first active link for this organization
+      if (report.organization_id) {
+        const { data: link, error: linkError } = await supabase
+          .from('organization_links')
+          .select('link_token')
+          .eq('organization_id', report.organization_id)
+          .eq('is_active', true)
+          .order('created_at', { ascending: false })
+          .limit(1)
+          .maybeSingle();
+
+        if (!linkError && link) {
+          setLinkToken(link.link_token);
+        }
+      }
+    } catch (error) {
+      console.error('Error fetching link token:', error);
+    }
+  };
 
   const copyTrackingId = () => {
     if (trackingId) {
@@ -53,6 +106,7 @@ const ReportSuccess = () => {
       organizationName={organizationName}
       logoUrl={logoUrl}
       brandColor={brandColor}
+      linkToken={linkToken || undefined}
     >
       <div className="space-y-6">
         {error && (

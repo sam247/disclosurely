@@ -1216,71 +1216,10 @@ Additional Details: ${decryptedContent.additionalDetails || 'None provided'}
                                     <DropdownMenuSeparator />
                                     <DropdownMenuItem 
                                       className="text-destructive"
-                                      onClick={async () => {
-                                        try {
-                                          log.info(LogContext.SYSTEM, 'Starting report deletion process', { 
-                                            reportId: report.id, 
-                                            trackingId: report.tracking_id,
-                                            userId: user?.id 
-                                          });
-                                          
-                                          // Use edge function for soft delete
-                                          const { data: { session } } = await supabase.auth.getSession();
-                                          
-                                          if (!session?.access_token) {
-                                            log.error(LogContext.SYSTEM, 'No valid session token for deletion', new Error('Missing session token'), { reportId: report.id });
-                                            throw new Error('No valid session token');
-                                          }
-                                          
-                                          log.info(LogContext.SYSTEM, 'Calling soft-delete-report Edge Function', { 
-                                            reportId: report.id,
-                                            hasToken: !!session?.access_token 
-                                          });
-                                          
-                                          const response = await fetch(
-                                            `https://cxmuzperkittvibslnff.supabase.co/functions/v1/soft-delete-report`,
-                                            {
-                                              method: 'POST',
-                                              headers: {
-                                                'Content-Type': 'application/json',
-                                                'Authorization': `Bearer ${session?.access_token}`
-                                              },
-                                              body: JSON.stringify({ reportId: report.id })
-                                            }
-                                          );
-
-                                          log.info(LogContext.SYSTEM, 'Soft-delete-report response received', { 
-                                            reportId: report.id,
-                                            status: response.status,
-                                            ok: response.ok 
-                                          });
-
-                                          if (!response.ok) {
-                                            const errorData = await response.json();
-                                            log.error(LogContext.SYSTEM, 'Soft-delete-report failed', new Error(errorData.error || 'Failed to delete report'), { 
-                                              reportId: report.id,
-                                              status: response.status,
-                                              errorData 
-                                            });
-                                            throw new Error(errorData.error || 'Failed to delete report');
-                                          }
-                                          
-                                          log.info(LogContext.SYSTEM, 'Report deleted successfully', { reportId: report.id });
-                                          toast({ title: 'Report deleted successfully' });
-                                          fetchData();
-                                        } catch (error: any) {
-                                          log.error(LogContext.SYSTEM, 'Report deletion failed', error, { 
-                                            reportId: report.id,
-                                            trackingId: report.tracking_id,
-                                            userId: user?.id 
-                                          });
-                                          console.error('Error deleting report:', error);
-                                          toast({ 
-                                            title: 'Error deleting report',
-                                            description: error.message,
-                                            variant: 'destructive'
-                                          });
-                                        }
+                                      onClick={(e) => {
+                                        e.preventDefault();
+                                        setDeleteReportId(report.id);
+                                        setIsDeleteDialogOpen(true);
                                       }}
                                     >
                                       <Trash2 className="h-4 w-4 mr-2" />
@@ -1618,12 +1557,17 @@ Additional Details: ${decryptedContent.additionalDetails || 'None provided'}
       </div>
 
       {/* Delete Confirmation Dialog */}
-      <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
+      <AlertDialog open={isDeleteDialogOpen} onOpenChange={(open) => {
+        setIsDeleteDialogOpen(open);
+        if (!open) {
+          setDeleteReportId(null);
+        }
+      }}>
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
             <AlertDialogDescription>
-              {deleteReportId && (() => {
+              {deleteReportId ? (() => {
                 const reportToDelete = reports.find(r => r.id === deleteReportId) || 
                                       archivedReports.find(r => r.id === deleteReportId);
                 return reportToDelete ? (
@@ -1634,7 +1578,7 @@ Additional Details: ${decryptedContent.additionalDetails || 'None provided'}
                 ) : (
                   'This action cannot be undone. This will permanently delete the report and all associated data.'
                 );
-              })()}
+              })() : 'This action cannot be undone. This will permanently delete the report and all associated data.'}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
