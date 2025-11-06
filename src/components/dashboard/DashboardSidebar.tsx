@@ -34,11 +34,6 @@ const DashboardSidebar = ({
     path: '/dashboard',
     locked: false
   }, {
-    title: 'My Policies',
-    icon: FileText,
-    path: '/dashboard/my-policies',
-    locked: false
-  }, {
     title: t('aiCaseHelper'),
     icon: Bot,
     path: '/dashboard/ai-helper',
