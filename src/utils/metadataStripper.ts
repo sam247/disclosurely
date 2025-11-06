@@ -120,35 +120,129 @@ export const stripImageMetadata = async (file: File): Promise<MetadataStripResul
 };
 
 /**
- * Strip metadata from PDF files
- * This is a placeholder - full PDF metadata stripping requires server-side processing
+ * Strip metadata from PDF files using server-side processing
  */
 export const stripPdfMetadata = async (file: File): Promise<MetadataStripResult> => {
-  // PDF metadata stripping is complex and requires libraries like pdf-lib
-  // Best done server-side
-  console.log('📄 PDF detected - server-side stripping recommended');
+  console.log('📄 PDF detected - calling server-side metadata stripping...');
 
-  return {
-    success: true,
-    file,
-    stripped: false // Will be stripped server-side
-  };
+  try {
+    const supabase = (await import('@/integrations/supabase/client')).supabase;
+
+    // Create FormData to send file
+    const formData = new FormData();
+    formData.append('file', file);
+    formData.append('fileType', file.type);
+
+    // Call edge function
+    const response = await fetch(
+      `${supabase.supabaseUrl}/functions/v1/strip-document-metadata`,
+      {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${supabase.supabaseKey}`
+        },
+        body: formData
+      }
+    );
+
+    if (!response.ok) {
+      throw new Error(`Server returned ${response.status}: ${response.statusText}`);
+    }
+
+    // Get cleaned file
+    const cleanedBlob = await response.blob();
+    const cleanedFile = new File(
+      [cleanedBlob],
+      `sanitized_${Date.now()}.pdf`,
+      { type: file.type }
+    );
+
+    console.log('✅ PDF metadata stripped successfully');
+    console.log(`   Original: ${(file.size / 1024).toFixed(1)}KB`);
+    console.log(`   Clean: ${(cleanedFile.size / 1024).toFixed(1)}KB`);
+
+    return {
+      success: true,
+      file: cleanedFile,
+      originalSize: file.size,
+      newSize: cleanedFile.size,
+      stripped: true
+    };
+  } catch (error) {
+    console.error('❌ Failed to strip PDF metadata:', error);
+    // Return original file on error (better than blocking upload)
+    console.warn('⚠️ Returning original PDF file - metadata NOT stripped');
+    return {
+      success: true, // Don't block upload
+      file,
+      stripped: false,
+      error: error instanceof Error ? error.message : 'Unknown error'
+    };
+  }
 };
 
 /**
- * Strip metadata from document files (.doc, .docx, etc.)
- * This is a placeholder - full document metadata stripping requires server-side processing
+ * Strip metadata from document files (.docx, .xlsx, .pptx)
+ * Uses server-side processing with JSZip
  */
 export const stripDocumentMetadata = async (file: File): Promise<MetadataStripResult> => {
-  // Document metadata stripping requires parsing the file format
-  // Best done server-side
-  console.log('📝 Document detected - server-side stripping recommended');
+  console.log('📝 Document detected - calling server-side metadata stripping...');
 
-  return {
-    success: true,
-    file,
-    stripped: false // Will be stripped server-side
-  };
+  try {
+    const supabase = (await import('@/integrations/supabase/client')).supabase;
+
+    // Create FormData to send file
+    const formData = new FormData();
+    formData.append('file', file);
+    formData.append('fileType', file.type);
+
+    // Call edge function
+    const response = await fetch(
+      `${supabase.supabaseUrl}/functions/v1/strip-document-metadata`,
+      {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${supabase.supabaseKey}`
+        },
+        body: formData
+      }
+    );
+
+    if (!response.ok) {
+      throw new Error(`Server returned ${response.status}: ${response.statusText}`);
+    }
+
+    // Get cleaned file
+    const cleanedBlob = await response.blob();
+    const extension = file.name.split('.').pop();
+    const cleanedFile = new File(
+      [cleanedBlob],
+      `sanitized_${Date.now()}.${extension}`,
+      { type: file.type }
+    );
+
+    console.log('✅ Document metadata stripped successfully');
+    console.log(`   Original: ${(file.size / 1024).toFixed(1)}KB`);
+    console.log(`   Clean: ${(cleanedFile.size / 1024).toFixed(1)}KB`);
+
+    return {
+      success: true,
+      file: cleanedFile,
+      originalSize: file.size,
+      newSize: cleanedFile.size,
+      stripped: true
+    };
+  } catch (error) {
+    console.error('❌ Failed to strip document metadata:', error);
+    // Return original file on error (better than blocking upload)
+    console.warn('⚠️ Returning original document - metadata NOT stripped');
+    return {
+      success: true, // Don't block upload
+      file,
+      stripped: false,
+      error: error instanceof Error ? error.message : 'Unknown error'
+    };
+  }
 };
 
 /**
