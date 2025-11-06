@@ -34,11 +34,6 @@ const DashboardSidebar = ({
     path: '/dashboard',
     locked: false
   }, {
-    title: 'My Policies',
-    icon: FileText,
-    path: '/dashboard/my-policies',
-    locked: false
-  }, {
     title: t('aiCaseHelper'),
     icon: Bot,
     path: '/dashboard/ai-helper',
@@ -49,12 +44,6 @@ const DashboardSidebar = ({
     icon: BarChart3,
     path: '/dashboard/analytics',
     locked: !isOrgAdmin
-  }, {
-    title: 'Compliance',
-    icon: Shield,
-    path: '/dashboard/compliance',
-    locked: !isOrgAdmin,
-    badge: 'New'
   }, {
     title: t('audit'),
     icon: ScrollText,

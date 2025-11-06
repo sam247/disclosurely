@@ -41,12 +41,6 @@ import WhistleblowerMessagingPage from './pages/WhistleblowerMessaging';
 import About from './pages/About';
 import Features from './pages/Features';
 import Careers from './pages/Careers';
-import ComplianceOverview from './pages/ComplianceOverview';
-import CompliancePolicies from './pages/CompliancePolicies';
-import ComplianceRisks from './pages/ComplianceRisks';
-import ComplianceCalendar from './pages/ComplianceCalendar';
-import PolicyAcknowledgment from './pages/PolicyAcknowledgment';
-import ComplianceInsights from './pages/ComplianceInsights';
 
 // Component to handle session timeout only for authenticated users
 const SessionTimeoutManager = () => {
@@ -166,67 +160,7 @@ const AppContent = () => {
                 <AIHelperView />
               </DashboardLayout>
             </ProtectedRoute>
-          } 
-        />
-        <Route 
-          path="/dashboard/compliance" 
-          element={
-            <ProtectedRoute>
-              <DashboardLayout>
-                <ComplianceOverview />
-              </DashboardLayout>
-            </ProtectedRoute>
-          } 
-        />
-        <Route 
-          path="/dashboard/compliance/policies" 
-          element={
-            <ProtectedRoute>
-              <DashboardLayout>
-                <CompliancePolicies />
-              </DashboardLayout>
-            </ProtectedRoute>
-          } 
-        />
-        <Route 
-          path="/dashboard/compliance/risks" 
-          element={
-            <ProtectedRoute>
-              <DashboardLayout>
-                <ComplianceRisks />
-              </DashboardLayout>
-            </ProtectedRoute>
-          } 
-        />
-        <Route 
-          path="/dashboard/compliance/calendar" 
-          element={
-            <ProtectedRoute>
-              <DashboardLayout>
-                <ComplianceCalendar />
-              </DashboardLayout>
-            </ProtectedRoute>
           }
-        />
-        <Route 
-          path="/dashboard/my-policies" 
-          element={
-            <ProtectedRoute>
-              <DashboardLayout>
-                <PolicyAcknowledgment />
-              </DashboardLayout>
-            </ProtectedRoute>
-          }
-        />
-        <Route 
-          path="/dashboard/compliance/insights" 
-          element={
-            <ProtectedRoute>
-              <DashboardLayout>
-                <ComplianceInsights />
-              </DashboardLayout>
-            </ProtectedRoute>
-          } 
         />
         <Route 
           path="/dashboard/settings" 
