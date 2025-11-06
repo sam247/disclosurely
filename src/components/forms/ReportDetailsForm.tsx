@@ -1,7 +1,11 @@
+import { useState } from 'react';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Badge } from '@/components/ui/badge';
+import { Sparkles, Loader2 } from 'lucide-react';
+import { supabase } from '@/integrations/supabase/client';
 
 const MAIN_CATEGORIES = {
   "Financial Misconduct": [
@@ -65,22 +69,76 @@ interface ReportDetailsFormProps {
 }
 
 const ReportDetailsForm = ({ formData, updateFormData, validationErrors = {} }: ReportDetailsFormProps) => {
+  const [isLoadingSuggestion, setIsLoadingSuggestion] = useState(false);
+  const [aiSuggested, setAiSuggested] = useState(false);
+  const [hasAttemptedSuggestion, setHasAttemptedSuggestion] = useState(false);
+
   const handleMainCategoryChange = (value: string) => {
-    updateFormData({ 
+    updateFormData({
       mainCategory: value,
       subCategory: '', // Reset subcategory when main category changes
       customCategory: ''
     });
+    // Clear AI suggestion flag when manually changed
+    setAiSuggested(false);
   };
 
   const handleSubCategoryChange = (value: string) => {
-    updateFormData({ 
+    updateFormData({
       subCategory: value,
       customCategory: value === "Other (Please Specify)" ? formData.customCategory : ""
     });
+    // Clear AI suggestion flag when manually changed
+    setAiSuggested(false);
   };
 
   const availableSubCategories = formData.mainCategory ? MAIN_CATEGORIES[formData.mainCategory as keyof typeof MAIN_CATEGORIES] || [] : [];
+
+  const suggestCategory = async () => {
+    // Only suggest if we have both title and description, haven't already suggested, and categories aren't already set
+    if (!formData.title.trim() || !formData.description.trim() || hasAttemptedSuggestion) {
+      return;
+    }
+
+    // Don't override if user has already selected categories
+    if (formData.mainCategory && formData.subCategory) {
+      return;
+    }
+
+    setIsLoadingSuggestion(true);
+    setHasAttemptedSuggestion(true);
+
+    try {
+      const { data, error } = await supabase.functions.invoke('suggest-category-with-ai', {
+        body: {
+          title: formData.title,
+          description: formData.description
+        }
+      });
+
+      if (error) {
+        console.error('AI category suggestion error:', error);
+        return;
+      }
+
+      if (data?.suggestion) {
+        const { mainCategory, subCategory } = data.suggestion;
+
+        // Auto-fill the categories
+        updateFormData({
+          mainCategory,
+          subCategory
+        });
+
+        setAiSuggested(true);
+        console.log('✨ AI suggested:', mainCategory, '-', subCategory);
+      }
+    } catch (error) {
+      console.error('Failed to get AI category suggestion:', error);
+    } finally {
+      setIsLoadingSuggestion(false);
+    }
+  };
 
   return (
     <div className="space-y-4">
@@ -100,7 +158,38 @@ const ReportDetailsForm = ({ formData, updateFormData, validationErrors = {} }: 
       </div>
 
       <div className="space-y-2">
-        <Label htmlFor="mainCategory">Main Category *</Label>
+        <Label htmlFor="description">Detailed Description *</Label>
+        <Textarea
+          id="description"
+          required
+          value={formData.description}
+          onChange={(e) => updateFormData({ description: e.target.value })}
+          onBlur={suggestCategory}
+          placeholder="Please provide a detailed description of what happened..."
+          rows={4}
+          className={validationErrors.description ? "border-destructive" : ""}
+        />
+        {validationErrors.description && (
+          <p className="text-sm text-destructive">{validationErrors.description}</p>
+        )}
+        {isLoadingSuggestion && (
+          <p className="text-sm text-muted-foreground flex items-center gap-1">
+            <Loader2 className="w-3 h-3 animate-spin" />
+            AI is analyzing and suggesting categories...
+          </p>
+        )}
+      </div>
+
+      <div className="space-y-2">
+        <div className="flex items-center justify-between">
+          <Label htmlFor="mainCategory">Main Category *</Label>
+          {aiSuggested && (
+            <Badge variant="outline" className="text-xs bg-primary/10 text-primary border-primary/20">
+              <Sparkles className="w-3 h-3 mr-1" />
+              AI Suggested
+            </Badge>
+          )}
+        </div>
         <Select value={formData.mainCategory} onValueChange={handleMainCategoryChange} required>
           <SelectTrigger className={validationErrors.mainCategory ? "border-destructive" : ""}>
             <SelectValue placeholder="Select a main category" />
@@ -156,22 +245,6 @@ const ReportDetailsForm = ({ formData, updateFormData, validationErrors = {} }: 
           )}
         </div>
       )}
-
-      <div className="space-y-2">
-        <Label htmlFor="description">Detailed Description *</Label>
-        <Textarea
-          id="description"
-          required
-          value={formData.description}
-          onChange={(e) => updateFormData({ description: e.target.value })}
-          placeholder="Please provide a detailed description of what happened..."
-          rows={4}
-          className={validationErrors.description ? "border-destructive" : ""}
-        />
-        {validationErrors.description && (
-          <p className="text-sm text-destructive">{validationErrors.description}</p>
-        )}
-      </div>
 
       <div className="space-y-2">
         <Label htmlFor="priority">Priority Level</Label>
