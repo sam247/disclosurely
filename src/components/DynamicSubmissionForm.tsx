@@ -5,13 +5,21 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
-import { Shield, AlertTriangle, Search } from 'lucide-react';
+import { Shield, AlertTriangle, Search, Clock, Info } from 'lucide-react';
 import BrandedFormLayout from './BrandedFormLayout';
 import FileUpload from './FileUpload';
 import { uploadReportFile } from '@/utils/fileUpload';
 import ReportTypeSelector from './forms/ReportTypeSelector';
 import ReportDetailsForm from './forms/ReportDetailsForm';
 import ErrorBoundary from './forms/ErrorBoundary';
+import SubmissionProgress from './forms/SubmissionProgress';
+import { useFormAutoSave } from '@/hooks/useFormAutoSave';
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from '@/components/ui/tooltip';
 
 interface LinkData {
   id: string;
@@ -38,6 +46,7 @@ const DynamicSubmissionForm = () => {
   const [submitting, setSubmitting] = useState(false);
   const [isAnonymous, setIsAnonymous] = useState(true);
   const [attachedFiles, setAttachedFiles] = useState<File[]>([]);
+  const [currentStep, setCurrentStep] = useState(1);
 
   const [formData, setFormData] = useState({
     title: '',
@@ -49,9 +58,41 @@ const DynamicSubmissionForm = () => {
     priority: 3
   });
 
+  const steps = ['Details', 'Category', 'Evidence', 'Review'];
+
+  // Auto-save form data
+  const { loadSavedData, clearSavedData } = useFormAutoSave({
+    key: `report-draft-${linkToken}`,
+    data: formData,
+    enabled: !submitting
+  });
+
   useEffect(() => {
     fetchLinkData();
+
+    // Try to restore saved data on mount
+    const saved = loadSavedData();
+    if (saved) {
+      setFormData(saved);
+      toast({
+        title: "Draft restored",
+        description: "We restored your previous work. You can continue where you left off.",
+      });
+    }
   }, [linkToken]);
+
+  // Calculate current step based on form completion
+  useEffect(() => {
+    if (!formData.title || !formData.description) {
+      setCurrentStep(1);
+    } else if (!formData.mainCategory || !formData.subCategory) {
+      setCurrentStep(2);
+    } else if (attachedFiles.length === 0) {
+      setCurrentStep(3);
+    } else {
+      setCurrentStep(4);
+    }
+  }, [formData, attachedFiles]);
 
   const updateFormData = (updates: Partial<typeof formData>) => {
     setFormData(prev => ({ ...prev, ...updates }));
@@ -277,11 +318,15 @@ const DynamicSubmissionForm = () => {
       }
 
       console.log('Success! Navigating to success page...');
+
+      // Clear auto-saved draft after successful submission
+      clearSavedData();
+
       navigate(`/secure/tool/success?trackingId=${encodeURIComponent(trackingId)}`);
 
     } catch (error: any) {
       console.error('Submission error:', error);
-      
+
       toast({
         title: "Submission failed",
         description: error.message || "There was an error submitting your report. Please try again.",
@@ -333,9 +378,9 @@ const DynamicSubmissionForm = () => {
           {/* Check Status Button */}
           <Card className="border-blue-200 bg-blue-50">
             <CardContent className="pt-4">
-              <div className="flex items-center justify-between">
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                 <div className="flex items-start gap-3">
-                  <Search className="h-4 w-4 text-blue-600 mt-0.5" />
+                  <Search className="h-4 w-4 text-blue-600 mt-0.5 flex-shrink-0" />
                   <div className="text-sm">
                     <p className="font-medium text-blue-900 mb-1">Already submitted a report?</p>
                     <p className="text-blue-800">
@@ -343,11 +388,11 @@ const DynamicSubmissionForm = () => {
                     </p>
                   </div>
                 </div>
-                <Link to={`/secure/tool/submit/${linkToken}/status`}>
-                  <Button 
-                    variant="outline" 
+                <Link to={`/secure/tool/submit/${linkToken}/status`} className="sm:flex-shrink-0">
+                  <Button
+                    variant="outline"
                     size="sm"
-                    className="border-blue-300 text-blue-700 hover:bg-blue-100"
+                    className="border-blue-300 text-blue-700 hover:bg-blue-100 w-full sm:w-auto min-h-[44px]"
                   >
                     <Search className="h-4 w-4 mr-2" />
                     Check Status
@@ -356,6 +401,25 @@ const DynamicSubmissionForm = () => {
               </div>
             </CardContent>
           </Card>
+
+          {/* Progress Indicator */}
+          <SubmissionProgress currentStep={currentStep} steps={steps} />
+
+          {/* Estimated Time */}
+          <TooltipProvider>
+            <div className="flex items-center justify-center gap-2 text-sm text-gray-600">
+              <Clock className="h-4 w-4" />
+              <span>Estimated time: 3-5 minutes</span>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Info className="h-4 w-4 text-gray-400 cursor-help" />
+                </TooltipTrigger>
+                <TooltipContent className="max-w-xs">
+                  <p>Your progress is automatically saved. You can leave and return to complete this form later.</p>
+                </TooltipContent>
+              </Tooltip>
+            </div>
+          </TooltipProvider>
 
           <form onSubmit={handleSubmit} className="space-y-4">
             <ReportTypeSelector
@@ -397,10 +461,10 @@ const DynamicSubmissionForm = () => {
             </Card>
 
             {/* Submit Button */}
-            <Button 
-              type="submit" 
+            <Button
+              type="submit"
               disabled={submitting}
-              className="w-full hover:opacity-90"
+              className="w-full hover:opacity-90 min-h-[48px] text-base font-semibold"
               style={{ backgroundColor: brandColor }}
             >
               {submitting ? 'Submitting...' : 'Submit Report'}

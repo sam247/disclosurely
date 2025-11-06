@@ -60,12 +60,12 @@ const BrandedFormLayout = ({
       {/* Header with Organization Branding - Matching CompanyStatusPage */}
       <header className="bg-white shadow-sm border-t-4 w-full" style={{ borderTopColor: brandColor }}>
         <div className="w-full px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between py-4 max-w-7xl mx-auto">
-            <div className="flex items-center">
-              <div className="flex items-center justify-center mr-4">
+          <div className="flex items-center justify-between py-3 sm:py-4 max-w-7xl mx-auto">
+            <div className="flex items-center min-w-0">
+              <div className="flex items-center justify-center mr-3 sm:mr-4 flex-shrink-0">
                  {logoUrl ? (
-                   <img 
-                     src={logoUrl} 
+                   <img
+                     src={logoUrl}
                      alt={`${organizationName || 'Organization'} logo`}
                      className="w-10 h-10 sm:w-12 sm:h-12 object-contain cursor-pointer"
                      onClick={() => window.location.href = getMainSecurePageUrl()}
@@ -76,25 +76,25 @@ const BrandedFormLayout = ({
                      }}
                    />
                  ) : (
-                   <img 
-                     src={disclosurelyIcon} 
+                   <img
+                     src={disclosurelyIcon}
                      alt="Disclosurely logo"
                      className="w-10 h-10 sm:w-12 sm:h-12 object-contain cursor-pointer"
                      onClick={() => window.location.href = getMainSecurePageUrl()}
                    />
                  )}
                 {logoUrl && (
-                  <img 
-                    src={disclosurelyIcon} 
+                  <img
+                    src={disclosurelyIcon}
                     alt="Disclosurely logo"
                     className="w-10 h-10 sm:w-12 sm:h-12 object-contain cursor-pointer hidden"
                     onClick={() => window.location.href = getMainSecurePageUrl()}
                   />
                 )}
               </div>
-              <div>
-                <h1 className="text-xl font-bold text-gray-900">{organizationName || 'Organization'}</h1>
-                <p className="text-sm text-gray-600">Secure Report Submission</p>
+              <div className="min-w-0">
+                <h1 className="text-base sm:text-xl font-bold text-gray-900 truncate">{organizationName || 'Organization'}</h1>
+                <p className="text-xs sm:text-sm text-gray-600">Secure Report Submission</p>
               </div>
             </div>
           </div>
@@ -103,10 +103,10 @@ const BrandedFormLayout = ({
 
 
       {/* Main content */}
-      <div className="container mx-auto px-4 py-8">
+      <div className="container mx-auto px-4 py-6 sm:py-8">
         <div className="max-w-2xl mx-auto">
           <Card>
-            <CardContent className="p-6">
+            <CardContent className="p-4 sm:p-6">
               {children}
             </CardContent>
           </Card>

@@ -17,7 +17,11 @@ import ReportMessaging from '@/components/ReportMessaging';
 import ReportContentDisplay from '@/components/ReportContentDisplay';
 import ReportAttachments from '@/components/ReportAttachments';
 import LinkGenerator from '@/components/LinkGenerator';
+import PatternAlerts from '@/components/dashboard/PatternAlerts';
+import BulkActions from '@/components/dashboard/BulkActions';
+import SmartFilters, { createSmartFilters, SmartFilter } from '@/components/dashboard/SmartFilters';
 import { Input } from '@/components/ui/input';
+import { Checkbox } from '@/components/ui/checkbox';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
@@ -25,6 +29,7 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { createBrandedPDF, addPDFSection, addPDFField, downloadPDF, exportToCSV, formatExportDate, getStatusColor, addPDFTable } from '@/utils/export-utils';
 import { decryptReport } from '@/utils/encryption';
+import { detectAllPatterns, PatternDetectionResult } from '@/utils/patternDetection';
 
 // Risk Level Selector Component
 const RiskLevelSelector = ({ 
@@ -165,6 +170,12 @@ const DashboardView = () => {
   const [teamMembers, setTeamMembers] = useState<any[]>([]);
   const [deleteReportId, setDeleteReportId] = useState<string | null>(null);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [patterns, setPatterns] = useState<PatternDetectionResult | null>(null);
+  const [patternsDismissed, setPatternsDismissed] = useState(false);
+  const [highlightedReportIds, setHighlightedReportIds] = useState<string[]>([]);
+  const [selectedReportIds, setSelectedReportIds] = useState<string[]>([]);
+  const [smartFilters, setSmartFilters] = useState<SmartFilter[]>([]);
+  const [isBulkProcessing, setIsBulkProcessing] = useState(false);
 
   useEffect(() => {
     console.log('DashboardView useEffect - user:', !!user, 'rolesLoading:', rolesLoading, 'isOrgAdmin:', isOrgAdmin);
@@ -175,6 +186,47 @@ const DashboardView = () => {
       console.log('DashboardView - Waiting for roles to load...');
     }
   }, [user, rolesLoading, isOrgAdmin]);
+
+  // Pattern Detection: Run when reports change
+  useEffect(() => {
+    const runPatternDetection = async () => {
+      if (reports.length < 3 || patternsDismissed) return; // Need minimum data for patterns
+
+      console.log('🔍 Running pattern detection on', reports.length, 'reports...');
+
+      // Decrypt report contents for name detection
+      const decryptedContents = new Map<string, string>();
+
+      for (const report of reports) {
+        try {
+          if (report.encrypted_content && report.encryption_key_hash) {
+            const decrypted = await decryptReport(report.encrypted_content, report.encryption_key_hash);
+            decryptedContents.set(report.id, decrypted);
+          }
+        } catch (error) {
+          console.error('Failed to decrypt report for pattern detection:', report.id, error);
+        }
+      }
+
+      // Run pattern detection
+      const detectedPatterns = await detectAllPatterns(reports, decryptedContents);
+
+      console.log('🔍 Pattern detection results:', detectedPatterns);
+
+      if (detectedPatterns.totalPatterns > 0) {
+        setPatterns(detectedPatterns);
+      }
+    };
+
+    runPatternDetection();
+  }, [reports, patternsDismissed]);
+
+  // Initialize smart filters when reports change
+  useEffect(() => {
+    if (reports.length > 0) {
+      setSmartFilters(createSmartFilters(reports));
+    }
+  }, [reports]);
 
   const fetchData = async () => {
     if (!user) return;
@@ -767,7 +819,7 @@ Additional Details: ${decryptedContent.additionalDetails || 'None provided'}
     try {
       const { error } = await supabase
         .from('reports')
-        .update({ 
+        .update({
           manual_risk_level: riskLevel,
           updated_at: new Date().toISOString()
         })
@@ -781,9 +833,9 @@ Additional Details: ${decryptedContent.additionalDetails || 'None provided'}
       });
 
       // Update local state
-      setReports(prevReports => 
-        prevReports.map(r => 
-          r.id === reportId 
+      setReports(prevReports =>
+        prevReports.map(r =>
+          r.id === reportId
             ? { ...r, manual_risk_level: riskLevel }
             : r
         )
@@ -800,10 +852,223 @@ Additional Details: ${decryptedContent.additionalDetails || 'None provided'}
     }
   };
 
+  // Pattern Alert Handlers
+  const handlePatternReportClick = (reportIds: string[]) => {
+    setHighlightedReportIds(reportIds);
+    // Scroll to reports table
+    setTimeout(() => {
+      const tableElement = document.querySelector('[role="table"]');
+      if (tableElement) {
+        tableElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+    }, 100);
+  };
+
+  const handlePatternDismiss = () => {
+    setPatternsDismissed(true);
+    setPatterns(null);
+  };
+
+  // Bulk Actions Handlers
+  const handleBulkStatusUpdate = async (status: string) => {
+    setIsBulkProcessing(true);
+    try {
+      const { error } = await supabase
+        .from('reports')
+        .update({ status, updated_at: new Date().toISOString() })
+        .in('id', selectedReportIds);
+
+      if (error) throw error;
+
+      toast({
+        title: "Status Updated",
+        description: `${selectedReportIds.length} report(s) marked as ${status}`,
+      });
+
+      // Update local state
+      setReports(prevReports =>
+        prevReports.map(r =>
+          selectedReportIds.includes(r.id)
+            ? { ...r, status }
+            : r
+        )
+      );
+
+      setSelectedReportIds([]);
+    } catch (error) {
+      console.error('Error bulk updating status:', error);
+      toast({
+        title: "Error",
+        description: "Failed to update report status",
+        variant: "destructive",
+      });
+    } finally {
+      setIsBulkProcessing(false);
+    }
+  };
+
+  const handleBulkAssign = async (userId: string) => {
+    setIsBulkProcessing(true);
+    try {
+      const assigneeId = userId === 'unassigned' ? null : userId;
+
+      const { error } = await supabase
+        .from('reports')
+        .update({ assigned_to: assigneeId, updated_at: new Date().toISOString() })
+        .in('id', selectedReportIds);
+
+      if (error) throw error;
+
+      toast({
+        title: "Reports Assigned",
+        description: `${selectedReportIds.length} report(s) assigned successfully`,
+      });
+
+      // Update local state
+      setReports(prevReports =>
+        prevReports.map(r =>
+          selectedReportIds.includes(r.id)
+            ? { ...r, assigned_to: assigneeId }
+            : r
+        )
+      );
+
+      setSelectedReportIds([]);
+    } catch (error) {
+      console.error('Error bulk assigning:', error);
+      toast({
+        title: "Error",
+        description: "Failed to assign reports",
+        variant: "destructive",
+      });
+    } finally {
+      setIsBulkProcessing(false);
+    }
+  };
+
+  const handleBulkArchive = async () => {
+    setIsBulkProcessing(true);
+    try {
+      const { error } = await supabase
+        .from('reports')
+        .update({ status: 'archived', updated_at: new Date().toISOString() })
+        .in('id', selectedReportIds);
+
+      if (error) throw error;
+
+      toast({
+        title: "Reports Archived",
+        description: `${selectedReportIds.length} report(s) archived successfully`,
+      });
+
+      // Move to archived list
+      const archivedReports = reports.filter(r => selectedReportIds.includes(r.id));
+      setReports(prevReports => prevReports.filter(r => !selectedReportIds.includes(r.id)));
+      setArchivedReports(prev => [...prev, ...archivedReports.map(r => ({ ...r, status: 'archived' }))]);
+
+      setSelectedReportIds([]);
+    } catch (error) {
+      console.error('Error bulk archiving:', error);
+      toast({
+        title: "Error",
+        description: "Failed to archive reports",
+        variant: "destructive",
+      });
+    } finally {
+      setIsBulkProcessing(false);
+    }
+  };
+
+  const handleBulkDelete = async () => {
+    setIsBulkProcessing(true);
+    try {
+      const { error } = await supabase
+        .from('reports')
+        .update({ deleted_at: new Date().toISOString() })
+        .in('id', selectedReportIds);
+
+      if (error) throw error;
+
+      toast({
+        title: "Reports Deleted",
+        description: `${selectedReportIds.length} report(s) deleted successfully`,
+      });
+
+      setReports(prevReports => prevReports.filter(r => !selectedReportIds.includes(r.id)));
+      setSelectedReportIds([]);
+    } catch (error) {
+      console.error('Error bulk deleting:', error);
+      toast({
+        title: "Error",
+        description: "Failed to delete reports",
+        variant: "destructive",
+      });
+    } finally {
+      setIsBulkProcessing(false);
+    }
+  };
+
+  // Smart Filter Handlers
+  const handleSmartFilterToggle = (filterId: string) => {
+    setSmartFilters(prevFilters =>
+      prevFilters.map(f =>
+        f.id === filterId ? { ...f, active: !f.active } : f
+      )
+    );
+  };
+
+  const handleClearSmartFilters = () => {
+    setSmartFilters(prevFilters =>
+      prevFilters.map(f => ({ ...f, active: false }))
+    );
+  };
+
+  // Selection Handlers
+  const handleSelectAll = (checked: boolean) => {
+    if (checked) {
+      setSelectedReportIds(filteredReports.map(r => r.id));
+    } else {
+      setSelectedReportIds([]);
+    }
+  };
+
+  const handleSelectReport = (reportId: string, checked: boolean) => {
+    if (checked) {
+      setSelectedReportIds(prev => [...prev, reportId]);
+    } else {
+      setSelectedReportIds(prev => prev.filter(id => id !== reportId));
+    }
+  };
+
   const filteredReports = reports.filter(report => {
     const matchesSearch = report.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          report.tracking_id.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesStatus = statusFilter === 'all' || report.status === statusFilter;
+
+    // Apply smart filters
+    const activeFilters = smartFilters.filter(f => f.active);
+    if (activeFilters.length > 0) {
+      const matchesSmartFilters = activeFilters.every(filter => {
+        switch (filter.id) {
+          case 'high-risk':
+            return report.ai_risk_level === 'Critical' || report.ai_risk_level === 'High' ||
+                   report.manual_risk_level === 1 || report.manual_risk_level === 2;
+          case 'unassigned':
+            return !report.assigned_to;
+          case 'recent':
+            const daysDiff = (Date.now() - new Date(report.created_at).getTime()) / (1000 * 60 * 60 * 24);
+            return daysDiff <= 7;
+          case 'ai-triaged':
+            return report.ai_risk_score && report.ai_risk_score > 0;
+          case 'needs-action':
+            return report.status === 'new' || report.status === 'reviewing';
+          default:
+            return true;
+        }
+      });
+      return matchesSearch && matchesStatus && matchesSmartFilters;
+    }
+
     return matchesSearch && matchesStatus;
   }).sort((a, b) => {
     let aValue, bValue;
@@ -877,6 +1142,15 @@ Additional Details: ${decryptedContent.additionalDetails || 'None provided'}
           </CardContent>
         </Card>
       </div>
+
+      {/* Pattern Detection Alerts */}
+      {patterns && patterns.totalPatterns > 0 && (
+        <PatternAlerts
+          patterns={patterns}
+          onReportClick={handlePatternReportClick}
+          onDismiss={handlePatternDismiss}
+        />
+      )}
 
       <div className="space-y-4">
         {/* Title and Subtitle */}
@@ -958,7 +1232,10 @@ Additional Details: ${decryptedContent.additionalDetails || 'None provided'}
                       </TableHeader>
                       <TableBody>
                         {filteredReports.map((report) => (
-                          <TableRow key={report.id}>
+                          <TableRow
+                            key={report.id}
+                            className={highlightedReportIds.includes(report.id) ? 'bg-yellow-50 border-l-4 border-l-orange-400' : ''}
+                          >
                             <TableCell className="font-mono text-sm">{report.tracking_id}</TableCell>
                             <TableCell className="font-medium">{report.title}</TableCell>
                             <TableCell>
