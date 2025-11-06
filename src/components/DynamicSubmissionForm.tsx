@@ -5,13 +5,21 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
-import { Shield, AlertTriangle, Search } from 'lucide-react';
+import { Shield, AlertTriangle, Search, Clock, Info } from 'lucide-react';
 import BrandedFormLayout from './BrandedFormLayout';
 import FileUpload from './FileUpload';
 import { uploadReportFile } from '@/utils/fileUpload';
 import ReportTypeSelector from './forms/ReportTypeSelector';
 import ReportDetailsForm from './forms/ReportDetailsForm';
 import ErrorBoundary from './forms/ErrorBoundary';
+import SubmissionProgress from './forms/SubmissionProgress';
+import { useFormAutoSave } from '@/hooks/useFormAutoSave';
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from '@/components/ui/tooltip';
 
 interface LinkData {
   id: string;
@@ -38,6 +46,7 @@ const DynamicSubmissionForm = () => {
   const [submitting, setSubmitting] = useState(false);
   const [isAnonymous, setIsAnonymous] = useState(true);
   const [attachedFiles, setAttachedFiles] = useState<File[]>([]);
+  const [currentStep, setCurrentStep] = useState(1);
 
   const [formData, setFormData] = useState({
     title: '',
@@ -49,9 +58,41 @@ const DynamicSubmissionForm = () => {
     priority: 3
   });
 
+  const steps = ['Details', 'Category', 'Evidence', 'Review'];
+
+  // Auto-save form data
+  const { loadSavedData, clearSavedData } = useFormAutoSave({
+    key: `report-draft-${linkToken}`,
+    data: formData,
+    enabled: !submitting
+  });
+
   useEffect(() => {
     fetchLinkData();
+
+    // Try to restore saved data on mount
+    const saved = loadSavedData();
+    if (saved) {
+      setFormData(saved);
+      toast({
+        title: "Draft restored",
+        description: "We restored your previous work. You can continue where you left off.",
+      });
+    }
   }, [linkToken]);
+
+  // Calculate current step based on form completion
+  useEffect(() => {
+    if (!formData.title || !formData.description) {
+      setCurrentStep(1);
+    } else if (!formData.mainCategory || !formData.subCategory) {
+      setCurrentStep(2);
+    } else if (attachedFiles.length === 0) {
+      setCurrentStep(3);
+    } else {
+      setCurrentStep(4);
+    }
+  }, [formData, attachedFiles]);
 
   const updateFormData = (updates: Partial<typeof formData>) => {
     setFormData(prev => ({ ...prev, ...updates }));
@@ -277,11 +318,15 @@ const DynamicSubmissionForm = () => {
       }
 
       console.log('Success! Navigating to success page...');
+
+      // Clear auto-saved draft after successful submission
+      clearSavedData();
+
       navigate(`/secure/tool/success?trackingId=${encodeURIComponent(trackingId)}`);
 
     } catch (error: any) {
       console.error('Submission error:', error);
-      
+
       toast({
         title: "Submission failed",
         description: error.message || "There was an error submitting your report. Please try again.",
@@ -356,6 +401,25 @@ const DynamicSubmissionForm = () => {
               </div>
             </CardContent>
           </Card>
+
+          {/* Progress Indicator */}
+          <SubmissionProgress currentStep={currentStep} steps={steps} />
+
+          {/* Estimated Time */}
+          <TooltipProvider>
+            <div className="flex items-center justify-center gap-2 text-sm text-gray-600">
+              <Clock className="h-4 w-4" />
+              <span>Estimated time: 3-5 minutes</span>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Info className="h-4 w-4 text-gray-400 cursor-help" />
+                </TooltipTrigger>
+                <TooltipContent className="max-w-xs">
+                  <p>Your progress is automatically saved. You can leave and return to complete this form later.</p>
+                </TooltipContent>
+              </Tooltip>
+            </div>
+          </TooltipProvider>
 
           <form onSubmit={handleSubmit} className="space-y-4">
             <ReportTypeSelector
