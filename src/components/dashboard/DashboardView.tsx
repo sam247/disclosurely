@@ -949,7 +949,13 @@ Additional Details: ${decryptedContent.additionalDetails || 'None provided'}
                           <TableHead>{t('title')}</TableHead>
                           <TableHead>{t('status')}</TableHead>
                           <TableHead>{t('category')}</TableHead>
-                          <TableHead>Risk Level</TableHead>
+                          <TableHead>Manual Risk</TableHead>
+                          <TableHead>
+                            <div className="flex items-center gap-1">
+                              <Bot className="w-3 h-3" />
+                              AI Triage
+                            </div>
+                          </TableHead>
                           <TableHead>{t('assignedTo')}</TableHead>
                           <TableHead>{t('date')}</TableHead>
                           <TableHead className="text-right">{t('actions')}</TableHead>
@@ -983,85 +989,90 @@ Additional Details: ${decryptedContent.additionalDetails || 'None provided'}
                                 <span className="text-sm text-muted-foreground">-</span>
                               )}
                             </TableCell>
+
+                            {/* Manual Risk Level Column */}
                             <TableCell>
-                              <div className="flex items-center gap-2 flex-wrap">
-                                {/* Manual Risk Level */}
-                                <RiskLevelSelector
-                                  reportId={report.id}
-                                  currentLevel={report.manual_risk_level}
-                                  onUpdate={(level) => updateManualRiskLevel(report.id, level)}
-                                  isUpdating={updatingRiskLevel === report.id}
-                                />
-                                
-                                {/* AI Risk Level (if available) */}
-                                {report.ai_risk_level && (
-                                  <Popover>
-                                    <PopoverTrigger asChild>
-                                      <Badge
-                                        variant={
-                                          report.ai_risk_level === 'Critical' ? 'destructive' :
-                                          report.ai_risk_level === 'High' ? 'destructive' :
-                                          report.ai_risk_level === 'Medium' ? 'secondary' :
-                                          'outline'
-                                        }
-                                        className={`text-xs cursor-pointer hover:opacity-80 transition-opacity ${
-                                          report.ai_risk_level === 'Critical' ? 'bg-red-600 text-white' :
-                                          report.ai_risk_level === 'High' ? 'bg-orange-500 text-white' :
-                                          report.ai_risk_level === 'Medium' ? 'bg-yellow-500 text-white' :
-                                          'bg-green-500 text-white'
-                                        }`}
-                                      >
-                                        <Bot className="w-3 h-3 mr-1" />
-                                        {report.ai_risk_level} ({report.ai_risk_score}/25)
-                                      </Badge>
-                                    </PopoverTrigger>
-                                    <PopoverContent className="w-80">
-                                      <div className="space-y-3">
-                                        <div className="flex items-center gap-2">
-                                          <Zap className="w-4 h-4 text-primary" />
-                                          <h4 className="font-semibold text-sm">AI Risk Assessment</h4>
-                                        </div>
+                              <RiskLevelSelector
+                                reportId={report.id}
+                                currentLevel={report.manual_risk_level}
+                                onUpdate={(level) => updateManualRiskLevel(report.id, level)}
+                                isUpdating={updatingRiskLevel === report.id}
+                              />
+                            </TableCell>
 
-                                        <div className="grid grid-cols-2 gap-2 text-sm">
-                                          <div>
-                                            <div className="text-xs text-muted-foreground">Risk Score</div>
-                                            <div className="font-bold">{report.ai_risk_score}/25</div>
-                                          </div>
-                                          <div>
-                                            <div className="text-xs text-muted-foreground">Risk Level</div>
-                                            <div className="font-bold">{report.ai_risk_level}</div>
-                                          </div>
-                                          <div>
-                                            <div className="text-xs text-muted-foreground">Likelihood</div>
-                                            <div className="font-bold">{report.ai_likelihood_score}/5</div>
-                                          </div>
-                                          <div>
-                                            <div className="text-xs text-muted-foreground">Impact</div>
-                                            <div className="font-bold">{report.ai_impact_score}/5</div>
-                                          </div>
-                                        </div>
-
-                                        {report.ai_assessed_at && (
-                                          <div className="text-xs text-muted-foreground pt-2 border-t">
-                                            Assessed: {new Date(report.ai_assessed_at).toLocaleString()}
-                                          </div>
-                                        )}
-
-                                        {report.ai_risk_assessment?.priority_recommendation && (
-                                          <div className="text-xs pt-2 border-t">
-                                            <div className="font-medium mb-1">Recommended Priority:</div>
-                                            <Badge variant="outline" className="text-xs">
-                                              {report.ai_risk_assessment.priority_recommendation}
-                                            </Badge>
-                                          </div>
-                                        )}
+                            {/* AI Triage Column */}
+                            <TableCell>
+                              {report.ai_risk_level ? (
+                                <Popover>
+                                  <PopoverTrigger asChild>
+                                    <Badge
+                                      variant={
+                                        report.ai_risk_level === 'Critical' ? 'destructive' :
+                                        report.ai_risk_level === 'High' ? 'destructive' :
+                                        report.ai_risk_level === 'Medium' ? 'secondary' :
+                                        'outline'
+                                      }
+                                      className={`text-xs cursor-pointer hover:opacity-80 transition-opacity ${
+                                        report.ai_risk_level === 'Critical' ? 'bg-red-600 text-white' :
+                                        report.ai_risk_level === 'High' ? 'bg-orange-500 text-white' :
+                                        report.ai_risk_level === 'Medium' ? 'bg-yellow-500 text-white' :
+                                        'bg-green-500 text-white'
+                                      }`}
+                                    >
+                                      <Bot className="w-3 h-3 mr-1" />
+                                      {report.ai_risk_level} ({report.ai_risk_score}/25)
+                                    </Badge>
+                                  </PopoverTrigger>
+                                  <PopoverContent className="w-80">
+                                    <div className="space-y-3">
+                                      <div className="flex items-center gap-2">
+                                        <Zap className="w-4 h-4 text-primary" />
+                                        <h4 className="font-semibold text-sm">AI Risk Assessment</h4>
                                       </div>
-                                    </PopoverContent>
-                                  </Popover>
-                                )}
-                                
-                                {/* Legacy Priority (if no manual risk level) */}
-                                {!report.manual_risk_level && report.priority && report.ai_risk_level && (
+
+                                      <div className="grid grid-cols-2 gap-2 text-sm">
+                                        <div>
+                                          <div className="text-xs text-muted-foreground">Risk Score</div>
+                                          <div className="font-bold">{report.ai_risk_score}/25</div>
+                                        </div>
+                                        <div>
+                                          <div className="text-xs text-muted-foreground">Risk Level</div>
+                                          <div className="font-bold">{report.ai_risk_level}</div>
+                                        </div>
+                                        <div>
+                                          <div className="text-xs text-muted-foreground">Likelihood</div>
+                                          <div className="font-bold">{report.ai_likelihood_score}/5</div>
+                                        </div>
+                                        <div>
+                                          <div className="text-xs text-muted-foreground">Impact</div>
+                                          <div className="font-bold">{report.ai_impact_score}/5</div>
+                                        </div>
+                                      </div>
+
+                                      {report.ai_assessed_at && (
+                                        <div className="text-xs text-muted-foreground pt-2 border-t">
+                                          Assessed: {new Date(report.ai_assessed_at).toLocaleString()}
+                                        </div>
+                                      )}
+
+                                      {report.ai_risk_assessment?.priority_recommendation && (
+                                        <div className="text-xs pt-2 border-t">
+                                          <div className="font-medium mb-1">Recommended Priority:</div>
+                                          <Badge variant="outline" className="text-xs">
+                                            {report.ai_risk_assessment.priority_recommendation}
+                                          </Badge>
+                                        </div>
+                                      )}
+                                    </div>
+                                  </PopoverContent>
+                                </Popover>
+                              ) : (
+                                <span className="text-xs text-muted-foreground">Pending...</span>
+                              )}
+                            </TableCell>
+
+                            {/* Legacy Priority badge removed - no longer needed with separate columns */}
+                            {false && !report.manual_risk_level && report.priority && report.ai_risk_level && (
                                   <Badge 
                                     variant={
                                       report.priority >= 4 ? 'destructive' :
