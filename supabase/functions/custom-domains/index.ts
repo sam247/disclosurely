@@ -1,28 +1,33 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 
-// Restrict CORS for authenticated endpoints
-const isAllowedOrigin = (origin: string | null): boolean => {
-  if (!origin) return false;
-  const allowedExact = [
+// Restrict CORS for authenticated endpoints  
+const getAllowedOrigin = (req: Request): string => {
+  const origin = req.headers.get('origin');
+  
+  if (!origin) {
+    return 'https://disclosurely.com';
+  }
+  
+  // Allow specific production domains
+  const allowedDomains = [
     'https://disclosurely.com',
     'https://www.disclosurely.com',
     'http://localhost:8080',
     'http://localhost:5173',
   ];
-  if (allowedExact.includes(origin)) return true;
-  try {
-    const url = new URL(origin);
-    const host = url.hostname;
-    return host.endsWith('.lovable.app') || host.endsWith('.lovableproject.com');
-  } catch {
-    return false;
+  
+  if (allowedDomains.includes(origin)) {
+    return origin;
   }
-};
-
-const getAllowedOrigin = (req: Request): string => {
-  const origin = req.headers.get('origin');
-  return isAllowedOrigin(origin) ? (origin as string) : 'https://disclosurely.com';
+  
+  // Allow Lovable preview domains (any subdomain)
+  if (origin.includes('.lovable.app') || origin.includes('.lovableproject.com')) {
+    return origin;
+  }
+  
+  // Default fallback
+  return 'https://disclosurely.com';
 };
 
 const getCorsHeaders = (req: Request) => ({
