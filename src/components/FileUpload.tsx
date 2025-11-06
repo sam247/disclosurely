@@ -155,27 +155,27 @@ const FileUpload: React.FC<FileUploadProps> = ({
       <Card className={`border-2 border-dashed transition-colors ${
         dragActive ? 'border-blue-400 bg-blue-50' : 'border-gray-300'
       } ${disabled ? 'opacity-50 pointer-events-none' : ''}`}>
-        <CardContent 
-          className="p-6 text-center cursor-pointer"
+        <CardContent
+          className="p-6 sm:p-8 text-center cursor-pointer min-h-[180px] flex flex-col items-center justify-center"
           onDragEnter={handleDrag}
           onDragLeave={handleDrag}
           onDragOver={handleDrag}
           onDrop={handleDrop}
           onClick={() => !disabled && document.getElementById('file-input')?.click()}
         >
-          <Upload className="h-8 w-8 text-gray-400 mx-auto mb-4" />
-          <p className="text-sm text-gray-600 mb-2">
-            <span className="font-medium text-blue-600">Click to upload</span> or drag and drop
+          <Upload className="h-10 w-10 sm:h-12 sm:w-12 text-gray-400 mx-auto mb-4" />
+          <p className="text-sm sm:text-base text-gray-600 mb-2">
+            <span className="font-medium text-blue-600">Tap to upload</span> or drag and drop
           </p>
-          <p className="text-xs text-gray-500">
+          <p className="text-xs sm:text-sm text-gray-500">
             Maximum {maxFiles} files, up to {maxSize}MB each
           </p>
           <p className="text-xs text-gray-400 mt-1">
             Supported: Images, PDF, Word documents, Text files
           </p>
 
-          <div className="flex items-center justify-center gap-1 mt-3 text-xs text-green-600">
-            <Shield className="h-3 w-3" />
+          <div className="flex items-center justify-center gap-1 mt-3 text-xs sm:text-sm text-green-600 px-2">
+            <Shield className="h-3 w-3 sm:h-4 sm:w-4 flex-shrink-0" />
             <span>Metadata automatically removed to protect your identity</span>
           </div>
 
@@ -204,20 +204,20 @@ const FileUpload: React.FC<FileUploadProps> = ({
           {files.map((file, index) => {
             const hasMetadataStripped = processedFiles.has(file.name);
             return (
-              <div key={index} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-                <div className="flex items-center space-x-3 flex-1">
-                  <File className="h-4 w-4 text-gray-500" />
-                  <div className="flex-1">
-                    <div className="flex items-center gap-2">
-                      <p className="text-sm font-medium text-gray-900">{file.name}</p>
+              <div key={index} className="flex items-center justify-between gap-2 p-3 sm:p-4 bg-gray-50 rounded-lg">
+                <div className="flex items-start space-x-3 flex-1 min-w-0">
+                  <File className="h-4 w-4 sm:h-5 sm:w-5 text-gray-500 flex-shrink-0 mt-0.5" />
+                  <div className="flex-1 min-w-0">
+                    <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-2">
+                      <p className="text-sm font-medium text-gray-900 break-words">{file.name}</p>
                       {hasMetadataStripped && (
-                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs bg-green-100 text-green-700 border border-green-200">
+                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs bg-green-100 text-green-700 border border-green-200 w-fit">
                           <Shield className="h-3 w-3" />
                           Protected
                         </span>
                       )}
                     </div>
-                    <p className="text-xs text-gray-500">{formatFileSize(file.size)}</p>
+                    <p className="text-xs text-gray-500 mt-0.5">{formatFileSize(file.size)}</p>
                   </div>
                 </div>
                 <Button
@@ -226,6 +226,8 @@ const FileUpload: React.FC<FileUploadProps> = ({
                   size="sm"
                   onClick={() => removeFile(index)}
                   disabled={disabled}
+                  className="min-h-[40px] min-w-[40px] flex-shrink-0"
+                  aria-label="Remove file"
                 >
                   <X className="h-4 w-4" />
                 </Button>

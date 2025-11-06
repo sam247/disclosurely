@@ -163,7 +163,9 @@ const ReportDetailsForm = ({ formData, updateFormData, validationErrors = {} }: 
           value={formData.title}
           onChange={(e) => updateFormData({ title: e.target.value })}
           placeholder="Brief summary of the issue"
-          className={validationErrors.title ? "border-destructive" : ""}
+          className={`min-h-[44px] text-base ${validationErrors.title ? "border-destructive" : ""}`}
+          autoComplete="off"
+          maxLength={200}
         />
         {validationErrors.title && (
           <p className="text-sm text-destructive">{validationErrors.title}</p>
@@ -179,8 +181,10 @@ const ReportDetailsForm = ({ formData, updateFormData, validationErrors = {} }: 
           onChange={(e) => updateFormData({ description: e.target.value })}
           onBlur={suggestCategory}
           placeholder="Please provide a detailed description of what happened..."
-          rows={4}
-          className={validationErrors.description ? "border-destructive" : ""}
+          rows={5}
+          className={`text-base ${validationErrors.description ? "border-destructive" : ""}`}
+          autoComplete="off"
+          maxLength={5000}
         />
         {validationErrors.description && (
           <p className="text-sm text-destructive">{validationErrors.description}</p>
@@ -251,7 +255,9 @@ const ReportDetailsForm = ({ formData, updateFormData, validationErrors = {} }: 
             onChange={(e) => updateFormData({ customCategory: e.target.value })}
             placeholder="Enter the specific category"
             required
-            className={validationErrors.customCategory ? "border-destructive" : ""}
+            className={`min-h-[44px] text-base ${validationErrors.customCategory ? "border-destructive" : ""}`}
+            autoComplete="off"
+            maxLength={100}
           />
           {validationErrors.customCategory && (
             <p className="text-sm text-destructive">{validationErrors.customCategory}</p>

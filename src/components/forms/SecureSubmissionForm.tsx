@@ -211,9 +211,9 @@ const SecureSubmissionForm = ({ linkToken, linkData, brandColor }: SecureSubmiss
         {/* Check Status Button */}
         <Card className="border-blue-200 bg-blue-50">
           <CardContent className="pt-4">
-            <div className="flex items-center justify-between">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
               <div className="flex items-start gap-3">
-                <Search className="h-4 w-4 text-blue-600 mt-0.5" />
+                <Search className="h-4 w-4 text-blue-600 mt-0.5 flex-shrink-0" />
                 <div className="text-sm">
                   <p className="font-medium text-blue-900 mb-1">Already submitted a report?</p>
                   <p className="text-blue-800">
@@ -221,11 +221,11 @@ const SecureSubmissionForm = ({ linkToken, linkData, brandColor }: SecureSubmiss
                   </p>
                 </div>
               </div>
-              <Link to={`/secure/tool/submit/${linkToken}/status`}>
-                <Button 
-                  variant="outline" 
+              <Link to={`/secure/tool/submit/${linkToken}/status`} className="sm:flex-shrink-0">
+                <Button
+                  variant="outline"
                   size="sm"
-                  className="border-blue-300 text-blue-700 hover:bg-blue-100"
+                  className="border-blue-300 text-blue-700 hover:bg-blue-100 w-full sm:w-auto min-h-[44px]"
                 >
                   <Search className="h-4 w-4 mr-2" />
                   Check Status
@@ -276,10 +276,10 @@ const SecureSubmissionForm = ({ linkToken, linkData, brandColor }: SecureSubmiss
           </Card>
 
           {/* Submit Button */}
-          <Button 
-            type="submit" 
+          <Button
+            type="submit"
             disabled={isSubmitting}
-            className="w-full hover:opacity-90"
+            className="w-full hover:opacity-90 min-h-[48px] text-base font-semibold"
             style={{ backgroundColor: brandColor }}
           >
             {isSubmitting ? 'Submitting...' : 'Submit Report'}
