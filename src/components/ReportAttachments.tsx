@@ -153,18 +153,18 @@ const ReportAttachments: React.FC<ReportAttachmentsProps> = ({ reportId }) => {
           {attachments.map((attachment) => (
             <div
               key={attachment.id}
-              className="flex items-center justify-between p-3 border rounded-lg hover:bg-gray-50"
+              className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 p-3 border rounded-lg hover:bg-gray-50"
             >
-              <div className="flex items-center space-x-3">
+              <div className="flex items-center space-x-3 min-w-0 flex-1">
                 {getFileIcon(attachment.content_type)}
-                <div>
-                  <p className="text-sm font-medium text-gray-900">
+                <div className="min-w-0 flex-1">
+                  <p className="text-sm font-medium text-gray-900 break-words">
                     {attachment.original_filename}
                   </p>
-                  <p className="text-xs text-gray-500">
+                  <p className="text-xs text-gray-500 break-words">
                     {formatFileSize(attachment.file_size)} • {formatDate(attachment.created_at)}
                     {attachment.uploaded_by_whistleblower && (
-                      <span className="ml-2 px-2 py-1 bg-blue-100 text-blue-800 text-xs rounded">
+                      <span className="ml-2 px-2 py-1 bg-blue-100 text-blue-800 text-xs rounded whitespace-nowrap">
                         From Reporter
                       </span>
                     )}
@@ -176,6 +176,7 @@ const ReportAttachments: React.FC<ReportAttachmentsProps> = ({ reportId }) => {
                 size="sm"
                 onClick={() => handleDownload(attachment)}
                 disabled={downloading === attachment.id}
+                className="shrink-0 w-full sm:w-auto"
               >
                 <Download className="h-4 w-4 mr-2" />
                 {downloading === attachment.id ? 'Downloading...' : 'Download'}

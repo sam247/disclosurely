@@ -834,7 +834,7 @@ Additional Details: ${decryptedContent.additionalDetails || 'None provided'}
       {/* Scrollable Content */}
       <div className="flex-1 overflow-y-auto space-y-6">
       {/* Summary Cards */}
-      <div className="grid gap-4 md:grid-cols-3">
+      <div className="grid grid-cols-3 gap-4">
         <Card>
           <CardContent className="pt-6">
             <div className="flex items-center gap-4">
@@ -887,39 +887,41 @@ Additional Details: ${decryptedContent.additionalDetails || 'None provided'}
 
         <Tabs defaultValue="active" className="space-y-4">
           {/* Tabs, Search, and Filter Row */}
-          <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center">
-            <TabsList>
-              <TabsTrigger value="active">{t('activeReports')} ({reports.length})</TabsTrigger>
-              <TabsTrigger value="archived">{t('archived')} ({archivedReports.length})</TabsTrigger>
+          <div className="flex flex-col gap-4">
+            <TabsList className="w-full">
+              <TabsTrigger value="active" className="flex-1">{t('activeReports')} ({reports.length})</TabsTrigger>
+              <TabsTrigger value="archived" className="flex-1">{t('archived')} ({archivedReports.length})</TabsTrigger>
             </TabsList>
             
-            <div className="flex flex-col sm:flex-row gap-4 flex-1">
+            <div className="flex flex-col gap-4">
               <Input
                 placeholder={t('searchReports')}
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="flex-1"
+                className="w-full"
               />
-              <Select value={statusFilter} onValueChange={setStatusFilter}>
-                <SelectTrigger className="w-full sm:w-48">
-                  <SelectValue placeholder={t('filterByStatus')} />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">{t('allStatuses')}</SelectItem>
-                  <SelectItem value="new">{t('newIssue')}</SelectItem>
-                  <SelectItem value="reviewing">{t('inReview')}</SelectItem>
-                  <SelectItem value="investigating">{t('investigating')}</SelectItem>
-                  <SelectItem value="resolved">{t('resolved')}</SelectItem>
-                </SelectContent>
-              </Select>
-              <Button
-                variant="outline"
-                onClick={exportReportsToCSV}
-                className="w-full sm:w-auto"
-              >
-                <FileSpreadsheet className="h-4 w-4 mr-2" />
-                Export CSV
-              </Button>
+              <div className="flex flex-col sm:flex-row gap-4">
+                <Select value={statusFilter} onValueChange={setStatusFilter}>
+                  <SelectTrigger className="w-full">
+                    <SelectValue placeholder={t('filterByStatus')} />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">{t('allStatuses')}</SelectItem>
+                    <SelectItem value="new">{t('newIssue')}</SelectItem>
+                    <SelectItem value="reviewing">{t('inReview')}</SelectItem>
+                    <SelectItem value="investigating">{t('investigating')}</SelectItem>
+                    <SelectItem value="resolved">{t('resolved')}</SelectItem>
+                  </SelectContent>
+                </Select>
+                <Button
+                  variant="outline"
+                  onClick={exportReportsToCSV}
+                  className="w-full sm:w-auto"
+                >
+                  <FileSpreadsheet className="h-4 w-4 mr-2" />
+                  Export CSV
+                </Button>
+              </div>
             </div>
           </div>
           <TabsContent value="active">
