@@ -50,12 +50,6 @@ const DashboardSidebar = ({
     path: '/dashboard/analytics',
     locked: !isOrgAdmin
   }, {
-    title: 'Compliance',
-    icon: Shield,
-    path: '/dashboard/compliance',
-    locked: !isOrgAdmin,
-    badge: 'New'
-  }, {
     title: t('audit'),
     icon: ScrollText,
     path: '/dashboard/audit',
