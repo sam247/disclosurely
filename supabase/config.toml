@@ -50,3 +50,12 @@ verify_jwt = true
 
 [functions.extract-pdf-text]
 verify_jwt = true
+
+[functions.assess-risk-with-ai]
+verify_jwt = false
+
+[functions.analyze-case-with-ai]
+verify_jwt = true
+
+[functions.analyze-patterns-with-ai]
+verify_jwt = true
