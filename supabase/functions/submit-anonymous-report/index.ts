@@ -435,7 +435,58 @@ serve(async (req) => {
     }
     
     console.log('✅ Report created successfully:', report.id)
-    
+
+    // 🤖 AUTO-TRIAGE: Trigger AI risk assessment immediately
+    console.log('🤖 Starting auto-triage with AI...')
+    try {
+      const aiAssessmentResponse = await fetch(
+        `${Deno.env.get('SUPABASE_URL')}/functions/v1/assess-risk-with-ai`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')}`
+          },
+          body: JSON.stringify({
+            reportData: {
+              title: reportData.title,
+              tracking_id: reportData.tracking_id,
+              status: reportData.status,
+              report_type: reportData.report_type,
+              created_at: report.created_at
+            },
+            reportContent: reportData.description // Use plain text description before encryption
+          })
+        }
+      )
+
+      if (aiAssessmentResponse.ok) {
+        const aiResult = await aiAssessmentResponse.json()
+        const assessment = aiResult.riskAssessment
+
+        // Update report with AI assessment
+        await supabase
+          .from('reports')
+          .update({
+            ai_risk_score: assessment.risk_score,
+            ai_likelihood_score: assessment.likelihood_score,
+            ai_impact_score: assessment.impact_score,
+            ai_risk_level: assessment.risk_level,
+            ai_risk_assessment: assessment,
+            ai_assessed_at: new Date().toISOString(),
+            ai_assessment_version: '1.0'
+          })
+          .eq('id', report.id)
+
+        console.log('✅ Auto-triage completed:', assessment.risk_level, 'risk with score', assessment.risk_score)
+      } else {
+        console.warn('⚠️ AI assessment failed:', await aiAssessmentResponse.text())
+      }
+    } catch (aiError) {
+      // Don't block submission if AI fails
+      console.error('⚠️ AI assessment error (non-blocking):', aiError)
+    }
+
     // Trigger email notifications directly (no bridge)
     await sendReportNotificationEmails(supabase, report, linkData.organization_id)
 
