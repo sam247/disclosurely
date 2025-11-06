@@ -17,6 +17,7 @@ import ReportMessaging from '@/components/ReportMessaging';
 import ReportContentDisplay from '@/components/ReportContentDisplay';
 import ReportAttachments from '@/components/ReportAttachments';
 import LinkGenerator from '@/components/LinkGenerator';
+import PatternAlerts from '@/components/dashboard/PatternAlerts';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
@@ -25,6 +26,7 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { createBrandedPDF, addPDFSection, addPDFField, downloadPDF, exportToCSV, formatExportDate, getStatusColor, addPDFTable } from '@/utils/export-utils';
 import { decryptReport } from '@/utils/encryption';
+import { detectAllPatterns, PatternDetectionResult } from '@/utils/patternDetection';
 
 // Risk Level Selector Component
 const RiskLevelSelector = ({ 
@@ -165,6 +167,9 @@ const DashboardView = () => {
   const [teamMembers, setTeamMembers] = useState<any[]>([]);
   const [deleteReportId, setDeleteReportId] = useState<string | null>(null);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [patterns, setPatterns] = useState<PatternDetectionResult | null>(null);
+  const [patternsDismissed, setPatternsDismissed] = useState(false);
+  const [highlightedReportIds, setHighlightedReportIds] = useState<string[]>([]);
 
   useEffect(() => {
     console.log('DashboardView useEffect - user:', !!user, 'rolesLoading:', rolesLoading, 'isOrgAdmin:', isOrgAdmin);
@@ -175,6 +180,40 @@ const DashboardView = () => {
       console.log('DashboardView - Waiting for roles to load...');
     }
   }, [user, rolesLoading, isOrgAdmin]);
+
+  // Pattern Detection: Run when reports change
+  useEffect(() => {
+    const runPatternDetection = async () => {
+      if (reports.length < 3 || patternsDismissed) return; // Need minimum data for patterns
+
+      console.log('🔍 Running pattern detection on', reports.length, 'reports...');
+
+      // Decrypt report contents for name detection
+      const decryptedContents = new Map<string, string>();
+
+      for (const report of reports) {
+        try {
+          if (report.encrypted_content && report.encryption_key_hash) {
+            const decrypted = await decryptReport(report.encrypted_content, report.encryption_key_hash);
+            decryptedContents.set(report.id, decrypted);
+          }
+        } catch (error) {
+          console.error('Failed to decrypt report for pattern detection:', report.id, error);
+        }
+      }
+
+      // Run pattern detection
+      const detectedPatterns = await detectAllPatterns(reports, decryptedContents);
+
+      console.log('🔍 Pattern detection results:', detectedPatterns);
+
+      if (detectedPatterns.totalPatterns > 0) {
+        setPatterns(detectedPatterns);
+      }
+    };
+
+    runPatternDetection();
+  }, [reports, patternsDismissed]);
 
   const fetchData = async () => {
     if (!user) return;
@@ -767,7 +806,7 @@ Additional Details: ${decryptedContent.additionalDetails || 'None provided'}
     try {
       const { error } = await supabase
         .from('reports')
-        .update({ 
+        .update({
           manual_risk_level: riskLevel,
           updated_at: new Date().toISOString()
         })
@@ -781,9 +820,9 @@ Additional Details: ${decryptedContent.additionalDetails || 'None provided'}
       });
 
       // Update local state
-      setReports(prevReports => 
-        prevReports.map(r => 
-          r.id === reportId 
+      setReports(prevReports =>
+        prevReports.map(r =>
+          r.id === reportId
             ? { ...r, manual_risk_level: riskLevel }
             : r
         )
@@ -798,6 +837,23 @@ Additional Details: ${decryptedContent.additionalDetails || 'None provided'}
     } finally {
       setUpdatingRiskLevel(null);
     }
+  };
+
+  // Pattern Alert Handlers
+  const handlePatternReportClick = (reportIds: string[]) => {
+    setHighlightedReportIds(reportIds);
+    // Scroll to reports table
+    setTimeout(() => {
+      const tableElement = document.querySelector('[role="table"]');
+      if (tableElement) {
+        tableElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+    }, 100);
+  };
+
+  const handlePatternDismiss = () => {
+    setPatternsDismissed(true);
+    setPatterns(null);
   };
 
   const filteredReports = reports.filter(report => {
@@ -877,6 +933,15 @@ Additional Details: ${decryptedContent.additionalDetails || 'None provided'}
           </CardContent>
         </Card>
       </div>
+
+      {/* Pattern Detection Alerts */}
+      {patterns && patterns.totalPatterns > 0 && (
+        <PatternAlerts
+          patterns={patterns}
+          onReportClick={handlePatternReportClick}
+          onDismiss={handlePatternDismiss}
+        />
+      )}
 
       <div className="space-y-4">
         {/* Title and Subtitle */}
@@ -958,7 +1023,10 @@ Additional Details: ${decryptedContent.additionalDetails || 'None provided'}
                       </TableHeader>
                       <TableBody>
                         {filteredReports.map((report) => (
-                          <TableRow key={report.id}>
+                          <TableRow
+                            key={report.id}
+                            className={highlightedReportIds.includes(report.id) ? 'bg-yellow-50 border-l-4 border-l-orange-400' : ''}
+                          >
                             <TableCell className="font-mono text-sm">{report.tracking_id}</TableCell>
                             <TableCell className="font-medium">{report.title}</TableCell>
                             <TableCell>
