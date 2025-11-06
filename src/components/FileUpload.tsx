@@ -94,11 +94,25 @@ const FileUpload: React.FC<FileUploadProps> = ({
                 `🛡️ Metadata removed from ${validFiles[index].name}`,
                 { description: 'Your identity is protected' }
               );
+            } else if (result.error) {
+              // Failed to strip - warn user but don't block
+              console.warn(`Failed to strip metadata from ${validFiles[index].name}:`, result.error);
+              toast.error(
+                `⚠️ Could not remove metadata from ${validFiles[index].name}`,
+                { description: 'File uploaded but metadata may still be present' }
+              );
+            } else {
+              // File type not supported for stripping (e.g., plain text)
+              console.log(`Metadata stripping not available for ${validFiles[index].name}`);
             }
           } else {
-            // If stripping failed, use original file but warn user
+            // If stripping failed completely, use original file but warn user
             console.warn(`Failed to strip metadata from ${validFiles[index].name}`);
             cleanFiles.push(validFiles[index]);
+            toast.error(
+              `⚠️ Could not process ${validFiles[index].name}`,
+              { description: 'File uploaded without metadata removal' }
+            );
           }
         });
 
