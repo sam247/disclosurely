@@ -19,6 +19,7 @@ const getAllowedOrigin = (req: Request): string => {
   const allowedDomains = [
     'https://disclosurely.com',
     'https://www.disclosurely.com',
+    'https://app.disclosurely.com',
     'http://localhost:8080',
     'http://localhost:5173',
   ];
