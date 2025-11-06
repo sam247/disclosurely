@@ -1071,35 +1071,6 @@ Additional Details: ${decryptedContent.additionalDetails || 'None provided'}
                               )}
                             </TableCell>
 
-                            {/* Legacy Priority badge removed - no longer needed with separate columns */}
-                            {false && !report.manual_risk_level && report.priority && report.ai_risk_level && (
-                                  <Badge 
-                                    variant={
-                                      report.priority >= 4 ? 'destructive' :
-                                      report.priority >= 3 ? 'secondary' :
-                                      'outline'
-                                    }
-                                    className="text-xs"
-                                  >
-                                    Legacy: {report.priority >= 4 ? 'High' : 
-                                     report.priority >= 3 ? 'Medium' : 'Low'} ({report.priority}/5)
-                                  </Badge>
-                                )}
-                                
-                                {/* Assess Button (if no risk level set) */}
-                                {!report.manual_risk_level && !report.ai_risk_level && !report.priority && (
-                                  <Button
-                                    variant="outline"
-                                    size="sm"
-                                    onClick={() => assessRisk(report.id)}
-                                    className="text-xs"
-                                    disabled={isAssessingRisk === report.id}
-                                  >
-                                    {isAssessingRisk === report.id ? 'Assessing...' : 'Assess'}
-                                  </Button>
-                                )}
-                              </div>
-                            </TableCell>
                             <TableCell>
                               <Select
                                 value={report.assigned_to || 'unassigned'}
