@@ -3,23 +3,34 @@ import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.50.0'
 import "https://deno.land/x/xhr@0.1.0/mod.ts"
 
 // Restrict CORS for authenticated endpoints
-const getAllowedOrigin = (req: Request): string => {
-  const origin = req.headers.get('origin');
-  const allowedOrigins = [
-    'https://5c8a3c05-42bc-4914-b492-275c4e4e75f4.lovableproject.com',
+const isAllowedOrigin = (origin: string | null): boolean => {
+  if (!origin) return false;
+  const allowedExact = [
     'https://disclosurely.com',
     'https://www.disclosurely.com',
     'http://localhost:8080',
     'http://localhost:5173',
   ];
-  
-  return origin && allowedOrigins.includes(origin) ? origin : allowedOrigins[0];
+  if (allowedExact.includes(origin)) return true;
+  try {
+    const url = new URL(origin);
+    const host = url.hostname;
+    return host.endsWith('.lovable.app') || host.endsWith('.lovableproject.com');
+  } catch {
+    return false;
+  }
+};
+
+const getAllowedOrigin = (req: Request): string => {
+  const origin = req.headers.get('origin');
+  return isAllowedOrigin(origin) ? (origin as string) : 'https://disclosurely.com';
 };
 
 const getCorsHeaders = (req: Request) => ({
   'Access-Control-Allow-Origin': getAllowedOrigin(req),
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
   'Access-Control-Allow-Credentials': 'true',
+  'Access-Control-Allow-Methods': 'POST, OPTIONS',
 });
 
 // ⚠️ CRITICAL: Verify ENCRYPTION_SALT on module load (startup check)
