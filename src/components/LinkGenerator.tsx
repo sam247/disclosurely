@@ -293,8 +293,8 @@ const LinkGenerator = () => {
           </div>
         </CardHeader>
         <CardContent className="space-y-3">
-          {/* Branded Link - Show first if available */}
-          {brandedUrl && primaryDomain ? (
+          {/* Branded Link - Show if available */}
+          {brandedUrl && primaryDomain && (
             <div className="p-4 bg-blue-50/50 rounded-lg border border-blue-200">
               <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
                 <div className="flex-1 min-w-0 w-full">
@@ -338,10 +338,43 @@ const LinkGenerator = () => {
                 </Button>
               </div>
             </div>
-          ) : (
-            <div className="p-4 bg-gray-50 rounded-lg border border-dashed">
+          )}
+
+          {/* Default Secure Link - Always show */}
+          <div className="p-4 bg-background rounded-lg border">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+              <div className="flex-1 min-w-0 w-full">
+                <div className="flex flex-wrap items-center gap-2 mb-1">
+                  <p className="text-sm font-semibold">{brandedUrl ? 'Fallback Link' : 'Secure Link'}</p>
+                  <Badge variant="default" className="bg-green-600 text-xs h-5 shrink-0">
+                    ✓ Active
+                  </Badge>
+                </div>
+                <p className="text-xs text-muted-foreground mb-2 break-words">
+                  {brandedUrl
+                    ? 'Use this as a backup or for testing • Works without custom domain'
+                    : `Standard secure link • Used ${primaryLink.usage_count || 0} times`
+                  }
+                </p>
+                <code className="text-xs sm:text-sm bg-muted px-3 py-2 rounded border font-mono break-all block w-full">
+                  {generateLinkUrl(primaryLink.link_token)}
+                </code>
+              </div>
+              <Button
+                size="sm"
+                onClick={() => copyToClipboard(generateLinkUrl(primaryLink.link_token))}
+                className="whitespace-nowrap shrink-0 w-full sm:w-auto"
+              >
+                {t('copyLink')}
+              </Button>
+            </div>
+          </div>
+
+          {/* Prompt to set up custom domain if they don't have one */}
+          {!brandedUrl && !primaryDomain && (
+            <div className="p-3 bg-gray-50 rounded-lg border border-dashed">
               <p className="text-xs text-muted-foreground break-words">
-                <strong>Want a branded link?</strong> Go to <a href="/dashboard/settings" className="text-blue-600 hover:underline">Settings → Custom Domains</a> to set up your own domain. It will appear here automatically after verification.
+                <strong>💡 Want a clean branded link?</strong> Go to <a href="/dashboard/settings" className="text-blue-600 hover:underline">Settings → Custom Domains</a> to set up your own domain for a professional URL like <code>yourcompany.com/report</code>
               </p>
             </div>
           )}
