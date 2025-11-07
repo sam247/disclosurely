@@ -1123,44 +1123,44 @@ Additional Details: ${decryptedContent.additionalDetails || 'None provided'}
       {/* Scrollable Content */}
       <div className="flex-1 overflow-y-auto space-y-6">
       {/* Summary Cards */}
-      <div className="grid gap-4 md:grid-cols-3">
-        <Card>
-          <CardContent className="pt-6">
-            <div className="flex items-center gap-4">
-              <div className="p-3 rounded-lg bg-primary/10">
-                <FileText className="h-6 w-6 text-primary" />
+      <div className="grid gap-4 grid-cols-3 md:grid-cols-3">
+        <Card className="md:col-span-1">
+          <CardContent className="pt-4 md:pt-6">
+            <div className="flex items-center gap-2 md:gap-4">
+              <div className="p-2 md:p-3 rounded-lg bg-primary/10">
+                <FileText className="h-4 w-4 md:h-6 md:w-6 text-primary" />
               </div>
               <div>
-                <p className="text-sm text-muted-foreground">{t('activeReports')}</p>
-                <p className="text-2xl font-bold">{reports.length}</p>
+                <p className="text-xs md:text-sm text-muted-foreground">{t('activeReports')}</p>
+                <p className="text-lg md:text-2xl font-bold">{reports.length}</p>
               </div>
             </div>
           </CardContent>
         </Card>
         
-        <Card>
-          <CardContent className="pt-6">
-            <div className="flex items-center gap-4">
-              <div className="p-3 rounded-lg bg-muted">
-                <Archive className="h-6 w-6 text-muted-foreground" />
+        <Card className="md:col-span-1">
+          <CardContent className="pt-4 md:pt-6">
+            <div className="flex items-center gap-2 md:gap-4">
+              <div className="p-2 md:p-3 rounded-lg bg-muted">
+                <Archive className="h-4 w-4 md:h-6 md:w-6 text-muted-foreground" />
               </div>
               <div>
-                <p className="text-sm text-muted-foreground">{t('archivedReports')}</p>
-                <p className="text-2xl font-bold">{archivedReports.length}</p>
+                <p className="text-xs md:text-sm text-muted-foreground">{t('archivedReports')}</p>
+                <p className="text-lg md:text-2xl font-bold">{archivedReports.length}</p>
               </div>
             </div>
           </CardContent>
         </Card>
         
-        <Card>
-          <CardContent className="pt-6">
-            <div className="flex items-center gap-4">
-              <div className="p-3 rounded-lg bg-green-500/10">
-                <CheckCircle className="h-6 w-6 text-green-500" />
+        <Card className="md:col-span-1">
+          <CardContent className="pt-4 md:pt-6">
+            <div className="flex items-center gap-2 md:gap-4">
+              <div className="p-2 md:p-3 rounded-lg bg-green-500/10">
+                <CheckCircle className="h-4 w-4 md:h-6 md:w-6 text-green-500" />
               </div>
               <div>
-                <p className="text-sm text-muted-foreground">{t('quickReport')}</p>
-                <p className="text-2xl font-bold">{t('active')}</p>
+                <p className="text-xs md:text-sm text-muted-foreground">{t('quickReport')}</p>
+                <p className="text-lg md:text-2xl font-bold">{t('active')}</p>
               </div>
             </div>
           </CardContent>
@@ -1186,9 +1186,9 @@ Additional Details: ${decryptedContent.additionalDetails || 'None provided'}
         <Tabs defaultValue="active" className="space-y-4">
           {/* Tabs, Search, and Filter Row */}
           <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center">
-            <TabsList>
-              <TabsTrigger value="active">{t('activeReports')} ({reports.length})</TabsTrigger>
-              <TabsTrigger value="archived">{t('archived')} ({archivedReports.length})</TabsTrigger>
+            <TabsList className="w-full md:w-auto">
+              <TabsTrigger value="active" className="flex-1 md:flex-none">{t('activeReports')} ({reports.length})</TabsTrigger>
+              <TabsTrigger value="archived" className="flex-1 md:flex-none">{t('archived')} ({archivedReports.length})</TabsTrigger>
             </TabsList>
             
             <div className="flex flex-col sm:flex-row gap-4 flex-1 w-full sm:w-auto">
@@ -1948,7 +1948,7 @@ Additional Details: ${decryptedContent.additionalDetails || 'None provided'}
 
       {/* Report Details Dialog */}
       <Dialog open={isReportDialogOpen} onOpenChange={setIsReportDialogOpen}>
-        <DialogContent className="w-[calc(100vw-2rem)] sm:w-[calc(100vw-4rem)] max-w-2xl max-h-[90vh] overflow-y-auto overflow-x-hidden">
+        <DialogContent className="w-[calc(100vw-2rem)] sm:w-[calc(100vw-4rem)] sm:max-w-lg md:max-w-xl max-h-[90vh] overflow-y-auto overflow-x-hidden">
           {selectedReport && (
             <>
               <DialogHeader>
