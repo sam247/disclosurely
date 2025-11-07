@@ -2116,7 +2116,7 @@ Additional Details: ${decryptedContent.additionalDetails || 'None provided'}
 
       {/* Report Details Dialog */}
       <Dialog open={isReportDialogOpen} onOpenChange={setIsReportDialogOpen}>
-        <DialogContent className="w-[calc(100vw-2rem)] sm:w-[calc(100vw-4rem)] sm:max-w-lg md:max-w-md lg:max-w-lg max-h-[90vh] overflow-y-auto overflow-x-hidden">
+        <DialogContent className="w-[calc(100vw-2rem)] sm:w-[calc(100vw-4rem)] sm:max-w-lg md:!max-w-md lg:!max-w-lg md:!w-auto max-h-[90vh] overflow-y-auto overflow-x-hidden">
           {selectedReport && (
             <>
               <DialogHeader>
