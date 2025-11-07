@@ -163,10 +163,10 @@ const SecureMessaging = ({ report, onClose }: SecureMessagingProps) => {
       clearTimeout(navigationTimeoutRef.current);
     }
     
-    // Reset navigation flag after transition completes (500ms should be enough)
+    // Reset navigation flag after transition completes (1000ms to handle eager gestures)
     navigationTimeoutRef.current = setTimeout(() => {
       isNavigatingRef.current = false;
-    }, 500);
+    }, 1000);
     
     return () => {
       isMountedRef.current = false;

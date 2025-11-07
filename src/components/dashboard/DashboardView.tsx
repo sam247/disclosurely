@@ -1129,9 +1129,9 @@ Additional Details: ${decryptedContent.additionalDetails || 'None provided'}
   }
 
   return (
-    <div className="flex flex-col h-[calc(100vh-4rem)] overflow-hidden">
+    <div className="flex flex-col h-[calc(100vh-4rem)] md:h-[calc(100vh-4rem)] overflow-hidden">
       {/* Scrollable Content */}
-      <div className="flex-1 overflow-y-auto space-y-6">
+      <div className="flex-1 overflow-y-auto space-y-6 pb-[calc(1rem+env(safe-area-inset-bottom))]">
       {/* Summary Cards */}
       <div className="grid gap-4 grid-cols-3 md:grid-cols-3">
         <Card className="md:col-span-1">
