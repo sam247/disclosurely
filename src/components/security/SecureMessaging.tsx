@@ -65,62 +65,38 @@ const SecureMessaging = ({ report, onClose }: SecureMessagingProps) => {
   };
 
   useEffect(() => {
-    scrollToBottom();
-  }, [messages]);
+    // Only scroll if messages exist and component is mounted
+    if (messages.length > 0 && !isLoading) {
+      scrollToBottom();
+    }
+  }, [messages, isLoading]);
 
   useEffect(() => {
-    fetchMessages();
+    // Only fetch messages once when component mounts or report.id changes
+    let isMounted = true;
     
-    // Disabled real-time subscription to avoid encrypted message display issues
-    // Messages are refreshed manually after sending to ensure decrypted content
-    // const channel = supabase
-    //   .channel(`report-messages-secure-${report.id}`)
-    //   .on(
-    //     'postgres_changes',
-    //     {
-    //       event: 'INSERT',
-    //       schema: 'public',
-    //       table: 'report_messages',
-    //       filter: `report_id=eq.${report.id}`,
-    //     },
-    //     (payload) => {
-    //       console.log('New message received:', payload.new);
-    //       const newMsg = payload.new as Message;
-    //       setMessages(prev => {
-    //         // Check if message already exists to prevent duplicates
-    //         if (prev.some(msg => msg.id === newMsg.id)) {
-    //           return prev;
-    //         }
-    //         return [...prev, newMsg].sort((a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime());
-    //       });
-    //     }
-    //   )
-    //   .on(
-    //     'postgres_changes',
-    //     {
-    //       event: 'UPDATE',
-    //       schema: 'public',
-    //       table: 'report_messages',
-    //       filter: `report_id=eq.${report.id}`,
-    //     },
-    //     (payload) => {
-    //       console.log('Message updated:', payload.new);
-    //       const updatedMsg = payload.new as Message;
-    //       setMessages(prev => prev.map(msg => msg.id === updatedMsg.id ? updatedMsg : msg));
-    //     }
-    //   )
-    //   .subscribe((status) => {
-    //     console.log('Secure messaging subscription status:', status);
-    //   });
-
-    // return () => {
-    //   console.log('Cleaning up secure messaging subscription');
-    //   supabase.removeChannel(channel);
-    // };
+    const loadMessages = async () => {
+      if (isMounted) {
+        await fetchMessages();
+      }
+    };
+    
+    loadMessages();
+    
+    return () => {
+      isMounted = false;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [report.id]);
 
   const fetchMessages = async () => {
+    // Prevent multiple simultaneous fetches
+    if (isLoading) {
+      return;
+    }
+    
     try {
+      setIsLoading(true);
       console.log('Fetching messages for report:', report.id);
       
       // Use Edge Function for encrypted message loading instead of direct database query
