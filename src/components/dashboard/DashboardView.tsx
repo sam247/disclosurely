@@ -11,7 +11,7 @@ import { useOrganization } from '@/hooks/useOrganization';
 import { useToast } from '@/hooks/use-toast';
 import { useTranslation } from 'react-i18next';
 import { log, LogContext } from '@/utils/logger';
-import { FileText, Eye, Archive, Trash2, RotateCcw, MoreVertical, XCircle, ChevronUp, ChevronDown, CheckCircle, Search, Download, FileSpreadsheet, Bot, Zap } from 'lucide-react';
+import { FileText, Eye, Archive, Trash2, RotateCcw, MoreVertical, XCircle, ChevronUp, ChevronDown, CheckCircle, Search, Download, FileSpreadsheet, Bot, Zap, AlertCircle, Clock, Flame, User } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import ReportMessaging from '@/components/ReportMessaging';
 import ReportContentDisplay from '@/components/ReportContentDisplay';
@@ -136,6 +136,66 @@ interface Report {
   ai_assessed_at?: string;
   manual_risk_level?: number;
 }
+
+// Helper functions for AI Triage user-friendly labels
+const getSeverityScore = (aiRiskScore?: number): number => {
+  // Convert AI risk score (0-25) to severity (0-10)
+  if (!aiRiskScore) return 0;
+  return Math.round((aiRiskScore / 25) * 10);
+};
+
+const getSeverityDescription = (severity: number): string => {
+  if (severity >= 8) return "Critical - Immediate action needed";
+  if (severity >= 6) return "Significant impact likely";
+  if (severity >= 4) return "Moderate concern";
+  if (severity >= 2) return "Minor issue";
+  return "Low priority";
+};
+
+const getConfidencePercentage = (likelihoodScore?: number): number => {
+  // Convert likelihood (0-5) to confidence percentage
+  if (!likelihoodScore) return 0;
+  return Math.round((likelihoodScore / 5) * 100);
+};
+
+const getUrgencyLevel = (riskLevel?: string): 'HIGH' | 'MEDIUM' | 'LOW' => {
+  if (!riskLevel) return 'LOW';
+  if (riskLevel === 'Critical' || riskLevel === 'High') return 'HIGH';
+  if (riskLevel === 'Medium') return 'MEDIUM';
+  return 'LOW';
+};
+
+const getUrgencyIcon = (urgency: 'HIGH' | 'MEDIUM' | 'LOW') => {
+  switch(urgency) {
+    case 'HIGH': return Flame;
+    case 'MEDIUM': return Clock;
+    case 'LOW': return CheckCircle;
+  }
+};
+
+const getUrgencyColor = (urgency: 'HIGH' | 'MEDIUM' | 'LOW'): string => {
+  switch(urgency) {
+    case 'HIGH': return 'text-red-600 bg-red-50';
+    case 'MEDIUM': return 'text-yellow-600 bg-yellow-50';
+    case 'LOW': return 'text-green-600 bg-green-50';
+  }
+};
+
+const getTimelineText = (urgency: 'HIGH' | 'MEDIUM' | 'LOW'): string => {
+  switch(urgency) {
+    case 'HIGH': return 'Review within 24 hours';
+    case 'MEDIUM': return 'Review within 3 days';
+    case 'LOW': return 'Review within 7 days';
+  }
+};
+
+const getHandlerRecommendation = (urgency: 'HIGH' | 'MEDIUM' | 'LOW'): string => {
+  switch(urgency) {
+    case 'HIGH': return 'Senior case handler recommended';
+    case 'MEDIUM': return 'Standard case handler';
+    case 'LOW': return 'Any available handler';
+  }
+};
 
 const DashboardView = () => {
   const { user } = useAuth();
@@ -1279,56 +1339,97 @@ Additional Details: ${decryptedContent.additionalDetails || 'None provided'}
                                   <Popover>
                                     <PopoverTrigger asChild>
                                       <button
-                                        className={`inline-flex items-center gap-1 px-2 py-1 rounded-md text-xs font-medium cursor-pointer transition-all hover:ring-2 hover:ring-offset-1 ${
+                                        className={`inline-flex items-center gap-1 px-2 py-1 rounded-md text-xs font-semibold cursor-pointer transition-all hover:ring-2 hover:ring-offset-1 ${
                                           report.ai_risk_level === 'Critical' ? 'bg-red-600 text-white hover:ring-red-400' :
                                           report.ai_risk_level === 'High' ? 'bg-orange-500 text-white hover:ring-orange-400' :
                                           report.ai_risk_level === 'Medium' ? 'bg-yellow-500 text-white hover:ring-yellow-400' :
                                           'bg-green-500 text-white hover:ring-green-400'
                                         }`}
                                       >
-                                        <Bot className="w-3 h-3" />
-                                        <span>{report.ai_risk_level} ({report.ai_risk_score}/25)</span>
+                                        {(() => {
+                                          const urgency = getUrgencyLevel(report.ai_risk_level);
+                                          const Icon = getUrgencyIcon(urgency);
+                                          return <Icon className="w-3 h-3" />;
+                                        })()}
+                                        <span>{getUrgencyLevel(report.ai_risk_level)}</span>
                                         <Eye className="w-3 h-3 opacity-70" />
                                       </button>
                                     </PopoverTrigger>
                                     <PopoverContent className="w-80">
                                       <div className="space-y-3">
-                                        <div className="flex items-center gap-2">
-                                          <Zap className="w-4 h-4 text-primary" />
-                                          <h4 className="font-semibold text-sm">AI Risk Assessment</h4>
+                                        {/* Header */}
+                                        <div className="flex items-center justify-between">
+                                          <div className="flex items-center gap-2">
+                                            <Bot className="w-4 h-4 text-primary" />
+                                            <h4 className="font-semibold text-sm">AI Case Triage</h4>
+                                          </div>
+                                          <Badge variant={
+                                            getUrgencyLevel(report.ai_risk_level) === 'HIGH' ? 'destructive' :
+                                            getUrgencyLevel(report.ai_risk_level) === 'MEDIUM' ? 'default' :
+                                            'secondary'
+                                          }>
+                                            {getUrgencyLevel(report.ai_risk_level)}
+                                          </Badge>
                                         </div>
 
-                                        <div className="grid grid-cols-2 gap-2 text-sm">
-                                          <div>
-                                            <div className="text-xs text-muted-foreground">Risk Score</div>
-                                            <div className="font-bold">{report.ai_risk_score}/25</div>
+                                        <p className="text-sm text-muted-foreground">
+                                          This case {getUrgencyLevel(report.ai_risk_level) === 'HIGH' ? 'needs urgent attention' :
+                                                     getUrgencyLevel(report.ai_risk_level) === 'MEDIUM' ? 'requires prompt review' :
+                                                     'can be handled in standard timeline'}
+                                        </p>
+
+                                        {/* Severity Score */}
+                                        <div className="space-y-2">
+                                          <div className="flex justify-between items-center">
+                                            <span className="text-sm font-medium">Severity</span>
+                                            <span className="text-sm font-bold">{getSeverityScore(report.ai_risk_score)}/10</span>
                                           </div>
-                                          <div>
-                                            <div className="text-xs text-muted-foreground">Risk Level</div>
-                                            <div className="font-bold">{report.ai_risk_level}</div>
+                                          <div className="w-full bg-gray-200 rounded-full h-2">
+                                            <div
+                                              className={`h-2 rounded-full ${
+                                                getSeverityScore(report.ai_risk_score) >= 8 ? 'bg-red-600' :
+                                                getSeverityScore(report.ai_risk_score) >= 6 ? 'bg-orange-500' :
+                                                getSeverityScore(report.ai_risk_score) >= 4 ? 'bg-yellow-500' :
+                                                'bg-green-500'
+                                              }`}
+                                              style={{width: `${(getSeverityScore(report.ai_risk_score)/10)*100}%`}}
+                                            />
                                           </div>
+                                          <p className="text-xs text-muted-foreground">
+                                            {getSeverityDescription(getSeverityScore(report.ai_risk_score))}
+                                          </p>
+                                        </div>
+
+                                        {/* AI Confidence */}
+                                        <div className="flex justify-between items-center pt-2 border-t">
                                           <div>
-                                            <div className="text-xs text-muted-foreground">Likelihood</div>
-                                            <div className="font-bold">{report.ai_likelihood_score}/5</div>
+                                            <div className="text-sm font-medium">AI Confidence</div>
+                                            <div className="text-xs text-muted-foreground">How certain the AI is</div>
                                           </div>
-                                          <div>
-                                            <div className="text-xs text-muted-foreground">Impact</div>
-                                            <div className="font-bold">{report.ai_impact_score}/5</div>
+                                          <div className="text-right">
+                                            <div className="text-lg font-bold">{getConfidencePercentage(report.ai_likelihood_score)}%</div>
                                           </div>
                                         </div>
 
+                                        {/* Suggested Action */}
+                                        <div className="pt-3 border-t bg-blue-50 -mx-4 px-4 py-3 rounded-b-lg">
+                                          <div className="text-xs font-semibold text-blue-900 mb-2">Suggested Action:</div>
+                                          <div className="space-y-1">
+                                            <div className="flex items-center gap-2 text-sm text-blue-800">
+                                              <Clock className="w-4 h-4 flex-shrink-0" />
+                                              <span>{getTimelineText(getUrgencyLevel(report.ai_risk_level))}</span>
+                                            </div>
+                                            <div className="flex items-center gap-2 text-sm text-blue-800">
+                                              <User className="w-4 h-4 flex-shrink-0" />
+                                              <span>{getHandlerRecommendation(getUrgencyLevel(report.ai_risk_level))}</span>
+                                            </div>
+                                          </div>
+                                        </div>
+
+                                        {/* Timestamp */}
                                         {report.ai_assessed_at && (
                                           <div className="text-xs text-muted-foreground pt-2 border-t">
-                                            Assessed: {new Date(report.ai_assessed_at).toLocaleString()}
-                                          </div>
-                                        )}
-
-                                        {report.ai_risk_assessment?.priority_recommendation && (
-                                          <div className="text-xs pt-2 border-t">
-                                            <div className="font-medium mb-1">Recommended Priority:</div>
-                                            <Badge variant="outline" className="text-xs">
-                                              {report.ai_risk_assessment.priority_recommendation}
-                                            </Badge>
+                                            Triaged: {new Date(report.ai_assessed_at).toLocaleDateString()} at {new Date(report.ai_assessed_at).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}
                                           </div>
                                         )}
                                       </div>
@@ -1576,17 +1677,22 @@ Additional Details: ${decryptedContent.additionalDetails || 'None provided'}
                               isUpdating={updatingRiskLevel === report.id}
                             />
                             {report.ai_risk_level && (
-                              <Badge 
-                                variant={
-                                  report.ai_risk_level === 'Critical' ? 'destructive' :
-                                  report.ai_risk_level === 'High' ? 'destructive' :
-                                  report.ai_risk_level === 'Medium' ? 'secondary' :
-                                  'outline'
-                                }
-                                className="text-xs"
-                              >
-                                AI: {report.ai_risk_level}
-                              </Badge>
+                              <div className="flex items-center gap-1 px-2 py-1 rounded-md bg-opacity-20 text-xs font-medium">
+                                {(() => {
+                                  const urgency = getUrgencyLevel(report.ai_risk_level);
+                                  const Icon = getUrgencyIcon(urgency);
+                                  return (
+                                    <div className={`flex items-center gap-1 px-2 py-1 rounded-md ${
+                                      urgency === 'HIGH' ? 'bg-red-100 text-red-800' :
+                                      urgency === 'MEDIUM' ? 'bg-yellow-100 text-yellow-800' :
+                                      'bg-green-100 text-green-800'
+                                    }`}>
+                                      <Icon className="w-3 h-3" />
+                                      <span>AI: {urgency}</span>
+                                    </div>
+                                  );
+                                })()}
+                              </div>
                             )}
                           </div>
                           
