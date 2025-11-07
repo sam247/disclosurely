@@ -31,6 +31,7 @@ import VsWhistleblowerSoftware from './pages/VsWhistleblowerSoftware';
 import ComplianceSoftware from './pages/ComplianceSoftware';
 import WhistleblowingDirective from './pages/WhistleblowingDirective';
 import SubmissionFormWrapper from './components/forms/SubmissionFormWrapper';
+import CleanSubmissionWrapper from './components/forms/CleanSubmissionWrapper';
 import ReportSuccess from './components/ReportSuccess';
 import TestAnonymousSubmission from './pages/TestAnonymousSubmission';
 import ScrollToTop from './components/ScrollToTop';
@@ -116,9 +117,18 @@ const AppContent = () => {
           </ProtectedRoute>
         } />
         
-        {/* Anonymous report routes */}
+        {/* Anonymous report routes - Clean URLs */}
+        <Route path="/report" element={<CleanSubmissionWrapper />} />
+        <Route path="/submit" element={<CleanSubmissionWrapper />} />
+        <Route path="/whistleblow" element={<CleanSubmissionWrapper />} />
+
+        {/* Legacy token-based routes (for testing/fallback) */}
         <Route path="/secure/tool/submit/:linkToken" element={<SubmissionFormWrapper />} />
         <Route path="/secure/tool/submit/:linkToken/status" element={<ReportStatusLookup />} />
+
+        {/* Report status and messaging */}
+        <Route path="/status" element={<ReportStatusLookup />} />
+        <Route path="/success" element={<ReportSuccess />} />
         <Route path="/secure/tool/success" element={<ReportSuccess />} />
         <Route path="/secure/tool/lookup" element={<ReportStatusLookup />} />
         <Route path="/secure/tool/messaging/:trackingId" element={<WhistleblowerMessagingPage />} />

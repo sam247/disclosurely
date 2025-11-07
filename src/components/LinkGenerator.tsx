@@ -155,9 +155,10 @@ const LinkGenerator = () => {
 
   const generateLinkUrl = (linkToken: string) => {
     if (primaryDomain) {
-      return `https://${primaryDomain}/secure/tool/submit/${linkToken}`;
+      return `https://${primaryDomain}/report`;
     }
     // Always use secure.disclosurely.com for default (never app.disclosurely.com)
+    // Keep token-based for default domain since it doesn't have custom domain detection
     return `https://secure.disclosurely.com/secure/tool/submit/${linkToken}`;
   };
 
@@ -181,9 +182,9 @@ const LinkGenerator = () => {
   // State for checking if branded link is accessible - MUST be before early returns (React rules)
   const [brandedLinkStatus, setBrandedLinkStatus] = useState<'checking' | 'accessible' | 'inaccessible' | null>(null);
   
-  // Generate branded URL if we have primary domain and link
-  const brandedUrl = primaryDomain && primaryLink 
-    ? `https://${primaryDomain}/secure/tool/submit/${primaryLink.link_token}` 
+  // Generate branded URL if we have primary domain and link - use clean URL
+  const brandedUrl = primaryDomain && primaryLink
+    ? `https://${primaryDomain}/report`
     : null;
 
   // Debug logging - MUST be after primaryLink is defined
@@ -192,7 +193,7 @@ const LinkGenerator = () => {
       console.log('🔍 LinkGenerator Debug:', {
         customDomains,
         primaryDomain,
-        brandedUrl: primaryDomain && primaryLink ? `https://${primaryDomain}/secure/tool/submit/${primaryLink.link_token}` : null,
+        brandedUrl: primaryDomain && primaryLink ? `https://${primaryDomain}/report` : null,
         user: user.id
       });
     }
@@ -292,35 +293,13 @@ const LinkGenerator = () => {
           </div>
         </CardHeader>
         <CardContent className="space-y-3">
-          {/* Default Link - Always show first */}
-          <div className="p-4 bg-muted/30 rounded-lg border">
-            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-              <div className="flex-1 min-w-0 w-full">
-                <p className="text-sm font-semibold mb-1">Default Secure Link</p>
-                <p className="text-xs text-muted-foreground mb-2">
-                  Used {primaryLink.usage_count || 0} times
-                </p>
-                <code className="text-xs sm:text-sm bg-background px-3 py-2 rounded border font-mono break-all block w-full">
-                  {unbrandedUrl}
-                </code>
-              </div>
-              <Button
-                size="sm"
-                onClick={() => copyToClipboard(unbrandedUrl)}
-                className="whitespace-nowrap shrink-0 w-full sm:w-auto"
-              >
-                {t('copyLink')}
-              </Button>
-            </div>
-          </div>
-
-          {/* Branded Link - Show if available */}
+          {/* Branded Link - Show first if available */}
           {brandedUrl && primaryDomain ? (
             <div className="p-4 bg-blue-50/50 rounded-lg border border-blue-200">
               <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
                 <div className="flex-1 min-w-0 w-full">
                   <div className="flex flex-wrap items-center gap-2 mb-1">
-                    <p className="text-sm font-semibold">Your Branded Secure Link</p>
+                    <p className="text-sm font-semibold">✨ Your Branded Link</p>
                     {primaryDomainStatus && primaryDomainStatus !== 'active' && (
                       <Badge variant="outline" className="text-xs h-5 capitalize shrink-0">
                         {primaryDomainStatus}
@@ -343,9 +322,9 @@ const LinkGenerator = () => {
                     )}
                   </div>
                   <p className="text-xs text-muted-foreground mb-2 break-words">
-                    Custom domain: {primaryDomain}
+                    Clean, professional URL for your employees • Used {primaryLink.usage_count || 0} times
                   </p>
-                  <code className="text-xs sm:text-sm bg-background px-3 py-2 rounded border font-mono break-all block w-full">
+                  <code className="text-xs sm:text-sm bg-background px-3 py-2 rounded border font-mono break-all block w-full font-semibold">
                     {brandedUrl}
                   </code>
                 </div>
