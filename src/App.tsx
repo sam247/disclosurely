@@ -33,6 +33,7 @@ import ComplianceSoftware from './pages/ComplianceSoftware';
 import WhistleblowingDirective from './pages/WhistleblowingDirective';
 import SubmissionFormWrapper from './components/forms/SubmissionFormWrapper';
 import CleanSubmissionWrapper from './components/forms/CleanSubmissionWrapper';
+import ProgressiveFormWrapper from './components/forms/ProgressiveFormWrapper';
 import ReportSuccess from './components/ReportSuccess';
 import TestAnonymousSubmission from './pages/TestAnonymousSubmission';
 import ScrollToTop from './components/ScrollToTop';
@@ -132,6 +133,9 @@ const AppContent = () => {
         <Route path="/report" element={<CleanSubmissionWrapper />} />
         <Route path="/submit" element={<CleanSubmissionWrapper />} />
         <Route path="/whistleblow" element={<CleanSubmissionWrapper />} />
+
+        {/* Progressive disclosure form - New experience */}
+        <Route path="/newform" element={<ProgressiveFormWrapper />} />
 
         {/* Legacy token-based routes (for testing/fallback) */}
         <Route path="/secure/tool/submit/:linkToken" element={<SubmissionFormWrapper />} />
