@@ -6,6 +6,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Badge } from '@/components/ui/badge';
 import { Sparkles, Loader2, HelpCircle } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
+import PrivacyScanner from './PrivacyScanner';
 import {
   Tooltip,
   TooltipContent,
@@ -245,6 +246,19 @@ const ReportDetailsForm = ({ formData, updateFormData, validationErrors = {} }: 
             </div>
           )}
         </div>
+
+        {/* Privacy Scanner - shows privacy warnings */}
+        <PrivacyScanner
+          title={formData.title}
+          description={formData.description}
+          onAutoRedact={(redactedTitle, redactedDescription) => {
+            updateFormData({
+              title: redactedTitle,
+              description: redactedDescription
+            });
+          }}
+          className="mt-4"
+        />
 
       <div className="space-y-2">
         <div className="flex items-center justify-between">
