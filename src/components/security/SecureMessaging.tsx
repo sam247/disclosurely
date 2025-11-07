@@ -72,27 +72,10 @@ const SecureMessaging = ({ report, onClose }: SecureMessagingProps) => {
     }
   }, [messages, isLoading]);
 
-  useEffect(() => {
-    // Only fetch messages once when component mounts or report.id changes
-    let isMounted = true;
-    
-    const loadMessages = async () => {
-      if (isMounted && !fetchingRef.current) {
-        await fetchMessages();
-      }
-    };
-    
-    loadMessages();
-    
-    return () => {
-      isMounted = false;
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [report.id]);
-
-  const fetchMessages = async () => {
+  const fetchMessages = useCallback(async () => {
     // Prevent multiple simultaneous fetches using ref instead of state
     if (fetchingRef.current) {
+      console.log('Already fetching messages, skipping...');
       return;
     }
     
@@ -127,7 +110,26 @@ const SecureMessaging = ({ report, onClose }: SecureMessagingProps) => {
       setIsLoading(false);
       fetchingRef.current = false;
     }
-  };
+  }, [report.id, report.tracking_id, toast]);
+
+  useEffect(() => {
+    // Only fetch messages once when component mounts or report.id changes
+    let isMounted = true;
+    
+    const loadMessages = async () => {
+      if (isMounted && !fetchingRef.current) {
+        await fetchMessages();
+      }
+    };
+    
+    loadMessages();
+    
+    return () => {
+      isMounted = false;
+      // Reset fetching ref when component unmounts to prevent stale state
+      fetchingRef.current = false;
+    };
+  }, [report.id, fetchMessages]);
 
   const validateMessage = (data: { message: string }) => {
     if (!data.message.trim()) {
