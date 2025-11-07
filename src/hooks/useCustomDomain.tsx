@@ -35,7 +35,54 @@ export const useCustomDomain = (): CustomDomainInfo => {
         return;
       }
 
-      // Check for custom domains (no more subdomain support)
+      // Check for disclosurely.com subdomain pattern: {slug}.disclosurely.com
+      const subdomainMatch = currentHost.match(/^([^.]+)\.disclosurely\.com$/);
+      if (subdomainMatch) {
+        const slug = subdomainMatch[1];
+
+        // Skip if it's the main app domain or secure domain
+        if (slug === 'app' || slug === 'www' || slug === 'secure') {
+          console.log('⏭️ useCustomDomain: Skipping app/www/secure subdomain');
+          setDomainInfo({
+            customDomain: null,
+            organizationId: null,
+            isCustomDomain: false,
+            loading: false
+          });
+          return;
+        }
+
+        console.log('📡 useCustomDomain: Detected subdomain slug:', slug);
+
+        try {
+          // Look up organization by domain slug
+          const { data: org, error } = await supabase
+            .from('organizations')
+            .select('id, domain, name')
+            .eq('domain', slug)
+            .eq('is_active', true)
+            .single();
+
+          console.log('📡 useCustomDomain: Subdomain query result:', { data: org, error });
+
+          if (!error && org) {
+            console.log('✅ useCustomDomain: Organization found via subdomain!', org);
+            setDomainInfo({
+              customDomain: currentHost,
+              organizationId: org.id,
+              isCustomDomain: true,
+              loading: false
+            });
+            return;
+          } else {
+            console.log('❌ useCustomDomain: No organization found for subdomain:', slug);
+          }
+        } catch (error) {
+          console.error('❌ useCustomDomain: Error checking subdomain:', error);
+        }
+      }
+
+      // Check for custom domains (e.g., testing.betterranking.co.uk)
       try {
         console.log('📡 useCustomDomain: Querying custom_domains table for:', currentHost);
         const { data: customDomain, error } = await supabase
