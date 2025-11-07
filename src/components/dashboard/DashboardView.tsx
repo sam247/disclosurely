@@ -1208,7 +1208,7 @@ Additional Details: ${decryptedContent.additionalDetails || 'None provided'}
           </div>
           <TabsContent value="active">
           <Card className="md:border md:shadow-sm border-0 shadow-none">
-            <CardContent className="pt-0 md:pt-6">
+            <CardContent className="pt-0 px-0 md:pt-6 md:px-6">
               {filteredReports.length === 0 ? (
                 <div className="text-center py-8 text-muted-foreground">
                   {isOrgAdmin ? (
