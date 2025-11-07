@@ -2,22 +2,41 @@ import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.50.0'
 import "https://deno.land/x/xhr@0.1.0/mod.ts"
 
-// Restrict CORS for authenticated endpoints
+// Restrict CORS for authenticated endpoints  
 const getAllowedOrigin = (req: Request): string => {
   const origin = req.headers.get('origin');
-  const allowedOrigins = [
-    'https://5c8a3c05-42bc-4914-b492-275c4e4e75f4.lovableproject.com',
+  
+  if (!origin) {
+    return 'https://disclosurely.com';
+  }
+  
+  // Allow specific production domains
+  const allowedDomains = [
+    'https://disclosurely.com',
+    'https://www.disclosurely.com',
+    'https://app.disclosurely.com',
     'http://localhost:8080',
     'http://localhost:5173',
   ];
   
-  return origin && allowedOrigins.includes(origin) ? origin : allowedOrigins[0];
+  if (allowedDomains.includes(origin)) {
+    return origin;
+  }
+  
+  // Allow Lovable preview domains (any subdomain)
+  if (origin.includes('.lovable.app') || origin.includes('.lovableproject.com')) {
+    return origin;
+  }
+  
+  // Default fallback
+  return 'https://disclosurely.com';
 };
 
 const getCorsHeaders = (req: Request) => ({
   'Access-Control-Allow-Origin': getAllowedOrigin(req),
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
   'Access-Control-Allow-Credentials': 'true',
+  'Access-Control-Allow-Methods': 'POST, OPTIONS',
 });
 
 // ⚠️ CRITICAL: Verify ENCRYPTION_SALT on module load (startup check)

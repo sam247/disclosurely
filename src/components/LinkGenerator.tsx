@@ -321,7 +321,7 @@ const LinkGenerator = () => {
                 <div className="flex-1 min-w-0 w-full">
                   <div className="flex flex-wrap items-center gap-2 mb-1">
                     <p className="text-sm font-semibold">Your Branded Secure Link</p>
-                    {primaryDomainStatus && (
+                    {primaryDomainStatus && primaryDomainStatus !== 'active' && (
                       <Badge variant="outline" className="text-xs h-5 capitalize shrink-0">
                         {primaryDomainStatus}
                       </Badge>

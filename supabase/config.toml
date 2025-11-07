@@ -65,3 +65,6 @@ verify_jwt = true
 
 [functions.strip-document-metadata]
 verify_jwt = false
+
+[functions.strip-all-metadata]
+verify_jwt = false

@@ -76,6 +76,7 @@ const AICaseHelper: React.FC<AICaseHelperProps> = ({ reportId, reportContent }) 
   const [hasViewedPreview, setHasViewedPreview] = useState(false); // Track if user has previewed current case
   const containerRef = useRef<HTMLDivElement>(null);
   const chatMessagesEndRef = useRef<HTMLDivElement>(null);
+  const isDeletingRef = useRef<boolean>(false); // Track if we're deleting to prevent selection
   const { user } = useAuth();
   const { organization } = useOrganization();
   const { toast } = useToast();
@@ -770,6 +771,12 @@ Guidelines:
             <div className="space-y-2">
               <label className="text-sm font-semibold text-green-700">📁 Saved Analyses {savedAnalyses.length > 0 && `(${savedAnalyses.length})`}</label>
               <Select value={currentSavedAnalysisId || ""} onValueChange={(value) => {
+                  // Don't process selection if we're deleting
+                  if (isDeletingRef.current) {
+                    isDeletingRef.current = false;
+                    return;
+                  }
+                  
                   const saved = savedAnalyses.find(s => s.id === value);
                   if (saved) {
                     // Load the saved analysis into chat
@@ -811,9 +818,11 @@ Guidelines:
                         value={saved.id}
                         onSelect={(e) => {
                           // Don't select if clicking the delete button
-                          if ((e.target as HTMLElement).closest('button')) {
+                          const target = e.target as HTMLElement;
+                          if (target.closest('button') || target.closest('[data-delete-button]')) {
                             e.preventDefault();
-                            return;
+                            e.stopPropagation();
+                            return false;
                           }
                         }}
                       >
@@ -827,15 +836,23 @@ Guidelines:
                           <Button
                             size="sm"
                             variant="ghost"
+                            data-delete-button
                             className="h-6 w-6 p-0 opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0"
                             onMouseDown={(e) => {
                               e.preventDefault();
                               e.stopPropagation();
+                              isDeletingRef.current = true;
                             }}
                             onClick={(e) => {
                               e.preventDefault();
                               e.stopPropagation();
+                              isDeletingRef.current = true;
                               deleteSavedAnalysis(saved.id, saved.tracking_id);
+                            }}
+                            onPointerDown={(e) => {
+                              e.preventDefault();
+                              e.stopPropagation();
+                              isDeletingRef.current = true;
                             }}
                           >
                             <Trash2 className="h-3 w-3 text-destructive" />
