@@ -7,6 +7,7 @@ const corsHeaders = {
 }
 
 const MAX_FILE_SIZE = 100 * 1024 * 1024 // 100MB
+const MAX_VIDEO_SIZE = 500 * 1024 * 1024 // 500MB for videos (larger timeout needed)
 
 /**
  * Detect file type using magic bytes (more reliable than MIME type)
@@ -61,52 +62,123 @@ function detectFileType(data: Uint8Array, mimeType: string): string {
 }
 
 /**
+ * Check if FFmpeg is available on the system
+ */
+async function isFFmpegAvailable(): Promise<boolean> {
+  try {
+    const command = new Deno.Command('ffmpeg', {
+      args: ['-version'],
+      stdout: 'null',
+      stderr: 'null',
+    })
+    const { code } = await command.output()
+    return code === 0
+  } catch {
+    return false
+  }
+}
+
+/**
  * Strip metadata from video/audio files
- * Note: Full metadata stripping requires FFmpeg which isn't available in Deno Deploy
- * This is a basic implementation that removes some metadata boxes
- * For production, consider using an external FFmpeg service
+ * For MP3: Removes ID3 tags without FFmpeg
+ * For MP4/Videos: Requires FFmpeg to be installed on the server
+ * FFmpeg command: ffmpeg -i input -map_metadata -1 -c copy output
  */
 async function stripVideoAudioMetadata(fileData: Uint8Array, fileType: string): Promise<Uint8Array> {
   try {
-    // For MP4, we can remove some metadata boxes (moov/meta boxes)
-    // This is a simplified approach - full stripping requires FFmpeg
-    if (fileType === 'video/mp4' || fileType === 'audio/mp4') {
-      // MP4 structure: ftyp box + moov box + mdat box
-      // Metadata is in moov/meta boxes
-      // For now, we'll do basic box removal
-      // In production, use FFmpeg: ffmpeg -i input.mp4 -map_metadata -1 -c copy output.mp4
-      
-      console.log('⚠️ MP4 metadata stripping - basic implementation (full stripping requires FFmpeg)')
-      // Return as-is for now - requires FFmpeg service for full implementation
-      // This should be replaced with a call to an FFmpeg service
-      throw new Error('Video/Audio metadata stripping requires FFmpeg service. Please use an external service.')
-    }
-    
+    // Handle MP3 files - can be processed without FFmpeg
     if (fileType === 'audio/mpeg' || fileType === 'audio/mp3') {
-      // MP3: Remove ID3 tags
-      // ID3v2 starts with "ID3"
-      if (fileData.length >= 3 && 
+      console.log('Processing MP3 file - removing ID3 tags')
+      let cleanedData = fileData
+
+      // Remove ID3v2 tag (at the beginning)
+      if (fileData.length >= 10 &&
           fileData[0] === 0x49 && fileData[1] === 0x44 && fileData[2] === 0x33) {
-        // Skip ID3v2 tag
-        const tagSize = (fileData[6] << 21) | (fileData[7] << 14) | 
+        const tagSize = (fileData[6] << 21) | (fileData[7] << 14) |
                         (fileData[8] << 7) | fileData[9]
         const headerSize = 10
-        return fileData.slice(headerSize + tagSize)
+        cleanedData = fileData.slice(headerSize + tagSize)
+        console.log(`✓ Removed ID3v2 tag: ${headerSize + tagSize} bytes`)
       }
-      
-      // ID3v1 is at the end (128 bytes)
-      if (fileData.length >= 128) {
-        const end = fileData.slice(-128)
+
+      // Remove ID3v1 tag (at the end - 128 bytes)
+      if (cleanedData.length >= 128) {
+        const end = cleanedData.slice(-128)
         if (end[0] === 0x54 && end[1] === 0x41 && end[2] === 0x47) {
-          // Found ID3v1 tag, remove it
-          return fileData.slice(0, -128)
+          cleanedData = cleanedData.slice(0, -128)
+          console.log('✓ Removed ID3v1 tag: 128 bytes')
         }
       }
-      
-      return fileData
+
+      return cleanedData
     }
-    
-    // Other video/audio formats require FFmpeg
+
+    // Handle video files (MP4, etc) - requires FFmpeg
+    if (fileType.startsWith('video/') || fileType === 'audio/mp4') {
+      const ffmpegAvailable = await isFFmpegAvailable()
+
+      if (!ffmpegAvailable) {
+        throw new Error(
+          'FFmpeg is not available. Video metadata stripping requires FFmpeg to be installed. ' +
+          'Please install FFmpeg on your server: https://www.ffmpeg.org/download.html'
+        )
+      }
+
+      console.log('Processing video file with FFmpeg - removing all metadata')
+
+      // Create temporary files
+      const tempDir = await Deno.makeTempDir()
+      const inputPath = `${tempDir}/input${fileType === 'video/mp4' ? '.mp4' : ''}`
+      const outputPath = `${tempDir}/output${fileType === 'video/mp4' ? '.mp4' : ''}`
+
+      try {
+        // Write input file
+        await Deno.writeFile(inputPath, fileData)
+
+        // Run FFmpeg to strip metadata
+        // -i: input file
+        // -map_metadata -1: strip all metadata
+        // -c copy: copy codec (no re-encoding for speed)
+        // -fflags +bitexact: avoid encoding metadata
+        // -y: overwrite output file
+        const command = new Deno.Command('ffmpeg', {
+          args: [
+            '-i', inputPath,
+            '-map_metadata', '-1',
+            '-c', 'copy',
+            '-fflags', '+bitexact',
+            '-y',
+            outputPath
+          ],
+          stdout: 'piped',
+          stderr: 'piped',
+        })
+
+        const { code, stderr } = await command.output()
+
+        if (code !== 0) {
+          const errorOutput = new TextDecoder().decode(stderr)
+          console.error('FFmpeg error:', errorOutput)
+          throw new Error(`FFmpeg failed with code ${code}`)
+        }
+
+        // Read the cleaned file
+        const cleanedData = await Deno.readFile(outputPath)
+        console.log(`✓ FFmpeg processing complete. Original: ${fileData.length} bytes, Cleaned: ${cleanedData.length} bytes`)
+
+        return cleanedData
+
+      } finally {
+        // Clean up temporary files
+        try {
+          await Deno.remove(tempDir, { recursive: true })
+        } catch (e) {
+          console.warn('Failed to clean up temp directory:', e)
+        }
+      }
+    }
+
+    // Other formats not supported
     throw new Error(`Video/Audio metadata stripping for ${fileType} requires FFmpeg service`)
   } catch (error) {
     console.error('❌ Failed to strip video/audio metadata:', error)
@@ -410,14 +482,6 @@ serve(async (req) => {
       )
     }
 
-    // Check file size
-    if (file.size > MAX_FILE_SIZE) {
-      return new Response(
-        JSON.stringify({ error: `File size exceeds maximum of ${MAX_FILE_SIZE / 1024 / 1024}MB` }),
-        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      )
-    }
-
     // Get optional parameters
     const userId = formData.get('userId') as string | null
     const reportId = formData.get('reportId') as string | null
@@ -431,6 +495,33 @@ serve(async (req) => {
     // Detect file type using magic bytes (don't trust client)
     const detectedType = detectFileType(fileData, file.type)
     console.log(`Detected file type: ${detectedType} (client provided: ${file.type})`)
+
+    // Check file size based on type
+    const isVideo = detectedType.startsWith('video/')
+    const maxSize = isVideo ? MAX_VIDEO_SIZE : MAX_FILE_SIZE
+
+    if (file.size > maxSize) {
+      return new Response(
+        JSON.stringify({
+          error: `File size exceeds maximum of ${maxSize / 1024 / 1024}MB for ${isVideo ? 'videos' : 'files'}`
+        }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      )
+    }
+
+    // Reject WebP and GIF files
+    if (detectedType === 'image/webp') {
+      return new Response(
+        JSON.stringify({ error: 'WebP files are not supported. Please use JPEG or PNG.' }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      )
+    }
+    if (detectedType === 'image/gif') {
+      return new Response(
+        JSON.stringify({ error: 'GIF files are not supported. Please use JPEG or PNG.' }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      )
+    }
 
     const originalSize = fileData.length
     let cleanedData: Uint8Array

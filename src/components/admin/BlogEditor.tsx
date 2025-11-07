@@ -136,11 +136,11 @@ export const BlogEditor = () => {
     if (!file) return;
 
     // Validate file type
-    const allowedTypes = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
+    const allowedTypes = ['image/jpeg', 'image/png'];
     if (!allowedTypes.includes(file.type)) {
       toast({
         title: "Invalid file type",
-        description: "Please upload a JPEG, PNG, WebP, or GIF image.",
+        description: "Please upload a JPEG or PNG image.",
         variant: "destructive",
       });
       return;
@@ -203,11 +203,11 @@ export const BlogEditor = () => {
     if (!file) return;
 
     // Validate file type
-    const allowedTypes = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
+    const allowedTypes = ['image/jpeg', 'image/png'];
     if (!allowedTypes.includes(file.type)) {
       toast({
         title: "Invalid file type",
-        description: "Please upload a JPEG, PNG, WebP, or GIF image.",
+        description: "Please upload a JPEG or PNG image.",
         variant: "destructive",
       });
       return;

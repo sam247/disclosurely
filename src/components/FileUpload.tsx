@@ -2,6 +2,7 @@
 import React, { useState, useCallback } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
+import { Progress } from '@/components/ui/progress';
 import { Upload, X, File, AlertCircle, Shield, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
@@ -25,6 +26,8 @@ const FileUpload: React.FC<FileUploadProps> = ({
   const [dragActive, setDragActive] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
   const [processedFiles, setProcessedFiles] = useState<Set<string>>(new Set());
+  const [uploadProgress, setUploadProgress] = useState<{[key: string]: number}>({});
+  const [processingFileName, setProcessingFileName] = useState<string>('');
 
   const validateFile = (file: File): boolean => {
     // Check file size
@@ -82,50 +85,84 @@ const FileUpload: React.FC<FileUploadProps> = ({
 
         for (const file of validFiles) {
           try {
+            // Set processing status
+            setProcessingFileName(file.name);
+            setUploadProgress({...uploadProgress, [file.name]: 0});
+
             // Create FormData to send file
             const formData = new FormData();
             formData.append('file', file);
 
-            // Call unified edge function
-            const response = await fetch(
-              `${supabase.supabaseUrl}/functions/v1/strip-all-metadata`,
-              {
-                method: 'POST',
-                headers: {
-                  'Authorization': `Bearer ${supabase.supabaseKey}`
-                },
-                body: formData
-              }
-            );
+            // Simulate progress for large files (especially videos)
+            const isLargeFile = file.size > 10 * 1024 * 1024; // > 10MB
+            let progressInterval: ReturnType<typeof setInterval> | null = null;
 
-            if (!response.ok) {
-              const errorData = await response.json().catch(() => ({ error: 'Unknown error' }));
-              throw new Error(errorData.error || `Server returned ${response.status}`);
+            if (isLargeFile) {
+              let progress = 0;
+              progressInterval = setInterval(() => {
+                progress += 5;
+                if (progress >= 90) {
+                  clearInterval(progressInterval!);
+                } else {
+                  setUploadProgress(prev => ({...prev, [file.name]: progress}));
+                }
+              }, 1000);
             }
 
-            // Get cleaned file
-            const cleanedBlob = await response.blob();
-            const extension = file.name.split('.').pop() || '';
-            const cleanedFile = new File(
-              [cleanedBlob],
-              `sanitized_${Date.now()}.${extension}`,
-              { type: file.type }
-            );
+            try {
+              // Call unified edge function with extended timeout for videos
+              const controller = new AbortController();
+              const timeout = file.type.startsWith('video/') ? 300000 : 120000; // 5 min for videos, 2 min for others
+              const timeoutId = setTimeout(() => controller.abort(), timeout);
 
-            cleanFiles.push(cleanedFile);
-            newProcessedFiles.add(cleanedFile.name);
-
-            const originalSize = file.size;
-            const cleanedSize = cleanedFile.size;
-            const metadataFound = response.headers.get('X-Metadata-Found') === 'true';
-
-            if (metadataFound) {
-              toast.success(
-                `🛡️ Metadata removed from ${file.name}`,
-                { description: 'Your identity is protected' }
+              const response = await fetch(
+                `${supabase.supabaseUrl}/functions/v1/strip-all-metadata`,
+                {
+                  method: 'POST',
+                  headers: {
+                    'Authorization': `Bearer ${supabase.supabaseKey}`
+                  },
+                  body: formData,
+                  signal: controller.signal
+                }
               );
-            } else {
-              console.log(`No metadata found in ${file.name}`);
+
+              clearTimeout(timeoutId);
+              if (progressInterval) clearInterval(progressInterval);
+              setUploadProgress(prev => ({...prev, [file.name]: 100}));
+
+              if (!response.ok) {
+                const errorData = await response.json().catch(() => ({ error: 'Unknown error' }));
+                throw new Error(errorData.error || `Server returned ${response.status}`);
+              }
+
+              // Get cleaned file
+              const cleanedBlob = await response.blob();
+              const extension = file.name.split('.').pop() || '';
+              const cleanedFile = new File(
+                [cleanedBlob],
+                `sanitized_${Date.now()}.${extension}`,
+                { type: file.type }
+              );
+
+              cleanFiles.push(cleanedFile);
+              newProcessedFiles.add(cleanedFile.name);
+
+              const originalSize = file.size;
+              const cleanedSize = cleanedFile.size;
+              const metadataFound = response.headers.get('X-Metadata-Found') === 'true';
+
+              if (metadataFound) {
+                toast.success(
+                  `🛡️ Metadata removed from ${file.name}`,
+                  { description: 'Your identity is protected' }
+                );
+              } else {
+                console.log(`No metadata found in ${file.name}`);
+              }
+            } catch (fetchError) {
+              if (progressInterval) clearInterval(progressInterval);
+              throw fetchError;
             }
           } catch (error) {
             // NEVER return original file if stripping fails
@@ -140,19 +177,19 @@ const FileUpload: React.FC<FileUploadProps> = ({
 
         setProcessedFiles(newProcessedFiles);
 
-        if (cleanFiles.length > 0) {
-          const updatedFiles = [...files, ...cleanFiles];
-          setFiles(updatedFiles);
-          onFilesChange(updatedFiles);
-        }
+        const updatedFiles = [...files, ...cleanFiles];
+        setFiles(updatedFiles);
+        onFilesChange(updatedFiles);
       } catch (error) {
         console.error('Error processing files:', error);
         toast.error('Failed to process files. Please try again.');
       } finally {
         setIsProcessing(false);
+        setProcessingFileName('');
+        setUploadProgress({});
       }
     }
-  }, [files, maxFiles, acceptedTypes, disabled, isProcessing, processedFiles, onFilesChange]);
+  }, [files, maxFiles, acceptedTypes, disabled, isProcessing, processedFiles, uploadProgress, onFilesChange]);
 
   const removeFile = (index: number) => {
     const updatedFiles = files.filter((_, i) => i !== index);
@@ -209,7 +246,7 @@ const FileUpload: React.FC<FileUploadProps> = ({
             Maximum {maxFiles} files, up to {maxSize}MB each
           </p>
           <p className="text-xs text-gray-400 mt-1">
-            Supported: Images, PDF, Word documents, Text files
+            Supported: Images (JPEG, PNG), PDF, Word documents, Text files, Videos (MP4), Audio (MP3)
           </p>
 
           <div className="flex items-center justify-center gap-1 mt-3 text-xs sm:text-sm text-green-600 px-2">
@@ -218,9 +255,20 @@ const FileUpload: React.FC<FileUploadProps> = ({
           </div>
 
           {isProcessing && (
-            <div className="flex items-center justify-center gap-2 mt-3 text-sm text-blue-600">
-              <Loader2 className="h-4 w-4 animate-spin" />
-              <span>Stripping metadata from files... This may take 5-10 seconds for videos.</span>
+            <div className="w-full max-w-md mt-4 space-y-2">
+              <div className="flex items-center justify-center gap-2 text-sm text-blue-600">
+                <Loader2 className="h-4 w-4 animate-spin" />
+                <span>Processing {processingFileName}...</span>
+              </div>
+              {processingFileName && uploadProgress[processingFileName] !== undefined && (
+                <div className="space-y-1">
+                  <Progress value={uploadProgress[processingFileName]} className="h-2" />
+                  <p className="text-xs text-gray-500 text-center">
+                    {uploadProgress[processingFileName]}% - Stripping metadata...
+                    {uploadProgress[processingFileName] < 100 && ' This may take a while for large videos.'}
+                  </p>
+                </div>
+              )}
             </div>
           )}
 
