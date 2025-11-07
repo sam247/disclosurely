@@ -343,15 +343,15 @@ const SecureMessaging = ({ report, onClose }: SecureMessagingProps) => {
             disabled={isSubmitting}
             maxLength={5000}
           />
-          <div className="flex items-center justify-between">
-            <div className="flex items-center text-sm text-gray-500">
-              <Lock className="h-4 w-4 mr-1" />
-              {t('messagesEncrypted')}
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 sm:gap-0">
+            <div className="flex items-center text-xs sm:text-sm text-gray-500">
+              <Lock className="h-3 w-3 sm:h-4 sm:w-4 mr-1" />
+              <span className="break-words">{t('messagesEncrypted')}</span>
             </div>
             <Button 
               type="submit"
               disabled={isSubmitting || !newMessage.trim()}
-              className="flex items-center gap-2"
+              className="flex items-center gap-2 w-full sm:w-auto"
             >
               <Send className="h-4 w-4" />
               {isSubmitting ? 'Sending...' : t('sendMessage')}
