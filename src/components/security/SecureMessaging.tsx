@@ -57,6 +57,8 @@ const SecureMessaging = ({ report, onClose }: SecureMessagingProps) => {
   const [translatedMessages, setTranslatedMessages] = useState<Record<string, string>>({});
   const fetchingRef = useRef(false);
   const isMountedRef = useRef(true);
+  const isNavigatingRef = useRef(false);
+  const navigationTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   const { isSubmitting, secureSubmit } = useSecureForm({
     rateLimitKey: `messaging_${report.id}`,
@@ -77,8 +79,9 @@ const SecureMessaging = ({ report, onClose }: SecureMessagingProps) => {
 
   const fetchMessages = useCallback(async () => {
     // Prevent multiple simultaneous fetches using ref instead of state
-    if (fetchingRef.current || !isMountedRef.current) {
-      console.log('Already fetching messages or component unmounted, skipping...');
+    // Also prevent fetching during navigation transitions (eager gestures)
+    if (fetchingRef.current || !isMountedRef.current || isNavigatingRef.current) {
+      console.log('Already fetching messages, component unmounted, or navigating - skipping...');
       return;
     }
     
@@ -150,10 +153,31 @@ const SecureMessaging = ({ report, onClose }: SecureMessagingProps) => {
   }, [report.id, fetchMessages]);
 
   // Reset mounted ref when location changes (handles browser back navigation)
+  // Also set navigation flag to prevent eager gestures during transition
   useEffect(() => {
+    // Set navigation flag immediately when location starts changing
+    isNavigatingRef.current = true;
+    
+    // Clear any existing timeout
+    if (navigationTimeoutRef.current) {
+      clearTimeout(navigationTimeoutRef.current);
+    }
+    
+    // Reset navigation flag after transition completes (500ms should be enough)
+    navigationTimeoutRef.current = setTimeout(() => {
+      isNavigatingRef.current = false;
+    }, 500);
+    
     return () => {
       isMountedRef.current = false;
       fetchingRef.current = false;
+      isNavigatingRef.current = true; // Keep true during unmount
+      
+      // Clear timeout on cleanup
+      if (navigationTimeoutRef.current) {
+        clearTimeout(navigationTimeoutRef.current);
+        navigationTimeoutRef.current = null;
+      }
     };
   }, [location.pathname]);
 
