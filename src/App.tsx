@@ -75,37 +75,20 @@ const AppContent = () => {
         <Route path="/pricing" element={<Pricing />} />
         <Route path="/contact" element={<Contact />} />
         <Route path="/terms" element={<Terms />} />
+        <Route path="/privacy" element={<Privacy />} />
         <Route path="/about" element={<About />} />
         <Route path="/features" element={<Features />} />
         <Route path="/careers" element={<Careers />} />
         <Route path="/vs-speakup" element={<VsSpeakUp />} />
         <Route path="/vs-whistleblower-software" element={<VsWhistleblowerSoftware />} />
         <Route path="/compliance-software" element={<ComplianceSoftware />} />
-        
-        {/* Multilingual public routes */}
-        <Route path="/:lang" element={<Index />} />
-        <Route path="/:lang/pricing" element={<Pricing />} />
-        <Route path="/:lang/contact" element={<Contact />} />
-        <Route path="/:lang/terms" element={<Terms />} />
-        <Route path="/:lang/privacy" element={<Privacy />} />
-        <Route path="/:lang/about" element={<About />} />
-        <Route path="/:lang/features" element={<Features />} />
-        <Route path="/:lang/careers" element={<Careers />} />
-        <Route path="/:lang/vs-speakup" element={<VsSpeakUp />} />
-        <Route path="/:lang/vs-whistleblower-software" element={<VsWhistleblowerSoftware />} />
-        <Route path="/:lang/compliance-software" element={<ComplianceSoftware />} />
-        
-        {/* Privacy route */}
-        <Route path="/privacy" element={<Privacy />} />
         <Route path="/whistleblowing-directive" element={<WhistleblowingDirective />} />
-        
+
         {/* Authentication routes */}
         <Route path="/login" element={<Login />} />
         <Route path="/signup" element={<Signup />} />
         <Route path="/auth/login" element={<Login />} />
         <Route path="/auth/signup" element={<Signup />} />
-        <Route path="/:lang/auth/login" element={<Login />} />
-        <Route path="/:lang/auth/signup" element={<Signup />} />
         <Route path="/invite/:token" element={<AcceptInvite />} />
 
         {/* Organization Onboarding - Protected Route */}
@@ -121,14 +104,14 @@ const AppContent = () => {
         {/* Blog routes */}
         <Route path="/blog" element={<Blog />} />
         <Route path="/blog/:slug" element={<Blog />} />
-        
+
         {/* Admin routes */}
         <Route path="/admin" element={
           <ProtectedRoute>
             <AdminDashboard />
           </ProtectedRoute>
         } />
-        
+
         {/* Anonymous report routes - Clean URLs */}
         <Route path="/report" element={<CleanSubmissionWrapper />} />
         <Route path="/submit" element={<CleanSubmissionWrapper />} />
@@ -147,10 +130,25 @@ const AppContent = () => {
         <Route path="/secure/tool/success" element={<ReportSuccess />} />
         <Route path="/secure/tool/lookup" element={<ReportStatusLookup />} />
         <Route path="/secure/tool/messaging/:trackingId" element={<WhistleblowerMessagingPage />} />
-        
+
         {/* Testing routes */}
         <Route path="/test/anonymous-submission" element={<TestAnonymousSubmission />} />
-        
+
+        {/* Multilingual public routes - MUST BE AFTER specific routes */}
+        <Route path="/:lang" element={<Index />} />
+        <Route path="/:lang/pricing" element={<Pricing />} />
+        <Route path="/:lang/contact" element={<Contact />} />
+        <Route path="/:lang/terms" element={<Terms />} />
+        <Route path="/:lang/privacy" element={<Privacy />} />
+        <Route path="/:lang/about" element={<About />} />
+        <Route path="/:lang/features" element={<Features />} />
+        <Route path="/:lang/careers" element={<Careers />} />
+        <Route path="/:lang/vs-speakup" element={<VsSpeakUp />} />
+        <Route path="/:lang/vs-whistleblower-software" element={<VsWhistleblowerSoftware />} />
+        <Route path="/:lang/compliance-software" element={<ComplianceSoftware />} />
+        <Route path="/:lang/auth/login" element={<Login />} />
+        <Route path="/:lang/auth/signup" element={<Signup />} />
+
         {/* Authenticated routes */}
         <Route 
           path="/app" 
