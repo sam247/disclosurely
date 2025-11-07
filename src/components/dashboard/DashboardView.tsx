@@ -112,7 +112,7 @@ interface Report {
   id: string;
   title: string;
   tracking_id: string;
-  status: 'new' | 'reviewing' | 'investigating' | 'resolved' | 'closed' | 'archived' | 'deleted';
+  status: 'new' | 'in_review' | 'reviewing' | 'investigating' | 'resolved' | 'closed' | 'live' | 'archived' | 'deleted';
   created_at: string;
   encrypted_content: string;
   encryption_key_hash: string;
@@ -969,7 +969,7 @@ Additional Details: ${decryptedContent.additionalDetails || 'None provided'}
     try {
       const { error } = await supabase
         .from('reports')
-        .update({ status, updated_at: new Date().toISOString() })
+        .update({ status: status as Report['status'], updated_at: new Date().toISOString() })
         .in('id', selectedReportIds);
 
       if (error) throw error;
@@ -983,7 +983,7 @@ Additional Details: ${decryptedContent.additionalDetails || 'None provided'}
       setReports(prevReports =>
         prevReports.map(r =>
           selectedReportIds.includes(r.id)
-            ? { ...r, status }
+            ? { ...r, status: status as Report['status'] }
             : r
         )
       );
@@ -1058,7 +1058,7 @@ Additional Details: ${decryptedContent.additionalDetails || 'None provided'}
       // Move to archived list
       const archivedReports = reports.filter(r => selectedReportIds.includes(r.id));
       setReports(prevReports => prevReports.filter(r => !selectedReportIds.includes(r.id)));
-      setArchivedReports(prev => [...prev, ...archivedReports.map(r => ({ ...r, status: 'archived' }))]);
+      setArchivedReports(prev => [...prev, ...archivedReports.map(r => ({ ...r, status: 'archived' as Report['status'] }))]);
 
       setSelectedReportIds([]);
     } catch (error) {
