@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Upload, X, File, AlertCircle, Shield, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
-import { stripMetadataFromFiles } from '@/utils/metadataStripper';
+import { supabase } from '@/integrations/supabase/client';
 
 interface FileUploadProps {
   onFilesChange: (files: File[]) => void;
@@ -76,51 +76,75 @@ const FileUpload: React.FC<FileUploadProps> = ({
       setIsProcessing(true);
 
       try {
-        // Strip metadata from files
-        const results = await stripMetadataFromFiles(validFiles);
-
+        // Strip metadata from files using server-side edge function
         const cleanFiles: File[] = [];
         const newProcessedFiles = new Set(processedFiles);
 
-        results.forEach((result, index) => {
-          if (result.success && result.file) {
-            cleanFiles.push(result.file);
+        for (const file of validFiles) {
+          try {
+            // Create FormData to send file
+            const formData = new FormData();
+            formData.append('file', file);
 
-            if (result.stripped) {
-              // Mark this file as having metadata stripped
-              newProcessedFiles.add(result.file.name);
+            // Call unified edge function
+            const response = await fetch(
+              `${supabase.supabaseUrl}/functions/v1/strip-all-metadata`,
+              {
+                method: 'POST',
+                headers: {
+                  'Authorization': `Bearer ${supabase.supabaseKey}`
+                },
+                body: formData
+              }
+            );
 
+            if (!response.ok) {
+              const errorData = await response.json().catch(() => ({ error: 'Unknown error' }));
+              throw new Error(errorData.error || `Server returned ${response.status}`);
+            }
+
+            // Get cleaned file
+            const cleanedBlob = await response.blob();
+            const extension = file.name.split('.').pop() || '';
+            const cleanedFile = new File(
+              [cleanedBlob],
+              `sanitized_${Date.now()}.${extension}`,
+              { type: file.type }
+            );
+
+            cleanFiles.push(cleanedFile);
+            newProcessedFiles.add(cleanedFile.name);
+
+            const originalSize = file.size;
+            const cleanedSize = cleanedFile.size;
+            const metadataFound = response.headers.get('X-Metadata-Found') === 'true';
+
+            if (metadataFound) {
               toast.success(
-                `🛡️ Metadata removed from ${validFiles[index].name}`,
+                `🛡️ Metadata removed from ${file.name}`,
                 { description: 'Your identity is protected' }
               );
-            } else if (result.error) {
-              // Failed to strip - warn user but don't block
-              console.warn(`Failed to strip metadata from ${validFiles[index].name}:`, result.error);
-              toast.error(
-                `⚠️ Could not remove metadata from ${validFiles[index].name}`,
-                { description: 'File uploaded but metadata may still be present' }
-              );
             } else {
-              // File type not supported for stripping (e.g., plain text)
-              console.log(`Metadata stripping not available for ${validFiles[index].name}`);
+              console.log(`No metadata found in ${file.name}`);
             }
-          } else {
-            // If stripping failed completely, use original file but warn user
-            console.warn(`Failed to strip metadata from ${validFiles[index].name}`);
-            cleanFiles.push(validFiles[index]);
+          } catch (error) {
+            // NEVER return original file if stripping fails
+            console.error(`Failed to strip metadata from ${file.name}:`, error);
             toast.error(
-              `⚠️ Could not process ${validFiles[index].name}`,
-              { description: 'File uploaded without metadata removal' }
+              `❌ Could not process ${file.name}`,
+              { description: error instanceof Error ? error.message : 'Metadata stripping failed. File not uploaded.' }
             );
+            // Don't add file to cleanFiles - reject it completely
           }
-        });
+        }
 
         setProcessedFiles(newProcessedFiles);
 
-        const updatedFiles = [...files, ...cleanFiles];
-        setFiles(updatedFiles);
-        onFilesChange(updatedFiles);
+        if (cleanFiles.length > 0) {
+          const updatedFiles = [...files, ...cleanFiles];
+          setFiles(updatedFiles);
+          onFilesChange(updatedFiles);
+        }
       } catch (error) {
         console.error('Error processing files:', error);
         toast.error('Failed to process files. Please try again.');
@@ -196,7 +220,7 @@ const FileUpload: React.FC<FileUploadProps> = ({
           {isProcessing && (
             <div className="flex items-center justify-center gap-2 mt-3 text-sm text-blue-600">
               <Loader2 className="h-4 w-4 animate-spin" />
-              <span>Processing files...</span>
+              <span>Stripping metadata from files... This may take 5-10 seconds for videos.</span>
             </div>
           )}
 
