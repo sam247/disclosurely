@@ -502,8 +502,9 @@ const DashboardView = () => {
               : r
           )
         );
-      } catch (error) {
-        console.error('Error updating report status:', error);
+        } catch (error) {
+          console.error('Error updating report status:', error);
+        }
       }
     }
   };
