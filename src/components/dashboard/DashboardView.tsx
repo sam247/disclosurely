@@ -11,7 +11,7 @@ import { useOrganization } from '@/hooks/useOrganization';
 import { useToast } from '@/hooks/use-toast';
 import { useTranslation } from 'react-i18next';
 import { log, LogContext } from '@/utils/logger';
-import { FileText, Eye, Archive, Trash2, RotateCcw, MoreVertical, XCircle, ChevronUp, ChevronDown, CheckCircle, Search, Download, FileSpreadsheet, Bot, Zap } from 'lucide-react';
+import { FileText, Eye, Archive, Trash2, RotateCcw, MoreVertical, XCircle, ChevronUp, ChevronDown, CheckCircle, Search, Download, FileSpreadsheet, Bot, Zap, Copy } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import ReportMessaging from '@/components/ReportMessaging';
 import ReportContentDisplay from '@/components/ReportContentDisplay';
@@ -1126,42 +1126,27 @@ Additional Details: ${decryptedContent.additionalDetails || 'None provided'}
       <div className="grid gap-4 grid-cols-3 md:grid-cols-3">
         <Card className="md:col-span-1">
           <CardContent className="pt-4 md:pt-6">
-            <div className="flex items-center gap-2 md:gap-4">
-              <div className="p-2 md:p-3 rounded-lg bg-primary/10">
-                <FileText className="h-4 w-4 md:h-6 md:w-6 text-primary" />
-              </div>
-              <div>
-                <p className="text-xs md:text-sm text-muted-foreground">{t('activeReports')}</p>
-                <p className="text-lg md:text-2xl font-bold">{reports.length}</p>
-              </div>
+            <div className="text-center">
+              <p className="text-lg md:text-2xl font-bold">{reports.length}</p>
+              <p className="text-xs md:text-sm text-muted-foreground mt-1">{t('activeReports')}</p>
             </div>
           </CardContent>
         </Card>
         
         <Card className="md:col-span-1">
           <CardContent className="pt-4 md:pt-6">
-            <div className="flex items-center gap-2 md:gap-4">
-              <div className="p-2 md:p-3 rounded-lg bg-muted">
-                <Archive className="h-4 w-4 md:h-6 md:w-6 text-muted-foreground" />
-              </div>
-              <div>
-                <p className="text-xs md:text-sm text-muted-foreground">{t('archivedReports')}</p>
-                <p className="text-lg md:text-2xl font-bold">{archivedReports.length}</p>
-              </div>
+            <div className="text-center">
+              <p className="text-lg md:text-2xl font-bold">{archivedReports.length}</p>
+              <p className="text-xs md:text-sm text-muted-foreground mt-1">{t('archivedReports')}</p>
             </div>
           </CardContent>
         </Card>
         
         <Card className="md:col-span-1">
           <CardContent className="pt-4 md:pt-6">
-            <div className="flex items-center gap-2 md:gap-4">
-              <div className="p-2 md:p-3 rounded-lg bg-green-500/10">
-                <CheckCircle className="h-4 w-4 md:h-6 md:w-6 text-green-500" />
-              </div>
-              <div>
-                <p className="text-xs md:text-sm text-muted-foreground">{t('quickReport')}</p>
-                <p className="text-lg md:text-2xl font-bold">{t('active')}</p>
-              </div>
+            <div className="text-center">
+              <p className="text-lg md:text-2xl font-bold">{t('active')}</p>
+              <p className="text-xs md:text-sm text-muted-foreground mt-1">{t('quickReport')}</p>
             </div>
           </CardContent>
         </Card>
@@ -1260,7 +1245,28 @@ Additional Details: ${decryptedContent.additionalDetails || 'None provided'}
                             key={report.id}
                             className={highlightedReportIds.includes(report.id) ? 'bg-yellow-50 border-l-4 border-l-orange-400' : ''}
                           >
-                            <TableCell className="font-mono text-sm">{report.tracking_id}</TableCell>
+                            <TableCell className="font-mono text-sm">
+                              <div className="flex items-center gap-2">
+                                <span>{report.tracking_id}</span>
+                                <button
+                                  onClick={async () => {
+                                    try {
+                                      await navigator.clipboard.writeText(report.tracking_id);
+                                      toast({
+                                        title: "Copied!",
+                                        description: "Tracking ID copied to clipboard",
+                                      });
+                                    } catch (error) {
+                                      console.error('Failed to copy:', error);
+                                    }
+                                  }}
+                                  className="text-muted-foreground hover:text-foreground transition-colors"
+                                  title="Copy tracking ID"
+                                >
+                                  <Copy className="h-3 w-3" />
+                                </button>
+                              </div>
+                            </TableCell>
                             <TableCell className="font-medium">{report.title}</TableCell>
                             <TableCell>
                               <Badge variant={report.status === 'new' ? 'default' : 'secondary'}>
@@ -1304,7 +1310,6 @@ Additional Details: ${decryptedContent.additionalDetails || 'None provided'}
                                           'bg-green-500 text-white hover:ring-green-400'
                                         }`}
                                       >
-                                        <Bot className="w-3 h-3" />
                                         <span>{report.ai_risk_level}</span>
                                         <Eye className="w-3 h-3 opacity-70" />
                                       </button>
@@ -1563,7 +1568,26 @@ Additional Details: ${decryptedContent.additionalDetails || 'None provided'}
                         <CardContent className="p-4 space-y-3">
                           <div className="flex items-start justify-between gap-2">
                             <div className="flex-1 min-w-0">
-                              <div className="font-mono text-xs text-muted-foreground mb-1">{report.tracking_id}</div>
+                              <div className="flex items-center gap-2 mb-1">
+                                <span className="font-mono text-xs text-muted-foreground">{report.tracking_id}</span>
+                                <button
+                                  onClick={async () => {
+                                    try {
+                                      await navigator.clipboard.writeText(report.tracking_id);
+                                      toast({
+                                        title: "Copied!",
+                                        description: "Tracking ID copied to clipboard",
+                                      });
+                                    } catch (error) {
+                                      console.error('Failed to copy:', error);
+                                    }
+                                  }}
+                                  className="text-muted-foreground hover:text-foreground transition-colors"
+                                  title="Copy tracking ID"
+                                >
+                                  <Copy className="h-3 w-3" />
+                                </button>
+                              </div>
                               <h3 className="font-semibold text-sm break-words">{report.title}</h3>
                             </div>
                             <Badge variant={report.status === 'new' ? 'default' : 'secondary'} className="shrink-0">
@@ -1810,7 +1834,28 @@ Additional Details: ${decryptedContent.additionalDetails || 'None provided'}
                   <TableBody>
                     {archivedReports.map((report) => (
                       <TableRow key={report.id}>
-                        <TableCell className="font-mono text-sm">{report.tracking_id}</TableCell>
+                        <TableCell className="font-mono text-sm">
+                          <div className="flex items-center gap-2">
+                            <span>{report.tracking_id}</span>
+                            <button
+                              onClick={async () => {
+                                try {
+                                  await navigator.clipboard.writeText(report.tracking_id);
+                                  toast({
+                                    title: "Copied!",
+                                    description: "Tracking ID copied to clipboard",
+                                  });
+                                } catch (error) {
+                                  console.error('Failed to copy:', error);
+                                }
+                              }}
+                              className="text-muted-foreground hover:text-foreground transition-colors"
+                              title="Copy tracking ID"
+                            >
+                              <Copy className="h-3 w-3" />
+                            </button>
+                          </div>
+                        </TableCell>
                         <TableCell className="font-medium">{report.title}</TableCell>
                         <TableCell>
                           <Badge variant="secondary">{report.status}</Badge>
