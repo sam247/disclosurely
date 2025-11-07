@@ -255,9 +255,10 @@ const SecureMessaging = ({ report, onClose }: SecureMessagingProps) => {
     <Card>
       <CardHeader>
         <div className="flex items-center justify-between">
-          <CardDescription className="text-sm">
-            {t('messagesEncrypted')}
-          </CardDescription>
+          <CardTitle className="flex items-center gap-2 text-xl">
+            <MessageSquare className="h-5 w-5" />
+            {t('secureMessaging')}
+          </CardTitle>
           <Button variant="outline" onClick={onClose}>
             Close
           </Button>
