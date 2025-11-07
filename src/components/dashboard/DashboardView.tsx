@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
@@ -144,6 +145,7 @@ const DashboardView = () => {
   const { organization } = useOrganization();
   const { toast } = useToast();
   const { t } = useTranslation();
+  const navigate = useNavigate();
   
   // Get organization ID from multiple sources
   const effectiveOrganizationId = organizationId || organization?.id;
@@ -455,22 +457,28 @@ const DashboardView = () => {
   };
 
   const handleViewReport = async (report: Report) => {
-    setSelectedReport(report);
-    setIsReportDialogOpen(true);
+    // On mobile, navigate to full page. On desktop, use modal
+    const isMobile = window.innerWidth < 768;
     
-    // Automatically change status from "new" to "new" when first viewed
-    if (report.status === 'new') {
-      try {
-        const { error } = await supabase
-          .from('reports')
-          .update({ 
-            status: 'new',
-            first_read_at: new Date().toISOString(),
-            updated_at: new Date().toISOString()
-          })
-          .eq('id', report.id);
+    if (isMobile) {
+      navigate(`/dashboard/reports/${report.id}`);
+    } else {
+      setSelectedReport(report);
+      setIsReportDialogOpen(true);
+      
+      // Automatically change status from "new" to "new" when first viewed (desktop only)
+      if (report.status === 'new') {
+        try {
+          const { error } = await supabase
+            .from('reports')
+            .update({ 
+              status: 'new',
+              first_read_at: new Date().toISOString(),
+              updated_at: new Date().toISOString()
+            })
+            .eq('id', report.id);
 
-        if (error) throw error;
+          if (error) throw error;
 
         // Log audit event
         console.log('DashboardView: organizationId from useCustomDomain:', organizationId);
