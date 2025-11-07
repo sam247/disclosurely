@@ -363,9 +363,9 @@ const DashboardView = () => {
         const allReports = [...(reportsData || []), ...(archivedData || [])];
         for (const report of allReports) {
           try {
-            if (report.encrypted_content && report.encryption_key_hash) {
-              const decrypted = await decryptReport(report.encrypted_content, report.encryption_key_hash);
-              if (decrypted.category) {
+            if (report.encrypted_content) {
+              const decrypted = await decryptReport(report.encrypted_content, profile.organization_id);
+              if (decrypted && decrypted.category) {
                 const parts = decrypted.category.split(' - ');
                 categories[report.id] = {
                   main: parts[0] || decrypted.category,
