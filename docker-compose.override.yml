@@ -1,0 +1,13 @@
+# Docker Compose override for Supabase with FFmpeg support
+# This file extends the base Supabase docker-compose.yml
+
+version: "3.8"
+
+services:
+  # Override the edge functions service to use our custom FFmpeg-enabled image
+  functions:
+    build:
+      context: ./supabase/functions
+      dockerfile: Dockerfile
+    image: supabase-functions-ffmpeg:latest
+    # The rest of the configuration is inherited from the base docker-compose.yml
