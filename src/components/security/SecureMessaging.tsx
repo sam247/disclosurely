@@ -1,5 +1,5 @@
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Textarea } from '@/components/ui/textarea';
@@ -53,6 +53,7 @@ const SecureMessaging = ({ report, onClose }: SecureMessagingProps) => {
   const [isLoading, setIsLoading] = useState(true);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const [translatedMessages, setTranslatedMessages] = useState<Record<string, string>>({});
+  const fetchingRef = useRef(false);
 
   const { isSubmitting, secureSubmit } = useSecureForm({
     rateLimitKey: `messaging_${report.id}`,
@@ -76,7 +77,7 @@ const SecureMessaging = ({ report, onClose }: SecureMessagingProps) => {
     let isMounted = true;
     
     const loadMessages = async () => {
-      if (isMounted) {
+      if (isMounted && !fetchingRef.current) {
         await fetchMessages();
       }
     };
@@ -90,12 +91,13 @@ const SecureMessaging = ({ report, onClose }: SecureMessagingProps) => {
   }, [report.id]);
 
   const fetchMessages = async () => {
-    // Prevent multiple simultaneous fetches
-    if (isLoading) {
+    // Prevent multiple simultaneous fetches using ref instead of state
+    if (fetchingRef.current) {
       return;
     }
     
     try {
+      fetchingRef.current = true;
       setIsLoading(true);
       console.log('Fetching messages for report:', report.id);
       
@@ -123,6 +125,7 @@ const SecureMessaging = ({ report, onClose }: SecureMessagingProps) => {
       console.error('Error fetching messages:', error);
     } finally {
       setIsLoading(false);
+      fetchingRef.current = false;
     }
   };
 
