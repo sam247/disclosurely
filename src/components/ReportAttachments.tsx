@@ -143,7 +143,7 @@ const ReportAttachments: React.FC<ReportAttachmentsProps> = ({ reportId }) => {
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="flex items-center space-x-2">
+        <CardTitle className="flex items-center space-x-2 text-xl">
           <Paperclip className="h-5 w-5" />
           <span>Attachments ({attachments.length})</span>
         </CardTitle>
