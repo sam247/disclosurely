@@ -85,17 +85,29 @@ export const useCustomDomain = (): CustomDomainInfo => {
       // Check for custom domains (e.g., testing.betterranking.co.uk)
       try {
         console.log('📡 useCustomDomain: Querying custom_domains table for:', currentHost);
+
         const { data: customDomain, error } = await supabase
           .from('custom_domains')
           .select('domain_name, organization_id, is_active, status')
           .eq('domain_name', currentHost)
           .eq('is_active', true)
           .eq('status', 'active')
-          .single();
+          .maybeSingle(); // Use maybeSingle() to avoid errors when no domain found
 
         console.log('📡 useCustomDomain: Query result:', { data: customDomain, error });
 
-        if (!error && customDomain) {
+        if (error) {
+          console.error('❌ useCustomDomain: Database error:', error);
+          setDomainInfo({
+            customDomain: null,
+            organizationId: null,
+            isCustomDomain: false,
+            loading: false
+          });
+          return;
+        }
+
+        if (customDomain) {
           console.log('✅ useCustomDomain: Custom domain found!', customDomain);
           setDomainInfo({
             customDomain: currentHost,
@@ -105,7 +117,7 @@ export const useCustomDomain = (): CustomDomainInfo => {
           });
           return;
         } else {
-          console.log('❌ useCustomDomain: No custom domain found or error occurred');
+          console.log('❌ useCustomDomain: No custom domain found');
         }
       } catch (error) {
         console.error('❌ useCustomDomain: Error checking custom domain:', error);

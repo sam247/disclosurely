@@ -3,7 +3,7 @@ import React, { useState, useCallback } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
-import { Upload, X, File, AlertCircle, Shield, Loader2 } from 'lucide-react';
+import { Upload, X, File as FileIcon, AlertCircle, Shield, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 
@@ -116,11 +116,11 @@ const FileUpload: React.FC<FileUploadProps> = ({
               const timeoutId = setTimeout(() => controller.abort(), timeout);
 
               const response = await fetch(
-                `${supabase.supabaseUrl}/functions/v1/strip-all-metadata`,
+                `https://cxmuzperkittvibslnff.supabase.co/functions/v1/strip-all-metadata`,
                 {
                   method: 'POST',
                   headers: {
-                    'Authorization': `Bearer ${supabase.supabaseKey}`
+                    'Authorization': `Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImN4bXV6cGVya2l0dHZpYnNsbmZmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTAyNTk1MDEsImV4cCI6MjA2NTgzNTUwMX0.NxqrBnzSR-dxfWw4mn7nIHB-QTt900MtAh96fCCm1Lg`
                   },
                   body: formData,
                   signal: controller.signal
@@ -292,7 +292,7 @@ const FileUpload: React.FC<FileUploadProps> = ({
             return (
               <div key={index} className="flex items-center justify-between gap-2 p-3 sm:p-4 bg-gray-50 rounded-lg">
                 <div className="flex items-start space-x-3 flex-1 min-w-0">
-                  <File className="h-4 w-4 sm:h-5 sm:w-5 text-gray-500 flex-shrink-0 mt-0.5" />
+                  <FileIcon className="h-4 w-4 sm:h-5 sm:w-5 text-gray-500 flex-shrink-0 mt-0.5" />
                   <div className="flex-1 min-w-0">
                     <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-2">
                       <p className="text-sm font-medium text-gray-900 break-words">{file.name}</p>

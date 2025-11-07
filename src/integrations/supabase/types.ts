@@ -1621,6 +1621,60 @@ export type Database = {
           },
         ]
       }
+      metadata_stripping_audit: {
+        Row: {
+          cleaned_size: number
+          created_at: string
+          file_name: string
+          file_type: string
+          id: string
+          metadata_found: boolean
+          original_size: number
+          report_id: string | null
+          stripped_at: string
+          user_id: string | null
+        }
+        Insert: {
+          cleaned_size: number
+          created_at?: string
+          file_name: string
+          file_type: string
+          id?: string
+          metadata_found?: boolean
+          original_size: number
+          report_id?: string | null
+          stripped_at?: string
+          user_id?: string | null
+        }
+        Update: {
+          cleaned_size?: number
+          created_at?: string
+          file_name?: string
+          file_type?: string
+          id?: string
+          metadata_found?: boolean
+          original_size?: number
+          report_id?: string | null
+          stripped_at?: string
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "metadata_stripping_audit_report_id_fkey"
+            columns: ["report_id"]
+            isOneToOne: false
+            referencedRelation: "reports"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "metadata_stripping_audit_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       notifications: {
         Row: {
           created_at: string

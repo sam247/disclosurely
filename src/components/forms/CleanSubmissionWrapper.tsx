@@ -31,7 +31,6 @@ const CleanSubmissionWrapper = () => {
 
   const [linkData, setLinkData] = useState<LinkData | null>(null);
   const [loading, setLoading] = useState(true);
-  const [subscriptionTier, setSubscriptionTier] = useState<'basic' | 'pro' | null>(null);
 
   useEffect(() => {
     console.log('CleanSubmissionWrapper: Domain detection:', {
@@ -124,16 +123,6 @@ const CleanSubmissionWrapper = () => {
         return;
       }
 
-      // Fetch subscription tier
-      const { data: subscription } = await supabase
-        .from('subscriptions')
-        .select('tier')
-        .eq('organization_id', organizationId)
-        .eq('status', 'active')
-        .single();
-
-      setSubscriptionTier(subscription?.tier || 'basic');
-
       // Transform to expected format
       const formattedLinkData: LinkData = {
         id: linkInfo.id,
@@ -225,11 +214,12 @@ const CleanSubmissionWrapper = () => {
 
   return (
     <BrandedFormLayout
+      title="Submit a Report"
       organizationName={linkData.organization_name}
       logoUrl={linkData.organization_custom_logo_url || linkData.organization_logo_url}
       brandColor={brandColor}
       description={linkData.description}
-      isPro={subscriptionTier === 'pro'}
+      linkToken={linkData.link_token}
     >
       <SecureSubmissionForm
         linkToken={linkData.link_token}
