@@ -1,5 +1,6 @@
 
 import { useState, useEffect, useRef, useCallback } from 'react';
+import { useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Textarea } from '@/components/ui/textarea';
@@ -48,12 +49,14 @@ const SecureMessaging = ({ report, onClose }: SecureMessagingProps) => {
   const { t } = useTranslation();
   const { user } = useAuth();
   const { organization } = useOrganization();
+  const location = useLocation();
   const [messages, setMessages] = useState<Message[]>([]);
   const [newMessage, setNewMessage] = useState('');
   const [isLoading, setIsLoading] = useState(true);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const [translatedMessages, setTranslatedMessages] = useState<Record<string, string>>({});
   const fetchingRef = useRef(false);
+  const isMountedRef = useRef(true);
 
   const { isSubmitting, secureSubmit } = useSecureForm({
     rateLimitKey: `messaging_${report.id}`,
@@ -74,14 +77,16 @@ const SecureMessaging = ({ report, onClose }: SecureMessagingProps) => {
 
   const fetchMessages = useCallback(async () => {
     // Prevent multiple simultaneous fetches using ref instead of state
-    if (fetchingRef.current) {
-      console.log('Already fetching messages, skipping...');
+    if (fetchingRef.current || !isMountedRef.current) {
+      console.log('Already fetching messages or component unmounted, skipping...');
       return;
     }
     
     try {
       fetchingRef.current = true;
-      setIsLoading(true);
+      if (isMountedRef.current) {
+        setIsLoading(true);
+      }
       console.log('Fetching messages for report:', report.id);
       
       // Use Edge Function for encrypted message loading instead of direct database query
@@ -92,32 +97,44 @@ const SecureMessaging = ({ report, onClose }: SecureMessagingProps) => {
         }
       });
 
+      // Check if component is still mounted before updating state
+      if (!isMountedRef.current) {
+        console.log('Component unmounted during fetch, aborting state update');
+        return;
+      }
+
       if (error) {
         console.error('Error fetching messages:', error);
-        toast({
-          title: "Error",
-          description: "Failed to load messages",
-          variant: "destructive",
-        });
+        if (isMountedRef.current) {
+          toast({
+            title: "Error",
+            description: "Failed to load messages",
+            variant: "destructive",
+          });
+        }
         return;
       }
 
       console.log('Messages loaded:', result?.messages);
-      setMessages(result?.messages || []);
+      if (isMountedRef.current) {
+        setMessages(result?.messages || []);
+      }
     } catch (error) {
       console.error('Error fetching messages:', error);
     } finally {
-      setIsLoading(false);
+      if (isMountedRef.current) {
+        setIsLoading(false);
+      }
       fetchingRef.current = false;
     }
   }, [report.id, report.tracking_id, toast]);
 
   useEffect(() => {
     // Only fetch messages once when component mounts or report.id changes
-    let isMounted = true;
+    isMountedRef.current = true;
     
     const loadMessages = async () => {
-      if (isMounted && !fetchingRef.current) {
+      if (isMountedRef.current && !fetchingRef.current) {
         await fetchMessages();
       }
     };
@@ -125,11 +142,20 @@ const SecureMessaging = ({ report, onClose }: SecureMessagingProps) => {
     loadMessages();
     
     return () => {
-      isMounted = false;
+      // Mark component as unmounted immediately
+      isMountedRef.current = false;
       // Reset fetching ref when component unmounts to prevent stale state
       fetchingRef.current = false;
     };
   }, [report.id, fetchMessages]);
+
+  // Reset mounted ref when location changes (handles browser back navigation)
+  useEffect(() => {
+    return () => {
+      isMountedRef.current = false;
+      fetchingRef.current = false;
+    };
+  }, [location.pathname]);
 
   const validateMessage = (data: { message: string }) => {
     if (!data.message.trim()) {
