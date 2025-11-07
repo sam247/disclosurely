@@ -133,7 +133,7 @@ export function scanForPrivacyRisks(text: string): PrivacyRisk[] {
           });
         }
       }
-    });
+    }
   });
 
   // Sort by position in text
