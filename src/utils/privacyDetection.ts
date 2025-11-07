@@ -4,7 +4,7 @@
  */
 
 export interface PrivacyRisk {
-  type: 'email' | 'phone' | 'employeeId' | 'ssn' | 'creditCard' | 'ipAddress' | 'url' | 'name' | 'date' | 'address';
+  type: 'email' | 'phone' | 'employeeId' | 'ssn' | 'creditCard' | 'ipAddress' | 'url' | 'possibleName' | 'standaloneName' | 'specificDate' | 'address';
   text: string;
   redacted: string;
   position: { start: number; end: number };
@@ -29,11 +29,18 @@ const PII_PATTERNS = {
     description: 'Phone numbers can identify you',
     redact: (match: string) => '***-***-' + match.slice(-4)
   },
+  // Employee IDs - now catches alphanumeric patterns
   employeeId: {
-    pattern: /\b(EMP|emp|EMPLOYEE|Employee|ID|id|Staff|STAFF)[-_\s#:]*\d{3,8}\b/gi,
+    pattern: /\b(EMP|emp|EMPLOYEE|Employee|ID|id|Staff|STAFF|Office|OFFICE)[-_\s#:]*[A-Z0-9]{2,3}[-_]?\d{3,8}\b/gi,
     severity: 'high' as const,
-    description: 'Employee IDs can identify you',
-    redact: (match: string) => 'EMP-****' + match.slice(-2)
+    description: 'Employee/Office IDs can identify you',
+    redact: (match: string) => {
+      const parts = match.match(/([A-Za-z-_\s#:]+)([A-Z0-9-]+)/);
+      if (parts && parts[2]) {
+        return parts[1] + '****' + parts[2].slice(-2);
+      }
+      return 'ID-****';
+    }
   },
   ssn: {
     pattern: /\b\d{3}[-\s]?\d{2}[-\s]?\d{4}\b/g,
@@ -66,19 +73,26 @@ const PII_PATTERNS = {
       }
     }
   },
-  // Common name patterns that might indicate names in context
+  // Common name patterns - catches various contexts
   possibleName: {
-    pattern: /\b(my\s+(?:manager|supervisor|boss|colleague|coworker)|Mr\.|Mrs\.|Ms\.|Dr\.)\s+[A-Z][a-z]+(?:\s+[A-Z][a-z]+)?\b/gi,
-    severity: 'medium' as const,
-    description: 'Potential names detected - could identify individuals',
+    pattern: /\b(my\s+name\s+is|I\s+am|my\s+(?:manager|supervisor|boss|colleague|coworker)|Mr\.|Mrs\.|Ms\.|Dr\.)\s+([A-Z][a-z]+(?:\s+[A-Z][a-z]+)?)\b/gi,
+    severity: 'high' as const,
+    description: 'Names detected - highly identifying',
     redact: (match: string) => {
-      const prefix = match.match(/^(my\s+(?:manager|supervisor|boss|colleague|coworker)|Mr\.|Mrs\.|Ms\.|Dr\.)/i)?.[0] || '';
+      const prefix = match.match(/^(my\s+name\s+is|I\s+am|my\s+(?:manager|supervisor|boss|colleague|coworker)|Mr\.|Mrs\.|Ms\.|Dr\.)/i)?.[0] || '';
       return prefix ? `${prefix} [NAME REDACTED]` : '[NAME REDACTED]';
     }
   },
-  // Specific dates that might be identifying
+  // Standalone capitalized names (2+ words) - catches names without context
+  standaloneName: {
+    pattern: /\b[A-Z][a-z]{2,}\s+[A-Z][a-z]{2,}(?:\s+[A-Z][a-z]{2,})?\b/g,
+    severity: 'medium' as const,
+    description: 'Possible full name detected',
+    redact: () => '[NAME REDACTED]'
+  },
+  // Specific dates - supports both US and UK formats
   specificDate: {
-    pattern: /\b(?:on|since|from|started|joined|hired)\s+(?:January|February|March|April|May|June|July|August|September|October|November|December)\s+\d{1,2},?\s+\d{4}\b/gi,
+    pattern: /\b(?:on|since|from|started|joined|hired)\s+(?:(?:January|February|March|April|May|June|July|August|September|October|November|December)\s+\d{1,2}|\d{1,2}\s+(?:January|February|March|April|May|June|July|August|September|October|November|December)),?\s+\d{4}\b/gi,
     severity: 'low' as const,
     description: 'Specific dates (hire date, etc.) could narrow identification',
     redact: (match: string) => {
@@ -197,17 +211,18 @@ export function getPrivacyRiskSummary(risks: PrivacyRisk[]): string {
     const label = {
       email: 'email address',
       phone: 'phone number',
-      employeeId: 'employee ID',
+      employeeId: 'employee/office ID',
       ssn: 'social security number',
       creditCard: 'credit card number',
       ipAddress: 'IP address',
       url: 'URL',
-      name: 'name',
-      date: 'specific date',
+      possibleName: 'name',
+      standaloneName: 'possible name',
+      specificDate: 'specific date',
       address: 'address'
     }[type] || type;
 
-    return `${count} ${label}${count > 1 ? 'es' : ''}`;
+    return `${count} ${label}${count > 1 ? 's' : ''}`;
   });
 
   return `Found ${risks.length} privacy risk${risks.length > 1 ? 's' : ''}: ${summaryParts.join(', ')}`;

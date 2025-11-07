@@ -80,23 +80,6 @@ const ReportDetailsForm = ({ formData, updateFormData, validationErrors = {} }: 
   const [aiSuggested, setAiSuggested] = useState(false);
   const [hasAttemptedSuggestion, setHasAttemptedSuggestion] = useState(false);
 
-  // Debounced AI suggestion - triggers 2 seconds after user stops typing
-  useEffect(() => {
-    // Only trigger if we have both title and description with sufficient length
-    if (!formData.title.trim() || formData.title.length < 5) return;
-    if (!formData.description.trim() || formData.description.length < 20) return;
-    if (hasAttemptedSuggestion) return; // Only suggest once
-    if (formData.mainCategory && formData.subCategory) return; // Don't override user selection
-
-    // Debounce: Wait 2 seconds after user stops typing
-    const timer = setTimeout(() => {
-      console.log('⏰ Debounce timer triggered - calling AI suggestion');
-      suggestCategory();
-    }, 2000);
-
-    return () => clearTimeout(timer);
-  }, [formData.title, formData.description, hasAttemptedSuggestion, formData.mainCategory, formData.subCategory]);
-
   const handleMainCategoryChange = (value: string) => {
     updateFormData({
       mainCategory: value,
@@ -118,7 +101,7 @@ const ReportDetailsForm = ({ formData, updateFormData, validationErrors = {} }: 
 
   const availableSubCategories = formData.mainCategory ? MAIN_CATEGORIES[formData.mainCategory as keyof typeof MAIN_CATEGORIES] || [] : [];
 
-  const suggestCategory = async () => {
+  const suggestCategory = useCallback(async () => {
     console.log('🔍 suggestCategory called', {
       hasTitle: !!formData.title.trim(),
       hasDescription: !!formData.description.trim(),
@@ -175,7 +158,24 @@ const ReportDetailsForm = ({ formData, updateFormData, validationErrors = {} }: 
     } finally {
       setIsLoadingSuggestion(false);
     }
-  };
+  }, [formData.title, formData.description, formData.mainCategory, formData.subCategory, hasAttemptedSuggestion, updateFormData]);
+
+  // Debounced AI suggestion - triggers 2 seconds after user stops typing
+  useEffect(() => {
+    // Only trigger if we have both title and description with sufficient length
+    if (!formData.title.trim() || formData.title.length < 5) return;
+    if (!formData.description.trim() || formData.description.length < 20) return;
+    if (hasAttemptedSuggestion) return; // Only suggest once
+    if (formData.mainCategory && formData.subCategory) return; // Don't override user selection
+
+    // Debounce: Wait 2 seconds after user stops typing
+    const timer = setTimeout(() => {
+      console.log('⏰ Debounce timer triggered - calling AI suggestion');
+      suggestCategory();
+    }, 2000);
+
+    return () => clearTimeout(timer);
+  }, [formData.title, formData.description, formData.mainCategory, formData.subCategory, hasAttemptedSuggestion, suggestCategory]);
 
   return (
     <TooltipProvider>
