@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
@@ -78,6 +78,23 @@ const ReportDetailsForm = ({ formData, updateFormData, validationErrors = {} }: 
   const [isLoadingSuggestion, setIsLoadingSuggestion] = useState(false);
   const [aiSuggested, setAiSuggested] = useState(false);
   const [hasAttemptedSuggestion, setHasAttemptedSuggestion] = useState(false);
+
+  // Debounced AI suggestion - triggers 2 seconds after user stops typing
+  useEffect(() => {
+    // Only trigger if we have both title and description with sufficient length
+    if (!formData.title.trim() || formData.title.length < 5) return;
+    if (!formData.description.trim() || formData.description.length < 20) return;
+    if (hasAttemptedSuggestion) return; // Only suggest once
+    if (formData.mainCategory && formData.subCategory) return; // Don't override user selection
+
+    // Debounce: Wait 2 seconds after user stops typing
+    const timer = setTimeout(() => {
+      console.log('⏰ Debounce timer triggered - calling AI suggestion');
+      suggestCategory();
+    }, 2000);
+
+    return () => clearTimeout(timer);
+  }, [formData.title, formData.description, hasAttemptedSuggestion, formData.mainCategory, formData.subCategory]);
 
   const handleMainCategoryChange = (value: string) => {
     updateFormData({
@@ -197,7 +214,11 @@ const ReportDetailsForm = ({ formData, updateFormData, validationErrors = {} }: 
                 <HelpCircle className="h-3.5 w-3.5 text-gray-400 cursor-help" />
               </TooltipTrigger>
               <TooltipContent className="max-w-xs">
-                <p>Include relevant details: What happened? When? Who was involved? Include any evidence or witnesses. Our AI will suggest categories based on your description.</p>
+                <p className="mb-2">Include relevant details: What happened? When? Who was involved? Include any evidence or witnesses.</p>
+                <p className="text-xs text-primary flex items-center gap-1">
+                  <Sparkles className="w-3 h-3" />
+                  AI will automatically suggest categories as you type
+                </p>
               </TooltipContent>
             </Tooltip>
           </div>
@@ -206,7 +227,6 @@ const ReportDetailsForm = ({ formData, updateFormData, validationErrors = {} }: 
             required
             value={formData.description}
             onChange={(e) => updateFormData({ description: e.target.value })}
-            onBlur={suggestCategory}
             placeholder="Please provide a detailed description of what happened..."
             rows={5}
             className={`text-base ${validationErrors.description ? "border-destructive" : ""}`}
@@ -217,10 +237,12 @@ const ReportDetailsForm = ({ formData, updateFormData, validationErrors = {} }: 
             <p className="text-sm text-destructive">{validationErrors.description}</p>
           )}
           {isLoadingSuggestion && (
-            <p className="text-sm text-muted-foreground flex items-center gap-1">
-              <Loader2 className="w-3 h-3 animate-spin" />
-              AI is analyzing and suggesting categories...
-            </p>
+            <div className="p-3 bg-primary/5 border border-primary/20 rounded-lg flex items-center gap-2 animate-pulse">
+              <Loader2 className="w-4 h-4 animate-spin text-primary" />
+              <span className="text-sm font-medium text-primary">
+                AI is analyzing your report and suggesting categories...
+              </span>
+            </div>
           )}
         </div>
 
