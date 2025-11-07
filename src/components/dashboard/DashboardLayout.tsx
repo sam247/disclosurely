@@ -28,20 +28,55 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
   const [showProfileModal, setShowProfileModal] = useState(false);
   const [lockedFeature, setLockedFeature] = useState('');
   const [firstName, setFirstName] = useState('');
+  const [hasOrganization, setHasOrganization] = useState<boolean | null>(null);
   const mainContentRef = useRef<HTMLElement>(null);
   const headerRef = useRef<HTMLElement>(null);
+
+  // Check if user has completed organization onboarding
+  useEffect(() => {
+    const checkOrganization = async () => {
+      if (!user) return;
+
+      try {
+        const { data, error } = await supabase
+          .from('profiles')
+          .select('organization_id')
+          .eq('id', user.id)
+          .single();
+
+        if (error) {
+          console.error('Error checking organization:', error);
+          setHasOrganization(false);
+        } else {
+          const hasOrg = !!data?.organization_id;
+          setHasOrganization(hasOrg);
+
+          // Redirect to onboarding if no organization
+          if (!hasOrg) {
+            console.log('No organization found, redirecting to onboarding...');
+            navigate('/onboarding');
+          }
+        }
+      } catch (error) {
+        console.error('Error checking organization:', error);
+        setHasOrganization(false);
+      }
+    };
+
+    checkOrganization();
+  }, [user, navigate]);
 
   useEffect(() => {
     const fetchUserProfile = async () => {
       if (!user) return;
-      
+
       try {
         const { data, error } = await supabase
           .from('profiles')
           .select('first_name')
           .eq('id', user.id)
           .single();
-        
+
         if (error) {
           console.error('Error fetching profile:', error);
         } else if (data) {
@@ -84,6 +119,20 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
     setLockedFeature(feature);
     setShowUpgradeModal(true);
   };
+
+  // Show loading while checking organization
+  if (hasOrganization === null) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+      </div>
+    );
+  }
+
+  // If no organization, show nothing (will redirect to onboarding)
+  if (hasOrganization === false) {
+    return null;
+  }
 
   return (
     <SidebarProvider>

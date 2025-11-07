@@ -33,11 +33,21 @@ const CleanSubmissionWrapper = () => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    console.log('CleanSubmissionWrapper: Domain detection:', {
+      domainLoading,
+      isCustomDomain,
+      organizationId,
+      customDomain,
+      currentHost: window.location.hostname
+    });
+
     if (!domainLoading) {
       if (isCustomDomain && organizationId) {
+        console.log('✅ Custom domain detected, fetching link data...');
         fetchOrgLinkData();
       } else {
         // Not on a custom domain
+        console.log('❌ Custom domain NOT detected:', { isCustomDomain, organizationId });
         setLoading(false);
         toast({
           title: "Access via custom domain",

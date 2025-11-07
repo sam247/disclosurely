@@ -100,6 +100,31 @@ const LinkGenerator = () => {
   const primaryDomain = primaryDomainRecord?.domain_name ?? null;
   const primaryDomainStatus = primaryDomainRecord?.status ?? null;
 
+  // Fetch organization info for subdomain
+  const { data: organizationInfo } = useQuery({
+    queryKey: ['organization-info', user?.id],
+    queryFn: async () => {
+      if (!user) return null;
+
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('organization_id')
+        .eq('id', user.id)
+        .single();
+
+      if (!profile?.organization_id) return null;
+
+      const { data: org } = await supabase
+        .from('organizations')
+        .select('id, domain, name')
+        .eq('id', profile.organization_id)
+        .single();
+
+      return org;
+    },
+    enabled: !!user,
+  });
+
   // Fetch the primary active link
   const { data: primaryLink, isLoading } = useQuery({
     queryKey: ['primary-link'],
@@ -273,8 +298,13 @@ const LinkGenerator = () => {
     return null;
   }
 
-  // Generate unbranded URL - always use secure.disclosurely.com (not app.disclosurely.com)
-  const unbrandedUrl = `https://secure.disclosurely.com/secure/tool/submit/${primaryLink.link_token}`;
+  // Generate subdomain URL if organization has a domain slug
+  const subdomainUrl = organizationInfo?.domain
+    ? `https://${organizationInfo.domain}.disclosurely.com/report`
+    : null;
+
+  // Generate token-based URL as last resort fallback
+  const tokenUrl = `https://secure.disclosurely.com/secure/tool/submit/${primaryLink.link_token}`;
 
   return (
     <>
@@ -293,8 +323,8 @@ const LinkGenerator = () => {
           </div>
         </CardHeader>
         <CardContent className="space-y-3">
-          {/* Branded Link - Show first if available */}
-          {brandedUrl && primaryDomain ? (
+          {/* Branded Link - Show if available */}
+          {brandedUrl && primaryDomain && (
             <div className="p-4 bg-blue-50/50 rounded-lg border border-blue-200">
               <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
                 <div className="flex-1 min-w-0 w-full">
@@ -338,10 +368,70 @@ const LinkGenerator = () => {
                 </Button>
               </div>
             </div>
-          ) : (
-            <div className="p-4 bg-gray-50 rounded-lg border border-dashed">
+          )}
+
+          {/* Subdomain Link - Show if available */}
+          {subdomainUrl && (
+            <div className="p-4 bg-purple-50/50 rounded-lg border border-purple-200">
+              <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                <div className="flex-1 min-w-0 w-full">
+                  <div className="flex flex-wrap items-center gap-2 mb-1">
+                    <p className="text-sm font-semibold">🏢 Your Subdomain Link</p>
+                    <Badge variant="default" className="bg-green-600 text-xs h-5 shrink-0">
+                      ✓ Active
+                    </Badge>
+                  </div>
+                  <p className="text-xs text-muted-foreground mb-2 break-words">
+                    {brandedUrl
+                      ? `Fallback option when custom domain is unavailable • Used ${primaryLink.usage_count || 0} times`
+                      : `Professional branded link • Used ${primaryLink.usage_count || 0} times`
+                    }
+                  </p>
+                  <code className="text-xs sm:text-sm bg-background px-3 py-2 rounded border font-mono break-all block w-full font-semibold">
+                    {subdomainUrl}
+                  </code>
+                </div>
+                <Button
+                  size="sm"
+                  onClick={() => copyToClipboard(subdomainUrl)}
+                  className="whitespace-nowrap shrink-0 w-full sm:w-auto"
+                >
+                  {t('copyLink')}
+                </Button>
+              </div>
+            </div>
+          )}
+
+          {/* Token-based Link - Show as last resort */}
+          <div className="p-3 bg-gray-50 rounded-lg border border-dashed">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+              <div className="flex-1 min-w-0 w-full">
+                <div className="flex flex-wrap items-center gap-2 mb-1">
+                  <p className="text-xs font-medium text-muted-foreground">Legacy Link (for testing only)</p>
+                </div>
+                <p className="text-xs text-muted-foreground mb-2 break-words">
+                  This link works but is not as professional. Use the links above for production.
+                </p>
+                <code className="text-xs bg-muted px-2 py-1 rounded border font-mono break-all block w-full">
+                  {tokenUrl}
+                </code>
+              </div>
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={() => copyToClipboard(tokenUrl)}
+                className="whitespace-nowrap shrink-0 w-full sm:w-auto text-xs"
+              >
+                Copy
+              </Button>
+            </div>
+          </div>
+
+          {/* Prompt to set up custom domain if they don't have one */}
+          {!brandedUrl && (
+            <div className="p-3 bg-blue-50 rounded-lg border border-blue-200">
               <p className="text-xs text-muted-foreground break-words">
-                <strong>Want a branded link?</strong> Go to <a href="/dashboard/settings" className="text-blue-600 hover:underline">Settings → Custom Domains</a> to set up your own domain. It will appear here automatically after verification.
+                <strong>💡 Want an even more professional link?</strong> Go to <a href="/dashboard/settings" className="text-blue-600 hover:underline font-semibold">Settings → Custom Domains</a> to use your own domain like <code className="font-semibold">yourcompany.com/report</code>
               </p>
             </div>
           )}

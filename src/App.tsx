@@ -11,6 +11,7 @@ import AIHelperView from './components/dashboard/AIHelperView';
 import SettingsView from './components/dashboard/SettingsView';
 import ReportDetails from './pages/ReportDetails';
 import OrganizationSettings from './components/dashboard/OrganizationSettings';
+import OrganizationOnboarding from './components/OrganizationOnboarding';
 import TeamView from './components/dashboard/TeamView';
 import BrandingView from './components/dashboard/BrandingView';
 import SecureLinkView from './components/dashboard/SecureLinkView';
@@ -105,7 +106,17 @@ const AppContent = () => {
         <Route path="/:lang/auth/login" element={<Login />} />
         <Route path="/:lang/auth/signup" element={<Signup />} />
         <Route path="/invite/:token" element={<AcceptInvite />} />
-        
+
+        {/* Organization Onboarding - Protected Route */}
+        <Route
+          path="/onboarding"
+          element={
+            <ProtectedRoute>
+              <OrganizationOnboarding />
+            </ProtectedRoute>
+          }
+        />
+
         {/* Blog routes */}
         <Route path="/blog" element={<Blog />} />
         <Route path="/blog/:slug" element={<Blog />} />
