@@ -1565,9 +1565,9 @@ Additional Details: ${decryptedContent.additionalDetails || 'None provided'}
                   </div>
                   
                   {/* Mobile Card View */}
-                  <div className="md:hidden">
+                  <div className="md:hidden space-y-4">
                     {filteredReports.map((report) => (
-                      <Card key={report.id} className="overflow-hidden rounded-none border-x-0 border-t-0 first:border-t">
+                      <Card key={report.id} className="overflow-hidden">
                         <CardContent className="p-5 md:p-4 space-y-4 md:space-y-3">
                           <div className="flex items-start justify-between gap-2">
                             <div className="flex-1 min-w-0">
