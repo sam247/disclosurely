@@ -143,7 +143,7 @@ const ReportAttachments: React.FC<ReportAttachmentsProps> = ({ reportId }) => {
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="flex items-center space-x-2">
+        <CardTitle className="flex items-center space-x-2 text-xl">
           <Paperclip className="h-5 w-5" />
           <span>Attachments ({attachments.length})</span>
         </CardTitle>
@@ -163,11 +163,6 @@ const ReportAttachments: React.FC<ReportAttachmentsProps> = ({ reportId }) => {
                   </p>
                   <p className="text-xs text-gray-500 break-words">
                     {formatFileSize(attachment.file_size)} • {formatDate(attachment.created_at)}
-                    {attachment.uploaded_by_whistleblower && (
-                      <span className="ml-2 px-2 py-1 bg-blue-100 text-blue-800 text-xs rounded whitespace-nowrap">
-                        From Reporter
-                      </span>
-                    )}
                   </p>
                 </div>
               </div>

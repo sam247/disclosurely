@@ -1,5 +1,6 @@
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
+import { useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Textarea } from '@/components/ui/textarea';
@@ -48,11 +49,16 @@ const SecureMessaging = ({ report, onClose }: SecureMessagingProps) => {
   const { t } = useTranslation();
   const { user } = useAuth();
   const { organization } = useOrganization();
+  const location = useLocation();
   const [messages, setMessages] = useState<Message[]>([]);
   const [newMessage, setNewMessage] = useState('');
   const [isLoading, setIsLoading] = useState(true);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const [translatedMessages, setTranslatedMessages] = useState<Record<string, string>>({});
+  const fetchingRef = useRef(false);
+  const isMountedRef = useRef(true);
+  const isNavigatingRef = useRef(false);
+  const navigationTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   const { isSubmitting, secureSubmit } = useSecureForm({
     rateLimitKey: `messaging_${report.id}`,
@@ -65,62 +71,25 @@ const SecureMessaging = ({ report, onClose }: SecureMessagingProps) => {
   };
 
   useEffect(() => {
-    scrollToBottom();
-  }, [messages]);
+    // Only scroll if messages exist and component is mounted
+    if (messages.length > 0 && !isLoading) {
+      scrollToBottom();
+    }
+  }, [messages, isLoading]);
 
-  useEffect(() => {
-    fetchMessages();
+  const fetchMessages = useCallback(async () => {
+    // Prevent multiple simultaneous fetches using ref instead of state
+    // Also prevent fetching during navigation transitions (eager gestures)
+    if (fetchingRef.current || !isMountedRef.current || isNavigatingRef.current) {
+      console.log('Already fetching messages, component unmounted, or navigating - skipping...');
+      return;
+    }
     
-    // Disabled real-time subscription to avoid encrypted message display issues
-    // Messages are refreshed manually after sending to ensure decrypted content
-    // const channel = supabase
-    //   .channel(`report-messages-secure-${report.id}`)
-    //   .on(
-    //     'postgres_changes',
-    //     {
-    //       event: 'INSERT',
-    //       schema: 'public',
-    //       table: 'report_messages',
-    //       filter: `report_id=eq.${report.id}`,
-    //     },
-    //     (payload) => {
-    //       console.log('New message received:', payload.new);
-    //       const newMsg = payload.new as Message;
-    //       setMessages(prev => {
-    //         // Check if message already exists to prevent duplicates
-    //         if (prev.some(msg => msg.id === newMsg.id)) {
-    //           return prev;
-    //         }
-    //         return [...prev, newMsg].sort((a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime());
-    //       });
-    //     }
-    //   )
-    //   .on(
-    //     'postgres_changes',
-    //     {
-    //       event: 'UPDATE',
-    //       schema: 'public',
-    //       table: 'report_messages',
-    //       filter: `report_id=eq.${report.id}`,
-    //     },
-    //     (payload) => {
-    //       console.log('Message updated:', payload.new);
-    //       const updatedMsg = payload.new as Message;
-    //       setMessages(prev => prev.map(msg => msg.id === updatedMsg.id ? updatedMsg : msg));
-    //     }
-    //   )
-    //   .subscribe((status) => {
-    //     console.log('Secure messaging subscription status:', status);
-    //   });
-
-    // return () => {
-    //   console.log('Cleaning up secure messaging subscription');
-    //   supabase.removeChannel(channel);
-    // };
-  }, [report.id]);
-
-  const fetchMessages = async () => {
     try {
+      fetchingRef.current = true;
+      if (isMountedRef.current) {
+        setIsLoading(true);
+      }
       console.log('Fetching messages for report:', report.id);
       
       // Use Edge Function for encrypted message loading instead of direct database query
@@ -131,24 +100,86 @@ const SecureMessaging = ({ report, onClose }: SecureMessagingProps) => {
         }
       });
 
+      // Check if component is still mounted before updating state
+      if (!isMountedRef.current) {
+        console.log('Component unmounted during fetch, aborting state update');
+        return;
+      }
+
       if (error) {
         console.error('Error fetching messages:', error);
-        toast({
-          title: "Error",
-          description: "Failed to load messages",
-          variant: "destructive",
-        });
+        if (isMountedRef.current) {
+          toast({
+            title: "Error",
+            description: "Failed to load messages",
+            variant: "destructive",
+          });
+        }
         return;
       }
 
       console.log('Messages loaded:', result?.messages);
-      setMessages(result?.messages || []);
+      if (isMountedRef.current) {
+        setMessages(result?.messages || []);
+      }
     } catch (error) {
       console.error('Error fetching messages:', error);
     } finally {
-      setIsLoading(false);
+      if (isMountedRef.current) {
+        setIsLoading(false);
+      }
+      fetchingRef.current = false;
     }
-  };
+  }, [report.id, report.tracking_id, toast]);
+
+  useEffect(() => {
+    // Only fetch messages once when component mounts or report.id changes
+    isMountedRef.current = true;
+    
+    const loadMessages = async () => {
+      if (isMountedRef.current && !fetchingRef.current) {
+        await fetchMessages();
+      }
+    };
+    
+    loadMessages();
+    
+    return () => {
+      // Mark component as unmounted immediately
+      isMountedRef.current = false;
+      // Reset fetching ref when component unmounts to prevent stale state
+      fetchingRef.current = false;
+    };
+  }, [report.id, fetchMessages]);
+
+  // Reset mounted ref when location changes (handles browser back navigation)
+  // Also set navigation flag to prevent eager gestures during transition
+  useEffect(() => {
+    // Set navigation flag immediately when location starts changing
+    isNavigatingRef.current = true;
+    
+    // Clear any existing timeout
+    if (navigationTimeoutRef.current) {
+      clearTimeout(navigationTimeoutRef.current);
+    }
+    
+    // Reset navigation flag after transition completes (1000ms to handle eager gestures)
+    navigationTimeoutRef.current = setTimeout(() => {
+      isNavigatingRef.current = false;
+    }, 1000);
+    
+    return () => {
+      isMountedRef.current = false;
+      fetchingRef.current = false;
+      isNavigatingRef.current = true; // Keep true during unmount
+      
+      // Clear timeout on cleanup
+      if (navigationTimeoutRef.current) {
+        clearTimeout(navigationTimeoutRef.current);
+        navigationTimeoutRef.current = null;
+      }
+    };
+  }, [location.pathname]);
 
   const validateMessage = (data: { message: string }) => {
     if (!data.message.trim()) {
@@ -255,15 +286,10 @@ const SecureMessaging = ({ report, onClose }: SecureMessagingProps) => {
     <Card>
       <CardHeader>
         <div className="flex items-center justify-between">
-          <div>
-            <CardTitle className="flex items-center gap-2">
-              <MessageSquare className="h-5 w-5" />
-              {t('secureMessaging')}
-            </CardTitle>
-            <CardDescription>
-              {t('messagesEncrypted')}
-            </CardDescription>
-          </div>
+          <CardTitle className="flex items-center gap-2 text-xl">
+            <MessageSquare className="h-5 w-5" />
+            {t('secureMessaging')}
+          </CardTitle>
           <Button variant="outline" onClick={onClose}>
             Close
           </Button>
@@ -343,15 +369,15 @@ const SecureMessaging = ({ report, onClose }: SecureMessagingProps) => {
             disabled={isSubmitting}
             maxLength={5000}
           />
-          <div className="flex items-center justify-between">
-            <div className="flex items-center text-sm text-gray-500">
-              <Lock className="h-4 w-4 mr-1" />
-              {t('messagesEncrypted')}
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 sm:gap-0">
+            <div className="flex items-center text-xs sm:text-sm text-gray-500">
+              <Lock className="h-3 w-3 sm:h-4 sm:w-4 mr-1" />
+              <span className="break-words">{t('messagesEncrypted')}</span>
             </div>
             <Button 
               type="submit"
               disabled={isSubmitting || !newMessage.trim()}
-              className="flex items-center gap-2"
+              className="flex items-center gap-2 w-full sm:w-auto"
             >
               <Send className="h-4 w-4" />
               {isSubmitting ? 'Sending...' : t('sendMessage')}

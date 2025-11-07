@@ -1,4 +1,4 @@
-import { ReactNode, useState, useEffect } from 'react';
+import { ReactNode, useState, useEffect, useRef } from 'react';
 import { SidebarProvider, SidebarTrigger } from '@/components/ui/sidebar';
 import DashboardSidebar from './DashboardSidebar';
 import { Button } from '@/components/ui/button';
@@ -28,6 +28,8 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
   const [showProfileModal, setShowProfileModal] = useState(false);
   const [lockedFeature, setLockedFeature] = useState('');
   const [firstName, setFirstName] = useState('');
+  const mainContentRef = useRef<HTMLElement>(null);
+  const headerRef = useRef<HTMLElement>(null);
 
   useEffect(() => {
     const fetchUserProfile = async () => {
@@ -53,6 +55,26 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
     fetchUserProfile();
   }, [user]);
 
+  // Ensure header is visible when scrolling to top
+  useEffect(() => {
+    const mainContent = mainContentRef.current;
+    if (!mainContent) return;
+
+    const handleScroll = () => {
+      // When scrolled to top, ensure header is visible
+      if (mainContent.scrollTop === 0 && headerRef.current) {
+        headerRef.current.style.visibility = 'visible';
+        headerRef.current.style.opacity = '1';
+      }
+    };
+
+    mainContent.addEventListener('scroll', handleScroll, { passive: true });
+    
+    return () => {
+      mainContent.removeEventListener('scroll', handleScroll);
+    };
+  }, []);
+
   const handleLogout = async () => {
     await signOut();
     navigate('/login');
@@ -73,7 +95,7 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
         
         <div className="flex-1 flex flex-col min-w-0">
           {/* Header */}
-          <header className="h-16 border-b border-l-0 bg-background flex items-center justify-between px-4 md:px-6 sticky top-0 z-10">
+          <header ref={headerRef} className="h-16 border-b border-l-0 bg-background flex items-center justify-between px-4 md:px-6 sticky top-0 z-50 backdrop-blur-sm bg-background/95 transition-opacity">
             <div className="flex items-center gap-3">
               <SidebarTrigger className="md:hidden" />
               <h1 className="text-base md:text-lg font-semibold truncate">
@@ -118,7 +140,7 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
           <AnnouncementBar showOnDashboard={true} />
 
           {/* Main Content */}
-          <main className="flex-1 overflow-y-auto overflow-x-hidden p-4 md:p-6">
+          <main ref={mainContentRef} className="flex-1 overflow-y-auto overflow-x-hidden p-4 md:p-6 pb-[calc(1rem+env(safe-area-inset-bottom))]">
             {children}
           </main>
         </div>

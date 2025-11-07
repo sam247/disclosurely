@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
@@ -11,7 +12,7 @@ import { useOrganization } from '@/hooks/useOrganization';
 import { useToast } from '@/hooks/use-toast';
 import { useTranslation } from 'react-i18next';
 import { log, LogContext } from '@/utils/logger';
-import { FileText, Eye, Archive, Trash2, RotateCcw, MoreVertical, XCircle, ChevronUp, ChevronDown, CheckCircle, Search, Download, FileSpreadsheet, Bot, Zap, AlertCircle, Clock, Flame, User } from 'lucide-react';
+import { FileText, Eye, Archive, Trash2, RotateCcw, MoreVertical, XCircle, ChevronUp, ChevronDown, CheckCircle, Search, Download, FileSpreadsheet, Bot, Zap, AlertCircle, Clock, Flame, User, Copy, Check } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import ReportMessaging from '@/components/ReportMessaging';
 import ReportContentDisplay from '@/components/ReportContentDisplay';
@@ -204,6 +205,7 @@ const DashboardView = () => {
   const { organization } = useOrganization();
   const { toast } = useToast();
   const { t } = useTranslation();
+  const navigate = useNavigate();
   
   // Get organization ID from multiple sources
   const effectiveOrganizationId = organizationId || organization?.id;
@@ -223,8 +225,10 @@ const DashboardView = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
   const [sortField, setSortField] = useState<'created_at' | 'title' | 'tracking_id' | 'ai_risk_score'>('created_at');
+  const [copiedTrackingId, setCopiedTrackingId] = useState<string | null>(null);
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('desc');
   const [reportCategories, setReportCategories] = useState<Record<string, string>>({});
+  const [decryptedCategories, setDecryptedCategories] = useState<Record<string, { main: string; sub: string }>>({});
   const [isAssessingRisk, setIsAssessingRisk] = useState<string | null>(null);
   const [updatingRiskLevel, setUpdatingRiskLevel] = useState<string | null>(null);
   const [teamMembers, setTeamMembers] = useState<any[]>([]);
@@ -416,6 +420,29 @@ const DashboardView = () => {
       setReports(reportsData || []);
       setArchivedReports(archivedData || []);
 
+      // Decrypt categories for display (both active and archived)
+      if ((reportsData || archivedData) && profile?.organization_id) {
+        const categories: Record<string, { main: string; sub: string }> = {};
+        const allReports = [...(reportsData || []), ...(archivedData || [])];
+        for (const report of allReports) {
+          try {
+            if (report.encrypted_content) {
+              const decrypted = await decryptReport(report.encrypted_content, profile.organization_id);
+              if (decrypted && decrypted.category) {
+                const parts = decrypted.category.split(' - ');
+                categories[report.id] = {
+                  main: parts[0] || decrypted.category,
+                  sub: parts[1] || ''
+                };
+              }
+            }
+          } catch (error) {
+            console.error('Failed to decrypt category for report:', report.id, error);
+          }
+        }
+        setDecryptedCategories(categories);
+      }
+
       // Fetch team members for assignment
       const { data: teamData, error: teamError } = await supabase
         .from('profiles')
@@ -490,22 +517,28 @@ const DashboardView = () => {
   };
 
   const handleViewReport = async (report: Report) => {
-    setSelectedReport(report);
-    setIsReportDialogOpen(true);
+    // On mobile, navigate to full page. On desktop, use modal
+    const isMobile = window.innerWidth < 768;
     
-    // Automatically change status from "new" to "new" when first viewed
-    if (report.status === 'new') {
-      try {
-        const { error } = await supabase
-          .from('reports')
-          .update({ 
-            status: 'new',
-            first_read_at: new Date().toISOString(),
-            updated_at: new Date().toISOString()
-          })
-          .eq('id', report.id);
+    if (isMobile) {
+      navigate(`/dashboard/reports/${report.id}`);
+    } else {
+      setSelectedReport(report);
+      setIsReportDialogOpen(true);
+      
+      // Automatically change status from "new" to "new" when first viewed (desktop only)
+      if (report.status === 'new') {
+        try {
+          const { error } = await supabase
+            .from('reports')
+            .update({ 
+              status: 'new',
+              first_read_at: new Date().toISOString(),
+              updated_at: new Date().toISOString()
+            })
+            .eq('id', report.id);
 
-        if (error) throw error;
+          if (error) throw error;
 
         // Log audit event
         console.log('DashboardView: organizationId from useCustomDomain:', organizationId);
@@ -529,8 +562,9 @@ const DashboardView = () => {
               : r
           )
         );
-      } catch (error) {
-        console.error('Error updating report status:', error);
+        } catch (error) {
+          console.error('Error updating report status:', error);
+        }
       }
     }
   };
@@ -1155,49 +1189,34 @@ Additional Details: ${decryptedContent.additionalDetails || 'None provided'}
   }
 
   return (
-    <div className="flex flex-col h-[calc(100vh-4rem)] overflow-hidden">
+    <div className="flex flex-col h-[calc(100vh-4rem)] md:h-[calc(100vh-4rem)] overflow-hidden">
       {/* Scrollable Content */}
-      <div className="flex-1 overflow-y-auto space-y-6">
+      <div className="flex-1 overflow-y-auto space-y-6 pb-[calc(1rem+env(safe-area-inset-bottom))]">
       {/* Summary Cards */}
-      <div className="grid gap-4 md:grid-cols-3">
-        <Card>
-          <CardContent className="pt-6">
-            <div className="flex items-center gap-4">
-              <div className="p-3 rounded-lg bg-primary/10">
-                <FileText className="h-6 w-6 text-primary" />
-              </div>
-              <div>
-                <p className="text-sm text-muted-foreground">{t('activeReports')}</p>
-                <p className="text-2xl font-bold">{reports.length}</p>
-              </div>
+      <div className="grid gap-4 grid-cols-3 md:grid-cols-3">
+        <Card className="md:col-span-1">
+          <CardContent className="pt-4 md:pt-6">
+            <div className="text-center">
+              <p className="text-lg md:text-2xl font-bold">{reports.length}</p>
+              <p className="text-xs md:text-sm text-muted-foreground mt-1">{t('activeReports')}</p>
             </div>
           </CardContent>
         </Card>
         
-        <Card>
-          <CardContent className="pt-6">
-            <div className="flex items-center gap-4">
-              <div className="p-3 rounded-lg bg-muted">
-                <Archive className="h-6 w-6 text-muted-foreground" />
-              </div>
-              <div>
-                <p className="text-sm text-muted-foreground">{t('archivedReports')}</p>
-                <p className="text-2xl font-bold">{archivedReports.length}</p>
-              </div>
+        <Card className="md:col-span-1">
+          <CardContent className="pt-4 md:pt-6">
+            <div className="text-center">
+              <p className="text-lg md:text-2xl font-bold">{archivedReports.length}</p>
+              <p className="text-xs md:text-sm text-muted-foreground mt-1">{t('archivedReports')}</p>
             </div>
           </CardContent>
         </Card>
         
-        <Card>
-          <CardContent className="pt-6">
-            <div className="flex items-center gap-4">
-              <div className="p-3 rounded-lg bg-green-500/10">
-                <CheckCircle className="h-6 w-6 text-green-500" />
-              </div>
-              <div>
-                <p className="text-sm text-muted-foreground">{t('quickReport')}</p>
-                <p className="text-2xl font-bold">{t('active')}</p>
-              </div>
+        <Card className="md:col-span-1">
+          <CardContent className="pt-4 md:pt-6">
+            <div className="text-center">
+              <p className="text-lg md:text-2xl font-bold">{t('active')}</p>
+              <p className="text-xs md:text-sm text-muted-foreground mt-1">{t('quickReport')}</p>
             </div>
           </CardContent>
         </Card>
@@ -1222,9 +1241,9 @@ Additional Details: ${decryptedContent.additionalDetails || 'None provided'}
         <Tabs defaultValue="active" className="space-y-4">
           {/* Tabs, Search, and Filter Row */}
           <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center">
-            <TabsList>
-              <TabsTrigger value="active">{t('activeReports')} ({reports.length})</TabsTrigger>
-              <TabsTrigger value="archived">{t('archived')} ({archivedReports.length})</TabsTrigger>
+            <TabsList className="w-full md:w-auto">
+              <TabsTrigger value="active" className="flex-1 md:flex-none">{t('activeReports')} ({reports.length})</TabsTrigger>
+              <TabsTrigger value="archived" className="flex-1 md:flex-none">{t('archived')} ({archivedReports.length})</TabsTrigger>
             </TabsList>
             
             <div className="flex flex-col sm:flex-row gap-4 flex-1 w-full sm:w-auto">
@@ -1257,8 +1276,8 @@ Additional Details: ${decryptedContent.additionalDetails || 'None provided'}
             </div>
           </div>
           <TabsContent value="active">
-          <Card>
-            <CardContent className="pt-6">
+          <Card className="md:border md:shadow-sm border-0 shadow-none">
+            <CardContent className="pt-0 px-0 md:pt-6 md:px-6">
               {filteredReports.length === 0 ? (
                 <div className="text-center py-8 text-muted-foreground">
                   {isOrgAdmin ? (
@@ -1296,7 +1315,30 @@ Additional Details: ${decryptedContent.additionalDetails || 'None provided'}
                             key={report.id}
                             className={highlightedReportIds.includes(report.id) ? 'bg-yellow-50 border-l-4 border-l-orange-400' : ''}
                           >
-                            <TableCell className="font-mono text-sm">{report.tracking_id}</TableCell>
+                            <TableCell className="font-mono text-sm">
+                              <div className="flex items-center gap-2">
+                                <span>{report.tracking_id}</span>
+                                <button
+                                  onClick={async () => {
+                                    try {
+                                      await navigator.clipboard.writeText(report.tracking_id);
+                                      setCopiedTrackingId(report.tracking_id);
+                                      setTimeout(() => setCopiedTrackingId(null), 1000);
+                                    } catch (error) {
+                                      console.error('Failed to copy:', error);
+                                    }
+                                  }}
+                                  className="text-muted-foreground hover:text-foreground transition-colors"
+                                  title="Copy tracking ID"
+                                >
+                                  {copiedTrackingId === report.tracking_id ? (
+                                    <Check className="h-3 w-3 text-green-600" />
+                                  ) : (
+                                    <Copy className="h-3 w-3" />
+                                  )}
+                                </button>
+                              </div>
+                            </TableCell>
                             <TableCell className="font-medium">{report.title}</TableCell>
                             <TableCell>
                               <Badge variant={report.status === 'new' ? 'default' : 'secondary'}>
@@ -1304,17 +1346,11 @@ Additional Details: ${decryptedContent.additionalDetails || 'None provided'}
                               </Badge>
                             </TableCell>
                             <TableCell>
-                              {report.tags && report.tags.length > 0 ? (
-                                <div className="flex flex-wrap gap-1">
-                                  {report.tags.slice(0, 2).map((tag: string, idx: number) => (
-                                    <Badge key={idx} variant="outline" className="text-xs">
-                                      {tag}
-                                    </Badge>
-                                  ))}
-                                  {report.tags.length > 2 && (
-                                    <Badge variant="outline" className="text-xs">
-                                      +{report.tags.length - 2}
-                                    </Badge>
+                              {decryptedCategories[report.id] ? (
+                                <div className="text-sm">
+                                  <div className="font-medium">{decryptedCategories[report.id].main}</div>
+                                  {decryptedCategories[report.id].sub && (
+                                    <div className="text-muted-foreground text-xs">{decryptedCategories[report.id].sub}</div>
                                   )}
                                 </div>
                               ) : (
@@ -1476,7 +1512,7 @@ Additional Details: ${decryptedContent.additionalDetails || 'None provided'}
                                 </Button>
                                 <DropdownMenu>
                                   <DropdownMenuTrigger asChild>
-                                    <Button variant="ghost" size="sm">
+                                    <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
                                       <MoreVertical className="h-4 w-4" />
                                     </Button>
                                   </DropdownMenuTrigger>
@@ -1643,30 +1679,47 @@ Additional Details: ${decryptedContent.additionalDetails || 'None provided'}
                   <div className="md:hidden space-y-4">
                     {filteredReports.map((report) => (
                       <Card key={report.id} className="overflow-hidden">
-                        <CardContent className="p-4 space-y-3">
+                        <CardContent className="p-5 md:p-4 space-y-4 md:space-y-3">
                           <div className="flex items-start justify-between gap-2">
                             <div className="flex-1 min-w-0">
-                              <div className="font-mono text-xs text-muted-foreground mb-1">{report.tracking_id}</div>
-                              <h3 className="font-semibold text-sm break-words">{report.title}</h3>
+                              <div className="flex items-center gap-2 mb-1">
+                                <span className="font-mono text-sm md:text-xs text-muted-foreground">{report.tracking_id}</span>
+                                <button
+                                  onClick={async () => {
+                                    try {
+                                      await navigator.clipboard.writeText(report.tracking_id);
+                                      setCopiedTrackingId(report.tracking_id);
+                                      setTimeout(() => setCopiedTrackingId(null), 1000);
+                                    } catch (error) {
+                                      console.error('Failed to copy:', error);
+                                    }
+                                  }}
+                                  className="text-muted-foreground hover:text-foreground transition-colors"
+                                  title="Copy tracking ID"
+                                >
+                                  {copiedTrackingId === report.tracking_id ? (
+                                    <Check className="h-3 w-3 text-green-600" />
+                                  ) : (
+                                    <Copy className="h-3 w-3" />
+                                  )}
+                                </button>
+                              </div>
+                              <h3 className="font-semibold text-base md:text-sm break-words">{report.title}</h3>
                             </div>
                             <Badge variant={report.status === 'new' ? 'default' : 'secondary'} className="shrink-0">
                               {report.status}
                             </Badge>
                           </div>
                           
-                          {report.tags && report.tags.length > 0 && (
-                            <div className="flex flex-wrap gap-1">
-                              {report.tags.slice(0, 3).map((tag: string, idx: number) => (
-                                <Badge key={idx} variant="outline" className="text-xs">
-                                  {tag}
-                                </Badge>
-                              ))}
-                              {report.tags.length > 3 && (
-                                <Badge variant="outline" className="text-xs">
-                                  +{report.tags.length - 3}
-                                </Badge>
+                          {decryptedCategories[report.id] ? (
+                            <div className="text-base md:text-sm">
+                              <div className="font-medium">{decryptedCategories[report.id].main}</div>
+                              {decryptedCategories[report.id].sub && (
+                                <div className="text-muted-foreground text-sm md:text-xs">{decryptedCategories[report.id].sub}</div>
                               )}
                             </div>
+                          ) : (
+                            <span className="text-base md:text-sm text-muted-foreground">-</span>
                           )}
                           
                           <div className="flex flex-wrap items-center gap-2">
@@ -1696,7 +1749,7 @@ Additional Details: ${decryptedContent.additionalDetails || 'None provided'}
                             )}
                           </div>
                           
-                          <div className="flex items-center justify-between text-xs text-muted-foreground">
+                          <div className="flex items-center justify-between text-sm md:text-xs text-muted-foreground">
                             <span>{new Date(report.created_at).toLocaleDateString()}</span>
                             <Select
                               value={report.assigned_to || 'unassigned'}
@@ -1902,23 +1955,40 @@ Additional Details: ${decryptedContent.additionalDetails || 'None provided'}
                   <TableBody>
                     {archivedReports.map((report) => (
                       <TableRow key={report.id}>
-                        <TableCell className="font-mono text-sm">{report.tracking_id}</TableCell>
+                        <TableCell className="font-mono text-sm">
+                          <div className="flex items-center gap-2">
+                            <span>{report.tracking_id}</span>
+                            <button
+                              onClick={async () => {
+                                try {
+                                  await navigator.clipboard.writeText(report.tracking_id);
+                                  setCopiedTrackingId(report.tracking_id);
+                                  setTimeout(() => setCopiedTrackingId(null), 1000);
+                                } catch (error) {
+                                  console.error('Failed to copy:', error);
+                                }
+                              }}
+                              className="text-muted-foreground hover:text-foreground transition-colors"
+                              title="Copy tracking ID"
+                            >
+                              {copiedTrackingId === report.tracking_id ? (
+                                <Check className="h-3 w-3 text-green-600" />
+                              ) : (
+                                <Copy className="h-3 w-3" />
+                              )}
+                            </button>
+                          </div>
+                        </TableCell>
                         <TableCell className="font-medium">{report.title}</TableCell>
                         <TableCell>
                           <Badge variant="secondary">{report.status}</Badge>
                         </TableCell>
                         <TableCell>
-                          {report.tags && report.tags.length > 0 ? (
-                            <div className="flex flex-wrap gap-1">
-                              {report.tags.slice(0, 2).map((tag: string, idx: number) => (
-                                <Badge key={idx} variant="outline" className="text-xs">
-                                  {tag}
-                                </Badge>
-                              ))}
-                              {report.tags.length > 2 && (
-                                <Badge variant="outline" className="text-xs">
-                                  +{report.tags.length - 2}
-                                </Badge>
+                          {decryptedCategories[report.id] ? (
+                            <div className="text-sm">
+                              <div className="font-medium">{decryptedCategories[report.id].main}</div>
+                              {decryptedCategories[report.id].sub && (
+                                <div className="text-muted-foreground text-xs">{decryptedCategories[report.id].sub}</div>
                               )}
                             </div>
                           ) : (
@@ -1940,7 +2010,7 @@ Additional Details: ${decryptedContent.additionalDetails || 'None provided'}
                             </Button>
                             <DropdownMenu>
                               <DropdownMenuTrigger asChild>
-                                <Button variant="ghost" size="sm">
+                                <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
                                   <MoreVertical className="h-4 w-4" />
                                 </Button>
                               </DropdownMenuTrigger>
@@ -2046,7 +2116,7 @@ Additional Details: ${decryptedContent.additionalDetails || 'None provided'}
 
       {/* Report Details Dialog */}
       <Dialog open={isReportDialogOpen} onOpenChange={setIsReportDialogOpen}>
-        <DialogContent className="w-[calc(100vw-2rem)] sm:w-[calc(100vw-4rem)] max-w-2xl max-h-[90vh] overflow-y-auto overflow-x-hidden">
+        <DialogContent className="w-[calc(100vw-2rem)] sm:w-[calc(100vw-4rem)] sm:max-w-lg md:max-w-xl max-h-[90vh] overflow-y-auto overflow-x-hidden">
           {selectedReport && (
             <>
               <DialogHeader>

@@ -182,7 +182,7 @@ const ReportContentDisplay = ({
       {/* Report Content with Scroll Area */}
       <Card>
         <CardHeader>
-          <CardTitle className="flex items-center justify-between">
+          <CardTitle className="flex items-center justify-between text-xl">
             <div className="flex items-center space-x-2">
               <Lock className="h-4 w-4 text-green-600" />
               <span>{t('reportContent')}</span>

@@ -9,6 +9,7 @@ import DashboardLayout from './components/dashboard/DashboardLayout';
 import DashboardView from './components/dashboard/DashboardView';
 import AIHelperView from './components/dashboard/AIHelperView';
 import SettingsView from './components/dashboard/SettingsView';
+import ReportDetails from './pages/ReportDetails';
 import OrganizationSettings from './components/dashboard/OrganizationSettings';
 import TeamView from './components/dashboard/TeamView';
 import BrandingView from './components/dashboard/BrandingView';
@@ -159,6 +160,14 @@ const AppContent = () => {
               <DashboardLayout>
                 <DashboardView />
               </DashboardLayout>
+            </ProtectedRoute>
+          } 
+        />
+        <Route 
+          path="/dashboard/reports/:reportId" 
+          element={
+            <ProtectedRoute>
+              <ReportDetails />
             </ProtectedRoute>
           } 
         />
