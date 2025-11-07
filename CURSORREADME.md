@@ -302,6 +302,67 @@ cd docs
 npm run docs:build         # VitePress build
 ```
 
+### Local Supabase Setup with FFmpeg
+
+**Note**: Supabase CLI commands may hang in Cursor's terminal. Use Terminal.app for Docker commands.
+
+**Prerequisites:**
+- Docker Desktop running
+- Supabase CLI installed (v2.54.11+)
+
+**Initial Setup:**
+
+1. **Build FFmpeg Docker image** (one-time):
+   ```bash
+   export PATH="/Applications/Docker.app/Contents/Resources/bin:$PATH"
+   docker build -t supabase-functions-ffmpeg:latest -f supabase/functions/Dockerfile supabase/functions/
+   ```
+
+2. **Start Supabase**:
+   ```bash
+   # If Supabase CLI works:
+   supabase start
+   
+   # If CLI hangs, use the helper script:
+   ./start-edge-functions.sh
+   ```
+
+**Starting Edge Functions with FFmpeg:**
+
+If the edge functions container stops or needs to be recreated:
+
+```bash
+# Run in Terminal.app (not Cursor):
+./start-edge-functions.sh
+```
+
+This script will:
+- Find the Supabase network
+- Create/start edge functions container with FFmpeg
+- Verify FFmpeg is working
+
+**Verify FFmpeg:**
+
+```bash
+docker exec supabase_edge_runtime_cxmuzperkittvibslnff ffmpeg -version
+```
+
+**Stop Supabase:**
+
+```bash
+# Stop containers
+docker stop supabase_db_cxmuzperkittvibslnff supabase_edge_runtime_cxmuzperkittvibslnff
+
+# Or quit Docker Desktop
+```
+
+**Important Files:**
+- `start-edge-functions.sh` - Script to start edge functions with FFmpeg
+- `docker-compose.override.yml` - Docker configuration for FFmpeg image
+- `supabase/functions/Dockerfile` - FFmpeg image build file
+
+**Note**: The `strip-all-metadata` edge function requires FFmpeg for video files (MP4, etc.). Audio files (MP3) are handled without FFmpeg.
+
 ---
 
 ## 🚢 Deployment
@@ -551,6 +612,10 @@ cd docs && npm run docs:build  # Build docs
 # Database (requires Supabase CLI)
 supabase migration list        # List migrations
 supabase db push              # Push migrations
+
+# Supabase with FFmpeg (run in Terminal.app, not Cursor)
+./start-edge-functions.sh     # Start edge functions with FFmpeg
+docker exec supabase_edge_runtime_cxmuzperkittvibslnff ffmpeg -version  # Verify FFmpeg
 
 # Git
 git checkout -b feature/name   # Create feature branch

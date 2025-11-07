@@ -165,6 +165,7 @@ const DashboardView = () => {
   const [sortField, setSortField] = useState<'created_at' | 'title' | 'tracking_id' | 'ai_risk_score'>('created_at');
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('desc');
   const [reportCategories, setReportCategories] = useState<Record<string, string>>({});
+  const [decryptedCategories, setDecryptedCategories] = useState<Record<string, { main: string; sub: string }>>({});
   const [isAssessingRisk, setIsAssessingRisk] = useState<string | null>(null);
   const [updatingRiskLevel, setUpdatingRiskLevel] = useState<string | null>(null);
   const [teamMembers, setTeamMembers] = useState<any[]>([]);
@@ -355,6 +356,29 @@ const DashboardView = () => {
       console.log('Archived reports fetched:', archivedData);
       setReports(reportsData || []);
       setArchivedReports(archivedData || []);
+
+      // Decrypt categories for display (both active and archived)
+      if ((reportsData || archivedData) && profile?.organization_id) {
+        const categories: Record<string, { main: string; sub: string }> = {};
+        const allReports = [...(reportsData || []), ...(archivedData || [])];
+        for (const report of allReports) {
+          try {
+            if (report.encrypted_content && report.encryption_key_hash) {
+              const decrypted = await decryptReport(report.encrypted_content, report.encryption_key_hash);
+              if (decrypted.category) {
+                const parts = decrypted.category.split(' - ');
+                categories[report.id] = {
+                  main: parts[0] || decrypted.category,
+                  sub: parts[1] || ''
+                };
+              }
+            }
+          } catch (error) {
+            console.error('Failed to decrypt category for report:', report.id, error);
+          }
+        }
+        setDecryptedCategories(categories);
+      }
 
       // Fetch team members for assignment
       const { data: teamData, error: teamError } = await supabase
@@ -1244,17 +1268,11 @@ Additional Details: ${decryptedContent.additionalDetails || 'None provided'}
                               </Badge>
                             </TableCell>
                             <TableCell>
-                              {report.tags && report.tags.length > 0 ? (
-                                <div className="flex flex-wrap gap-1">
-                                  {report.tags.slice(0, 2).map((tag: string, idx: number) => (
-                                    <Badge key={idx} variant="outline" className="text-xs">
-                                      {tag}
-                                    </Badge>
-                                  ))}
-                                  {report.tags.length > 2 && (
-                                    <Badge variant="outline" className="text-xs">
-                                      +{report.tags.length - 2}
-                                    </Badge>
+                              {decryptedCategories[report.id] ? (
+                                <div className="text-sm">
+                                  <div className="font-medium">{decryptedCategories[report.id].main}</div>
+                                  {decryptedCategories[report.id].sub && (
+                                    <div className="text-muted-foreground text-xs">{decryptedCategories[report.id].sub}</div>
                                   )}
                                 </div>
                               ) : (
@@ -1287,7 +1305,7 @@ Additional Details: ${decryptedContent.additionalDetails || 'None provided'}
                                         }`}
                                       >
                                         <Bot className="w-3 h-3" />
-                                        <span>{report.ai_risk_level} ({report.ai_risk_score}/25)</span>
+                                        <span>{report.ai_risk_level}</span>
                                         <Eye className="w-3 h-3 opacity-70" />
                                       </button>
                                     </PopoverTrigger>
@@ -1375,7 +1393,7 @@ Additional Details: ${decryptedContent.additionalDetails || 'None provided'}
                                 </Button>
                                 <DropdownMenu>
                                   <DropdownMenuTrigger asChild>
-                                    <Button variant="ghost" size="sm">
+                                    <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
                                       <MoreVertical className="h-4 w-4" />
                                     </Button>
                                   </DropdownMenuTrigger>
@@ -1553,19 +1571,15 @@ Additional Details: ${decryptedContent.additionalDetails || 'None provided'}
                             </Badge>
                           </div>
                           
-                          {report.tags && report.tags.length > 0 && (
-                            <div className="flex flex-wrap gap-1">
-                              {report.tags.slice(0, 3).map((tag: string, idx: number) => (
-                                <Badge key={idx} variant="outline" className="text-xs">
-                                  {tag}
-                                </Badge>
-                              ))}
-                              {report.tags.length > 3 && (
-                                <Badge variant="outline" className="text-xs">
-                                  +{report.tags.length - 3}
-                                </Badge>
+                          {decryptedCategories[report.id] ? (
+                            <div className="text-sm">
+                              <div className="font-medium">{decryptedCategories[report.id].main}</div>
+                              {decryptedCategories[report.id].sub && (
+                                <div className="text-muted-foreground text-xs">{decryptedCategories[report.id].sub}</div>
                               )}
                             </div>
+                          ) : (
+                            <span className="text-sm text-muted-foreground">-</span>
                           )}
                           
                           <div className="flex flex-wrap items-center gap-2">
@@ -1802,17 +1816,11 @@ Additional Details: ${decryptedContent.additionalDetails || 'None provided'}
                           <Badge variant="secondary">{report.status}</Badge>
                         </TableCell>
                         <TableCell>
-                          {report.tags && report.tags.length > 0 ? (
-                            <div className="flex flex-wrap gap-1">
-                              {report.tags.slice(0, 2).map((tag: string, idx: number) => (
-                                <Badge key={idx} variant="outline" className="text-xs">
-                                  {tag}
-                                </Badge>
-                              ))}
-                              {report.tags.length > 2 && (
-                                <Badge variant="outline" className="text-xs">
-                                  +{report.tags.length - 2}
-                                </Badge>
+                          {decryptedCategories[report.id] ? (
+                            <div className="text-sm">
+                              <div className="font-medium">{decryptedCategories[report.id].main}</div>
+                              {decryptedCategories[report.id].sub && (
+                                <div className="text-muted-foreground text-xs">{decryptedCategories[report.id].sub}</div>
                               )}
                             </div>
                           ) : (
@@ -1834,7 +1842,7 @@ Additional Details: ${decryptedContent.additionalDetails || 'None provided'}
                             </Button>
                             <DropdownMenu>
                               <DropdownMenuTrigger asChild>
-                                <Button variant="ghost" size="sm">
+                                <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
                                   <MoreVertical className="h-4 w-4" />
                                 </Button>
                               </DropdownMenuTrigger>

@@ -2,8 +2,10 @@
 FROM denoland/deno:1.40.0
 
 # Install FFmpeg and required dependencies
+# Use --fix-missing to handle hash mismatches and retry logic
 RUN apt-get update && \
-    apt-get install -y ffmpeg && \
+    apt-get install -y --fix-missing ffmpeg || \
+    (apt-get update && apt-get install -y --fix-missing ffmpeg) && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
 
