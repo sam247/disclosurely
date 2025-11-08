@@ -110,7 +110,7 @@ const Step1Welcome = ({ onContinue, brandColor, language, onLanguageChange, orga
   };
 
   return (
-    <div className="text-center space-y-3 py-2">
+    <div className="text-center space-y-3 sm:space-y-4 py-2">
       {/* Language Selector and Check Status Button */}
       <div className="flex justify-between items-center mb-2">
         {/* Check Existing Report Button */}
@@ -127,10 +127,10 @@ const Step1Welcome = ({ onContinue, brandColor, language, onLanguageChange, orga
             <Button
               variant="outline"
               size="sm"
-              className="h-8 border-gray-300 bg-white hover:bg-gray-50 gap-2"
+              className="h-9 sm:h-8 border-gray-300 bg-white hover:bg-gray-50 gap-2"
             >
               <FileText className="h-4 w-4 text-gray-600" />
-              <span className="text-sm">Check Existing Report</span>
+              <span className="text-xs sm:text-sm">Check Existing Report</span>
             </Button>
           </DialogTrigger>
           <DialogContent className="sm:max-w-md">
@@ -180,11 +180,11 @@ const Step1Welcome = ({ onContinue, brandColor, language, onLanguageChange, orga
 
         {/* Language Selector */}
         <Select value={language} onValueChange={onLanguageChange}>
-          <SelectTrigger className="w-[140px] h-8 border-gray-300 bg-white hover:bg-gray-50">
+          <SelectTrigger className="w-[120px] sm:w-[140px] h-9 sm:h-8 border-gray-300 bg-white hover:bg-gray-50">
             <div className="flex items-center gap-2">
               <Globe className="h-4 w-4 text-gray-600" />
               <SelectValue>
-                <span className="text-sm">{currentLang.flag} {currentLang.name}</span>
+                <span className="text-xs sm:text-sm">{currentLang.flag} {currentLang.name}</span>
               </SelectValue>
             </div>
           </SelectTrigger>
@@ -201,22 +201,22 @@ const Step1Welcome = ({ onContinue, brandColor, language, onLanguageChange, orga
         </Select>
       </div>
 
-      <div className="space-y-1">
-        <h1 className="text-2xl font-bold text-gray-900">
+      <div className="space-y-2">
+        <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-gray-900 px-2">
           {welcomeTitle}
         </h1>
-        <p className="text-base text-gray-600 max-w-md mx-auto">
+        <p className="text-sm sm:text-base text-gray-600 max-w-md mx-auto px-4">
           {t.welcome.subtitle}
         </p>
       </div>
 
 
-      <div className="pt-1">
+      <div className="pt-2 sm:pt-1 px-4">
         <Button
           size="lg"
           onClick={onContinue}
           style={{ backgroundColor: brandColor }}
-          className="px-8 py-4 text-base"
+          className="px-6 sm:px-8 py-3 sm:py-4 text-base sm:text-lg h-12 sm:h-auto w-full sm:w-auto"
         >
           {t.welcome.beginButton}
         </Button>
@@ -226,13 +226,13 @@ const Step1Welcome = ({ onContinue, brandColor, language, onLanguageChange, orga
         <Button
           variant="link"
           onClick={() => window.location.href = '/resume-draft'}
-          className="text-sm text-gray-600 hover:text-primary"
+          className="text-xs sm:text-sm text-gray-600 hover:text-primary h-9 sm:h-auto"
         >
           Resume a saved draft
         </Button>
       </div>
 
-      <p className="text-xs text-gray-500 max-w-md mx-auto">
+      <p className="text-xs sm:text-sm text-gray-500 max-w-md mx-auto px-4">
         {t.welcome.footer}
       </p>
     </div>

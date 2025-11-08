@@ -67,8 +67,8 @@ const Step6Urgency = ({ priority, onChange, language }: Step6UrgencyProps) => {
       </div>
 
       <div className="space-y-2">
-        <Label className="text-sm">{t.step5.label}</Label>
-        <div className="grid grid-cols-2 gap-2 mt-2">
+        <Label className="text-sm sm:text-base">{t.step5.label}</Label>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-2">
           {urgencyLevels.map((level) => {
             const Icon = level.icon;
             const isSelected = priority === level.value;
@@ -79,23 +79,23 @@ const Step6Urgency = ({ priority, onChange, language }: Step6UrgencyProps) => {
                 type="button"
                 onClick={() => onChange(level.value)}
                 className={cn(
-                  "w-full p-2 border-2 rounded-lg text-left transition-all cursor-pointer flex items-start gap-2",
+                  "w-full p-3 sm:p-2 border-2 rounded-lg text-left transition-all cursor-pointer flex items-start gap-2 min-h-[72px] sm:min-h-0",
                   isSelected ? level.activeColor : level.color
                 )}
               >
-                <div className={cn("p-1 rounded-lg bg-white flex-shrink-0", level.iconColor)}>
-                  <Icon className="w-4 h-4" />
+                <div className={cn("p-1.5 sm:p-1 rounded-lg bg-white flex-shrink-0", level.iconColor)}>
+                  <Icon className="w-5 h-5 sm:w-4 sm:h-4" />
                 </div>
                 <div className="flex-1">
                   <div className="flex items-center gap-2">
-                    <span className="font-semibold text-sm">{level.label}</span>
+                    <span className="font-semibold text-base sm:text-sm">{level.label}</span>
                     {isSelected && (
                       <span className="text-xs px-1.5 py-0.5 rounded-full bg-white font-medium">
                         {t.step5.selected}
                       </span>
                     )}
                   </div>
-                  <p className="text-xs mt-0 opacity-90">{level.description}</p>
+                  <p className="text-sm sm:text-xs mt-1 sm:mt-0 opacity-90">{level.description}</p>
                 </div>
               </button>
             );
