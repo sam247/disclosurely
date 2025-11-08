@@ -1,52 +1,55 @@
 import { Label } from '@/components/ui/label';
 import { AlertTriangle, Clock, Info, Flame } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { progressiveFormTranslations } from '@/i18n/progressiveFormTranslations';
 
 interface Step6UrgencyProps {
   priority: number;
   onChange: (priority: number) => void;
+  language: string;
 }
 
-const urgencyLevels = [
-  {
-    value: 1,
-    label: 'Critical',
-    icon: Flame,
-    description: 'Immediate danger or serious violation',
-    color: 'border-red-500 bg-red-50 hover:bg-red-100 text-red-900',
-    iconColor: 'text-red-600',
-    activeColor: 'border-red-600 bg-red-100 ring-2 ring-red-500'
-  },
-  {
-    value: 2,
-    label: 'High',
-    icon: AlertTriangle,
-    description: 'Significant impact or ongoing issue',
-    color: 'border-orange-500 bg-orange-50 hover:bg-orange-100 text-orange-900',
-    iconColor: 'text-orange-600',
-    activeColor: 'border-orange-600 bg-orange-100 ring-2 ring-orange-500'
-  },
-  {
-    value: 3,
-    label: 'Medium',
-    icon: Clock,
-    description: 'Standard concern requiring attention',
-    color: 'border-yellow-500 bg-yellow-50 hover:bg-yellow-100 text-yellow-900',
-    iconColor: 'text-yellow-600',
-    activeColor: 'border-yellow-600 bg-yellow-100 ring-2 ring-yellow-500'
-  },
-  {
-    value: 4,
-    label: 'Low',
-    icon: Info,
-    description: 'Minor issue or informational report',
-    color: 'border-blue-500 bg-blue-50 hover:bg-blue-100 text-blue-900',
-    iconColor: 'text-blue-600',
-    activeColor: 'border-blue-600 bg-blue-100 ring-2 ring-blue-500'
-  }
-];
+const Step6Urgency = ({ priority, onChange, language }: Step6UrgencyProps) => {
+  const t = progressiveFormTranslations[language as keyof typeof progressiveFormTranslations] || progressiveFormTranslations.en;
 
-const Step6Urgency = ({ priority, onChange }: Step6UrgencyProps) => {
+  const urgencyLevels = [
+    {
+      value: 1,
+      label: t.step5.levels.critical.label,
+      icon: Flame,
+      description: t.step5.levels.critical.desc,
+      color: 'border-red-500 bg-red-50 hover:bg-red-100 text-red-900',
+      iconColor: 'text-red-600',
+      activeColor: 'border-red-600 bg-red-100 ring-2 ring-red-500'
+    },
+    {
+      value: 2,
+      label: t.step5.levels.high.label,
+      icon: AlertTriangle,
+      description: t.step5.levels.high.desc,
+      color: 'border-orange-500 bg-orange-50 hover:bg-orange-100 text-orange-900',
+      iconColor: 'text-orange-600',
+      activeColor: 'border-orange-600 bg-orange-100 ring-2 ring-orange-500'
+    },
+    {
+      value: 3,
+      label: t.step5.levels.medium.label,
+      icon: Clock,
+      description: t.step5.levels.medium.desc,
+      color: 'border-yellow-500 bg-yellow-50 hover:bg-yellow-100 text-yellow-900',
+      iconColor: 'text-yellow-600',
+      activeColor: 'border-yellow-600 bg-yellow-100 ring-2 ring-yellow-500'
+    },
+    {
+      value: 4,
+      label: t.step5.levels.low.label,
+      icon: Info,
+      description: t.step5.levels.low.desc,
+      color: 'border-blue-500 bg-blue-50 hover:bg-blue-100 text-blue-900',
+      iconColor: 'text-blue-600',
+      activeColor: 'border-blue-600 bg-blue-100 ring-2 ring-blue-500'
+    }
+  ];
   return (
     <div className="space-y-4 py-2">
       <div className="flex items-center gap-3">
@@ -55,16 +58,16 @@ const Step6Urgency = ({ priority, onChange }: Step6UrgencyProps) => {
         </div>
         <div>
           <h2 className="text-2xl font-bold text-gray-900">
-            How urgent is this matter?
+            {t.step5.title}
           </h2>
           <p className="text-sm text-gray-600 mt-1">
-            Help us prioritize the response
+            {t.step5.subtitle}
           </p>
         </div>
       </div>
 
       <div className="space-y-2">
-        <Label className="text-base">Priority Level *</Label>
+        <Label className="text-base">{t.step5.label}</Label>
         <div className="grid gap-3 mt-3">
           {urgencyLevels.map((level) => {
             const Icon = level.icon;
@@ -87,8 +90,8 @@ const Step6Urgency = ({ priority, onChange }: Step6UrgencyProps) => {
                   <div className="flex items-center gap-2">
                     <span className="font-semibold text-base">{level.label}</span>
                     {isSelected && (
-                      <span className="text-xs px-1.5 py-0.5 rounded-full bg-white font-medium">
-                        Selected
+                      <span className="text-xs px-2 py-0.5 rounded-full bg-white font-medium">
+                        {t.step5.selected}
                       </span>
                     )}
                   </div>
@@ -102,7 +105,7 @@ const Step6Urgency = ({ priority, onChange }: Step6UrgencyProps) => {
 
       {priority > 0 && (
         <p className="text-sm text-green-600">
-          ✓ Priority set to: <strong>{urgencyLevels.find(l => l.value === priority)?.label}</strong>
+          {t.step5.prioritySet} <strong>{urgencyLevels.find(l => l.value === priority)?.label}</strong>
         </p>
       )}
     </div>

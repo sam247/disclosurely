@@ -3,6 +3,7 @@ import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { scanForPrivacyRisks } from '@/utils/privacyDetection';
+import { progressiveFormTranslations } from '@/i18n/progressiveFormTranslations';
 
 // Step components
 import Step1Welcome from './progressive-steps/Step1Welcome';
@@ -53,6 +54,7 @@ const ProgressiveReportForm = ({
   const [direction, setDirection] = useState<'forward' | 'backward'>('forward');
   const [privacyRisks, setPrivacyRisks] = useState<any[]>([]);
   const [hasViewedPrivacy, setHasViewedPrivacy] = useState(false);
+  const [language, setLanguage] = useState<string>('en');
 
   // Check for privacy risks whenever title/description changes
   useEffect(() => {
@@ -218,13 +220,21 @@ const ProgressiveReportForm = ({
 
     switch (currentStep) {
       case 0:
-        return <Step1Welcome onContinue={handleNext} brandColor={brandColor} />;
+        return (
+          <Step1Welcome
+            onContinue={handleNext}
+            brandColor={brandColor}
+            language={language}
+            onLanguageChange={setLanguage}
+          />
+        );
       case 1:
         return (
           <Step2Title
             value={formData.title}
             onChange={(title) => updateFormData({ title })}
             isValid={validateStep(1)}
+            language={language}
           />
         );
       case 2:
@@ -233,6 +243,7 @@ const ProgressiveReportForm = ({
             value={formData.description}
             onChange={(description) => updateFormData({ description })}
             isValid={validateStep(2)}
+            language={language}
           />
         );
       case 3:
@@ -244,6 +255,7 @@ const ProgressiveReportForm = ({
               description={formData.description}
               risks={privacyRisks}
               onAutoRedact={handleAutoRedact}
+              language={language}
             />
           );
         }
@@ -255,6 +267,7 @@ const ProgressiveReportForm = ({
             customCategory={formData.customCategory}
             onChange={updateFormData}
             isValid={validateStep(currentStep)}
+            language={language}
           />
         );
       case 4:
@@ -265,6 +278,7 @@ const ProgressiveReportForm = ({
             customCategory={formData.customCategory}
             onChange={updateFormData}
             isValid={validateStep(currentStep)}
+            language={language}
           />
         );
       case 5:
@@ -272,6 +286,7 @@ const ProgressiveReportForm = ({
           <Step6Urgency
             priority={formData.priority}
             onChange={(priority) => updateFormData({ priority })}
+            language={language}
           />
         );
       case 6:
@@ -280,6 +295,7 @@ const ProgressiveReportForm = ({
             incidentDate={formData.incidentDate}
             location={formData.location}
             onChange={updateFormData}
+            language={language}
           />
         );
       case 7:
@@ -287,6 +303,7 @@ const ProgressiveReportForm = ({
           <Step8Evidence
             attachedFiles={attachedFiles}
             setAttachedFiles={setAttachedFiles}
+            language={language}
           />
         );
       case 8:
@@ -296,6 +313,7 @@ const ProgressiveReportForm = ({
             previousReports={formData.previousReports}
             additionalNotes={formData.additionalNotes}
             onChange={updateFormData}
+            language={language}
           />
         );
       case 9:
@@ -307,6 +325,7 @@ const ProgressiveReportForm = ({
             onEdit={goToStep}
             onSubmit={handleSubmit}
             isSubmitting={isSubmitting}
+            language={language}
           />
         );
       default:
@@ -319,15 +338,21 @@ const ProgressiveReportForm = ({
   const showSkip = [6, 7, 8].includes(currentStep); // When/Where, Evidence, Additional
   const isNextDisabled = !validateStep(currentStep);
 
+  const t = progressiveFormTranslations[language as keyof typeof progressiveFormTranslations] || progressiveFormTranslations.en;
+
   return (
-    <div className="w-full max-w-2xl mx-auto">
+    <div className="w-full max-w-2xl mx-auto" dir={language === 'el' ? 'ltr' : undefined}>
       {/* Progress bar */}
       <div className="mb-6">
         <div className="flex justify-between items-center mb-2">
           <span className="text-sm font-medium text-gray-600">
-            {currentStep === 0 ? 'Welcome' : `Step ${displayStep} of 9`}
+            {currentStep === 0
+              ? t.navigation.welcome
+              : t.navigation.step
+                  .replace('{current}', displayStep.toString())
+                  .replace('{total}', '9')}
           </span>
-          <span className="text-sm text-gray-500">{Math.round(progressPercent)}%</span>
+          <span className="text-sm text-gray-500">{Math.round(progressPercent)}{t.navigation.percent}</span>
         </div>
         <Progress value={progressPercent} className="h-2" />
       </div>
@@ -350,7 +375,7 @@ const ProgressiveReportForm = ({
             className="flex items-center gap-2"
           >
             <ChevronLeft className="w-4 h-4" />
-            Back
+            {t.navigation.back}
           </Button>
 
           <div className="flex items-center gap-3">
@@ -360,7 +385,7 @@ const ProgressiveReportForm = ({
                 onClick={handleSkip}
                 disabled={isSubmitting}
               >
-                Skip
+                {t.navigation.skip}
               </Button>
             )}
             <Button
@@ -369,7 +394,7 @@ const ProgressiveReportForm = ({
               style={{ backgroundColor: isNextDisabled ? undefined : brandColor }}
               className="flex items-center gap-2"
             >
-              Continue
+              {t.navigation.continue}
               <ChevronRight className="w-4 h-4" />
             </Button>
           </div>

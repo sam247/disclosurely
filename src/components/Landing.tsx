@@ -52,14 +52,8 @@ const Landing = () => {
   } = useTranslation();
   const currentLanguage = i18n.language;
   const langPrefix = currentLanguage && currentLanguage !== "en" ? `/${currentLanguage}` : "";
-  return (
-    <>
-          <DynamicHelmet
-            pageIdentifier="/"
-            fallbackTitle="Disclosurely | Whistleblowing Platform | Disclosure Management Software"
-            fallbackDescription="Secure whistleblowing platform for organizations. Anonymous reporting, end-to-end encryption, and compliance features."
-            fallbackImage="https://disclosurely.com/ogimage.png"
-          />
+  return <>
+          <DynamicHelmet pageIdentifier="/" fallbackTitle="Disclosurely | Whistleblowing Platform | Disclosure Management Software" fallbackDescription="Secure whistleblowing platform for organizations. Anonymous reporting, end-to-end encryption, and compliance features." fallbackImage="https://disclosurely.com/ogimage.png" />
       <div className="min-h-screen bg-white">
       {/* Announcement Bar */}
       <AnnouncementBar />
@@ -93,51 +87,39 @@ const Landing = () => {
       </nav>
 
       {/* Hero Section */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-[100px] pb-20 py-[100px]">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-[100px] pb-20 py-[50px]">
         <div className="text-center">
           {/* Security Badge */}
           <div className="flex justify-center mb-6">
             <div className="inline-flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-full">
               <ShieldCheck className="w-5 h-5" />
-              <span className="text-sm font-medium">Military Grade AES-GCM Encryption</span>
+              <span className="font-medium text-xs">Military Grade AES-GCM Encryption</span>
             </div>
           </div>
 
-          <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold text-gray-900 mb-6">
+          <h1 className="sm:text-5xl font-bold text-gray-900 mb-6 text-2xl md:text-4xl">
             {t("landing.hero.title1")}
             <span className="block text-blue-600">
-              <TypingAnimation 
-                phrases={(() => {
-                  try {
-                    const phrases = t("landing.hero.typingPhrases", { returnObjects: true });
-                    // Debug: log what we get
-                    console.log('🔍 Typing phrases from i18n:', phrases, 'Type:', typeof phrases, 'Is Array:', Array.isArray(phrases));
-                    // Ensure we always have an array
-                    if (Array.isArray(phrases) && phrases.length > 0) {
-                      console.log('✅ Using i18n phrases:', phrases);
-                      return phrases;
-                    }
-                  } catch (error) {
-                    console.warn('⚠️ Failed to load typing phrases:', error);
+              <TypingAnimation phrases={(() => {
+                try {
+                  const phrases = t("landing.hero.typingPhrases", {
+                    returnObjects: true
+                  });
+                  // Debug: log what we get
+                  console.log('🔍 Typing phrases from i18n:', phrases, 'Type:', typeof phrases, 'Is Array:', Array.isArray(phrases));
+                  // Ensure we always have an array
+                  if (Array.isArray(phrases) && phrases.length > 0) {
+                    console.log('✅ Using i18n phrases:', phrases);
+                    return phrases;
                   }
-                  // Fallback to English phrases if translation fails
-                  const fallback = [
-                    "AI-Powered Workflows",
-                    "Anonymous Reporting",
-                    "Real-Time Audit Trails",
-                    "Private AI Assistance",
-                    "Military-Grade Security",
-                    "Automated Risk Scoring",
-                    "Proactive Risk Detection",
-                    "Trust-First Technology"
-                  ];
-                  console.log('🔄 Using fallback phrases:', fallback);
-                  return fallback;
-                })()}
-                typingSpeed={100}
-                deletingSpeed={50}
-                pauseDuration={2000}
-              />
+                } catch (error) {
+                  console.warn('⚠️ Failed to load typing phrases:', error);
+                }
+                // Fallback to English phrases if translation fails
+                const fallback = ["AI-Powered Workflows", "Anonymous Reporting", "Real-Time Audit Trails", "Private AI Assistance", "Military-Grade Security", "Automated Risk Scoring", "Proactive Risk Detection", "Trust-First Technology"];
+                console.log('🔄 Using fallback phrases:', fallback);
+                return fallback;
+              })()} typingSpeed={100} deletingSpeed={50} pauseDuration={2000} />
             </span>
           </h1>
           <p className="text-lg sm:text-xl text-gray-700 mb-8 max-w-3xl mx-auto px-4">{t("landing.hero.subtitle")}</p>
@@ -158,16 +140,9 @@ const Landing = () => {
 
             {/* Logo Grid - Static Display */}
             <div className="flex flex-wrap justify-center items-center gap-8 max-w-5xl mx-auto">
-              {businessLogos.map((logo, index) => (
-                <div key={index} className="flex-shrink-0">
-                  <img 
-                    src={logo.src} 
-                    alt={logo.alt} 
-                    loading="lazy" 
-                    className="h-12 w-auto object-contain opacity-70 hover:opacity-100 transition-opacity" 
-                  />
-                </div>
-              ))}
+              {businessLogos.map((logo, index) => <div key={index} className="flex-shrink-0">
+                  <img src={logo.src} alt={logo.alt} loading="lazy" className="h-12 w-auto object-contain opacity-70 hover:opacity-100 transition-opacity" />
+                </div>)}
             </div>
           </div>
         </div>
@@ -820,7 +795,6 @@ const Landing = () => {
       <CookieConsentBanner />
       <Footer />
       </div>
-    </>
-  );
+    </>;
 };
 export default Landing;

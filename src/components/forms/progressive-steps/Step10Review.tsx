@@ -3,6 +3,7 @@ import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
 import { CheckCircle2, Edit, Loader2, FileText, Tag, AlertTriangle, Calendar, MapPin, Paperclip, FileTextIcon } from 'lucide-react';
 import { ProgressiveFormData } from '../ProgressiveReportForm';
+import { progressiveFormTranslations } from '@/i18n/progressiveFormTranslations';
 
 interface Step10ReviewProps {
   formData: ProgressiveFormData;
@@ -10,12 +11,21 @@ interface Step10ReviewProps {
   onEdit: (step: number) => void;
   onSubmit: () => Promise<void>;
   isSubmitting: boolean;
+  language: string;
 }
 
-const Step10Review = ({ formData, attachedFiles, onEdit, onSubmit, isSubmitting }: Step10ReviewProps) => {
+const Step10Review = ({ formData, attachedFiles, onEdit, onSubmit, isSubmitting, language }: Step10ReviewProps) => {
+  const t = progressiveFormTranslations[language as keyof typeof progressiveFormTranslations] || progressiveFormTranslations.en;
+
   const getUrgencyLabel = (priority: number) => {
-    const labels = { 1: 'Critical', 2: 'High', 3: 'Medium', 4: 'Low', 5: 'Informational' };
-    return labels[priority as keyof typeof labels] || 'Medium';
+    const labels = {
+      1: t.step5.levels.critical.label,
+      2: t.step5.levels.high.label,
+      3: t.step5.levels.medium.label,
+      4: t.step5.levels.low.label,
+      5: t.step5.levels.low.label
+    };
+    return labels[priority as keyof typeof labels] || t.step5.levels.medium.label;
   };
 
   const getUrgencyColor = (priority: number) => {
@@ -29,17 +39,67 @@ const Step10Review = ({ formData, attachedFiles, onEdit, onSubmit, isSubmitting 
     return colors[priority as keyof typeof colors] || colors[3];
   };
 
+  // Helper to get translated category name (same as in Step5Category)
+  const getTranslatedMainCategory = (key: string) => {
+    const categoryMap: Record<string, keyof typeof t.step4.categories> = {
+      "Financial Misconduct": "financial",
+      "Workplace Behaviour": "workplace",
+      "Legal & Compliance": "legal",
+      "Safety & Risk": "safety",
+      "Data & Security": "data"
+    };
+    const categoryKey = categoryMap[key];
+    return categoryKey ? t.step4.categories[categoryKey] : key;
+  };
+
+  const getTranslatedSubCategory = (mainCatKey: string, subCatKey: string) => {
+    if (subCatKey === "Other (Please Specify)") return formData.customCategory;
+    const categoryMap: Record<string, keyof typeof t.step4.categories> = {
+      "Financial Misconduct": "financial",
+      "Workplace Behaviour": "workplace",
+      "Legal & Compliance": "legal",
+      "Safety & Risk": "safety",
+      "Data & Security": "data"
+    };
+    const mainCat = categoryMap[mainCatKey];
+    if (!mainCat) return subCatKey;
+    
+    const subCatMap: Record<string, string> = {
+      "Financial Misconduct": "subFinancial",
+      "Workplace Behaviour": "subWorkplace",
+      "Legal & Compliance": "subLegal",
+      "Safety & Risk": "subSafety",
+      "Data & Security": "subData"
+    };
+    const subCatType = subCatMap[mainCatKey] as keyof typeof t.step4.categories;
+    const subCategories = t.step4.categories[subCatType] as Record<string, string>;
+    
+    const subCategoryKeyMap: Record<string, string> = {
+      "Fraud": "fraud", "Bribery": "bribery", "Corruption": "corruption", "Embezzlement": "embezzlement",
+      "Theft": "theft", "Kickbacks": "kickbacks", "Laundering": "laundering", "Insider": "insider",
+      "Forgery": "forgery", "Collusion": "collusion", "Harassment": "harassment", "Discrimination": "discrimination",
+      "Bullying": "bullying", "Retaliation": "retaliation", "Nepotism": "nepotism", "Favouritism": "favouritism",
+      "Misconduct": "misconduct", "Exploitation": "exploitation", "Abuse": "abuse", "Compliance": "compliance",
+      "Ethics": "ethics", "Manipulation": "manipulation", "Extortion": "extortion", "Coercion": "coercion",
+      "Violation": "violation", "Safety": "safety", "Negligence": "negligence", "Hazards": "hazards",
+      "Sabotage": "sabotage", "Privacy": "privacy", "Data": "data", "Security": "security", "Cyber": "cyber"
+    };
+    
+    const subKey = subCategoryKeyMap[subCatKey];
+    return subKey && subCategories ? subCategories[subKey] : subCatKey;
+  };
+
   const reviewSections = [
     {
       step: 1,
-      title: 'Report Title',
+      title: t.step9.sections.reportTitle,
       icon: FileText,
       content: formData.title,
       show: true
     },
     {
       step: 2,
-      title: 'Description',
+      title: t.step9.sections.description,
       icon: FileTextIcon,
       content: formData.description,
       show: true,
@@ -47,14 +107,14 @@ const Step10Review = ({ formData, attachedFiles, onEdit, onSubmit, isSubmitting 
     },
     {
       step: 4,
-      title: 'Category',
+      title: t.step9.sections.category,
       icon: Tag,
-      content: `${formData.mainCategory} - ${formData.subCategory === "Other (Please Specify)" ? formData.customCategory : formData.subCategory}`,
+      content: `${getTranslatedMainCategory(formData.mainCategory)} - ${getTranslatedSubCategory(formData.mainCategory, formData.subCategory)}`,
       show: true
     },
     {
       step: 5,
-      title: 'Priority',
+      title: t.step9.sections.priority,
       icon: AlertTriangle,
       content: getUrgencyLabel(formData.priority),
       badge: true,
@@ -63,46 +123,48 @@ const Step10Review = ({ formData, attachedFiles, onEdit, onSubmit, isSubmitting 
     },
     {
       step: 6,
-      title: 'When it happened',
+      title: t.step9.sections.whenHappened,
       icon: Calendar,
-      content: formData.incidentDate || 'Not specified',
+      content: formData.incidentDate || t.step9.notSpecified,
       show: !!formData.incidentDate
     },
     {
       step: 6,
-      title: 'Where it happened',
+      title: t.step9.sections.whereHappened,
       icon: MapPin,
-      content: formData.location || 'Not specified',
+      content: formData.location || t.step9.notSpecified,
       show: !!formData.location
     },
     {
       step: 7,
-      title: 'Evidence',
+      title: t.step9.sections.evidence,
       icon: Paperclip,
       content: attachedFiles.length > 0
-        ? `${attachedFiles.length} file${attachedFiles.length > 1 ? 's' : ''} attached`
-        : 'No files attached',
+        ? t.step9.filesAttached
+            .replace('{count}', attachedFiles.length.toString())
+            .replace('{plural}', attachedFiles.length > 1 ? 's' : '')
+        : t.step9.noFiles,
       show: attachedFiles.length > 0
     },
     {
       step: 8,
-      title: 'Witnesses',
+      title: t.step9.sections.witnesses,
       icon: FileTextIcon,
-      content: formData.witnesses || 'None specified',
+      content: formData.witnesses || t.step9.noneSpecified,
       show: !!formData.witnesses
     },
     {
       step: 8,
-      title: 'Previous Reports',
+      title: t.step9.sections.previousReports,
       icon: FileTextIcon,
-      content: formData.previousReports ? 'Yes, reported before' : 'First time reporting',
+      content: formData.previousReports ? t.step9.reportedBefore : t.step9.firstTime,
       show: formData.previousReports
     },
     {
       step: 8,
-      title: 'Additional Notes',
+      title: t.step9.sections.additionalNotes,
       icon: FileTextIcon,
-      content: formData.additionalNotes || 'None',
+      content: formData.additionalNotes || t.step9.none,
       show: !!formData.additionalNotes,
       multiline: true
     }
@@ -116,17 +178,17 @@ const Step10Review = ({ formData, attachedFiles, onEdit, onSubmit, isSubmitting 
         </div>
         <div>
           <h2 className="text-2xl font-bold text-gray-900">
-            Review and submit
+            {t.step9.title}
           </h2>
           <p className="text-sm text-gray-600 mt-1">
-            Please review your report before submitting
+            {t.step9.subtitle}
           </p>
         </div>
       </div>
 
       <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
         <p className="text-sm text-blue-900">
-          ℹ️ Once submitted, you'll receive a tracking ID to check the status of your report and communicate anonymously with the review team.
+          {t.step9.info}
         </p>
       </div>
 
@@ -173,7 +235,7 @@ const Step10Review = ({ formData, attachedFiles, onEdit, onSubmit, isSubmitting 
             <div className="flex items-start gap-3">
               <Paperclip className="w-5 h-5 text-gray-500 mt-0.5 flex-shrink-0" />
               <div className="flex-1">
-                <p className="text-sm font-medium text-gray-600 mb-2">Attached Files ({attachedFiles.length})</p>
+                <p className="text-sm font-medium text-gray-600 mb-2">{t.step9.attachedFiles.replace('{count}', attachedFiles.length.toString())}</p>
                 <ul className="space-y-1">
                   {attachedFiles.map((file, i) => (
                     <li key={i} className="text-sm text-gray-700 truncate">
@@ -191,15 +253,15 @@ const Step10Review = ({ formData, attachedFiles, onEdit, onSubmit, isSubmitting 
         <div className="flex items-start gap-3 mb-4">
           <CheckCircle2 className="w-6 h-6 text-green-600 flex-shrink-0 mt-0.5" />
           <div className="flex-1">
-            <h3 className="font-semibold text-green-900 mb-2">Ready to submit?</h3>
+            <h3 className="font-semibold text-green-900 mb-2">{t.step9.readyTitle}</h3>
             <p className="text-sm text-green-800 mb-4">
-              Your report will be submitted anonymously and securely. You'll receive a tracking ID to monitor its progress.
+              {t.step9.readyDesc}
             </p>
             <ul className="text-sm text-green-800 space-y-1 list-disc list-inside mb-4">
-              <li>Your identity is protected with end-to-end encryption</li>
-              <li>You can check the status using your tracking ID</li>
-              <li>Two-way anonymous messaging is available</li>
-              <li>All file metadata has been removed</li>
+              <li>{t.step9.readyList1}</li>
+              <li>{t.step9.readyList2}</li>
+              <li>{t.step9.readyList3}</li>
+              <li>{t.step9.readyList4}</li>
             </ul>
           </div>
         </div>
@@ -213,19 +275,19 @@ const Step10Review = ({ formData, attachedFiles, onEdit, onSubmit, isSubmitting 
           {isSubmitting ? (
             <>
               <Loader2 className="w-5 h-5 mr-2 animate-spin" />
-              Submitting Report...
+              {t.step9.submitting}
             </>
           ) : (
             <>
               <CheckCircle2 className="w-5 h-5 mr-2" />
-              Submit Report
+              {t.step9.submitButton}
             </>
           )}
         </Button>
       </div>
 
       <p className="text-xs text-center text-gray-500">
-        By submitting, you confirm that the information provided is accurate to the best of your knowledge.
+        {t.step9.confirmText}
       </p>
     </div>
   );
