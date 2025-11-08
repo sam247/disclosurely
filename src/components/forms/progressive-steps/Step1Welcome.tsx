@@ -30,11 +30,11 @@ const Step1Welcome = ({ onContinue, brandColor, language, onLanguageChange }: St
   const currentLang = languages.find(lang => lang.code === language) || languages[0];
 
   return (
-    <div className="text-center space-y-5 py-4">
+    <div className="text-center space-y-3 py-2">
       {/* Language Selector */}
-      <div className="flex justify-end mb-4">
+      <div className="flex justify-end mb-2">
         <Select value={language} onValueChange={onLanguageChange}>
-          <SelectTrigger className="w-[140px] h-9 border-gray-300 bg-white hover:bg-gray-50">
+          <SelectTrigger className="w-[140px] h-8 border-gray-300 bg-white hover:bg-gray-50">
             <div className="flex items-center gap-2">
               <Globe className="h-4 w-4 text-gray-600" />
               <SelectValue>
@@ -57,14 +57,14 @@ const Step1Welcome = ({ onContinue, brandColor, language, onLanguageChange }: St
 
       <div className="flex justify-center">
         <div
-          className="p-4 rounded-full"
+          className="p-3 rounded-full"
           style={{ backgroundColor: `${brandColor}15` }}
         >
-          <Shield className="w-12 h-12" style={{ color: brandColor }} />
+          <Shield className="w-10 h-10" style={{ color: brandColor }} />
         </div>
       </div>
 
-      <div className="space-y-2">
+      <div className="space-y-1">
         <h1 className="text-2xl font-bold text-gray-900">
           {t.welcome.title}
         </h1>
@@ -73,8 +73,8 @@ const Step1Welcome = ({ onContinue, brandColor, language, onLanguageChange }: St
         </p>
       </div>
 
-      <div className="grid md:grid-cols-3 gap-4 max-w-2xl mx-auto text-left">
-        <div className="flex flex-col items-center text-center space-y-2 p-3">
+      <div className="grid md:grid-cols-3 gap-3 max-w-2xl mx-auto text-left">
+        <div className="flex flex-col items-center text-center space-y-1.5 p-2">
           <div className="p-2 rounded-lg bg-green-50">
             <Shield className="w-5 h-5 text-green-600" />
           </div>
@@ -84,7 +84,7 @@ const Step1Welcome = ({ onContinue, brandColor, language, onLanguageChange }: St
           </p>
         </div>
 
-        <div className="flex flex-col items-center text-center space-y-2 p-3">
+        <div className="flex flex-col items-center text-center space-y-1.5 p-2">
           <div className="p-2 rounded-lg bg-blue-50">
             <Lock className="w-5 h-5 text-blue-600" />
           </div>
@@ -94,7 +94,7 @@ const Step1Welcome = ({ onContinue, brandColor, language, onLanguageChange }: St
           </p>
         </div>
 
-        <div className="flex flex-col items-center text-center space-y-2 p-3">
+        <div className="flex flex-col items-center text-center space-y-1.5 p-2">
           <div className="p-2 rounded-lg bg-purple-50">
             <Clock className="w-5 h-5 text-purple-600" />
           </div>
@@ -105,12 +105,12 @@ const Step1Welcome = ({ onContinue, brandColor, language, onLanguageChange }: St
         </div>
       </div>
 
-      <div className="pt-2">
+      <div className="pt-1">
         <Button
           size="lg"
           onClick={onContinue}
           style={{ backgroundColor: brandColor }}
-          className="px-8 py-5 text-base"
+          className="px-8 py-4 text-base"
         >
           {t.welcome.beginButton}
         </Button>
