@@ -45,6 +45,7 @@ import WhistleblowerMessagingPage from './pages/WhistleblowerMessaging';
 import About from './pages/About';
 import Features from './pages/Features';
 import Careers from './pages/Careers';
+import ResumeDraft from './pages/ResumeDraft';
 
 // Component to handle session timeout only for authenticated users
 const SessionTimeoutManager = () => {
@@ -119,6 +120,9 @@ const AppContent = () => {
 
         {/* Progressive disclosure form - New experience */}
         <Route path="/newform" element={<ProgressiveFormWrapper />} />
+        
+        {/* Resume draft page */}
+        <Route path="/resume-draft" element={<ResumeDraft />} />
 
         {/* Legacy token-based routes (for testing/fallback) */}
         <Route path="/secure/tool/submit/:linkToken" element={<SubmissionFormWrapper />} />

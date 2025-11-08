@@ -2140,6 +2140,59 @@ export type Database = {
           },
         ]
       }
+      report_drafts: {
+        Row: {
+          created_at: string
+          current_step: number | null
+          draft_code: string
+          encrypted_content: string
+          encryption_key_hash: string
+          expires_at: string
+          file_metadata: Json | null
+          id: string
+          language: string | null
+          organization_id: string
+          save_count: number | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          current_step?: number | null
+          draft_code: string
+          encrypted_content: string
+          encryption_key_hash: string
+          expires_at: string
+          file_metadata?: Json | null
+          id?: string
+          language?: string | null
+          organization_id: string
+          save_count?: number | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          current_step?: number | null
+          draft_code?: string
+          encrypted_content?: string
+          encryption_key_hash?: string
+          expires_at?: string
+          file_metadata?: Json | null
+          id?: string
+          language?: string | null
+          organization_id?: string
+          save_count?: number | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "report_drafts_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       report_messages: {
         Row: {
           created_at: string
@@ -2864,6 +2917,7 @@ export type Database = {
         Args: { p_organization_id: string; p_requested_tokens: number }
         Returns: boolean
       }
+      cleanup_expired_drafts: { Args: never; Returns: number }
       cleanup_expired_redaction_maps: { Args: never; Returns: number }
       cleanup_old_logs: { Args: never; Returns: undefined }
       create_security_alert: {
@@ -2886,6 +2940,7 @@ export type Database = {
       }
       generate_anonymous_access_token: { Args: never; Returns: string }
       generate_domain_verification_token: { Args: never; Returns: string }
+      generate_draft_code: { Args: never; Returns: string }
       generate_invitation_token: { Args: never; Returns: string }
       generate_link_token: { Args: never; Returns: string }
       generate_tracking_id: { Args: never; Returns: string }

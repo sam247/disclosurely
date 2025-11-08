@@ -116,6 +116,16 @@ const Step1Welcome = ({ onContinue, brandColor, language, onLanguageChange }: St
         </Button>
       </div>
 
+      <div className="text-center">
+        <Button
+          variant="link"
+          onClick={() => window.location.href = '/resume-draft'}
+          className="text-sm text-gray-600 hover:text-primary"
+        >
+          Resume a saved draft
+        </Button>
+      </div>
+
       <p className="text-xs text-gray-500 max-w-md mx-auto">
         {t.welcome.footer}
       </p>

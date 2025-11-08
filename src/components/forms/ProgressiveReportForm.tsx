@@ -4,6 +4,7 @@ import { Progress } from '@/components/ui/progress';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { scanForPrivacyRisks } from '@/utils/privacyDetection';
 import { progressiveFormTranslations } from '@/i18n/progressiveFormTranslations';
+import { SaveDraftButton } from './draft-controls/SaveDraftButton';
 
 // Step components
 import Step1Welcome from './progressive-steps/Step1Welcome';
@@ -39,6 +40,9 @@ interface ProgressiveReportFormProps {
   onSubmit: (data: ProgressiveFormData) => Promise<void>;
   isSubmitting: boolean;
   brandColor?: string;
+  organizationId?: string;
+  draftCode?: string;
+  onDraftSaved?: (draftCode: string) => void;
 }
 
 const ProgressiveReportForm = ({
@@ -48,13 +52,17 @@ const ProgressiveReportForm = ({
   setAttachedFiles,
   onSubmit,
   isSubmitting,
-  brandColor = '#6366f1'
+  brandColor = '#6366f1',
+  organizationId,
+  draftCode: initialDraftCode,
+  onDraftSaved
 }: ProgressiveReportFormProps) => {
   const [currentStep, setCurrentStep] = useState(0);
   const [direction, setDirection] = useState<'forward' | 'backward'>('forward');
   const [privacyRisks, setPrivacyRisks] = useState<any[]>([]);
   const [hasViewedPrivacy, setHasViewedPrivacy] = useState(false);
   const [language, setLanguage] = useState<string>('en');
+  const [currentDraftCode, setCurrentDraftCode] = useState(initialDraftCode);
 
   // Check for privacy risks whenever title/description changes
   useEffect(() => {
@@ -176,6 +184,14 @@ const ProgressiveReportForm = ({
   const handleSubmit = async () => {
     await onSubmit(formData);
   };
+
+  // Load draft on mount if draftCode provided
+  useEffect(() => {
+    if (initialDraftCode) {
+      // Draft loading is handled by parent component
+      setCurrentDraftCode(initialDraftCode);
+    }
+  }, [initialDraftCode]);
 
   // Keyboard navigation
   useEffect(() => {
@@ -367,37 +383,56 @@ const ProgressiveReportForm = ({
 
       {/* Navigation buttons */}
       {showNavigation && (
-        <div className="flex items-center justify-between mt-6 pt-4 border-t">
-          <Button
-            variant="ghost"
-            onClick={handleBack}
-            disabled={isSubmitting}
-            className="flex items-center gap-2"
-          >
-            <ChevronLeft className="w-4 h-4" />
-            {t.navigation.back}
-          </Button>
-
-          <div className="flex items-center gap-3">
-            {showSkip && (
-              <Button
-                variant="outline"
-                onClick={handleSkip}
-                disabled={isSubmitting}
-              >
-                {t.navigation.skip}
-              </Button>
-            )}
+        <div className="flex flex-col gap-4 mt-6 pt-4 border-t">
+          <div className="flex items-center justify-between">
             <Button
-              onClick={handleNext}
-              disabled={isNextDisabled || isSubmitting}
-              style={{ backgroundColor: isNextDisabled ? undefined : brandColor }}
+              variant="ghost"
+              onClick={handleBack}
+              disabled={isSubmitting}
               className="flex items-center gap-2"
             >
-              {t.navigation.continue}
-              <ChevronRight className="w-4 h-4" />
+              <ChevronLeft className="w-4 h-4" />
+              {t.navigation.back}
             </Button>
+
+            <div className="flex items-center gap-3">
+              {showSkip && (
+                <Button
+                  variant="outline"
+                  onClick={handleSkip}
+                  disabled={isSubmitting}
+                >
+                  {t.navigation.skip}
+                </Button>
+              )}
+              <Button
+                onClick={handleNext}
+                disabled={isNextDisabled || isSubmitting}
+                style={{ backgroundColor: isNextDisabled ? undefined : brandColor }}
+                className="flex items-center gap-2"
+              >
+                {t.navigation.continue}
+                <ChevronRight className="w-4 h-4" />
+              </Button>
+            </div>
           </div>
+
+          {/* Save Draft Button */}
+          {organizationId && currentStep > 0 && (
+            <div className="flex justify-center">
+              <SaveDraftButton
+                formData={formData}
+                currentStep={currentStep}
+                language={language}
+                organizationId={organizationId}
+                existingDraftCode={currentDraftCode}
+                onDraftSaved={(code) => {
+                  setCurrentDraftCode(code);
+                  onDraftSaved?.(code);
+                }}
+              />
+            </div>
+          )}
         </div>
       )}
     </div>

@@ -27,26 +27,36 @@ interface ProgressiveSubmissionFormProps {
   linkToken: string;
   linkData: LinkData;
   brandColor: string;
+  draftCode?: string;
+  draftData?: any;
 }
 
-const ProgressiveSubmissionForm = ({ linkToken, linkData, brandColor }: ProgressiveSubmissionFormProps) => {
+const ProgressiveSubmissionForm = ({ 
+  linkToken, 
+  linkData, 
+  brandColor,
+  draftCode,
+  draftData 
+}: ProgressiveSubmissionFormProps) => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const [attachedFiles, setAttachedFiles] = useState<File[]>([]);
 
-  const [formData, setFormData] = useState<ProgressiveFormData>({
-    title: '',
-    description: '',
-    mainCategory: '',
-    subCategory: '',
-    customCategory: '',
-    priority: 3,
-    incidentDate: '',
-    location: '',
-    witnesses: '',
-    previousReports: false,
-    additionalNotes: ''
-  });
+  const [formData, setFormData] = useState<ProgressiveFormData>(
+    draftData?.formData || {
+      title: '',
+      description: '',
+      mainCategory: '',
+      subCategory: '',
+      customCategory: '',
+      priority: 3,
+      incidentDate: '',
+      location: '',
+      witnesses: '',
+      previousReports: false,
+      additionalNotes: ''
+    }
+  );
 
   const { isSubmitting, secureSubmit } = useSecureForm({
     rateLimitKey: `submission_${linkToken}`,
@@ -171,6 +181,12 @@ const ProgressiveSubmissionForm = ({ linkToken, linkData, brandColor }: Progress
           }
         }
 
+        // Delete draft if submitting from draft
+        if (draftCode) {
+          const { deleteDraft } = await import('@/services/draftService');
+          await deleteDraft(draftCode);
+        }
+
         // Navigate to success page
         navigate('/success', {
           state: {
@@ -189,7 +205,7 @@ const ProgressiveSubmissionForm = ({ linkToken, linkData, brandColor }: Progress
         });
         throw error;
       }
-    });
+    }, {});
   };
 
   return (
@@ -201,6 +217,8 @@ const ProgressiveSubmissionForm = ({ linkToken, linkData, brandColor }: Progress
       onSubmit={handleSubmit}
       isSubmitting={isSubmitting}
       brandColor={brandColor}
+      organizationId={linkData.organization_id}
+      draftCode={draftCode}
     />
   );
 };
