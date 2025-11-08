@@ -360,25 +360,25 @@ const ProgressiveReportForm = ({
   const t = progressiveFormTranslations[language as keyof typeof progressiveFormTranslations] || progressiveFormTranslations.en;
 
   return (
-    <div className="w-full max-w-2xl mx-auto" dir={language === 'el' ? 'ltr' : undefined}>
+    <div className="w-full max-w-2xl mx-auto px-1 sm:px-0" dir={language === 'el' ? 'ltr' : undefined}>
       {/* Progress bar */}
-      <div className="mb-6">
+      <div className="mb-4 sm:mb-6">
         <div className="flex justify-between items-center mb-2">
-          <span className="text-sm font-medium text-gray-600">
+          <span className="text-xs sm:text-sm font-medium text-gray-600">
             {currentStep === 0
               ? t.navigation.welcome
               : t.navigation.step
                   .replace('{current}', displayStep.toString())
                   .replace('{total}', '9')}
           </span>
-          <span className="text-sm text-gray-500">{Math.round(progressPercent)}{t.navigation.percent}</span>
+          <span className="text-xs sm:text-sm text-gray-500">{Math.round(progressPercent)}{t.navigation.percent}</span>
         </div>
         <Progress value={progressPercent} className="h-2" />
       </div>
 
       {/* Step content with animation */}
       <div
-        className="min-h-[300px] transition-all duration-300 ease-in-out"
+        className="min-h-[280px] sm:min-h-[300px] transition-all duration-300 ease-in-out"
         key={currentStep}
       >
         {renderStep()}
@@ -386,24 +386,25 @@ const ProgressiveReportForm = ({
 
       {/* Navigation buttons */}
       {showNavigation && (
-        <div className="flex flex-col gap-4 mt-6 pt-4 border-t">
-          <div className="flex items-center justify-between">
+        <div className="flex flex-col gap-3 sm:gap-4 mt-4 sm:mt-6 pt-4 border-t">
+          <div className="flex items-center justify-between gap-2">
             <Button
               variant="ghost"
               onClick={handleBack}
               disabled={isSubmitting}
-              className="flex items-center gap-2"
+              className="flex items-center gap-2 h-11 sm:h-10 px-3 sm:px-4"
             >
               <ChevronLeft className="w-4 h-4" />
-              {t.navigation.back}
+              <span className="hidden xs:inline">{t.navigation.back}</span>
             </Button>
 
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-2 sm:gap-3 flex-wrap justify-end">
               {showSkip && (
                 <Button
                   variant="outline"
                   onClick={handleSkip}
                   disabled={isSubmitting}
+                  className="h-11 sm:h-10 px-3 sm:px-4 text-sm"
                 >
                   {t.navigation.skip}
                 </Button>
@@ -425,7 +426,7 @@ const ProgressiveReportForm = ({
                 onClick={handleNext}
                 disabled={isNextDisabled || isSubmitting}
                 style={{ backgroundColor: isNextDisabled ? undefined : brandColor }}
-                className="flex items-center gap-2"
+                className="flex items-center gap-2 h-11 sm:h-10 px-4 sm:px-4"
               >
                 {t.navigation.continue}
                 <ChevronRight className="w-4 h-4" />

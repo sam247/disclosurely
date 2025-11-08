@@ -29,15 +29,15 @@ const Step2Title = ({ value, onChange, isValid, language }: Step2TitleProps) => 
   return (
     <TooltipProvider>
       <div className="space-y-4 py-2">
-        <div className="flex items-center gap-3">
-          <div className="p-2 rounded-lg bg-primary/10">
-            <FileText className="w-5 h-5 text-primary" />
+        <div className="flex items-center gap-2 sm:gap-3">
+          <div className="p-1.5 sm:p-2 rounded-lg bg-primary/10 flex-shrink-0">
+            <FileText className="w-4 h-4 sm:w-5 sm:h-5 text-primary" />
           </div>
-          <div>
-            <h2 className="text-2xl font-bold text-gray-900">
+          <div className="min-w-0">
+            <h2 className="text-lg sm:text-2xl font-bold text-gray-900">
               {t.step1.title}
             </h2>
-            <p className="text-sm text-gray-600 mt-1">
+            <p className="text-xs sm:text-sm text-gray-600 mt-1">
               {t.step1.subtitle}
             </p>
           </div>
@@ -45,7 +45,7 @@ const Step2Title = ({ value, onChange, isValid, language }: Step2TitleProps) => 
 
         <div className="space-y-2">
           <div className="flex items-center gap-2">
-            <Label htmlFor="title" className="text-base">
+            <Label htmlFor="title" className="text-sm sm:text-base">
               {t.step1.label}
             </Label>
             <Tooltip>
@@ -68,12 +68,12 @@ const Step2Title = ({ value, onChange, isValid, language }: Step2TitleProps) => 
             value={value}
             onChange={(e) => onChange(e.target.value)}
             placeholder={t.step1.placeholder}
-            className="text-lg min-h-[56px] text-base"
+            className="text-base sm:text-lg min-h-[52px] sm:min-h-[56px]"
             maxLength={200}
             autoComplete="off"
           />
-          <div className="flex justify-between items-center text-sm">
-            <div className="text-gray-500">
+          <div className="flex justify-between items-center text-xs sm:text-sm gap-2">
+            <div className="text-gray-500 min-w-0 flex-1">
               {!isValid && value.length > 0 && value.length < 5 && (
                 <span className="text-amber-600">{t.step1.minChars}</span>
               )}
@@ -81,7 +81,7 @@ const Step2Title = ({ value, onChange, isValid, language }: Step2TitleProps) => 
                 <span className="text-green-600">{t.step1.looksGood}</span>
               )}
             </div>
-            <span className="text-gray-400">{value.length}{t.step1.charCount}</span>
+            <span className="text-gray-400 flex-shrink-0">{value.length}{t.step1.charCount}</span>
           </div>
         </div>
       </div>
