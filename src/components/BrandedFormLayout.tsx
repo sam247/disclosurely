@@ -33,16 +33,9 @@ const BrandedFormLayout = ({
   
   // Determine the main secure page URL based on context
   const getMainSecurePageUrl = () => {
-    if (token) {
-      return `/secure/tool/submit/${token}`;
-    }
-    // If no linkToken, try to extract from current path
-    const pathMatch = window.location.pathname.match(/\/secure\/tool\/(submit|status)\/([^\/]+)/);
-    if (pathMatch && pathMatch[2]) {
-      return `/secure/tool/submit/${pathMatch[2]}`;
-    }
-    // Fallback to status page
-    return '/secure/tool/status';
+    // Always return the clean /report URL for the main form
+    // This provides a consistent UX regardless of how the user accessed the form
+    return '/report';
   };
   
   // Dynamic page title: "{Company Name} Secure Reporting Portal"

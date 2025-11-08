@@ -81,14 +81,24 @@ const Step1Welcome = ({ onContinue, brandColor, language, onLanguageChange, orga
         </Button>
       </div>
 
-      <div className="text-center">
-        <Button
-          variant="link"
-          onClick={() => window.location.href = '/resume-draft'}
-          className="text-xs sm:text-sm text-gray-600 hover:text-primary h-9 sm:h-auto"
-        >
-          Resume a saved draft
-        </Button>
+      <div className="text-center space-y-2">
+        <div className="flex flex-col sm:flex-row items-center justify-center gap-2 sm:gap-4">
+          <Button
+            variant="link"
+            onClick={() => window.location.href = '/status'}
+            className="text-xs sm:text-sm text-gray-600 hover:text-primary h-9 sm:h-auto"
+          >
+            Check Existing Report
+          </Button>
+          <span className="hidden sm:inline text-gray-400">|</span>
+          <Button
+            variant="link"
+            onClick={() => window.location.href = '/resume-draft'}
+            className="text-xs sm:text-sm text-gray-600 hover:text-primary h-9 sm:h-auto"
+          >
+            Resume a saved draft
+          </Button>
+        </div>
       </div>
 
       <p className="text-xs sm:text-sm text-gray-500 max-w-md mx-auto px-4">

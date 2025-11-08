@@ -5,7 +5,6 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { ArrowRight } from 'lucide-react';
 import { resumeDraft } from '@/services/draftService';
-import { Card, CardContent } from '@/components/ui/card';
 import BrandedFormLayout from '@/components/BrandedFormLayout';
 import { supabase } from '@/integrations/supabase/client';
 
@@ -152,29 +151,17 @@ export const ResumeDraft = () => {
     </div>
   );
 
-  if (organizationBranding || loadingBranding) {
-    return (
-      <BrandedFormLayout
-        title="Resume Draft"
-        organizationName={organizationBranding?.name}
-        logoUrl={logoUrl}
-        brandColor={brandColor}
-        description="Enter your draft code to continue your report"
-      >
-        {content}
-      </BrandedFormLayout>
-    );
-  }
-
-  // Fallback if organization branding not loaded yet
+  // Always use BrandedFormLayout for consistent header
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-50 to-slate-100 p-4">
-      <Card className="w-full max-w-md">
-        <CardContent className="pt-6">
-          {content}
-        </CardContent>
-      </Card>
-    </div>
+    <BrandedFormLayout
+      title="Resume Draft"
+      organizationName={organizationBranding?.name || 'Disclosurely'}
+      logoUrl={logoUrl}
+      brandColor={brandColor}
+      description="Enter your draft code to continue your report"
+    >
+      {content}
+    </BrandedFormLayout>
   );
 };
 
