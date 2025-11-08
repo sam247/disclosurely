@@ -1,8 +1,8 @@
-# Pull Request: UX Improvements, Navigation Fixes, and Language Settings
+# Pull Request: UX Improvements, Navigation Fixes, Language Settings & Critical Bug Fix
 
 ## 📋 Summary
 
-This PR improves the user experience for the progressive whistleblowing form by fixing navigation issues, adding clear status lookup access, ensuring consistent branding across all pages, and introducing default language settings for administrators.
+This PR improves the user experience for the progressive whistleblowing form by fixing navigation issues, adding clear status lookup access, ensuring consistent branding across all pages, introducing default language settings for administrators, and **fixing a critical bug that was causing all report submissions to show errors despite being successful**.
 
 ## 🎯 Key Changes
 
@@ -159,6 +159,54 @@ ADD COLUMN IF NOT EXISTS default_language TEXT DEFAULT 'en';
 
 ---
 
+### 5. Critical Bug Fix: Report Submission Success Parsing 🐛
+
+**Problem**: All report submissions were showing "Invalid response from server" error, even though reports were being created successfully in the database. This was causing user confusion and preventing the success page from displaying.
+
+**Root Cause**: Response structure mismatch between edge function and frontend.
+
+**Edge Function Returns**:
+```json
+{
+  "success": true,
+  "report": {
+    "id": "uuid-here",
+    "tracking_id": "DIS-XXXXX",
+    "status": "new",
+    "created_at": "2025-11-08..."
+  }
+}
+```
+
+**Frontend Was Checking** (WRONG):
+```typescript
+if (!data?.success || !data?.reportId) {  // ❌
+  throw new Error('Invalid response from server');
+}
+const reportId = data.reportId;  // ❌
+```
+
+**Fixed To**:
+```typescript
+if (!data?.success || !data?.report?.id) {  // ✅
+  throw new Error('Invalid response from server');
+}
+const reportId = data.report.id;  // ✅
+```
+
+**Files Changed**:
+- `src/components/forms/ProgressiveSubmissionForm.tsx` (lines 165, 169)
+
+**Impact**:
+- ✅ Report submissions now show success page correctly
+- ✅ File uploads work properly (depend on reportId)
+- ✅ Draft cleanup works (depends on successful submission)
+- ✅ No more confusing error messages for successful submissions
+
+**Why This Happened**: The old `SecureSubmissionForm` correctly used `data.report.id`, but the new `ProgressiveSubmissionForm` incorrectly assumed a flat response structure.
+
+---
+
 ## 🧪 Testing Checklist
 
 ### Status Lookup Flow
@@ -192,6 +240,15 @@ ADD COLUMN IF NOT EXISTS default_language TEXT DEFAULT 'en';
 - [ ] Refresh page
 - [ ] Verify language selection persists
 - [ ] **Future**: Verify form defaults to selected language when accessed
+
+### Critical Bug Fix: Report Submission
+- [ ] Visit `/report` and fill out a complete report
+- [ ] Click "Submit Report"
+- [ ] ✅ **SHOULD SEE**: Success page with tracking ID (e.g., "Report Submitted - DIS-XXXXX")
+- [ ] ❌ **SHOULD NOT SEE**: "Invalid response from server" error
+- [ ] Verify report appears in admin dashboard
+- [ ] If files were attached, verify they uploaded successfully
+- [ ] If submitting from draft, verify draft was cleaned up
 
 ---
 
@@ -360,7 +417,10 @@ This PR delivers:
 ---
 
 **Branch**: `claude/whistleblowing-feature-roadmap-011CUtVb77xMdFcqQBajYmKw`
+
 **Commits**:
+- `ab3a908` - Fix critical bug: report submission success parsing ⚠️ **CRITICAL**
+- `ee21090` - Add PR description for UX improvements and language settings
 - `fa7189f` - Improve UX for status lookups, form navigation, and add language settings
 - `c988cc3` - Update status lookup to use /status route instead of legacy /secure/tool/messaging
 - `78665db` - Add comprehensive whistleblowing feature roadmap for 2025
@@ -369,3 +429,5 @@ This PR delivers:
 - Progressive Form Launch
 - Security Fixes for Draft System
 - Whistleblowing Feature Roadmap 2025
+
+**⚠️ IMPORTANT**: This PR includes a **critical bug fix** that resolves report submission errors. All form submissions were showing errors despite being successful. This is now fixed.
