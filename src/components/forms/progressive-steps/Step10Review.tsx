@@ -173,11 +173,11 @@ const Step10Review = ({ formData, attachedFiles, onEdit, onSubmit, isSubmitting,
   return (
     <div className="space-y-4 py-2">
       <div className="flex items-center gap-3">
-        <div className="p-2 rounded-lg bg-green-100">
+        <div className="p-2 rounded-lg bg-green-100 flex-shrink-0">
           <CheckCircle2 className="w-5 h-5 text-green-600" />
         </div>
-        <div>
-          <h2 className="text-2xl font-bold text-gray-900">
+        <div className="min-w-0">
+          <h2 className="text-xl sm:text-2xl font-bold text-gray-900">
             {t.step9.title}
           </h2>
           <p className="text-sm text-gray-600 mt-1">
@@ -197,18 +197,18 @@ const Step10Review = ({ formData, attachedFiles, onEdit, onSubmit, isSubmitting,
           const Icon = section.icon;
           return (
             <Card key={index} className="border-2">
-              <CardContent className="p-4">
-                <div className="flex items-start justify-between gap-4">
-                  <div className="flex items-start gap-3 flex-1">
+              <CardContent className="p-3 sm:p-4">
+                <div className="flex items-start justify-between gap-2 sm:gap-4">
+                  <div className="flex items-start gap-2 sm:gap-3 flex-1 min-w-0">
                     <Icon className="w-5 h-5 text-gray-500 mt-0.5 flex-shrink-0" />
                     <div className="flex-1 min-w-0">
-                      <p className="text-sm font-medium text-gray-600 mb-1">{section.title}</p>
+                      <p className="text-xs sm:text-sm font-medium text-gray-600 mb-1">{section.title}</p>
                       {section.badge ? (
                         <Badge className={section.badgeColor}>
                           {section.content}
                         </Badge>
                       ) : (
-                        <p className={`text-sm text-gray-900 ${section.multiline ? 'whitespace-pre-wrap' : 'truncate'}`}>
+                        <p className={`text-sm sm:text-base text-gray-900 ${section.multiline ? 'whitespace-pre-wrap break-words' : 'break-words'}`}>
                           {section.content}
                         </p>
                       )}
@@ -218,7 +218,7 @@ const Step10Review = ({ formData, attachedFiles, onEdit, onSubmit, isSubmitting,
                     variant="ghost"
                     size="sm"
                     onClick={() => onEdit(section.step)}
-                    className="flex-shrink-0"
+                    className="flex-shrink-0 h-8 w-8 p-0"
                   >
                     <Edit className="w-4 h-4" />
                   </Button>
@@ -249,15 +249,15 @@ const Step10Review = ({ formData, attachedFiles, onEdit, onSubmit, isSubmitting,
         </Card>
       )}
 
-      <div className="bg-green-50 border-2 border-green-200 rounded-lg p-6">
-        <div className="flex items-start gap-3 mb-4">
-          <CheckCircle2 className="w-6 h-6 text-green-600 flex-shrink-0 mt-0.5" />
-          <div className="flex-1">
-            <h3 className="font-semibold text-green-900 mb-2">{t.step9.readyTitle}</h3>
-            <p className="text-sm text-green-800 mb-4">
+      <div className="bg-green-50 border-2 border-green-200 rounded-lg p-4 sm:p-6">
+        <div className="flex items-start gap-2 sm:gap-3 mb-4">
+          <CheckCircle2 className="w-5 h-5 sm:w-6 sm:h-6 text-green-600 flex-shrink-0 mt-0.5" />
+          <div className="flex-1 min-w-0">
+            <h3 className="font-semibold text-base sm:text-lg text-green-900 mb-2">{t.step9.readyTitle}</h3>
+            <p className="text-xs sm:text-sm text-green-800 mb-3 sm:mb-4">
               {t.step9.readyDesc}
             </p>
-            <ul className="text-sm text-green-800 space-y-1 list-disc list-inside mb-4">
+            <ul className="text-xs sm:text-sm text-green-800 space-y-1 list-disc list-inside mb-3 sm:mb-4">
               <li>{t.step9.readyList1}</li>
               <li>{t.step9.readyList2}</li>
               <li>{t.step9.readyList3}</li>
@@ -268,19 +268,19 @@ const Step10Review = ({ formData, attachedFiles, onEdit, onSubmit, isSubmitting,
 
         <Button
           size="lg"
-          className="w-full bg-green-600 hover:bg-green-700 text-white"
+          className="w-full bg-green-600 hover:bg-green-700 text-white h-12 sm:h-11 text-base sm:text-lg"
           onClick={onSubmit}
           disabled={isSubmitting}
         >
           {isSubmitting ? (
             <>
               <Loader2 className="w-5 h-5 mr-2 animate-spin" />
-              {t.step9.submitting}
+              <span className="text-sm sm:text-base">{t.step9.submitting}</span>
             </>
           ) : (
             <>
               <CheckCircle2 className="w-5 h-5 mr-2" />
-              {t.step9.submitButton}
+              <span className="text-sm sm:text-base">{t.step9.submitButton}</span>
             </>
           )}
         </Button>
