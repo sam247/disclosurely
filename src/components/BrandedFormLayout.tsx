@@ -32,9 +32,11 @@ const BrandedFormLayout = ({
   const token = linkToken || params.linkToken;
   
   // Determine the main secure page URL based on context
+  // Use new form URLs instead of legacy token-based links
   const getMainSecurePageUrl = () => {
     // Always return the clean /report URL for the main form
     // This provides a consistent UX regardless of how the user accessed the form
+    // /report, /submit, /whistleblow all route to the same form
     return '/report';
   };
   

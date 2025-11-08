@@ -539,12 +539,35 @@ serve(async (req) => {
 
   } catch (error) {
     console.error('❌ ERROR IN SUBMIT FUNCTION:', error)
-    console.error('❌ Error message:', error.message)
-    console.error('❌ Error stack:', error.stack)
+    console.error('❌ Error message:', error?.message || 'Unknown error')
+    console.error('❌ Error stack:', error?.stack || 'No stack trace')
+    console.error('❌ Error details:', JSON.stringify(error, null, 2))
+    
+    // Log to system logs for debugging
+    try {
+      const supabase = createClient(
+        Deno.env.get('SUPABASE_URL') ?? '',
+        Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '',
+        {
+          auth: {
+            autoRefreshToken: false,
+            persistSession: false
+          }
+        }
+      )
+      await logToSystem(supabase, 'error', 'submission', 'Edge function error', {
+        errorMessage: error?.message || 'Unknown error',
+        errorStack: error?.stack || 'No stack trace',
+        errorType: error?.constructor?.name || 'Unknown'
+      }, error)
+    } catch (logError) {
+      console.error('Failed to log error to system:', logError)
+    }
     
     return new Response(
       JSON.stringify({ 
-        error: 'Submit failed. Please try again or contact support.'
+        error: 'Submit failed. Please try again or contact support.',
+        details: process.env.NODE_ENV === 'development' ? error?.message : undefined
       }),
       { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     )

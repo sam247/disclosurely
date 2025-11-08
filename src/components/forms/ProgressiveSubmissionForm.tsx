@@ -148,12 +148,15 @@ const ProgressiveSubmissionForm = ({
       additional_notes: formData.additionalNotes || null
     };
 
-    await secureSubmit(async () => {
+    await secureSubmit(async (sanitizedData) => {
       try {
+        // Use sanitized data (reportPayload is passed as data parameter)
+        const payload = sanitizedData || reportPayload;
+        
         // Submit via edge function
         const { data, error } = await supabase.functions.invoke('submit-anonymous-report', {
           body: {
-            reportData: reportPayload,
+            reportData: payload,
             linkToken
           }
         });
@@ -162,11 +165,17 @@ const ProgressiveSubmissionForm = ({
           throw new Error(error.message || 'Failed to submit report');
         }
 
-        if (!data?.success || !data?.report?.id) {
-          throw new Error('Invalid response from server');
+        if (!data?.success) {
+          throw new Error(data?.error || 'Invalid response from server');
         }
 
-        const reportId = data.report.id;
+        // Edge function returns data.report.id (nested structure)
+        // Fallback to data.reportId for backwards compatibility
+        const reportId = data.report?.id || data.reportId;
+
+        if (!reportId) {
+          throw new Error('Invalid response from server: missing report ID');
+        }
 
         // Upload files if any
         if (attachedFiles.length > 0) {
@@ -204,7 +213,7 @@ const ProgressiveSubmissionForm = ({
         });
         throw error;
       }
-    }, {});
+    }, reportPayload);
   };
 
   return (
