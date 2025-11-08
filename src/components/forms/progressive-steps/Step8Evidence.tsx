@@ -94,15 +94,6 @@ const Step8Evidence = ({ attachedFiles, setAttachedFiles }: Step8EvidenceProps) 
           <p className="text-xs text-gray-600 mt-1">MP3, MP4, recordings</p>
         </div>
       </div>
-
-      <div className="bg-amber-50 border border-amber-200 rounded-lg p-4">
-        <p className="text-sm text-amber-900 font-medium mb-2">⚠️ Before uploading:</p>
-        <ul className="text-sm text-amber-800 space-y-1 list-disc list-inside">
-          <li>Make sure files don't contain information that could identify you</li>
-          <li>Avoid uploading personal photos or videos showing your face</li>
-          <li>Screenshots should have identifiable information cropped out</li>
-        </ul>
-      </div>
     </div>
   );
 };

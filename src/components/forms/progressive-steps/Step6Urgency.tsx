@@ -100,22 +100,10 @@ const Step6Urgency = ({ priority, onChange }: Step6UrgencyProps) => {
         </div>
       </div>
 
-      <div className="bg-gray-50 border border-gray-200 rounded-lg p-4">
-        <p className="text-sm text-gray-900 font-medium mb-2">ℹ️ Selecting the right priority:</p>
-        <ul className="text-sm text-gray-700 space-y-1 list-disc list-inside">
-          <li><strong>Critical:</strong> Imminent danger, active harm, or severe violations</li>
-          <li><strong>High:</strong> Serious issues with significant impact on people or operations</li>
-          <li><strong>Medium:</strong> Important concerns that should be addressed soon</li>
-          <li><strong>Low:</strong> Minor issues, suggestions, or general feedback</li>
-        </ul>
-      </div>
-
       {priority > 0 && (
-        <div className="bg-green-50 border border-green-200 rounded-lg p-3">
-          <p className="text-sm text-green-800">
-            ✓ Priority set to: <strong>{urgencyLevels.find(l => l.value === priority)?.label}</strong>
-          </p>
-        </div>
+        <p className="text-sm text-green-600">
+          ✓ Priority set to: <strong>{urgencyLevels.find(l => l.value === priority)?.label}</strong>
+        </p>
       )}
     </div>
   );

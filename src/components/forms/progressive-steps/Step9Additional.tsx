@@ -100,22 +100,10 @@ const Step9Additional = ({ witnesses, previousReports, additionalNotes, onChange
         </div>
       </div>
 
-      <div className="bg-purple-50 border border-purple-200 rounded-lg p-4">
-        <p className="text-sm text-purple-900 font-medium mb-2">💡 What else might be helpful:</p>
-        <ul className="text-sm text-purple-800 space-y-1 list-disc list-inside">
-          <li>Whether this is an ongoing issue or a one-time incident</li>
-          <li>If there are others affected by the same situation</li>
-          <li>Any actions you or others have already taken</li>
-          <li>If you're aware of relevant policies or procedures</li>
-        </ul>
-      </div>
-
       {(witnesses || previousReports || additionalNotes) && (
-        <div className="bg-green-50 border border-green-200 rounded-lg p-3">
-          <p className="text-sm text-green-800">
-            ✓ Additional context provided - this helps build a complete picture
-          </p>
-        </div>
+        <p className="text-sm text-green-600">
+          ✓ Additional context provided
+        </p>
       )}
     </div>
   );

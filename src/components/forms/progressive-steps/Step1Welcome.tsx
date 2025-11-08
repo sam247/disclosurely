@@ -8,63 +8,63 @@ interface Step1WelcomeProps {
 
 const Step1Welcome = ({ onContinue, brandColor }: Step1WelcomeProps) => {
   return (
-    <div className="text-center space-y-8 py-8">
+    <div className="text-center space-y-5 py-4">
       <div className="flex justify-center">
         <div
-          className="p-6 rounded-full"
+          className="p-4 rounded-full"
           style={{ backgroundColor: `${brandColor}15` }}
         >
-          <Shield className="w-16 h-16" style={{ color: brandColor }} />
+          <Shield className="w-12 h-12" style={{ color: brandColor }} />
         </div>
       </div>
 
-      <div className="space-y-4">
-        <h1 className="text-3xl font-bold text-gray-900">
+      <div className="space-y-2">
+        <h1 className="text-2xl font-bold text-gray-900">
           Submit a Confidential Report
         </h1>
-        <p className="text-lg text-gray-600 max-w-md mx-auto">
-          Your identity is protected. This secure form takes approximately 5 minutes to complete.
+        <p className="text-base text-gray-600 max-w-md mx-auto">
+          Your identity is protected. Takes approximately 5 minutes.
         </p>
       </div>
 
-      <div className="grid md:grid-cols-3 gap-6 max-w-3xl mx-auto text-left">
-        <div className="flex flex-col items-center text-center space-y-3 p-4">
-          <div className="p-3 rounded-lg bg-green-50">
-            <Shield className="w-6 h-6 text-green-600" />
+      <div className="grid md:grid-cols-3 gap-4 max-w-2xl mx-auto text-left">
+        <div className="flex flex-col items-center text-center space-y-2 p-3">
+          <div className="p-2 rounded-lg bg-green-50">
+            <Shield className="w-5 h-5 text-green-600" />
           </div>
-          <h3 className="font-semibold text-gray-900">100% Anonymous</h3>
-          <p className="text-sm text-gray-600">
-            Your identity remains completely confidential throughout the process
+          <h3 className="font-semibold text-sm text-gray-900">100% Anonymous</h3>
+          <p className="text-xs text-gray-600">
+            Your identity remains completely confidential
           </p>
         </div>
 
-        <div className="flex flex-col items-center text-center space-y-3 p-4">
-          <div className="p-3 rounded-lg bg-blue-50">
-            <Lock className="w-6 h-6 text-blue-600" />
+        <div className="flex flex-col items-center text-center space-y-2 p-3">
+          <div className="p-2 rounded-lg bg-blue-50">
+            <Lock className="w-5 h-5 text-blue-600" />
           </div>
-          <h3 className="font-semibold text-gray-900">Secure & Encrypted</h3>
-          <p className="text-sm text-gray-600">
-            All data is encrypted and stored securely with enterprise-grade protection
+          <h3 className="font-semibold text-sm text-gray-900">Secure & Encrypted</h3>
+          <p className="text-xs text-gray-600">
+            All data encrypted with enterprise-grade protection
           </p>
         </div>
 
-        <div className="flex flex-col items-center text-center space-y-3 p-4">
-          <div className="p-3 rounded-lg bg-purple-50">
-            <Clock className="w-6 h-6 text-purple-600" />
+        <div className="flex flex-col items-center text-center space-y-2 p-3">
+          <div className="p-2 rounded-lg bg-purple-50">
+            <Clock className="w-5 h-5 text-purple-600" />
           </div>
-          <h3 className="font-semibold text-gray-900">~5 Minutes</h3>
-          <p className="text-sm text-gray-600">
-            Quick and easy process with step-by-step guidance
+          <h3 className="font-semibold text-sm text-gray-900">~5 Minutes</h3>
+          <p className="text-xs text-gray-600">
+            Quick process with step-by-step guidance
           </p>
         </div>
       </div>
 
-      <div className="pt-4">
+      <div className="pt-2">
         <Button
           size="lg"
           onClick={onContinue}
           style={{ backgroundColor: brandColor }}
-          className="px-8 py-6 text-lg"
+          className="px-8 py-5 text-base"
         >
           Let's Begin →
         </Button>
