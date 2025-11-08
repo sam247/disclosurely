@@ -1,14 +1,52 @@
 import { Button } from '@/components/ui/button';
-import { Shield, Lock, Clock } from 'lucide-react';
+import { Shield, Lock, Clock, Globe } from 'lucide-react';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { useState } from 'react';
 
 interface Step1WelcomeProps {
   onContinue: () => void;
   brandColor: string;
 }
 
+const LANGUAGES = [
+  { code: 'en', name: 'English' },
+  { code: 'es', name: 'Español' },
+  { code: 'fr', name: 'Français' },
+  { code: 'de', name: 'Deutsch' },
+  { code: 'it', name: 'Italiano' },
+  { code: 'pt', name: 'Português' },
+  { code: 'nl', name: 'Nederlands' },
+  { code: 'pl', name: 'Polski' },
+  { code: 'zh', name: '中文' },
+  { code: 'ja', name: '日本語' },
+  { code: 'ar', name: 'العربية' },
+  { code: 'ru', name: 'Русский' },
+];
+
 const Step1Welcome = ({ onContinue, brandColor }: Step1WelcomeProps) => {
+  const [selectedLanguage, setSelectedLanguage] = useState('en');
+
   return (
     <div className="text-center space-y-5 py-4">
+      {/* Language Selector */}
+      <div className="flex justify-end">
+        <Select value={selectedLanguage} onValueChange={setSelectedLanguage}>
+          <SelectTrigger className="w-[180px] h-9 text-sm">
+            <div className="flex items-center gap-2">
+              <Globe className="w-4 h-4" />
+              <SelectValue />
+            </div>
+          </SelectTrigger>
+          <SelectContent>
+            {LANGUAGES.map((lang) => (
+              <SelectItem key={lang.code} value={lang.code} className="text-sm">
+                {lang.name}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </div>
+
       <div className="flex justify-center">
         <div
           className="p-4 rounded-full"
