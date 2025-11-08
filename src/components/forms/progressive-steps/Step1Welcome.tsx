@@ -133,7 +133,7 @@ const Step1Welcome = ({ onContinue, brandColor, language, onLanguageChange, orga
               <span className="text-xs sm:text-sm">Check Existing Report</span>
             </Button>
           </DialogTrigger>
-          <DialogContent className="sm:max-w-md">
+          <DialogContent className="w-[95vw] max-w-[800px] sm:w-full">
             <DialogHeader>
               <DialogTitle>Check Report Status</DialogTitle>
               <DialogDescription>
