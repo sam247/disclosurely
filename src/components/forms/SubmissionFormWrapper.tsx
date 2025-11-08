@@ -6,7 +6,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent } from '@/components/ui/card';
 import { AlertTriangle } from 'lucide-react';
 import BrandedFormLayout from '../BrandedFormLayout';
-import SecureSubmissionForm from './SecureSubmissionForm';
+import ProgressiveSubmissionForm from './ProgressiveSubmissionForm';
 
 interface LinkData {
   id: string;
@@ -228,7 +228,7 @@ const SubmissionFormWrapper = () => {
       subscriptionTier={subscriptionTier}
       linkToken={linkToken}
     >
-      <SecureSubmissionForm
+      <ProgressiveSubmissionForm
         linkToken={linkToken!}
         linkData={linkData}
         brandColor={brandColor}
