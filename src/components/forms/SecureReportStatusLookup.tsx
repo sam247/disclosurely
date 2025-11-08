@@ -2,6 +2,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useOrganizationData } from '@/contexts/OrganizationContext';
+import { useCustomDomain } from '@/hooks/useCustomDomain';
 import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -13,6 +14,13 @@ import BrandedFormLayout from '../BrandedFormLayout';
 import { useSecureForm } from '@/hooks/useSecureForm';
 import { validateTrackingId } from '@/utils/inputValidation';
 
+interface OrganizationBranding {
+  name: string;
+  logo_url?: string;
+  custom_logo_url?: string;
+  brand_color?: string;
+}
+
 const SecureReportStatusLookup = () => {
   const [trackingId, setTrackingId] = useState('');
   const navigate = useNavigate();
@@ -20,7 +28,20 @@ const SecureReportStatusLookup = () => {
   const { toast } = useToast();
   const { organizationData, fetchOrganizationByTrackingId, fetchOrganizationByLinkToken } = useOrganizationData();
   const { isSubmitting, secureSubmit } = useSecureForm();
+  const { customDomain, organizationId, isCustomDomain, loading: domainLoading } = useCustomDomain();
+  const [domainBranding, setDomainBranding] = useState<OrganizationBranding | null>(null);
+  const [loadingBranding, setLoadingBranding] = useState(true);
 
+  // Fetch organization branding from custom domain (like main form does)
+  useEffect(() => {
+    if (!domainLoading && isCustomDomain && organizationId) {
+      fetchOrganizationBrandingFromDomain();
+    } else if (!domainLoading) {
+      setLoadingBranding(false);
+    }
+  }, [domainLoading, isCustomDomain, organizationId]);
+
+  // Also fetch from linkToken if available
   useEffect(() => {
     if (linkToken) {
       // Pre-fetch organization data to avoid branding flash
@@ -34,6 +55,59 @@ const SecureReportStatusLookup = () => {
       fetchOrganizationByLinkToken(linkToken);
     }
   }, []);
+
+  const fetchOrganizationBrandingFromDomain = async () => {
+    if (!organizationId) {
+      setLoadingBranding(false);
+      return;
+    }
+
+    try {
+      console.log('Fetching organization branding for custom domain:', customDomain);
+
+      const { data: linkInfo, error: linkError } = await supabase
+        .from('organization_links')
+        .select(`
+          organization_id,
+          organizations!inner(
+            name,
+            logo_url,
+            custom_logo_url,
+            brand_color
+          )
+        `)
+        .eq('organization_id', organizationId)
+        .eq('is_active', true)
+        .order('created_at', { ascending: true })
+        .limit(1)
+        .maybeSingle();
+
+      if (linkError) {
+        console.error('Organization link error:', linkError);
+        setLoadingBranding(false);
+        return;
+      }
+
+      if (!linkInfo) {
+        console.log('No organization link found for custom domain');
+        setLoadingBranding(false);
+        return;
+      }
+
+      console.log('Organization branding found for custom domain:', linkInfo);
+
+      setDomainBranding({
+        name: linkInfo.organizations.name,
+        logo_url: linkInfo.organizations.logo_url,
+        custom_logo_url: linkInfo.organizations.custom_logo_url,
+        brand_color: linkInfo.organizations.brand_color
+      });
+    } catch (error) {
+      console.error('Error fetching organization branding from domain:', error);
+    } finally {
+      setLoadingBranding(false);
+    }
+  };
 
   const validateInput = (data: { trackingId: string }) => {
     if (!validateTrackingId(data.trackingId)) {
@@ -86,18 +160,19 @@ const SecureReportStatusLookup = () => {
     secureSubmit(lookupReport, { trackingId: trackingId.replace(/\s+/g, '').trim() }, validateInput);
   };
 
-  // Show loading only if we have a linkToken and are waiting for organization data
-  // Otherwise, use default branding for /status route
-  if (linkToken && !organizationData) {
+  // Show loading if we're fetching branding from domain or linkToken
+  if (loadingBranding || (linkToken && !organizationData)) {
     return <div className="min-h-screen bg-gray-50 flex items-center justify-center">
       <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
     </div>;
   }
 
-  // Default branding from organization data (if available) or fallback to defaults
-  const logoUrl = organizationData?.custom_logo_url || organizationData?.logo_url || undefined;
-  const brandColor = organizationData?.brand_color || '#2563eb';
-  const organizationName = organizationData?.name || 'Organization';
+  // Priority: domainBranding > organizationData (from linkToken) > defaults
+  // This ensures custom domain branding takes precedence
+  const branding = domainBranding || organizationData;
+  const logoUrl = branding?.custom_logo_url || branding?.logo_url || undefined;
+  const brandColor = branding?.brand_color || '#2563eb';
+  const organizationName = branding?.name || 'Organization';
 
   return (
     <BrandedFormLayout
