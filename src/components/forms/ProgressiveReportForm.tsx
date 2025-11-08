@@ -360,7 +360,6 @@ const ProgressiveReportForm = ({
 
   // Don't show navigation on welcome or review steps
   const showNavigation = currentStep > 0 && currentStep < totalSteps - 1;
-  const showSkip = [6, 7, 8].includes(currentStep); // When/Where, Evidence, Additional
   const isNextDisabled = !validateStep(currentStep);
 
   const t = progressiveFormTranslations[language as keyof typeof progressiveFormTranslations] || progressiveFormTranslations.en;
@@ -401,20 +400,10 @@ const ProgressiveReportForm = ({
               className="flex items-center gap-2 h-11 sm:h-10 px-3 sm:px-4"
             >
               <ChevronLeft className="w-4 h-4" />
-              <span className="hidden xs:inline">{t.navigation.back}</span>
+              <span>{t.navigation.back}</span>
             </Button>
 
             <div className="flex items-center gap-2 sm:gap-3 flex-wrap justify-end">
-              {showSkip && (
-                <Button
-                  variant="outline"
-                  onClick={handleSkip}
-                  disabled={isSubmitting}
-                  className="h-11 sm:h-10 px-3 sm:px-4 text-sm"
-                >
-                  {t.navigation.skip}
-                </Button>
-              )}
               {organizationId && currentStep > 0 && (
                 <SaveDraftButton
                   formData={formData}

@@ -1,5 +1,5 @@
 import { Label } from '@/components/ui/label';
-import { Paperclip, Shield, FileText, Image, FileAudio, FileVideo } from 'lucide-react';
+import { Paperclip, FileText, Image, FileAudio, FileVideo } from 'lucide-react';
 import FileUpload from '@/components/FileUpload';
 import { progressiveFormTranslations } from '@/i18n/progressiveFormTranslations';
 
@@ -24,20 +24,6 @@ const Step8Evidence = ({ attachedFiles, setAttachedFiles, language }: Step8Evide
           <p className="text-sm text-gray-600 mt-1">
             {t.step7.subtitle}
           </p>
-        </div>
-      </div>
-
-      <div className="bg-green-50 border border-green-200 rounded-lg p-4">
-        <div className="flex items-start gap-3">
-          <Shield className="w-5 h-5 text-green-600 flex-shrink-0 mt-0.5" />
-          <div className="space-y-2">
-            <p className="text-sm font-medium text-green-900">
-              {t.step7.metadataTitle}
-            </p>
-            <p className="text-sm text-green-800">
-              {t.step7.metadataDesc}
-            </p>
-          </div>
         </div>
       </div>
 
