@@ -162,11 +162,11 @@ const ProgressiveSubmissionForm = ({
           throw new Error(error.message || 'Failed to submit report');
         }
 
-        if (!data?.success || !data?.reportId) {
+        if (!data?.success || !data?.report?.id) {
           throw new Error('Invalid response from server');
         }
 
-        const reportId = data.reportId;
+        const reportId = data.report.id;
 
         // Upload files if any
         if (attachedFiles.length > 0) {
