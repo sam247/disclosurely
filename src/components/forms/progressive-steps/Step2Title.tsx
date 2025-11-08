@@ -8,14 +8,17 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from '@/components/ui/tooltip';
+import { progressiveFormTranslations } from '@/i18n/progressiveFormTranslations';
 
 interface Step2TitleProps {
   value: string;
   onChange: (value: string) => void;
   isValid: boolean;
+  language: string;
 }
 
-const Step2Title = ({ value, onChange, isValid }: Step2TitleProps) => {
+const Step2Title = ({ value, onChange, isValid, language }: Step2TitleProps) => {
+  const t = progressiveFormTranslations[language as keyof typeof progressiveFormTranslations] || progressiveFormTranslations.en;
   const inputRef = useRef<HTMLInputElement>(null);
 
   // Auto-focus on mount
@@ -32,10 +35,10 @@ const Step2Title = ({ value, onChange, isValid }: Step2TitleProps) => {
           </div>
           <div>
             <h2 className="text-2xl font-bold text-gray-900">
-              Give your report a title
+              {t.step1.title}
             </h2>
             <p className="text-sm text-gray-600 mt-1">
-              A brief, clear summary of the issue
+              {t.step1.subtitle}
             </p>
           </div>
         </div>
@@ -43,18 +46,18 @@ const Step2Title = ({ value, onChange, isValid }: Step2TitleProps) => {
         <div className="space-y-2">
           <div className="flex items-center gap-2">
             <Label htmlFor="title" className="text-base">
-              Report Title *
+              {t.step1.label}
             </Label>
             <Tooltip>
               <TooltipTrigger asChild>
                 <HelpCircle className="h-4 w-4 text-gray-400 cursor-help" />
               </TooltipTrigger>
               <TooltipContent className="max-w-xs">
-                <p className="font-medium mb-2">Examples of good titles:</p>
+                <p className="font-medium mb-2">{t.step1.tooltipTitle}</p>
                 <ul className="space-y-1 list-disc list-inside text-sm">
-                  <li>"Unethical hiring practices in HR department"</li>
-                  <li>"Safety equipment not provided on construction site"</li>
-                  <li>"Financial irregularities in expense reports"</li>
+                  <li>{t.step1.tooltipExample1}</li>
+                  <li>{t.step1.tooltipExample2}</li>
+                  <li>{t.step1.tooltipExample3}</li>
                 </ul>
               </TooltipContent>
             </Tooltip>
@@ -64,7 +67,7 @@ const Step2Title = ({ value, onChange, isValid }: Step2TitleProps) => {
             id="title"
             value={value}
             onChange={(e) => onChange(e.target.value)}
-            placeholder="e.g., Unsafe working conditions in warehouse"
+            placeholder={t.step1.placeholder}
             className="text-lg min-h-[56px] text-base"
             maxLength={200}
             autoComplete="off"
@@ -72,13 +75,13 @@ const Step2Title = ({ value, onChange, isValid }: Step2TitleProps) => {
           <div className="flex justify-between items-center text-sm">
             <div className="text-gray-500">
               {!isValid && value.length > 0 && value.length < 5 && (
-                <span className="text-amber-600">At least 5 characters required</span>
+                <span className="text-amber-600">{t.step1.minChars}</span>
               )}
               {isValid && (
-                <span className="text-green-600">✓ Looks good</span>
+                <span className="text-green-600">{t.step1.looksGood}</span>
               )}
             </div>
-            <span className="text-gray-400">{value.length}/200</span>
+            <span className="text-gray-400">{value.length}{t.step1.charCount}</span>
           </div>
         </div>
       </div>

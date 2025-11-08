@@ -3,15 +3,18 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { FileText, Users, History } from 'lucide-react';
+import { progressiveFormTranslations } from '@/i18n/progressiveFormTranslations';
 
 interface Step9AdditionalProps {
   witnesses: string;
   previousReports: boolean;
   additionalNotes: string;
   onChange: (updates: { witnesses?: string; previousReports?: boolean; additionalNotes?: string }) => void;
+  language: string;
 }
 
-const Step9Additional = ({ witnesses, previousReports, additionalNotes, onChange }: Step9AdditionalProps) => {
+const Step9Additional = ({ witnesses, previousReports, additionalNotes, onChange, language }: Step9AdditionalProps) => {
+  const t = progressiveFormTranslations[language as keyof typeof progressiveFormTranslations] || progressiveFormTranslations.en;
   return (
     <div className="space-y-6 py-4">
       <div className="flex items-center gap-3">
@@ -20,17 +23,17 @@ const Step9Additional = ({ witnesses, previousReports, additionalNotes, onChange
         </div>
         <div>
           <h2 className="text-2xl font-bold text-gray-900">
-            Anything else we should know?
+            {t.step8.title}
           </h2>
           <p className="text-sm text-gray-600 mt-1">
-            All fields on this page are optional
+            {t.step8.subtitle}
           </p>
         </div>
       </div>
 
       <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
         <p className="text-sm text-blue-900">
-          ℹ️ These details can help with the investigation, but you can skip this step if you prefer.
+          {t.step8.info}
         </p>
       </div>
 
@@ -40,19 +43,19 @@ const Step9Additional = ({ witnesses, previousReports, additionalNotes, onChange
           <div className="flex items-center gap-2">
             <Users className="w-4 h-4 text-gray-500" />
             <Label htmlFor="witnesses" className="text-base">
-              Were there any witnesses? (Optional)
+              {t.step8.witnessesLabel}
             </Label>
           </div>
           <Input
             id="witnesses"
             value={witnesses}
             onChange={(e) => onChange({ witnesses: e.target.value })}
-            placeholder="e.g., 'Two colleagues from the same department' (avoid specific names)"
+            placeholder={t.step8.witnessesPlaceholder}
             className="min-h-[48px] text-base"
             maxLength={200}
           />
           <p className="text-xs text-gray-500">
-            Describe witnesses without revealing identifying details
+            {t.step8.witnessesHint}
           </p>
         </div>
 
@@ -61,7 +64,7 @@ const Step9Additional = ({ witnesses, previousReports, additionalNotes, onChange
           <div className="flex items-center gap-2">
             <History className="w-4 h-4 text-gray-500" />
             <Label htmlFor="previousReports" className="text-base">
-              Have you reported this before? (Optional)
+              {t.step8.previousReportsLabel}
             </Label>
           </div>
           <Select
@@ -72,8 +75,8 @@ const Step9Additional = ({ witnesses, previousReports, additionalNotes, onChange
               <SelectValue placeholder="Select an option" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="no" className="text-base">No, this is my first report</SelectItem>
-              <SelectItem value="yes" className="text-base">Yes, I've reported this before</SelectItem>
+              <SelectItem value="no" className="text-base">{t.step8.previousReportsNo}</SelectItem>
+              <SelectItem value="yes" className="text-base">{t.step8.previousReportsYes}</SelectItem>
             </SelectContent>
           </Select>
         </div>
@@ -83,26 +86,26 @@ const Step9Additional = ({ witnesses, previousReports, additionalNotes, onChange
           <div className="flex items-center gap-2">
             <FileText className="w-4 h-4 text-gray-500" />
             <Label htmlFor="additionalNotes" className="text-base">
-              Additional Notes (Optional)
+              {t.step8.additionalNotesLabel}
             </Label>
           </div>
           <Textarea
             id="additionalNotes"
             value={additionalNotes}
             onChange={(e) => onChange({ additionalNotes: e.target.value })}
-            placeholder="Any other relevant information you'd like to share..."
+            placeholder={t.step8.additionalNotesPlaceholder}
             className="min-h-[120px] text-base resize-none"
             maxLength={1000}
           />
           <div className="flex justify-end">
-            <span className="text-xs text-gray-400">{additionalNotes.length}/1000</span>
+            <span className="text-xs text-gray-400">{additionalNotes.length}{t.step8.additionalNotesCharCount}</span>
           </div>
         </div>
       </div>
 
       {(witnesses || previousReports || additionalNotes) && (
         <p className="text-sm text-green-600">
-          ✓ Additional context provided
+          {t.step8.contextProvided}
         </p>
       )}
     </div>
