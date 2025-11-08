@@ -1,7 +1,9 @@
 # Draft Save Feature - Implementation Guide for Lovable
 
 ## Overview
-Enable whistleblowers to save incomplete reports and resume later using a unique DR-xxxx code. Drafts expire after 48 hours and are NOT visible in admin dashboard.
+Enable whistleblowers to **manually save** incomplete reports and resume later using a unique DR-xxxx code. Drafts expire after 48 hours and are NOT visible in admin dashboard.
+
+**Note:** Auto-save is intentionally NOT included for security reasons. Users must click "Save Draft" manually.
 
 ---
 
@@ -33,9 +35,8 @@ CREATE TABLE public.report_drafts (
   -- Expiration
   expires_at TIMESTAMP WITH TIME ZONE NOT NULL,
 
-  -- Auto-save tracking
+  -- Save tracking
   save_count INTEGER DEFAULT 1, -- How many times saved (useful for analytics)
-  last_saved_step INTEGER DEFAULT 0, -- Last step when saved
 
   created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(),
   updated_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now()
@@ -354,7 +355,6 @@ export async function updateDraft(draftCode: string, request: SaveDraftRequest):
         file_metadata: request.fileMetadata || [],
         updated_at: new Date().toISOString(),
         save_count: supabase.sql`save_count + 1`,
-        last_saved_step: request.currentStep,
       })
       .eq('draft_code', draftCode);
 
@@ -700,7 +700,6 @@ interface ProgressiveReportFormProps {
 
 // Inside component
 const [currentDraftCode, setCurrentDraftCode] = useState(draftCode);
-const [autoSaveEnabled, setAutoSaveEnabled] = useState(false);
 
 // Load draft on mount if draftCode provided
 useEffect(() => {
@@ -718,34 +717,6 @@ useEffect(() => {
   }
 }, [draftCode]);
 
-// Auto-save every 30 seconds if enabled
-useEffect(() => {
-  if (!autoSaveEnabled) return;
-
-  const interval = setInterval(async () => {
-    if (currentStep > 0) { // Don't auto-save on welcome screen
-      const request = {
-        formData,
-        currentStep,
-        language,
-        organizationId: /* get from context */,
-      };
-
-      if (currentDraftCode) {
-        await updateDraft(currentDraftCode, request);
-      } else {
-        const response = await saveDraft(request);
-        if (response.success) {
-          setCurrentDraftCode(response.draftCode);
-          onDraftSaved?.(response.draftCode);
-        }
-      }
-    }
-  }, 30000); // 30 seconds
-
-  return () => clearInterval(interval);
-}, [autoSaveEnabled, formData, currentStep, language, currentDraftCode]);
-
 // Add Save Draft button to navigation area
 <div className="flex justify-between items-center mt-6 pt-4 border-t">
   <div className="flex gap-2">
@@ -761,18 +732,6 @@ useEffect(() => {
           onDraftSaved?.(code);
         }}
       />
-    )}
-
-    {/* Optional: Auto-save toggle */}
-    {currentStep > 0 && (
-      <label className="flex items-center gap-2 text-sm text-gray-600 cursor-pointer">
-        <input
-          type="checkbox"
-          checked={autoSaveEnabled}
-          onChange={(e) => setAutoSaveEnabled(e.target.checked)}
-        />
-        Auto-save
-      </label>
     )}
   </div>
 
@@ -811,20 +770,14 @@ Modify `src/components/forms/progressive-steps/Step1Welcome.tsx`:
    - Derive encryption key from draft code
    - Never store unencrypted sensitive data
 
-2. **Auto-save Warning**: Show clear warning that auto-save stores data on server:
-   ```tsx
-   ⚠️ Auto-save will store your draft on our secure servers.
-   Only enable on a private, trusted device.
-   ```
-
-3. **Device Security**: Add prominent warning on save:
+2. **Device Security**: Add prominent warning on save:
    ```
    Keep your draft code secure. Anyone with this code can access your draft.
    ```
 
-4. **localStorage**: Avoid storing draft codes in localStorage - they should only be displayed once and copied
+3. **localStorage**: Avoid storing draft codes in localStorage - they should only be displayed once and copied
 
-5. **Cleanup Job**: Set up automated cleanup of expired drafts (see migration SQL)
+4. **Cleanup Job**: Set up automated cleanup of expired drafts (see migration SQL)
 
 ---
 
@@ -839,7 +792,7 @@ Modify `src/components/forms/progressive-steps/Step1Welcome.tsx`:
 - [ ] Add route for `/resume-draft` in router
 - [ ] Integrate draft save/load into `ProgressiveReportForm`
 - [ ] Add "Resume draft" link to welcome page
-- [ ] Add security warnings and auto-save opt-in UI
+- [ ] Add security warnings to Save Draft modal
 - [ ] Test full flow: save → resume → update → submit
 - [ ] Set up cleanup job for expired drafts
 - [ ] Update submission flow to delete draft on successful submission
@@ -848,17 +801,18 @@ Modify `src/components/forms/progressive-steps/Step1Welcome.tsx`:
 
 ## 9. Testing Scenarios
 
-1. **Save new draft** → Copy code → Close tab → Resume with code ✅
-2. **Auto-save** → Enable auto-save → Fill form → Wait 30s → Refresh → Resume ✅
-3. **Update draft** → Save → Continue editing → Save again → Should update same code ✅
-4. **Expired draft** → Save → Manually set expires_at to past → Try to resume → Should error ✅
-5. **Submit from draft** → Resume → Complete → Submit → Draft should be deleted ✅
-6. **Invalid code** → Enter fake code → Should show error message ✅
+1. **Save new draft** → Click Save Draft → Copy code → Close tab → Resume with code ✅
+2. **Update draft** → Save → Continue editing → Click Save Draft again → Should update same code ✅
+3. **Expired draft** → Save → Manually set expires_at to past → Try to resume → Should show "Draft has expired" error ✅
+4. **Submit from draft** → Resume → Complete → Submit → Draft should be deleted ✅
+5. **Invalid code** → Enter fake code → Should show "Draft not found" error message ✅
+6. **Resume from welcome** → Click "Resume a saved draft" → Enter valid code → Should load form with saved data ✅
 
 ---
 
 ## 10. Future Enhancements (Post-MVP)
 
+- [ ] **Auto-save feature** - Optional 30-second auto-save with security warnings (if users request it)
 - [ ] Show time remaining until expiration in modal
 - [ ] Email draft code to user (if they opt-in)
 - [ ] Extend expiration on each save (sliding window)
