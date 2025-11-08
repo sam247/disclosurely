@@ -236,9 +236,19 @@ Defined in `user_roles` table with `app_role` enum:
 - `/privacy` - Privacy Policy
 
 ### Anonymous Reporting Routes (Public, No Auth)
-- `/secure/tool/submit/:linkToken` - Submission form
-- `/secure/tool/submit/:linkToken/status` - Status lookup
-- `/secure/tool/messaging/:trackingId` - Two-way messaging
+
+**Primary Routes:**
+- `/report`, `/submit`, `/whistleblow` - Clean submission URLs (progressive form)
+- `/newform` - Progressive disclosure form (new experience)
+- `/status` - Report status lookup form
+- `/status/:trackingId` - Two-way messaging interface
+- `/success` - Report submission success page
+- `/resume-draft` - Resume saved draft
+
+**Legacy Routes (for backwards compatibility):**
+- `/secure/tool/submit/:linkToken` - Token-based submission form
+- `/secure/tool/submit/:linkToken/status` - Token-based status lookup
+- `/secure/tool/messaging/:trackingId` - Legacy messaging route (redirects to /status/:trackingId)
 
 ### Authenticated Routes
 All routes under `/dashboard/*` and `/app/*` require authentication:

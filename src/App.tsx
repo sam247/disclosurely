@@ -130,6 +130,7 @@ const AppContent = () => {
 
         {/* Report status and messaging */}
         <Route path="/status" element={<ReportStatusLookup />} />
+        <Route path="/status/:trackingId" element={<WhistleblowerMessagingPage />} />
         <Route path="/success" element={<ReportSuccess />} />
         <Route path="/secure/tool/success" element={<ReportSuccess />} />
         <Route path="/secure/tool/lookup" element={<ReportStatusLookup />} />
