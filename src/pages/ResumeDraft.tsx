@@ -6,6 +6,7 @@ import { Label } from '@/components/ui/label';
 import { ArrowRight, ArrowLeft } from 'lucide-react';
 import { resumeDraft } from '@/services/draftService';
 import BrandedFormLayout from '@/components/BrandedFormLayout';
+import { useCustomDomain } from '@/hooks/useCustomDomain';
 import { supabase } from '@/integrations/supabase/client';
 
 interface OrganizationBranding {
@@ -21,17 +22,81 @@ export const ResumeDraft = () => {
   const [draftCode, setDraftCode] = useState(searchParams.get('code') || '');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
-  const [organizationBranding, setOrganizationBranding] = useState<OrganizationBranding | null>(null);
-  const [loadingBranding, setLoadingBranding] = useState(false);
+  const { customDomain, organizationId, isCustomDomain, loading: domainLoading } = useCustomDomain();
+  const [domainBranding, setDomainBranding] = useState<OrganizationBranding | null>(null);
+  const [draftBranding, setDraftBranding] = useState<OrganizationBranding | null>(null);
+  const [loadingBranding, setLoadingBranding] = useState(true);
 
-  // Fetch organization branding when draft code is entered
+  // Fetch organization branding from custom domain (like main form does)
+  useEffect(() => {
+    if (!domainLoading && isCustomDomain && organizationId) {
+      fetchOrganizationBrandingFromDomain();
+    } else if (!domainLoading) {
+      setLoadingBranding(false);
+    }
+  }, [domainLoading, isCustomDomain, organizationId]);
+
+  // Also fetch organization branding when draft code is entered
   useEffect(() => {
     if (draftCode && draftCode.length >= 12) {
-      fetchOrganizationBranding();
+      fetchOrganizationBrandingFromDraft();
     }
   }, [draftCode]);
 
-  const fetchOrganizationBranding = async () => {
+  const fetchOrganizationBrandingFromDomain = async () => {
+    if (!organizationId) {
+      setLoadingBranding(false);
+      return;
+    }
+
+    try {
+      console.log('Fetching organization branding for custom domain:', customDomain);
+
+      const { data: linkInfo, error: linkError } = await supabase
+        .from('organization_links')
+        .select(`
+          organization_id,
+          organizations!inner(
+            name,
+            logo_url,
+            custom_logo_url,
+            brand_color
+          )
+        `)
+        .eq('organization_id', organizationId)
+        .eq('is_active', true)
+        .order('created_at', { ascending: true })
+        .limit(1)
+        .maybeSingle();
+
+      if (linkError) {
+        console.error('Organization link error:', linkError);
+        setLoadingBranding(false);
+        return;
+      }
+
+      if (!linkInfo) {
+        console.log('No organization link found for custom domain');
+        setLoadingBranding(false);
+        return;
+      }
+
+      console.log('Organization branding found for custom domain:', linkInfo);
+
+      setDomainBranding({
+        name: linkInfo.organizations.name,
+        logo_url: linkInfo.organizations.logo_url,
+        custom_logo_url: linkInfo.organizations.custom_logo_url,
+        brand_color: linkInfo.organizations.brand_color
+      });
+    } catch (error) {
+      console.error('Error fetching organization branding from domain:', error);
+    } finally {
+      setLoadingBranding(false);
+    }
+  };
+
+  const fetchOrganizationBrandingFromDraft = async () => {
     if (!draftCode) return;
     
     setLoadingBranding(true);
@@ -60,14 +125,14 @@ export const ResumeDraft = () => {
         return;
       }
 
-      setOrganizationBranding({
+      setDraftBranding({
         name: orgData.name,
         logo_url: orgData.logo_url,
         custom_logo_url: orgData.custom_logo_url,
         brand_color: orgData.brand_color
       });
     } catch (error) {
-      console.error('Error fetching organization branding:', error);
+      console.error('Error fetching organization branding from draft:', error);
     } finally {
       setLoadingBranding(false);
     }
@@ -82,14 +147,17 @@ export const ResumeDraft = () => {
 
     if (response.success) {
       // Navigate to form with draft data
-      navigate(`/newform?draft=${draftCode}`);
+      navigate(`/report?draft=${draftCode}`);
     } else {
       setError(response.message || 'Failed to load draft');
     }
   };
 
-  const brandColor = organizationBranding?.brand_color || '#2563eb';
-  const logoUrl = organizationBranding?.custom_logo_url || organizationBranding?.logo_url;
+  // Priority: domainBranding > draftBranding > defaults
+  // This ensures custom domain branding takes precedence
+  const branding = domainBranding || draftBranding;
+  const brandColor = branding?.brand_color || '#2563eb';
+  const logoUrl = branding?.custom_logo_url || branding?.logo_url;
 
   const content = (
     <div className="space-y-6">
@@ -98,7 +166,7 @@ export const ResumeDraft = () => {
         <Button
           variant="ghost"
           size="sm"
-          onClick={() => navigate('/newform')}
+          onClick={() => navigate('/report')}
           className="gap-2"
         >
           <ArrowLeft className="h-4 w-4" />
@@ -150,7 +218,7 @@ export const ResumeDraft = () => {
         <div className="text-center">
           <Button
             variant="link"
-            onClick={() => navigate('/newform')}
+            onClick={() => navigate('/report')}
             className="text-sm"
           >
             Start a new report instead
@@ -164,11 +232,28 @@ export const ResumeDraft = () => {
     </div>
   );
 
+  // Show loading if we're fetching branding from domain
+  if (loadingBranding) {
+    return (
+      <BrandedFormLayout
+        title="Loading..."
+        organizationName="Loading"
+        brandColor="#2563eb"
+        description="Loading..."
+      >
+        <div className="text-center py-8">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-4"></div>
+          <p>Loading...</p>
+        </div>
+      </BrandedFormLayout>
+    );
+  }
+
   // Always use BrandedFormLayout for consistent header
   return (
     <BrandedFormLayout
       title="Resume Draft"
-      organizationName={organizationBranding?.name || 'Disclosurely'}
+      organizationName={branding?.name || 'Disclosurely'}
       logoUrl={logoUrl}
       brandColor={brandColor}
       description="Enter your draft code to continue your report"

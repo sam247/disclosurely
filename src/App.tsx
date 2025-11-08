@@ -117,9 +117,6 @@ const AppContent = () => {
         <Route path="/report" element={<CleanSubmissionWrapper />} />
         <Route path="/submit" element={<CleanSubmissionWrapper />} />
         <Route path="/whistleblow" element={<CleanSubmissionWrapper />} />
-
-        {/* Progressive disclosure form - New experience */}
-        <Route path="/newform" element={<ProgressiveFormWrapper />} />
         
         {/* Resume draft page */}
         <Route path="/resume-draft" element={<ResumeDraft />} />

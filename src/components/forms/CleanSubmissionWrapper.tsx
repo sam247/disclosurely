@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useToast } from '@/hooks/use-toast';
 import { useCustomDomain } from '@/hooks/useCustomDomain';
 import { supabase } from '@/integrations/supabase/client';
@@ -7,6 +7,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { AlertTriangle, Loader2 } from 'lucide-react';
 import BrandedFormLayout from '../BrandedFormLayout';
 import ProgressiveSubmissionForm from './ProgressiveSubmissionForm';
+import { resumeDraft } from '@/services/draftService';
 
 interface LinkData {
   id: string;
@@ -28,9 +29,12 @@ const CleanSubmissionWrapper = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const { customDomain, organizationId, isCustomDomain, loading: domainLoading } = useCustomDomain();
+  const [searchParams] = useSearchParams();
+  const draftCode = searchParams.get('draft');
 
   const [linkData, setLinkData] = useState<LinkData | null>(null);
   const [loading, setLoading] = useState(true);
+  const [draftData, setDraftData] = useState<any>(null);
 
   useEffect(() => {
     console.log('CleanSubmissionWrapper: Domain detection:', {
@@ -153,6 +157,28 @@ const CleanSubmissionWrapper = () => {
     }
   };
 
+  // Load draft if draft code is provided
+  useEffect(() => {
+    if (draftCode && linkData) {
+      loadDraft();
+    }
+  }, [draftCode, linkData]);
+
+  const loadDraft = async () => {
+    if (!draftCode) return;
+
+    const response = await resumeDraft({ draftCode });
+    if (response.success) {
+      setDraftData(response);
+    } else {
+      toast({
+        title: "Draft not found",
+        description: response.message || "Unable to load draft. It may have expired.",
+        variant: "destructive",
+      });
+    }
+  };
+
   if (domainLoading || loading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-50 to-slate-100">
@@ -225,6 +251,8 @@ const CleanSubmissionWrapper = () => {
         linkToken={linkData.link_token}
         linkData={linkData}
         brandColor={brandColor}
+        draftCode={draftCode || undefined}
+        draftData={draftData}
       />
     </BrandedFormLayout>
   );
