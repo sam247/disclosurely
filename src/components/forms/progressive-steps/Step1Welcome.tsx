@@ -79,10 +79,10 @@ const Step1Welcome = ({ onContinue, brandColor, language, onLanguageChange, orga
       </div>
 
       <div className="space-y-2">
-        <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-gray-900 px-2">
+        <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-gray-900 px-2 break-words">
           {welcomeTitle}
         </h1>
-        <p className="text-sm sm:text-base text-gray-600 max-w-md mx-auto px-4">
+        <p className="text-sm sm:text-base text-gray-600 max-w-md mx-auto px-4 break-words">
           {t.welcome.subtitle}
         </p>
       </div>
@@ -119,7 +119,7 @@ const Step1Welcome = ({ onContinue, brandColor, language, onLanguageChange, orga
         </div>
       </div>
 
-      <p className="text-xs sm:text-sm text-gray-500 max-w-md mx-auto px-4">
+      <p className="text-xs sm:text-sm text-gray-500 max-w-md mx-auto px-4 break-words">
         {t.welcome.footer}
       </p>
     </div>

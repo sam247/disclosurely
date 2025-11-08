@@ -239,12 +239,15 @@ const LinkGenerator = () => {
       const { error } = await supabase
         .from('organization_links')
         .update({ available_languages })
-        .eq('id', id);
+        .eq('id', id)
+        .select();
 
       if (error) throw error;
     },
     onSuccess: () => {
+      // Invalidate and refetch to get fresh data
       queryClient.invalidateQueries({ queryKey: ['primary-link'] });
+      queryClient.refetchQueries({ queryKey: ['primary-link'] });
       toast({
         title: "Languages Updated",
         description: "Available languages for the form have been updated successfully.",

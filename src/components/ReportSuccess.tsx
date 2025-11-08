@@ -1,21 +1,48 @@
 
-import { useState, useEffect } from 'react';
-import { useSearchParams } from 'react-router-dom';
+import { useState, useEffect, useMemo } from 'react';
+import { useSearchParams, useNavigate } from 'react-router-dom';
 import { useOrganizationData } from '@/contexts/OrganizationContext';
+import { useCustomDomain } from '@/hooks/useCustomDomain';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { CheckCircle, Copy, AlertTriangle } from 'lucide-react';
+import { CheckCircle, Copy, AlertTriangle, ArrowLeft } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import BrandedFormLayout from './BrandedFormLayout';
 import { supabase } from '@/integrations/supabase/client';
 
 const ReportSuccess = () => {
   const [searchParams] = useSearchParams();
+  const navigate = useNavigate();
   const trackingId = searchParams.get('trackingId');
   const linkTokenFromUrl = searchParams.get('linkToken');
   const { toast } = useToast();
   const { organizationData, loading, error, fetchOrganizationByTrackingId } = useOrganizationData();
+  const { customDomain, organizationId, isCustomDomain, loading: domainLoading } = useCustomDomain();
   const [linkToken, setLinkToken] = useState<string | null>(linkTokenFromUrl);
+  const [domainBranding, setDomainBranding] = useState<any>(null);
+
+  // Fetch organization branding from custom domain (like main form does)
+  useEffect(() => {
+    if (!domainLoading && isCustomDomain && organizationId) {
+      fetchOrganizationBrandingFromDomain();
+    }
+  }, [domainLoading, isCustomDomain, organizationId]);
+
+  const fetchOrganizationBrandingFromDomain = async () => {
+    try {
+      const { data: org, error: orgError } = await supabase
+        .from('organizations')
+        .select('id, name, logo_url, custom_logo_url, brand_color')
+        .eq('id', organizationId)
+        .single();
+
+      if (!orgError && org) {
+        setDomainBranding(org);
+      }
+    } catch (error) {
+      console.error('Error fetching organization branding from domain:', error);
+    }
+  };
 
   useEffect(() => {
     if (trackingId) {
@@ -86,7 +113,7 @@ const ReportSuccess = () => {
     }
   };
 
-  if (loading) {
+  if (loading || domainLoading) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
@@ -97,10 +124,12 @@ const ReportSuccess = () => {
     );
   }
 
-  // Default branding if organization data fails to load
-  const logoUrl = organizationData?.custom_logo_url || organizationData?.logo_url;
-  const brandColor = organizationData?.brand_color || '#2563eb';
-  const organizationName = organizationData?.name || 'Organization';
+  // Priority: domainBranding > organizationData (from tracking ID) > defaults
+  // This ensures custom domain branding takes precedence
+  const finalBranding = useMemo(() => domainBranding || organizationData, [domainBranding, organizationData]);
+  const logoUrl = finalBranding?.custom_logo_url || finalBranding?.logo_url;
+  const brandColor = finalBranding?.brand_color || '#2563eb';
+  const organizationName = finalBranding?.name || 'Organization';
 
   return (
     <BrandedFormLayout
@@ -159,6 +188,18 @@ const ReportSuccess = () => {
               <p><strong>Save your tracking ID</strong> - you'll need it to check your report status.</p>
               <p>You will be contacted if additional information is needed.</p>
               <p>All communications will be handled securely and confidentially.</p>
+            </div>
+
+            <div className="mt-6 pt-6 border-t border-green-200">
+              <Button
+                variant="outline"
+                onClick={() => navigate('/report')}
+                className="flex items-center gap-2"
+                style={{ borderColor: brandColor, color: brandColor }}
+              >
+                <ArrowLeft className="h-4 w-4" />
+                Back to Report
+              </Button>
             </div>
           </CardContent>
         </Card>
