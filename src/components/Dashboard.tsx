@@ -48,6 +48,11 @@ interface Report {
     name: string;
   };
   submitted_by_email?: string;
+  incident_date?: string | null;
+  location?: string | null;
+  witnesses?: string | null;
+  previous_reports?: boolean | null;
+  additional_notes?: string | null;
 }
 
 interface SubmissionLink {
@@ -380,7 +385,7 @@ const Dashboard = () => {
       // Fetch active reports - filter by assignment for team members
       let reportsQuery = supabase
         .from('reports')
-        .select('id, title, tracking_id, status, created_at, encrypted_content, encryption_key_hash, priority, report_type, submitted_by_email, assigned_to')
+        .select('id, title, tracking_id, status, created_at, encrypted_content, encryption_key_hash, priority, report_type, submitted_by_email, assigned_to, incident_date, location, witnesses, previous_reports, additional_notes')
         .eq('organization_id', profile.organization_id)
         .neq('status', 'closed')
         .order('created_at', { ascending: false })
@@ -412,7 +417,7 @@ const Dashboard = () => {
       // Fetch archived reports - filter by assignment for team members
       let archivedQuery = supabase
         .from('reports')
-        .select('id, title, tracking_id, status, created_at, encrypted_content, encryption_key_hash, priority, report_type, submitted_by_email, assigned_to')
+        .select('id, title, tracking_id, status, created_at, encrypted_content, encryption_key_hash, priority, report_type, submitted_by_email, assigned_to, incident_date, location, witnesses, previous_reports, additional_notes')
         .eq('organization_id', profile.organization_id)
         .eq('status', 'closed')
         .order('created_at', { ascending: false })
@@ -1672,6 +1677,11 @@ const Dashboard = () => {
                   priority={selectedReport.priority}
                   submittedByEmail={selectedReport.submitted_by_email}
                   reportId={selectedReport.id}
+                  incidentDate={selectedReport.incident_date}
+                  location={selectedReport.location}
+                  witnesses={selectedReport.witnesses}
+                  previousReports={selectedReport.previous_reports}
+                  additionalNotes={selectedReport.additional_notes}
                 />
                 <ReportAttachments reportId={selectedReport.id} />
               </div>

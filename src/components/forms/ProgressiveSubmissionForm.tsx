@@ -153,9 +153,8 @@ const ProgressiveSubmissionForm = ({
         // Submit via edge function
         const { data, error } = await supabase.functions.invoke('submit-anonymous-report', {
           body: {
-            ...reportPayload,
-            linkToken,
-            organizationId: linkData.organization_id
+            reportData: reportPayload,
+            linkToken
           }
         });
 

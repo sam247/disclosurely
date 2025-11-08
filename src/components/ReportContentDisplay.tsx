@@ -23,6 +23,11 @@ interface ReportContentDisplayProps {
   priority: number;
   submittedByEmail?: string;
   reportId?: string;
+  incidentDate?: string | null;
+  location?: string | null;
+  witnesses?: string | null;
+  previousReports?: boolean | null;
+  additionalNotes?: string | null;
 }
 
 const ReportContentDisplay = ({
@@ -34,7 +39,12 @@ const ReportContentDisplay = ({
   createdAt,
   priority,
   submittedByEmail,
-  reportId
+  reportId,
+  incidentDate,
+  location,
+  witnesses,
+  previousReports,
+  additionalNotes
 }: ReportContentDisplayProps) => {
   const { user } = useAuth();
   const { toast } = useToast();
@@ -280,20 +290,6 @@ const ReportContentDisplay = ({
                   </div>
                 )}
 
-                {decryptedContent.incident_date && (
-                  <div>
-                    <h4 className="font-medium text-gray-900 mb-2">Incident Date:</h4>
-                    <p className="text-gray-700">{decryptedContent.incident_date}</p>
-                  </div>
-                )}
-
-                {decryptedContent.location && (
-                  <div>
-                    <h4 className="font-medium text-gray-900 mb-2">Location:</h4>
-                    <p className="text-gray-700">{decryptedContent.location}</p>
-                  </div>
-                )}
-
                 {decryptedContent.people_involved && (
                   <div>
                     <h4 className="font-medium text-gray-900 mb-2">People Involved:</h4>
@@ -325,6 +321,56 @@ const ReportContentDisplay = ({
           )}
         </CardContent>
       </Card>
+
+      {/* Incident Details Section - Only show if at least one field has data */}
+      {(incidentDate || location || witnesses || previousReports !== null || additionalNotes) && (
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center space-x-2 text-xl">
+              <Calendar className="h-5 w-5 text-blue-600" />
+              <span>Incident Details</span>
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-4">
+              {incidentDate && (
+                <div>
+                  <h4 className="font-medium text-gray-900 mb-1">When:</h4>
+                  <p className="text-gray-700">{incidentDate}</p>
+                </div>
+              )}
+              
+              {location && (
+                <div>
+                  <h4 className="font-medium text-gray-900 mb-1">Where:</h4>
+                  <p className="text-gray-700">{location}</p>
+                </div>
+              )}
+              
+              {witnesses && (
+                <div>
+                  <h4 className="font-medium text-gray-900 mb-1">Witnesses:</h4>
+                  <p className="text-gray-700 whitespace-pre-wrap">{witnesses}</p>
+                </div>
+              )}
+              
+              {previousReports !== null && (
+                <div>
+                  <h4 className="font-medium text-gray-900 mb-1">Previous Reports:</h4>
+                  <p className="text-gray-700">{previousReports ? 'Yes' : 'No'}</p>
+                </div>
+              )}
+              
+              {additionalNotes && (
+                <div>
+                  <h4 className="font-medium text-gray-900 mb-1">Additional Notes:</h4>
+                  <p className="text-gray-700 whitespace-pre-wrap">{additionalNotes}</p>
+                </div>
+              )}
+            </div>
+          </CardContent>
+        </Card>
+      )}
     </div>
   );
 };

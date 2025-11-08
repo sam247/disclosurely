@@ -412,7 +412,13 @@ serve(async (req) => {
         priority: priorityValue,
         manual_risk_level: priorityValue, // Map priority to risk level
         tags: reportData.tags,
-        organization_id: linkData.organization_id
+        organization_id: linkData.organization_id,
+        // Contextual fields (not encrypted - stored as plain columns)
+        incident_date: reportData.incident_date || null,
+        location: reportData.location || null,
+        witnesses: reportData.witnesses || null,
+        previous_reports: reportData.previous_reports || false,
+        additional_notes: reportData.additional_notes || null
       })
       .select()
       .single()

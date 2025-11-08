@@ -136,6 +136,11 @@ interface Report {
   ai_risk_assessment?: any;
   ai_assessed_at?: string;
   manual_risk_level?: number;
+  incident_date?: string | null;
+  location?: string | null;
+  witnesses?: string | null;
+  previous_reports?: boolean | null;
+  additional_notes?: string | null;
 }
 
 // Helper functions for AI Triage user-friendly labels
@@ -326,7 +331,7 @@ const DashboardView = () => {
         // Try with AI fields first
         let reportsQuery = supabase
           .from('reports')
-          .select('id, title, tracking_id, status, created_at, encrypted_content, encryption_key_hash, priority, report_type, submitted_by_email, tags, assigned_to, ai_risk_score, ai_risk_level, ai_likelihood_score, ai_impact_score, ai_risk_assessment, ai_assessed_at, manual_risk_level')
+          .select('id, title, tracking_id, status, created_at, encrypted_content, encryption_key_hash, priority, report_type, submitted_by_email, tags, assigned_to, ai_risk_score, ai_risk_level, ai_likelihood_score, ai_impact_score, ai_risk_assessment, ai_assessed_at, manual_risk_level, incident_date, location, witnesses, previous_reports, additional_notes')
           .eq('organization_id', profile.organization_id)
           .not('status', 'in', '(archived,deleted)')
           .is('deleted_at', null)
@@ -353,7 +358,7 @@ const DashboardView = () => {
 
         const { data: archivedWithAI, error: archivedError } = await supabase
           .from('reports')
-          .select('id, title, tracking_id, status, created_at, encrypted_content, encryption_key_hash, priority, report_type, submitted_by_email, tags, assigned_to')
+          .select('id, title, tracking_id, status, created_at, encrypted_content, encryption_key_hash, priority, report_type, submitted_by_email, tags, assigned_to, incident_date, location, witnesses, previous_reports, additional_notes')
           .eq('organization_id', profile.organization_id)
           .eq('status', 'archived')
           .is('deleted_at', null)
@@ -377,7 +382,7 @@ const DashboardView = () => {
         // Fallback to basic query without AI fields
         let reportsBasicQuery = supabase
           .from('reports')
-          .select('id, title, tracking_id, status, created_at, encrypted_content, encryption_key_hash, priority, report_type, submitted_by_email, tags, assigned_to, manual_risk_level')
+          .select('id, title, tracking_id, status, created_at, encrypted_content, encryption_key_hash, priority, report_type, submitted_by_email, tags, assigned_to, manual_risk_level, incident_date, location, witnesses, previous_reports, additional_notes')
           .eq('organization_id', profile.organization_id)
           .not('status', 'in', '(archived,deleted)')
           .is('deleted_at', null)
@@ -397,7 +402,7 @@ const DashboardView = () => {
 
         const { data: archivedBasic, error: archivedBasicError } = await supabase
           .from('reports')
-          .select('id, title, tracking_id, status, created_at, encrypted_content, encryption_key_hash, priority, report_type, submitted_by_email, tags, assigned_to')
+          .select('id, title, tracking_id, status, created_at, encrypted_content, encryption_key_hash, priority, report_type, submitted_by_email, tags, assigned_to, incident_date, location, witnesses, previous_reports, additional_notes')
           .eq('organization_id', profile.organization_id)
           .eq('status', 'archived')
           .is('deleted_at', null)
@@ -2136,6 +2141,11 @@ Additional Details: ${decryptedContent.additionalDetails || 'None provided'}
                   priority={selectedReport.priority}
                   submittedByEmail={selectedReport.submitted_by_email}
                   reportId={selectedReport.id}
+                  incidentDate={selectedReport.incident_date}
+                  location={selectedReport.location}
+                  witnesses={selectedReport.witnesses}
+                  previousReports={selectedReport.previous_reports}
+                  additionalNotes={selectedReport.additional_notes}
                 />
                 <ReportAttachments reportId={selectedReport.id} />
                 <ReportMessaging 
