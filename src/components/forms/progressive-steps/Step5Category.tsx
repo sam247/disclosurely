@@ -82,7 +82,7 @@ const Step5Category = ({ mainCategory, subCategory, customCategory, onChange, is
   const availableSubCategories = mainCategory ? MAIN_CATEGORIES[mainCategory as keyof typeof MAIN_CATEGORIES] || [] : [];
 
   return (
-    <div className="space-y-6 py-4">
+    <div className="space-y-4 py-2">
       <div className="flex items-center gap-3">
         <div className="p-2 rounded-lg bg-primary/10">
           <Tag className="w-5 h-5 text-primary" />

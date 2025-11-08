@@ -37,7 +37,7 @@ const Step3Description = ({ value, onChange, isValid }: Step3DescriptionProps) =
 
   return (
     <TooltipProvider>
-      <div className="space-y-4 py-4">
+      <div className="space-y-4 py-2">
         <div className="flex items-center gap-3">
           <div className="p-2 rounded-lg bg-primary/10">
             <FileText className="w-5 h-5 text-primary" />
