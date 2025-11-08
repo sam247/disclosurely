@@ -169,9 +169,10 @@ const ProgressiveSubmissionForm = ({
           throw new Error(data?.error || 'Invalid response from server');
         }
 
-        // Edge function returns report.id, not reportId
+        // Edge function returns data.report.id (nested structure)
+        // Fallback to data.reportId for backwards compatibility
         const reportId = data.report?.id || data.reportId;
-        
+
         if (!reportId) {
           throw new Error('Invalid response from server: missing report ID');
         }
