@@ -32,17 +32,22 @@ const BrandedFormLayout = ({
   const token = linkToken || params.linkToken;
   
   // Determine the main secure page URL based on context
+  // Use new form URLs instead of legacy token-based links
   const getMainSecurePageUrl = () => {
-    if (token) {
-      return `/secure/tool/submit/${token}`;
+    // Check if we're on a custom domain (new form structure)
+    const currentPath = window.location.pathname;
+    
+    // If we're on /newform, /report, /submit, or /whistleblow, return to /newform
+    if (currentPath.includes('/newform') || 
+        currentPath.includes('/report') || 
+        currentPath.includes('/submit') || 
+        currentPath.includes('/whistleblow')) {
+      return '/newform';
     }
-    // If no linkToken, try to extract from current path
-    const pathMatch = window.location.pathname.match(/\/secure\/tool\/(submit|status)\/([^\/]+)/);
-    if (pathMatch && pathMatch[2]) {
-      return `/secure/tool/submit/${pathMatch[2]}`;
-    }
-    // Fallback to status page
-    return '/secure/tool/status';
+    
+    // Fallback: try to detect custom domain and return /newform
+    // Otherwise return /newform as default
+    return '/newform';
   };
   
   // Dynamic page title: "{Company Name} Secure Reporting Portal"

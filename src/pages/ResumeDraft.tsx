@@ -3,7 +3,7 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { ArrowRight } from 'lucide-react';
+import { ArrowRight, ArrowLeft } from 'lucide-react';
 import { resumeDraft } from '@/services/draftService';
 import { Card, CardContent } from '@/components/ui/card';
 import BrandedFormLayout from '@/components/BrandedFormLayout';
@@ -94,6 +94,19 @@ export const ResumeDraft = () => {
 
   const content = (
     <div className="space-y-6">
+      {/* Back Button */}
+      <div className="flex items-center">
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={() => navigate('/newform')}
+          className="gap-2"
+        >
+          <ArrowLeft className="h-4 w-4" />
+          Back
+        </Button>
+      </div>
+
       <div className="text-center space-y-2">
         <h1 className="text-2xl font-bold text-foreground">Resume Draft</h1>
         <p className="text-sm text-muted-foreground">

@@ -1,7 +1,14 @@
+import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Globe } from 'lucide-react';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Globe, Search, FileText } from 'lucide-react';
 import { progressiveFormTranslations } from '@/i18n/progressiveFormTranslations';
+import { useNavigate } from 'react-router-dom';
+import { supabase } from '@/integrations/supabase/client';
+import { useToast } from '@/hooks/use-toast';
 
 const languages = [
   { code: 'en', name: 'English', flag: '🇬🇧' },
@@ -29,15 +36,149 @@ interface Step1WelcomeProps {
 const Step1Welcome = ({ onContinue, brandColor, language, onLanguageChange, organizationName }: Step1WelcomeProps) => {
   const t = progressiveFormTranslations[language as keyof typeof progressiveFormTranslations] || progressiveFormTranslations.en;
   const currentLang = languages.find(lang => lang.code === language) || languages[0];
+  const navigate = useNavigate();
+  const { toast } = useToast();
+  const [isStatusDialogOpen, setIsStatusDialogOpen] = useState(false);
+  const [trackingId, setTrackingId] = useState('');
+  const [isCheckingStatus, setIsCheckingStatus] = useState(false);
 
   const welcomeTitle = organizationName 
     ? `${t.welcome.title} To ${organizationName}`
     : t.welcome.title;
 
+  const handleCheckStatus = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (!trackingId.trim()) {
+      toast({
+        title: "Tracking ID required",
+        description: "Please enter your tracking ID to check the status.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    // Validate tracking ID format (DIS-XXXXXXXX)
+    const trackingIdPattern = /^DIS-[A-Z0-9]{8}$/i;
+    const cleanTrackingId = trackingId.trim().toUpperCase().replace(/\s+/g, '');
+    
+    if (!trackingIdPattern.test(cleanTrackingId)) {
+      toast({
+        title: "Invalid tracking ID",
+        description: "Please enter a valid tracking ID in the format DIS-XXXXXXXX.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setIsCheckingStatus(true);
+
+    try {
+      // Use secure RPC to validate existence and get organization info
+      const { data: orgRows, error: orgError } = await supabase.rpc(
+        'get_organization_by_tracking_id',
+        { p_tracking_id: cleanTrackingId }
+      );
+
+      if (orgError) {
+        console.error('RPC error during status lookup:', orgError);
+        throw new Error('Unable to check status right now. Please try again.');
+      }
+
+      if (!orgRows || orgRows.length === 0) {
+        throw new Error('Report not found. Please check your tracking ID and try again.');
+      }
+
+      // Navigate to messaging page with tracking ID
+      setIsStatusDialogOpen(false);
+      setTrackingId(''); // Reset tracking ID
+      navigate(`/secure/tool/messaging/${cleanTrackingId}`, {
+        state: {
+          trackingId: cleanTrackingId,
+          organizationData: orgRows[0],
+        },
+      });
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to check report status. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsCheckingStatus(false);
+    }
+  };
+
   return (
     <div className="text-center space-y-3 py-2">
-      {/* Language Selector */}
-      <div className="flex justify-end mb-2">
+      {/* Language Selector and Check Status Button */}
+      <div className="flex justify-between items-center mb-2">
+        {/* Check Existing Report Button */}
+        <Dialog 
+          open={isStatusDialogOpen} 
+          onOpenChange={(open) => {
+            setIsStatusDialogOpen(open);
+            if (!open) {
+              setTrackingId(''); // Reset tracking ID when dialog closes
+            }
+          }}
+        >
+          <DialogTrigger asChild>
+            <Button
+              variant="outline"
+              size="sm"
+              className="h-8 border-gray-300 bg-white hover:bg-gray-50 gap-2"
+            >
+              <FileText className="h-4 w-4 text-gray-600" />
+              <span className="text-sm">Check Existing Report</span>
+            </Button>
+          </DialogTrigger>
+          <DialogContent className="sm:max-w-md">
+            <DialogHeader>
+              <DialogTitle>Check Report Status</DialogTitle>
+              <DialogDescription>
+                Enter your tracking ID to view your report status and communicate securely.
+              </DialogDescription>
+            </DialogHeader>
+            <form onSubmit={handleCheckStatus} className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="trackingId">Tracking ID</Label>
+                <Input
+                  id="trackingId"
+                  type="text"
+                  placeholder="DIS-XXXXXXXX"
+                  value={trackingId}
+                  onChange={(e) => setTrackingId(e.target.value.toUpperCase().replace(/\s+/g, ''))}
+                  className="font-mono"
+                  maxLength={12}
+                />
+                <p className="text-xs text-muted-foreground">
+                  Use the tracking ID provided when you submitted your report
+                </p>
+              </div>
+              <Button 
+                type="submit" 
+                className="w-full"
+                disabled={isCheckingStatus}
+                style={{ backgroundColor: brandColor }}
+              >
+                {isCheckingStatus ? (
+                  <>
+                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                    Checking...
+                  </>
+                ) : (
+                  <>
+                    <Search className="h-4 w-4 mr-2" />
+                    Check Status
+                  </>
+                )}
+              </Button>
+            </form>
+          </DialogContent>
+        </Dialog>
+
+        {/* Language Selector */}
         <Select value={language} onValueChange={onLanguageChange}>
           <SelectTrigger className="w-[140px] h-8 border-gray-300 bg-white hover:bg-gray-50">
             <div className="flex items-center gap-2">
