@@ -68,7 +68,7 @@ const Step6Urgency = ({ priority, onChange, language }: Step6UrgencyProps) => {
 
       <div className="space-y-2">
         <Label className="text-sm">{t.step5.label}</Label>
-        <div className="grid gap-2 mt-2">
+        <div className="grid grid-cols-2 gap-2 mt-2">
           {urgencyLevels.map((level) => {
             const Icon = level.icon;
             const isSelected = priority === level.value;

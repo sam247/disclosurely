@@ -79,26 +79,6 @@ const Step8Evidence = ({ attachedFiles, setAttachedFiles, language }: Step8Evide
           </ul>
         </div>
       )}
-
-      <div className="grid md:grid-cols-3 gap-4 text-center">
-        <div className="p-4 bg-gray-50 rounded-lg border border-gray-200">
-          <FileText className="w-6 h-6 mx-auto mb-2 text-gray-600" />
-          <p className="text-sm font-medium text-gray-900">{t.step7.fileTypes.documents.title}</p>
-          <p className="text-xs text-gray-600 mt-1">{t.step7.fileTypes.documents.desc}</p>
-        </div>
-
-        <div className="p-4 bg-gray-50 rounded-lg border border-gray-200">
-          <Image className="w-6 h-6 mx-auto mb-2 text-gray-600" />
-          <p className="text-sm font-medium text-gray-900">{t.step7.fileTypes.images.title}</p>
-          <p className="text-xs text-gray-600 mt-1">{t.step7.fileTypes.images.desc}</p>
-        </div>
-
-        <div className="p-4 bg-gray-50 rounded-lg border border-gray-200">
-          <FileAudio className="w-6 h-6 mx-auto mb-2 text-gray-600" />
-          <p className="text-sm font-medium text-gray-900">{t.step7.fileTypes.audioVideo.title}</p>
-          <p className="text-xs text-gray-600 mt-1">{t.step7.fileTypes.audioVideo.desc}</p>
-        </div>
-      </div>
     </div>
   );
 };

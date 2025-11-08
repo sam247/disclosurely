@@ -218,6 +218,7 @@ const ProgressiveSubmissionForm = ({
       isSubmitting={isSubmitting}
       brandColor={brandColor}
       organizationId={linkData.organization_id}
+      organizationName={linkData.organization_name}
       draftCode={draftCode}
     />
   );

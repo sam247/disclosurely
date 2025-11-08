@@ -41,6 +41,7 @@ interface ProgressiveReportFormProps {
   isSubmitting: boolean;
   brandColor?: string;
   organizationId?: string;
+  organizationName?: string;
   draftCode?: string;
   onDraftSaved?: (draftCode: string) => void;
 }
@@ -54,6 +55,7 @@ const ProgressiveReportForm = ({
   isSubmitting,
   brandColor = '#6366f1',
   organizationId,
+  organizationName,
   draftCode: initialDraftCode,
   onDraftSaved
 }: ProgressiveReportFormProps) => {
@@ -242,6 +244,7 @@ const ProgressiveReportForm = ({
             brandColor={brandColor}
             language={language}
             onLanguageChange={setLanguage}
+            organizationName={organizationName}
           />
         );
       case 1:
@@ -405,6 +408,19 @@ const ProgressiveReportForm = ({
                   {t.navigation.skip}
                 </Button>
               )}
+              {organizationId && currentStep > 0 && (
+                <SaveDraftButton
+                  formData={formData}
+                  currentStep={currentStep}
+                  language={language}
+                  organizationId={organizationId}
+                  existingDraftCode={currentDraftCode}
+                  onDraftSaved={(code) => {
+                    setCurrentDraftCode(code);
+                    onDraftSaved?.(code);
+                  }}
+                />
+              )}
               <Button
                 onClick={handleNext}
                 disabled={isNextDisabled || isSubmitting}
@@ -416,23 +432,6 @@ const ProgressiveReportForm = ({
               </Button>
             </div>
           </div>
-
-          {/* Save Draft Button */}
-          {organizationId && currentStep > 0 && (
-            <div className="flex justify-center">
-              <SaveDraftButton
-                formData={formData}
-                currentStep={currentStep}
-                language={language}
-                organizationId={organizationId}
-                existingDraftCode={currentDraftCode}
-                onDraftSaved={(code) => {
-                  setCurrentDraftCode(code);
-                  onDraftSaved?.(code);
-                }}
-              />
-            </div>
-          )}
         </div>
       )}
     </div>

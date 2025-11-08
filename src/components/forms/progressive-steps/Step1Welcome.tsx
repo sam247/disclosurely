@@ -1,6 +1,6 @@
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Shield, Lock, Clock, Globe } from 'lucide-react';
+import { Globe } from 'lucide-react';
 import { progressiveFormTranslations } from '@/i18n/progressiveFormTranslations';
 
 const languages = [
@@ -23,11 +23,16 @@ interface Step1WelcomeProps {
   brandColor: string;
   language: string;
   onLanguageChange: (language: string) => void;
+  organizationName?: string;
 }
 
-const Step1Welcome = ({ onContinue, brandColor, language, onLanguageChange }: Step1WelcomeProps) => {
+const Step1Welcome = ({ onContinue, brandColor, language, onLanguageChange, organizationName }: Step1WelcomeProps) => {
   const t = progressiveFormTranslations[language as keyof typeof progressiveFormTranslations] || progressiveFormTranslations.en;
   const currentLang = languages.find(lang => lang.code === language) || languages[0];
+
+  const welcomeTitle = organizationName 
+    ? `${t.welcome.title} To ${organizationName}`
+    : t.welcome.title;
 
   return (
     <div className="text-center space-y-3 py-2">
@@ -55,55 +60,15 @@ const Step1Welcome = ({ onContinue, brandColor, language, onLanguageChange }: St
         </Select>
       </div>
 
-      <div className="flex justify-center">
-        <div
-          className="p-3 rounded-full"
-          style={{ backgroundColor: `${brandColor}15` }}
-        >
-          <Shield className="w-10 h-10" style={{ color: brandColor }} />
-        </div>
-      </div>
-
       <div className="space-y-1">
         <h1 className="text-2xl font-bold text-gray-900">
-          {t.welcome.title}
+          {welcomeTitle}
         </h1>
         <p className="text-base text-gray-600 max-w-md mx-auto">
           {t.welcome.subtitle}
         </p>
       </div>
 
-      <div className="grid md:grid-cols-3 gap-3 max-w-2xl mx-auto text-left">
-        <div className="flex flex-col items-center text-center space-y-1.5 p-2">
-          <div className="p-2 rounded-lg bg-green-50">
-            <Shield className="w-5 h-5 text-green-600" />
-          </div>
-          <h3 className="font-semibold text-sm text-gray-900">{t.welcome.anonymous}</h3>
-          <p className="text-xs text-gray-600">
-            {t.welcome.anonymousDesc}
-          </p>
-        </div>
-
-        <div className="flex flex-col items-center text-center space-y-1.5 p-2">
-          <div className="p-2 rounded-lg bg-blue-50">
-            <Lock className="w-5 h-5 text-blue-600" />
-          </div>
-          <h3 className="font-semibold text-sm text-gray-900">{t.welcome.secure}</h3>
-          <p className="text-xs text-gray-600">
-            {t.welcome.secureDesc}
-          </p>
-        </div>
-
-        <div className="flex flex-col items-center text-center space-y-1.5 p-2">
-          <div className="p-2 rounded-lg bg-purple-50">
-            <Clock className="w-5 h-5 text-purple-600" />
-          </div>
-          <h3 className="font-semibold text-sm text-gray-900">{t.welcome.minutes}</h3>
-          <p className="text-xs text-gray-600">
-            {t.welcome.minutesDesc}
-          </p>
-        </div>
-      </div>
 
       <div className="pt-1">
         <Button
