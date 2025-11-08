@@ -34,20 +34,10 @@ const BrandedFormLayout = ({
   // Determine the main secure page URL based on context
   // Use new form URLs instead of legacy token-based links
   const getMainSecurePageUrl = () => {
-    // Check if we're on a custom domain (new form structure)
-    const currentPath = window.location.pathname;
-    
-    // If we're on /newform, /report, /submit, or /whistleblow, return to /newform
-    if (currentPath.includes('/newform') || 
-        currentPath.includes('/report') || 
-        currentPath.includes('/submit') || 
-        currentPath.includes('/whistleblow')) {
-      return '/newform';
-    }
-    
-    // Fallback: try to detect custom domain and return /newform
-    // Otherwise return /newform as default
-    return '/newform';
+    // Always return the clean /report URL for the main form
+    // This provides a consistent UX regardless of how the user accessed the form
+    // /report, /submit, /whistleblow all route to the same form
+    return '/report';
   };
   
   // Dynamic page title: "{Company Name} Secure Reporting Portal"

@@ -72,7 +72,7 @@ const SecureReportStatusLookup = () => {
     fetchOrganizationByTrackingId(data.trackingId);
 
     // Navigate to messaging with minimal org branding in state
-    navigate(`/secure/tool/messaging/${data.trackingId}`, {
+    navigate(`/status/${data.trackingId}`, {
       state: {
         trackingId: data.trackingId,
         organizationData: org,

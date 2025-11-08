@@ -6,6 +6,9 @@ import { useAuth } from '@/hooks/useAuth';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Label } from '@/components/ui/label';
+import { Globe } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { auditLogger } from '@/utils/auditLogger';
 
@@ -16,6 +19,7 @@ interface OrganizationLink {
   is_active: boolean;
   usage_count: number | null;
   created_at: string;
+  default_language?: string;
 }
 
 interface CustomDomainRecord {
@@ -167,6 +171,32 @@ const LinkGenerator = () => {
       toast({
         title: t('linkCopied'),
         description: t('linkCopiedDescription'),
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Error",
+        description: error.message,
+        variant: "destructive",
+      });
+    },
+  });
+
+  // Update default language
+  const updateLanguageMutation = useMutation({
+    mutationFn: async ({ id, default_language }: { id: string, default_language: string }) => {
+      const { error } = await supabase
+        .from('organization_links')
+        .update({ default_language })
+        .eq('id', id);
+
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['primary-link'] });
+      toast({
+        title: "Language Updated",
+        description: "Default form language has been updated successfully.",
       });
     },
     onError: (error: any) => {
@@ -435,6 +465,54 @@ const LinkGenerator = () => {
               </p>
             </div>
           )}
+        </CardContent>
+      </Card>
+
+      {/* Form Settings */}
+      <Card>
+        <CardHeader>
+          <div className="flex items-center gap-2">
+            <Globe className="h-5 w-5 text-primary" />
+            <CardTitle className="text-lg">Form Settings</CardTitle>
+          </div>
+          <CardDescription className="text-sm mt-1">
+            Configure the default language for your submission form
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="space-y-2">
+            <Label htmlFor="default-language">Default Language</Label>
+            <Select
+              value={primaryLink.default_language || 'en'}
+              onValueChange={(value) => {
+                updateLanguageMutation.mutate({
+                  id: primaryLink.id,
+                  default_language: value
+                });
+              }}
+            >
+              <SelectTrigger id="default-language" className="w-full sm:w-[300px]">
+                <SelectValue placeholder="Select language" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="en">🇬🇧 English</SelectItem>
+                <SelectItem value="es">🇪🇸 Español (Spanish)</SelectItem>
+                <SelectItem value="fr">🇫🇷 Français (French)</SelectItem>
+                <SelectItem value="de">🇩🇪 Deutsch (German)</SelectItem>
+                <SelectItem value="pl">🇵🇱 Polski (Polish)</SelectItem>
+                <SelectItem value="sv">🇸🇪 Svenska (Swedish)</SelectItem>
+                <SelectItem value="no">🇳🇴 Norsk (Norwegian)</SelectItem>
+                <SelectItem value="pt">🇵🇹 Português (Portuguese)</SelectItem>
+                <SelectItem value="it">🇮🇹 Italiano (Italian)</SelectItem>
+                <SelectItem value="nl">🇳🇱 Nederlands (Dutch)</SelectItem>
+                <SelectItem value="da">🇩🇰 Dansk (Danish)</SelectItem>
+                <SelectItem value="el">🇬🇷 Ελληνικά (Greek)</SelectItem>
+              </SelectContent>
+            </Select>
+            <p className="text-xs text-muted-foreground">
+              This sets the default language when users access your submission form. Users can still change the language within the form.
+            </p>
+          </div>
         </CardContent>
       </Card>
 
