@@ -33,7 +33,6 @@ import ComplianceSoftware from './pages/ComplianceSoftware';
 import WhistleblowingDirective from './pages/WhistleblowingDirective';
 import SubmissionFormWrapper from './components/forms/SubmissionFormWrapper';
 import CleanSubmissionWrapper from './components/forms/CleanSubmissionWrapper';
-import ProgressiveFormWrapper from './components/forms/ProgressiveFormWrapper';
 import ReportSuccess from './components/ReportSuccess';
 import TestAnonymousSubmission from './pages/TestAnonymousSubmission';
 import ScrollToTop from './components/ScrollToTop';
