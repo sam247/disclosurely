@@ -86,17 +86,18 @@ const SecureReportStatusLookup = () => {
     secureSubmit(lookupReport, { trackingId: trackingId.replace(/\s+/g, '').trim() }, validateInput);
   };
 
-  // Don't render if no organization data is available yet
-  if (!organizationData) {
+  // Show loading only if we have a linkToken and are waiting for organization data
+  // Otherwise, use default branding for /status route
+  if (linkToken && !organizationData) {
     return <div className="min-h-screen bg-gray-50 flex items-center justify-center">
       <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
     </div>;
   }
 
-  // Default branding from organization data
-  const logoUrl = organizationData.custom_logo_url || organizationData.logo_url;
-  const brandColor = organizationData.brand_color || '#2563eb';
-  const organizationName = organizationData.name || 'Organization';
+  // Default branding from organization data (if available) or fallback to defaults
+  const logoUrl = organizationData?.custom_logo_url || organizationData?.logo_url || undefined;
+  const brandColor = organizationData?.brand_color || '#2563eb';
+  const organizationName = organizationData?.name || 'Organization';
 
   return (
     <BrandedFormLayout
