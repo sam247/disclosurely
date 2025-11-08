@@ -92,7 +92,7 @@ const Step5Category = ({ mainCategory, subCategory, customCategory, onChange, is
   };
 
   // Helper to get translated category name
-  const getTranslatedMainCategory = (key: string) => {
+  const getTranslatedMainCategory = (key: string): string => {
     const categoryMap: Record<string, keyof typeof t.step4.categories> = {
       "Financial Misconduct": "financial",
       "Workplace Behaviour": "workplace",
@@ -101,11 +101,12 @@ const Step5Category = ({ mainCategory, subCategory, customCategory, onChange, is
       "Data & Security": "data"
     };
     const categoryKey = categoryMap[key];
-    return categoryKey ? t.step4.categories[categoryKey] : key;
+    const translated = categoryKey ? t.step4.categories[categoryKey] : key;
+    return typeof translated === 'string' ? translated : key;
   };
 
   // Helper to get translated subcategory name
-  const getTranslatedSubCategory = (mainCatKey: string, subCatKey: string) => {
+  const getTranslatedSubCategory = (mainCatKey: string, subCatKey: string): string => {
     const categoryMap: Record<string, keyof typeof t.step4.categories> = {
       "Financial Misconduct": "financial",
       "Workplace Behaviour": "workplace",
@@ -164,7 +165,8 @@ const Step5Category = ({ mainCategory, subCategory, customCategory, onChange, is
     };
     
     const subKey = subCategoryKeyMap[subCatKey];
-    return subKey && subCategories ? subCategories[subKey] : subCatKey;
+    const translated = subKey && subCategories ? subCategories[subKey] : subCatKey;
+    return typeof translated === 'string' ? translated : subCatKey;
   };
 
   // Get available subcategories for the selected main category

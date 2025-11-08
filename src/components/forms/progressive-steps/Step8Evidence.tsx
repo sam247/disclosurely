@@ -44,9 +44,9 @@ const Step8Evidence = ({ attachedFiles, setAttachedFiles, language }: Step8Evide
       <div className="space-y-2">
         <Label className="text-base">{t.step7.uploadLabel}</Label>
         <FileUpload
-          onFilesSelected={setAttachedFiles}
+          onFilesChange={setAttachedFiles}
           maxFiles={10}
-          maxSizeMB={50}
+          maxSize={50}
         />
       </div>
 
