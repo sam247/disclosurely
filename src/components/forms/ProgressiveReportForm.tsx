@@ -175,11 +175,6 @@ const ProgressiveReportForm = ({
     }
   };
 
-  const handleSkip = () => {
-    if (currentStep < totalSteps - 1) {
-      goToStep(currentStep + 1);
-    }
-  };
 
   const handleAutoRedact = (redactedTitle: string, redactedDescription: string) => {
     updateFormData({
