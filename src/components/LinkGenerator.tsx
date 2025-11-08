@@ -8,6 +8,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Label } from '@/components/ui/label';
+import { Checkbox } from '@/components/ui/checkbox';
 import { Globe } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { auditLogger } from '@/utils/auditLogger';
@@ -20,7 +21,23 @@ interface OrganizationLink {
   usage_count: number | null;
   created_at: string;
   default_language?: string;
+  available_languages?: string[] | null;
 }
+
+const ALL_LANGUAGES = [
+  { code: 'en', name: 'English', flag: '🇬🇧' },
+  { code: 'es', name: 'Español', flag: '🇪🇸' },
+  { code: 'fr', name: 'Français', flag: '🇫🇷' },
+  { code: 'de', name: 'Deutsch', flag: '🇩🇪' },
+  { code: 'pl', name: 'Polski', flag: '🇵🇱' },
+  { code: 'sv', name: 'Svenska', flag: '🇸🇪' },
+  { code: 'no', name: 'Norsk', flag: '🇳🇴' },
+  { code: 'pt', name: 'Português', flag: '🇵🇹' },
+  { code: 'it', name: 'Italiano', flag: '🇮🇹' },
+  { code: 'nl', name: 'Nederlands', flag: '🇳🇱' },
+  { code: 'da', name: 'Dansk', flag: '🇩🇰' },
+  { code: 'el', name: 'Ελληνικά', flag: '🇬🇷' },
+];
 
 interface CustomDomainRecord {
   id: string;
@@ -151,7 +168,15 @@ const LinkGenerator = () => {
         .order('created_at', { ascending: false })
         .limit(1);
 
-      return links?.[0] || null;
+      const link = links?.[0];
+      if (link && link.available_languages) {
+        // Parse JSONB array if it's a string
+        if (typeof link.available_languages === 'string') {
+          link.available_languages = JSON.parse(link.available_languages);
+        }
+      }
+      
+      return link || null;
     },
     enabled: !!user,
   });
@@ -197,6 +222,32 @@ const LinkGenerator = () => {
       toast({
         title: "Language Updated",
         description: "Default form language has been updated successfully.",
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Error",
+        description: error.message,
+        variant: "destructive",
+      });
+    },
+  });
+
+  // Update available languages
+  const updateAvailableLanguagesMutation = useMutation({
+    mutationFn: async ({ id, available_languages }: { id: string, available_languages: string[] }) => {
+      const { error } = await supabase
+        .from('organization_links')
+        .update({ available_languages })
+        .eq('id', id);
+
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['primary-link'] });
+      toast({
+        title: "Languages Updated",
+        description: "Available languages for the form have been updated successfully.",
       });
     },
     onError: (error: any) => {
@@ -476,10 +527,10 @@ const LinkGenerator = () => {
             <CardTitle className="text-lg">Form Settings</CardTitle>
           </div>
           <CardDescription className="text-sm mt-1">
-            Configure the default language for your submission form
+            Configure which languages appear in your submission form
           </CardDescription>
         </CardHeader>
-        <CardContent className="space-y-4">
+        <CardContent className="space-y-6">
           <div className="space-y-2">
             <Label htmlFor="default-language">Default Language</Label>
             <Select
@@ -495,22 +546,77 @@ const LinkGenerator = () => {
                 <SelectValue placeholder="Select language" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="en">🇬🇧 English</SelectItem>
-                <SelectItem value="es">🇪🇸 Español (Spanish)</SelectItem>
-                <SelectItem value="fr">🇫🇷 Français (French)</SelectItem>
-                <SelectItem value="de">🇩🇪 Deutsch (German)</SelectItem>
-                <SelectItem value="pl">🇵🇱 Polski (Polish)</SelectItem>
-                <SelectItem value="sv">🇸🇪 Svenska (Swedish)</SelectItem>
-                <SelectItem value="no">🇳🇴 Norsk (Norwegian)</SelectItem>
-                <SelectItem value="pt">🇵🇹 Português (Portuguese)</SelectItem>
-                <SelectItem value="it">🇮🇹 Italiano (Italian)</SelectItem>
-                <SelectItem value="nl">🇳🇱 Nederlands (Dutch)</SelectItem>
-                <SelectItem value="da">🇩🇰 Dansk (Danish)</SelectItem>
-                <SelectItem value="el">🇬🇷 Ελληνικά (Greek)</SelectItem>
+                {ALL_LANGUAGES.map((lang) => (
+                  <SelectItem key={lang.code} value={lang.code}>
+                    {lang.flag} {lang.name}
+                  </SelectItem>
+                ))}
               </SelectContent>
             </Select>
             <p className="text-xs text-muted-foreground">
               This sets the default language when users access your submission form. Users can still change the language within the form.
+            </p>
+          </div>
+
+          <div className="space-y-3">
+            <Label>Available Languages</Label>
+            <p className="text-xs text-muted-foreground mb-3">
+              Select which languages should appear in the form. Only selected languages will be available to users.
+            </p>
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 p-4 border rounded-lg bg-muted/50">
+              {ALL_LANGUAGES.map((lang) => {
+                const availableLanguages = primaryLink.available_languages || ALL_LANGUAGES.map(l => l.code);
+                const isChecked = availableLanguages.includes(lang.code);
+                
+                return (
+                  <div key={lang.code} className="flex items-center space-x-2">
+                    <Checkbox
+                      id={`lang-${lang.code}`}
+                      checked={isChecked}
+                      onCheckedChange={(checked) => {
+                        const current = primaryLink.available_languages || ALL_LANGUAGES.map(l => l.code);
+                        const updated = checked
+                          ? [...current, lang.code]
+                          : current.filter((code: string) => code !== lang.code);
+                        
+                        // Ensure at least one language is selected
+                        if (updated.length === 0) {
+                          toast({
+                            title: "Error",
+                            description: "At least one language must be selected.",
+                            variant: "destructive",
+                          });
+                          return;
+                        }
+
+                        // Ensure default language is always included
+                        const defaultLang = primaryLink.default_language || 'en';
+                        if (!updated.includes(defaultLang)) {
+                          updated.push(defaultLang);
+                        }
+
+                        updateAvailableLanguagesMutation.mutate({
+                          id: primaryLink.id,
+                          available_languages: updated
+                        });
+                      }}
+                    />
+                    <Label
+                      htmlFor={`lang-${lang.code}`}
+                      className="text-sm font-normal cursor-pointer flex items-center gap-2"
+                    >
+                      <span>{lang.flag}</span>
+                      <span>{lang.name}</span>
+                    </Label>
+                  </div>
+                );
+              })}
+            </div>
+            <p className="text-xs text-muted-foreground">
+              {(() => {
+                const availableLanguages = primaryLink.available_languages || ALL_LANGUAGES.map(l => l.code);
+                return `${availableLanguages.length} of ${ALL_LANGUAGES.length} languages selected`;
+              })()}
             </p>
           </div>
         </CardContent>

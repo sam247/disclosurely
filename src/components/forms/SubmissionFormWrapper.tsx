@@ -21,6 +21,8 @@ interface LinkData {
   usage_limit: number | null;
   expires_at: string | null;
   is_active: boolean;
+  default_language?: string;
+  available_languages?: string[] | null;
 }
 
 const SubmissionFormWrapper = () => {
@@ -58,6 +60,8 @@ const SubmissionFormWrapper = () => {
           expires_at,
           usage_limit,
           usage_count,
+          default_language,
+          available_languages,
           organizations!inner(
             name,
             logo_url,
@@ -101,6 +105,17 @@ const SubmissionFormWrapper = () => {
         return;
       }
 
+      // Parse available_languages if it's a string (JSONB)
+      let availableLanguages = linkInfo.available_languages;
+      if (availableLanguages && typeof availableLanguages === 'string') {
+        try {
+          availableLanguages = JSON.parse(availableLanguages);
+        } catch (e) {
+          console.error('Error parsing available_languages:', e);
+          availableLanguages = null;
+        }
+      }
+
       setLinkData({
         id: linkInfo.id,
         name: linkInfo.name,
@@ -113,7 +128,9 @@ const SubmissionFormWrapper = () => {
         usage_count: linkInfo.usage_count,
         usage_limit: linkInfo.usage_limit,
         expires_at: linkInfo.expires_at,
-        is_active: linkInfo.is_active
+        is_active: linkInfo.is_active,
+        default_language: linkInfo.default_language,
+        available_languages: availableLanguages as string[] | null
       });
 
       // Fetch subscription tier for the organization
@@ -232,6 +249,8 @@ const SubmissionFormWrapper = () => {
         linkToken={linkToken!}
         linkData={linkData}
         brandColor={brandColor}
+        defaultLanguage={linkData.default_language}
+        availableLanguages={linkData.available_languages}
       />
     </BrandedFormLayout>
   );

@@ -29,6 +29,8 @@ interface ProgressiveSubmissionFormProps {
   brandColor: string;
   draftCode?: string;
   draftData?: any;
+  defaultLanguage?: string;
+  availableLanguages?: string[] | null;
 }
 
 const ProgressiveSubmissionForm = ({ 
@@ -36,7 +38,9 @@ const ProgressiveSubmissionForm = ({
   linkData, 
   brandColor,
   draftCode,
-  draftData 
+  draftData,
+  defaultLanguage,
+  availableLanguages
 }: ProgressiveSubmissionFormProps) => {
   const navigate = useNavigate();
   const { toast } = useToast();
@@ -228,6 +232,8 @@ const ProgressiveSubmissionForm = ({
       organizationId={linkData.organization_id}
       organizationName={linkData.organization_name}
       draftCode={draftCode}
+      defaultLanguage={defaultLanguage}
+      availableLanguages={availableLanguages}
     />
   );
 };

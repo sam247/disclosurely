@@ -44,6 +44,8 @@ interface ProgressiveReportFormProps {
   organizationName?: string;
   draftCode?: string;
   onDraftSaved?: (draftCode: string) => void;
+  defaultLanguage?: string;
+  availableLanguages?: string[] | null;
 }
 
 const ProgressiveReportForm = ({
@@ -57,13 +59,16 @@ const ProgressiveReportForm = ({
   organizationId,
   organizationName,
   draftCode: initialDraftCode,
-  onDraftSaved
+  onDraftSaved,
+  defaultLanguage,
+  availableLanguages
 }: ProgressiveReportFormProps) => {
   const [currentStep, setCurrentStep] = useState(0);
   const [direction, setDirection] = useState<'forward' | 'backward'>('forward');
   const [privacyRisks, setPrivacyRisks] = useState<any[]>([]);
   const [hasViewedPrivacy, setHasViewedPrivacy] = useState(false);
-  const [language, setLanguage] = useState<string>('en');
+  // Use default_language from settings, fallback to 'en'
+  const [language, setLanguage] = useState<string>(defaultLanguage || 'en');
   const [currentDraftCode, setCurrentDraftCode] = useState(initialDraftCode);
 
   // Check for privacy risks whenever title/description changes
@@ -245,6 +250,7 @@ const ProgressiveReportForm = ({
             language={language}
             onLanguageChange={setLanguage}
             organizationName={organizationName}
+            availableLanguages={availableLanguages}
           />
         );
       case 1:

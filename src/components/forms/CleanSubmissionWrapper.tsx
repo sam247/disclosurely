@@ -23,6 +23,8 @@ interface LinkData {
   expires_at: string | null;
   is_active: boolean;
   link_token: string;
+  default_language?: string;
+  available_languages?: string[] | null;
 }
 
 const CleanSubmissionWrapper = () => {
@@ -82,6 +84,8 @@ const CleanSubmissionWrapper = () => {
           usage_limit,
           usage_count,
           link_token,
+          default_language,
+          available_languages,
           organizations!inner(
             name,
             logo_url,
@@ -127,6 +131,17 @@ const CleanSubmissionWrapper = () => {
         return;
       }
 
+      // Parse available_languages if it's a string (JSONB)
+      let availableLanguages = linkInfo.available_languages;
+      if (availableLanguages && typeof availableLanguages === 'string') {
+        try {
+          availableLanguages = JSON.parse(availableLanguages);
+        } catch (e) {
+          console.error('Error parsing available_languages:', e);
+          availableLanguages = null;
+        }
+      }
+
       // Transform to expected format
       const formattedLinkData: LinkData = {
         id: linkInfo.id,
@@ -141,7 +156,9 @@ const CleanSubmissionWrapper = () => {
         usage_limit: linkInfo.usage_limit,
         expires_at: linkInfo.expires_at,
         is_active: linkInfo.is_active,
-        link_token: linkInfo.link_token
+        link_token: linkInfo.link_token,
+        default_language: linkInfo.default_language,
+        available_languages: availableLanguages as string[] | null
       };
 
       setLinkData(formattedLinkData);
@@ -253,6 +270,8 @@ const CleanSubmissionWrapper = () => {
         brandColor={brandColor}
         draftCode={draftCode || undefined}
         draftData={draftData}
+        defaultLanguage={linkData.default_language}
+        availableLanguages={linkData.available_languages}
       />
     </BrandedFormLayout>
   );

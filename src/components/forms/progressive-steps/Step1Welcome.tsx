@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
@@ -31,12 +31,29 @@ interface Step1WelcomeProps {
   language: string;
   onLanguageChange: (language: string) => void;
   organizationName?: string;
+  availableLanguages?: string[] | null;
 }
 
-const Step1Welcome = ({ onContinue, brandColor, language, onLanguageChange, organizationName }: Step1WelcomeProps) => {
+const Step1Welcome = ({ onContinue, brandColor, language, onLanguageChange, organizationName, availableLanguages }: Step1WelcomeProps) => {
   const t = progressiveFormTranslations[language as keyof typeof progressiveFormTranslations] || progressiveFormTranslations.en;
-  const currentLang = languages.find(lang => lang.code === language) || languages[0];
+  
+  // Filter languages based on availableLanguages from settings
+  // If availableLanguages is null/undefined, show all languages (backward compatibility)
+  const filteredLanguages = availableLanguages && availableLanguages.length > 0
+    ? languages.filter(lang => availableLanguages.includes(lang.code))
+    : languages;
+  
+  // Ensure current language is in filtered list, if not, use first available
+  const currentLang = filteredLanguages.find(lang => lang.code === language) || filteredLanguages[0];
+  
   const navigate = useNavigate();
+  
+  // If current language is not in available languages, switch to first available
+  useEffect(() => {
+    if (availableLanguages && availableLanguages.length > 0 && !availableLanguages.includes(language)) {
+      onLanguageChange(filteredLanguages[0].code);
+    }
+  }, [availableLanguages, language, filteredLanguages, onLanguageChange]);
   const { toast } = useToast();
   const [isStatusDialogOpen, setIsStatusDialogOpen] = useState(false);
   const [trackingId, setTrackingId] = useState('');
@@ -189,7 +206,7 @@ const Step1Welcome = ({ onContinue, brandColor, language, onLanguageChange, orga
             </div>
           </SelectTrigger>
           <SelectContent className="max-h-[28rem]">
-            {languages.map((lang) => (
+            {filteredLanguages.map((lang) => (
               <SelectItem key={lang.code} value={lang.code}>
                 <div className="flex items-center gap-2">
                   <span>{lang.flag}</span>
