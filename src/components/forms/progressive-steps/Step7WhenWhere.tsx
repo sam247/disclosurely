@@ -25,15 +25,6 @@ const Step7WhenWhere = ({ incidentDate, location, onChange }: Step7WhenWhereProp
         </div>
       </div>
 
-      <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-        <div className="flex items-start gap-2">
-          <Info className="w-4 h-4 text-blue-600 mt-0.5 flex-shrink-0" />
-          <p className="text-sm text-blue-900">
-            You can be as vague or specific as you're comfortable with. Protecting your anonymity is our priority.
-          </p>
-        </div>
-      </div>
-
       <div className="space-y-4">
         <div className="space-y-2">
           <div className="flex items-center gap-2">
@@ -76,28 +67,15 @@ const Step7WhenWhere = ({ incidentDate, location, onChange }: Step7WhenWhereProp
         </div>
       </div>
 
-      <div className="bg-purple-50 border border-purple-200 rounded-lg p-4">
-        <p className="text-sm text-purple-900 font-medium mb-2">💡 Privacy Tip:</p>
-        <p className="text-sm text-purple-800">
-          Instead of "3rd floor engineering, desk 42", consider "Engineering department" or just "Office building".
-          The less specific you are, the better protected your identity.
-        </p>
-      </div>
-
       {(incidentDate || location) && (
-        <div className="bg-green-50 border border-green-200 rounded-lg p-3">
-          <p className="text-sm text-green-800">
-            ✓ Context provided
-            {incidentDate && `: Occurred ${incidentDate}`}
-            {location && ` at ${location}`}
-          </p>
-        </div>
+        <p className="text-sm text-green-600">
+          ✓ Context provided
+          {incidentDate && `: Occurred ${incidentDate}`}
+          {location && ` at ${location}`}
+        </p>
       )}
     </div>
   );
 };
-
-// Import Info icon
-import { Info } from 'lucide-react';
 
 export default Step7WhenWhere;

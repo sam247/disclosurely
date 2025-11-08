@@ -175,19 +175,10 @@ const Step5Category = ({ mainCategory, subCategory, customCategory, onChange, is
       )}
 
       {isValid && (
-        <div className="bg-green-50 border border-green-200 rounded-lg p-3">
-          <p className="text-sm text-green-800">
-            ✓ Category selected: <strong>{mainCategory} - {subCategory === "Other (Please Specify)" ? customCategory : subCategory}</strong>
-          </p>
-        </div>
-      )}
-
-      <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-        <p className="text-sm text-blue-900 font-medium mb-2">💡 Why categorize?</p>
-        <p className="text-sm text-blue-800">
-          Categories help ensure your report reaches the right people who can take appropriate action. This speeds up the review and response process.
+        <p className="text-sm text-green-600">
+          ✓ Category selected: <strong>{mainCategory} - {subCategory === "Other (Please Specify)" ? customCategory : subCategory}</strong>
         </p>
-      </div>
+      )}
     </div>
   );
 };
