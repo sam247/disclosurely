@@ -42,7 +42,7 @@ const Step4PrivacyCheck = ({ title, description, risks, onAutoRedact, language }
   const lowRisks = risks.filter(r => r.severity === 'low');
 
   return (
-    <div className="space-y-6 py-4">
+    <div className="space-y-4 py-2">
       <div className="flex items-center gap-3">
         <div className="p-2 rounded-lg bg-amber-100">
           <AlertTriangle className="w-5 h-5 text-amber-600" />

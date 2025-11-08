@@ -51,7 +51,7 @@ const Step6Urgency = ({ priority, onChange, language }: Step6UrgencyProps) => {
     }
   ];
   return (
-    <div className="space-y-6 py-4">
+    <div className="space-y-4 py-2">
       <div className="flex items-center gap-3">
         <div className="p-2 rounded-lg bg-primary/10">
           <AlertTriangle className="w-5 h-5 text-primary" />
@@ -79,23 +79,23 @@ const Step6Urgency = ({ priority, onChange, language }: Step6UrgencyProps) => {
                 type="button"
                 onClick={() => onChange(level.value)}
                 className={cn(
-                  "w-full p-4 border-2 rounded-lg text-left transition-all cursor-pointer flex items-start gap-4",
+                  "w-full p-3 border-2 rounded-lg text-left transition-all cursor-pointer flex items-start gap-3",
                   isSelected ? level.activeColor : level.color
                 )}
               >
-                <div className={cn("p-2 rounded-lg bg-white flex-shrink-0", level.iconColor)}>
-                  <Icon className="w-6 h-6" />
+                <div className={cn("p-1.5 rounded-lg bg-white flex-shrink-0", level.iconColor)}>
+                  <Icon className="w-5 h-5" />
                 </div>
                 <div className="flex-1">
                   <div className="flex items-center gap-2">
-                    <span className="font-semibold text-lg">{level.label}</span>
+                    <span className="font-semibold text-base">{level.label}</span>
                     {isSelected && (
                       <span className="text-xs px-2 py-0.5 rounded-full bg-white font-medium">
                         {t.step5.selected}
                       </span>
                     )}
                   </div>
-                  <p className="text-sm mt-1 opacity-90">{level.description}</p>
+                  <p className="text-xs mt-0.5 opacity-90">{level.description}</p>
                 </div>
               </button>
             );

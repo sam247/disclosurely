@@ -67,6 +67,20 @@ const ProgressiveReportForm = ({
   const showPrivacyStep = privacyRisks.length > 0 && currentStep >= 3 && !hasViewedPrivacy;
   const totalSteps = showPrivacyStep ? 11 : 10;
 
+  // Calculate display step number (accounting for conditional privacy step)
+  const getDisplayStepNumber = () => {
+    if (currentStep === 0) return 0; // Welcome
+
+    // If we're past the privacy step (currentStep >= 4) and privacy was never shown
+    if (currentStep >= 4 && !hasViewedPrivacy && privacyRisks.length === 0) {
+      return currentStep - 1; // Subtract 1 because we skipped privacy step
+    }
+
+    return currentStep;
+  };
+
+  const displayStep = getDisplayStepNumber();
+
   // Step validation logic
   const validateStep = useCallback((step: number): boolean => {
     switch (step) {
@@ -329,14 +343,14 @@ const ProgressiveReportForm = ({
   return (
     <div className="w-full max-w-2xl mx-auto" dir={language === 'el' ? 'ltr' : undefined}>
       {/* Progress bar */}
-      <div className="mb-8">
+      <div className="mb-6">
         <div className="flex justify-between items-center mb-2">
           <span className="text-sm font-medium text-gray-600">
             {currentStep === 0
               ? t.navigation.welcome
               : t.navigation.step
-                  .replace('{current}', currentStep.toString())
-                  .replace('{total}', (totalSteps - 1).toString())}
+                  .replace('{current}', displayStep.toString())
+                  .replace('{total}', '9')}
           </span>
           <span className="text-sm text-gray-500">{Math.round(progressPercent)}{t.navigation.percent}</span>
         </div>
@@ -345,7 +359,7 @@ const ProgressiveReportForm = ({
 
       {/* Step content with animation */}
       <div
-        className="min-h-[400px] transition-all duration-300 ease-in-out"
+        className="min-h-[300px] transition-all duration-300 ease-in-out"
         key={currentStep}
       >
         {renderStep()}
@@ -353,7 +367,7 @@ const ProgressiveReportForm = ({
 
       {/* Navigation buttons */}
       {showNavigation && (
-        <div className="flex items-center justify-between mt-8 pt-6 border-t">
+        <div className="flex items-center justify-between mt-6 pt-4 border-t">
           <Button
             variant="ghost"
             onClick={handleBack}

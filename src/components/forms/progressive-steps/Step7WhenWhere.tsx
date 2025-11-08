@@ -13,7 +13,7 @@ interface Step7WhenWhereProps {
 const Step7WhenWhere = ({ incidentDate, location, onChange, language }: Step7WhenWhereProps) => {
   const t = progressiveFormTranslations[language as keyof typeof progressiveFormTranslations] || progressiveFormTranslations.en;
   return (
-    <div className="space-y-6 py-4">
+    <div className="space-y-4 py-2">
       <div className="flex items-center gap-3">
         <div className="p-2 rounded-lg bg-primary/10">
           <Calendar className="w-5 h-5 text-primary" />

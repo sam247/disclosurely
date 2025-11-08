@@ -171,7 +171,7 @@ const Step10Review = ({ formData, attachedFiles, onEdit, onSubmit, isSubmitting,
   ];
 
   return (
-    <div className="space-y-6 py-4">
+    <div className="space-y-4 py-2">
       <div className="flex items-center gap-3">
         <div className="p-2 rounded-lg bg-green-100">
           <CheckCircle2 className="w-5 h-5 text-green-600" />
