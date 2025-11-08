@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import DOMPurify from 'dompurify';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -256,7 +257,7 @@ export function AIContentGenerator() {
             <div className="space-y-2">
               <Label>Content Preview</Label>
               <div className="border rounded-md p-4 max-h-60 overflow-y-auto bg-gray-50">
-                <div dangerouslySetInnerHTML={{ __html: generatedPost.content }} />
+                <div dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(generatedPost.content) }} />
               </div>
             </div>
             
