@@ -39,7 +39,7 @@ and Built for Trust
           {/* Mission Card Section */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
             <div>
-              <img src="/abouthero.jpeg" alt="Our team working together" className="rounded-2xl shadow-lg" />
+              <img src="/abouthero.jpeg" alt="Our team working together" className="rounded-2xl shadow-lg" loading="lazy" decoding="async" />
             </div>
             <Card className="text-white p-8 rounded-2xl bg-blue-600">
               <h3 className="text-3xl font-bold mb-4">On a Mission to Make Whistleblowing Easier, Safer, and More Effective</h3>
@@ -254,7 +254,7 @@ and Built for Trust
             avatar: 'https://images.unsplash.com/photo-1573497019940-1c28c88b4f3e?w=200&h=200&fit=crop&crop=faces'
           }].map((person, idx) => <div key={idx} className="text-center">
                 <div className="w-24 h-24 rounded-full mx-auto mb-4 overflow-hidden border-4 border-gray-200">
-                  <img src={person.avatar} alt={person.name} className="w-full h-full object-cover" />
+                  <img src={person.avatar} alt={person.name} className="w-full h-full object-cover" loading="lazy" decoding="async" />
                 </div>
                 <h3 className="font-bold text-gray-900 mb-1">{person.name}</h3>
                 <p className="text-sm text-gray-600">{person.role}</p>
