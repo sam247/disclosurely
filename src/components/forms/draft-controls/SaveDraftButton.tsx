@@ -105,6 +105,8 @@ export const SaveDraftButton = ({
           draftCode={savedDraftCode}
           onClose={() => setShowModal(false)}
           brandColor={brandColor}
+          currentStep={currentStep}
+          language={language}
         />
       )}
     </>
