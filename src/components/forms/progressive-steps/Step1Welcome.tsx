@@ -52,75 +52,73 @@ const Step1Welcome = ({ onContinue, brandColor, language, onLanguageChange, orga
     : t.welcome.title;
 
   return (
-    <div className="text-center space-y-3 sm:space-y-4 py-2 h-full flex flex-col justify-between">
+    <div className="text-center space-y-4 sm:space-y-6 py-2">
+      {/* Language Selector */}
+      <div className="flex justify-end items-center mb-2">
+        {/* Language Selector - Responsive, stays on one line */}
+        <Select value={language} onValueChange={onLanguageChange}>
+          <SelectTrigger className="w-[120px] sm:w-[140px] h-9 sm:h-8 border-gray-300 bg-white hover:bg-gray-50">
+            <div className="flex items-center gap-1.5 sm:gap-2">
+              <Globe className="h-4 w-4 text-gray-600 flex-shrink-0" />
+              <SelectValue>
+                <span className="text-xs sm:text-sm truncate whitespace-nowrap">{currentLang.flag} {currentLang.name}</span>
+              </SelectValue>
+            </div>
+          </SelectTrigger>
+          <SelectContent className="max-h-[28rem]">
+            {filteredLanguages.map((lang) => (
+              <SelectItem key={lang.code} value={lang.code}>
+                <div className="flex items-center gap-2">
+                  <span>{lang.flag}</span>
+                  <span>{lang.name}</span>
+                </div>
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </div>
+
       <div className="space-y-3 sm:space-y-4">
-        {/* Language Selector */}
-        <div className="flex justify-end items-center mb-1 sm:mb-2">
-          {/* Language Selector - Responsive, stays on one line */}
-          <Select value={language} onValueChange={onLanguageChange}>
-            <SelectTrigger className="w-[120px] sm:w-[140px] h-9 sm:h-8 border-gray-300 bg-white hover:bg-gray-50">
-              <div className="flex items-center gap-1.5 sm:gap-2">
-                <Globe className="h-4 w-4 text-gray-600 flex-shrink-0" />
-                <SelectValue>
-                  <span className="text-xs sm:text-sm truncate whitespace-nowrap">{currentLang.flag} {currentLang.name}</span>
-                </SelectValue>
-              </div>
-            </SelectTrigger>
-            <SelectContent className="max-h-[28rem]">
-              {filteredLanguages.map((lang) => (
-                <SelectItem key={lang.code} value={lang.code}>
-                  <div className="flex items-center gap-2">
-                    <span>{lang.flag}</span>
-                    <span>{lang.name}</span>
-                  </div>
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
+        <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-gray-900 px-2 break-words">
+          {welcomeTitle}
+        </h1>
+        <p className="text-sm sm:text-base text-gray-600 max-w-md mx-auto px-4 break-words">
+          {t.welcome.subtitle}
+        </p>
+      </div>
 
-        <div className="space-y-2 sm:space-y-3">
-          <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-gray-900 px-2 break-words">
-            {welcomeTitle}
-          </h1>
-          <p className="text-sm sm:text-base text-gray-600 max-w-md mx-auto px-4 break-words">
-            {t.welcome.subtitle}
-          </p>
-        </div>
+      <div className="pt-4 sm:pt-6 px-4">
+        <Button
+          size="lg"
+          onClick={onContinue}
+          style={{ backgroundColor: brandColor }}
+          className="px-6 sm:px-8 py-3 sm:py-4 text-base sm:text-lg h-12 sm:h-auto w-full sm:w-auto"
+        >
+          {t.welcome.beginButton}
+        </Button>
+      </div>
 
-        <div className="pt-2 sm:pt-3 px-4">
+      <div className="text-center space-y-3 sm:space-y-4">
+        <div className="flex flex-col sm:flex-row items-center justify-center gap-2 sm:gap-4">
           <Button
-            size="lg"
-            onClick={onContinue}
-            style={{ backgroundColor: brandColor }}
-            className="px-6 sm:px-8 py-3 sm:py-4 text-base sm:text-lg h-12 sm:h-auto w-full sm:w-auto"
+            variant="link"
+            onClick={() => window.location.href = '/status'}
+            className="text-xs sm:text-sm text-gray-600 hover:text-primary h-9 sm:h-auto"
           >
-            {t.welcome.beginButton}
+            Check Existing Report
           </Button>
-        </div>
-
-        <div className="text-center space-y-2 sm:space-y-3">
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-2 sm:gap-4">
-            <Button
-              variant="link"
-              onClick={() => window.location.href = '/status'}
-              className="text-xs sm:text-sm text-gray-600 hover:text-primary h-9 sm:h-auto"
-            >
-              Check Existing Report
-            </Button>
-            <span className="hidden sm:inline text-gray-400">|</span>
-            <Button
-              variant="link"
-              onClick={() => window.location.href = '/resume-draft'}
-              className="text-xs sm:text-sm text-gray-600 hover:text-primary h-9 sm:h-auto"
-            >
-              Resume a saved draft
-            </Button>
-          </div>
+          <span className="hidden sm:inline text-gray-400">|</span>
+          <Button
+            variant="link"
+            onClick={() => window.location.href = '/resume-draft'}
+            className="text-xs sm:text-sm text-gray-600 hover:text-primary h-9 sm:h-auto"
+          >
+            Resume a saved draft
+          </Button>
         </div>
       </div>
 
-      <p className="text-xs sm:text-sm text-gray-500 max-w-md mx-auto px-4 break-words mt-1 sm:mt-2">
+      <p className="text-xs sm:text-sm text-gray-500 max-w-md mx-auto px-4 break-words mt-2 sm:mt-4">
         {t.welcome.footer}
       </p>
     </div>
