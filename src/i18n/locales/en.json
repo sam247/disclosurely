@@ -465,7 +465,7 @@
     "info": {
       "effectiveDate": {
         "label": "Effective Date:",
-        "value": "May 2025"
+        "value": "November 2025"
       },
       "company": {
         "label": "Company:",
@@ -484,186 +484,361 @@
     },
     "sections": {
       "introduction": {
-        "title": "1. Introduction",
-        "content1": "Disclosurely Limited (\"Disclosurely\", \"we\", \"us\" or \"our\") is committed to protecting your personal data and respecting your privacy. This Privacy Policy explains how we collect, use, store and protect your personal data when you use our whistleblowing platform at disclosurely.com (the \"Service\").",
-        "content2": "We comply with the General Data Protection Regulation (EU 2016/679), the UK GDPR (as enacted in the Data Protection Act 2018), and other applicable data protection laws."
+        "title": "1. Introduction and Scope",
+        "content1": "Disclosurely Limited (\"Disclosurely\", \"we\", \"us\" or \"our\"), a company registered in England and Wales with registered office at London, EC1V 2NX, United Kingdom, is committed to protecting your personal data and respecting your privacy. This Privacy Policy explains how we collect, use, store, disclose, and protect your personal data when you use our whistleblowing and compliance platform at disclosurely.com (the \"Service\").",
+        "content2": "We comply with the General Data Protection Regulation (EU 2016/679) (\"GDPR\"), the UK GDPR (as enacted in the Data Protection Act 2018), the EU Whistleblowing Directive (2019/1937), and all other applicable data protection laws and regulations.",
+        "content3": "This Privacy Policy applies to all users of the Service, including: (a) Customers (organisations subscribing to the Service); (b) Authorised Users (employees and agents of Customer organisations); (c) Whistleblowers (individuals submitting reports); and (d) website visitors. Different sections may apply to different user types as indicated.",
+        "content4": "By using the Service, you acknowledge that you have read and understood this Privacy Policy. If you do not agree with this Privacy Policy, you must not use the Service."
       },
       "dataController": {
-        "title": "2. Data Controller and Data Processor",
-        "content1": "When we provide the Service to organisations (the \"Customer\"), that organisation acts as the Data Controller for whistleblower reports and any personal data it collects.",
-        "content2": "Disclosurely acts as the Data Processor, processing personal data only on the Customer's documented instructions.",
-        "content3": "For data related to your own use of disclosurely.com (e.g. your account, billing), Disclosurely is the Data Controller."
+        "title": "2. Data Controller and Data Processor Roles",
+        "content1": "The roles of Data Controller and Data Processor depend on the type of data and the context in which it is processed:",
+        "content2": "For Customer Account Data: When you register as a Customer, subscribe to the Service, or manage your account and billing, Disclosurely acts as the Data Controller for your personal data (name, email, company details, billing information, etc.).",
+        "content3": "For Whistleblower Reports and Customer Data: When Customers use the Service to receive and manage whistleblower reports, the Customer organisation acts as the Data Controller for all report content and personal data contained therein. Disclosurely acts as the Data Processor, processing this data strictly according to the Customer's documented instructions and our Data Processing Agreement (DPA).",
+        "content4": "For Website Analytics: Disclosurely acts as the Data Controller for anonymised website usage data collected through essential cookies.",
+        "content5": "Contact Information: For questions about how your personal data is processed, Customers should contact privacy@disclosurely.com. Whistleblowers should contact the organisation to which they submitted their report, as that organisation is the Data Controller for report content."
       },
       "personalData": {
         "title": "3. Personal Data We Collect",
-        "content1": "We may collect and process the following categories of data:",
+        "content1": "We may collect and process the following categories of personal data, depending on how you interact with the Service:",
         "subsections": {
           "customer": {
-            "title": "a) From Customers (Account Holders)",
+            "title": "a) Customer Account Data (Disclosurely as Controller)",
             "items": {
-              "1": "Name, company details, contact information",
-              "2": "Billing and payment details",
-              "3": "Login credentials (username, email, password – encrypted)"
+              "1": "Identity and contact information: full name, job title, company name, business email address, business phone number",
+              "2": "Account credentials: username, email address, password (encrypted and hashed), multi-factor authentication data",
+              "3": "Billing and payment information: billing address, payment method details (processed by our payment processor Stripe - we do not store full card details), VAT/tax numbers, purchase history, invoices",
+              "4": "Organisation information: company registration details, number of employees, industry sector, organisational structure",
+              "5": "Communication data: correspondence with our support team, feedback, survey responses"
             }
           },
           "whistleblower": {
-            "title": "b) From Whistleblowers (Reporters)",
+            "title": "b) Whistleblower and Report Data (Customer as Controller, Disclosurely as Processor)",
             "items": {
-              "1": "Information you choose to submit in a report (which may include personal data, sensitive data, or special category data)",
-              "2": "Optional contact details if you choose to provide them",
-              "3": "Metadata such as IP address, browser type, device information (unless anonymised reporting is enabled)"
+              "1": "Report content: any information voluntarily submitted in a report, which may include personal data about the whistleblower, accused persons, witnesses, or other individuals. This may include names, job titles, departments, dates, locations, descriptions of events, and other details",
+              "2": "Special category data: reports may contain special categories of personal data (e.g., data revealing racial or ethnic origin, political opinions, religious beliefs, health data, sex life, sexual orientation, trade union membership, biometric data, genetic data) or data relating to criminal convictions and offences. Processing of such data is governed by GDPR Articles 9 and 10 and the EU Whistleblowing Directive",
+              "3": "Contact information (optional): if provided, email address, phone number, or mailing address for follow-up communication",
+              "4": "Technical and metadata: For non-anonymous reports, we may collect IP address, browser type and version, device type, operating system, time zone setting, browser plug-in types and versions, screen resolution, and timestamp. For anonymous reports, technical metadata collection is minimised or disabled as configured by the Customer",
+              "5": "Communication data: messages exchanged between whistleblowers and Customer organisations through our secure messaging system",
+              "6": "Uploaded files: documents, images, audio, video, or other files attached to reports"
             }
           },
           "technical": {
-            "title": "c) Technical Data",
+            "title": "c) Technical and Usage Data",
             "items": {
-              "1": "Log files, usage statistics, and cookies (essential for site functionality)",
-              "2": "Security and access data for auditing and fraud prevention"
+              "1": "Log data: IP addresses, access times, pages viewed, browser type, referring/exit pages, operating system, click-stream data",
+              "2": "Security data: login attempts, authentication events, security incidents, access control logs",
+              "3": "Performance data: Service performance metrics, error logs, crash reports, load times",
+              "4": "Cookie data: essential cookies for session management, authentication, and security (see Section 14)"
+            }
+          },
+          "marketing": {
+            "title": "d) Marketing and Communications Data (with consent)",
+            "items": {
+              "1": "Newsletter subscriptions: email address, communication preferences",
+              "2": "Event registrations: name, email, company, job title for webinars or events",
+              "3": "Website forms: information submitted through contact forms, demo requests, or quote requests"
             }
           }
         }
       },
       "usage": {
         "title": "4. How We Use Personal Data",
-        "content1": "We use personal data for the following purposes:",
+        "content1": "We use personal data for the following purposes, with the legal basis indicated in Section 5:",
         "items": {
-          "1": "To provide, maintain and improve the Service",
-          "2": "To authenticate and manage user accounts",
-          "3": "To process subscription payments",
-          "4": "To ensure the security and integrity of reports and communications",
-          "5": "To comply with legal obligations and cooperate with regulatory authorities",
-          "6": "For internal analytics (in anonymised and aggregated form only)"
+          "1": "Service Provision: To provide, operate, and maintain the Service; authenticate users; process and facilitate whistleblower reports; enable secure messaging; deliver case management functionality; and perform our contractual obligations",
+          "2": "Account Management: To create and manage Customer accounts; process registrations; verify identity; manage subscriptions and renewals; and communicate service-related information",
+          "3": "Payment Processing: To process subscription payments; issue invoices; manage billing; prevent payment fraud; and maintain financial records",
+          "4": "Customer Support: To respond to inquiries; provide technical support; troubleshoot issues; and improve customer service quality",
+          "5": "Security and Fraud Prevention: To protect the Service and users from security threats; detect and prevent fraud, abuse, and unauthorised access; investigate security incidents; conduct security audits; and ensure Service integrity",
+          "6": "Legal Compliance: To comply with legal obligations including data protection laws, the EU Whistleblowing Directive, financial regulations, court orders, and regulatory requests; maintain required records; and cooperate with law enforcement where legally required",
+          "7": "Service Improvement: To analyse Service usage; identify trends and patterns; improve features and functionality; develop new services; conduct quality assurance; and optimise user experience (using anonymised and aggregated data only)",
+          "8": "Communications: To send transactional emails (account confirmations, password resets, billing notices, security alerts); provide Service updates and announcements; and send marketing communications (with consent, which can be withdrawn at any time)",
+          "9": "Research and Analytics: To conduct anonymised research; generate statistical reports; benchmark performance; and analyse compliance trends (personal data is always anonymised or aggregated for these purposes)",
+          "10": "Business Operations: To manage internal operations; conduct audits; enforce our terms; protect our legal rights; and facilitate business transactions (mergers, acquisitions, asset sales)"
         }
       },
       "legalBases": {
         "title": "5. Legal Bases for Processing",
-        "content1": "We process personal data on the following legal bases:",
+        "content1": "We process personal data only where we have a lawful basis under GDPR Article 6 (and Article 9 for special category data). Our legal bases are:",
         "items": {
           "contractual": {
-            "label": "Contractual necessity –",
-            "content": "to provide the Service you subscribe to"
+            "label": "Contractual Necessity (Article 6(1)(b)) –",
+            "content": "Processing is necessary to perform our contract with you, including: providing the Service you subscribed to; managing your account; processing payments; and delivering customer support"
           },
           "legitimate": {
-            "label": "Legitimate interests –",
-            "content": "to improve the Service, maintain security, and prevent fraud"
+            "label": "Legitimate Interests (Article 6(1)(f)) –",
+            "content": "Processing is necessary for our legitimate interests or those of a third party, including: improving and optimising the Service; ensuring security and preventing fraud; conducting analytics (anonymised); direct marketing to existing customers (subject to opt-out); enforcing legal rights; and business administration. We always balance our legitimate interests against your rights and freedoms"
           },
           "legal": {
-            "label": "Legal obligations –",
-            "content": "to comply with applicable laws and regulations"
+            "label": "Legal Obligations (Article 6(1)(c)) –",
+            "content": "Processing is necessary to comply with legal obligations, including: compliance with the EU Whistleblowing Directive; GDPR requirements; financial and tax regulations; court orders and legal process; regulatory investigations; and record-keeping requirements"
           },
           "consent": {
-            "label": "Consent –",
-            "content": "when you voluntarily provide sensitive or optional data"
+            "label": "Consent (Article 6(1)(a) and Article 9(2)(a)) –",
+            "content": "You have given explicit consent for processing, including: marketing communications; optional data collection; processing of special category data (where applicable); and cookies beyond essential cookies. You may withdraw consent at any time without affecting the lawfulness of processing before withdrawal"
+          },
+          "vitalInterests": {
+            "label": "Vital Interests (Article 6(1)(d)) –",
+            "content": "Processing is necessary to protect vital interests, such as when a report involves imminent serious harm or threats to life"
+          },
+          "publicInterest": {
+            "label": "Public Interest and Legal Claims (Article 9(2)(f) and (g)) –",
+            "content": "For special category data in whistleblower reports, processing may be necessary for the establishment, exercise, or defence of legal claims, or when processing is necessary for reasons of substantial public interest (prevention of unlawful acts, protection of public interest in the area of employment law and social security)"
+          },
+          "whistleblowing": {
+            "label": "Whistleblowing Legal Framework (Article 9(2)(g) and Directive 2019/1937) –",
+            "content": "Processing of personal data in whistleblower reports is explicitly permitted under the EU Whistleblowing Directive for the purposes of receiving, investigating, and following up on reports concerning breaches of EU law and serious misconduct"
           }
         }
       },
       "dataHosting": {
-        "title": "6. Data Hosting and Transfers",
-        "content1": "All data is hosted in Western EU (Ireland) on secure Supabase infrastructure.",
-        "content2": "Data is not transferred outside the European Economic Area (EEA) or the UK, unless adequate safeguards are in place (such as Standard Contractual Clauses).",
-        "content3": "Encryption is applied to protect data both in transit and at rest."
+        "title": "6. Data Hosting, Storage, and International Transfers",
+        "content1": "Data Hosting: All Customer Data, including whistleblower reports, is hosted on secure infrastructure provided by Supabase, with servers located in the European Economic Area (Ireland/Frankfurt region). Data is encrypted both at rest (AES-256 encryption) and in transit (TLS 1.3).",
+        "content2": "Data Residency: We ensure that all personal data subject to GDPR remains within the European Economic Area (EEA) and the United Kingdom. Primary data storage is in Ireland (EU) with automated backups in geographically redundant EU data centres.",
+        "content3": "International Transfers: We do not routinely transfer personal data outside the EEA/UK. If any transfer becomes necessary (e.g., to a subprocessor or service provider located outside the EEA/UK), we will ensure appropriate safeguards are in place as required by GDPR Chapter V, including: (a) Standard Contractual Clauses (SCCs) approved by the European Commission; (b) adequacy decisions by the European Commission; or (c) other legally valid transfer mechanisms. We will notify Customers of any such transfers.",
+        "content4": "Subprocessors: We engage carefully selected subprocessors to assist in providing the Service. A current list of subprocessors is available upon request. We conduct due diligence on all subprocessors and ensure they provide appropriate data protection guarantees through written contracts."
       },
       "dataRetention": {
-        "title": "7. Data Retention",
-        "content1": "Customer account data is retained for the duration of the subscription and for up to six years afterwards for accounting and legal purposes.",
-        "content2": "Whistleblower reports are retained for as long as determined by the Customer (as Data Controller). Upon account termination, we will either delete or return all Customer Data within three months, unless law requires longer retention.",
-        "content3": "Technical logs are kept for security monitoring for up to 12 months."
+        "title": "7. Data Retention Periods",
+        "content1": "We retain personal data only for as long as necessary to fulfil the purposes for which it was collected, comply with legal obligations, resolve disputes, and enforce our agreements. Specific retention periods are:",
+        "content2": "Customer Account Data: Retained for the duration of your active subscription plus six (6) years after account closure for accounting, tax, and legal purposes. Financial records are retained for seven (7) years to comply with UK tax law.",
+        "content3": "Whistleblower Reports and Customer Data: As Data Processor, we retain this data according to the Customer's instructions (the Customer, as Data Controller, determines retention periods). Upon account termination or Customer request, we will delete or return all Customer Data within thirty (30) days, unless longer retention is required by law. Customers must ensure their retention periods comply with the EU Whistleblowing Directive (which generally requires retention for the duration of investigations and legal proceedings, with a maximum recommended period of five years after case closure).",
+        "content4": "Technical Logs and Security Data: Retained for up to twelve (12) months for security monitoring, fraud prevention, and incident investigation purposes, then automatically deleted.",
+        "content5": "Marketing Data: Retained until you unsubscribe or withdraw consent, then deleted within thirty (30) days. We may retain a suppression list of unsubscribed email addresses to ensure we do not contact you again.",
+        "content6": "Anonymised Data: We may retain anonymised and aggregated data indefinitely for statistical analysis, research, and service improvement. This data cannot be used to identify individuals.",
+        "content7": "Legal Holds: In the event of litigation, investigation, or regulatory inquiry, we may suspend deletion of relevant data until the matter is resolved, as required by law."
       },
       "disclosure": {
-        "title": "8. Disclosure of Personal Data",
-        "content1": "We do not sell or rent personal data. We may disclose data only to:",
+        "title": "8. Disclosure and Sharing of Personal Data",
+        "content1": "We do not sell, rent, or trade personal data. We may disclose personal data only in the following limited circumstances:",
         "items": {
-          "1": "The Customer (for whistleblower reports)",
-          "2": "Trusted service providers (e.g. hosting, payment processing) under strict confidentiality agreements",
-          "3": "Regulatory or law enforcement bodies if required by law",
-          "4": "Professional advisors (lawyers, auditors) where necessary"
+          "1": "To Customer Organisations: Whistleblower reports and related data are disclosed to the Customer organisation that operates the reporting portal. The Customer is the Data Controller and is responsible for handling reports in accordance with applicable laws.",
+          "2": "Service Providers and Subprocessors: We engage trusted third-party service providers who process personal data on our behalf under strict contractual obligations, including: (a) Supabase (data hosting and infrastructure); (b) Stripe (payment processing); (c) SendGrid or similar (transactional email delivery); (d) Cloud storage providers (for file attachments); and (e) Customer support platforms. All service providers are required to implement appropriate security measures and process data only as instructed.",
+          "3": "Legal and Regulatory Obligations: We may disclose personal data where required by law, including: (a) in response to court orders, subpoenas, or legal process; (b) to comply with regulatory investigations or requests from data protection authorities; (c) to comply with the EU Whistleblowing Directive or national implementing legislation; (d) to enforce our Terms of Service or protect our legal rights; and (e) to investigate fraud, security incidents, or violations of our policies.",
+          "4": "Protection of Rights and Safety: We may disclose personal data where necessary to: (a) protect the rights, property, or safety of Disclosurely, our users, or the public; (b) detect, prevent, or address fraud, security, or technical issues; or (c) respond to emergencies involving danger of death or serious physical injury.",
+          "5": "Business Transfers: In the event of a merger, acquisition, reorganisation, sale of assets, or bankruptcy, personal data may be transferred to the successor entity. We will notify you via email and/or prominent notice on our website before your data is transferred and becomes subject to a different privacy policy.",
+          "6": "Professional Advisors: We may share personal data with lawyers, accountants, auditors, and other professional advisors under obligations of confidentiality when necessary for business operations or legal compliance.",
+          "7": "With Your Consent: We may disclose personal data for purposes not described in this Privacy Policy with your explicit consent."
         }
       },
       "security": {
-        "title": "9. Security",
-        "content1": "We implement technical and organisational measures to protect personal data, including:",
+        "title": "9. Security Measures",
+        "content1": "We implement comprehensive technical and organisational measures to protect personal data from unauthorised access, disclosure, alteration, destruction, loss, or misuse. Our security measures include, but are not limited to:",
         "items": {
-          "1": "Encryption (at rest and in transit)",
-          "2": "Secure access controls and authentication",
-          "3": "Regular audits and monitoring",
-          "4": "Incident response procedures"
-        }
+          "1": "Encryption: All data is encrypted in transit using TLS 1.3 or higher. Data at rest is encrypted using AES-256 encryption. Passwords are hashed using bcrypt with salt.",
+          "2": "Access Controls: Role-based access control (RBAC) ensures users can only access data necessary for their role. Multi-factor authentication (MFA) is available and recommended for all accounts. Authorised Users are assigned unique credentials with audit logging.",
+          "3": "Network Security: Firewalls, intrusion detection systems (IDS), and intrusion prevention systems (IPS) protect our infrastructure. Regular penetration testing and vulnerability assessments are conducted. DDoS protection is implemented.",
+          "4": "Data Segregation: Customer Data is logically segregated to prevent cross-customer data access. Anonymised and identified reports are stored with appropriate access controls.",
+          "5": "Security Monitoring: 24/7 automated monitoring for security incidents and anomalous behaviour. Security logs are retained and regularly reviewed. Incident response procedures are in place and regularly tested.",
+          "6": "Employee Training and Vetting: All employees with access to personal data undergo background checks and sign confidentiality agreements. Regular security awareness and data protection training is mandatory. Access is granted on a need-to-know basis and reviewed quarterly.",
+          "7": "Physical Security: Data centres are ISO 27001 certified with physical access controls, environmental controls, and 24/7 surveillance.",
+          "8": "Backup and Recovery: Automated encrypted backups are performed daily and stored in geographically redundant locations. Disaster recovery and business continuity plans are tested regularly.",
+          "9": "Secure Development: We follow secure coding practices and conduct code reviews. Security testing is integrated into our development lifecycle. Third-party dependencies are regularly updated and scanned for vulnerabilities.",
+          "10": "Data Breach Response: We have documented procedures for detecting, investigating, and responding to personal data breaches. In the event of a breach affecting personal data, we will notify affected individuals and relevant supervisory authorities within 72 hours as required by GDPR."
+        },
+        "content2": "While we implement industry-leading security measures, no system is completely secure. You acknowledge that you provide personal data at your own risk. We encourage you to use strong passwords, enable MFA, and follow security best practices."
       },
       "yourRights": {
-        "title": "10. Your Rights",
-        "content1": "Depending on your role (Customer or Whistleblower) and applicable law, you may have rights to:",
+        "title": "10. Your Rights Under Data Protection Law",
+        "content1": "Under GDPR, UK GDPR, and other data protection laws, you have the following rights regarding your personal data. The specific rights available to you depend on your role (Customer, Authorised User, or Whistleblower) and the legal basis for processing:",
         "items": {
-          "1": "Access your data",
-          "2": "Correct inaccurate or incomplete data",
-          "3": "Request deletion of your data",
-          "4": "Restrict or object to processing",
-          "5": "Port your data to another provider",
-          "6": "Lodge a complaint with your supervisory authority (e.g. the ICO in the UK)"
+          "1": "Right of Access (Article 15): You have the right to obtain confirmation of whether we process your personal data and, if so, to access that data along with information about how it is processed. You may request a copy of your personal data free of charge (additional copies may incur a reasonable administrative fee).",
+          "2": "Right to Rectification (Article 16): You have the right to have inaccurate personal data corrected and incomplete personal data completed without undue delay.",
+          "3": "Right to Erasure / 'Right to be Forgotten' (Article 17): You have the right to request deletion of your personal data in certain circumstances, including: (a) the data is no longer necessary for the purposes for which it was collected; (b) you withdraw consent (where processing is based on consent) and there is no other legal basis; (c) you object to processing based on legitimate interests and there are no overriding legitimate grounds; (d) the data has been unlawfully processed; or (e) erasure is required to comply with a legal obligation. Note: This right is not absolute. We may retain data where necessary to comply with legal obligations, establish or defend legal claims, or for other legitimate reasons.",
+          "4": "Right to Restriction of Processing (Article 18): You have the right to request that we restrict processing of your personal data in certain circumstances, including when: (a) you contest the accuracy of the data (restriction applies during verification); (b) processing is unlawful but you prefer restriction over erasure; (c) we no longer need the data but you need it for legal claims; or (d) you have objected to processing pending verification of our legitimate grounds.",
+          "5": "Right to Data Portability (Article 20): Where processing is based on consent or contract and is carried out by automated means, you have the right to receive your personal data in a structured, commonly used, machine-readable format and to transmit it to another controller without hindrance. Where technically feasible, you may request that we transmit the data directly to another controller.",
+          "6": "Right to Object (Article 21): You have the right to object at any time to processing of your personal data based on legitimate interests or for direct marketing purposes. For direct marketing, we will cease processing upon your objection. For other objections, we will cease processing unless we can demonstrate compelling legitimate grounds that override your interests, rights, and freedoms, or the processing is necessary for the establishment, exercise, or defence of legal claims.",
+          "7": "Right Not to Be Subject to Automated Decision-Making (Article 22): You have the right not to be subject to decisions based solely on automated processing, including profiling, which produce legal effects or similarly significantly affect you. We do not currently engage in automated decision-making of this nature.",
+          "8": "Right to Withdraw Consent (Article 7(3)): Where processing is based on consent, you have the right to withdraw your consent at any time. Withdrawal does not affect the lawfulness of processing before withdrawal. You can withdraw consent by contacting privacy@disclosurely.com or using unsubscribe links in marketing emails.",
+          "9": "Right to Lodge a Complaint (Article 77): You have the right to lodge a complaint with a supervisory authority, particularly in the EU Member State or UK country of your habitual residence, place of work, or place of the alleged infringement. In the UK, the supervisory authority is the Information Commissioner's Office (ICO): ico.org.uk, telephone: 0303 123 1113."
         },
-        "content2": "If you are a whistleblower, you should contact the Customer (your organisation) to exercise your rights, as they are the Data Controller."
+        "content2": "How to Exercise Your Rights: To exercise any of these rights, please contact us at privacy@disclosurely.com with sufficient detail to identify you and the data concerned. We will respond within one (1) month of receipt (this may be extended by two months for complex or numerous requests, in which case we will inform you).",
+        "content3": "Important Note for Whistleblowers: If you submitted a report to an organisation using our Service, that organisation is the Data Controller for the report content and your personal data contained therein. To exercise your rights regarding report data, you must contact the organisation directly. Disclosurely, as Data Processor, can only act on instructions from the Data Controller. However, we will assist the organisation in responding to your request where appropriate.",
+        "content4": "Verification: To protect your personal data, we may need to verify your identity before responding to requests. We may request additional information to confirm your identity."
+      },
+      "thirdPartyServices": {
+        "title": "11. Third-Party Services and Links",
+        "content1": "The Service may integrate with or contain links to third-party websites, applications, or services (\"Third-Party Services\") that are not operated by Disclosurely. This Privacy Policy does not apply to Third-Party Services.",
+        "content2": "We are not responsible for the privacy practices, content, or security of Third-Party Services. We encourage you to review the privacy policies of any Third-Party Services you access.",
+        "content3": "Third-Party Services we may use include: (a) Stripe for payment processing (Stripe Privacy Policy: stripe.com/privacy); (b) Google OAuth for authentication (Google Privacy Policy: policies.google.com/privacy); and (c) email service providers for transactional emails."
+      },
+      "childrenPrivacy": {
+        "title": "12. Children's Privacy",
+        "content1": "The Service is not intended for use by children under the age of 16. We do not knowingly collect personal data from children under 16. If you are under 16, you must not use the Service or provide any personal data to us.",
+        "content2": "If we become aware that we have collected personal data from a child under 16 without parental consent, we will take steps to delete that information as soon as possible.",
+        "content3": "If you believe we have collected personal data from a child under 16, please contact us immediately at privacy@disclosurely.com."
+      },
+      "anonymousReporting": {
+        "title": "13. Anonymous Whistleblower Reporting",
+        "content1": "The Service offers anonymous reporting functionality to protect whistleblower confidentiality in accordance with the EU Whistleblowing Directive. When anonymous reporting is enabled by a Customer:",
+        "content2": "We minimise data collection: IP addresses, device identifiers, and other metadata that could identify the whistleblower are not collected or are anonymised. Whistleblowers access their reports using a unique access code that does not require registration or authentication with personal information.",
+        "content3": "Anonymous Messaging: Whistleblowers can communicate with the Customer organisation through our secure messaging system while maintaining anonymity. Messages are encrypted end-to-end.",
+        "content4": "Customer Obligations: Customers are responsible for ensuring they do not attempt to identify anonymous whistleblowers. Customers must configure the Service in accordance with applicable law and their whistleblowing procedures.",
+        "content5": "Limitations: Complete anonymity cannot be guaranteed in all circumstances. For example, if a whistleblower includes identifying information in their report, or if disclosure is required by law, anonymity may be compromised. Whistleblowers are advised not to include personal information in reports if they wish to remain anonymous."
       },
       "cookies": {
-        "title": "11. Cookies",
-        "content": "Disclosurely uses only essential cookies required for functionality and security. We do not use advertising or tracking cookies."
+        "title": "14. Cookies and Tracking Technologies",
+        "content1": "The Service uses cookies and similar tracking technologies. A cookie is a small text file stored on your device that allows us to recognise your browser and capture certain information.",
+        "content2": "Types of Cookies We Use: We use only essential cookies that are strictly necessary for the Service to function. These include: (a) Session cookies: to authenticate users and maintain your logged-in state; (b) Security cookies: to detect authentication abuse and protect user accounts; (c) Functionality cookies: to remember your preferences (e.g., language settings).",
+        "content3": "We do not use: Advertising cookies, tracking cookies, analytics cookies (other than anonymised internal analytics), or third-party marketing cookies.",
+        "content4": "Cookie Duration: Most cookies are session cookies that expire when you close your browser. Some cookies persist for up to 30 days to maintain your login state.",
+        "content5": "Managing Cookies: You can control cookies through your browser settings. Most browsers allow you to refuse cookies or delete cookies. However, if you disable essential cookies, you may not be able to use certain features of the Service. For browser-specific instructions, see: Chrome: support.google.com/chrome/answer/95647; Firefox: support.mozilla.org/kb/enable-and-disable-cookies-website-preferences; Safari: support.apple.com/guide/safari/manage-cookies-and-website-data-sfri11471/mac; Edge: support.microsoft.com/help/4027947/microsoft-edge-delete-cookies."
       },
       "changes": {
-        "title": "12. Changes to this Policy",
-        "content": "We may update this Privacy Policy from time to time. Material changes will be notified to Customers by email or via the Service."
+        "title": "15. Changes to this Privacy Policy",
+        "content1": "We may update this Privacy Policy from time to time to reflect changes in our practices, technology, legal requirements, or other factors. We will notify you of material changes as follows:",
+        "content2": "For Customers: We will send email notification to the email address associated with your account at least thirty (30) days before material changes take effect. We will also post a notice on the Service dashboard.",
+        "content3": "For Whistleblowers: Material changes will be posted on the reporting portal, and the effective date at the top of this Privacy Policy will be updated.",
+        "content4": "For Website Visitors: We will post a notice on our website homepage for thirty (30) days.",
+        "content5": "Non-Material Changes: Minor changes, clarifications, or corrections may be made without advance notice. We encourage you to review this Privacy Policy periodically.",
+        "content6": "Continued Use: Your continued use of the Service after changes take effect constitutes acceptance of the updated Privacy Policy. If you do not agree to changes, you must stop using the Service and may request deletion of your data."
       },
       "contact": {
-        "title": "13. Contact Us",
-        "content1": "If you have questions or concerns about this Privacy Policy, please contact:",
+        "title": "16. Contact Us and Data Protection Officer",
+        "content1": "If you have questions, concerns, or requests regarding this Privacy Policy or our data processing practices, please contact us:",
         "company": "Disclosurely Limited",
-        "address": "London, EC1V 2NX, United Kingdom"
+        "address": "London, EC1V 2NX, United Kingdom",
+        "content2": "Email: privacy@disclosurely.com (for privacy and data protection inquiries) or support@disclosurely.com (for general support)",
+        "content3": "Data Protection Officer: We have appointed a Data Protection Officer (DPO) who can be contacted at: dpo@disclosurely.com",
+        "content4": "Response Time: We will respond to all inquiries within ten (10) business days and will resolve requests within one (1) month (or notify you of any extension)."
+      },
+      "euWhistleblowing": {
+        "title": "17. EU Whistleblowing Directive Compliance",
+        "content1": "The Service is designed to comply with the EU Whistleblowing Directive (Directive 2019/1937) and national implementing legislation. Key compliance measures include:",
+        "content2": "Confidentiality and Anonymity: The Service provides secure channels that protect the confidentiality of whistleblowers, including anonymous reporting options. We implement technical and organisational measures to prevent unauthorised access to whistleblower identities.",
+        "content3": "Data Minimisation: Personal data in reports is processed only to the extent necessary for the purposes of receiving, investigating, and following up on reports. Customers are advised to limit data collection to what is necessary.",
+        "content4": "Security: We implement state-of-the-art encryption and security measures to protect the integrity and confidentiality of reports and communications.",
+        "content5": "Retention Limits: Customers are responsible for establishing retention periods for reports in accordance with the Directive and national law. The Directive generally requires deletion of data that is not necessary for follow-up actions.",
+        "content6": "Access Rights: Access to whistleblower identity and report content is restricted to authorised personnel designated by the Customer. We provide audit logs to track access.",
+        "content7": "Data Subject Rights: While the Directive requires protection of whistleblower confidentiality, data subjects (including persons mentioned in reports) retain their GDPR rights, which must be balanced against the need to protect whistleblowers. Customers are responsible for managing this balance.",
+        "content8": "Disclaimer: Customers are solely responsible for ensuring their use of the Service and their internal whistleblowing procedures comply with the EU Whistleblowing Directive and all applicable national laws. Disclosurely provides the technical platform but does not provide legal advice on compliance."
       }
     },
-    "lastUpdated": "Last updated: May 2025"
+    "lastUpdated": "Last updated: November 2025"
   },
   "terms": {
     "meta": {
-      "title": "Terms and Conditions - Disclosurely",
+      "title": "Terms of Service - Disclosurely",
       "description": "Please read these terms carefully before using our services."
     },
     "hero": {
-      "title": "Terms and Conditions",
+      "title": "Terms of Service",
       "description": "Please read these terms carefully before using our services."
     },
     "sections": {
       "introduction": {
-        "title": "1. Introduction",
-        "content": "Disclosurely Limited (London EC1V 2NX) provides a secure, online whistleblowing platform at disclosurely.com (the \"Service\"). By registering for and using the Service, you agree to these Terms. The Service enables whistleblowers to submit confidential reports of misconduct within their organisation. Disclosurely is committed to GDPR compliance and maintains strict privacy, security and legal standards. Contact for support is support@disclosurely.com."
+        "title": "1. Introduction and Acceptance",
+        "content": "These Terms of Service (\"Terms\") constitute a legally binding agreement between you (\"Customer\", \"you\", or \"your\") and Disclosurely Limited, a company registered in England and Wales with registered office at London, EC1V 2NX, United Kingdom (\"Disclosurely\", \"we\", \"us\", or \"our\"). By creating an account, accessing, or using the Disclosurely platform and services (collectively, the \"Service\"), you acknowledge that you have read, understood, and agree to be bound by these Terms. If you are entering into these Terms on behalf of an organisation, you represent and warrant that you have the authority to bind that organisation to these Terms. If you do not agree to these Terms, you must not use the Service."
       },
-      "accounts": {
-        "title": "3. Account Registration and Use",
-        "content1": "To use the Service, the Customer must register for an account and provide accurate, complete information.",
-        "content2": "The Customer is responsible for all use of the Service under its account and must keep usernames and passwords confidential."
+      "definitions": {
+        "title": "2. Definitions",
+        "content": "In these Terms: \"Customer\" means the organisation or individual subscribing to the Service; \"Customer Data\" means all data, information, and materials submitted, uploaded, or transmitted by Customer or its Authorised Users through the Service; \"Authorised Users\" means Customer's employees, contractors, or agents authorised to use the Service; \"Whistleblower\" means any individual who submits a report through Customer's portal; \"Report\" means any submission made through the Service; \"Subscription Period\" means the period for which Customer has subscribed to the Service; \"Documentation\" means user guides and technical documentation provided by Disclosurely."
+      },
+      "serviceDescription": {
+        "title": "3. Service Description and Scope",
+        "content1": "Disclosurely provides a secure, cloud-based whistleblowing and compliance reporting platform that enables organisations to receive, manage, and investigate reports of misconduct, ethical violations, and other concerns in compliance with applicable laws including the EU Whistleblowing Directive (Directive 2019/1937), GDPR, and UK data protection legislation.",
+        "content2": "The Service includes: (a) secure anonymous and identified reporting channels; (b) encrypted two-way messaging between Customers and Whistleblowers; (c) case management dashboard and tools; (d) customisable reporting forms and branding; (e) audit trail and compliance reporting; (f) role-based access controls; and (g) such other features as described in the Documentation and made available in your selected subscription plan.",
+        "content3": "We reserve the right to modify, suspend, or discontinue any feature of the Service with reasonable notice. We will use commercially reasonable efforts to maintain Service availability of 99.5% uptime (excluding scheduled maintenance)."
+      },
+      "registration": {
+        "title": "4. Account Registration and Security",
+        "content1": "To use the Service, you must register for an account and provide accurate, complete, and current information. You agree to maintain and promptly update your account information to keep it accurate and complete.",
+        "content2": "You are responsible for: (a) maintaining the confidentiality of your login credentials; (b) all activities that occur under your account; (c) ensuring only Authorised Users access the Service; (d) immediately notifying us of any unauthorised access or security breach; and (e) ensuring Authorised Users comply with these Terms.",
+        "content3": "We reserve the right to suspend or terminate accounts that violate these Terms or pose security risks."
+      },
+      "subscriptionPayment": {
+        "title": "5. Subscription and Payment Terms",
+        "content1": "Subscription Plans: The Service is provided on a subscription basis according to the plan you select (Starter, Pro, or Enterprise). Features, user limits, and pricing are as described on our website at the time of subscription.",
+        "content2": "Payment: Subscription fees are payable in advance for the Subscription Period (monthly or annually as selected). All fees are in GBP and exclusive of applicable taxes. You authorise us to charge your payment method on each renewal date. Failure to pay may result in suspension or termination of the Service.",
+        "content3": "Free Trial: New customers may receive a 7-day free trial. We may require payment information to activate the trial. If you do not cancel before the trial ends, you will be automatically charged for your selected plan.",
+        "content4": "Price Changes: We may change subscription fees with at least 30 days' notice. Changes will apply from your next renewal date. Continued use after the price change constitutes acceptance.",
+        "content5": "Refunds: Fees are non-refundable except as required by law or as expressly stated in these Terms. If we terminate for our convenience, we will provide a pro-rata refund."
+      },
+      "dataProcessing": {
+        "title": "6. Data Processing and Responsibilities",
+        "content1": "Controller-Processor Relationship: For Customer Data and Reports, you are the Data Controller and we are the Data Processor as defined under GDPR. We process personal data only according to your documented instructions and our Data Processing Agreement (DPA).",
+        "content2": "Customer Obligations: You warrant that: (a) you have lawful basis to collect and process data through the Service; (b) you have provided required privacy notices to Whistleblowers and data subjects; (c) your use of the Service complies with all applicable data protection laws; and (d) you have obtained necessary consents where required.",
+        "content3": "Our Obligations: We will: (a) implement appropriate technical and organisational measures to protect Customer Data; (b) process Customer Data only as instructed by you; (c) assist you in responding to data subject rights requests; (d) notify you of any personal data breaches without undue delay; and (e) make available information necessary to demonstrate compliance.",
+        "content4": "Data Location: Customer Data is hosted in the European Economic Area (Ireland) using Supabase infrastructure. Data will not be transferred outside the EEA/UK without appropriate safeguards."
+      },
+      "customerObligations": {
+        "title": "7. Customer Obligations and Responsibilities",
+        "content1": "You agree to: (a) use the Service in compliance with all applicable laws, regulations, and these Terms; (b) not use the Service for any unlawful, fraudulent, or malicious purpose; (c) implement appropriate internal processes for handling Reports received through the Service; (d) maintain confidentiality of Reports and protect Whistleblower identities; (e) not attempt to identify anonymous Whistleblowers; (f) ensure Authorised Users receive appropriate training; (g) promptly investigate Reports in good faith; and (h) not use the Service to infringe third-party rights.",
+        "content2": "You acknowledge that Disclosurely does not provide legal advice and that you are solely responsible for ensuring your whistleblowing procedures comply with applicable laws."
       },
       "acceptableUse": {
-        "title": "Acceptable Use",
-        "content": "The Customer agrees to use the Service only for lawful purposes and in accordance with these Terms."
+        "title": "8. Acceptable Use Policy",
+        "content1": "You must not: (a) violate any laws or regulations; (b) infringe intellectual property rights; (c) transmit malicious code, viruses, or harmful materials; (d) attempt to gain unauthorised access to the Service or other systems; (e) interfere with or disrupt the Service; (f) use the Service to send spam, unsolicited communications, or harassing content; (g) impersonate any person or entity; (h) use automated means to access the Service except through our official API; (i) reverse engineer, decompile, or disassemble the Service; or (j) remove or modify proprietary notices.",
+        "content2": "We reserve the right to investigate violations and cooperate with law enforcement authorities. We may suspend or terminate access immediately upon violation."
       },
       "intellectualProperty": {
-        "title": "Intellectual Property",
-        "content": "Disclosurely retains all intellectual property rights in the Service. No ownership is transferred to the Customer."
+        "title": "9. Intellectual Property Rights",
+        "content1": "Disclosurely Ownership: The Service, including all software, designs, text, graphics, interfaces, trademarks, and other intellectual property, is owned by Disclosurely and protected by copyright, trademark, and other laws. These Terms grant you no ownership rights; only a limited right to use the Service as permitted herein.",
+        "content2": "Customer Data: You retain all ownership rights in Customer Data. You grant us a limited licence to host, store, process, and transmit Customer Data solely as necessary to provide the Service.",
+        "content3": "Feedback: If you provide suggestions, ideas, or feedback, we may use them without obligation or compensation to you."
       },
-      "disclaimer": {
-        "title": "Disclaimer",
-        "content": "The Service is provided \"as is\" without warranties of any kind."
+      "warranties": {
+        "title": "10. Warranties and Disclaimers",
+        "content1": "Our Warranties: We warrant that: (a) we have the right to provide the Service; (b) the Service will perform materially in accordance with the Documentation; and (c) we will use commercially reasonable efforts to prevent introduction of malicious code.",
+        "content2": "DISCLAIMER: EXCEPT AS EXPRESSLY STATED, THE SERVICE IS PROVIDED \"AS IS\" AND \"AS AVAILABLE\" WITHOUT WARRANTIES OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, NON-INFRINGEMENT, SECURITY, OR ACCURACY. WE DO NOT WARRANT THAT THE SERVICE WILL BE UNINTERRUPTED, ERROR-FREE, OR COMPLETELY SECURE. WE ARE NOT RESPONSIBLE FOR DELAYS, FAILURES, OR DAMAGE RESULTING FROM INTERNET CONNECTIVITY, CUSTOMER SYSTEMS, OR THIRD-PARTY SERVICES.",
+        "content3": "You acknowledge that no software is free from defects and that you are responsible for implementing backup and business continuity procedures."
       },
       "limitationOfLiability": {
-        "title": "Limitation of Liability",
-        "content": "Disclosurely's liability is limited to the total subscription fees paid for the preceding 12 months."
+        "title": "11. Limitation of Liability and Indemnification",
+        "content1": "Liability Cap: TO THE MAXIMUM EXTENT PERMITTED BY LAW, DISCLOSURELY'S TOTAL AGGREGATE LIABILITY ARISING OUT OF OR RELATED TO THESE TERMS, WHETHER IN CONTRACT, TORT, OR OTHERWISE, SHALL NOT EXCEED THE TOTAL FEES PAID BY CUSTOMER IN THE TWELVE (12) MONTHS PRECEDING THE EVENT GIVING RISE TO LIABILITY.",
+        "content2": "Excluded Damages: IN NO EVENT SHALL DISCLOSURELY BE LIABLE FOR INDIRECT, INCIDENTAL, SPECIAL, CONSEQUENTIAL, EXEMPLARY, OR PUNITIVE DAMAGES, INCLUDING LOST PROFITS, LOST DATA, BUSINESS INTERRUPTION, OR LOSS OF GOODWILL, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.",
+        "content3": "Exceptions: Nothing in these Terms excludes or limits liability for: (a) death or personal injury caused by negligence; (b) fraud or fraudulent misrepresentation; (c) wilful misconduct; or (d) any other liability that cannot be excluded under applicable law.",
+        "content4": "Customer Indemnification: You agree to indemnify, defend, and hold harmless Disclosurely from claims, damages, losses, and expenses (including reasonable legal fees) arising from: (a) your breach of these Terms; (b) your violation of applicable laws; (c) Customer Data or your use of the Service; (d) claims that your use infringes third-party rights; or (e) Whistleblower claims related to your internal processes and investigations."
       },
-      "governingLaw": {
-        "title": "Governing Law",
-        "content": "These Terms are governed by the laws of the United Kingdom."
+      "termination": {
+        "title": "12. Term, Termination, and Suspension",
+        "content1": "Term: These Terms commence when you first access the Service and continue for the Subscription Period, automatically renewing unless terminated.",
+        "content2": "Termination by Customer: You may cancel your subscription at any time from your account settings. Cancellation takes effect at the end of your current billing period. No refunds will be provided for partial periods.",
+        "content3": "Termination by Disclosurely: We may terminate or suspend your account: (a) immediately if you breach these Terms; (b) immediately for non-payment after 15 days' notice; (c) with 30 days' notice for convenience; or (d) immediately if required by law or if your use poses security or legal risks.",
+        "content4": "Effect of Termination: Upon termination: (a) your right to access the Service immediately ceases; (b) we will cease processing Customer Data; (c) you remain liable for all fees incurred before termination; and (d) provisions that by nature should survive will survive termination.",
+        "content5": "Data Export and Deletion: Before termination, you may export Customer Data using available tools. Following termination, we will retain Customer Data for 30 days, after which it will be permanently deleted unless longer retention is required by law. We may retain aggregated, anonymised data for analytical purposes."
       },
-      "changes": {
-        "title": "Changes to these Terms",
-        "content": "Disclosurely may revise these Terms from time to time. Continued use of the Service after changes constitutes acceptance."
+      "confidentiality": {
+        "title": "13. Confidentiality",
+        "content1": "Confidential Information includes non-public information disclosed by one party to the other, including technical data, business strategies, pricing, and Customer Data. The receiving party must: (a) maintain confidentiality using at least reasonable care; (b) use Confidential Information only for purposes of these Terms; and (c) not disclose except to employees or contractors with a need to know.",
+        "content2": "Exceptions: Confidentiality obligations do not apply to information that: (a) is or becomes publicly available without breach; (b) was rightfully possessed before disclosure; (c) is independently developed; or (d) must be disclosed by law (with notice if permitted)."
+      },
+      "compliance": {
+        "title": "14. Regulatory Compliance",
+        "content1": "The Service is designed to assist with compliance with the EU Whistleblowing Directive (2019/1937), GDPR, UK GDPR, Data Protection Act 2018, and related regulations. However, you are solely responsible for ensuring your use of the Service and your internal procedures comply with all applicable laws in your jurisdiction.",
+        "content2": "We will maintain appropriate security certifications and comply with our obligations as a Data Processor. We will notify you of any material changes to our compliance posture.",
+        "content3": "Export Controls: The Service may be subject to UK and international export controls. You must comply with all applicable export and trade sanctions laws."
+      },
+      "modifications": {
+        "title": "15. Modifications to Terms",
+        "content1": "We may modify these Terms from time to time. Material changes will be notified by email or through the Service at least 30 days before taking effect. Non-material changes (e.g., clarifications, corrections) may take effect immediately upon posting.",
+        "content2": "Your continued use of the Service after changes take effect constitutes acceptance. If you do not agree to changes, you may terminate your subscription before the changes take effect."
+      },
+      "disputeResolution": {
+        "title": "16. Dispute Resolution and Governing Law",
+        "content1": "Governing Law: These Terms are governed by the laws of England and Wales, without regard to conflict of law principles.",
+        "content2": "Jurisdiction: Subject to the arbitration clause below, the courts of England and Wales have exclusive jurisdiction over disputes arising from these Terms.",
+        "content3": "Informal Resolution: Before initiating formal proceedings, parties agree to attempt good faith informal resolution for at least 30 days by contacting support@disclosurely.com.",
+        "content4": "Arbitration: For disputes not resolved informally, either party may elect binding arbitration under LCIA (London Court of International Arbitration) Rules. Arbitration will be conducted in English in London. Each party bears its own costs unless the arbitrator awards costs."
+      },
+      "generalProvisions": {
+        "title": "17. General Provisions",
+        "content1": "Entire Agreement: These Terms, together with our Privacy Policy and DPA, constitute the entire agreement regarding the Service and supersede all prior agreements and understandings.",
+        "content2": "Assignment: You may not assign these Terms without our written consent. We may assign these Terms in connection with a merger, acquisition, or sale of assets with notice to you.",
+        "content3": "Severability: If any provision is found unenforceable, the remaining provisions remain in effect and the unenforceable provision will be modified to reflect the parties' intent.",
+        "content4": "Waiver: Failure to enforce any provision does not constitute a waiver. Waivers must be in writing.",
+        "content5": "Force Majeure: Neither party is liable for delays or failures due to causes beyond reasonable control, including acts of God, war, terrorism, pandemics, internet failures, or government actions.",
+        "content6": "Notices: Notices must be sent to the email address associated with your account (for Customer) or to legal@disclosurely.com (for Disclosurely). Notices are deemed received 24 hours after sending.",
+        "content7": "Third-Party Rights: No third party has rights to enforce these Terms under the Contracts (Rights of Third Parties) Act 1999.",
+        "content8": "Relationship: The parties are independent contractors. These Terms do not create a partnership, joint venture, or agency relationship."
+      },
+      "contact": {
+        "title": "18. Contact Information",
+        "content": "For questions about these Terms, please contact us at: legal@disclosurely.com or Disclosurely Limited, London, EC1V 2NX, United Kingdom. For technical support, contact support@disclosurely.com."
       }
     },
-    "lastUpdated": "Last updated: September 2025"
+    "lastUpdated": "Last updated: November 2025"
   },
   "about": {
     "meta": {
