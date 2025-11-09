@@ -1,4 +1,3 @@
-import { useState } from 'react';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Input } from '@/components/ui/input';
@@ -72,7 +71,6 @@ interface Step5CategoryProps {
 
 const Step5Category = ({ mainCategory, subCategory, customCategory, onChange, isValid, language }: Step5CategoryProps) => {
   const t = progressiveFormTranslations[language as keyof typeof progressiveFormTranslations] || progressiveFormTranslations.en;
-  const [aiSuggested, setAiSuggested] = useState(!!mainCategory && !!subCategory);
 
   const handleMainCategoryChange = (value: string) => {
     onChange({
@@ -80,7 +78,6 @@ const Step5Category = ({ mainCategory, subCategory, customCategory, onChange, is
       subCategory: '',
       customCategory: ''
     });
-    setAiSuggested(false);
   };
 
   const handleSubCategoryChange = (value: string) => {
@@ -88,7 +85,6 @@ const Step5Category = ({ mainCategory, subCategory, customCategory, onChange, is
       subCategory: value,
       customCategory: value === "Other (Please Specify)" ? customCategory : ""
     });
-    setAiSuggested(false);
   };
 
   // Helper to get translated category name
@@ -200,20 +196,6 @@ const Step5Category = ({ mainCategory, subCategory, customCategory, onChange, is
           </p>
         </div>
       </div>
-
-      {aiSuggested && (
-        <div className="bg-primary/10 border border-primary/20 rounded-lg p-4">
-          <div className="flex items-center gap-2">
-            <Sparkles className="w-4 h-4 text-primary" />
-            <Badge variant="outline" className="text-xs bg-white text-primary border-primary/20">
-              {t.step4.aiSuggested}
-            </Badge>
-          </div>
-          <p className="text-sm text-primary/80 mt-2">
-            {t.step4.aiSuggestedDesc}
-          </p>
-        </div>
-      )}
 
       <div className="space-y-4">
         <div className="space-y-2">

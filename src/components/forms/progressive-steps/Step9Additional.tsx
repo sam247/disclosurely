@@ -31,7 +31,7 @@ const Step9Additional = ({ witnesses, previousReports, additionalNotes, onChange
         </div>
       </div>
 
-      <div className="space-y-6">
+      <div className="space-y-4 sm:space-y-6">
         {/* Witnesses */}
         <div className="space-y-2">
           <div className="flex items-center gap-2">
@@ -88,7 +88,7 @@ const Step9Additional = ({ witnesses, previousReports, additionalNotes, onChange
             value={additionalNotes}
             onChange={(e) => onChange({ additionalNotes: e.target.value })}
             placeholder={t.step8.additionalNotesPlaceholder}
-            className="min-h-[120px] text-base resize-none"
+            className="min-h-[80px] sm:min-h-[120px] text-base resize-none"
             maxLength={1000}
           />
           <div className="flex justify-end">
