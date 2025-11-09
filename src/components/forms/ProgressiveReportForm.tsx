@@ -359,7 +359,7 @@ const ProgressiveReportForm = ({
   const t = progressiveFormTranslations[language as keyof typeof progressiveFormTranslations] || progressiveFormTranslations.en;
 
   return (
-    <div className="w-full max-w-2xl mx-auto px-1 sm:px-0" dir={language === 'el' ? 'ltr' : undefined}>
+    <div className="w-full max-w-2xl mx-auto px-1 sm:px-0 flex flex-col min-h-0" dir={language === 'el' ? 'ltr' : undefined}>
       {/* Progress bar */}
       <div className="mb-4 sm:mb-6">
         <div className="flex justify-between items-center mb-2">
