@@ -145,28 +145,6 @@ const Step10Review = ({ formData, attachedFiles, onEdit, onSubmit, isSubmitting,
             .replace('{plural}', attachedFiles.length > 1 ? 's' : '')
         : t.step9.noFiles,
       show: attachedFiles.length > 0
-    },
-    {
-      step: 8,
-      title: t.step9.sections.witnesses,
-      icon: FileTextIcon,
-      content: formData.witnesses || t.step9.noneSpecified,
-      show: !!formData.witnesses
-    },
-    {
-      step: 8,
-      title: t.step9.sections.previousReports,
-      icon: FileTextIcon,
-      content: formData.previousReports ? t.step9.reportedBefore : t.step9.firstTime,
-      show: formData.previousReports
-    },
-    {
-      step: 8,
-      title: t.step9.sections.additionalNotes,
-      icon: FileTextIcon,
-      content: formData.additionalNotes || t.step9.none,
-      show: !!formData.additionalNotes,
-      multiline: true
     }
   ];
 
