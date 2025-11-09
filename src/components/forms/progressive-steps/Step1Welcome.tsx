@@ -52,7 +52,7 @@ const Step1Welcome = ({ onContinue, brandColor, language, onLanguageChange, orga
     : t.welcome.title;
 
   return (
-    <div className="text-center space-y-3 sm:space-y-4 py-2">
+    <div className="text-center space-y-4 sm:space-y-6 py-2">
       {/* Language Selector */}
       <div className="flex justify-end items-center mb-2">
         {/* Language Selector - Responsive, stays on one line */}
@@ -78,7 +78,7 @@ const Step1Welcome = ({ onContinue, brandColor, language, onLanguageChange, orga
         </Select>
       </div>
 
-      <div className="space-y-2">
+      <div className="space-y-3 sm:space-y-4">
         <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-gray-900 px-2 break-words">
           {welcomeTitle}
         </h1>
@@ -87,8 +87,7 @@ const Step1Welcome = ({ onContinue, brandColor, language, onLanguageChange, orga
         </p>
       </div>
 
-
-      <div className="pt-2 sm:pt-1 px-4">
+      <div className="pt-4 sm:pt-6 px-4">
         <Button
           size="lg"
           onClick={onContinue}
@@ -99,7 +98,7 @@ const Step1Welcome = ({ onContinue, brandColor, language, onLanguageChange, orga
         </Button>
       </div>
 
-      <div className="text-center space-y-2">
+      <div className="text-center space-y-3 sm:space-y-4">
         <div className="flex flex-col sm:flex-row items-center justify-center gap-2 sm:gap-4">
           <Button
             variant="link"
@@ -119,7 +118,7 @@ const Step1Welcome = ({ onContinue, brandColor, language, onLanguageChange, orga
         </div>
       </div>
 
-      <p className="text-xs sm:text-sm text-gray-500 max-w-md mx-auto px-4 break-words">
+      <p className="text-xs sm:text-sm text-gray-500 max-w-md mx-auto px-4 break-words pt-2 sm:pt-4">
         {t.welcome.footer}
       </p>
     </div>
