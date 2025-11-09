@@ -8,7 +8,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { AlertCircle, Search } from 'lucide-react';
+import { AlertCircle, Search, ArrowLeft } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import BrandedFormLayout from '../BrandedFormLayout';
 import { useSecureForm } from '@/hooks/useSecureForm';
@@ -184,6 +184,17 @@ const SecureReportStatusLookup = () => {
       linkToken={linkToken}
     >
       <div className="space-y-6">
+        {/* Back Button */}
+        <div className="flex items-center">
+          <Button
+            variant="ghost"
+            onClick={() => navigate('/report')}
+            className="gap-2 h-11 sm:h-10 px-3 sm:px-4"
+          >
+            <ArrowLeft className="h-4 w-4" />
+            Back
+          </Button>
+        </div>
 
         <Card>
           <CardContent className="pt-6">

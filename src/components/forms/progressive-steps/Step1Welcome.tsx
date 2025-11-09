@@ -55,13 +55,13 @@ const Step1Welcome = ({ onContinue, brandColor, language, onLanguageChange, orga
     <div className="text-center space-y-3 sm:space-y-4 py-2">
       {/* Language Selector */}
       <div className="flex justify-end items-center mb-2">
-        {/* Language Selector */}
+        {/* Language Selector - Responsive, stays on one line */}
         <Select value={language} onValueChange={onLanguageChange}>
-          <SelectTrigger className="w-[120px] sm:w-[140px] h-9 sm:h-8 border-gray-300 bg-white hover:bg-gray-50">
-            <div className="flex items-center gap-2">
-              <Globe className="h-4 w-4 text-gray-600" />
-              <SelectValue>
-                <span className="text-xs sm:text-sm">{currentLang.flag} {currentLang.name}</span>
+          <SelectTrigger className="h-9 sm:h-8 border-gray-300 bg-white hover:bg-gray-50 min-w-0 max-w-full">
+            <div className="flex items-center gap-1.5 sm:gap-2 min-w-0 flex-1">
+              <Globe className="h-4 w-4 text-gray-600 flex-shrink-0" />
+              <SelectValue className="min-w-0">
+                <span className="text-xs sm:text-sm truncate whitespace-nowrap">{currentLang.flag} {currentLang.name}</span>
               </SelectValue>
             </div>
           </SelectTrigger>

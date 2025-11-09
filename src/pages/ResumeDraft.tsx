@@ -165,9 +165,8 @@ export const ResumeDraft = () => {
       <div className="flex items-center">
         <Button
           variant="ghost"
-          size="sm"
           onClick={() => navigate('/report')}
-          className="gap-2"
+          className="gap-2 h-11 sm:h-10 px-3 sm:px-4"
         >
           <ArrowLeft className="h-4 w-4" />
           Back
