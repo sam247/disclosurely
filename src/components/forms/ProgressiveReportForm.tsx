@@ -415,6 +415,7 @@ const ProgressiveReportForm = ({
                     setCurrentDraftCode(code);
                     onDraftSaved?.(code);
                   }}
+                  brandColor={brandColor}
                 />
               )}
               <Button

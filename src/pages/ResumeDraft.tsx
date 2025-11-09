@@ -143,13 +143,19 @@ export const ResumeDraft = () => {
     setError('');
     setIsLoading(true);
 
-    const response = await resumeDraft({ draftCode: draftCode.trim() });
+    // Normalize draft code: trim, uppercase, remove spaces
+    const normalizedCode = draftCode.trim().toUpperCase().replace(/\s+/g, '');
+    
+    console.log('Resuming draft with normalized code:', normalizedCode);
+
+    const response = await resumeDraft({ draftCode: normalizedCode });
     setIsLoading(false);
 
     if (response.success) {
-      // Navigate to form with draft data
-      navigate(`/report?draft=${draftCode}`);
+      // Navigate to form with draft data using normalized code
+      navigate(`/report?draft=${normalizedCode}`);
     } else {
+      console.error('Failed to resume draft:', response);
       setError(response.message || 'Failed to load draft');
     }
   };

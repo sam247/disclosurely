@@ -110,10 +110,15 @@ export async function saveDraft(request: SaveDraftRequest): Promise<SaveDraftRes
 
 export async function resumeDraft(request: ResumeDraftRequest): Promise<ResumeDraftResponse> {
   try {
+    // Normalize draft code: trim whitespace and convert to uppercase
+    const normalizedDraftCode = request.draftCode.trim().toUpperCase().replace(/\s+/g, '');
+    
+    console.log('Resuming draft with code:', normalizedDraftCode);
+    
     const { data, error } = await supabase.functions.invoke('draft-operations', {
       body: {
         operation: 'resume',
-        draftCode: request.draftCode,
+        draftCode: normalizedDraftCode,
       }
     });
 

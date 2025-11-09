@@ -13,6 +13,7 @@ interface SaveDraftButtonProps {
   organizationId: string;
   existingDraftCode?: string;
   onDraftSaved: (draftCode: string) => void;
+  brandColor?: string;
 }
 
 export const SaveDraftButton = ({
@@ -22,6 +23,7 @@ export const SaveDraftButton = ({
   organizationId,
   existingDraftCode,
   onDraftSaved,
+  brandColor = '#2563eb',
 }: SaveDraftButtonProps) => {
   const [isSaving, setIsSaving] = useState(false);
   const [showModal, setShowModal] = useState(false);
@@ -102,6 +104,7 @@ export const SaveDraftButton = ({
         <SaveDraftModal
           draftCode={savedDraftCode}
           onClose={() => setShowModal(false)}
+          brandColor={brandColor}
         />
       )}
     </>

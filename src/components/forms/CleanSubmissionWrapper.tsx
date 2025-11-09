@@ -184,10 +184,15 @@ const CleanSubmissionWrapper = () => {
   const loadDraft = async () => {
     if (!draftCode) return;
 
-    const response = await resumeDraft({ draftCode });
+    // Normalize draft code: trim, uppercase, remove spaces
+    const normalizedCode = draftCode.trim().toUpperCase().replace(/\s+/g, '');
+    console.log('Loading draft with normalized code:', normalizedCode);
+
+    const response = await resumeDraft({ draftCode: normalizedCode });
     if (response.success) {
       setDraftData(response);
     } else {
+      console.error('Failed to load draft:', response);
       toast({
         title: "Draft not found",
         description: response.message || "Unable to load draft. It may have expired.",
