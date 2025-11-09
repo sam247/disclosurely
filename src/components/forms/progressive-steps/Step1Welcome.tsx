@@ -52,7 +52,7 @@ const Step1Welcome = ({ onContinue, brandColor, language, onLanguageChange, orga
     : t.welcome.title;
 
   return (
-    <div className="text-center space-y-3 sm:space-y-4 py-2">
+    <div className="text-center space-y-3 sm:space-y-4 py-2 h-full flex flex-col justify-center">
       {/* Language Selector */}
       <div className="flex justify-end items-center mb-2">
         {/* Language Selector - Responsive, stays on one line */}
