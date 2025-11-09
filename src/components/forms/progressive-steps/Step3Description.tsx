@@ -55,7 +55,7 @@ const Step3Description = ({ value, onChange, isValid, language }: Step3Descripti
         </div>
       </div>
 
-        <div className="space-y-2">
+        <div className="space-y-2 flex flex-col flex-1 min-h-0">
           <div className="flex items-center gap-2">
             <Label htmlFor="description" className="text-base">
               {t.step2.label}
@@ -96,10 +96,10 @@ const Step3Description = ({ value, onChange, isValid, language }: Step3Descripti
             value={value}
             onChange={(e) => onChange(e.target.value)}
             placeholder={t.step2.placeholder}
-            className="min-h-[180px] sm:min-h-[180px] text-base resize-none"
+            className="min-h-[120px] sm:min-h-[180px] flex-1 text-base resize-none"
             maxLength={5000}
           />
-          <div className="flex justify-between items-center text-sm mt-2">
+          <div className="flex justify-between items-center text-sm mt-2 flex-shrink-0">
             <div className="text-gray-500">
               {!isValid && value.length > 0 && value.length < 20 && (
                 <span className="text-amber-600">{t.step2.minChars}</span>
