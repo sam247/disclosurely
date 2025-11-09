@@ -260,11 +260,11 @@ const Step5Category = ({ mainCategory, subCategory, customCategory, onChange, is
       </div>
 
       {!isValid && mainCategory && (
-        <p className="text-sm text-amber-600">{t.step4.selectBoth}</p>
+        <p className="text-sm text-amber-600 mt-2 sm:mt-0">{t.step4.selectBoth}</p>
       )}
 
       {isValid && (
-        <p className="text-sm text-green-600">
+        <p className="text-sm text-green-600 mt-2 sm:mt-0">
           {t.step4.categorySelected} <strong>{getTranslatedMainCategory(mainCategory)} - {subCategory === "Other (Please Specify)" ? customCategory : getTranslatedSubCategory(mainCategory, subCategory)}</strong>
         </p>
       )}

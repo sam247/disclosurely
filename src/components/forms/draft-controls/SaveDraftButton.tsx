@@ -80,7 +80,7 @@ export const SaveDraftButton = ({
         variant="outline"
         onClick={handleSave}
         disabled={isSaving}
-        className="gap-2 h-11 sm:h-10 px-3 sm:px-4"
+        className="gap-2 h-11 sm:h-10 px-3 sm:px-4 w-full sm:w-auto"
       >
         {isSaving ? (
           <>

@@ -71,7 +71,7 @@ const Step7WhenWhere = ({ incidentDate, location, onChange, language }: Step7Whe
       </div>
 
       {(incidentDate || location) && (
-        <p className="text-sm text-green-600">
+        <p className="text-sm text-green-600 mt-2">
           {t.step6.contextProvided}
           {incidentDate && `: ${t.step6.occurred} ${incidentDate}`}
           {location && ` ${t.step6.at} ${location}`}

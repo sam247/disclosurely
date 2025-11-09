@@ -76,7 +76,7 @@ const Step9Additional = ({ witnesses, previousReports, onChange, language }: Ste
       </div>
 
       {(witnesses || previousReports) && (
-        <p className="text-sm text-green-600">
+        <p className="text-sm text-green-600 mt-2">
           {t.step8.contextProvided}
         </p>
       )}

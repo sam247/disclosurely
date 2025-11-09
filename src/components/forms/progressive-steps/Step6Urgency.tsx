@@ -104,7 +104,7 @@ const Step6Urgency = ({ priority, onChange, language }: Step6UrgencyProps) => {
       </div>
 
       {priority > 0 && (
-        <p className="text-sm text-green-600">
+        <p className="text-sm text-green-600 mt-2">
           {t.step5.prioritySet} <strong>{urgencyLevels.find(l => l.value === priority)?.label}</strong>
         </p>
       )}
