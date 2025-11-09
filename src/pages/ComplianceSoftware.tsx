@@ -18,7 +18,7 @@ const ComplianceSoftware = () => {
           <div className="flex justify-between items-center py-4">
             <div className="flex items-center">
               <Link to="/" className="flex items-center space-x-3">
-                <img src="/lovable-uploads/c46ace0e-df58-4119-b5e3-8dcfa075ea2f.png" alt="Disclosurely" className="h-6 md:h-8 w-auto" />
+                <img src="/lovable-uploads/c46ace0e-df58-4119-b5e3-8dcfa075ea2f.png" alt="Disclosurely" className="h-6 md:h-8 w-auto" loading="lazy" decoding="async" />
               </Link>
             </div>
             <div className="hidden md:flex items-center space-x-4">
