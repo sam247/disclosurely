@@ -13,15 +13,15 @@ const Step8Evidence = ({ attachedFiles, setAttachedFiles, language }: Step8Evide
   const t = progressiveFormTranslations[language as keyof typeof progressiveFormTranslations] || progressiveFormTranslations.en;
   return (
     <div className="space-y-4 py-2">
-      <div className="flex items-center gap-3">
-        <div className="p-2 rounded-lg bg-primary/10">
-          <Paperclip className="w-5 h-5 text-primary" />
+      <div className="flex items-center gap-2 sm:gap-3">
+        <div className="p-1.5 sm:p-2 rounded-lg bg-primary/10 flex-shrink-0">
+          <Paperclip className="w-4 h-4 sm:w-5 sm:h-5 text-primary" />
         </div>
-        <div>
-          <h2 className="text-2xl font-bold text-gray-900">
+        <div className="min-w-0">
+          <h2 className="text-lg sm:text-2xl font-bold text-gray-900">
             {t.step7.title}
           </h2>
-          <p className="text-sm text-gray-600 mt-1">
+          <p className="text-xs sm:text-sm text-gray-600 mt-1">
             {t.step7.subtitle}
           </p>
         </div>

@@ -51,16 +51,16 @@ const Step6Urgency = ({ priority, onChange, language }: Step6UrgencyProps) => {
     }
   ];
   return (
-    <div className="space-y-3 py-2">
-      <div className="flex items-center gap-2">
-        <div className="p-1.5 rounded-lg bg-primary/10">
-          <AlertTriangle className="w-4 h-4 text-primary" />
+    <div className="space-y-4 py-2">
+      <div className="flex items-center gap-2 sm:gap-3">
+        <div className="p-1.5 sm:p-2 rounded-lg bg-primary/10 flex-shrink-0">
+          <AlertTriangle className="w-4 h-4 sm:w-5 sm:h-5 text-primary" />
         </div>
-        <div>
-          <h2 className="text-xl font-bold text-gray-900">
+        <div className="min-w-0">
+          <h2 className="text-lg sm:text-2xl font-bold text-gray-900">
             {t.step5.title}
           </h2>
-          <p className="text-xs text-gray-600 mt-0.5">
+          <p className="text-xs sm:text-sm text-gray-600 mt-1">
             {t.step5.subtitle}
           </p>
         </div>
