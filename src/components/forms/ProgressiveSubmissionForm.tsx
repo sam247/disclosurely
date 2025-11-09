@@ -148,8 +148,7 @@ const ProgressiveSubmissionForm = ({
       incident_date: formData.incidentDate || null,
       location: formData.location || null,
       witnesses: formData.witnesses || null,
-      previous_reports: formData.previousReports,
-      additional_notes: formData.additionalNotes || null
+      previous_reports: formData.previousReports
     };
 
     await secureSubmit(async (sanitizedData) => {

@@ -160,14 +160,6 @@ const Step10Review = ({ formData, attachedFiles, onEdit, onSubmit, isSubmitting,
       content: formData.previousReports ? t.step9.reportedBefore : t.step9.firstTime,
       show: formData.previousReports
     },
-    {
-      step: 8,
-      title: t.step9.sections.additionalNotes,
-      icon: FileTextIcon,
-      content: formData.additionalNotes || t.step9.none,
-      show: !!formData.additionalNotes,
-      multiline: true
-    }
   ];
 
   return (

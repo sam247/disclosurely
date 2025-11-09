@@ -1,6 +1,5 @@
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { FileText, Users, History } from 'lucide-react';
 import { progressiveFormTranslations } from '@/i18n/progressiveFormTranslations';
@@ -8,12 +7,11 @@ import { progressiveFormTranslations } from '@/i18n/progressiveFormTranslations'
 interface Step9AdditionalProps {
   witnesses: string;
   previousReports: boolean;
-  additionalNotes: string;
-  onChange: (updates: { witnesses?: string; previousReports?: boolean; additionalNotes?: string }) => void;
+  onChange: (updates: { witnesses?: string; previousReports?: boolean }) => void;
   language: string;
 }
 
-const Step9Additional = ({ witnesses, previousReports, additionalNotes, onChange, language }: Step9AdditionalProps) => {
+const Step9Additional = ({ witnesses, previousReports, onChange, language }: Step9AdditionalProps) => {
   const t = progressiveFormTranslations[language as keyof typeof progressiveFormTranslations] || progressiveFormTranslations.en;
   return (
     <div className="space-y-4 py-2">
@@ -75,29 +73,9 @@ const Step9Additional = ({ witnesses, previousReports, additionalNotes, onChange
           </Select>
         </div>
 
-        {/* Additional Notes */}
-        <div className="space-y-2">
-          <div className="flex items-center gap-2">
-            <FileText className="w-4 h-4 text-gray-500" />
-            <Label htmlFor="additionalNotes" className="text-base">
-              {t.step8.additionalNotesLabel}
-            </Label>
-          </div>
-          <Textarea
-            id="additionalNotes"
-            value={additionalNotes}
-            onChange={(e) => onChange({ additionalNotes: e.target.value })}
-            placeholder={t.step8.additionalNotesPlaceholder}
-            className="min-h-[80px] sm:min-h-[120px] text-base resize-none"
-            maxLength={1000}
-          />
-          <div className="flex justify-end">
-            <span className="text-xs text-gray-400">{additionalNotes.length}{t.step8.additionalNotesCharCount}</span>
-          </div>
-        </div>
       </div>
 
-      {(witnesses || previousReports || additionalNotes) && (
+      {(witnesses || previousReports) && (
         <p className="text-sm text-green-600">
           {t.step8.contextProvided}
         </p>

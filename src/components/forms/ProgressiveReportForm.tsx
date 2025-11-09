@@ -331,7 +331,6 @@ const ProgressiveReportForm = ({
           <Step9Additional
             witnesses={formData.witnesses}
             previousReports={formData.previousReports}
-            additionalNotes={formData.additionalNotes}
             onChange={updateFormData}
             language={language}
           />
