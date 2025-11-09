@@ -380,7 +380,7 @@ const ProgressiveReportForm = ({
         className={`transition-all duration-300 ease-in-out ${
           currentStep === 9 || currentStep === 10 
             ? 'min-h-[180px]' // Review step - min height only, allow scroll
-            : 'h-[198px] sm:h-[352px] flex flex-col' // Fixed height: 180px + 10% = 198px mobile, 320px + 10% = 352px desktop
+            : 'h-[198px] sm:h-[352px]' // Fixed height: 180px + 10% = 198px mobile, 320px + 10% = 352px desktop
         }`}
         key={currentStep}
       >
