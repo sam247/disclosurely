@@ -25,6 +25,9 @@ interface Report {
   assigned_to?: string;
   incident_date?: string | null;
   location?: string | null;
+  witnesses?: string | null;
+  previous_reports?: boolean | null;
+  additional_notes?: string | null;
 }
 
 const ReportDetails = () => {
@@ -138,6 +141,9 @@ const ReportDetails = () => {
           reportId={report.id}
           incidentDate={report.incident_date}
           location={report.location}
+          witnesses={report.witnesses}
+          previousReports={report.previous_reports}
+          additionalNotes={report.additional_notes}
         />
         <ReportAttachments reportId={report.id} />
         <ReportMessaging 

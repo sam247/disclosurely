@@ -25,6 +25,9 @@ interface ReportContentDisplayProps {
   reportId?: string;
   incidentDate?: string | null;
   location?: string | null;
+  witnesses?: string | null;
+  previousReports?: boolean | null;
+  additionalNotes?: string | null;
 }
 
 const ReportContentDisplay = ({
@@ -38,7 +41,10 @@ const ReportContentDisplay = ({
   submittedByEmail,
   reportId,
   incidentDate,
-  location
+  location,
+  witnesses,
+  previousReports,
+  additionalNotes
 }: ReportContentDisplayProps) => {
   const { user } = useAuth();
   const { toast } = useToast();
@@ -317,7 +323,7 @@ const ReportContentDisplay = ({
       </Card>
 
       {/* Incident Details Section - Only show if at least one field has data */}
-      {(incidentDate || location) && (
+      {(incidentDate || location || witnesses || previousReports !== null || additionalNotes) && (
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center space-x-2 text-xl">
@@ -338,6 +344,27 @@ const ReportContentDisplay = ({
                 <div>
                   <h4 className="font-medium text-gray-900 mb-1">Where:</h4>
                   <p className="text-gray-700">{location}</p>
+                </div>
+              )}
+              
+              {witnesses && (
+                <div>
+                  <h4 className="font-medium text-gray-900 mb-1">Witnesses:</h4>
+                  <p className="text-gray-700 whitespace-pre-wrap">{witnesses}</p>
+                </div>
+              )}
+              
+              {previousReports !== null && (
+                <div>
+                  <h4 className="font-medium text-gray-900 mb-1">Previous Reports:</h4>
+                  <p className="text-gray-700">{previousReports ? 'Yes' : 'No'}</p>
+                </div>
+              )}
+              
+              {additionalNotes && (
+                <div>
+                  <h4 className="font-medium text-gray-900 mb-1">Additional Notes:</h4>
+                  <p className="text-gray-700 whitespace-pre-wrap">{additionalNotes}</p>
                 </div>
               )}
             </div>

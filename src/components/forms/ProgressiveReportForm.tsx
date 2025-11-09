@@ -15,6 +15,7 @@ import Step5Category from './progressive-steps/Step5Category';
 import Step6Urgency from './progressive-steps/Step6Urgency';
 import Step7WhenWhere from './progressive-steps/Step7WhenWhere';
 import Step8Evidence from './progressive-steps/Step8Evidence';
+import Step9Additional from './progressive-steps/Step9Additional';
 import Step10Review from './progressive-steps/Step10Review';
 
 export interface ProgressiveFormData {
@@ -26,6 +27,9 @@ export interface ProgressiveFormData {
   priority: number;
   incidentDate: string;
   location: string;
+  witnesses: string;
+  previousReports: boolean;
+  additionalNotes: string;
 }
 
 interface ProgressiveReportFormProps {
@@ -76,7 +80,7 @@ const ProgressiveReportForm = ({
 
   // Determine total steps (privacy check is conditional)
   const showPrivacyStep = privacyRisks.length > 0 && currentStep >= 3 && !hasViewedPrivacy;
-  const totalSteps = showPrivacyStep ? 10 : 9; // Removed Step 9 (Additional Information)
+  const totalSteps = showPrivacyStep ? 11 : 10;
 
   // Calculate display step number (accounting for conditional privacy step)
   const getDisplayStepNumber = () => {
@@ -111,7 +115,9 @@ const ProgressiveReportForm = ({
         return true; // Optional fields
       case 7: // Evidence
         return true; // Optional
-      case 8: // Review
+      case 8: // Additional
+        return true; // Optional
+      case 9: // Review
         return true;
       default:
         return false;
@@ -321,7 +327,17 @@ const ProgressiveReportForm = ({
           />
         );
       case 8:
+        return (
+          <Step9Additional
+            witnesses={formData.witnesses}
+            previousReports={formData.previousReports}
+            additionalNotes={formData.additionalNotes}
+            onChange={updateFormData}
+            language={language}
+          />
+        );
       case 9:
+      case 10:
         return (
           <Step10Review
             formData={formData}
@@ -353,7 +369,7 @@ const ProgressiveReportForm = ({
               ? t.navigation.welcome
               : t.navigation.step
                   .replace('{current}', displayStep.toString())
-                  .replace('{total}', '8')}
+                  .replace('{total}', '9')}
           </span>
           <span className="text-xs sm:text-sm text-gray-500">{Math.round(progressPercent)}{t.navigation.percent}</span>
         </div>

@@ -138,6 +138,9 @@ interface Report {
   manual_risk_level?: number;
   incident_date?: string | null;
   location?: string | null;
+  witnesses?: string | null;
+  previous_reports?: boolean | null;
+  additional_notes?: string | null;
 }
 
 // Helper functions for AI Triage user-friendly labels
@@ -328,7 +331,7 @@ const DashboardView = () => {
         // Try with AI fields first
         let reportsQuery = supabase
           .from('reports')
-          .select('id, title, tracking_id, status, created_at, encrypted_content, encryption_key_hash, priority, report_type, submitted_by_email, tags, assigned_to, ai_risk_score, ai_risk_level, ai_likelihood_score, ai_impact_score, ai_risk_assessment, ai_assessed_at, manual_risk_level, incident_date, location')
+          .select('id, title, tracking_id, status, created_at, encrypted_content, encryption_key_hash, priority, report_type, submitted_by_email, tags, assigned_to, ai_risk_score, ai_risk_level, ai_likelihood_score, ai_impact_score, ai_risk_assessment, ai_assessed_at, manual_risk_level, incident_date, location, witnesses, previous_reports, additional_notes')
           .eq('organization_id', profile.organization_id)
           .not('status', 'in', '(archived,deleted)')
           .is('deleted_at', null)
@@ -355,7 +358,7 @@ const DashboardView = () => {
 
         const { data: archivedWithAI, error: archivedError } = await supabase
           .from('reports')
-          .select('id, title, tracking_id, status, created_at, encrypted_content, encryption_key_hash, priority, report_type, submitted_by_email, tags, assigned_to, incident_date, location')
+          .select('id, title, tracking_id, status, created_at, encrypted_content, encryption_key_hash, priority, report_type, submitted_by_email, tags, assigned_to, incident_date, location, witnesses, previous_reports, additional_notes')
           .eq('organization_id', profile.organization_id)
           .eq('status', 'archived')
           .is('deleted_at', null)
@@ -379,7 +382,7 @@ const DashboardView = () => {
         // Fallback to basic query without AI fields
         let reportsBasicQuery = supabase
           .from('reports')
-          .select('id, title, tracking_id, status, created_at, encrypted_content, encryption_key_hash, priority, report_type, submitted_by_email, tags, assigned_to, manual_risk_level, incident_date, location')
+          .select('id, title, tracking_id, status, created_at, encrypted_content, encryption_key_hash, priority, report_type, submitted_by_email, tags, assigned_to, manual_risk_level, incident_date, location, witnesses, previous_reports, additional_notes')
           .eq('organization_id', profile.organization_id)
           .not('status', 'in', '(archived,deleted)')
           .is('deleted_at', null)
@@ -399,7 +402,7 @@ const DashboardView = () => {
 
         const { data: archivedBasic, error: archivedBasicError } = await supabase
           .from('reports')
-          .select('id, title, tracking_id, status, created_at, encrypted_content, encryption_key_hash, priority, report_type, submitted_by_email, tags, assigned_to, incident_date, location')
+          .select('id, title, tracking_id, status, created_at, encrypted_content, encryption_key_hash, priority, report_type, submitted_by_email, tags, assigned_to, incident_date, location, witnesses, previous_reports, additional_notes')
           .eq('organization_id', profile.organization_id)
           .eq('status', 'archived')
           .is('deleted_at', null)
@@ -671,7 +674,9 @@ Category: ${decryptedContent.category || 'Not specified'}
 Description: ${decryptedContent.description || 'Not provided'}
 Location: ${decryptedContent.location || 'Not specified'}
 Date of Incident: ${decryptedContent.dateOfIncident || 'Not specified'}
+Witnesses: ${decryptedContent.witnesses || 'None mentioned'}
 Evidence: ${decryptedContent.evidence || 'No evidence provided'}
+Additional Details: ${decryptedContent.additionalDetails || 'None provided'}
       `.trim();
 
       console.log('Calling AI risk assessment function...');
@@ -792,7 +797,9 @@ Evidence: ${decryptedContent.evidence || 'No evidence provided'}
       y = addPDFField(doc, 'Description', decryptedContent.description || 'Not provided', y);
       y = addPDFField(doc, 'Location', decryptedContent.location || 'Not specified', y);
       y = addPDFField(doc, 'Date of Incident', decryptedContent.dateOfIncident || 'Not specified', y);
+      y = addPDFField(doc, 'Witnesses', decryptedContent.witnesses || 'None mentioned', y);
       y = addPDFField(doc, 'Evidence', decryptedContent.evidence || 'No evidence provided', y);
+      y = addPDFField(doc, 'Additional Details', decryptedContent.additionalDetails || 'None provided', y);
 
       // AI Risk Assessment (if available)
       if (report.ai_risk_assessment) {
@@ -2136,6 +2143,9 @@ Evidence: ${decryptedContent.evidence || 'No evidence provided'}
                   reportId={selectedReport.id}
                   incidentDate={selectedReport.incident_date}
                   location={selectedReport.location}
+                  witnesses={selectedReport.witnesses}
+                  previousReports={selectedReport.previous_reports}
+                  additionalNotes={selectedReport.additional_notes}
                 />
                 <ReportAttachments reportId={selectedReport.id} />
                 <ReportMessaging 

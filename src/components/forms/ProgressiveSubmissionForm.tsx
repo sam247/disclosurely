@@ -55,7 +55,10 @@ const ProgressiveSubmissionForm = ({
       customCategory: '',
       priority: 3,
       incidentDate: '',
-      location: ''
+      location: '',
+      witnesses: '',
+      previousReports: false,
+      additionalNotes: ''
     }
   );
 
@@ -143,7 +146,10 @@ const ProgressiveSubmissionForm = ({
       priority: formData.priority,
       tags: [finalCategory],
       incident_date: formData.incidentDate || null,
-      location: formData.location || null
+      location: formData.location || null,
+      witnesses: formData.witnesses || null,
+      previous_reports: formData.previousReports,
+      additional_notes: formData.additionalNotes || null
     };
 
     await secureSubmit(async (sanitizedData) => {
