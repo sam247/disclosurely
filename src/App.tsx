@@ -1,4 +1,5 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { Suspense, lazy } from 'react';
 import { AuthProvider } from './hooks/useAuth';
 import { OrganizationProvider } from './contexts/OrganizationContext';
 import { useSessionTimeout } from './hooks/useSessionTimeout';
@@ -18,19 +19,10 @@ import SecureLinkView from './components/dashboard/SecureLinkView';
 import IntegrationsView from './components/IntegrationsView';
 import AnalyticsView from './components/AnalyticsView';
 import AuditLogView from './components/AuditLogView';
-import Index from './pages/Index';
 import Login from './pages/Login';
 import Signup from './pages/Signup';
 import AcceptInvite from './pages/AcceptInvite';
 import NotFound from './pages/NotFound';
-import Pricing from './pages/Pricing';
-import Contact from './pages/Contact';
-import Terms from './pages/Terms';
-import Privacy from './pages/Privacy';
-import VsSpeakUp from './pages/VsSpeakUp';
-import VsWhistleblowerSoftware from './pages/VsWhistleblowerSoftware';
-import ComplianceSoftware from './pages/ComplianceSoftware';
-import WhistleblowingDirective from './pages/WhistleblowingDirective';
 import SubmissionFormWrapper from './components/forms/SubmissionFormWrapper';
 import CleanSubmissionWrapper from './components/forms/CleanSubmissionWrapper';
 import ReportSuccess from './components/ReportSuccess';
@@ -41,10 +33,31 @@ import ReportStatusLookup from './components/ReportStatusLookup';
 import AdminDashboard from './pages/AdminDashboard';
 import Blog from './pages/Blog';
 import WhistleblowerMessagingPage from './pages/WhistleblowerMessaging';
-import About from './pages/About';
-import Features from './pages/Features';
 import Careers from './pages/Careers';
 import ResumeDraft from './pages/ResumeDraft';
+
+// Code splitting for public routes
+const Index = lazy(() => import('./pages/Index'));
+const Pricing = lazy(() => import('./pages/Pricing'));
+const Contact = lazy(() => import('./pages/Contact'));
+const Terms = lazy(() => import('./pages/Terms'));
+const Privacy = lazy(() => import('./pages/Privacy'));
+const About = lazy(() => import('./pages/About'));
+const Features = lazy(() => import('./pages/Features'));
+const VsSpeakUp = lazy(() => import('./pages/VsSpeakUp'));
+const VsWhistleblowerSoftware = lazy(() => import('./pages/VsWhistleblowerSoftware'));
+const ComplianceSoftware = lazy(() => import('./pages/ComplianceSoftware'));
+const WhistleblowingDirective = lazy(() => import('./pages/WhistleblowingDirective'));
+
+// Loading fallback component
+const PageLoader = () => (
+  <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-50 to-slate-100">
+    <div className="text-center">
+      <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+      <p className="text-gray-600">Loading...</p>
+    </div>
+  </div>
+);
 
 // Component to handle session timeout only for authenticated users
 const SessionTimeoutManager = () => {
@@ -70,20 +83,20 @@ const AppContent = () => {
     <OrganizationProvider>
       <ScrollToTop />
       <Routes>
-        {/* Public routes - English (default) */}
-        <Route path="/" element={<Index />} />
-        <Route path="/pricing" element={<Pricing />} />
-        <Route path="/contact" element={<Contact />} />
-        <Route path="/terms" element={<Terms />} />
-        <Route path="/privacy" element={<Privacy />} />
-        <Route path="/about" element={<About />} />
-        <Route path="/features" element={<Features />} />
+        {/* Public routes - English (default) - Code split */}
+        <Route path="/" element={<Suspense fallback={<PageLoader />}><Index /></Suspense>} />
+        <Route path="/pricing" element={<Suspense fallback={<PageLoader />}><Pricing /></Suspense>} />
+        <Route path="/contact" element={<Suspense fallback={<PageLoader />}><Contact /></Suspense>} />
+        <Route path="/terms" element={<Suspense fallback={<PageLoader />}><Terms /></Suspense>} />
+        <Route path="/privacy" element={<Suspense fallback={<PageLoader />}><Privacy /></Suspense>} />
+        <Route path="/about" element={<Suspense fallback={<PageLoader />}><About /></Suspense>} />
+        <Route path="/features" element={<Suspense fallback={<PageLoader />}><Features /></Suspense>} />
         <Route path="/careers" element={<Careers />} />
-        <Route path="/vs-speakup" element={<VsSpeakUp />} />
-        <Route path="/vs-whistleblower-software" element={<VsWhistleblowerSoftware />} />
-        <Route path="/compliance-software" element={<ComplianceSoftware />} />
-        <Route path="/whistleblowing-directive" element={<WhistleblowingDirective />} />
-
+        <Route path="/vs-speakup" element={<Suspense fallback={<PageLoader />}><VsSpeakUp /></Suspense>} />
+        <Route path="/vs-whistleblower-software" element={<Suspense fallback={<PageLoader />}><VsWhistleblowerSoftware /></Suspense>} />
+        <Route path="/compliance-software" element={<Suspense fallback={<PageLoader />}><ComplianceSoftware /></Suspense>} />
+        <Route path="/whistleblowing-directive" element={<Suspense fallback={<PageLoader />}><WhistleblowingDirective /></Suspense>} />
+        
         {/* Authentication routes */}
         <Route path="/login" element={<Login />} />
         <Route path="/signup" element={<Signup />} />
@@ -100,18 +113,18 @@ const AppContent = () => {
             </ProtectedRoute>
           }
         />
-
+        
         {/* Blog routes */}
         <Route path="/blog" element={<Blog />} />
         <Route path="/blog/:slug" element={<Blog />} />
-
+        
         {/* Admin routes */}
         <Route path="/admin" element={
           <ProtectedRoute>
             <AdminDashboard />
           </ProtectedRoute>
         } />
-
+        
         {/* Anonymous report routes - Clean URLs */}
         <Route path="/report" element={<CleanSubmissionWrapper />} />
         <Route path="/submit" element={<CleanSubmissionWrapper />} />
@@ -131,25 +144,25 @@ const AppContent = () => {
         <Route path="/secure/tool/success" element={<ReportSuccess />} />
         <Route path="/secure/tool/lookup" element={<ReportStatusLookup />} />
         <Route path="/secure/tool/messaging/:trackingId" element={<WhistleblowerMessagingPage />} />
-
+        
         {/* Testing routes */}
         <Route path="/test/anonymous-submission" element={<TestAnonymousSubmission />} />
 
-        {/* Multilingual public routes - MUST BE AFTER specific routes */}
-        <Route path="/:lang" element={<Index />} />
-        <Route path="/:lang/pricing" element={<Pricing />} />
-        <Route path="/:lang/contact" element={<Contact />} />
-        <Route path="/:lang/terms" element={<Terms />} />
-        <Route path="/:lang/privacy" element={<Privacy />} />
-        <Route path="/:lang/about" element={<About />} />
-        <Route path="/:lang/features" element={<Features />} />
+        {/* Multilingual public routes - MUST BE AFTER specific routes - Code split */}
+        <Route path="/:lang" element={<Suspense fallback={<PageLoader />}><Index /></Suspense>} />
+        <Route path="/:lang/pricing" element={<Suspense fallback={<PageLoader />}><Pricing /></Suspense>} />
+        <Route path="/:lang/contact" element={<Suspense fallback={<PageLoader />}><Contact /></Suspense>} />
+        <Route path="/:lang/terms" element={<Suspense fallback={<PageLoader />}><Terms /></Suspense>} />
+        <Route path="/:lang/privacy" element={<Suspense fallback={<PageLoader />}><Privacy /></Suspense>} />
+        <Route path="/:lang/about" element={<Suspense fallback={<PageLoader />}><About /></Suspense>} />
+        <Route path="/:lang/features" element={<Suspense fallback={<PageLoader />}><Features /></Suspense>} />
         <Route path="/:lang/careers" element={<Careers />} />
-        <Route path="/:lang/vs-speakup" element={<VsSpeakUp />} />
-        <Route path="/:lang/vs-whistleblower-software" element={<VsWhistleblowerSoftware />} />
-        <Route path="/:lang/compliance-software" element={<ComplianceSoftware />} />
+        <Route path="/:lang/vs-speakup" element={<Suspense fallback={<PageLoader />}><VsSpeakUp /></Suspense>} />
+        <Route path="/:lang/vs-whistleblower-software" element={<Suspense fallback={<PageLoader />}><VsWhistleblowerSoftware /></Suspense>} />
+        <Route path="/:lang/compliance-software" element={<Suspense fallback={<PageLoader />}><ComplianceSoftware /></Suspense>} />
         <Route path="/:lang/auth/login" element={<Login />} />
         <Route path="/:lang/auth/signup" element={<Signup />} />
-
+        
         {/* Authenticated routes */}
         <Route 
           path="/app" 

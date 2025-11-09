@@ -212,7 +212,7 @@ const Step5Category = ({ mainCategory, subCategory, customCategory, onChange, is
                 return (
                   <SelectItem key={englishKey} value={englishKey} className="text-base">
                     {getTranslatedMainCategory(englishKey)}
-                  </SelectItem>
+                </SelectItem>
                 );
               })}
             </SelectContent>

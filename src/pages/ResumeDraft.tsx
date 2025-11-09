@@ -167,7 +167,7 @@ export const ResumeDraft = () => {
   const logoUrl = branding?.custom_logo_url || branding?.logo_url;
 
   const content = (
-    <div className="space-y-6">
+          <div className="space-y-6">
       {/* Back Button */}
       <div className="flex items-center">
         <Button
@@ -178,61 +178,61 @@ export const ResumeDraft = () => {
           <ArrowLeft className="h-4 w-4" />
           Back
         </Button>
-      </div>
+            </div>
 
-      <div className="text-center space-y-2">
-        <h1 className="text-2xl font-bold text-foreground">Resume Draft</h1>
-        <p className="text-sm text-muted-foreground">
-          Enter your draft code to continue your report
-        </p>
-      </div>
+            <div className="text-center space-y-2">
+              <h1 className="text-2xl font-bold text-foreground">Resume Draft</h1>
+              <p className="text-sm text-muted-foreground">
+                Enter your draft code to continue your report
+              </p>
+            </div>
 
       <Card>
         <CardContent className="pt-6">
-          <div className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="draft-code">Draft Code</Label>
-              <Input
-                id="draft-code"
-                placeholder="DR-A7K9-M3P2-X8Q5"
-                value={draftCode}
-                onChange={(e) => setDraftCode(e.target.value.toUpperCase())}
-                className="font-mono"
-              />
-            </div>
-
-            {error && (
-              <div className="bg-red-50 border border-red-200 rounded-lg p-3">
-                <p className="text-sm text-red-800">{error}</p>
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="draft-code">Draft Code</Label>
+                <Input
+                  id="draft-code"
+                  placeholder="DR-A7K9-M3P2-X8Q5"
+                  value={draftCode}
+                  onChange={(e) => setDraftCode(e.target.value.toUpperCase())}
+                  className="font-mono"
+                />
               </div>
-            )}
 
-            <Button
-              onClick={handleResume}
-              disabled={!draftCode || isLoading}
-              className="w-full gap-2"
-              style={{ backgroundColor: brandColor }}
-            >
-              {isLoading ? (
-                'Loading...'
-              ) : (
-                <>
-                  Resume Draft
-                  <ArrowRight className="w-4 h-4" />
-                </>
+              {error && (
+                <div className="bg-red-50 border border-red-200 rounded-lg p-3">
+                  <p className="text-sm text-red-800">{error}</p>
+                </div>
               )}
-            </Button>
 
-            <div className="text-center">
               <Button
-                variant="link"
-                onClick={() => navigate('/report')}
-                className="text-sm"
+                onClick={handleResume}
+                disabled={!draftCode || isLoading}
+                className="w-full gap-2"
+              style={{ backgroundColor: brandColor }}
               >
-                Start a new report instead
+                {isLoading ? (
+                  'Loading...'
+                ) : (
+                  <>
+                    Resume Draft
+                    <ArrowRight className="w-4 h-4" />
+                  </>
+                )}
               </Button>
+
+              <div className="text-center">
+                <Button
+                  variant="link"
+                onClick={() => navigate('/report')}
+                  className="text-sm"
+                >
+                  Start a new report instead
+                </Button>
+              </div>
             </div>
-          </div>
         </CardContent>
       </Card>
 
