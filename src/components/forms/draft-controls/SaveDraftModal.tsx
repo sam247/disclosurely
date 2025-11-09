@@ -24,9 +24,9 @@ export const SaveDraftModal = ({ draftCode, onClose, brandColor = '#2563eb' }: S
     console.error('SaveDraftModal: draftCode is empty or undefined');
     return (
       <Dialog open={true} onOpenChange={onClose}>
-        <DialogContent className="max-w-sm">
+        <DialogContent className="max-w-xs w-full mx-4">
           <DialogHeader>
-            <DialogTitle className="flex items-center gap-2 text-base">
+            <DialogTitle className="flex items-center gap-2 text-sm">
               <AlertTriangle className="w-4 h-4 text-red-500" />
               Error Saving Draft
             </DialogTitle>
@@ -46,9 +46,9 @@ export const SaveDraftModal = ({ draftCode, onClose, brandColor = '#2563eb' }: S
 
   return (
     <Dialog open={true} onOpenChange={onClose}>
-      <DialogContent className="max-w-sm">
+      <DialogContent className="max-w-xs w-full mx-4">
         <DialogHeader>
-          <DialogTitle className="flex items-center gap-2 text-base">
+          <DialogTitle className="flex items-center gap-2 text-sm">
             <AlertTriangle className="w-4 h-4 text-amber-500" />
             Save This Code!
           </DialogTitle>
@@ -59,8 +59,8 @@ export const SaveDraftModal = ({ draftCode, onClose, brandColor = '#2563eb' }: S
             Your draft has been saved. Use this code to resume your report later:
           </p>
 
-          <div className="bg-muted p-3 rounded-lg border-2" style={{ borderColor: `${brandColor}33` }}>
-            <p className="text-center text-lg font-mono font-bold break-all" style={{ color: brandColor }}>
+          <div className="bg-muted p-2.5 rounded-lg border-2" style={{ borderColor: `${brandColor}33` }}>
+            <p className="text-center text-sm font-mono font-bold break-all px-1" style={{ color: brandColor }}>
               {draftCode}
             </p>
           </div>
