@@ -376,12 +376,12 @@ const ProgressiveReportForm = ({
         <Progress value={progressPercent} className="h-2" />
       </div>
 
-      {/* Step content with animation - Standardized height on desktop (except review step) */}
+      {/* Step content with animation - Standardized fixed height (except review step) */}
       <div
-        className={`min-h-[180px] transition-all duration-300 ease-in-out ${
+        className={`transition-all duration-300 ease-in-out ${
           currentStep === 9 || currentStep === 10 
-            ? '' // Review step - no fixed height, allow scroll
-            : 'sm:min-h-[320px]' // Desktop: fixed height matching Step 6 (reduced by 100px)
+            ? 'min-h-[180px]' // Review step - min height only, allow scroll
+            : 'h-[198px] sm:h-[352px]' // Fixed height: 180px + 10% = 198px mobile, 320px + 10% = 352px desktop
         }`}
         key={currentStep}
       >
