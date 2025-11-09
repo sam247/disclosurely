@@ -12,10 +12,36 @@ export const SaveDraftModal = ({ draftCode, onClose }: SaveDraftModalProps) => {
   const [copied, setCopied] = useState(false);
 
   const handleCopy = () => {
-    navigator.clipboard.writeText(draftCode);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
+    if (draftCode) {
+      navigator.clipboard.writeText(draftCode);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    }
   };
+
+  if (!draftCode) {
+    console.error('SaveDraftModal: draftCode is empty or undefined');
+    return (
+      <Dialog open={true} onOpenChange={onClose}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <AlertTriangle className="w-5 h-5 text-red-500" />
+              Error Saving Draft
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <p className="text-sm text-red-600">
+              The draft was saved but no draft code was received. Please try saving again.
+            </p>
+            <Button onClick={onClose} className="w-full">
+              Close
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+    );
+  }
 
   return (
     <Dialog open={true} onOpenChange={onClose}>

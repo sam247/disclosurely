@@ -54,6 +54,7 @@ export async function saveDraft(request: SaveDraftRequest): Promise<SaveDraftRes
     }
 
     if (!data) {
+      console.error('No data returned from edge function');
       return {
         success: false,
         draftCode: '',
@@ -62,7 +63,30 @@ export async function saveDraft(request: SaveDraftRequest): Promise<SaveDraftRes
       };
     }
 
-    return data;
+    console.log('Edge function response data:', data);
+    
+    // Ensure the response has the expected structure
+    if (data.success && data.draftCode) {
+      console.log('Draft code received:', data.draftCode);
+      return data;
+    } else if (data.error) {
+      // Edge function returned an error in the data
+      console.error('Edge function error in data:', data.error);
+      return {
+        success: false,
+        draftCode: '',
+        expiresAt: '',
+        message: data.error || 'Failed to save draft',
+      };
+    } else {
+      console.error('Unexpected response structure:', data);
+      return {
+        success: false,
+        draftCode: '',
+        expiresAt: '',
+        message: 'Unexpected response from server. Please try again.',
+      };
+    }
   } catch (error) {
     console.error('Error saving draft:', error);
     
