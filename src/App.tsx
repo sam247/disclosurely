@@ -55,7 +55,7 @@ const ReportStatusLookup = lazy(() => import('./components/ReportStatusLookup'))
 // Component to handle session timeout only for authenticated users
 const SessionTimeoutManager = () => {
   const { user } = useAuth();
-  
+
   const { IdleWarningComponent, AbsoluteWarningComponent } = useSessionTimeout();
 
   // Only show session timeout for authenticated users
@@ -134,7 +134,7 @@ const AppContent = () => {
         <Route path="/report" element={<CleanSubmissionWrapper />} />
         <Route path="/submit" element={<CleanSubmissionWrapper />} />
         <Route path="/whistleblow" element={<CleanSubmissionWrapper />} />
-        
+
         {/* Resume draft page */}
         <Route path="/resume-draft" element={<ResumeDraft />} />
 
@@ -169,42 +169,42 @@ const AppContent = () => {
         <Route path="/:lang/auth/signup" element={<Signup />} />
 
         {/* Authenticated routes */}
-        <Route 
-          path="/app" 
+        <Route
+          path="/app"
           element={
             <ProtectedRoute>
               <AuthenticatedApp />
             </ProtectedRoute>
-          } 
+          }
         />
-        <Route 
-          path="/app/*" 
+        <Route
+          path="/app/*"
           element={
             <ProtectedRoute>
               <AuthenticatedApp />
             </ProtectedRoute>
-          } 
+          }
         />
-        <Route 
-          path="/dashboard" 
+        <Route
+          path="/dashboard"
           element={
             <ProtectedRoute>
               <DashboardLayout>
                 <DashboardView />
               </DashboardLayout>
             </ProtectedRoute>
-          } 
+          }
         />
-        <Route 
-          path="/dashboard/reports/:reportId" 
+        <Route
+          path="/dashboard/reports/:reportId"
           element={
             <ProtectedRoute>
               <ReportDetails />
             </ProtectedRoute>
-          } 
+          }
         />
-        <Route 
-          path="/dashboard/ai-helper" 
+        <Route
+          path="/dashboard/ai-helper"
           element={
             <ProtectedRoute>
               <DashboardLayout>
@@ -213,77 +213,77 @@ const AppContent = () => {
             </ProtectedRoute>
           }
         />
-        <Route 
-          path="/dashboard/settings" 
+        <Route
+          path="/dashboard/settings"
           element={
             <ProtectedRoute>
               <DashboardLayout>
                 <OrganizationSettings />
               </DashboardLayout>
             </ProtectedRoute>
-          } 
+          }
         />
-        <Route 
-          path="/dashboard/team" 
+        <Route
+          path="/dashboard/team"
           element={
             <ProtectedRoute>
               <DashboardLayout>
                 <TeamView />
               </DashboardLayout>
             </ProtectedRoute>
-          } 
+          }
         />
-        <Route 
-          path="/dashboard/branding" 
+        <Route
+          path="/dashboard/branding"
           element={
             <ProtectedRoute>
               <DashboardLayout>
                 <BrandingView />
               </DashboardLayout>
             </ProtectedRoute>
-          } 
+          }
         />
-        <Route 
-          path="/dashboard/secure-link" 
+        <Route
+          path="/dashboard/secure-link"
           element={
             <ProtectedRoute>
               <DashboardLayout>
                 <SecureLinkView />
               </DashboardLayout>
             </ProtectedRoute>
-          } 
+          }
         />
-        <Route 
-          path="/dashboard/integrations" 
+        <Route
+          path="/dashboard/integrations"
           element={
             <ProtectedRoute>
               <DashboardLayout>
                 <IntegrationsView />
               </DashboardLayout>
             </ProtectedRoute>
-          } 
+          }
         />
-        <Route 
-          path="/dashboard/analytics" 
+        <Route
+          path="/dashboard/analytics"
           element={
             <ProtectedRoute>
               <DashboardLayout>
                 <AnalyticsView />
               </DashboardLayout>
             </ProtectedRoute>
-          } 
+          }
         />
-        <Route 
-          path="/dashboard/audit" 
+        <Route
+          path="/dashboard/audit"
           element={
             <ProtectedRoute>
               <DashboardLayout>
                 <AuditLogView />
               </DashboardLayout>
             </ProtectedRoute>
-          } 
+          }
         />
-        
+
         {/* Catch all - 404 */}
         <Route path="*" element={<NotFound />} />
       </Routes>

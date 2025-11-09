@@ -182,15 +182,15 @@ const Step5Category = ({ mainCategory, subCategory, customCategory, onChange, is
 
   return (
     <div className="space-y-4 py-2">
-      <div className="flex items-center gap-3">
-        <div className="p-2 rounded-lg bg-primary/10">
-          <Tag className="w-5 h-5 text-primary" />
+      <div className="flex items-center gap-2 sm:gap-3">
+        <div className="p-1.5 sm:p-2 rounded-lg bg-primary/10 flex-shrink-0">
+          <Tag className="w-4 h-4 sm:w-5 sm:h-5 text-primary" />
         </div>
-        <div>
-          <h2 className="text-2xl font-bold text-gray-900">
+        <div className="min-w-0">
+          <h2 className="text-lg sm:text-2xl font-bold text-gray-900">
             {t.step4.title}
           </h2>
-          <p className="text-sm text-gray-600 mt-1">
+          <p className="text-xs sm:text-sm text-gray-600 mt-1">
             {t.step4.subtitle}
           </p>
         </div>
@@ -212,7 +212,7 @@ const Step5Category = ({ mainCategory, subCategory, customCategory, onChange, is
                 return (
                   <SelectItem key={englishKey} value={englishKey} className="text-base">
                     {getTranslatedMainCategory(englishKey)}
-                  </SelectItem>
+                </SelectItem>
                 );
               })}
             </SelectContent>
@@ -260,11 +260,11 @@ const Step5Category = ({ mainCategory, subCategory, customCategory, onChange, is
       </div>
 
       {!isValid && mainCategory && (
-        <p className="text-sm text-amber-600">{t.step4.selectBoth}</p>
+        <p className="text-sm text-amber-600 mt-2 sm:mt-0">{t.step4.selectBoth}</p>
       )}
 
       {isValid && (
-        <p className="text-sm text-green-600">
+        <p className="text-sm text-green-600 mt-2 sm:mt-0">
           {t.step4.categorySelected} <strong>{getTranslatedMainCategory(mainCategory)} - {subCategory === "Other (Please Specify)" ? customCategory : getTranslatedSubCategory(mainCategory, subCategory)}</strong>
         </p>
       )}

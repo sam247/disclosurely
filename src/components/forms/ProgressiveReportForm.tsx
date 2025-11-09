@@ -359,7 +359,7 @@ const ProgressiveReportForm = ({
   const t = progressiveFormTranslations[language as keyof typeof progressiveFormTranslations] || progressiveFormTranslations.en;
 
   return (
-    <div className="w-full max-w-2xl mx-auto px-1 sm:px-0" dir={language === 'el' ? 'ltr' : undefined}>
+    <div className="w-full max-w-2xl mx-auto px-1 sm:px-0 flex flex-col min-h-0" dir={language === 'el' ? 'ltr' : undefined}>
       {/* Progress bar */}
       <div className="mb-4 sm:mb-6">
         <div className="flex justify-between items-center mb-2">
@@ -375,12 +375,14 @@ const ProgressiveReportForm = ({
         <Progress value={progressPercent} className="h-2" />
       </div>
 
-      {/* Step content with animation - Standardized fixed height (except review step) */}
+      {/* Step content with animation - Flexible on mobile, fixed on desktop */}
       <div
         className={`transition-all duration-300 ease-in-out ${
           currentStep === 9 || currentStep === 10 
             ? 'min-h-[180px]' // Review step - min height only, allow scroll
-            : 'h-[198px] sm:h-[352px]' // Fixed height: 180px + 10% = 198px mobile, 320px + 10% = 352px desktop
+            : currentStep === 0
+            ? 'min-h-[198px] sm:min-h-[352px]' // Welcome step - min height to accommodate footer
+            : 'min-h-[198px] sm:h-[352px]' // Mobile: min-height (flexible), Desktop: fixed height
         }`}
         key={currentStep}
       >
@@ -390,19 +392,11 @@ const ProgressiveReportForm = ({
       {/* Navigation buttons */}
       {showNavigation && (
         <div className="flex flex-col gap-3 sm:gap-4 mt-4 sm:mt-6 pt-4 border-t">
-          <div className="flex items-center justify-between gap-2">
-            <Button
-              variant="ghost"
-              onClick={handleBack}
-              disabled={isSubmitting}
-              className="flex items-center gap-2 h-11 sm:h-10 px-3 sm:px-4"
-            >
-              <ChevronLeft className="w-4 h-4" />
-              <span>{t.navigation.back}</span>
-            </Button>
-
-            <div className="flex items-center gap-2 sm:gap-3 flex-wrap justify-end">
-              {organizationId && currentStep > 0 && (
+          {/* Mobile: Stack buttons vertically */}
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2 sm:gap-2">
+            {/* Mobile: Save Draft on top, then Back/Continue */}
+            {organizationId && currentStep > 0 && (
+              <div className="sm:hidden w-full">
                 <SaveDraftButton
                   formData={formData}
                   currentStep={currentStep}
@@ -413,18 +407,51 @@ const ProgressiveReportForm = ({
                     setCurrentDraftCode(code);
                     onDraftSaved?.(code);
                   }}
+                  brandColor={brandColor}
                 />
-              )}
+              </div>
+            )}
+            
+            {/* Back and Continue buttons */}
+            <div className="flex items-center gap-2 w-full sm:w-auto">
+              <Button
+                variant="ghost"
+                onClick={handleBack}
+                disabled={isSubmitting}
+                className="flex items-center gap-2 h-11 sm:h-10 px-3 sm:px-4 flex-1 sm:flex-initial"
+              >
+                <ChevronLeft className="w-4 h-4" />
+                <span>{t.navigation.back}</span>
+              </Button>
+
               <Button
                 onClick={handleNext}
                 disabled={isNextDisabled || isSubmitting}
                 style={{ backgroundColor: isNextDisabled ? undefined : brandColor }}
-                className="flex items-center gap-2 h-11 sm:h-10 px-4 sm:px-4"
+                className="flex items-center gap-2 h-11 sm:h-10 px-4 sm:px-4 flex-1 sm:flex-initial"
               >
                 {t.navigation.continue}
                 <ChevronRight className="w-4 h-4" />
               </Button>
             </div>
+
+            {/* Desktop: Save Draft on the right */}
+            {organizationId && currentStep > 0 && (
+              <div className="hidden sm:flex items-center gap-2 sm:gap-3">
+                <SaveDraftButton
+                  formData={formData}
+                  currentStep={currentStep}
+                  language={language}
+                  organizationId={organizationId}
+                  existingDraftCode={currentDraftCode}
+                  onDraftSaved={(code) => {
+                    setCurrentDraftCode(code);
+                    onDraftSaved?.(code);
+                  }}
+                  brandColor={brandColor}
+                />
+              </div>
+            )}
           </div>
         </div>
       )}

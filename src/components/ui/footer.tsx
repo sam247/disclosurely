@@ -18,6 +18,8 @@ export const Footer = () => {
                 src="/lovable-uploads/416d39db-53ff-402e-a2cf-26d1a3618601.png"
                 alt="Disclosurely"
                 className="h-7 w-auto"
+                loading="lazy"
+                decoding="async"
               />
             </div>
             <p className="text-gray-400 mb-4">

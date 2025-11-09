@@ -334,6 +334,8 @@ const CompanyStatusPage = () => {
                     src={logoUrl} 
                     alt={`${organizationName} logo`}
                     className="w-10 h-10 object-contain cursor-pointer"
+                    loading="lazy"
+                    decoding="async"
                     onClick={() => linkToken ? window.location.href = `/secure/tool/submit/${linkToken}` : window.location.href = '/secure/tool/status'}
                     onError={(e) => {
                       const target = e.target as HTMLImageElement;
@@ -346,6 +348,8 @@ const CompanyStatusPage = () => {
                     src={disclosurelyIcon} 
                     alt="Disclosurely logo"
                     className="w-10 h-10 object-contain cursor-pointer"
+                    loading="lazy"
+                    decoding="async"
                     onClick={() => linkToken ? window.location.href = `/secure/tool/submit/${linkToken}` : window.location.href = '/secure/tool/status'}
                   />
                 )}
@@ -354,6 +358,8 @@ const CompanyStatusPage = () => {
                     src={disclosurelyIcon} 
                     alt="Disclosurely logo"
                     className="w-10 h-10 object-contain cursor-pointer hidden"
+                    loading="lazy"
+                    decoding="async"
                     onClick={() => linkToken ? window.location.href = `/secure/tool/submit/${linkToken}` : window.location.href = '/secure/tool/status'}
                   />
                 )}

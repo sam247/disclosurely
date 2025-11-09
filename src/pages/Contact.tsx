@@ -90,6 +90,8 @@ const Contact = () => {
                 <img
                   src="/lovable-uploads/c46ace0e-df58-4119-b5e3-8dcfa075ea2f.png"
                   alt="Disclosurely"
+                  loading="lazy"
+                  decoding="async"
                   className="h-5 sm:h-6 md:h-8 w-auto"
                 />
               </Link>

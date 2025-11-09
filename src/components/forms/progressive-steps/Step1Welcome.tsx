@@ -118,7 +118,7 @@ const Step1Welcome = ({ onContinue, brandColor, language, onLanguageChange, orga
         </div>
       </div>
 
-      <p className="text-xs sm:text-sm text-gray-500 max-w-md mx-auto px-4 break-words pt-2 sm:pt-4">
+      <p className="text-xs sm:text-sm text-gray-500 max-w-md mx-auto px-4 break-words mt-2 sm:mt-4">
         {t.welcome.footer}
       </p>
     </div>

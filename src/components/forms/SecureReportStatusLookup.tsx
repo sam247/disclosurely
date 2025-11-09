@@ -196,6 +196,13 @@ const SecureReportStatusLookup = () => {
           </Button>
         </div>
 
+        <div className="text-center space-y-2">
+          <h1 className="text-2xl font-bold text-foreground">Check Report Status</h1>
+          <p className="text-sm text-muted-foreground">
+            Enter your tracking ID to view your report status and communicate securely
+          </p>
+        </div>
+
         <Card>
           <CardContent className="pt-6">
             <form onSubmit={handleSubmit} className="space-y-4">

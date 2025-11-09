@@ -81,7 +81,9 @@ const VsWhistleblowerSoftware = () => {
               <Link to="/" className="flex items-center space-x-3">
                 <img 
                   src="/lovable-uploads/c46ace0e-df58-4119-b5e3-8dcfa075ea2f.png" 
-                  alt="Disclosurely" 
+                  alt="Disclosurely"
+                  loading="lazy"
+                  decoding="async" 
                   className="h-8 w-auto"
                 />
               </Link>
