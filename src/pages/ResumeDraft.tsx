@@ -3,7 +3,8 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { ArrowRight, ArrowLeft } from 'lucide-react';
+import { Card, CardContent } from '@/components/ui/card';
+import { ArrowRight, ArrowLeft, AlertCircle } from 'lucide-react';
 import { resumeDraft } from '@/services/draftService';
 import BrandedFormLayout from '@/components/BrandedFormLayout';
 import { useCustomDomain } from '@/hooks/useCustomDomain';
@@ -180,54 +181,68 @@ export const ResumeDraft = () => {
         </p>
       </div>
 
-      <div className="space-y-4">
-        <div className="space-y-2">
-          <Label htmlFor="draft-code">Draft Code</Label>
-          <Input
-            id="draft-code"
-            placeholder="DR-A7K9-M3P2-X8Q5"
-            value={draftCode}
-            onChange={(e) => setDraftCode(e.target.value.toUpperCase())}
-            className="font-mono"
-          />
-        </div>
+      <Card>
+        <CardContent className="pt-6">
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="draft-code">Draft Code</Label>
+              <Input
+                id="draft-code"
+                placeholder="DR-A7K9-M3P2-X8Q5"
+                value={draftCode}
+                onChange={(e) => setDraftCode(e.target.value.toUpperCase())}
+                className="font-mono"
+              />
+            </div>
 
-        {error && (
-          <div className="bg-red-50 border border-red-200 rounded-lg p-3">
-            <p className="text-sm text-red-800">{error}</p>
+            {error && (
+              <div className="bg-red-50 border border-red-200 rounded-lg p-3">
+                <p className="text-sm text-red-800">{error}</p>
+              </div>
+            )}
+
+            <Button
+              onClick={handleResume}
+              disabled={!draftCode || isLoading}
+              className="w-full gap-2"
+              style={{ backgroundColor: brandColor }}
+            >
+              {isLoading ? (
+                'Loading...'
+              ) : (
+                <>
+                  Resume Draft
+                  <ArrowRight className="w-4 h-4" />
+                </>
+              )}
+            </Button>
+
+            <div className="text-center">
+              <Button
+                variant="link"
+                onClick={() => navigate('/report')}
+                className="text-sm"
+              >
+                Start a new report instead
+              </Button>
+            </div>
           </div>
-        )}
+        </CardContent>
+      </Card>
 
-        <Button
-          onClick={handleResume}
-          disabled={!draftCode || isLoading}
-          className="w-full gap-2"
-          style={{ backgroundColor: brandColor }}
-        >
-          {isLoading ? (
-            'Loading...'
-          ) : (
-            <>
-              Resume Draft
-              <ArrowRight className="w-4 h-4" />
-            </>
-          )}
-        </Button>
-
-        <div className="text-center">
-          <Button
-            variant="link"
-            onClick={() => navigate('/report')}
-            className="text-sm"
-          >
-            Start a new report instead
-          </Button>
-        </div>
-      </div>
-
-      <div className="bg-muted rounded-lg p-3 text-xs text-muted-foreground">
-        <p><strong>Note:</strong> Drafts expire after 48 hours for security reasons.</p>
-      </div>
+      <Card className="border-blue-200 bg-blue-50">
+        <CardContent className="pt-4">
+          <div className="flex items-start gap-3">
+            <AlertCircle className="h-5 w-5 text-blue-600 mt-0.5" />
+            <div className="text-sm">
+              <p className="font-medium text-blue-900 mb-1">Need Help?</p>
+              <p className="text-blue-800">
+                If you can't find your draft code, check your email or contact support. Drafts expire after 48 hours for security reasons.
+              </p>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
     </div>
   );
 
