@@ -121,7 +121,8 @@ function generateSitemapEntries(): UrlEntry[] {
       alternates: [
         { hreflang: 'x-default', href: `${BASE_URL}${basePath}` },
         { hreflang: 'en', href: `${BASE_URL}${basePath}` },
-        ...LANGUAGES.map(lang => ({
+        // Only include non-English languages to avoid duplicate 'en' hreflang
+        ...LANGUAGES.filter(lang => lang !== 'en').map(lang => ({
           hreflang: lang,
           href: `${BASE_URL}/${lang}${basePath}`,
         })),
@@ -138,7 +139,8 @@ function generateSitemapEntries(): UrlEntry[] {
         alternates: [
           { hreflang: 'x-default', href: `${BASE_URL}${basePath}` },
           { hreflang: 'en', href: `${BASE_URL}${basePath}` },
-          ...LANGUAGES.map(l => ({
+          // Only include non-English languages to avoid duplicate 'en' hreflang
+          ...LANGUAGES.filter(l => l !== 'en').map(l => ({
             hreflang: l,
             href: `${BASE_URL}/${l}${basePath}`,
           })),
