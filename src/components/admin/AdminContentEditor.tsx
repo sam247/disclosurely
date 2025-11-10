@@ -44,12 +44,24 @@ export const AdminContentEditor = ({ pageIdentifier, title, description }: Admin
   };
 
   const handleSave = async () => {
-    if (editingId) {
-      const success = await updatePageContent(editingId, editValue);
-      if (success) {
-        setEditingId(null);
-        setEditValue('');
+    setIsSaving(true);
+    try {
+      if (editingId) {
+        const success = await updatePageContent(editingId, editValue);
+        if (success) {
+          setEditingId(null);
+          setEditValue('');
+        }
+      } else if (newSectionKey && newContent) {
+        const success = await upsertPageContent(pageIdentifier, newSectionKey, newContent);
+        if (success) {
+          setNewSectionKey('');
+          setNewContent('');
+          setShowAddNew(false);
+        }
       }
+    } finally {
+      setIsSaving(false);
     }
   };
 
