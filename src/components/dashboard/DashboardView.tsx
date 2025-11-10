@@ -843,6 +843,8 @@ Additional Details: ${decryptedContent.additionalDetails || 'None provided'}
         description: "Failed to generate PDF",
         variant: "destructive",
       });
+    } finally {
+      setExportingReportId(null);
     }
   };
 
