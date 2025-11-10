@@ -46,6 +46,7 @@ const SecureLinkView = lazy(() => import('./components/dashboard/SecureLinkView'
 const IntegrationsView = lazy(() => import('./components/IntegrationsView'));
 const AnalyticsView = lazy(() => import('./components/AnalyticsView'));
 const AuditLogView = lazy(() => import('./components/AuditLogView'));
+const WorkflowsView = lazy(() => import('./components/dashboard/WorkflowsView'));
 
 // Lazy load form components
 const SubmissionFormWrapper = lazy(() => import('./components/forms/SubmissionFormWrapper'));
@@ -281,6 +282,16 @@ const AppContent = () => {
             <ProtectedRoute>
               <DashboardLayout>
                 <AuditLogView />
+              </DashboardLayout>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/dashboard/workflows"
+          element={
+            <ProtectedRoute>
+              <DashboardLayout>
+                <WorkflowsView />
               </DashboardLayout>
             </ProtectedRoute>
           }
