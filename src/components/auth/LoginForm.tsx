@@ -136,11 +136,10 @@ const LoginForm = () => {
         onClick={handleGoogleLogin}
         variant="outline"
         className="w-full"
-        disabled={googleLoading}
+        loading={googleLoading}
+        loadingText={t('auth.signin.signingInWithGoogle')}
       >
-        {googleLoading ? (
-          t('auth.signin.signingInWithGoogle')
-        ) : (
+        {
           <>
             <svg className="w-4 h-4 mr-2" viewBox="0 0 24 24">
               <path
@@ -195,9 +194,10 @@ const LoginForm = () => {
           <Button
             type="submit"
             className="w-full"
-            disabled={loading}
+            loading={loading}
+            loadingText={t('auth.signin.sendingCode')}
           >
-            {loading ? t('auth.signin.sendingCode') : t('auth.signin.signInButton')}
+            {t('auth.signin.signInButton')}
           </Button>
         </div>
 

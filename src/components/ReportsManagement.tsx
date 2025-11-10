@@ -76,6 +76,7 @@ const ReportsManagement = () => {
   const [teamMembers, setTeamMembers] = useState<any[]>([]);
   const [newNote, setNewNote] = useState('');
   const [reportNotes, setReportNotes] = useState<any[]>([]);
+  const [isAddingNote, setIsAddingNote] = useState(false);
   const [showDeleted, setShowDeleted] = useState(false);
   const [editingTags, setEditingTags] = useState(false);
   const [tempTags, setTempTags] = useState<string[]>([]);
@@ -611,6 +612,7 @@ const ReportsManagement = () => {
   const addNote = async () => {
     if (!selectedReport || !newNote.trim()) return;
 
+    setIsAddingNote(true);
     try {
       const { data: profile } = await supabase.from('profiles').select('organization_id').eq('id', user?.id).single();
       
@@ -659,6 +661,8 @@ const ReportsManagement = () => {
         description: "Failed to add note",
         variant: "destructive",
       });
+    } finally {
+      setIsAddingNote(false);
     }
   };
 
@@ -1086,7 +1090,12 @@ const ReportsManagement = () => {
                       onChange={(e) => setNewNote(e.target.value)}
                       rows={3}
                     />
-                    <Button onClick={addNote} disabled={!newNote.trim()}>
+                    <Button 
+                      onClick={addNote} 
+                      loading={isAddingNote}
+                      loadingText="Adding..."
+                      disabled={!newNote.trim()}
+                    >
                       Add Note
                     </Button>
                   </div>

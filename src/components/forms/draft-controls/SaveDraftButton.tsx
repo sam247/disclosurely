@@ -79,15 +79,11 @@ export const SaveDraftButton = ({
         type="button"
         variant="outline"
         onClick={handleSave}
-        disabled={isSaving}
+        loading={isSaving}
+        loadingText="Saving..."
         className="gap-2 h-11 sm:h-10 px-3 sm:px-4 w-full sm:w-auto"
       >
-        {isSaving ? (
-          <>
-            <div className="animate-spin">⏳</div>
-            Saving...
-          </>
-        ) : existingDraftCode ? (
+        {existingDraftCode ? (
           <>
             <Check className="w-4 h-4" />
             Update Draft

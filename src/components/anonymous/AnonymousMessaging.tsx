@@ -246,18 +246,16 @@ const AnonymousMessaging = () => {
 
             <form onSubmit={sendMessage} className="space-y-4">
               <Textarea value={newMessage} onChange={(e) => setNewMessage(e.target.value)} placeholder="Type your message..." rows={3} />
-              <Button type="submit" disabled={sending || !newMessage.trim()} className="w-full" style={{ backgroundColor: brandColor || '#2563eb' }}>
-                {sending ? (
-                  <>
-                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                    Sending...
-                  </>
-                ) : (
-                  <>
-                    <Send className="h-4 w-4 mr-2" />
-                    Send Message
-                  </>
-                )}
+              <Button 
+                type="submit" 
+                loading={sending}
+                loadingText="Sending..."
+                disabled={!newMessage.trim()} 
+                className="w-full" 
+                style={{ backgroundColor: brandColor || '#2563eb' }}
+              >
+                <Send className="h-4 w-4 mr-2" />
+                Send Message
               </Button>
             </form>
           </CardContent>

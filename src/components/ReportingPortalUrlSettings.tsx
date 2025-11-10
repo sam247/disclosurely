@@ -297,20 +297,13 @@ const ReportingPortalUrlSettings = () => {
         <div className="flex justify-end">
           <Button
             onClick={handleSave}
-            disabled={isSaving || !hasChanges}
+            loading={isSaving}
+            loadingText="Saving..."
+            disabled={!hasChanges}
             className="flex items-center gap-2"
           >
-            {isSaving ? (
-              <>
-                <Loader2 className="h-4 w-4 animate-spin" />
-                Saving...
-              </>
-            ) : (
-              <>
-                <CheckCircle className="h-4 w-4" />
-                Save Changes
-              </>
-            )}
+            <CheckCircle className="h-4 w-4" />
+            Save Changes
           </Button>
         </div>
       </CardContent>

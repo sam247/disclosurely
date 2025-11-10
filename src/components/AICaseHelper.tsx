@@ -989,41 +989,27 @@ Guidelines:
           <div className="flex gap-2">
             <Button
               onClick={loadPreviewContent}
-              disabled={!selectedCaseId || isLoadingPreview}
+              loading={isLoadingPreview}
+              loadingText="Loading..."
+              disabled={!selectedCaseId}
               variant="outline"
               className="flex-1"
               size="lg"
             >
-              {isLoadingPreview ? (
-                <>
-                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                  Loading...
-                </>
-              ) : (
-                <>
-                  <Eye className="h-4 w-4 mr-2" />
-                  Preview
-                </>
-              )}
+              <Eye className="h-4 w-4 mr-2" />
+              Preview
             </Button>
             <Button
               onClick={() => analyzeCase()}
-              disabled={isAnalyzing || !selectedCaseId || !hasViewedPreview}
+              loading={isAnalyzing}
+              loadingText="Analyzing..."
+              disabled={!selectedCaseId || !hasViewedPreview}
               className="flex-1"
               size="lg"
               title={!hasViewedPreview ? "Please preview the case first" : ""}
             >
-              {isAnalyzing ? (
-                <>
-                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                  Analyzing...
-                </>
-              ) : (
-                <>
-                  <Brain className="h-4 w-4 mr-2" />
-                  {hasRunInitialAnalysis ? 'Re-Analyze' : 'Analyze'}
-                </>
-              )}
+              <Brain className="h-4 w-4 mr-2" />
+              {hasRunInitialAnalysis ? 'Re-Analyze' : 'Analyze'}
             </Button>
           </div>
             {isAnalyzing && (

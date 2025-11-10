@@ -106,11 +106,10 @@ const SignupForm = () => {
         onClick={handleGoogleSignup}
         variant="outline"
         className="w-full"
-        disabled={googleLoading}
+        loading={googleLoading}
+        loadingText="Signing up with Google..."
       >
-        {googleLoading ? (
-          'Signing up with Google...'
-        ) : (
+        {
           <>
             <svg className="w-4 h-4 mr-2" viewBox="0 0 24 24">
               <path
@@ -228,9 +227,10 @@ const SignupForm = () => {
           <Button
             type="submit"
             className="w-full"
-            disabled={loading}
+            loading={loading}
+            loadingText="Creating account..."
           >
-            {loading ? 'Creating account...' : 'Create account'}
+            Create account
           </Button>
         </div>
 

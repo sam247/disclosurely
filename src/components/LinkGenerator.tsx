@@ -627,21 +627,13 @@ const LinkGenerator = () => {
             <div className="flex justify-end">
               <Button
                 onClick={handleSaveUrlType}
-                disabled={isSavingUrlType}
+                loading={isSavingUrlType}
+                loadingText="Saving..."
                 size="sm"
                 className="flex items-center gap-2"
               >
-                {isSavingUrlType ? (
-                  <>
-                    <Loader2 className="h-4 w-4 animate-spin" />
-                    Saving...
-                  </>
-                ) : (
-                  <>
-                    <CheckCircle className="h-4 w-4" />
-                    Save Changes
-                  </>
-                )}
+                <CheckCircle className="h-4 w-4" />
+                Save Changes
               </Button>
             </div>
           )}
