@@ -6,6 +6,7 @@ import { useSessionTimeout } from './hooks/useSessionTimeout';
 import { useAuth } from './hooks/useAuth';
 import ProtectedRoute from './components/ProtectedRoute';
 import ScrollToTop from './components/ScrollToTop';
+import UrlRedirectMiddleware from './components/UrlRedirectMiddleware';
 
 // Lazy load page components for better code splitting
 const Index = lazy(() => import('./pages/Index'));
@@ -74,8 +75,9 @@ const SessionTimeoutManager = () => {
 const AppContent = () => {
   return (
     <OrganizationProvider>
-      <ScrollToTop />
-      <Suspense fallback={
+      <UrlRedirectMiddleware>
+        <ScrollToTop />
+        <Suspense fallback={
         <div style={{
           display: 'flex',
           justifyContent: 'center',
@@ -290,6 +292,7 @@ const AppContent = () => {
       </Suspense>
       {/* Session timeout only for authenticated users */}
       <SessionTimeoutManager />
+      </UrlRedirectMiddleware>
     </OrganizationProvider>
   );
 };

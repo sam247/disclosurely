@@ -1,6 +1,7 @@
-import { Palette, Globe } from 'lucide-react';
+import { Palette, Globe, Link2 } from 'lucide-react';
 import OrganizationSettingsBranding from '@/components/OrganizationSettings';
 import CustomDomainSettings from '@/components/CustomDomainSettings';
+import ReportingPortalUrlSettings from '@/components/ReportingPortalUrlSettings';
 import { Separator } from '@/components/ui/separator';
 
 const OrganizationSettings = () => {
@@ -21,6 +22,17 @@ const OrganizationSettings = () => {
             <h2 className="text-2xl font-semibold">Branding</h2>
           </div>
           <OrganizationSettingsBranding />
+        </div>
+
+        <Separator />
+
+        {/* Reporting Portal URL Section */}
+        <div className="space-y-4">
+          <div className="flex items-center gap-2 mb-4">
+            <Link2 className="h-5 w-5 text-primary" />
+            <h2 className="text-2xl font-semibold">Reporting Portal URL</h2>
+          </div>
+          <ReportingPortalUrlSettings />
         </div>
 
         <Separator />
