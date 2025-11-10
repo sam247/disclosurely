@@ -503,9 +503,6 @@ const LinkGenerator = () => {
     ? `https://${organizationInfo.domain}.disclosurely.com/report`
     : null;
 
-  // Generate token-based URL as last resort fallback
-  const tokenUrl = `https://secure.disclosurely.com/secure/tool/submit/${primaryLink.link_token}`;
-
   return (
     <>
       <Card>
