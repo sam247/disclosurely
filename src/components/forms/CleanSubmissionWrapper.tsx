@@ -118,10 +118,28 @@ const CleanSubmissionWrapper = () => {
         subdomainMatch[1] !== 'app' && 
         subdomainMatch[1] !== 'www' && 
         subdomainMatch[1] !== 'secure';
-      const isOnCustomDomain = !isOnSubdomain && orgData.custom_domain === currentHost;
+      
+      // Check custom_domains table to verify if we're on a custom domain
+      // This is more reliable than checking organizations.custom_domain
+      let isOnCustomDomain = false;
+      if (!isOnSubdomain) {
+        const { data: customDomainData } = await supabase
+          .from('custom_domains')
+          .select('domain_name, organization_id, is_active, status')
+          .eq('domain_name', currentHost)
+          .eq('organization_id', organizationId)
+          .eq('is_active', true)
+          .eq('status', 'active')
+          .maybeSingle();
+        
+        isOnCustomDomain = !!customDomainData;
+        console.log('Custom domain check:', { currentHost, customDomainData, isOnCustomDomain });
+      }
 
       // Check if we're on the correct domain based on active_url_type
       const activeUrlType = orgData.active_url_type || 'subdomain';
+      console.log('Domain validation:', { activeUrlType, isOnSubdomain, isOnCustomDomain, currentHost });
+      
       if (activeUrlType === 'custom_domain' && !isOnCustomDomain) {
         // Should be on custom domain but we're not - redirect middleware should handle this
         console.log('Should be on custom domain but on subdomain - redirect should occur');
