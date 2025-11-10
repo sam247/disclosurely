@@ -21,6 +21,7 @@ export const AdminContentEditor = ({ pageIdentifier, title, description }: Admin
   const [showAddNew, setShowAddNew] = useState(false);
   const [newSectionKey, setNewSectionKey] = useState('');
   const [newContent, setNewContent] = useState('');
+  const [isSaving, setIsSaving] = useState(false);
 
   if (!isAdmin) {
     return (
@@ -132,7 +133,13 @@ export const AdminContentEditor = ({ pageIdentifier, title, description }: Admin
                   />
                 )}
                 <div className="flex gap-2">
-                  <Button onClick={handleSave} size="sm" className="flex items-center gap-1">
+                  <Button 
+                    onClick={handleSave} 
+                    size="sm" 
+                    className="flex items-center gap-1"
+                    loading={isSaving}
+                    loadingText="Saving..."
+                  >
                     <Save className="h-3 w-3" />
                     Save
                   </Button>

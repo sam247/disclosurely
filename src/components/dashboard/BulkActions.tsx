@@ -105,6 +105,8 @@ const BulkActions = ({
             variant="outline"
             size="sm"
             onClick={onArchive}
+            loading={isProcessing}
+            loadingText="Archiving..."
             disabled={isProcessing}
             className="h-9"
           >
