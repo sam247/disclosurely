@@ -39,9 +39,17 @@ const CleanSubmissionWrapper = () => {
   const [draftData, setDraftData] = useState<any>(null);
   const [organizationId, setOrganizationId] = useState<string | null>(hookOrganizationId);
 
+  // Sync organizationId from hook - this should happen first
+  useEffect(() => {
+    if (hookOrganizationId) {
+      console.log('🔄 Syncing organizationId from hook:', hookOrganizationId);
+      setOrganizationId(hookOrganizationId);
+    }
+  }, [hookOrganizationId]);
+
   // Also check for subdomain if not found via custom domain hook
   useEffect(() => {
-    if (!domainLoading && !organizationId) {
+    if (!domainLoading && !organizationId && !hookOrganizationId) {
       const currentHost = window.location.hostname;
       const subdomainMatch = currentHost.match(/^([^.]+)\.disclosurely\.com$/);
       
@@ -57,15 +65,14 @@ const CleanSubmissionWrapper = () => {
             .single()
             .then(({ data, error }) => {
               if (!error && data) {
+                console.log('🔄 Found organization via subdomain:', data.id);
                 setOrganizationId(data.id);
               }
             });
         }
       }
-    } else if (hookOrganizationId) {
-      setOrganizationId(hookOrganizationId);
     }
-  }, [domainLoading, hookOrganizationId]);
+  }, [domainLoading, organizationId, hookOrganizationId]);
 
   useEffect(() => {
     console.log('CleanSubmissionWrapper: Domain detection:', {
