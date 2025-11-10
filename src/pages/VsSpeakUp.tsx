@@ -5,6 +5,7 @@ import { Link } from 'react-router-dom';
 import { Footer } from '@/components/ui/footer';
 import PublicLanguageSelector from '@/components/PublicLanguageSelector';
 import { useLanguageFromUrl } from '@/hooks/useLanguageFromUrl';
+import DynamicHelmet from '@/components/DynamicHelmet';
 
 const VsSpeakUp = () => {
   useLanguageFromUrl();
@@ -72,8 +73,14 @@ const VsSpeakUp = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-white">
-      {/* Navigation */}
+    <>
+      <DynamicHelmet
+        pageIdentifier="/vs-speakup"
+        fallbackTitle="Disclosurely vs SpeakUp | Whistleblowing Platform Comparison"
+        fallbackDescription="Compare Disclosurely and SpeakUp whistleblowing platforms. See features, pricing, security, and compliance side-by-side to choose the best solution."
+      />
+      <div className="min-h-screen bg-white">
+        {/* Navigation */}
       <nav className="bg-white shadow-sm sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center py-4">
@@ -253,7 +260,8 @@ const VsSpeakUp = () => {
       </div>
 
       <Footer />
-    </div>
+      </div>
+    </>
   );
 };
 
