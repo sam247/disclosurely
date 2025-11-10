@@ -175,9 +175,15 @@ const SimpleGDPRSettings = () => {
               className="mt-1"
             />
           </div>
-          <Button onClick={handleDataExport} disabled={loading || !exportEmail} className="w-full sm:w-auto">
+          <Button 
+            onClick={handleDataExport} 
+            loading={loading}
+            loadingText="Processing..."
+            disabled={!exportEmail} 
+            className="w-full sm:w-auto"
+          >
             <Download className="w-4 h-4 mr-2" />
-            {loading ? 'Processing...' : 'Download My Data'}
+            Download My Data
           </Button>
           <div className="flex items-start gap-2 text-xs sm:text-sm text-gray-600">
             <Mail className="w-4 h-4 mt-0.5 flex-shrink-0" />

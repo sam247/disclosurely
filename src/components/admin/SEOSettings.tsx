@@ -76,6 +76,7 @@ export const SEOSettings = () => {
   const { profile } = useOrganization();
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [generatingSitemap, setGeneratingSitemap] = useState(false);
   const [selectedPage, setSelectedPage] = useState('landing');
   const [selectedLang, setSelectedLang] = useState('en');
   const [globalSettings, setGlobalSettings] = useState<GlobalSEOSettings>({});
@@ -210,6 +211,7 @@ export const SEOSettings = () => {
   };
 
   const generateSitemap = async () => {
+    setGeneratingSitemap(true);
     try {
       // Generate sitemap content
       const sitemapContent = `<?xml version="1.0" encoding="UTF-8"?>
@@ -277,6 +279,8 @@ export const SEOSettings = () => {
         description: "Failed to generate sitemap. Please try again.",
         variant: "destructive",
       });
+    } finally {
+      setGeneratingSitemap(false);
     }
   };
 
@@ -428,11 +432,20 @@ export const SEOSettings = () => {
           </div>
 
           <div className="flex gap-2">
-            <Button onClick={saveGlobalSettings} disabled={saving}>
+            <Button 
+              onClick={saveGlobalSettings} 
+              loading={saving}
+              loadingText="Saving..."
+            >
               <Save className="h-4 w-4 mr-2" />
-              {saving ? 'Saving...' : 'Save Global Settings'}
+              Save Global Settings
             </Button>
-            <Button onClick={generateSitemap} variant="outline">
+            <Button 
+              onClick={generateSitemap} 
+              variant="outline"
+              loading={generatingSitemap}
+              loadingText="Generating..."
+            >
               <RefreshCw className="h-4 w-4 mr-2" />
               Generate Sitemap
             </Button>
@@ -516,9 +529,13 @@ export const SEOSettings = () => {
             />
           </div>
 
-          <Button onClick={savePageSettings} disabled={saving}>
+          <Button 
+            onClick={savePageSettings} 
+            loading={saving}
+            loadingText="Saving..."
+          >
             <Save className="h-4 w-4 mr-2" />
-            {saving ? 'Saving...' : 'Save Page Settings'}
+            Save Page Settings
           </Button>
         </CardContent>
       </Card>

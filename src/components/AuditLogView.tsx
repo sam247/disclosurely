@@ -488,7 +488,13 @@ const AuditLogView = () => {
             
             {/* Action Buttons */}
             <div className="flex items-center space-x-2">
-              <Button onClick={handleFilterChange} disabled={loading} size="sm" className="h-8 text-xs">
+              <Button 
+                onClick={handleFilterChange} 
+                loading={loading}
+                loadingText="Loading..."
+                size="sm" 
+                className="h-8 text-xs"
+              >
                 <Filter className="h-3 w-3 mr-1" />
                 Apply
               </Button>
