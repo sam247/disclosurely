@@ -124,9 +124,20 @@ const LinkGenerator = () => {
   const primaryDomainStatus = primaryDomainRecord?.status ?? null;
   
   // Check if custom domain is verified (status is 'active' or 'verified')
+  // Also check if domain is active (is_active = true) as that's what Settings shows
   const isCustomDomainVerified = primaryDomainRecord 
-    ? (primaryDomainRecord.status === 'active' || primaryDomainRecord.status === 'verified')
+    ? (primaryDomainRecord.status === 'active' || primaryDomainRecord.status === 'verified') && primaryDomainRecord.is_active
     : false;
+
+  // Debug logging
+  useEffect(() => {
+    if (customDomains.length > 0) {
+      console.log('🔍 LinkGenerator: Custom domains:', customDomains);
+      console.log('🔍 LinkGenerator: Primary domain record:', primaryDomainRecord);
+      console.log('🔍 LinkGenerator: Is custom domain verified?', isCustomDomainVerified);
+      console.log('🔍 LinkGenerator: Primary domain status:', primaryDomainStatus);
+    }
+  }, [customDomains, primaryDomainRecord, isCustomDomainVerified, primaryDomainStatus]);
 
   // Fetch organization info for subdomain and URL toggle settings
   // Use primaryDomainRecord from customDomains query as source of truth for verification status
