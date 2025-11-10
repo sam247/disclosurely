@@ -244,6 +244,13 @@ const DynamicHelmet: React.FC<DynamicHelmetProps> = ({
     // Build URL from pageIdentifier (works on both server and client)
     const baseUrl = 'https://disclosurely.com';
 
+    // Detect current language from URL path
+    const currentPath = typeof window !== 'undefined' ? window.location.pathname : '';
+    const langMatch = currentPath.match(/^\/([a-z]{2})(\/|$)/);
+    const currentLang = langMatch ? langMatch[1] : null;
+    const supportedLangs = ['es', 'fr', 'de', 'pl', 'sv', 'no', 'pt', 'it', 'nl', 'da', 'el'];
+    const hasLangPrefix = currentLang && supportedLangs.includes(currentLang);
+
     // Normalize pageIdentifier to always start with /
     let path = pageIdentifier;
     if (!path.startsWith('/')) {
@@ -255,9 +262,14 @@ const DynamicHelmet: React.FC<DynamicHelmetProps> = ({
       path = path.slice(0, -1);
     }
 
+    // Prepend language prefix if current URL has one (for multilingual SEO)
+    if (hasLangPrefix) {
+      path = `/${currentLang}${path}`;
+    }
+
     // Handle root path specially
     if (path === '/' || path === '') {
-      return baseUrl;
+      return hasLangPrefix ? `${baseUrl}/${currentLang}` : baseUrl;
     }
 
     return `${baseUrl}${path}`;
