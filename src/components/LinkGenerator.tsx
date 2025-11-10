@@ -60,7 +60,7 @@ const LinkGenerator = () => {
   const queryClient = useQueryClient();
 
   // Fetch custom domains via edge function (handles RLS/service role logic)
-  const { data: customDomains = [], refetch: refetchDomains } = useQuery<CustomDomainRecord[]>({
+  const { data: customDomains = [], refetch: refetchDomains, isLoading: isLoadingDomains } = useQuery<CustomDomainRecord[]>({
     queryKey: ['custom-domains', user?.id],
     enabled: !!user,
     refetchOnWindowFocus: true,
