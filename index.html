@@ -1,6 +1,20 @@
 <!doctype html>
 <html lang="en">
   <head>
+    <!-- Set HTML lang attribute based on URL path BEFORE React loads (critical for SEO) -->
+    <script>
+      (function() {
+        var path = window.location.pathname;
+        var langMatch = path.match(/^\/([a-z]{2})(\/|$)/);
+        if (langMatch) {
+          var lang = langMatch[1];
+          var supportedLangs = ['es', 'fr', 'de', 'pl', 'sv', 'no', 'pt', 'it', 'nl', 'da', 'el'];
+          if (supportedLangs.indexOf(lang) !== -1) {
+            document.documentElement.setAttribute('lang', lang);
+          }
+        }
+      })();
+    </script>
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/favicon.ico" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
