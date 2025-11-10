@@ -68,3 +68,6 @@ verify_jwt = false
 
 [functions.strip-all-metadata]
 verify_jwt = false
+
+[functions.case-workflow-engine]
+verify_jwt = true
