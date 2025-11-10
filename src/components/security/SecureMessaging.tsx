@@ -376,11 +376,13 @@ const SecureMessaging = ({ report, onClose }: SecureMessagingProps) => {
             </div>
             <Button 
               type="submit"
-              disabled={isSubmitting || !newMessage.trim()}
+              loading={isSubmitting}
+              loadingText="Sending..."
+              disabled={!newMessage.trim()}
               className="flex items-center gap-2 w-full sm:w-auto"
             >
               <Send className="h-4 w-4" />
-              {isSubmitting ? 'Sending...' : t('sendMessage')}
+              {t('sendMessage')}
             </Button>
           </div>
         </form>

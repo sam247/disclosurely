@@ -592,15 +592,12 @@ const CustomDomainSettings = () => {
             />
             <Button 
               onClick={handleGenerateRecords}
-              disabled={isGenerating || !domain.trim() || (existingDomains.length >= limits.maxCustomDomains && limits.maxCustomDomains > 0)}
+              loading={isGenerating}
+              loadingText="Generating..."
+              disabled={!domain.trim() || (existingDomains.length >= limits.maxCustomDomains && limits.maxCustomDomains > 0)}
               className="flex items-center gap-2 w-full sm:w-auto shrink-0"
             >
-              {isGenerating ? (
-                <>
-                  <RefreshCw className="h-4 w-4 animate-spin" />
-                  Generating...
-                </>
-              ) : existingDomains.length >= limits.maxCustomDomains && limits.maxCustomDomains > 0 ? (
+              {existingDomains.length >= limits.maxCustomDomains && limits.maxCustomDomains > 0 ? (
                 <>
                   <Lock className="h-4 w-4" />
                   Limit Reached
@@ -699,20 +696,13 @@ const CustomDomainSettings = () => {
           <CardContent className="space-y-4">
             <Button 
               onClick={handleVerify}
-              disabled={isVerifying || !domain.trim()}
+              loading={isVerifying}
+              loadingText="Verifying..."
+              disabled={!domain.trim()}
               className="flex items-center gap-2"
             >
-              {isVerifying ? (
-                <>
-                  <RefreshCw className="h-4 w-4 animate-spin" />
-                  Verifying...
-                </>
-              ) : (
-                <>
-                  <CheckCircle className="h-4 w-4" />
-                  Verify Domain
-                </>
-              )}
+              <CheckCircle className="h-4 w-4" />
+              Verify Domain
             </Button>
 
             {/* Progress Indicators */}
