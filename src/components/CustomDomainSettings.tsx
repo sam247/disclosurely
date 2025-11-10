@@ -792,21 +792,13 @@ const CustomDomainSettings = () => {
                 <Button
                   variant="destructive"
                   size="sm"
-                  disabled={deletingDomain === existingDomain.domain_name}
+                  loading={deletingDomain === existingDomain.domain_name}
+                  loadingText="Removing..."
                   onClick={() => handleDeleteDomain(existingDomain.domain_name)}
                   className="whitespace-nowrap shrink-0 w-full sm:w-auto"
                 >
-                  {deletingDomain === existingDomain.domain_name ? (
-                    <>
-                      <RefreshCw className="mr-2 h-4 w-4 animate-spin" />
-                      Removing...
-                    </>
-                  ) : (
-                    <>
-                      <Trash2 className="mr-2 h-4 w-4" />
-                      Remove
-                    </>
-                  )}
+                  <Trash2 className="mr-2 h-4 w-4" />
+                  Remove
                 </Button>
               </div>
             ))}
