@@ -1,4 +1,4 @@
-import { Home, Bot, Users, Palette, Lock, BarChart3, ScrollText, Link as LinkIcon, MessageSquare, Info, FileText, Zap, Settings, Shield } from 'lucide-react';
+import { Home, Bot, Users, Palette, Lock, BarChart3, ScrollText, Link as LinkIcon, MessageSquare, Info, FileText, Zap, Settings, Shield, Workflow } from 'lucide-react';
 import { Separator } from '@/components/ui/separator';
 import { Badge } from '@/components/ui/badge';
 import { useLocation, useNavigate } from 'react-router-dom';
@@ -44,6 +44,12 @@ const DashboardSidebar = ({
     icon: BarChart3,
     path: '/dashboard/analytics',
     locked: !isOrgAdmin
+  }, {
+    title: 'Workflows',
+    icon: Workflow,
+    path: '/dashboard/workflows',
+    locked: !isOrgAdmin,
+    badge: 'NEW'
   }, {
     title: t('audit'),
     icon: ScrollText,

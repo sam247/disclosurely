@@ -46,6 +46,7 @@ import About from './pages/About';
 import Features from './pages/Features';
 import Careers from './pages/Careers';
 import ResumeDraft from './pages/ResumeDraft';
+import WorkflowsPage from './pages/dashboard/WorkflowsPage';
 
 // Component to handle session timeout only for authenticated users
 const SessionTimeoutManager = () => {
@@ -259,17 +260,27 @@ const AppContent = () => {
             </ProtectedRoute>
           } 
         />
-        <Route 
-          path="/dashboard/audit" 
+        <Route
+          path="/dashboard/audit"
           element={
             <ProtectedRoute>
               <DashboardLayout>
                 <AuditLogView />
               </DashboardLayout>
             </ProtectedRoute>
-          } 
+          }
         />
-        
+        <Route
+          path="/dashboard/workflows"
+          element={
+            <ProtectedRoute>
+              <DashboardLayout>
+                <WorkflowsPage />
+              </DashboardLayout>
+            </ProtectedRoute>
+          }
+        />
+
         {/* Catch all - 404 */}
         <Route path="*" element={<NotFound />} />
       </Routes>
