@@ -11,7 +11,7 @@ export const Footer = () => {
   return (
     <footer className="bg-gray-900 text-white">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
           <div className="col-span-1">
             <div className="flex items-center space-x-3 mb-4">
               <img
@@ -106,22 +106,6 @@ export const Footer = () => {
               <li>
                 <Link to={`${langPrefix}/terms`} className="text-gray-400 hover:text-white">
                   Terms of Service
-                </Link>
-              </li>
-            </ul>
-          </div>
-
-          <div>
-            <h3 className="font-semibold mb-4">Comparisons</h3>
-            <ul className="space-y-2">
-              <li>
-                <Link to={`${langPrefix}/vs-speakup`} className="text-gray-400 hover:text-white">
-                  Disclosurely vs SpeakUp
-                </Link>
-              </li>
-              <li>
-                <Link to={`${langPrefix}/vs-whistleblower-software`} className="text-gray-400 hover:text-white">
-                  vs WhistleblowerSoftware
                 </Link>
               </li>
             </ul>
