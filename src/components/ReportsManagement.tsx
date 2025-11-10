@@ -512,6 +512,8 @@ const ReportsManagement = () => {
         description: "Failed to restore report",
         variant: "destructive",
       });
+    } finally {
+      setProcessingReportId(null);
     }
   };
 
