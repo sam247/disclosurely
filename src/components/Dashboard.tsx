@@ -1354,9 +1354,17 @@ const Dashboard = () => {
                       <AlertDialogCancel>Cancel</AlertDialogCancel>
                       <AlertDialogAction 
                         onClick={() => handleDeleteReport(report.id)}
+                        disabled={processingReportId === report.id}
                         className="bg-red-600 hover:bg-red-700"
                       >
-                        Delete Report
+                        {processingReportId === report.id ? (
+                          <>
+                            <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                            Deleting...
+                          </>
+                        ) : (
+                          'Delete Report'
+                        )}
                       </AlertDialogAction>
                     </AlertDialogFooter>
                   </AlertDialogContent>
