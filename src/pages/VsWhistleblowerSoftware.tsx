@@ -5,6 +5,7 @@ import { Link } from 'react-router-dom';
 import { Footer } from '@/components/ui/footer';
 import PublicLanguageSelector from '@/components/PublicLanguageSelector';
 import { useLanguageFromUrl } from '@/hooks/useLanguageFromUrl';
+import DynamicHelmet from '@/components/DynamicHelmet';
 
 const VsWhistleblowerSoftware = () => {
   useLanguageFromUrl();
@@ -72,8 +73,14 @@ const VsWhistleblowerSoftware = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-white">
-      {/* Navigation */}
+    <>
+      <DynamicHelmet
+        pageIdentifier="/vs-whistleblower-software"
+        fallbackTitle="Disclosurely vs WhistleblowerSoftware.com | Platform Comparison"
+        fallbackDescription="Compare Disclosurely and WhistleblowerSoftware.com. Detailed comparison of features, pricing, security, and compliance for whistleblowing solutions."
+      />
+      <div className="min-h-screen bg-white">
+        {/* Navigation */}
       <nav className="bg-white shadow-sm sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center py-4">
@@ -81,7 +88,9 @@ const VsWhistleblowerSoftware = () => {
               <Link to="/" className="flex items-center space-x-3">
                 <img 
                   src="/lovable-uploads/c46ace0e-df58-4119-b5e3-8dcfa075ea2f.png" 
-                  alt="Disclosurely" 
+                  alt="Disclosurely"
+                  loading="lazy"
+                  decoding="async" 
                   className="h-8 w-auto"
                 />
               </Link>
@@ -225,7 +234,8 @@ const VsWhistleblowerSoftware = () => {
       </div>
 
       <Footer />
-    </div>
+      </div>
+    </>
   );
 };
 

@@ -16,12 +16,14 @@
 
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.50.0'
-import { checkRateLimit, Ratelimit } from '../_shared/rateLimit.ts'
+import { Ratelimit } from "https://esm.sh/@upstash/ratelimit@1.0.0"
 import { Redis } from "https://esm.sh/@upstash/redis@1.25.1"
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+  'Access-Control-Allow-Methods': 'POST, OPTIONS',
+  'Access-Control-Max-Age': '86400',
 }
 
 // Rate limiter for draft operations: 10 per 5 minutes per IP
@@ -131,19 +133,27 @@ async function logAudit(supabase: any, operation: string, draftId: string | null
 serve(async (req) => {
   console.log('draft-operations: request start')
 
+  // Handle CORS preflight requests FIRST - with explicit status 200
+  if (req.method === 'OPTIONS') {
+    console.log('draft-operations: Handling OPTIONS preflight request')
+    return new Response('ok', { 
+      status: 200,
+      headers: corsHeaders 
+    })
+  }
+  
   try {
-    if (req.method === 'OPTIONS') {
-      return new Response('ok', { headers: corsHeaders })
-    }
 
     // Rate limiting
-    const rateLimit = await checkRateLimit(req, draftRateLimiter)
-    if (!rateLimit.success) {
+    const clientIp = req.headers.get("x-forwarded-for") || req.headers.get("cf-connecting-ip") || "anonymous"
+    const rateLimitResult = await draftRateLimiter.limit(clientIp)
+    
+    if (!rateLimitResult.success) {
       console.warn('⚠️ Rate limit exceeded for draft operations')
       return new Response(
         JSON.stringify({
           error: "Too many draft operations. Please try again later.",
-          reset: rateLimit.reset,
+          reset: rateLimitResult.reset,
         }),
         {
           status: 429,
@@ -167,7 +177,7 @@ serve(async (req) => {
       }
     )
 
-    const clientIp = req.headers.get("x-forwarded-for") || "unknown"
+    // clientIp already defined above for rate limiting
 
     // Handle different operations
     switch (operation) {

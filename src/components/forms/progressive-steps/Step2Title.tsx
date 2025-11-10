@@ -72,7 +72,7 @@ const Step2Title = ({ value, onChange, isValid, language }: Step2TitleProps) => 
             maxLength={200}
             autoComplete="off"
           />
-          <div className="flex justify-between items-center text-xs sm:text-sm gap-2">
+          <div className="flex justify-between items-center text-xs sm:text-sm gap-2 mt-2">
             <div className="text-gray-500 min-w-0 flex-1">
               {!isValid && value.length > 0 && value.length < 5 && (
                 <span className="text-amber-600">{t.step1.minChars}</span>

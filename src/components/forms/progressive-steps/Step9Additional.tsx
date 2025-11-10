@@ -1,6 +1,5 @@
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { FileText, Users, History } from 'lucide-react';
 import { progressiveFormTranslations } from '@/i18n/progressiveFormTranslations';
@@ -8,36 +7,29 @@ import { progressiveFormTranslations } from '@/i18n/progressiveFormTranslations'
 interface Step9AdditionalProps {
   witnesses: string;
   previousReports: boolean;
-  additionalNotes: string;
-  onChange: (updates: { witnesses?: string; previousReports?: boolean; additionalNotes?: string }) => void;
+  onChange: (updates: { witnesses?: string; previousReports?: boolean }) => void;
   language: string;
 }
 
-const Step9Additional = ({ witnesses, previousReports, additionalNotes, onChange, language }: Step9AdditionalProps) => {
+const Step9Additional = ({ witnesses, previousReports, onChange, language }: Step9AdditionalProps) => {
   const t = progressiveFormTranslations[language as keyof typeof progressiveFormTranslations] || progressiveFormTranslations.en;
   return (
     <div className="space-y-4 py-2">
-      <div className="flex items-center gap-3">
-        <div className="p-2 rounded-lg bg-primary/10">
-          <FileText className="w-5 h-5 text-primary" />
+      <div className="flex items-center gap-2 sm:gap-3">
+        <div className="p-1.5 sm:p-2 rounded-lg bg-primary/10 flex-shrink-0">
+          <FileText className="w-4 h-4 sm:w-5 sm:h-5 text-primary" />
         </div>
-        <div>
-          <h2 className="text-2xl font-bold text-gray-900">
+        <div className="min-w-0">
+          <h2 className="text-lg sm:text-2xl font-bold text-gray-900">
             {t.step8.title}
           </h2>
-          <p className="text-sm text-gray-600 mt-1">
+          <p className="text-xs sm:text-sm text-gray-600 mt-1">
             {t.step8.subtitle}
           </p>
         </div>
       </div>
 
-      <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-        <p className="text-sm text-blue-900">
-          {t.step8.info}
-        </p>
-      </div>
-
-      <div className="space-y-6">
+      <div className="space-y-4 sm:space-y-6">
         {/* Witnesses */}
         <div className="space-y-2">
           <div className="flex items-center gap-2">
@@ -81,30 +73,10 @@ const Step9Additional = ({ witnesses, previousReports, additionalNotes, onChange
           </Select>
         </div>
 
-        {/* Additional Notes */}
-        <div className="space-y-2">
-          <div className="flex items-center gap-2">
-            <FileText className="w-4 h-4 text-gray-500" />
-            <Label htmlFor="additionalNotes" className="text-base">
-              {t.step8.additionalNotesLabel}
-            </Label>
-          </div>
-          <Textarea
-            id="additionalNotes"
-            value={additionalNotes}
-            onChange={(e) => onChange({ additionalNotes: e.target.value })}
-            placeholder={t.step8.additionalNotesPlaceholder}
-            className="min-h-[120px] text-base resize-none"
-            maxLength={1000}
-          />
-          <div className="flex justify-end">
-            <span className="text-xs text-gray-400">{additionalNotes.length}{t.step8.additionalNotesCharCount}</span>
-          </div>
-        </div>
       </div>
 
-      {(witnesses || previousReports || additionalNotes) && (
-        <p className="text-sm text-green-600">
+      {(witnesses || previousReports) && (
+        <p className="text-sm text-green-600 mt-2">
           {t.step8.contextProvided}
         </p>
       )}

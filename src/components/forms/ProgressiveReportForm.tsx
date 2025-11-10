@@ -44,6 +44,8 @@ interface ProgressiveReportFormProps {
   organizationName?: string;
   draftCode?: string;
   onDraftSaved?: (draftCode: string) => void;
+  defaultLanguage?: string;
+  availableLanguages?: string[] | null;
 }
 
 const ProgressiveReportForm = ({
@@ -57,13 +59,16 @@ const ProgressiveReportForm = ({
   organizationId,
   organizationName,
   draftCode: initialDraftCode,
-  onDraftSaved
+  onDraftSaved,
+  defaultLanguage,
+  availableLanguages
 }: ProgressiveReportFormProps) => {
   const [currentStep, setCurrentStep] = useState(0);
   const [direction, setDirection] = useState<'forward' | 'backward'>('forward');
   const [privacyRisks, setPrivacyRisks] = useState<any[]>([]);
   const [hasViewedPrivacy, setHasViewedPrivacy] = useState(false);
-  const [language, setLanguage] = useState<string>('en');
+  // Use default_language from settings, fallback to 'en'
+  const [language, setLanguage] = useState<string>(defaultLanguage || 'en');
   const [currentDraftCode, setCurrentDraftCode] = useState(initialDraftCode);
 
   // Check for privacy risks whenever title/description changes
@@ -170,11 +175,6 @@ const ProgressiveReportForm = ({
     }
   };
 
-  const handleSkip = () => {
-    if (currentStep < totalSteps - 1) {
-      goToStep(currentStep + 1);
-    }
-  };
 
   const handleAutoRedact = (redactedTitle: string, redactedDescription: string) => {
     updateFormData({
@@ -245,6 +245,7 @@ const ProgressiveReportForm = ({
             language={language}
             onLanguageChange={setLanguage}
             organizationName={organizationName}
+            availableLanguages={availableLanguages}
           />
         );
       case 1:
@@ -330,7 +331,6 @@ const ProgressiveReportForm = ({
           <Step9Additional
             witnesses={formData.witnesses}
             previousReports={formData.previousReports}
-            additionalNotes={formData.additionalNotes}
             onChange={updateFormData}
             language={language}
           />
@@ -354,13 +354,12 @@ const ProgressiveReportForm = ({
 
   // Don't show navigation on welcome or review steps
   const showNavigation = currentStep > 0 && currentStep < totalSteps - 1;
-  const showSkip = [6, 7, 8].includes(currentStep); // When/Where, Evidence, Additional
   const isNextDisabled = !validateStep(currentStep);
 
   const t = progressiveFormTranslations[language as keyof typeof progressiveFormTranslations] || progressiveFormTranslations.en;
 
   return (
-    <div className="w-full max-w-2xl mx-auto px-1 sm:px-0" dir={language === 'el' ? 'ltr' : undefined}>
+    <div className="w-full max-w-2xl mx-auto px-1 sm:px-0 flex flex-col min-h-0" dir={language === 'el' ? 'ltr' : undefined}>
       {/* Progress bar */}
       <div className="mb-4 sm:mb-6">
         <div className="flex justify-between items-center mb-2">
@@ -376,9 +375,15 @@ const ProgressiveReportForm = ({
         <Progress value={progressPercent} className="h-2" />
       </div>
 
-      {/* Step content with animation */}
+      {/* Step content with animation - Flexible on mobile, fixed on desktop */}
       <div
-        className="min-h-[280px] sm:min-h-[300px] transition-all duration-300 ease-in-out"
+        className={`transition-all duration-300 ease-in-out ${
+          currentStep === 9 || currentStep === 10 
+            ? 'min-h-[180px]' // Review step - min height only, allow scroll
+            : currentStep === 0
+            ? 'min-h-[198px] sm:min-h-[352px]' // Welcome step - min height to accommodate footer
+            : 'min-h-[198px] sm:h-[352px]' // Mobile: min-height (flexible), Desktop: fixed height
+        }`}
         key={currentStep}
       >
         {renderStep()}
@@ -387,29 +392,11 @@ const ProgressiveReportForm = ({
       {/* Navigation buttons */}
       {showNavigation && (
         <div className="flex flex-col gap-3 sm:gap-4 mt-4 sm:mt-6 pt-4 border-t">
-          <div className="flex items-center justify-between gap-2">
-            <Button
-              variant="ghost"
-              onClick={handleBack}
-              disabled={isSubmitting}
-              className="flex items-center gap-2 h-11 sm:h-10 px-3 sm:px-4"
-            >
-              <ChevronLeft className="w-4 h-4" />
-              <span className="hidden xs:inline">{t.navigation.back}</span>
-            </Button>
-
-            <div className="flex items-center gap-2 sm:gap-3 flex-wrap justify-end">
-              {showSkip && (
-                <Button
-                  variant="outline"
-                  onClick={handleSkip}
-                  disabled={isSubmitting}
-                  className="h-11 sm:h-10 px-3 sm:px-4 text-sm"
-                >
-                  {t.navigation.skip}
-                </Button>
-              )}
-              {organizationId && currentStep > 0 && (
+          {/* Mobile: Stack buttons vertically */}
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2 sm:gap-2">
+            {/* Mobile: Save Draft on top, then Back/Continue */}
+            {organizationId && currentStep > 0 && (
+              <div className="sm:hidden w-full">
                 <SaveDraftButton
                   formData={formData}
                   currentStep={currentStep}
@@ -420,18 +407,51 @@ const ProgressiveReportForm = ({
                     setCurrentDraftCode(code);
                     onDraftSaved?.(code);
                   }}
+                  brandColor={brandColor}
                 />
-              )}
+              </div>
+            )}
+            
+            {/* Back and Continue buttons */}
+            <div className="flex items-center gap-2 w-full sm:w-auto">
+              <Button
+                variant="ghost"
+                onClick={handleBack}
+                disabled={isSubmitting}
+                className="flex items-center gap-2 h-11 sm:h-10 px-3 sm:px-4 flex-1 sm:flex-initial"
+              >
+                <ChevronLeft className="w-4 h-4" />
+                <span>{t.navigation.back}</span>
+              </Button>
+
               <Button
                 onClick={handleNext}
                 disabled={isNextDisabled || isSubmitting}
                 style={{ backgroundColor: isNextDisabled ? undefined : brandColor }}
-                className="flex items-center gap-2 h-11 sm:h-10 px-4 sm:px-4"
+                className="flex items-center gap-2 h-11 sm:h-10 px-4 sm:px-4 flex-1 sm:flex-initial"
               >
                 {t.navigation.continue}
                 <ChevronRight className="w-4 h-4" />
               </Button>
             </div>
+
+            {/* Desktop: Save Draft on the right */}
+            {organizationId && currentStep > 0 && (
+              <div className="hidden sm:flex items-center gap-2 sm:gap-3">
+                <SaveDraftButton
+                  formData={formData}
+                  currentStep={currentStep}
+                  language={language}
+                  organizationId={organizationId}
+                  existingDraftCode={currentDraftCode}
+                  onDraftSaved={(code) => {
+                    setCurrentDraftCode(code);
+                    onDraftSaved?.(code);
+                  }}
+                  brandColor={brandColor}
+                />
+              </div>
+            )}
           </div>
         </div>
       )}

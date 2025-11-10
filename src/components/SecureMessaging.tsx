@@ -320,20 +320,13 @@ const SecureMessaging = () => {
                   />
                   <Button 
                     onClick={sendMessage}
-                    disabled={isSending || !newMessage.trim()}
+                    loading={isSending}
+                    loadingText="Sending..."
+                    disabled={!newMessage.trim()}
                     className="w-full"
                   >
-                    {isSending ? (
-                      <>
-                        <Clock className="mr-2 h-4 w-4 animate-spin" />
-                        Sending...
-                      </>
-                    ) : (
-                      <>
-                        <Send className="mr-2 h-4 w-4" />
-                        Send Secure Message
-                      </>
-                    )}
+                    <Send className="mr-2 h-4 w-4" />
+                    Send Secure Message
                   </Button>
                 </div>
               </CardContent>

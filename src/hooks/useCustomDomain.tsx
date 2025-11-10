@@ -68,9 +68,9 @@ export const useCustomDomain = (): CustomDomainInfo => {
           if (!error && org) {
             console.log('✅ useCustomDomain: Organization found via subdomain!', org);
             setDomainInfo({
-              customDomain: currentHost,
+              customDomain: null, // Subdomain, not custom domain
               organizationId: org.id,
-              isCustomDomain: true,
+              isCustomDomain: false, // This is a subdomain, not a custom domain
               loading: false
             });
             return;

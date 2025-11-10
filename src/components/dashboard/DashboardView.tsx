@@ -245,6 +245,10 @@ const DashboardView = () => {
   const [selectedReportIds, setSelectedReportIds] = useState<string[]>([]);
   const [smartFilters, setSmartFilters] = useState<SmartFilter[]>([]);
   const [isBulkProcessing, setIsBulkProcessing] = useState(false);
+  const [processingReportId, setProcessingReportId] = useState<string | null>(null);
+  const [exportingReportId, setExportingReportId] = useState<string | null>(null);
+  const [resolvingReportId, setResolvingReportId] = useState<string | null>(null);
+  const [updatingStatusReportId, setUpdatingStatusReportId] = useState<string | null>(null);
 
   useEffect(() => {
     console.log('DashboardView useEffect - user:', !!user, 'rolesLoading:', rolesLoading, 'isOrgAdmin:', isOrgAdmin);
@@ -575,6 +579,7 @@ const DashboardView = () => {
   };
 
   const handleArchiveReport = async (reportId: string) => {
+    setProcessingReportId(reportId);
     try {
       const { error } = await supabase
         .from('reports')
@@ -615,10 +620,13 @@ const DashboardView = () => {
         description: "Failed to archive report. Please try again.",
         variant: "destructive",
       });
+    } finally {
+      setProcessingReportId(null);
     }
   };
 
   const handleUnarchiveReport = async (reportId: string) => {
+    setProcessingReportId(reportId);
     try {
       const { error } = await supabase
         .from('reports')
@@ -643,6 +651,8 @@ const DashboardView = () => {
         description: "Failed to unarchive report. Please try again.",
         variant: "destructive",
       });
+    } finally {
+      setProcessingReportId(null);
     }
   };
 
@@ -752,6 +762,7 @@ Additional Details: ${decryptedContent.additionalDetails || 'None provided'}
 
   // Export individual report as PDF
   const exportReportToPDF = async (report: Report) => {
+    setExportingReportId(report.id);
     try {
       toast({ title: "Generating PDF...", description: "Please wait" });
 
@@ -816,8 +827,6 @@ Additional Details: ${decryptedContent.additionalDetails || 'None provided'}
 
       // Download the PDF
       downloadPDF(doc, `case-report-${report.tracking_id}`);
-
-      // Log export action
       await log.info(LogContext.CASE_MANAGEMENT, 'Case report exported as PDF', {
         reportId: report.id,
         userId: user?.id,
@@ -836,6 +845,8 @@ Additional Details: ${decryptedContent.additionalDetails || 'None provided'}
         description: "Failed to generate PDF",
         variant: "destructive",
       });
+    } finally {
+      setExportingReportId(null);
     }
   };
 
@@ -1524,9 +1535,8 @@ Additional Details: ${decryptedContent.additionalDetails || 'None provided'}
                                   <DropdownMenuContent align="end" className="w-48">
                                     <DropdownMenuItem 
                                       onClick={async () => {
-                                        console.log('Dropdown clicked: Mark as Reviewing');
+                                        setUpdatingStatusReportId(report.id);
                                         try {
-                                          console.log('DashboardView: Starting status change to reviewing for report:', report.id);
                                           const { error } = await supabase
                                             .from('reports')
                                             .update({ 
@@ -1538,27 +1548,13 @@ Additional Details: ${decryptedContent.additionalDetails || 'None provided'}
                                           if (error) throw error;
                                           
                                           // Log audit event
-                                          console.log('DashboardView: Dropdown action - organizationId:', organizationId);
-                                          console.log('DashboardView: Dropdown action - effectiveOrganizationId:', effectiveOrganizationId);
-                                          console.log('DashboardView: User ID:', user?.id);
-                                          console.log('DashboardView: User email:', user?.email);
-                                          console.log('DashboardView: User metadata:', user?.user_metadata);
-                                          console.log('DashboardView: About to check if effectiveOrganizationId exists...');
                                           if (effectiveOrganizationId) {
-                                            console.log('DashboardView: effectiveOrganizationId is valid, calling log.info...');
                                             await log.info(LogContext.CASE_MANAGEMENT, 'Report status updated', {
                                               reportId: report.id,
                                               userId: user?.id,
                                               userEmail: user?.email,
                                               organizationId: effectiveOrganizationId
                                             });
-                                            console.log('DashboardView: Audit event logged successfully');
-                                            // Small delay to ensure database transaction is committed
-                                            await new Promise(resolve => setTimeout(resolve, 100));
-                                          } else {
-                                            console.log('DashboardView: effectiveOrganizationId is null/undefined, cannot log audit event');
-                                            console.log('DashboardView: organizationId from useCustomDomain:', organizationId);
-                                            console.log('DashboardView: user?.user_metadata?.organization_id:', user?.user_metadata?.organization_id);
                                           }
                                           
                                           toast({ title: 'Report marked as Reviewing' });
@@ -1569,16 +1565,19 @@ Additional Details: ${decryptedContent.additionalDetails || 'None provided'}
                                             title: 'Error updating report status',
                                             variant: 'destructive'
                                           });
+                                        } finally {
+                                          setUpdatingStatusReportId(null);
                                         }
                                       }}
+                                      disabled={updatingStatusReportId === report.id}
                                     >
                                       <Eye className="h-4 w-4 mr-2" />
-                                      Mark as Reviewing
+                                      {updatingStatusReportId === report.id ? 'Updating...' : 'Mark as Reviewing'}
                                     </DropdownMenuItem>
                                     <DropdownMenuItem 
                                       onClick={async () => {
+                                        setUpdatingStatusReportId(report.id);
                                         try {
-                                          console.log('DashboardView: Starting status change to investigating for report:', report.id);
                                           const { error } = await supabase
                                             .from('reports')
                                             .update({ 
@@ -1607,14 +1606,18 @@ Additional Details: ${decryptedContent.additionalDetails || 'None provided'}
                                             title: 'Error updating report status',
                                             variant: 'destructive'
                                           });
+                                        } finally {
+                                          setUpdatingStatusReportId(null);
                                         }
                                       }}
+                                      disabled={updatingStatusReportId === report.id}
                                     >
                                       <Search className="h-4 w-4 mr-2" />
-                                      Mark as Investigating
+                                      {updatingStatusReportId === report.id ? 'Updating...' : 'Mark as Investigating'}
                                     </DropdownMenuItem>
                                     <DropdownMenuItem 
                                       onClick={async () => {
+                                        setResolvingReportId(report.id);
                                         try {
                                           const { error } = await supabase
                                             .from('reports')
@@ -1644,19 +1647,28 @@ Additional Details: ${decryptedContent.additionalDetails || 'None provided'}
                                             title: 'Error resolving report',
                                             variant: 'destructive'
                                           });
+                                        } finally {
+                                          setResolvingReportId(null);
                                         }
                                       }}
+                                      disabled={resolvingReportId === report.id}
                                     >
                                       <CheckCircle className="h-4 w-4 mr-2" />
-                                      Mark as Resolved
+                                      {resolvingReportId === report.id ? 'Resolving...' : 'Mark as Resolved'}
                                     </DropdownMenuItem>
-                                    <DropdownMenuItem onClick={() => exportReportToPDF(report)}>
+                                    <DropdownMenuItem 
+                                      onClick={() => exportReportToPDF(report)}
+                                      disabled={exportingReportId === report.id}
+                                    >
                                       <Download className="h-4 w-4 mr-2" />
-                                      Export PDF
+                                      {exportingReportId === report.id ? 'Exporting PDF...' : 'Export PDF'}
                                     </DropdownMenuItem>
-                                    <DropdownMenuItem onClick={() => handleArchiveReport(report.id)}>
+                                    <DropdownMenuItem 
+                                      onClick={() => handleArchiveReport(report.id)}
+                                      disabled={processingReportId === report.id}
+                                    >
                                       <Archive className="h-4 w-4 mr-2" />
-                                      Archive
+                                      {processingReportId === report.id ? 'Archiving...' : 'Archive'}
                                     </DropdownMenuItem>
                                     <DropdownMenuSeparator />
                                     <DropdownMenuItem 
@@ -1795,6 +1807,7 @@ Additional Details: ${decryptedContent.additionalDetails || 'None provided'}
                               <DropdownMenuContent align="end" className="w-48">
                                 <DropdownMenuItem 
                                   onClick={async () => {
+                                    setUpdatingStatusReportId(report.id);
                                     try {
                                       const { error } = await supabase
                                         .from('reports')
@@ -1820,14 +1833,18 @@ Additional Details: ${decryptedContent.additionalDetails || 'None provided'}
                                         title: 'Error updating report status',
                                         variant: 'destructive'
                                       });
+                                    } finally {
+                                      setUpdatingStatusReportId(null);
                                     }
                                   }}
+                                  disabled={updatingStatusReportId === report.id}
                                 >
                                   <Eye className="h-4 w-4 mr-2" />
-                                  Mark as Reviewing
+                                  {updatingStatusReportId === report.id ? 'Updating...' : 'Mark as Reviewing'}
                                 </DropdownMenuItem>
                                 <DropdownMenuItem 
                                   onClick={async () => {
+                                    setUpdatingStatusReportId(report.id);
                                     try {
                                       const { error } = await supabase
                                         .from('reports')
@@ -1853,14 +1870,18 @@ Additional Details: ${decryptedContent.additionalDetails || 'None provided'}
                                         title: 'Error updating report status',
                                         variant: 'destructive'
                                       });
+                                    } finally {
+                                      setUpdatingStatusReportId(null);
                                     }
                                   }}
+                                  disabled={updatingStatusReportId === report.id}
                                 >
                                   <Search className="h-4 w-4 mr-2" />
-                                  Mark as Investigating
+                                  {updatingStatusReportId === report.id ? 'Updating...' : 'Mark as Investigating'}
                                 </DropdownMenuItem>
                                 <DropdownMenuItem 
                                   onClick={async () => {
+                                    setResolvingReportId(report.id);
                                     try {
                                       const { error } = await supabase
                                         .from('reports')
@@ -1886,19 +1907,28 @@ Additional Details: ${decryptedContent.additionalDetails || 'None provided'}
                                         title: 'Error resolving report',
                                         variant: 'destructive'
                                       });
+                                    } finally {
+                                      setResolvingReportId(null);
                                     }
                                   }}
+                                  disabled={resolvingReportId === report.id}
                                 >
                                   <CheckCircle className="h-4 w-4 mr-2" />
-                                  Mark as Resolved
+                                  {resolvingReportId === report.id ? 'Resolving...' : 'Mark as Resolved'}
                                 </DropdownMenuItem>
-                                <DropdownMenuItem onClick={() => exportReportToPDF(report)}>
+                                <DropdownMenuItem 
+                                  onClick={() => exportReportToPDF(report)}
+                                  disabled={exportingReportId === report.id}
+                                >
                                   <Download className="h-4 w-4 mr-2" />
-                                  Export PDF
+                                  {exportingReportId === report.id ? 'Exporting PDF...' : 'Export PDF'}
                                 </DropdownMenuItem>
-                                <DropdownMenuItem onClick={() => handleArchiveReport(report.id)}>
+                                <DropdownMenuItem 
+                                  onClick={() => handleArchiveReport(report.id)}
+                                  disabled={processingReportId === report.id}
+                                >
                                   <Archive className="h-4 w-4 mr-2" />
-                                  Archive
+                                  {processingReportId === report.id ? 'Archiving...' : 'Archive'}
                                 </DropdownMenuItem>
                                 <DropdownMenuSeparator />
                                 <DropdownMenuItem 
@@ -2020,9 +2050,12 @@ Additional Details: ${decryptedContent.additionalDetails || 'None provided'}
                                 </Button>
                               </DropdownMenuTrigger>
                               <DropdownMenuContent align="end" className="w-40">
-                                <DropdownMenuItem onClick={() => handleUnarchiveReport(report.id)}>
+                                <DropdownMenuItem 
+                                  onClick={() => handleUnarchiveReport(report.id)}
+                                  disabled={processingReportId === report.id}
+                                >
                                   <RotateCcw className="h-4 w-4 mr-2" />
-                                  Unarchive
+                                  {processingReportId === report.id ? 'Unarchiving...' : 'Unarchive'}
                                 </DropdownMenuItem>
                               </DropdownMenuContent>
                             </DropdownMenu>

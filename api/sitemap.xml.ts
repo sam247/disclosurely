@@ -1,4 +1,6 @@
 import { createClient } from 'contentful';
+import { readdir } from 'fs/promises';
+import { join } from 'path';
 
 type VercelRequest = {
   method?: string;
@@ -45,86 +47,44 @@ const STATIC_ROUTES = [
 const BASE_URL = 'https://disclosurely.com';
 const DOCS_URL = 'https://docs.disclosurely.com';
 
-// Docs pages - extracted from VitePress config sidebar
-// This ensures all docs content is included in main sitemap for unified SEO authority
-const DOCS_PAGES = [
-  // Quick Start
-  '/quick-start',
-  // Introduction
-  '/introduction/platform-overview',
-  '/introduction/key-concepts',
-  // Admin
-  '/admin/initial-setup',
-  '/admin/organization-settings',
-  '/admin/team-management',
-  '/admin/custom-branding',
-  '/admin/custom-domains',
-  '/admin/subscription-billing',
-  // Reporting
-  '/reporting/how-to-submit',
-  '/reporting/report-types',
-  '/reporting/tracking-report',
-  '/reporting/secure-messaging',
-  '/reporting/encryption',
-  // Cases
-  '/cases/assignment',
-  '/cases/workflow',
-  '/cases/status',
-  '/cases/evidence',
-  '/cases/resolution',
-  '/cases/archiving',
-  // AI
-  '/ai/case-helper',
-  '/ai/pattern-detection',
-  '/ai/risk-assessment',
-  '/ai/content-generation',
-  // Compliance
-  '/compliance/overview',
-  '/compliance/audit-trail',
-  '/compliance/gdpr',
-  '/compliance/retention',
-  '/compliance/eu-directive',
-  '/compliance/sox',
-  '/compliance/policies',
-  '/compliance/risks',
-  '/compliance/calendar',
-  '/compliance/anti-retaliation',
-  '/compliance/reporting-analytics',
-  // Security
-  '/security/overview',
-  '/security/authentication',
-  '/security/mfa',
-  '/security/encryption',
-  '/security/access-control',
-  '/security/monitoring',
-  '/security/best-practices',
-  // Analytics
-  '/analytics/overview',
-  '/analytics/dashboard',
-  '/analytics/statistics',
-  '/analytics/compliance-analytics',
-  // Regulatory
-  '/regulatory/eu-directive',
-  '/regulatory/gdpr',
-  '/regulatory/sox',
-  '/regulatory/iso-27001',
-  // Guides
-  '/guides/administrators',
-  '/guides/case-handlers',
-  '/guides/reviewers',
-  '/guides/whistleblowers',
-  // Features
-  '/features/anonymous-reporting',
-  '/features/ai-case-analysis',
-  // Integrations
-  '/integrations/coming-soon',
-  // Support
-  '/support/faqs',
-  '/support/troubleshooting',
-  '/support/contact',
-  // Quick start
-  '/quick-start',
-];
+// Helper function to recursively scan directory for markdown files
+async function scanDocsDirectory(dir: string, baseDir: string = dir): Promise<string[]> {
+  const paths: string[] = [];
+
+  try {
+    const entries = await readdir(dir, { withFileTypes: true });
+
+    for (const entry of entries) {
+      const fullPath = join(dir, entry.name);
+
+      if (entry.isDirectory()) {
+        // Skip hidden directories and build output
+        if (!entry.name.startsWith('.') && !entry.name.startsWith('_')) {
+          const subPaths = await scanDocsDirectory(fullPath, baseDir);
+          paths.push(...subPaths);
+        }
+      } else if (entry.isFile() && entry.name.endsWith('.md')) {
+        // Convert file path to URL path
+        const relativePath = fullPath.substring(baseDir.length);
+        // Remove .md extension and convert to URL path
+        let urlPath = relativePath.replace(/\.md$/, '');
+        // Convert index.md to directory path
+        if (urlPath.endsWith('/index')) {
+          urlPath = urlPath.replace(/\/index$/, '');
+        }
+        // Handle root index
+        if (urlPath === '/index' || urlPath === 'index') {
+          continue; // Skip root index, we add it separately
+        }
+        paths.push(urlPath);
+      }
+    }
+  } catch (error) {
+    console.error('Error scanning docs directory:', error);
+  }
+
+  return paths;
+}
 
 interface UrlEntry {
   loc: string;
@@ -161,15 +121,16 @@ function generateSitemapEntries(): UrlEntry[] {
       alternates: [
         { hreflang: 'x-default', href: `${BASE_URL}${basePath}` },
         { hreflang: 'en', href: `${BASE_URL}${basePath}` },
-        ...LANGUAGES.map(lang => ({
+        // Only include non-English languages to avoid duplicate 'en' hreflang
+        ...LANGUAGES.filter(lang => lang !== 'en').map(lang => ({
           hreflang: lang,
           href: `${BASE_URL}/${lang}${basePath}`,
         })),
       ],
     });
 
-    // Add language-specific versions
-    LANGUAGES.forEach(lang => {
+    // Add language-specific versions (exclude 'en' - English is at root path)
+    LANGUAGES.filter(lang => lang !== 'en').forEach(lang => {
       entries.push({
         loc: `${BASE_URL}/${lang}${basePath}`,
         lastmod: now,
@@ -178,7 +139,8 @@ function generateSitemapEntries(): UrlEntry[] {
         alternates: [
           { hreflang: 'x-default', href: `${BASE_URL}${basePath}` },
           { hreflang: 'en', href: `${BASE_URL}${basePath}` },
-          ...LANGUAGES.map(l => ({
+          // Only include non-English languages to avoid duplicate 'en' hreflang
+          ...LANGUAGES.filter(l => l !== 'en').map(l => ({
             hreflang: l,
             href: `${BASE_URL}/${l}${basePath}`,
           })),
@@ -228,7 +190,7 @@ async function fetchBlogPosts(): Promise<UrlEntry[]> {
   }
 }
 
-function generateDocsEntries(): UrlEntry[] {
+async function generateDocsEntries(): Promise<UrlEntry[]> {
   const entries: UrlEntry[] = [];
   const now = new Date().toISOString().split('T')[0];
 
@@ -240,15 +202,26 @@ function generateDocsEntries(): UrlEntry[] {
     priority: '0.9',
   });
 
-  // Include all docs pages
-  DOCS_PAGES.forEach(path => {
-    entries.push({
-      loc: `${DOCS_URL}${path}`,
-      lastmod: now,
-      changefreq: 'monthly',
-      priority: '0.7', // High priority for docs - valuable SEO content
+  try {
+    // Dynamically scan the docs directory for all markdown files
+    const docsDir = join(process.cwd(), 'docs', 'docs');
+    const docsPaths = await scanDocsDirectory(docsDir);
+
+    console.log(`Found ${docsPaths.length} docs pages`);
+
+    // Include all discovered docs pages
+    docsPaths.forEach(path => {
+      entries.push({
+        loc: `${DOCS_URL}${path}`,
+        lastmod: now,
+        changefreq: 'monthly',
+        priority: '0.7', // High priority for docs - valuable SEO content
+      });
     });
-  });
+  } catch (error) {
+    console.error('Error generating docs entries:', error);
+    // If scanning fails, continue without docs entries
+  }
 
   return entries;
 }
@@ -279,23 +252,25 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   try {
     // Generate static route entries
     const staticEntries = generateSitemapEntries();
-    
+
     // Fetch blog posts from Contentful
     const blogEntries = await fetchBlogPosts();
-    
-    // Generate docs entries (unified in main sitemap for better SEO)
-    const docsEntries = generateDocsEntries();
-    
+
+    // Generate docs entries (dynamically scanned - unified in main sitemap for better SEO)
+    const docsEntries = await generateDocsEntries();
+
     // Combine all entries - UNIFIED sitemap for consolidated SEO authority
     const allEntries = [...staticEntries, ...blogEntries, ...docsEntries];
-    
+
+    console.log(`Total sitemap entries: ${allEntries.length} (static: ${staticEntries.length}, blog: ${blogEntries.length}, docs: ${docsEntries.length})`);
+
     // Generate XML
     const sitemap = generateSitemapXML(allEntries);
-    
+
     // Set proper headers
     res.setHeader('Content-Type', 'application/xml');
     res.setHeader('Cache-Control', 'public, s-maxage=3600, stale-while-revalidate=86400');
-    
+
     return res.status(200).send(sitemap);
   } catch (error) {
     console.error('Error generating sitemap:', error);

@@ -10,7 +10,7 @@ import { Badge } from '@/components/ui/badge';
 import { useAuth } from '@/hooks/useAuth';
 import { useUserRoles } from '@/hooks/useUserRoles';
 import { useToast } from '@/hooks/use-toast';
-import { LogOut, ExternalLink, FileText, Eye, Archive, Trash2, Settings, RotateCcw, MoreVertical, Bot, Search, User, XCircle, ChevronUp, ChevronDown } from 'lucide-react';
+import { LogOut, ExternalLink, FileText, Eye, Archive, Trash2, Settings, RotateCcw, MoreVertical, Bot, Search, User, XCircle, ChevronUp, ChevronDown, Loader2 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import ReportMessaging from '@/components/ReportMessaging';
 import ReportContentDisplay from '@/components/ReportContentDisplay';
@@ -98,6 +98,7 @@ const Dashboard = () => {
   const [sortField, setSortField] = useState<'created_at' | 'title' | 'tracking_id'>('created_at');
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('desc');
   const [reportCategories, setReportCategories] = useState<Record<string, string>>({});
+  const [processingReportId, setProcessingReportId] = useState<string | null>(null);
 
   // Secure category extraction with rate limiting
   const decryptReportCategory = async (report: Report): Promise<string> => {
@@ -484,6 +485,7 @@ const Dashboard = () => {
   };
 
   const handleArchiveReport = async (reportId: string) => {
+    setProcessingReportId(reportId);
     try {
       const { error } = await supabase
         .from('reports')
@@ -517,10 +519,13 @@ const Dashboard = () => {
         description: "Failed to archive report. Please try again.",
         variant: "destructive",
       });
+    } finally {
+      setProcessingReportId(null);
     }
   };
 
   const handleUnarchiveReport = async (reportId: string) => {
+    setProcessingReportId(reportId);
     try {
       const { error } = await supabase
         .from('reports')
@@ -554,10 +559,13 @@ const Dashboard = () => {
         description: "Failed to unarchive report. Please try again.",
         variant: "destructive",
       });
+    } finally {
+      setProcessingReportId(null);
     }
   };
 
   const handleDeleteReport = async (reportId: string) => {
+    setProcessingReportId(reportId);
     try {
       const { error } = await supabase.functions.invoke('soft-delete-report', {
         body: { reportId },
@@ -589,6 +597,8 @@ const Dashboard = () => {
         description: "Failed to delete report. Please try again.",
         variant: "destructive",
       });
+    } finally {
+      setProcessingReportId(null);
     }
   };
 
@@ -1220,14 +1230,20 @@ const Dashboard = () => {
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end">
                     {isArchived ? (
-                      <DropdownMenuItem onClick={() => handleUnarchiveReport(report.id)}>
+                      <DropdownMenuItem 
+                        onClick={() => handleUnarchiveReport(report.id)}
+                        disabled={processingReportId === report.id}
+                      >
                         <RotateCcw className="h-4 w-4 mr-2" />
-                        Unarchive
+                        {processingReportId === report.id ? 'Unarchiving...' : 'Unarchive'}
                       </DropdownMenuItem>
                     ) : (
-                      <DropdownMenuItem onClick={() => handleArchiveReport(report.id)}>
+                      <DropdownMenuItem 
+                        onClick={() => handleArchiveReport(report.id)}
+                        disabled={processingReportId === report.id}
+                      >
                         <Archive className="h-4 w-4 mr-2" />
-                        Archive
+                        {processingReportId === report.id ? 'Archiving...' : 'Archive'}
                       </DropdownMenuItem>
                     )}
                     <AlertDialog>
@@ -1249,9 +1265,17 @@ const Dashboard = () => {
                           <AlertDialogCancel>Cancel</AlertDialogCancel>
                           <AlertDialogAction 
                             onClick={() => handleDeleteReport(report.id)}
+                            disabled={processingReportId === report.id}
                             className="bg-red-600 hover:bg-red-700"
                           >
-                            Delete Report
+                            {processingReportId === report.id ? (
+                              <>
+                                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                                Deleting...
+                              </>
+                            ) : (
+                              'Delete Report'
+                            )}
                           </AlertDialogAction>
                         </AlertDialogFooter>
                       </AlertDialogContent>
@@ -1293,6 +1317,8 @@ const Dashboard = () => {
                     size="sm" 
                     variant="outline"
                     onClick={() => handleUnarchiveReport(report.id)}
+                    loading={processingReportId === report.id}
+                    loadingText="Unarchiving..."
                   >
                     <RotateCcw className="h-4 w-4 mr-1" />
                     Unarchive
@@ -1302,6 +1328,8 @@ const Dashboard = () => {
                     size="sm" 
                     variant="outline"
                     onClick={() => handleArchiveReport(report.id)}
+                    loading={processingReportId === report.id}
+                    loadingText="Archiving..."
                   >
                     <Archive className="h-4 w-4 mr-1" />
                     Archive
@@ -1326,9 +1354,17 @@ const Dashboard = () => {
                       <AlertDialogCancel>Cancel</AlertDialogCancel>
                       <AlertDialogAction 
                         onClick={() => handleDeleteReport(report.id)}
+                        disabled={processingReportId === report.id}
                         className="bg-red-600 hover:bg-red-700"
                       >
-                        Delete Report
+                        {processingReportId === report.id ? (
+                          <>
+                            <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                            Deleting...
+                          </>
+                        ) : (
+                          'Delete Report'
+                        )}
                       </AlertDialogAction>
                     </AlertDialogFooter>
                   </AlertDialogContent>

@@ -15,6 +15,36 @@
       "source": "/:path+/",
       "destination": "/:path+",
       "permanent": true
+    },
+    {
+      "source": "/en",
+      "destination": "/",
+      "permanent": true
+    },
+    {
+      "source": "/en/:path*",
+      "destination": "/:path*",
+      "permanent": true
+    },
+    {
+      "source": "/submit",
+      "destination": "/report",
+      "permanent": true
+    },
+    {
+      "source": "/whistleblow",
+      "destination": "/report",
+      "permanent": true
+    },
+    {
+      "source": "/auth/login",
+      "destination": "/login",
+      "permanent": true
+    },
+    {
+      "source": "/auth/signup",
+      "destination": "/signup",
+      "permanent": true
     }
   ],
   "headers": [

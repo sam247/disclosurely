@@ -1738,9 +1738,11 @@ export type Database = {
       }
       organization_links: {
         Row: {
+          available_languages: Json | null
           created_at: string
           created_by: string | null
           custom_fields: Json | null
+          default_language: string | null
           department: string | null
           description: string | null
           expires_at: string | null
@@ -1755,9 +1757,11 @@ export type Database = {
           usage_limit: number | null
         }
         Insert: {
+          available_languages?: Json | null
           created_at?: string
           created_by?: string | null
           custom_fields?: Json | null
+          default_language?: string | null
           department?: string | null
           description?: string | null
           expires_at?: string | null
@@ -1772,9 +1776,11 @@ export type Database = {
           usage_limit?: number | null
         }
         Update: {
+          available_languages?: Json | null
           created_at?: string
           created_by?: string | null
           custom_fields?: Json | null
+          default_language?: string | null
           department?: string | null
           description?: string | null
           expires_at?: string | null
@@ -2150,6 +2156,7 @@ export type Database = {
           expires_at: string
           file_metadata: Json | null
           id: string
+          iv: string | null
           language: string | null
           organization_id: string
           save_count: number | null
@@ -2164,6 +2171,7 @@ export type Database = {
           expires_at: string
           file_metadata?: Json | null
           id?: string
+          iv?: string | null
           language?: string | null
           organization_id: string
           save_count?: number | null
@@ -2178,6 +2186,7 @@ export type Database = {
           expires_at?: string
           file_metadata?: Json | null
           id?: string
+          iv?: string | null
           language?: string | null
           organization_id?: string
           save_count?: number | null
@@ -2285,6 +2294,7 @@ export type Database = {
       }
       reports: {
         Row: {
+          additional_notes: string | null
           ai_assessed_at: string | null
           ai_assessment_version: string | null
           ai_impact_score: number | null
@@ -2304,8 +2314,11 @@ export type Database = {
           encryption_key_hash: string
           first_read_at: string | null
           id: string
+          incident_date: string | null
+          location: string | null
           manual_risk_level: number | null
           organization_id: string
+          previous_reports: boolean | null
           priority: number | null
           report_type: Database["public"]["Enums"]["report_type"]
           resolved_at: string | null
@@ -2317,8 +2330,10 @@ export type Database = {
           tracking_id: string
           updated_at: string
           updated_by: string | null
+          witnesses: string | null
         }
         Insert: {
+          additional_notes?: string | null
           ai_assessed_at?: string | null
           ai_assessment_version?: string | null
           ai_impact_score?: number | null
@@ -2338,8 +2353,11 @@ export type Database = {
           encryption_key_hash: string
           first_read_at?: string | null
           id?: string
+          incident_date?: string | null
+          location?: string | null
           manual_risk_level?: number | null
           organization_id: string
+          previous_reports?: boolean | null
           priority?: number | null
           report_type?: Database["public"]["Enums"]["report_type"]
           resolved_at?: string | null
@@ -2351,8 +2369,10 @@ export type Database = {
           tracking_id: string
           updated_at?: string
           updated_by?: string | null
+          witnesses?: string | null
         }
         Update: {
+          additional_notes?: string | null
           ai_assessed_at?: string | null
           ai_assessment_version?: string | null
           ai_impact_score?: number | null
@@ -2372,8 +2392,11 @@ export type Database = {
           encryption_key_hash?: string
           first_read_at?: string | null
           id?: string
+          incident_date?: string | null
+          location?: string | null
           manual_risk_level?: number | null
           organization_id?: string
+          previous_reports?: boolean | null
           priority?: number | null
           report_type?: Database["public"]["Enums"]["report_type"]
           resolved_at?: string | null
@@ -2385,6 +2408,7 @@ export type Database = {
           tracking_id?: string
           updated_at?: string
           updated_by?: string | null
+          witnesses?: string | null
         }
         Relationships: [
           {

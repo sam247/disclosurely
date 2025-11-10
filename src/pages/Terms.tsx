@@ -32,6 +32,8 @@ const Terms = () => {
                   <img
                     src="/lovable-uploads/c46ace0e-df58-4119-b5e3-8dcfa075ea2f.png"
                     alt="Disclosurely"
+                    loading="lazy"
+                    decoding="async"
                     className="h-6 md:h-8 w-auto"
                   />
                 </Link>
@@ -71,49 +73,150 @@ const Terms = () => {
         {/* Content */}
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 pb-20">
           <div className="prose prose-gray max-w-none space-y-8">
+            {/* 1. Introduction */}
             <section>
               <h2 className="text-xl font-semibold mb-3">{t("terms.sections.introduction.title")}</h2>
-              <p className="text-muted-foreground leading-relaxed">{t("terms.sections.introduction.content")}</p>
+              <p className="text-gray-700 leading-relaxed">{t("terms.sections.introduction.content")}</p>
             </section>
 
+            {/* 2. Definitions */}
             <section>
-              <h2 className="text-xl font-semibold mb-3">{t("terms.sections.accounts.title")}</h2>
-              <p className="text-muted-foreground leading-relaxed">{t("terms.sections.accounts.content1")}</p>
-              <p className="text-muted-foreground leading-relaxed">{t("terms.sections.accounts.content2")}</p>
+              <h2 className="text-xl font-semibold mb-3">{t("terms.sections.definitions.title")}</h2>
+              <p className="text-gray-700 leading-relaxed">{t("terms.sections.definitions.content")}</p>
             </section>
 
+            {/* 3. Service Description */}
+            <section>
+              <h2 className="text-xl font-semibold mb-3">{t("terms.sections.serviceDescription.title")}</h2>
+              <p className="text-gray-700 leading-relaxed mb-2">{t("terms.sections.serviceDescription.content1")}</p>
+              <p className="text-gray-700 leading-relaxed mb-2">{t("terms.sections.serviceDescription.content2")}</p>
+              <p className="text-gray-700 leading-relaxed">{t("terms.sections.serviceDescription.content3")}</p>
+            </section>
+
+            {/* 4. Registration */}
+            <section>
+              <h2 className="text-xl font-semibold mb-3">{t("terms.sections.registration.title")}</h2>
+              <p className="text-gray-700 leading-relaxed mb-2">{t("terms.sections.registration.content1")}</p>
+              <p className="text-gray-700 leading-relaxed mb-2">{t("terms.sections.registration.content2")}</p>
+              <p className="text-gray-700 leading-relaxed">{t("terms.sections.registration.content3")}</p>
+            </section>
+
+            {/* 5. Subscription and Payment */}
+            <section>
+              <h2 className="text-xl font-semibold mb-3">{t("terms.sections.subscriptionPayment.title")}</h2>
+              <p className="text-gray-700 leading-relaxed mb-2">{t("terms.sections.subscriptionPayment.content1")}</p>
+              <p className="text-gray-700 leading-relaxed mb-2">{t("terms.sections.subscriptionPayment.content2")}</p>
+              <p className="text-gray-700 leading-relaxed mb-2">{t("terms.sections.subscriptionPayment.content3")}</p>
+              <p className="text-gray-700 leading-relaxed mb-2">{t("terms.sections.subscriptionPayment.content4")}</p>
+              <p className="text-gray-700 leading-relaxed">{t("terms.sections.subscriptionPayment.content5")}</p>
+            </section>
+
+            {/* 6. Data Processing */}
+            <section>
+              <h2 className="text-xl font-semibold mb-3">{t("terms.sections.dataProcessing.title")}</h2>
+              <p className="text-gray-700 leading-relaxed mb-2">{t("terms.sections.dataProcessing.content1")}</p>
+              <p className="text-gray-700 leading-relaxed mb-2">{t("terms.sections.dataProcessing.content2")}</p>
+              <p className="text-gray-700 leading-relaxed mb-2">{t("terms.sections.dataProcessing.content3")}</p>
+              <p className="text-gray-700 leading-relaxed">{t("terms.sections.dataProcessing.content4")}</p>
+            </section>
+
+            {/* 7. Customer Obligations */}
+            <section>
+              <h2 className="text-xl font-semibold mb-3">{t("terms.sections.customerObligations.title")}</h2>
+              <p className="text-gray-700 leading-relaxed mb-2">{t("terms.sections.customerObligations.content1")}</p>
+              <p className="text-gray-700 leading-relaxed">{t("terms.sections.customerObligations.content2")}</p>
+            </section>
+
+            {/* 8. Acceptable Use */}
             <section>
               <h2 className="text-xl font-semibold mb-3">{t("terms.sections.acceptableUse.title")}</h2>
-              <p className="text-muted-foreground leading-relaxed">{t("terms.sections.acceptableUse.content")}</p>
+              <p className="text-gray-700 leading-relaxed mb-2">{t("terms.sections.acceptableUse.content1")}</p>
+              <p className="text-gray-700 leading-relaxed">{t("terms.sections.acceptableUse.content2")}</p>
             </section>
 
+            {/* 9. Intellectual Property */}
             <section>
               <h2 className="text-xl font-semibold mb-3">{t("terms.sections.intellectualProperty.title")}</h2>
-              <p className="text-muted-foreground leading-relaxed">
-                {t("terms.sections.intellectualProperty.content")}
-              </p>
+              <p className="text-gray-700 leading-relaxed mb-2">{t("terms.sections.intellectualProperty.content1")}</p>
+              <p className="text-gray-700 leading-relaxed mb-2">{t("terms.sections.intellectualProperty.content2")}</p>
+              <p className="text-gray-700 leading-relaxed">{t("terms.sections.intellectualProperty.content3")}</p>
             </section>
 
+            {/* 10. Warranties */}
             <section>
-              <h2 className="text-xl font-semibold mb-3">{t("terms.sections.disclaimer.title")}</h2>
-              <p className="text-muted-foreground leading-relaxed">{t("terms.sections.disclaimer.content")}</p>
+              <h2 className="text-xl font-semibold mb-3">{t("terms.sections.warranties.title")}</h2>
+              <p className="text-gray-700 leading-relaxed mb-2">{t("terms.sections.warranties.content1")}</p>
+              <p className="text-gray-700 leading-relaxed mb-2 font-semibold">{t("terms.sections.warranties.content2")}</p>
+              <p className="text-gray-700 leading-relaxed">{t("terms.sections.warranties.content3")}</p>
             </section>
 
+            {/* 11. Limitation of Liability */}
             <section>
               <h2 className="text-xl font-semibold mb-3">{t("terms.sections.limitationOfLiability.title")}</h2>
-              <p className="text-muted-foreground leading-relaxed">
-                {t("terms.sections.limitationOfLiability.content")}
-              </p>
+              <p className="text-gray-700 leading-relaxed mb-2 font-semibold">{t("terms.sections.limitationOfLiability.content1")}</p>
+              <p className="text-gray-700 leading-relaxed mb-2 font-semibold">{t("terms.sections.limitationOfLiability.content2")}</p>
+              <p className="text-gray-700 leading-relaxed mb-2">{t("terms.sections.limitationOfLiability.content3")}</p>
+              <p className="text-gray-700 leading-relaxed">{t("terms.sections.limitationOfLiability.content4")}</p>
             </section>
 
+            {/* 12. Termination */}
             <section>
-              <h2 className="text-xl font-semibold mb-3">{t("terms.sections.governingLaw.title")}</h2>
-              <p className="text-muted-foreground leading-relaxed">{t("terms.sections.governingLaw.content")}</p>
+              <h2 className="text-xl font-semibold mb-3">{t("terms.sections.termination.title")}</h2>
+              <p className="text-gray-700 leading-relaxed mb-2">{t("terms.sections.termination.content1")}</p>
+              <p className="text-gray-700 leading-relaxed mb-2">{t("terms.sections.termination.content2")}</p>
+              <p className="text-gray-700 leading-relaxed mb-2">{t("terms.sections.termination.content3")}</p>
+              <p className="text-gray-700 leading-relaxed mb-2">{t("terms.sections.termination.content4")}</p>
+              <p className="text-gray-700 leading-relaxed">{t("terms.sections.termination.content5")}</p>
             </section>
 
+            {/* 13. Confidentiality */}
             <section>
-              <h2 className="text-xl font-semibold mb-3">{t("terms.sections.changes.title")}</h2>
-              <p className="text-muted-foreground leading-relaxed">{t("terms.sections.changes.content")}</p>
+              <h2 className="text-xl font-semibold mb-3">{t("terms.sections.confidentiality.title")}</h2>
+              <p className="text-gray-700 leading-relaxed mb-2">{t("terms.sections.confidentiality.content1")}</p>
+              <p className="text-gray-700 leading-relaxed">{t("terms.sections.confidentiality.content2")}</p>
+            </section>
+
+            {/* 14. Compliance */}
+            <section>
+              <h2 className="text-xl font-semibold mb-3">{t("terms.sections.compliance.title")}</h2>
+              <p className="text-gray-700 leading-relaxed mb-2">{t("terms.sections.compliance.content1")}</p>
+              <p className="text-gray-700 leading-relaxed mb-2">{t("terms.sections.compliance.content2")}</p>
+              <p className="text-gray-700 leading-relaxed">{t("terms.sections.compliance.content3")}</p>
+            </section>
+
+            {/* 15. Modifications */}
+            <section>
+              <h2 className="text-xl font-semibold mb-3">{t("terms.sections.modifications.title")}</h2>
+              <p className="text-gray-700 leading-relaxed mb-2">{t("terms.sections.modifications.content1")}</p>
+              <p className="text-gray-700 leading-relaxed">{t("terms.sections.modifications.content2")}</p>
+            </section>
+
+            {/* 16. Dispute Resolution */}
+            <section>
+              <h2 className="text-xl font-semibold mb-3">{t("terms.sections.disputeResolution.title")}</h2>
+              <p className="text-gray-700 leading-relaxed mb-2">{t("terms.sections.disputeResolution.content1")}</p>
+              <p className="text-gray-700 leading-relaxed mb-2">{t("terms.sections.disputeResolution.content2")}</p>
+              <p className="text-gray-700 leading-relaxed mb-2">{t("terms.sections.disputeResolution.content3")}</p>
+              <p className="text-gray-700 leading-relaxed">{t("terms.sections.disputeResolution.content4")}</p>
+            </section>
+
+            {/* 17. General Provisions */}
+            <section>
+              <h2 className="text-xl font-semibold mb-3">{t("terms.sections.generalProvisions.title")}</h2>
+              <p className="text-gray-700 leading-relaxed mb-2">{t("terms.sections.generalProvisions.content1")}</p>
+              <p className="text-gray-700 leading-relaxed mb-2">{t("terms.sections.generalProvisions.content2")}</p>
+              <p className="text-gray-700 leading-relaxed mb-2">{t("terms.sections.generalProvisions.content3")}</p>
+              <p className="text-gray-700 leading-relaxed mb-2">{t("terms.sections.generalProvisions.content4")}</p>
+              <p className="text-gray-700 leading-relaxed mb-2">{t("terms.sections.generalProvisions.content5")}</p>
+              <p className="text-gray-700 leading-relaxed mb-2">{t("terms.sections.generalProvisions.content6")}</p>
+              <p className="text-gray-700 leading-relaxed mb-2">{t("terms.sections.generalProvisions.content7")}</p>
+              <p className="text-gray-700 leading-relaxed">{t("terms.sections.generalProvisions.content8")}</p>
+            </section>
+
+            {/* 18. Contact */}
+            <section>
+              <h2 className="text-xl font-semibold mb-3">{t("terms.sections.contact.title")}</h2>
+              <p className="text-gray-700 leading-relaxed">{t("terms.sections.contact.content")}</p>
             </section>
 
             <div className="pt-8 text-center text-sm text-gray-500">

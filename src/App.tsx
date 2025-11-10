@@ -1,57 +1,62 @@
+import { Suspense, lazy } from 'react';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { AuthProvider } from './hooks/useAuth';
 import { OrganizationProvider } from './contexts/OrganizationContext';
 import { useSessionTimeout } from './hooks/useSessionTimeout';
 import { useAuth } from './hooks/useAuth';
 import ProtectedRoute from './components/ProtectedRoute';
-import AuthenticatedApp from './components/AuthenticatedApp';
-import DashboardLayout from './components/dashboard/DashboardLayout';
-import DashboardView from './components/dashboard/DashboardView';
-import AIHelperView from './components/dashboard/AIHelperView';
-import SettingsView from './components/dashboard/SettingsView';
-import ReportDetails from './pages/ReportDetails';
-import OrganizationSettings from './components/dashboard/OrganizationSettings';
-import OrganizationOnboarding from './components/OrganizationOnboarding';
-import TeamView from './components/dashboard/TeamView';
-import BrandingView from './components/dashboard/BrandingView';
-import SecureLinkView from './components/dashboard/SecureLinkView';
-import IntegrationsView from './components/IntegrationsView';
-import AnalyticsView from './components/AnalyticsView';
-import AuditLogView from './components/AuditLogView';
-import Index from './pages/Index';
-import Login from './pages/Login';
-import Signup from './pages/Signup';
-import AcceptInvite from './pages/AcceptInvite';
-import NotFound from './pages/NotFound';
-import Pricing from './pages/Pricing';
-import Contact from './pages/Contact';
-import Terms from './pages/Terms';
-import Privacy from './pages/Privacy';
-import VsSpeakUp from './pages/VsSpeakUp';
-import VsWhistleblowerSoftware from './pages/VsWhistleblowerSoftware';
-import ComplianceSoftware from './pages/ComplianceSoftware';
-import WhistleblowingDirective from './pages/WhistleblowingDirective';
-import SubmissionFormWrapper from './components/forms/SubmissionFormWrapper';
-import CleanSubmissionWrapper from './components/forms/CleanSubmissionWrapper';
-import ProgressiveFormWrapper from './components/forms/ProgressiveFormWrapper';
-import ReportSuccess from './components/ReportSuccess';
-import TestAnonymousSubmission from './pages/TestAnonymousSubmission';
 import ScrollToTop from './components/ScrollToTop';
-// import FeaturebaseMessenger from './components/FeaturebaseMessenger'; // REMOVED
-import ReportStatusLookup from './components/ReportStatusLookup';
-import AdminDashboard from './pages/AdminDashboard';
-import Blog from './pages/Blog';
-import WhistleblowerMessagingPage from './pages/WhistleblowerMessaging';
-import About from './pages/About';
-import Features from './pages/Features';
-import Careers from './pages/Careers';
-import ResumeDraft from './pages/ResumeDraft';
-import WorkflowsPage from './pages/dashboard/WorkflowsPage';
+import UrlRedirectMiddleware from './components/UrlRedirectMiddleware';
+
+// Lazy load page components for better code splitting
+const Index = lazy(() => import('./pages/Index'));
+const Login = lazy(() => import('./pages/Login'));
+const Signup = lazy(() => import('./pages/Signup'));
+const AcceptInvite = lazy(() => import('./pages/AcceptInvite'));
+const NotFound = lazy(() => import('./pages/NotFound'));
+const Pricing = lazy(() => import('./pages/Pricing'));
+const Contact = lazy(() => import('./pages/Contact'));
+const Terms = lazy(() => import('./pages/Terms'));
+const Privacy = lazy(() => import('./pages/Privacy'));
+const About = lazy(() => import('./pages/About'));
+const Features = lazy(() => import('./pages/Features'));
+const Careers = lazy(() => import('./pages/Careers'));
+const VsSpeakUp = lazy(() => import('./pages/VsSpeakUp'));
+const VsWhistleblowerSoftware = lazy(() => import('./pages/VsWhistleblowerSoftware'));
+const ComplianceSoftware = lazy(() => import('./pages/ComplianceSoftware'));
+const WhistleblowingDirective = lazy(() => import('./pages/WhistleblowingDirective'));
+const Blog = lazy(() => import('./pages/Blog'));
+const ResumeDraft = lazy(() => import('./pages/ResumeDraft'));
+const TestAnonymousSubmission = lazy(() => import('./pages/TestAnonymousSubmission'));
+const AdminDashboard = lazy(() => import('./pages/AdminDashboard'));
+const WhistleblowerMessagingPage = lazy(() => import('./pages/WhistleblowerMessaging'));
+const ReportDetails = lazy(() => import('./pages/ReportDetails'));
+
+// Lazy load dashboard and authenticated components
+const AuthenticatedApp = lazy(() => import('./components/AuthenticatedApp'));
+const DashboardLayout = lazy(() => import('./components/dashboard/DashboardLayout'));
+const DashboardView = lazy(() => import('./components/dashboard/DashboardView'));
+const AIHelperView = lazy(() => import('./components/dashboard/AIHelperView'));
+const SettingsView = lazy(() => import('./components/dashboard/SettingsView'));
+const OrganizationSettings = lazy(() => import('./components/dashboard/OrganizationSettings'));
+const OrganizationOnboarding = lazy(() => import('./components/OrganizationOnboarding'));
+const TeamView = lazy(() => import('./components/dashboard/TeamView'));
+const BrandingView = lazy(() => import('./components/dashboard/BrandingView'));
+const SecureLinkView = lazy(() => import('./components/dashboard/SecureLinkView'));
+const IntegrationsView = lazy(() => import('./components/IntegrationsView'));
+const AnalyticsView = lazy(() => import('./components/AnalyticsView'));
+const AuditLogView = lazy(() => import('./components/AuditLogView'));
+
+// Lazy load form components
+const SubmissionFormWrapper = lazy(() => import('./components/forms/SubmissionFormWrapper'));
+const CleanSubmissionWrapper = lazy(() => import('./components/forms/CleanSubmissionWrapper'));
+const ReportSuccess = lazy(() => import('./components/ReportSuccess'));
+const ReportStatusLookup = lazy(() => import('./components/ReportStatusLookup'));
 
 // Component to handle session timeout only for authenticated users
 const SessionTimeoutManager = () => {
   const { user } = useAuth();
-  
+
   const { IdleWarningComponent, AbsoluteWarningComponent } = useSessionTimeout();
 
   // Only show session timeout for authenticated users
@@ -70,8 +75,21 @@ const SessionTimeoutManager = () => {
 const AppContent = () => {
   return (
     <OrganizationProvider>
-      <ScrollToTop />
-      <Routes>
+      <UrlRedirectMiddleware>
+        <ScrollToTop />
+        <Suspense fallback={
+        <div style={{
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+          minHeight: '100vh',
+          fontSize: '16px',
+          color: '#666'
+        }}>
+          Loading...
+        </div>
+      }>
+        <Routes>
         {/* Public routes - English (default) */}
         <Route path="/" element={<Index />} />
         <Route path="/pricing" element={<Pricing />} />
@@ -119,9 +137,6 @@ const AppContent = () => {
         <Route path="/submit" element={<CleanSubmissionWrapper />} />
         <Route path="/whistleblow" element={<CleanSubmissionWrapper />} />
 
-        {/* Progressive disclosure form - New experience */}
-        <Route path="/newform" element={<ProgressiveFormWrapper />} />
-        
         {/* Resume draft page */}
         <Route path="/resume-draft" element={<ResumeDraft />} />
 
@@ -156,42 +171,42 @@ const AppContent = () => {
         <Route path="/:lang/auth/signup" element={<Signup />} />
 
         {/* Authenticated routes */}
-        <Route 
-          path="/app" 
+        <Route
+          path="/app"
           element={
             <ProtectedRoute>
               <AuthenticatedApp />
             </ProtectedRoute>
-          } 
+          }
         />
-        <Route 
-          path="/app/*" 
+        <Route
+          path="/app/*"
           element={
             <ProtectedRoute>
               <AuthenticatedApp />
             </ProtectedRoute>
-          } 
+          }
         />
-        <Route 
-          path="/dashboard" 
+        <Route
+          path="/dashboard"
           element={
             <ProtectedRoute>
               <DashboardLayout>
                 <DashboardView />
               </DashboardLayout>
             </ProtectedRoute>
-          } 
+          }
         />
-        <Route 
-          path="/dashboard/reports/:reportId" 
+        <Route
+          path="/dashboard/reports/:reportId"
           element={
             <ProtectedRoute>
               <ReportDetails />
             </ProtectedRoute>
-          } 
+          }
         />
-        <Route 
-          path="/dashboard/ai-helper" 
+        <Route
+          path="/dashboard/ai-helper"
           element={
             <ProtectedRoute>
               <DashboardLayout>
@@ -200,65 +215,65 @@ const AppContent = () => {
             </ProtectedRoute>
           }
         />
-        <Route 
-          path="/dashboard/settings" 
+        <Route
+          path="/dashboard/settings"
           element={
             <ProtectedRoute>
               <DashboardLayout>
                 <OrganizationSettings />
               </DashboardLayout>
             </ProtectedRoute>
-          } 
+          }
         />
-        <Route 
-          path="/dashboard/team" 
+        <Route
+          path="/dashboard/team"
           element={
             <ProtectedRoute>
               <DashboardLayout>
                 <TeamView />
               </DashboardLayout>
             </ProtectedRoute>
-          } 
+          }
         />
-        <Route 
-          path="/dashboard/branding" 
+        <Route
+          path="/dashboard/branding"
           element={
             <ProtectedRoute>
               <DashboardLayout>
                 <BrandingView />
               </DashboardLayout>
             </ProtectedRoute>
-          } 
+          }
         />
-        <Route 
-          path="/dashboard/secure-link" 
+        <Route
+          path="/dashboard/secure-link"
           element={
             <ProtectedRoute>
               <DashboardLayout>
                 <SecureLinkView />
               </DashboardLayout>
             </ProtectedRoute>
-          } 
+          }
         />
-        <Route 
-          path="/dashboard/integrations" 
+        <Route
+          path="/dashboard/integrations"
           element={
             <ProtectedRoute>
               <DashboardLayout>
                 <IntegrationsView />
               </DashboardLayout>
             </ProtectedRoute>
-          } 
+          }
         />
-        <Route 
-          path="/dashboard/analytics" 
+        <Route
+          path="/dashboard/analytics"
           element={
             <ProtectedRoute>
               <DashboardLayout>
                 <AnalyticsView />
               </DashboardLayout>
             </ProtectedRoute>
-          } 
+          }
         />
         <Route
           path="/dashboard/audit"
@@ -270,22 +285,14 @@ const AppContent = () => {
             </ProtectedRoute>
           }
         />
-        <Route
-          path="/dashboard/workflows"
-          element={
-            <ProtectedRoute>
-              <DashboardLayout>
-                <WorkflowsPage />
-              </DashboardLayout>
-            </ProtectedRoute>
-          }
-        />
 
         {/* Catch all - 404 */}
         <Route path="*" element={<NotFound />} />
       </Routes>
+      </Suspense>
       {/* Session timeout only for authenticated users */}
       <SessionTimeoutManager />
+      </UrlRedirectMiddleware>
     </OrganizationProvider>
   );
 };

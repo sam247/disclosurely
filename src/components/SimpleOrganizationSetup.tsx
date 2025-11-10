@@ -142,8 +142,13 @@ const SimpleOrganizationSetup = ({ onComplete }: SimpleOrganizationSetupProps) =
                 </p>
               </div>
 
-              <Button type="submit" disabled={loading} className="w-full">
-                {loading ? 'Creating...' : 'Create Organization'}
+              <Button 
+                type="submit" 
+                loading={loading}
+                loadingText="Creating..."
+                className="w-full"
+              >
+                Create Organization
               </Button>
             </form>
           </CardContent>

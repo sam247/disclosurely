@@ -177,6 +177,17 @@ const DynamicHelmet: React.FC<DynamicHelmetProps> = ({
     fetchSEOData();
   }, [pageIdentifier, i18n.language]);
 
+  // CRITICAL FIX: react-helmet-async cannot reliably set <html lang> attribute in SPAs
+  // Use direct DOM manipulation instead
+  // MUST be called before any early returns to maintain hook order
+  useEffect(() => {
+    const currentLang = i18n.language || 'en';
+    if (typeof document !== 'undefined') {
+      document.documentElement.setAttribute('lang', currentLang);
+      console.log('✅ DynamicHelmet: Set HTML lang attribute to:', currentLang);
+    }
+  }, [i18n.language]);
+
   if (loading) {
     return (
       <Helmet>
@@ -244,6 +255,13 @@ const DynamicHelmet: React.FC<DynamicHelmetProps> = ({
     // Build URL from pageIdentifier (works on both server and client)
     const baseUrl = 'https://disclosurely.com';
 
+    // Detect current language from URL path
+    const currentPath = typeof window !== 'undefined' ? window.location.pathname : '';
+    const langMatch = currentPath.match(/^\/([a-z]{2})(\/|$)/);
+    const currentLang = langMatch ? langMatch[1] : null;
+    const supportedLangs = ['es', 'fr', 'de', 'pl', 'sv', 'no', 'pt', 'it', 'nl', 'da', 'el'];
+    const hasLangPrefix = currentLang && supportedLangs.includes(currentLang);
+
     // Normalize pageIdentifier to always start with /
     let path = pageIdentifier;
     if (!path.startsWith('/')) {
@@ -255,9 +273,14 @@ const DynamicHelmet: React.FC<DynamicHelmetProps> = ({
       path = path.slice(0, -1);
     }
 
+    // Prepend language prefix if current URL has one (for multilingual SEO)
+    if (hasLangPrefix) {
+      path = `/${currentLang}${path}`;
+    }
+
     // Handle root path specially
     if (path === '/' || path === '') {
-      return baseUrl;
+      return hasLangPrefix ? `${baseUrl}/${currentLang}` : baseUrl;
     }
 
     return `${baseUrl}${path}`;
@@ -364,7 +387,7 @@ const DynamicHelmet: React.FC<DynamicHelmetProps> = ({
       )}
       <meta name="robots" content={finalRobots} />
       <link rel="canonical" href={finalCanonicalUrl} />
-      
+
       {/* Dynamic Hreflang Tags for All Language Versions */}
       {typeof window !== 'undefined' && Object.keys(hrefLangUrls).length > 0 && (
         <>
@@ -373,33 +396,6 @@ const DynamicHelmet: React.FC<DynamicHelmetProps> = ({
           ))}
         </>
       )}
-      {/* Hreflang Tags for All Language Versions - Dynamic based on current page */}
-      {typeof window !== 'undefined' && (() => {
-        const currentPath = window.location.pathname.replace(/\/$/, '') || '';
-        const baseUrl = 'https://disclosurely.com';
-        
-        // Remove language prefix if present (e.g., /es/pricing -> /pricing)
-        const pathWithoutLang = currentPath.replace(/^\/(en|es|fr|de|pl|sv|no|pt|it|nl|da|el)(\/|$)/, '/');
-        const normalizedPath = pathWithoutLang === '/' ? '' : pathWithoutLang;
-        
-        return (
-          <>
-            <link rel="alternate" hrefLang="x-default" href={`${baseUrl}${normalizedPath}`} />
-            <link rel="alternate" hrefLang="en" href={`${baseUrl}${normalizedPath}`} />
-            <link rel="alternate" hrefLang="es" href={`${baseUrl}/es${normalizedPath}`} />
-            <link rel="alternate" hrefLang="fr" href={`${baseUrl}/fr${normalizedPath}`} />
-            <link rel="alternate" hrefLang="de" href={`${baseUrl}/de${normalizedPath}`} />
-            <link rel="alternate" hrefLang="pl" href={`${baseUrl}/pl${normalizedPath}`} />
-            <link rel="alternate" hrefLang="sv" href={`${baseUrl}/sv${normalizedPath}`} />
-            <link rel="alternate" hrefLang="no" href={`${baseUrl}/no${normalizedPath}`} />
-            <link rel="alternate" hrefLang="pt" href={`${baseUrl}/pt${normalizedPath}`} />
-            <link rel="alternate" hrefLang="it" href={`${baseUrl}/it${normalizedPath}`} />
-            <link rel="alternate" hrefLang="nl" href={`${baseUrl}/nl${normalizedPath}`} />
-            <link rel="alternate" hrefLang="da" href={`${baseUrl}/da${normalizedPath}`} />
-            <link rel="alternate" hrefLang="el" href={`${baseUrl}/el${normalizedPath}`} />
-          </>
-        );
-      })()}
 
       {/* Open Graph Tags */}
       <meta property="og:title" content={seoData?.og_title || finalTitle} />

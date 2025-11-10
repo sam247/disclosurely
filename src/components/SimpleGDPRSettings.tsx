@@ -5,17 +5,20 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
-import { useGDPRCompliance } from '@/hooks/useGDPRCompliance';
+import { Checkbox } from '@/components/ui/checkbox';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
-import { Shield, Download, UserX, CheckCircle, Clock, Mail } from 'lucide-react';
+import { Shield, Download, UserX, CheckCircle, Clock, Mail, Trash2, AlertTriangle } from 'lucide-react';
+import { Separator } from '@/components/ui/separator';
 
 const SimpleGDPRSettings = () => {
   const { user } = useAuth();
   const { toast } = useToast();
   const [exportEmail, setExportEmail] = useState(user?.email || '');
   const [loading, setLoading] = useState(false);
+  const [deleteDataConfirm, setDeleteDataConfirm] = useState(false);
+  const [deleteAccountConfirm, setDeleteAccountConfirm] = useState(false);
 
   const handleDataExport = async () => {
     if (!exportEmail) return;
@@ -48,34 +51,78 @@ const SimpleGDPRSettings = () => {
     }
   };
 
-  const handleAccountDeletion = async () => {
-    if (!user) return;
+  const handleDataDeletion = async () => {
+    if (!user || !deleteDataConfirm) return;
 
+    setLoading(true);
     try {
-      // Trigger automated account deletion
-      const { data, error } = await supabase.functions.invoke('process-gdpr-requests', {
+      const { error } = await supabase.functions.invoke('process-gdpr-requests', {
         body: { 
-          type: 'delete_account',
+          type: 'delete_data',
           email: user.email 
+        },
+        headers: {
+          Authorization: `Bearer ${(await supabase.auth.getSession()).data.session?.access_token}`,
         }
       });
 
       if (error) throw error;
 
-      // Sign out the user
-      await supabase.auth.signOut();
+      toast({
+        title: "Data Deletion Requested",
+        description: "Your personal data will be anonymized within 24 hours while preserving necessary records for legal compliance.",
+        duration: 10000,
+      });
       
+      setDeleteDataConfirm(false);
+    } catch (error: any) {
+      toast({
+        title: "Request Failed",
+        description: error.message || "Failed to request data deletion.",
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleAccountDeletion = async () => {
+    if (!user || !deleteAccountConfirm) return;
+
+    setLoading(true);
+    try {
+      const { error } = await supabase.functions.invoke('process-gdpr-requests', {
+        body: { 
+          type: 'delete_account',
+          email: user.email 
+        },
+        headers: {
+          Authorization: `Bearer ${(await supabase.auth.getSession()).data.session?.access_token}`,
+        }
+      });
+
+      if (error) throw error;
+
       toast({
         title: "Account Deletion Initiated",
-        description: "Your account will be completely deleted within 24 hours. You will receive a confirmation email.",
+        description: "You will be logged out. Your account and ALL data will be permanently deleted within 24 hours.",
         duration: 15000,
       });
+
+      // Sign out after short delay
+      setTimeout(async () => {
+        await supabase.auth.signOut();
+      }, 2000);
+      
     } catch (error: any) {
       toast({
         title: "Error",
         description: error.message || "Failed to initiate account deletion.",
         variant: "destructive",
       });
+    } finally {
+      setLoading(false);
+      setDeleteAccountConfirm(false);
     }
   };
 
@@ -128,9 +175,15 @@ const SimpleGDPRSettings = () => {
               className="mt-1"
             />
           </div>
-          <Button onClick={handleDataExport} disabled={loading || !exportEmail} className="w-full sm:w-auto">
+          <Button 
+            onClick={handleDataExport} 
+            loading={loading}
+            loadingText="Processing..."
+            disabled={!exportEmail} 
+            className="w-full sm:w-auto"
+          >
             <Download className="w-4 h-4 mr-2" />
-            {loading ? 'Processing...' : 'Download My Data'}
+            Download My Data
           </Button>
           <div className="flex items-start gap-2 text-xs sm:text-sm text-gray-600">
             <Mail className="w-4 h-4 mt-0.5 flex-shrink-0" />
@@ -139,54 +192,173 @@ const SimpleGDPRSettings = () => {
         </CardContent>
       </Card>
 
-      {/* Account Deletion Section */}
-      <Card className="border-red-200">
+      {/* Danger Zone - Data Deletion */}
+      <Card className="border-orange-200 bg-orange-50/30">
         <CardHeader>
-          <CardTitle className="text-red-600 text-lg sm:text-xl">Delete Account</CardTitle>
+          <div className="flex items-center gap-2">
+            <AlertTriangle className="h-5 w-5 text-orange-600" />
+            <CardTitle className="text-orange-600 text-lg sm:text-xl">Danger Zone</CardTitle>
+          </div>
           <CardDescription className="text-sm sm:text-base">
-            Permanently delete your account and all associated data. This action is irreversible and will be completed automatically within 24 hours.
+            Irreversible actions that permanently affect your data
           </CardDescription>
         </CardHeader>
-        <CardContent>
-          <AlertDialog>
-            <AlertDialogTrigger asChild>
-              <Button variant="destructive" className="w-full sm:w-auto">
-                <UserX className="w-4 h-4 mr-2" />
-                Delete My Account
-              </Button>
-            </AlertDialogTrigger>
-            <AlertDialogContent className="sm:max-w-[425px] mx-4">
-              <AlertDialogHeader>
-                <AlertDialogTitle className="text-lg sm:text-xl">Are you absolutely sure?</AlertDialogTitle>
-                <AlertDialogDescription className="space-y-2 text-sm sm:text-base">
-                  <p>This will automatically and permanently delete:</p>
-                  <ul className="list-disc list-inside mt-2 space-y-1 text-xs sm:text-sm">
-                    <li>Your profile and account information</li>
-                    <li>All reports and messages you've submitted</li>
-                    <li>Any file attachments</li>
-                    <li>Your complete account history</li>
-                  </ul>
-                  <div className="flex items-center gap-2 mt-4 p-3 bg-yellow-50 rounded-lg">
-                    <Clock className="w-4 h-4 text-yellow-600 flex-shrink-0" />
-                    <p className="text-xs sm:text-sm">Deletion will be completed within 24 hours. You will be signed out immediately.</p>
-                  </div>
-                </AlertDialogDescription>
-              </AlertDialogHeader>
-              <AlertDialogFooter className="flex-col-reverse sm:flex-row gap-2">
-                <AlertDialogCancel className="w-full sm:w-auto">Cancel</AlertDialogCancel>
-                <AlertDialogAction
-                  onClick={handleAccountDeletion}
-                  className="bg-red-600 hover:bg-red-700 w-full sm:w-auto"
-                >
-                  Yes, Delete My Account
-                </AlertDialogAction>
-              </AlertDialogFooter>
-            </AlertDialogContent>
-          </AlertDialog>
-          
-          <div className="mt-4 flex items-start gap-2 text-xs sm:text-sm text-gray-600">
-            <Mail className="w-4 h-4 mt-0.5 flex-shrink-0" />
-            <p>You'll receive a confirmation email once your account has been completely deleted.</p>
+        <CardContent className="space-y-6">
+          {/* Delete Personal Data */}
+          <div className="space-y-4">
+            <div className="flex items-start gap-3">
+              <Trash2 className="w-5 h-5 text-orange-600 mt-1 flex-shrink-0" />
+              <div className="flex-1">
+                <h4 className="font-semibold text-base sm:text-lg">Delete My Personal Data</h4>
+                <p className="text-sm text-muted-foreground mt-1">
+                  Remove your personal information while keeping your account. Reports will be anonymized.
+                </p>
+                <ul className="list-disc list-inside mt-2 text-xs sm:text-sm text-muted-foreground space-y-1">
+                  <li>Your name and profile information will be removed</li>
+                  <li>Your reports will be anonymized (kept for compliance)</li>
+                  <li>Account remains active with anonymized data</li>
+                  <li>Cannot be undone after 24 hours</li>
+                </ul>
+              </div>
+            </div>
+            
+            <AlertDialog>
+              <AlertDialogTrigger asChild>
+                <Button variant="outline" className="w-full border-orange-300 hover:bg-orange-50">
+                  <Trash2 className="w-4 h-4 mr-2" />
+                  Delete My Data (Keep Account)
+                </Button>
+              </AlertDialogTrigger>
+              <AlertDialogContent className="sm:max-w-[500px] mx-4">
+                <AlertDialogHeader>
+                  <AlertDialogTitle className="flex items-center gap-2 text-orange-600">
+                    <AlertTriangle className="w-5 h-5" />
+                    Delete Personal Data?
+                  </AlertDialogTitle>
+                  <AlertDialogDescription className="space-y-3 text-sm">
+                    <p className="font-medium">This will permanently remove:</p>
+                    <ul className="list-disc list-inside space-y-1 ml-2">
+                      <li>Your name and contact information</li>
+                      <li>Your email address (replaced with anonymized ID)</li>
+                      <li>Any profile pictures or personal documents</li>
+                    </ul>
+                    <p className="font-medium mt-3">This will keep (anonymized):</p>
+                    <ul className="list-disc list-inside space-y-1 ml-2">
+                      <li>Reports you submitted (for legal compliance)</li>
+                      <li>Audit logs (with your identity removed)</li>
+                      <li>Your account (you can still log in)</li>
+                    </ul>
+                    <div className="flex items-start gap-2 p-3 bg-orange-50 rounded-lg mt-4">
+                      <Clock className="w-4 h-4 text-orange-600 mt-0.5 flex-shrink-0" />
+                      <p className="text-xs">Process completes in 24 hours. After that, your data cannot be recovered.</p>
+                    </div>
+                    
+                    <div className="flex items-center gap-2 mt-4">
+                      <Checkbox 
+                        id="delete-data-confirm" 
+                        checked={deleteDataConfirm}
+                        onCheckedChange={(checked) => setDeleteDataConfirm(checked as boolean)}
+                      />
+                      <Label htmlFor="delete-data-confirm" className="text-sm cursor-pointer">
+                        I understand this action cannot be undone
+                      </Label>
+                    </div>
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter className="flex-col-reverse sm:flex-row gap-2">
+                  <AlertDialogCancel className="w-full sm:w-auto">Cancel</AlertDialogCancel>
+                  <Button
+                    onClick={handleDataDeletion}
+                    disabled={!deleteDataConfirm || loading}
+                    className="bg-orange-600 hover:bg-orange-700 w-full sm:w-auto"
+                  >
+                    {loading ? 'Processing...' : 'Yes, Delete My Data'}
+                  </Button>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
+          </div>
+
+          <Separator className="bg-orange-200" />
+
+          {/* Delete Account Completely */}
+          <div className="space-y-4">
+            <div className="flex items-start gap-3">
+              <UserX className="w-5 h-5 text-red-600 mt-1 flex-shrink-0" />
+              <div className="flex-1">
+                <h4 className="font-semibold text-base sm:text-lg text-red-600">Delete My Account Permanently</h4>
+                <p className="text-sm text-muted-foreground mt-1">
+                  Permanently delete your account and ALL associated data. This is irreversible.
+                </p>
+                <ul className="list-disc list-inside mt-2 text-xs sm:text-sm text-muted-foreground space-y-1">
+                  <li>Your account will be deleted (cannot log in)</li>
+                  <li>All reports, messages, and files will be deleted</li>
+                  <li>All personal information will be erased</li>
+                  <li>Audit logs will be anonymized for compliance</li>
+                  <li>Storage files will be permanently deleted</li>
+                  <li>Cannot be recovered after deletion</li>
+                </ul>
+              </div>
+            </div>
+            
+            <AlertDialog>
+              <AlertDialogTrigger asChild>
+                <Button variant="destructive" className="w-full">
+                  <UserX className="w-4 h-4 mr-2" />
+                  Delete My Account Permanently
+                </Button>
+              </AlertDialogTrigger>
+              <AlertDialogContent className="sm:max-w-[500px] mx-4">
+                <AlertDialogHeader>
+                  <AlertDialogTitle className="flex items-center gap-2 text-red-600">
+                    <AlertTriangle className="w-5 h-5" />
+                    Delete Account Permanently?
+                  </AlertDialogTitle>
+                  <AlertDialogDescription className="space-y-3 text-sm">
+                    <div className="p-4 bg-red-50 border border-red-200 rounded-lg">
+                      <p className="font-semibold text-red-900">⚠️ CRITICAL WARNING</p>
+                      <p className="text-red-800 mt-1">This action CANNOT be undone. All your data will be permanently destroyed.</p>
+                    </div>
+                    
+                    <p className="font-medium">This will permanently delete:</p>
+                    <ul className="list-disc list-inside space-y-1 ml-2">
+                      <li>Your account and login credentials</li>
+                      <li>All reports and messages you created</li>
+                      <li>All file attachments and documents</li>
+                      <li>Your profile and personal information</li>
+                      <li>All notifications and activity history</li>
+                      <li>Everything else associated with your account</li>
+                    </ul>
+                    
+                    <div className="flex items-start gap-2 p-3 bg-yellow-50 rounded-lg mt-4">
+                      <Clock className="w-4 h-4 text-yellow-600 mt-0.5 flex-shrink-0" />
+                      <p className="text-xs">You will be logged out immediately. Deletion completes within 24 hours.</p>
+                    </div>
+                    
+                    <div className="flex items-center gap-2 mt-4">
+                      <Checkbox 
+                        id="delete-account-confirm" 
+                        checked={deleteAccountConfirm}
+                        onCheckedChange={(checked) => setDeleteAccountConfirm(checked as boolean)}
+                      />
+                      <Label htmlFor="delete-account-confirm" className="text-sm cursor-pointer">
+                        I understand this will permanently delete everything
+                      </Label>
+                    </div>
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter className="flex-col-reverse sm:flex-row gap-2">
+                  <AlertDialogCancel className="w-full sm:w-auto">Cancel</AlertDialogCancel>
+                  <Button
+                    onClick={handleAccountDeletion}
+                    disabled={!deleteAccountConfirm || loading}
+                    className="bg-red-600 hover:bg-red-700 w-full sm:w-auto"
+                  >
+                    {loading ? 'Processing...' : 'Yes, Delete Everything'}
+                  </Button>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
           </div>
         </CardContent>
       </Card>

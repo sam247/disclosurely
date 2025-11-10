@@ -1,3 +1,4 @@
+import React from 'react';
 import { Palette, Globe } from 'lucide-react';
 import OrganizationSettingsBranding from '@/components/OrganizationSettings';
 import CustomDomainSettings from '@/components/CustomDomainSettings';

@@ -8,7 +8,10 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Label } from '@/components/ui/label';
-import { Globe } from 'lucide-react';
+import { Checkbox } from '@/components/ui/checkbox';
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Globe, CheckCircle, AlertCircle, Loader2 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { auditLogger } from '@/utils/auditLogger';
 
@@ -20,7 +23,23 @@ interface OrganizationLink {
   usage_count: number | null;
   created_at: string;
   default_language?: string;
+  available_languages?: string[] | null;
 }
+
+const ALL_LANGUAGES = [
+  { code: 'en', name: 'English', flag: '🇬🇧' },
+  { code: 'es', name: 'Español', flag: '🇪🇸' },
+  { code: 'fr', name: 'Français', flag: '🇫🇷' },
+  { code: 'de', name: 'Deutsch', flag: '🇩🇪' },
+  { code: 'pl', name: 'Polski', flag: '🇵🇱' },
+  { code: 'sv', name: 'Svenska', flag: '🇸🇪' },
+  { code: 'no', name: 'Norsk', flag: '🇳🇴' },
+  { code: 'pt', name: 'Português', flag: '🇵🇹' },
+  { code: 'it', name: 'Italiano', flag: '🇮🇹' },
+  { code: 'nl', name: 'Nederlands', flag: '🇳🇱' },
+  { code: 'da', name: 'Dansk', flag: '🇩🇰' },
+  { code: 'el', name: 'Ελληνικά', flag: '🇬🇷' },
+];
 
 interface CustomDomainRecord {
   id: string;
@@ -41,7 +60,7 @@ const LinkGenerator = () => {
   const queryClient = useQueryClient();
 
   // Fetch custom domains via edge function (handles RLS/service role logic)
-  const { data: customDomains = [], refetch: refetchDomains } = useQuery<CustomDomainRecord[]>({
+  const { data: customDomains = [], refetch: refetchDomains, isLoading: isLoadingDomains } = useQuery<CustomDomainRecord[]>({
     queryKey: ['custom-domains', user?.id],
     enabled: !!user,
     refetchOnWindowFocus: true,
@@ -103,10 +122,27 @@ const LinkGenerator = () => {
 
   const primaryDomain = primaryDomainRecord?.domain_name ?? null;
   const primaryDomainStatus = primaryDomainRecord?.status ?? null;
+  
+  // Check if custom domain is verified (status is 'active' or 'verified')
+  // Also check if domain is active (is_active = true) as that's what Settings shows
+  const isCustomDomainVerified = primaryDomainRecord 
+    ? (primaryDomainRecord.status === 'active' || primaryDomainRecord.status === 'verified') && primaryDomainRecord.is_active
+    : false;
 
-  // Fetch organization info for subdomain
+  // Debug logging
+  useEffect(() => {
+    if (customDomains.length > 0) {
+      console.log('🔍 LinkGenerator: Custom domains:', customDomains);
+      console.log('🔍 LinkGenerator: Primary domain record:', primaryDomainRecord);
+      console.log('🔍 LinkGenerator: Is custom domain verified?', isCustomDomainVerified);
+      console.log('🔍 LinkGenerator: Primary domain status:', primaryDomainStatus);
+    }
+  }, [customDomains, primaryDomainRecord, isCustomDomainVerified, primaryDomainStatus]);
+
+  // Fetch organization info for subdomain and URL toggle settings
+  // Use primaryDomainRecord from customDomains query as source of truth for verification status
   const { data: organizationInfo } = useQuery({
-    queryKey: ['organization-info', user?.id],
+    queryKey: ['organization-info', user?.id, primaryDomainRecord?.status],
     queryFn: async () => {
       if (!user) return null;
 
@@ -120,14 +156,36 @@ const LinkGenerator = () => {
 
       const { data: org } = await supabase
         .from('organizations')
-        .select('id, domain, name')
+        .select('id, domain, name, active_url_type, custom_domain, custom_domain_verified')
         .eq('id', profile.organization_id)
         .single();
+
+      // Use primaryDomainRecord from customDomains query as source of truth
+      // This is more reliable since it's already fetched and up-to-date
+      if (org && primaryDomainRecord) {
+        const isVerified = primaryDomainRecord.status === 'active' || primaryDomainRecord.status === 'verified';
+        // Return org with synced data from custom_domains table
+        return {
+          ...org,
+          custom_domain: primaryDomainRecord.domain_name,
+          custom_domain_verified: isVerified
+        };
+      }
 
       return org;
     },
     enabled: !!user,
   });
+
+  const [activeUrlType, setActiveUrlType] = useState<'subdomain' | 'custom_domain'>('subdomain');
+  const [isSavingUrlType, setIsSavingUrlType] = useState(false);
+
+  // Sync activeUrlType with organization data
+  useEffect(() => {
+    if (organizationInfo?.active_url_type) {
+      setActiveUrlType(organizationInfo.active_url_type as 'subdomain' | 'custom_domain');
+    }
+  }, [organizationInfo?.active_url_type]);
 
   // Fetch the primary active link
   const { data: primaryLink, isLoading } = useQuery({
@@ -151,7 +209,15 @@ const LinkGenerator = () => {
         .order('created_at', { ascending: false })
         .limit(1);
 
-      return links?.[0] || null;
+      const link = links?.[0];
+      if (link && link.available_languages) {
+        // Parse JSONB array if it's a string
+        if (typeof link.available_languages === 'string') {
+          link.available_languages = JSON.parse(link.available_languages);
+        }
+      }
+      
+      return link || null;
     },
     enabled: !!user,
   });
@@ -207,6 +273,110 @@ const LinkGenerator = () => {
       });
     },
   });
+
+  // Update available languages
+  const updateAvailableLanguagesMutation = useMutation({
+    mutationFn: async ({ id, available_languages }: { id: string, available_languages: string[] }) => {
+      const { error } = await supabase
+        .from('organization_links')
+        .update({ available_languages })
+        .eq('id', id)
+        .select();
+
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      // Invalidate and refetch to get fresh data
+      queryClient.invalidateQueries({ queryKey: ['primary-link'] });
+      queryClient.refetchQueries({ queryKey: ['primary-link'] });
+      toast({
+        title: "Languages Updated",
+        description: "Available languages for the form have been updated successfully.",
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Error",
+        description: error.message,
+        variant: "destructive",
+      });
+    },
+  });
+
+  // Update active URL type
+  const updateUrlTypeMutation = useMutation({
+    mutationFn: async ({ organizationId, active_url_type }: { organizationId: string, active_url_type: 'subdomain' | 'custom_domain' }) => {
+      // Validate: can't switch to custom_domain if it's not verified
+      if (active_url_type === 'custom_domain' && !organizationInfo?.custom_domain_verified) {
+        throw new Error('Custom domain must be verified before it can be set as active.');
+      }
+
+      const { error } = await supabase
+        .from('organizations')
+        .update({ active_url_type })
+        .eq('id', organizationId);
+
+      if (error) throw error;
+    },
+    onSuccess: async () => {
+      // Invalidate and refetch organization info
+      queryClient.invalidateQueries({ queryKey: ['organization-info', user?.id] });
+      queryClient.refetchQueries({ queryKey: ['organization-info', user?.id] });
+      
+      // Log the change
+      if (user?.id && organizationInfo?.id) {
+        auditLogger.log({
+          eventType: 'organization.url_type_changed',
+          category: 'system',
+          action: 'update_url_type',
+          actorType: 'user',
+          actorId: user.id,
+          organizationId: organizationInfo.id,
+          summary: `Active URL type changed to: ${activeUrlType}`,
+          metadata: { 
+            previousType: organizationInfo.active_url_type,
+            newType: activeUrlType,
+            customDomain: organizationInfo.custom_domain
+          }
+        }).catch(console.error);
+      }
+
+      toast({
+        title: "URL Type Updated",
+        description: "The active URL type has been updated. The old URL will automatically redirect to the new one.",
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to update URL type",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const handleSaveUrlType = async () => {
+    if (!organizationInfo?.id) return;
+    
+    if (activeUrlType === 'custom_domain' && !isCustomDomainVerified) {
+      toast({
+        title: "Cannot Switch",
+        description: "Custom domain must be verified before it can be set as active.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setIsSavingUrlType(true);
+    try {
+      await updateUrlTypeMutation.mutateAsync({
+        organizationId: organizationInfo.id,
+        active_url_type: activeUrlType
+      });
+    } finally {
+      setIsSavingUrlType(false);
+    }
+  };
 
   const generateLinkUrl = (linkToken: string) => {
     if (primaryDomain) {
@@ -333,129 +503,141 @@ const LinkGenerator = () => {
     ? `https://${organizationInfo.domain}.disclosurely.com/report`
     : null;
 
-  // Generate token-based URL as last resort fallback
-  const tokenUrl = `https://secure.disclosurely.com/secure/tool/submit/${primaryLink.link_token}`;
-
   return (
     <>
       <Card>
         <CardHeader>
-          <div className="flex items-center justify-between">
-            <div>
-              <CardTitle className="text-lg">{t('secureReportLink')}</CardTitle>
-              <CardDescription className="text-sm mt-1">
-                {t('yourOrganisationCanUse')}
-              </CardDescription>
-            </div>
-            <Badge variant={primaryLink.is_active ? "default" : "secondary"}>
-              {primaryLink.is_active ? t('active') : t('inactive')}
-            </Badge>
+          <div>
+            <CardTitle className="text-lg">{t('secureReportLink')}</CardTitle>
+            <CardDescription className="text-sm mt-1">
+              Choose which URL type should be active. Only one can be active at a time. The inactive URL will automatically redirect to the active one.
+            </CardDescription>
           </div>
         </CardHeader>
-        <CardContent className="space-y-3">
-          {/* Branded Link - Show if available */}
-          {brandedUrl && primaryDomain && (
-            <div className="p-4 bg-blue-50/50 rounded-lg border border-blue-200">
-              <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-                <div className="flex-1 min-w-0 w-full">
-                  <div className="flex flex-wrap items-center gap-2 mb-1">
-                    <p className="text-sm font-semibold">✨ Your Branded Link</p>
-                    {primaryDomainStatus && primaryDomainStatus !== 'active' && (
-                      <Badge variant="outline" className="text-xs h-5 capitalize shrink-0">
-                        {primaryDomainStatus}
-                      </Badge>
-                    )}
-                    {brandedLinkStatus === 'accessible' && (
-                      <Badge variant="default" className="bg-green-600 text-xs h-5 shrink-0">
-                        ✓ Active
-                      </Badge>
-                    )}
-                    {brandedLinkStatus === 'checking' && (
-                      <Badge variant="outline" className="text-xs h-5 shrink-0">
-                        Checking DNS…
-                      </Badge>
-                    )}
-                    {brandedLinkStatus === 'inaccessible' && (
-                      <Badge variant="destructive" className="text-xs h-5 shrink-0">
-                        ⚠ Needs attention
-                      </Badge>
-                    )}
+        <CardContent className="space-y-4">
+          <RadioGroup
+            value={activeUrlType}
+            onValueChange={(value) => setActiveUrlType(value as 'subdomain' | 'custom_domain')}
+            className="space-y-3"
+          >
+                  {/* Subdomain Option */}
+                  <div className="flex items-start space-x-3 p-3 border rounded-lg bg-background">
+                    <RadioGroupItem 
+                      value="subdomain" 
+                      id="subdomain" 
+                      className="mt-1" 
+                    />
+                    <div className="flex-1 min-w-0">
+                      <Label htmlFor="subdomain" className="text-sm font-semibold cursor-pointer">
+                        Standard Subdomain
+                      </Label>
+                      {subdomainUrl && (
+                        <div className="mt-2 space-y-2">
+                          <div className="flex items-center gap-2">
+                            <code className="text-xs bg-muted px-2 py-1 rounded flex-1 min-w-0 break-all">
+                              {subdomainUrl}
+                            </code>
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => copyToClipboard(subdomainUrl)}
+                              className="shrink-0"
+                            >
+                              {t('copyLink')}
+                            </Button>
+                          </div>
+                          {activeUrlType === 'subdomain' && activeUrlType === organizationInfo?.active_url_type && (
+                            <div className="flex items-center gap-2 text-xs text-green-600">
+                              <CheckCircle className="h-3 w-3" />
+                              <span>Currently active</span>
+                            </div>
+                          )}
+                        </div>
+                      )}
+                    </div>
                   </div>
-                  <p className="text-xs text-muted-foreground mb-2 break-words">
-                    Clean, professional URL for your employees • Used {primaryLink.usage_count || 0} times
-                  </p>
-                  <code className="text-xs sm:text-sm bg-background px-3 py-2 rounded border font-mono break-all block w-full font-semibold">
-                    {brandedUrl}
-                  </code>
-                </div>
-                <Button
-                  size="sm"
-                  onClick={() => copyToClipboard(brandedUrl)}
-                  className="whitespace-nowrap shrink-0 w-full sm:w-auto"
-                  disabled={brandedLinkStatus === 'inaccessible'}
-                >
-                  {t('copyLink')}
-                </Button>
-              </div>
-            </div>
-          )}
 
-          {/* Subdomain Link - Show if available */}
-          {subdomainUrl && (
-            <div className="p-4 bg-purple-50/50 rounded-lg border border-purple-200">
-              <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-                <div className="flex-1 min-w-0 w-full">
-                  <div className="flex flex-wrap items-center gap-2 mb-1">
-                    <p className="text-sm font-semibold">🏢 Your Subdomain Link</p>
-                    <Badge variant="default" className="bg-green-600 text-xs h-5 shrink-0">
-                      ✓ Active
-                    </Badge>
+                  {/* Custom Domain Option */}
+                  <div className="flex items-start space-x-3 p-3 border rounded-lg bg-background">
+                    <RadioGroupItem 
+                      value="custom_domain" 
+                      id="custom_domain" 
+                      className="mt-1"
+                      disabled={!brandedUrl || !isCustomDomainVerified}
+                    />
+                    <div className="flex-1 min-w-0">
+                      <Label 
+                        htmlFor="custom_domain" 
+                        className={`text-sm font-semibold ${(!brandedUrl || !isCustomDomainVerified) ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}
+                      >
+                        Custom Domain
+                      </Label>
+                      {!brandedUrl ? (
+                        <div className="mt-2 flex items-center gap-2 text-xs text-muted-foreground">
+                          <AlertCircle className="h-3 w-3" />
+                          <span>Not configured - Set up custom domain in Settings → Custom Domains</span>
+                        </div>
+                      ) : !isCustomDomainVerified ? (
+                        <div className="mt-2 flex items-center gap-2 text-xs text-amber-600">
+                          <AlertCircle className="h-3 w-3" />
+                          <span>Pending verification - Domain must be verified before it can be activated</span>
+                        </div>
+                      ) : (
+                        <div className="mt-2 space-y-2">
+                          <div className="flex items-center gap-2">
+                            <code className="text-xs bg-muted px-2 py-1 rounded flex-1 min-w-0 break-all">
+                              {brandedUrl}
+                            </code>
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => copyToClipboard(brandedUrl)}
+                              className="shrink-0"
+                              disabled={brandedLinkStatus === 'inaccessible'}
+                            >
+                              {t('copyLink')}
+                            </Button>
+                          </div>
+                          {activeUrlType === 'custom_domain' && activeUrlType === organizationInfo?.active_url_type && (
+                            <div className="flex items-center gap-2 text-xs text-green-600">
+                              <CheckCircle className="h-3 w-3" />
+                              <span>Currently active</span>
+                            </div>
+                          )}
+                          {brandedLinkStatus === 'checking' && (
+                            <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                              <Loader2 className="h-3 w-3 animate-spin" />
+                              <span>Checking accessibility...</span>
+                            </div>
+                          )}
+                          {brandedLinkStatus === 'inaccessible' && (
+                            <div className="flex items-center gap-2 text-xs text-amber-600">
+                              <AlertCircle className="h-3 w-3" />
+                              <span>Needs attention - Domain may not be properly configured</span>
+                            </div>
+                          )}
+                        </div>
+                      )}
+                    </div>
                   </div>
-                  <p className="text-xs text-muted-foreground mb-2 break-words">
-                    {brandedUrl
-                      ? `Fallback option when custom domain is unavailable • Used ${primaryLink.usage_count || 0} times`
-                      : `Professional branded link • Used ${primaryLink.usage_count || 0} times`
-                    }
-                  </p>
-                  <code className="text-xs sm:text-sm bg-background px-3 py-2 rounded border font-mono break-all block w-full font-semibold">
-                    {subdomainUrl}
-                  </code>
-                </div>
-                <Button
-                  size="sm"
-                  onClick={() => copyToClipboard(subdomainUrl)}
-                  className="whitespace-nowrap shrink-0 w-full sm:w-auto"
-                >
-                  {t('copyLink')}
-                </Button>
-              </div>
-            </div>
-          )}
+                </RadioGroup>
 
-          {/* Token-based Link - Show as last resort */}
-          <div className="p-3 bg-gray-50 rounded-lg border border-dashed">
-            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-              <div className="flex-1 min-w-0 w-full">
-                <div className="flex flex-wrap items-center gap-2 mb-1">
-                  <p className="text-xs font-medium text-muted-foreground">Legacy Link (for testing only)</p>
-                </div>
-                <p className="text-xs text-muted-foreground mb-2 break-words">
-                  This link works but is not as professional. Use the links above for production.
-                </p>
-                <code className="text-xs bg-muted px-2 py-1 rounded border font-mono break-all block w-full">
-                  {tokenUrl}
-                </code>
-              </div>
+          {/* Save Button */}
+          {activeUrlType !== organizationInfo?.active_url_type && (
+            <div className="flex justify-end">
               <Button
+                onClick={handleSaveUrlType}
+                loading={isSavingUrlType}
+                loadingText="Saving..."
                 size="sm"
-                variant="outline"
-                onClick={() => copyToClipboard(tokenUrl)}
-                className="whitespace-nowrap shrink-0 w-full sm:w-auto text-xs"
+                className="flex items-center gap-2"
               >
-                Copy
+                <CheckCircle className="h-4 w-4" />
+                Save Changes
               </Button>
             </div>
-          </div>
+          )}
+
 
           {/* Prompt to set up custom domain if they don't have one */}
           {!brandedUrl && (
@@ -476,10 +658,10 @@ const LinkGenerator = () => {
             <CardTitle className="text-lg">Form Settings</CardTitle>
           </div>
           <CardDescription className="text-sm mt-1">
-            Configure the default language for your submission form
+            Configure which languages appear in your submission form
           </CardDescription>
         </CardHeader>
-        <CardContent className="space-y-4">
+        <CardContent className="space-y-6">
           <div className="space-y-2">
             <Label htmlFor="default-language">Default Language</Label>
             <Select
@@ -495,22 +677,77 @@ const LinkGenerator = () => {
                 <SelectValue placeholder="Select language" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="en">🇬🇧 English</SelectItem>
-                <SelectItem value="es">🇪🇸 Español (Spanish)</SelectItem>
-                <SelectItem value="fr">🇫🇷 Français (French)</SelectItem>
-                <SelectItem value="de">🇩🇪 Deutsch (German)</SelectItem>
-                <SelectItem value="pl">🇵🇱 Polski (Polish)</SelectItem>
-                <SelectItem value="sv">🇸🇪 Svenska (Swedish)</SelectItem>
-                <SelectItem value="no">🇳🇴 Norsk (Norwegian)</SelectItem>
-                <SelectItem value="pt">🇵🇹 Português (Portuguese)</SelectItem>
-                <SelectItem value="it">🇮🇹 Italiano (Italian)</SelectItem>
-                <SelectItem value="nl">🇳🇱 Nederlands (Dutch)</SelectItem>
-                <SelectItem value="da">🇩🇰 Dansk (Danish)</SelectItem>
-                <SelectItem value="el">🇬🇷 Ελληνικά (Greek)</SelectItem>
+                {ALL_LANGUAGES.map((lang) => (
+                  <SelectItem key={lang.code} value={lang.code}>
+                    {lang.flag} {lang.name}
+                  </SelectItem>
+                ))}
               </SelectContent>
             </Select>
             <p className="text-xs text-muted-foreground">
               This sets the default language when users access your submission form. Users can still change the language within the form.
+            </p>
+          </div>
+
+          <div className="space-y-3">
+            <Label>Available Languages</Label>
+            <p className="text-xs text-muted-foreground mb-3">
+              Select which languages should appear in the form. Only selected languages will be available to users.
+            </p>
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 p-4 border rounded-lg bg-muted/50">
+              {ALL_LANGUAGES.map((lang) => {
+                const availableLanguages = primaryLink.available_languages || ALL_LANGUAGES.map(l => l.code);
+                const isChecked = availableLanguages.includes(lang.code);
+                
+                return (
+                  <div key={lang.code} className="flex items-center space-x-2">
+                    <Checkbox
+                      id={`lang-${lang.code}`}
+                      checked={isChecked}
+                      onCheckedChange={(checked) => {
+                        const current = primaryLink.available_languages || ALL_LANGUAGES.map(l => l.code);
+                        const updated = checked
+                          ? [...current, lang.code]
+                          : current.filter((code: string) => code !== lang.code);
+                        
+                        // Ensure at least one language is selected
+                        if (updated.length === 0) {
+                          toast({
+                            title: "Error",
+                            description: "At least one language must be selected.",
+                            variant: "destructive",
+                          });
+                          return;
+                        }
+
+                        // Ensure default language is always included
+                        const defaultLang = primaryLink.default_language || 'en';
+                        if (!updated.includes(defaultLang)) {
+                          updated.push(defaultLang);
+                        }
+
+                        updateAvailableLanguagesMutation.mutate({
+                          id: primaryLink.id,
+                          available_languages: updated
+                        });
+                      }}
+                    />
+                    <Label
+                      htmlFor={`lang-${lang.code}`}
+                      className="text-sm font-normal cursor-pointer flex items-center gap-2"
+                    >
+                      <span>{lang.flag}</span>
+                      <span>{lang.name}</span>
+                    </Label>
+                  </div>
+                );
+              })}
+            </div>
+            <p className="text-xs text-muted-foreground">
+              {(() => {
+                const availableLanguages = primaryLink.available_languages || ALL_LANGUAGES.map(l => l.code);
+                return `${availableLanguages.length} of ${ALL_LANGUAGES.length} languages selected`;
+              })()}
             </p>
           </div>
         </CardContent>

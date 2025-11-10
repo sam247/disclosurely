@@ -1,9 +1,7 @@
-import { useState } from 'react';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Input } from '@/components/ui/input';
-import { Badge } from '@/components/ui/badge';
-import { Tag, Sparkles } from 'lucide-react';
+import { Tag } from 'lucide-react';
 import { progressiveFormTranslations } from '@/i18n/progressiveFormTranslations';
 
 // English keys for internal storage
@@ -72,7 +70,6 @@ interface Step5CategoryProps {
 
 const Step5Category = ({ mainCategory, subCategory, customCategory, onChange, isValid, language }: Step5CategoryProps) => {
   const t = progressiveFormTranslations[language as keyof typeof progressiveFormTranslations] || progressiveFormTranslations.en;
-  const [aiSuggested, setAiSuggested] = useState(!!mainCategory && !!subCategory);
 
   const handleMainCategoryChange = (value: string) => {
     onChange({
@@ -80,7 +77,6 @@ const Step5Category = ({ mainCategory, subCategory, customCategory, onChange, is
       subCategory: '',
       customCategory: ''
     });
-    setAiSuggested(false);
   };
 
   const handleSubCategoryChange = (value: string) => {
@@ -88,7 +84,6 @@ const Step5Category = ({ mainCategory, subCategory, customCategory, onChange, is
       subCategory: value,
       customCategory: value === "Other (Please Specify)" ? customCategory : ""
     });
-    setAiSuggested(false);
   };
 
   // Helper to get translated category name
@@ -187,33 +182,19 @@ const Step5Category = ({ mainCategory, subCategory, customCategory, onChange, is
 
   return (
     <div className="space-y-4 py-2">
-      <div className="flex items-center gap-3">
-        <div className="p-2 rounded-lg bg-primary/10">
-          <Tag className="w-5 h-5 text-primary" />
+      <div className="flex items-center gap-2 sm:gap-3">
+        <div className="p-1.5 sm:p-2 rounded-lg bg-primary/10 flex-shrink-0">
+          <Tag className="w-4 h-4 sm:w-5 sm:h-5 text-primary" />
         </div>
-        <div>
-          <h2 className="text-2xl font-bold text-gray-900">
+        <div className="min-w-0">
+          <h2 className="text-lg sm:text-2xl font-bold text-gray-900">
             {t.step4.title}
           </h2>
-          <p className="text-sm text-gray-600 mt-1">
+          <p className="text-xs sm:text-sm text-gray-600 mt-1">
             {t.step4.subtitle}
           </p>
         </div>
       </div>
-
-      {aiSuggested && (
-        <div className="bg-primary/10 border border-primary/20 rounded-lg p-4">
-          <div className="flex items-center gap-2">
-            <Sparkles className="w-4 h-4 text-primary" />
-            <Badge variant="outline" className="text-xs bg-white text-primary border-primary/20">
-              {t.step4.aiSuggested}
-            </Badge>
-          </div>
-          <p className="text-sm text-primary/80 mt-2">
-            {t.step4.aiSuggestedDesc}
-          </p>
-        </div>
-      )}
 
       <div className="space-y-4">
         <div className="space-y-2">
@@ -231,7 +212,7 @@ const Step5Category = ({ mainCategory, subCategory, customCategory, onChange, is
                 return (
                   <SelectItem key={englishKey} value={englishKey} className="text-base">
                     {getTranslatedMainCategory(englishKey)}
-                  </SelectItem>
+                </SelectItem>
                 );
               })}
             </SelectContent>
@@ -279,11 +260,11 @@ const Step5Category = ({ mainCategory, subCategory, customCategory, onChange, is
       </div>
 
       {!isValid && mainCategory && (
-        <p className="text-sm text-amber-600">{t.step4.selectBoth}</p>
+        <p className="text-sm text-amber-600 mt-2 sm:mt-0">{t.step4.selectBoth}</p>
       )}
 
       {isValid && (
-        <p className="text-sm text-green-600">
+        <p className="text-sm text-green-600 mt-2 sm:mt-0">
           {t.step4.categorySelected} <strong>{getTranslatedMainCategory(mainCategory)} - {subCategory === "Other (Please Specify)" ? customCategory : getTranslatedSubCategory(mainCategory, subCategory)}</strong>
         </p>
       )}

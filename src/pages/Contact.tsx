@@ -12,71 +12,67 @@ import DynamicHelmet from "@/components/DynamicHelmet";
 import { AnnouncementBar } from "@/components/AnnouncementBar";
 import { useLanguageFromUrl } from "@/hooks/useLanguageFromUrl";
 import { useTranslation } from "react-i18next";
-
 const Contact = () => {
   useLanguageFromUrl();
-  const { t } = useTranslation();
+  const {
+    t
+  } = useTranslation();
   const [formData, setFormData] = useState({
     name: "",
     email: "",
     company: "",
     department: "",
-    message: "",
+    message: ""
   });
-
+  const [loading, setLoading] = useState(false);
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-
+    setLoading(true);
     try {
       // Send email via edge function or email service
       const response = await fetch("https://cxmuzperkittvibslnff.supabase.co/functions/v1/send-contact-email", {
         method: "POST",
         headers: {
-          "Content-Type": "application/json",
+          "Content-Type": "application/json"
         },
         body: JSON.stringify({
           to: "team@disclsourely.com",
-          ...formData,
-        }),
+          ...formData
+        })
       });
-
       if (response.ok) {
         alert(t("contact.form.success") || "Thank you for your message! We will get back to you within 24 hours.");
-        setFormData({ name: "", email: "", company: "", department: "", message: "" });
+        setFormData({
+          name: "",
+          email: "",
+          company: "",
+          department: "",
+          message: ""
+        });
       } else {
-        alert(
-          t("contact.form.error") || "There was an error sending your message. Please try again or email us directly.",
-        );
+        alert(t("contact.form.error") || "There was an error sending your message. Please try again or email us directly.");
       }
     } catch (error) {
       console.error("Contact form error:", error);
-      alert(
-        t("contact.form.error") || "There was an error sending your message. Please email us at team@disclosurely.com",
-      );
+      alert(t("contact.form.error") || "There was an error sending your message. Please email us at team@disclosurely.com");
+    } finally {
+      setLoading(false);
     }
   };
-
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     setFormData({
       ...formData,
-      [e.target.name]: e.target.value,
+      [e.target.name]: e.target.value
     });
   };
-
   const handleDepartmentChange = (value: string) => {
     setFormData({
       ...formData,
-      department: value,
+      department: value
     });
   };
-
-  return (
-    <>
-      <DynamicHelmet
-        pageIdentifier="contact"
-        fallbackTitle={t("contact.meta.title")}
-        fallbackDescription={t("contact.meta.description")}
-      />
+  return <>
+      <DynamicHelmet pageIdentifier="contact" fallbackTitle={t("contact.meta.title")} fallbackDescription={t("contact.meta.description")} />
       <div className="min-h-screen bg-white">
       {/* Announcement Bar */}
       <AnnouncementBar />
@@ -87,11 +83,7 @@ const Contact = () => {
           <div className="flex justify-between items-center py-3">
             <div className="flex items-center">
               <Link to="/" className="flex items-center">
-                <img
-                  src="/lovable-uploads/c46ace0e-df58-4119-b5e3-8dcfa075ea2f.png"
-                  alt="Disclosurely"
-                  className="h-5 sm:h-6 md:h-8 w-auto"
-                />
+                <img src="/lovable-uploads/c46ace0e-df58-4119-b5e3-8dcfa075ea2f.png" alt="Disclosurely" loading="lazy" decoding="async" className="h-5 sm:h-6 md:h-8 w-auto" />
               </Link>
             </div>
             <div className="hidden md:flex items-center space-x-4">
@@ -99,19 +91,13 @@ const Contact = () => {
               <Link to="/pricing" className="text-gray-600 hover:text-gray-900">
                 {t("nav.pricing")}
               </Link>
-              <a
-                href="https://app.disclosurely.com/auth/signup"
-                className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors"
-              >
+              <a href="https://app.disclosurely.com/auth/signup" className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors">
                 {t("nav.getStarted")}
               </a>
             </div>
             <div className="md:hidden flex items-center gap-1.5">
               <PublicLanguageSelector />
-              <a
-                href="https://app.disclosurely.com/auth/login"
-                className="bg-blue-600 text-white px-2.5 py-1.5 rounded-lg hover:bg-blue-700 transition-colors text-xs whitespace-nowrap"
-              >
+              <a href="https://app.disclosurely.com/auth/login" className="bg-blue-600 text-white px-2.5 py-1.5 rounded-lg hover:bg-blue-700 transition-colors text-xs whitespace-nowrap">
                 {t("nav.signin")}
               </a>
             </div>
@@ -154,7 +140,7 @@ const Contact = () => {
                 </div>
                 <div>
                   <h3 className="font-semibold text-gray-900 mb-1">{t("contact.info.phone.title")}</h3>
-                  <p className="text-gray-600">{t("contact.info.phone.number")}</p>
+                  
                   <p className="text-sm text-gray-500">{t("contact.info.phone.hours")}</p>
                 </div>
               </div>
@@ -194,45 +180,21 @@ const Contact = () => {
                   <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-2">
                     {t("contact.form.name.label")}
                   </label>
-                  <Input
-                    id="name"
-                    name="name"
-                    type="text"
-                    required
-                    value={formData.name}
-                    onChange={handleChange}
-                    placeholder={t("contact.form.name.placeholder")}
-                  />
+                  <Input id="name" name="name" type="text" required value={formData.name} onChange={handleChange} placeholder={t("contact.form.name.placeholder")} />
                 </div>
 
                 <div>
                   <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
                     {t("contact.form.email.label")}
                   </label>
-                  <Input
-                    id="email"
-                    name="email"
-                    type="email"
-                    required
-                    value={formData.email}
-                    onChange={handleChange}
-                    placeholder={t("contact.form.email.placeholder")}
-                  />
+                  <Input id="email" name="email" type="email" required value={formData.email} onChange={handleChange} placeholder={t("contact.form.email.placeholder")} />
                 </div>
 
                 <div>
                   <label htmlFor="company" className="block text-sm font-medium text-gray-700 mb-2">
                     {t("contact.form.company.label")}
                   </label>
-                  <Input
-                    id="company"
-                    name="company"
-                    type="text"
-                    required
-                    value={formData.company}
-                    onChange={handleChange}
-                    placeholder={t("contact.form.company.placeholder")}
-                  />
+                  <Input id="company" name="company" type="text" required value={formData.company} onChange={handleChange} placeholder={t("contact.form.company.placeholder")} />
                 </div>
 
                 <div>
@@ -257,17 +219,15 @@ const Contact = () => {
                   <label htmlFor="message" className="block text-sm font-medium text-gray-700 mb-2">
                     {t("contact.form.message.label")}
                   </label>
-                  <Textarea
-                    id="message"
-                    name="message"
-                    rows={4}
-                    value={formData.message}
-                    onChange={handleChange}
-                    placeholder={t("contact.form.message.placeholder")}
-                  />
+                  <Textarea id="message" name="message" rows={4} value={formData.message} onChange={handleChange} placeholder={t("contact.form.message.placeholder")} />
                 </div>
 
-                <Button type="submit" className="w-full">
+                <Button 
+                  type="submit" 
+                  loading={loading}
+                  loadingText={t("contact.form.submit") || "Sending..."}
+                  className="w-full"
+                >
                   <Send className="h-4 w-4 mr-2" />
                   {t("contact.form.submit")}
                 </Button>
@@ -281,8 +241,6 @@ const Contact = () => {
 
       <Footer />
     </div>
-    </>
-  );
+    </>;
 };
-
 export default Contact;

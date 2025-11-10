@@ -76,9 +76,11 @@ const ReportsManagement = () => {
   const [teamMembers, setTeamMembers] = useState<any[]>([]);
   const [newNote, setNewNote] = useState('');
   const [reportNotes, setReportNotes] = useState<any[]>([]);
+  const [isAddingNote, setIsAddingNote] = useState(false);
   const [showDeleted, setShowDeleted] = useState(false);
   const [editingTags, setEditingTags] = useState(false);
   const [tempTags, setTempTags] = useState<string[]>([]);
+  const [processingReportId, setProcessingReportId] = useState<string | null>(null);
 
   useEffect(() => {
     fetchReports();
@@ -231,6 +233,7 @@ const ReportsManagement = () => {
   };
 
   const markAsRead = async (reportId: string) => {
+    setProcessingReportId(reportId);
     try {
       const report = reports.find(r => r.id === reportId);
       const { data: profile } = await supabase.from('profiles').select('organization_id').eq('id', user?.id).single();
@@ -280,10 +283,13 @@ const ReportsManagement = () => {
         description: "Failed to mark report as read",
         variant: "destructive",
       });
+    } finally {
+      setProcessingReportId(null);
     }
   };
 
   const closeReport = async (reportId: string) => {
+    setProcessingReportId(reportId);
     try {
       const report = reports.find(r => r.id === reportId);
       const { data: profile } = await supabase.from('profiles').select('organization_id').eq('id', user?.id).single();
@@ -331,10 +337,13 @@ const ReportsManagement = () => {
         description: "Failed to close report",
         variant: "destructive",
       });
+    } finally {
+      setProcessingReportId(null);
     }
   };
 
   const archiveReport = async (reportId: string) => {
+    setProcessingReportId(reportId);
     try {
       const report = reports.find(r => r.id === reportId);
       const profile = await supabase.from('profiles').select('organization_id').eq('id', user?.id).single();
@@ -387,10 +396,13 @@ const ReportsManagement = () => {
         description: "Failed to archive report",
         variant: "destructive",
       });
+    } finally {
+      setProcessingReportId(null);
     }
   };
 
   const deleteReport = async (reportId: string) => {
+    setProcessingReportId(reportId);
     try {
       const report = reports.find(r => r.id === reportId);
       const profile = await supabase.from('profiles').select('organization_id').eq('id', user?.id).single();
@@ -440,10 +452,13 @@ const ReportsManagement = () => {
         description: "Failed to delete report",
         variant: "destructive",
       });
+    } finally {
+      setProcessingReportId(null);
     }
   };
 
   const restoreReport = async (reportId: string) => {
+    setProcessingReportId(reportId);
     try {
       const report = reports.find(r => r.id === reportId);
       const profile = await supabase.from('profiles').select('organization_id').eq('id', user?.id).single();
@@ -497,6 +512,8 @@ const ReportsManagement = () => {
         description: "Failed to restore report",
         variant: "destructive",
       });
+    } finally {
+      setProcessingReportId(null);
     }
   };
 
@@ -611,6 +628,7 @@ const ReportsManagement = () => {
   const addNote = async () => {
     if (!selectedReport || !newNote.trim()) return;
 
+    setIsAddingNote(true);
     try {
       const { data: profile } = await supabase.from('profiles').select('organization_id').eq('id', user?.id).single();
       
@@ -659,6 +677,8 @@ const ReportsManagement = () => {
         description: "Failed to add note",
         variant: "destructive",
       });
+    } finally {
+      setIsAddingNote(false);
     }
   };
 
@@ -887,6 +907,8 @@ const ReportsManagement = () => {
                               size="sm"
                               variant="outline"
                               onClick={() => closeReport(report.id)}
+                              loading={processingReportId === report.id}
+                              loadingText="Closing..."
                               title="Close Case"
                             >
                               <XCircle className="h-4 w-4" />
@@ -897,6 +919,8 @@ const ReportsManagement = () => {
                               size="sm"
                               variant="outline"
                               onClick={() => archiveReport(report.id)}
+                              loading={processingReportId === report.id}
+                              loadingText="Archiving..."
                               title="Archive"
                             >
                               <Archive className="h-4 w-4" />
@@ -907,6 +931,8 @@ const ReportsManagement = () => {
                               size="sm"
                               variant="outline"
                               onClick={() => restoreReport(report.id)}
+                              loading={processingReportId === report.id}
+                              loadingText="Restoring..."
                               title="Restore"
                             >
                               <RotateCcw className="h-4 w-4" />
@@ -916,6 +942,8 @@ const ReportsManagement = () => {
                               size="sm"
                               variant="outline"
                               onClick={() => deleteReport(report.id)}
+                              loading={processingReportId === report.id}
+                              loadingText="Deleting..."
                               title="Delete"
                             >
                               <Trash2 className="h-4 w-4" />
@@ -1086,7 +1114,12 @@ const ReportsManagement = () => {
                       onChange={(e) => setNewNote(e.target.value)}
                       rows={3}
                     />
-                    <Button onClick={addNote} disabled={!newNote.trim()}>
+                    <Button 
+                      onClick={addNote} 
+                      loading={isAddingNote}
+                      loadingText="Adding..."
+                      disabled={!newNote.trim()}
+                    >
                       Add Note
                     </Button>
                   </div>

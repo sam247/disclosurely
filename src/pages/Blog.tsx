@@ -354,7 +354,7 @@ const Blog = () => {
     return (
       <>
         <DynamicHelmet
-          pageIdentifier="blog-post"
+          pageIdentifier={`/blog/${currentPost.slug}`}
           fallbackTitle={currentPost.seoTitle || currentPost.title}
           fallbackDescription={currentPost.seoDescription || currentPost.excerpt}
         />
@@ -415,6 +415,8 @@ const Blog = () => {
                     <img 
                       src={currentPost.featuredImage} 
                       alt={currentPost.title}
+                      loading="lazy"
+                      decoding="async"
                       className="w-full h-64 object-cover rounded-lg"
                     />
                   </div>
@@ -539,6 +541,8 @@ const Blog = () => {
                           <img 
                             src={post.featuredImage} 
                             alt={post.title}
+                            loading="lazy"
+                            decoding="async"
                             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                           />
                         </div>
@@ -817,6 +821,8 @@ const RelatedArticles = ({ currentPost }: { currentPost: BlogPostDisplay }) => {
                 <img 
                   src={post.featuredImage} 
                   alt={post.title}
+                  loading="lazy"
+                  decoding="async"
                   className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
                 />
               </div>

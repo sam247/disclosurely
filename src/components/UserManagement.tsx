@@ -663,17 +663,12 @@ const UserManagement = () => {
                         console.log('Send invitation button clicked, disabled:', !inviteEmail.trim());
                         sendInvitation();
                       }} 
-                      disabled={!inviteEmail.trim() || isSendingInvitation}
+                      loading={isSendingInvitation}
+                      loadingText="Sending..."
+                      disabled={!inviteEmail.trim()}
                       className="transition-all duration-200 hover:scale-105 active:scale-95"
                     >
-                      {isSendingInvitation ? (
-                        <>
-                          <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                          Sending...
-                        </>
-                      ) : (
-                        'Send Invitation'
-                      )}
+                      Send Invitation
                     </Button>
                   </div>
                 </div>

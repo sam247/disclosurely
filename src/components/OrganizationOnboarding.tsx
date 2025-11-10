@@ -179,8 +179,13 @@ const OrganizationOnboarding = () => {
                 </p>
               </div>
 
-              <Button type="submit" disabled={loading} className="w-full">
-                {loading ? 'Creating Organization...' : 'Create Organization'}
+              <Button 
+                type="submit" 
+                loading={loading}
+                loadingText="Creating Organization..."
+                className="w-full"
+              >
+                Create Organization
               </Button>
             </form>
           </CardContent>

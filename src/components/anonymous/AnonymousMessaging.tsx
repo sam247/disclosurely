@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useLocation, useParams } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
+import { useCustomDomain } from '@/hooks/useCustomDomain';
 import BrandedFormLayout from '@/components/BrandedFormLayout';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -19,15 +20,68 @@ const AnonymousMessaging = () => {
   const { trackingId } = useParams();
   const location = useLocation();
   const { toast } = useToast();
+  const { customDomain, organizationId, isCustomDomain, loading: domainLoading } = useCustomDomain();
 
   const [branding, setBranding] = useState<OrgBranding | null>(location.state?.organizationData || null);
+  const [domainBranding, setDomainBranding] = useState<OrgBranding | null>(null);
   const [report, setReport] = useState<ReportInfo | null>(null);
   const [messages, setMessages] = useState<Message[]>([]);
   const [loading, setLoading] = useState(true);
   const [sending, setSending] = useState(false);
   const [newMessage, setNewMessage] = useState('');
 
-  const brandColor = useMemo(() => branding?.brand_color, [branding]);
+  // Fetch organization branding from custom domain (like main form does)
+  useEffect(() => {
+    if (!domainLoading && isCustomDomain && organizationId) {
+      fetchOrganizationBrandingFromDomain();
+    }
+  }, [domainLoading, isCustomDomain, organizationId]);
+
+  const fetchOrganizationBrandingFromDomain = async () => {
+    if (!organizationId) return;
+
+    try {
+      console.log('Fetching organization branding for custom domain:', customDomain);
+
+      const { data: linkInfo, error: linkError } = await supabase
+        .from('organization_links')
+        .select(`
+          organization_id,
+          organizations!inner(
+            name,
+            logo_url,
+            custom_logo_url,
+            brand_color
+          )
+        `)
+        .eq('organization_id', organizationId)
+        .eq('is_active', true)
+        .order('created_at', { ascending: true })
+        .limit(1)
+        .maybeSingle();
+
+      if (linkError) {
+        console.error('Organization link error:', linkError);
+        return;
+      }
+
+      if (!linkInfo) {
+        console.log('No organization link found for custom domain');
+        return;
+      }
+
+      console.log('Organization branding found for custom domain:', linkInfo);
+
+      setDomainBranding({
+        name: linkInfo.organizations.name,
+        logo_url: linkInfo.organizations.logo_url,
+        custom_logo_url: linkInfo.organizations.custom_logo_url,
+        brand_color: linkInfo.organizations.brand_color
+      });
+    } catch (error) {
+      console.error('Error fetching organization branding from domain:', error);
+    }
+  };
 
   useEffect(() => {
     const load = async () => {
@@ -43,13 +97,17 @@ const AnonymousMessaging = () => {
       }
       setReport(data.report);
       setMessages(data.messages || []);
-      // Prefer server branding when available
-      if (data.organization) setBranding(data.organization);
+      // Prefer server branding when available, but domain branding takes precedence
+      if (data.organization && !domainBranding) setBranding(data.organization);
       setLoading(false);
     };
     load();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [trackingId]);
+
+  // Priority: domainBranding > branding (from location state or edge function) > defaults
+  const finalBranding = useMemo(() => domainBranding || branding, [domainBranding, branding]);
+  const brandColor = useMemo(() => finalBranding?.brand_color || '#2563eb', [finalBranding]);
 
   const sendMessage = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -107,7 +165,7 @@ const AnonymousMessaging = () => {
 
   if (loading) {
     return (
-      <BrandedFormLayout title="Loading..." description="Loading your report..." organizationName={branding?.name || 'Loading'} logoUrl={branding?.custom_logo_url || branding?.logo_url} brandColor={brandColor}>
+      <BrandedFormLayout title="Loading..." description="Loading your report..." organizationName={finalBranding?.name || 'Loading'} logoUrl={finalBranding?.custom_logo_url || finalBranding?.logo_url} brandColor={brandColor}>
         <div className="text-center py-8">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-4"></div>
           <p>Loading your report...</p>
@@ -118,7 +176,7 @@ const AnonymousMessaging = () => {
 
   if (!report) {
     return (
-      <BrandedFormLayout title="Error" description="Secure Report Submission" organizationName={branding?.name || 'Error'}>
+      <BrandedFormLayout title="Error" description="Secure Report Submission" organizationName={finalBranding?.name || 'Error'} logoUrl={finalBranding?.custom_logo_url || finalBranding?.logo_url} brandColor={brandColor}>
         <div className="text-center py-8">
           <p className="text-red-600">Report not found. Please check your tracking ID.</p>
         </div>
@@ -139,7 +197,7 @@ const AnonymousMessaging = () => {
   };
 
   return (
-    <BrandedFormLayout title="Secure Communication" description="Communicate securely about your report" organizationName={branding?.name} logoUrl={branding?.custom_logo_url || branding?.logo_url} brandColor={brandColor}>
+    <BrandedFormLayout title="Secure Communication" description="Communicate securely about your report" organizationName={finalBranding?.name} logoUrl={finalBranding?.custom_logo_url || finalBranding?.logo_url} brandColor={brandColor}>
       <div className="space-y-6">
         <Card>
           <CardHeader>
@@ -188,18 +246,16 @@ const AnonymousMessaging = () => {
 
             <form onSubmit={sendMessage} className="space-y-4">
               <Textarea value={newMessage} onChange={(e) => setNewMessage(e.target.value)} placeholder="Type your message..." rows={3} />
-              <Button type="submit" disabled={sending || !newMessage.trim()} className="w-full" style={{ backgroundColor: brandColor || '#2563eb' }}>
-                {sending ? (
-                  <>
-                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                    Sending...
-                  </>
-                ) : (
-                  <>
-                    <Send className="h-4 w-4 mr-2" />
-                    Send Message
-                  </>
-                )}
+              <Button 
+                type="submit" 
+                loading={sending}
+                loadingText="Sending..."
+                disabled={!newMessage.trim()} 
+                className="w-full" 
+                style={{ backgroundColor: brandColor || '#2563eb' }}
+              >
+                <Send className="h-4 w-4 mr-2" />
+                Send Message
               </Button>
             </form>
           </CardContent>

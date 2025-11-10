@@ -1,15 +1,17 @@
-import { Helmet } from "react-helmet-async";
 import { Footer } from "@/components/ui/footer";
 import { Link } from "react-router-dom";
 import PublicLanguageSelector from "@/components/PublicLanguageSelector";
 import { useLanguageFromUrl } from "@/hooks/useLanguageFromUrl";
+import DynamicHelmet from "@/components/DynamicHelmet";
+
 const WhistleblowingDirective = () => {
   useLanguageFromUrl();
   return <>
-      <Helmet>
-        <title>Whistleblowing Directive Summary - Disclosurely</title>
-        <meta name="description" content="Complete guide to the EU Whistleblowing Directive 2023 and what it means for organizations and employees across Europe." />
-      </Helmet>
+      <DynamicHelmet
+        pageIdentifier="/whistleblowing-directive"
+        fallbackTitle="EU Whistleblowing Directive 2019/1937 | Compliance Guide"
+        fallbackDescription="Complete guide to the EU Whistleblowing Directive 2019/1937 and what it means for organizations and employees across Europe. Understand your compliance obligations."
+      />
 
       <div className="min-h-screen bg-white">
         {/* Navigation */}
@@ -18,7 +20,7 @@ const WhistleblowingDirective = () => {
             <div className="flex justify-between items-center py-4">
               <div className="flex items-center">
                 <Link to="/" className="flex items-center space-x-3">
-                  <img src="/lovable-uploads/c46ace0e-df58-4119-b5e3-8dcfa075ea2f.png" alt="Disclosurely" className="h-6 md:h-8 w-auto" />
+                  <img src="/lovable-uploads/c46ace0e-df58-4119-b5e3-8dcfa075ea2f.png" alt="Disclosurely" className="h-6 md:h-8 w-auto" loading="lazy" decoding="async" />
                 </Link>
               </div>
               <div className="hidden md:flex items-center space-x-4">

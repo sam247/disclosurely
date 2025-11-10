@@ -63,6 +63,8 @@ const BrandedFormLayout = ({
                      src={logoUrl}
                      alt={`${organizationName || 'Organization'} logo`}
                      className="w-10 h-10 sm:w-12 sm:h-12 object-contain cursor-pointer"
+                     loading="lazy"
+                     decoding="async"
                      onClick={() => window.location.href = getMainSecurePageUrl()}
                      onError={(e) => {
                        const target = e.target as HTMLImageElement;
@@ -75,6 +77,8 @@ const BrandedFormLayout = ({
                      src={disclosurelyIcon}
                      alt="Disclosurely logo"
                      className="w-10 h-10 sm:w-12 sm:h-12 object-contain cursor-pointer"
+                     loading="lazy"
+                     decoding="async"
                      onClick={() => window.location.href = getMainSecurePageUrl()}
                    />
                  )}
@@ -83,6 +87,8 @@ const BrandedFormLayout = ({
                     src={disclosurelyIcon}
                     alt="Disclosurely logo"
                     className="w-10 h-10 sm:w-12 sm:h-12 object-contain cursor-pointer hidden"
+                    loading="lazy"
+                    decoding="async"
                     onClick={() => window.location.href = getMainSecurePageUrl()}
                   />
                 )}

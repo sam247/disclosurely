@@ -160,14 +160,6 @@ const Step10Review = ({ formData, attachedFiles, onEdit, onSubmit, isSubmitting,
       content: formData.previousReports ? t.step9.reportedBefore : t.step9.firstTime,
       show: formData.previousReports
     },
-    {
-      step: 8,
-      title: t.step9.sections.additionalNotes,
-      icon: FileTextIcon,
-      content: formData.additionalNotes || t.step9.none,
-      show: !!formData.additionalNotes,
-      multiline: true
-    }
   ];
 
   return (
@@ -270,19 +262,11 @@ const Step10Review = ({ formData, attachedFiles, onEdit, onSubmit, isSubmitting,
           size="lg"
           className="w-full bg-green-600 hover:bg-green-700 text-white h-12 sm:h-11 text-base sm:text-lg"
           onClick={onSubmit}
-          disabled={isSubmitting}
+          loading={isSubmitting}
+          loadingText={t.step9.submitting}
         >
-          {isSubmitting ? (
-            <>
-              <Loader2 className="w-5 h-5 mr-2 animate-spin" />
-              <span className="text-sm sm:text-base">{t.step9.submitting}</span>
-            </>
-          ) : (
-            <>
-              <CheckCircle2 className="w-5 h-5 mr-2" />
-              <span className="text-sm sm:text-base">{t.step9.submitButton}</span>
-            </>
-          )}
+          <CheckCircle2 className="w-5 h-5 mr-2" />
+          <span className="text-sm sm:text-base">{t.step9.submitButton}</span>
         </Button>
       </div>
 

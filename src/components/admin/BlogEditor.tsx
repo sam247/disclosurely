@@ -7,7 +7,7 @@ import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Label } from '@/components/ui/label';
-import { Plus, Edit, Trash2, Eye, Calendar, User, Upload, X, Bold, Italic, List, Link, Image as ImageIcon } from 'lucide-react';
+import { Plus, Edit, Trash2, Eye, Calendar, User, Upload, X, Bold, Italic, List, Link, Image as ImageIcon, Loader2 } from 'lucide-react';
 import { useContentManagement, BlogPost } from '@/hooks/useContentManagement';
 import { formatDistanceToNow } from 'date-fns';
 import { supabase } from '@/integrations/supabase/client';
@@ -43,6 +43,8 @@ export const BlogEditor = () => {
   const [editingPost, setEditingPost] = useState<BlogPost | null>(null);
   const [uploadingImage, setUploadingImage] = useState(false);
   const [deleteId, setDeleteId] = useState<string | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
   const [formData, setFormData] = useState({
     title: '',
     slug: '',
@@ -267,33 +269,43 @@ export const BlogEditor = () => {
   };
 
   const handleSubmit = async () => {
-    const postData = {
-      ...formData,
-      published_at: formData.status === 'published' ? new Date().toISOString() : null,
-    };
+    setIsSubmitting(true);
+    try {
+      const postData = {
+        ...formData,
+        published_at: formData.status === 'published' ? new Date().toISOString() : null,
+      };
 
-    let success = false;
-    if (editingPost) {
-      success = await updateBlogPost(editingPost.id, postData);
-    } else {
-      success = await createBlogPost(postData);
-    }
+      let success = false;
+      if (editingPost) {
+        success = await updateBlogPost(editingPost.id, postData);
+      } else {
+        success = await createBlogPost(postData);
+      }
 
-    if (success) {
-      resetForm();
-      setShowEditor(false);
-      setEditingPost(null);
-      toast({
-        title: "Success",
-        description: editingPost ? "Blog post updated successfully!" : "Blog post created successfully!",
-      });
+      if (success) {
+        resetForm();
+        setShowEditor(false);
+        setEditingPost(null);
+        toast({
+          title: "Success",
+          description: editingPost ? "Blog post updated successfully!" : "Blog post created successfully!",
+        });
+      }
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
   const handleDelete = async (id: string) => {
-    const success = await deleteBlogPost(id);
-    if (success) {
-      setDeleteId(null);
+    setIsDeleting(true);
+    try {
+      const success = await deleteBlogPost(id);
+      if (success) {
+        setDeleteId(null);
+      }
+    } finally {
+      setIsDeleting(false);
     }
   };
 
@@ -565,7 +577,11 @@ export const BlogEditor = () => {
                 <Button variant="outline" onClick={() => setShowEditor(false)}>
                   Cancel
                 </Button>
-                <Button onClick={handleSubmit}>
+                <Button 
+                  onClick={handleSubmit}
+                  loading={isSubmitting}
+                  loadingText={editingPost ? 'Updating...' : 'Creating...'}
+                >
                   {editingPost ? 'Update Post' : 'Create Post'}
                 </Button>
               </div>
@@ -658,8 +674,16 @@ export const BlogEditor = () => {
             <AlertDialogAction
               onClick={() => deleteId && handleDelete(deleteId)}
               className="bg-red-600 hover:bg-red-700"
+              disabled={isDeleting}
             >
-              Delete
+              {isDeleting ? (
+                <>
+                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                  Deleting...
+                </>
+              ) : (
+                'Delete'
+              )}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

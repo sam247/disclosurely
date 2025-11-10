@@ -51,16 +51,16 @@ const Step6Urgency = ({ priority, onChange, language }: Step6UrgencyProps) => {
     }
   ];
   return (
-    <div className="space-y-3 py-2">
-      <div className="flex items-center gap-2">
-        <div className="p-1.5 rounded-lg bg-primary/10">
-          <AlertTriangle className="w-4 h-4 text-primary" />
+    <div className="space-y-4 py-2">
+      <div className="flex items-center gap-2 sm:gap-3">
+        <div className="p-1.5 sm:p-2 rounded-lg bg-primary/10 flex-shrink-0">
+          <AlertTriangle className="w-4 h-4 sm:w-5 sm:h-5 text-primary" />
         </div>
-        <div>
-          <h2 className="text-xl font-bold text-gray-900">
+        <div className="min-w-0">
+          <h2 className="text-lg sm:text-2xl font-bold text-gray-900">
             {t.step5.title}
           </h2>
-          <p className="text-xs text-gray-600 mt-0.5">
+          <p className="text-xs sm:text-sm text-gray-600 mt-1">
             {t.step5.subtitle}
           </p>
         </div>
@@ -68,7 +68,7 @@ const Step6Urgency = ({ priority, onChange, language }: Step6UrgencyProps) => {
 
       <div className="space-y-2">
         <Label className="text-sm sm:text-base">{t.step5.label}</Label>
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-2">
+        <div className="grid grid-cols-2 sm:grid-cols-2 gap-2 sm:gap-3 mt-2">
           {urgencyLevels.map((level) => {
             const Icon = level.icon;
             const isSelected = priority === level.value;
@@ -79,23 +79,23 @@ const Step6Urgency = ({ priority, onChange, language }: Step6UrgencyProps) => {
                 type="button"
                 onClick={() => onChange(level.value)}
                 className={cn(
-                  "w-full p-3 sm:p-2 border-2 rounded-lg text-left transition-all cursor-pointer flex items-start gap-2 min-h-[72px] sm:min-h-0",
+                  "w-full p-2 sm:p-2 border-2 rounded-lg text-left transition-all cursor-pointer flex flex-col items-start gap-1.5 sm:flex-row sm:items-start sm:gap-2 min-h-[80px] sm:min-h-0",
                   isSelected ? level.activeColor : level.color
                 )}
               >
                 <div className={cn("p-1.5 sm:p-1 rounded-lg bg-white flex-shrink-0", level.iconColor)}>
-                  <Icon className="w-5 h-5 sm:w-4 sm:h-4" />
+                  <Icon className="w-4 h-4 sm:w-4 sm:h-4" />
                 </div>
-                <div className="flex-1">
-                  <div className="flex items-center gap-2">
-                    <span className="font-semibold text-base sm:text-sm">{level.label}</span>
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-1.5 sm:gap-2 flex-wrap">
+                    <span className="font-semibold text-xs sm:text-sm">{level.label}</span>
                     {isSelected && (
-                      <span className="text-xs px-1.5 py-0.5 rounded-full bg-white font-medium">
+                      <span className="text-xs px-1 py-0.5 rounded-full bg-white font-medium">
                         {t.step5.selected}
                       </span>
                     )}
                   </div>
-                  <p className="text-sm sm:text-xs mt-1 sm:mt-0 opacity-90">{level.description}</p>
+                  <p className="text-xs sm:text-xs mt-0.5 sm:mt-0 opacity-90 line-clamp-2">{level.description}</p>
                 </div>
               </button>
             );
@@ -104,7 +104,7 @@ const Step6Urgency = ({ priority, onChange, language }: Step6UrgencyProps) => {
       </div>
 
       {priority > 0 && (
-        <p className="text-sm text-green-600">
+        <p className="text-sm text-green-600 mt-2">
           {t.step5.prioritySet} <strong>{urgencyLevels.find(l => l.value === priority)?.label}</strong>
         </p>
       )}

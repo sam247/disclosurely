@@ -147,8 +147,12 @@ const ProfileSettings = () => {
               />
             </div>
           </div>
-          <Button onClick={handleUpdateProfile} disabled={loading}>
-            {loading ? 'Updating...' : 'Update Profile'}
+          <Button 
+            onClick={handleUpdateProfile} 
+            loading={loading}
+            loadingText="Updating..."
+          >
+            Update Profile
           </Button>
         </CardContent>
       </Card>

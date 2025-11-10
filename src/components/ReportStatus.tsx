@@ -329,8 +329,12 @@ const ReportStatus = () => {
                           Use the tracking ID provided when you submitted your report
                         </p>
                       </div>
-                      <Button type="submit" disabled={isLoading}>
-                        {isLoading ? "Looking up..." : "Check Status"}
+                      <Button 
+                        type="submit" 
+                        loading={isLoading}
+                        loadingText="Looking up..."
+                      >
+                        Check Status
                       </Button>
                     </form>
                   </CardContent>
@@ -430,8 +434,13 @@ const ReportStatus = () => {
                               rows={3}
                             />
                           </div>
-                          <Button type="submit" disabled={isSubmittingMessage || !newMessage.trim()}>
-                            {isSubmittingMessage ? "Sending..." : "Send Message"}
+                          <Button 
+                            type="submit" 
+                            loading={isSubmittingMessage}
+                            loadingText="Sending..."
+                            disabled={!newMessage.trim()}
+                          >
+                            Send Message
                           </Button>
                         </form>
                       </CardContent>

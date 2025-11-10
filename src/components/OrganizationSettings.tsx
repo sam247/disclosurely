@@ -265,11 +265,12 @@ const OrganizationSettings = () => {
           <div className="flex justify-end">
             <Button
               onClick={handleSaveOrganization}
-              disabled={isSubmitting}
+              loading={isSubmitting}
+              loadingText="Saving..."
               className="flex items-center gap-2"
             >
               <Upload className="h-4 w-4" />
-              {isSubmitting ? 'Saving...' : 'Save Changes'}
+              Save Changes
             </Button>
           </div>
         </CardContent>

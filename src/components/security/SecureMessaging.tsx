@@ -73,7 +73,7 @@ const SecureMessaging = ({ report, onClose }: SecureMessagingProps) => {
   useEffect(() => {
     // Only scroll if messages exist and component is mounted
     if (messages.length > 0 && !isLoading) {
-      scrollToBottom();
+    scrollToBottom();
     }
   }, [messages, isLoading]);
 
@@ -109,25 +109,25 @@ const SecureMessaging = ({ report, onClose }: SecureMessagingProps) => {
       if (error) {
         console.error('Error fetching messages:', error);
         if (isMountedRef.current) {
-          toast({
-            title: "Error",
-            description: "Failed to load messages",
-            variant: "destructive",
-          });
+        toast({
+          title: "Error",
+          description: "Failed to load messages",
+          variant: "destructive",
+        });
         }
         return;
       }
 
       console.log('Messages loaded:', result?.messages);
       if (isMountedRef.current) {
-        setMessages(result?.messages || []);
+      setMessages(result?.messages || []);
       }
     } catch (error) {
       console.error('Error fetching messages:', error);
     } finally {
       if (isMountedRef.current) {
-        setIsLoading(false);
-      }
+      setIsLoading(false);
+    }
       fetchingRef.current = false;
     }
   }, [report.id, report.tracking_id, toast]);
@@ -287,9 +287,9 @@ const SecureMessaging = ({ report, onClose }: SecureMessagingProps) => {
       <CardHeader>
         <div className="flex items-center justify-between">
           <CardTitle className="flex items-center gap-2 text-xl">
-            <MessageSquare className="h-5 w-5" />
-            {t('secureMessaging')}
-          </CardTitle>
+              <MessageSquare className="h-5 w-5" />
+              {t('secureMessaging')}
+            </CardTitle>
           <Button variant="outline" onClick={onClose}>
             Close
           </Button>
@@ -376,11 +376,13 @@ const SecureMessaging = ({ report, onClose }: SecureMessagingProps) => {
             </div>
             <Button 
               type="submit"
-              disabled={isSubmitting || !newMessage.trim()}
+              loading={isSubmitting}
+              loadingText="Sending..."
+              disabled={!newMessage.trim()}
               className="flex items-center gap-2 w-full sm:w-auto"
             >
               <Send className="h-4 w-4" />
-              {isSubmitting ? 'Sending...' : t('sendMessage')}
+              {t('sendMessage')}
             </Button>
           </div>
         </form>

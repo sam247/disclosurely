@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { Languages, RefreshCw } from 'lucide-react';
+import { Languages } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { useTranslation } from 'react-i18next';
@@ -87,20 +87,13 @@ const TranslateButton = ({
       variant={variant}
       size={size}
       onClick={handleTranslate}
+      loading={isTranslating}
+      loadingText={t('translating')}
       disabled={isTranslating}
       className="gap-2"
     >
-      {isTranslating ? (
-        <RefreshCw className="h-4 w-4 animate-spin" />
-      ) : (
-        <Languages className="h-4 w-4" />
-      )}
-      {isTranslating 
-        ? t('translating')
-        : isTranslated 
-        ? t('showOriginal')
-        : t('translate')
-      }
+      <Languages className="h-4 w-4" />
+      {isTranslated ? t('showOriginal') : t('translate')}
     </Button>
   );
 };

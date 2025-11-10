@@ -22,7 +22,7 @@ const Privacy = () => {
       <div className="min-h-screen bg-white">
         {/* Announcement Bar */}
         <AnnouncementBar />
-        
+
         {/* Navigation */}
         <nav className="bg-white shadow-sm sticky top-0 z-50">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -32,6 +32,8 @@ const Privacy = () => {
                   <img
                     src="/lovable-uploads/c46ace0e-df58-4119-b5e3-8dcfa075ea2f.png"
                     alt="Disclosurely"
+                    loading="lazy"
+                    decoding="async"
                     className="h-6 md:h-8 w-auto"
                   />
                 </Link>
@@ -71,6 +73,7 @@ const Privacy = () => {
         {/* Content */}
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 pb-20">
           <div className="prose prose-gray max-w-none space-y-8">
+            {/* Info Box */}
             <div className="bg-blue-50 p-6 rounded-lg border border-blue-200">
               <div className="space-y-2 text-sm">
                 <p>
@@ -87,8 +90,8 @@ const Privacy = () => {
                 </p>
                 <p>
                   <strong>{t("privacy.info.contact.label")}</strong>{" "}
-                  <a href="mailto:support@disclosurely.com" className="text-blue-600 hover:text-blue-800">
-                    support@disclosurely.com
+                  <a href="mailto:privacy@disclosurely.com" className="text-blue-600 hover:text-blue-800">
+                    privacy@disclosurely.com
                   </a>
                 </p>
                 <p>
@@ -97,182 +100,249 @@ const Privacy = () => {
               </div>
             </div>
 
+            {/* 1. Introduction */}
             <section>
               <h2 className="text-xl font-semibold mb-3">{t("privacy.sections.introduction.title")}</h2>
-              <p className="text-gray-700 leading-relaxed">{t("privacy.sections.introduction.content1")}</p>
-              <p className="text-gray-700 leading-relaxed">{t("privacy.sections.introduction.content2")}</p>
+              <p className="text-gray-700 leading-relaxed mb-2">{t("privacy.sections.introduction.content1")}</p>
+              <p className="text-gray-700 leading-relaxed mb-2">{t("privacy.sections.introduction.content2")}</p>
+              <p className="text-gray-700 leading-relaxed mb-2">{t("privacy.sections.introduction.content3")}</p>
+              <p className="text-gray-700 leading-relaxed">{t("privacy.sections.introduction.content4")}</p>
             </section>
 
+            {/* 2. Data Controller */}
             <section>
               <h2 className="text-xl font-semibold mb-3">{t("privacy.sections.dataController.title")}</h2>
-              <div className="text-gray-700 leading-relaxed space-y-2">
-                <p>{t("privacy.sections.dataController.content1")}</p>
-                <p>{t("privacy.sections.dataController.content2")}</p>
-                <p>{t("privacy.sections.dataController.content3")}</p>
-              </div>
+              <p className="text-gray-700 leading-relaxed mb-2">{t("privacy.sections.dataController.content1")}</p>
+              <p className="text-gray-700 leading-relaxed mb-2">{t("privacy.sections.dataController.content2")}</p>
+              <p className="text-gray-700 leading-relaxed mb-2">{t("privacy.sections.dataController.content3")}</p>
+              <p className="text-gray-700 leading-relaxed mb-2">{t("privacy.sections.dataController.content4")}</p>
+              <p className="text-gray-700 leading-relaxed">{t("privacy.sections.dataController.content5")}</p>
             </section>
 
+            {/* 3. Personal Data Collected - Complex nested structure */}
             <section>
               <h2 className="text-xl font-semibold mb-3">{t("privacy.sections.personalData.title")}</h2>
-              <div className="text-gray-700 leading-relaxed space-y-4">
-                <p>{t("privacy.sections.personalData.content1")}</p>
+              <p className="text-gray-700 leading-relaxed mb-4">{t("privacy.sections.personalData.content1")}</p>
 
+              <div className="space-y-4">
                 <div>
-                  <h3 className="font-medium mb-2">{t("privacy.sections.personalData.subsections.customer.title")}</h3>
-                  <ul className="list-disc pl-6 space-y-1">
+                  <h3 className="font-semibold mb-2">{t("privacy.sections.personalData.subsections.customer.title")}</h3>
+                  <ul className="list-disc pl-6 space-y-1 text-gray-700">
                     <li>{t("privacy.sections.personalData.subsections.customer.items.1")}</li>
                     <li>{t("privacy.sections.personalData.subsections.customer.items.2")}</li>
                     <li>{t("privacy.sections.personalData.subsections.customer.items.3")}</li>
+                    <li>{t("privacy.sections.personalData.subsections.customer.items.4")}</li>
+                    <li>{t("privacy.sections.personalData.subsections.customer.items.5")}</li>
                   </ul>
                 </div>
 
                 <div>
-                  <h3 className="font-medium mb-2">
-                    {t("privacy.sections.personalData.subsections.whistleblower.title")}
-                  </h3>
-                  <ul className="list-disc pl-6 space-y-1">
+                  <h3 className="font-semibold mb-2">{t("privacy.sections.personalData.subsections.whistleblower.title")}</h3>
+                  <ul className="list-disc pl-6 space-y-1 text-gray-700">
                     <li>{t("privacy.sections.personalData.subsections.whistleblower.items.1")}</li>
                     <li>{t("privacy.sections.personalData.subsections.whistleblower.items.2")}</li>
                     <li>{t("privacy.sections.personalData.subsections.whistleblower.items.3")}</li>
+                    <li>{t("privacy.sections.personalData.subsections.whistleblower.items.4")}</li>
+                    <li>{t("privacy.sections.personalData.subsections.whistleblower.items.5")}</li>
+                    <li>{t("privacy.sections.personalData.subsections.whistleblower.items.6")}</li>
                   </ul>
                 </div>
 
                 <div>
-                  <h3 className="font-medium mb-2">{t("privacy.sections.personalData.subsections.technical.title")}</h3>
-                  <ul className="list-disc pl-6 space-y-1">
+                  <h3 className="font-semibold mb-2">{t("privacy.sections.personalData.subsections.technical.title")}</h3>
+                  <ul className="list-disc pl-6 space-y-1 text-gray-700">
                     <li>{t("privacy.sections.personalData.subsections.technical.items.1")}</li>
                     <li>{t("privacy.sections.personalData.subsections.technical.items.2")}</li>
+                    <li>{t("privacy.sections.personalData.subsections.technical.items.3")}</li>
+                    <li>{t("privacy.sections.personalData.subsections.technical.items.4")}</li>
+                  </ul>
+                </div>
+
+                <div>
+                  <h3 className="font-semibold mb-2">{t("privacy.sections.personalData.subsections.marketing.title")}</h3>
+                  <ul className="list-disc pl-6 space-y-1 text-gray-700">
+                    <li>{t("privacy.sections.personalData.subsections.marketing.items.1")}</li>
+                    <li>{t("privacy.sections.personalData.subsections.marketing.items.2")}</li>
+                    <li>{t("privacy.sections.personalData.subsections.marketing.items.3")}</li>
                   </ul>
                 </div>
               </div>
             </section>
 
+            {/* 4. Usage */}
             <section>
               <h2 className="text-xl font-semibold mb-3">{t("privacy.sections.usage.title")}</h2>
-              <div className="text-gray-700 leading-relaxed">
-                <p className="mb-2">{t("privacy.sections.usage.content1")}</p>
-                <ul className="list-disc pl-6 space-y-1">
-                  <li>{t("privacy.sections.usage.items.1")}</li>
-                  <li>{t("privacy.sections.usage.items.2")}</li>
-                  <li>{t("privacy.sections.usage.items.3")}</li>
-                  <li>{t("privacy.sections.usage.items.4")}</li>
-                  <li>{t("privacy.sections.usage.items.5")}</li>
-                  <li>{t("privacy.sections.usage.items.6")}</li>
-                </ul>
-              </div>
+              <p className="text-gray-700 leading-relaxed mb-2">{t("privacy.sections.usage.content1")}</p>
+              <ul className="list-disc pl-6 space-y-1 text-gray-700">
+                {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map(num => (
+                  <li key={num}>{t(`privacy.sections.usage.items.${num}`)}</li>
+                ))}
+              </ul>
             </section>
 
+            {/* 5. Legal Bases - Complex structure */}
             <section>
               <h2 className="text-xl font-semibold mb-3">{t("privacy.sections.legalBases.title")}</h2>
-              <div className="text-gray-700 leading-relaxed">
-                <p className="mb-2">{t("privacy.sections.legalBases.content1")}</p>
-                <ul className="list-disc pl-6 space-y-1">
-                  <li>
-                    <strong>{t("privacy.sections.legalBases.items.contractual.label")}</strong>{" "}
-                    {t("privacy.sections.legalBases.items.contractual.content")}
-                  </li>
-                  <li>
-                    <strong>{t("privacy.sections.legalBases.items.legitimate.label")}</strong>{" "}
-                    {t("privacy.sections.legalBases.items.legitimate.content")}
-                  </li>
-                  <li>
-                    <strong>{t("privacy.sections.legalBases.items.legal.label")}</strong>{" "}
-                    {t("privacy.sections.legalBases.items.legal.content")}
-                  </li>
-                  <li>
-                    <strong>{t("privacy.sections.legalBases.items.consent.label")}</strong>{" "}
-                    {t("privacy.sections.legalBases.items.consent.content")}
-                  </li>
-                </ul>
+              <p className="text-gray-700 leading-relaxed mb-4">{t("privacy.sections.legalBases.content1")}</p>
+              <div className="space-y-2 text-gray-700">
+                <p><strong>{t("privacy.sections.legalBases.items.contractual.label")}</strong> {t("privacy.sections.legalBases.items.contractual.content")}</p>
+                <p><strong>{t("privacy.sections.legalBases.items.legitimate.label")}</strong> {t("privacy.sections.legalBases.items.legitimate.content")}</p>
+                <p><strong>{t("privacy.sections.legalBases.items.legal.label")}</strong> {t("privacy.sections.legalBases.items.legal.content")}</p>
+                <p><strong>{t("privacy.sections.legalBases.items.consent.label")}</strong> {t("privacy.sections.legalBases.items.consent.content")}</p>
+                <p><strong>{t("privacy.sections.legalBases.items.vitalInterests.label")}</strong> {t("privacy.sections.legalBases.items.vitalInterests.content")}</p>
+                <p><strong>{t("privacy.sections.legalBases.items.publicInterest.label")}</strong> {t("privacy.sections.legalBases.items.publicInterest.content")}</p>
+                <p><strong>{t("privacy.sections.legalBases.items.whistleblowing.label")}</strong> {t("privacy.sections.legalBases.items.whistleblowing.content")}</p>
               </div>
             </section>
 
+            {/* 6. Data Hosting */}
             <section>
               <h2 className="text-xl font-semibold mb-3">{t("privacy.sections.dataHosting.title")}</h2>
-              <div className="text-gray-700 leading-relaxed space-y-2">
+              <div className="space-y-2 text-gray-700">
                 <p>{t("privacy.sections.dataHosting.content1")}</p>
                 <p>{t("privacy.sections.dataHosting.content2")}</p>
                 <p>{t("privacy.sections.dataHosting.content3")}</p>
+                <p>{t("privacy.sections.dataHosting.content4")}</p>
               </div>
             </section>
 
+            {/* 7. Data Retention */}
             <section>
               <h2 className="text-xl font-semibold mb-3">{t("privacy.sections.dataRetention.title")}</h2>
-              <div className="text-gray-700 leading-relaxed space-y-2">
+              <div className="space-y-2 text-gray-700">
                 <p>{t("privacy.sections.dataRetention.content1")}</p>
                 <p>{t("privacy.sections.dataRetention.content2")}</p>
                 <p>{t("privacy.sections.dataRetention.content3")}</p>
+                <p>{t("privacy.sections.dataRetention.content4")}</p>
+                <p>{t("privacy.sections.dataRetention.content5")}</p>
+                <p>{t("privacy.sections.dataRetention.content6")}</p>
+                <p>{t("privacy.sections.dataRetention.content7")}</p>
               </div>
             </section>
 
+            {/* 8. Disclosure */}
             <section>
               <h2 className="text-xl font-semibold mb-3">{t("privacy.sections.disclosure.title")}</h2>
-              <div className="text-gray-700 leading-relaxed">
-                <p className="mb-2">{t("privacy.sections.disclosure.content1")}</p>
-                <ul className="list-disc pl-6 space-y-1">
-                  <li>{t("privacy.sections.disclosure.items.1")}</li>
-                  <li>{t("privacy.sections.disclosure.items.2")}</li>
-                  <li>{t("privacy.sections.disclosure.items.3")}</li>
-                  <li>{t("privacy.sections.disclosure.items.4")}</li>
-                </ul>
-              </div>
+              <p className="text-gray-700 leading-relaxed mb-2">{t("privacy.sections.disclosure.content1")}</p>
+              <ul className="list-disc pl-6 space-y-1 text-gray-700">
+                {[1, 2, 3, 4, 5, 6, 7].map(num => (
+                  <li key={num}>{t(`privacy.sections.disclosure.items.${num}`)}</li>
+                ))}
+              </ul>
             </section>
 
+            {/* 9. Security */}
             <section>
               <h2 className="text-xl font-semibold mb-3">{t("privacy.sections.security.title")}</h2>
-              <div className="text-gray-700 leading-relaxed">
-                <p className="mb-2">{t("privacy.sections.security.content1")}</p>
-                <ul className="list-disc pl-6 space-y-1">
-                  <li>{t("privacy.sections.security.items.1")}</li>
-                  <li>{t("privacy.sections.security.items.2")}</li>
-                  <li>{t("privacy.sections.security.items.3")}</li>
-                  <li>{t("privacy.sections.security.items.4")}</li>
-                </ul>
-              </div>
+              <p className="text-gray-700 leading-relaxed mb-2">{t("privacy.sections.security.content1")}</p>
+              <ul className="list-disc pl-6 space-y-1 text-gray-700">
+                {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map(num => (
+                  <li key={num}>{t(`privacy.sections.security.items.${num}`)}</li>
+                ))}
+              </ul>
+              <p className="text-gray-700 leading-relaxed mt-2">{t("privacy.sections.security.content2")}</p>
             </section>
 
+            {/* 10. Your Rights */}
             <section>
               <h2 className="text-xl font-semibold mb-3">{t("privacy.sections.yourRights.title")}</h2>
-              <div className="text-gray-700 leading-relaxed space-y-2">
-                <p>{t("privacy.sections.yourRights.content1")}</p>
-                <ul className="list-disc pl-6 space-y-1">
-                  <li>{t("privacy.sections.yourRights.items.1")}</li>
-                  <li>{t("privacy.sections.yourRights.items.2")}</li>
-                  <li>{t("privacy.sections.yourRights.items.3")}</li>
-                  <li>{t("privacy.sections.yourRights.items.4")}</li>
-                  <li>{t("privacy.sections.yourRights.items.5")}</li>
-                  <li>{t("privacy.sections.yourRights.items.6")}</li>
-                </ul>
+              <p className="text-gray-700 leading-relaxed mb-2">{t("privacy.sections.yourRights.content1")}</p>
+              <ul className="list-disc pl-6 space-y-1 text-gray-700">
+                {[1, 2, 3, 4, 5, 6, 7, 8, 9].map(num => (
+                  <li key={num}>{t(`privacy.sections.yourRights.items.${num}`)}</li>
+                ))}
+              </ul>
+              <div className="mt-4 space-y-2 text-gray-700">
                 <p>{t("privacy.sections.yourRights.content2")}</p>
+                <p>{t("privacy.sections.yourRights.content3")}</p>
+                <p>{t("privacy.sections.yourRights.content4")}</p>
               </div>
             </section>
 
+            {/* 11. Third Party Services */}
+            <section>
+              <h2 className="text-xl font-semibold mb-3">{t("privacy.sections.thirdPartyServices.title")}</h2>
+              <div className="space-y-2 text-gray-700">
+                <p>{t("privacy.sections.thirdPartyServices.content1")}</p>
+                <p>{t("privacy.sections.thirdPartyServices.content2")}</p>
+                <p>{t("privacy.sections.thirdPartyServices.content3")}</p>
+              </div>
+            </section>
+
+            {/* 12. Children's Privacy */}
+            <section>
+              <h2 className="text-xl font-semibold mb-3">{t("privacy.sections.childrenPrivacy.title")}</h2>
+              <div className="space-y-2 text-gray-700">
+                <p>{t("privacy.sections.childrenPrivacy.content1")}</p>
+                <p>{t("privacy.sections.childrenPrivacy.content2")}</p>
+                <p>{t("privacy.sections.childrenPrivacy.content3")}</p>
+              </div>
+            </section>
+
+            {/* 13. Anonymous Reporting */}
+            <section>
+              <h2 className="text-xl font-semibold mb-3">{t("privacy.sections.anonymousReporting.title")}</h2>
+              <div className="space-y-2 text-gray-700">
+                <p>{t("privacy.sections.anonymousReporting.content1")}</p>
+                <p>{t("privacy.sections.anonymousReporting.content2")}</p>
+                <p>{t("privacy.sections.anonymousReporting.content3")}</p>
+                <p>{t("privacy.sections.anonymousReporting.content4")}</p>
+                <p>{t("privacy.sections.anonymousReporting.content5")}</p>
+              </div>
+            </section>
+
+            {/* 14. Cookies */}
             <section>
               <h2 className="text-xl font-semibold mb-3">{t("privacy.sections.cookies.title")}</h2>
-              <p className="text-gray-700 leading-relaxed">{t("privacy.sections.cookies.content")}</p>
+              <div className="space-y-2 text-gray-700">
+                <p>{t("privacy.sections.cookies.content1")}</p>
+                <p>{t("privacy.sections.cookies.content2")}</p>
+                <p>{t("privacy.sections.cookies.content3")}</p>
+                <p>{t("privacy.sections.cookies.content4")}</p>
+                <p>{t("privacy.sections.cookies.content5")}</p>
+              </div>
             </section>
 
+            {/* 15. Changes */}
             <section>
               <h2 className="text-xl font-semibold mb-3">{t("privacy.sections.changes.title")}</h2>
-              <p className="text-gray-700 leading-relaxed">{t("privacy.sections.changes.content")}</p>
+              <div className="space-y-2 text-gray-700">
+                <p>{t("privacy.sections.changes.content1")}</p>
+                <p>{t("privacy.sections.changes.content2")}</p>
+                <p>{t("privacy.sections.changes.content3")}</p>
+                <p>{t("privacy.sections.changes.content4")}</p>
+                <p>{t("privacy.sections.changes.content5")}</p>
+                <p>{t("privacy.sections.changes.content6")}</p>
+              </div>
             </section>
 
+            {/* 16. Contact */}
             <section>
               <h2 className="text-xl font-semibold mb-3">{t("privacy.sections.contact.title")}</h2>
-              <div className="text-gray-700 leading-relaxed">
-                <p className="mb-2">{t("privacy.sections.contact.content1")}</p>
+              <div className="text-gray-700 space-y-2">
+                <p>{t("privacy.sections.contact.content1")}</p>
                 <div className="bg-gray-50 p-4 rounded-lg">
-                  <p>
-                    <strong>{t("privacy.sections.contact.company")}</strong>
-                  </p>
+                  <p><strong>{t("privacy.sections.contact.company")}</strong></p>
                   <p>{t("privacy.sections.contact.address")}</p>
-                  <p>
-                    Email:{" "}
-                    <a href="mailto:support@disclosurely.com" className="text-blue-600 hover:text-blue-800">
-                      support@disclosurely.com
-                    </a>
-                  </p>
+                  <p className="mt-2">{t("privacy.sections.contact.content2")}</p>
+                  <p>{t("privacy.sections.contact.content3")}</p>
+                  <p>{t("privacy.sections.contact.content4")}</p>
                 </div>
+              </div>
+            </section>
+
+            {/* 17. EU Whistleblowing Directive */}
+            <section>
+              <h2 className="text-xl font-semibold mb-3">{t("privacy.sections.euWhistleblowing.title")}</h2>
+              <div className="space-y-2 text-gray-700">
+                <p>{t("privacy.sections.euWhistleblowing.content1")}</p>
+                <p>{t("privacy.sections.euWhistleblowing.content2")}</p>
+                <p>{t("privacy.sections.euWhistleblowing.content3")}</p>
+                <p>{t("privacy.sections.euWhistleblowing.content4")}</p>
+                <p>{t("privacy.sections.euWhistleblowing.content5")}</p>
+                <p>{t("privacy.sections.euWhistleblowing.content6")}</p>
+                <p>{t("privacy.sections.euWhistleblowing.content7")}</p>
+                <p>{t("privacy.sections.euWhistleblowing.content8")}</p>
               </div>
             </section>
 
