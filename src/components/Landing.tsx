@@ -97,7 +97,7 @@ const Landing = () => {
             </div>
           </div>
 
-          <h1 className="sm:text-5xl text-gray-900 mb-6 text-2xl font-bold md:text-5xl">
+          <h1 className="sm:text-5xl text-gray-900 mb-6 font-bold text-2xl md:text-5xl">
             {t("landing.hero.title1")}
             <span className="block text-blue-600">
               <TypingAnimation phrases={(() => {
