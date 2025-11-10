@@ -89,6 +89,11 @@ export const Footer = () => {
                 </a>
               </li>
               <li>
+                <Link to={`${langPrefix}/whistleblowing-directive`} className="text-gray-400 hover:text-white">
+                  EU Whistleblowing Directive
+                </Link>
+              </li>
+              <li>
                 <Link to={`${langPrefix}/contact`} className="text-gray-400 hover:text-white">
                   Support
                 </Link>

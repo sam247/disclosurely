@@ -473,8 +473,19 @@ const ComplianceSoftware = () => {
                 <div className="space-y-6">
                   <div>
                     <h3 className="text-xl font-semibold text-gray-900 mb-3">Choosing the Right Platform</h3>
-                    <p className="text-gray-600">
+                    <p className="text-gray-600 mb-3">
                       Evaluate security certifications, user experience, customisation capabilities, and vendor support. Ensure scalability for growing organisations and verify compliance with your specific regulatory requirements.
+                    </p>
+                    <p className="text-gray-600">
+                      Compare platforms to make an informed decision:{" "}
+                      <Link to="/vs-speakup" className="text-blue-600 hover:text-blue-800 font-medium underline">
+                        Disclosurely vs SpeakUp
+                      </Link>
+                      {" "}or{" "}
+                      <Link to="/vs-whistleblower-software" className="text-blue-600 hover:text-blue-800 font-medium underline">
+                        Disclosurely vs WhistleblowerSoftware.com
+                      </Link>
+                      .
                     </p>
                 </div>
 

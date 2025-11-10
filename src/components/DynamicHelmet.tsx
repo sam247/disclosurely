@@ -310,6 +310,16 @@ const DynamicHelmet: React.FC<DynamicHelmetProps> = ({
 
   const finalKeywords = seoData?.meta_keywords || [];
 
+  // CRITICAL FIX: react-helmet-async cannot reliably set <html lang> attribute in SPAs
+  // Use direct DOM manipulation instead
+  useEffect(() => {
+    const currentLang = i18n.language || 'en';
+    if (typeof document !== 'undefined') {
+      document.documentElement.setAttribute('lang', currentLang);
+      console.log('✅ DynamicHelmet: Set HTML lang attribute to:', currentLang);
+    }
+  }, [i18n.language]);
+
   // Get structured data from props, Contentful schema, or SEO data
   let baseStructuredData = structuredData || 
                            (schemaData.length > 0 ? schemaData[0].data : {}) || 
@@ -356,9 +366,6 @@ const DynamicHelmet: React.FC<DynamicHelmetProps> = ({
 
   return (
     <Helmet>
-      {/* Set HTML lang attribute based on current language */}
-      <html lang={i18n.language || 'en'} />
-
       {/* Basic Meta Tags */}
       <title>{finalTitle}</title>
       <meta name="description" content={finalDescription} />
