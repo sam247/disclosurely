@@ -24,8 +24,10 @@ const Contact = () => {
     department: "",
     message: ""
   });
+  const [loading, setLoading] = useState(false);
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setLoading(true);
     try {
       // Send email via edge function or email service
       const response = await fetch("https://cxmuzperkittvibslnff.supabase.co/functions/v1/send-contact-email", {
@@ -53,6 +55,8 @@ const Contact = () => {
     } catch (error) {
       console.error("Contact form error:", error);
       alert(t("contact.form.error") || "There was an error sending your message. Please email us at team@disclosurely.com");
+    } finally {
+      setLoading(false);
     }
   };
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
@@ -218,7 +222,12 @@ const Contact = () => {
                   <Textarea id="message" name="message" rows={4} value={formData.message} onChange={handleChange} placeholder={t("contact.form.message.placeholder")} />
                 </div>
 
-                <Button type="submit" className="w-full">
+                <Button 
+                  type="submit" 
+                  loading={loading}
+                  loadingText={t("contact.form.submit") || "Sending..."}
+                  className="w-full"
+                >
                   <Send className="h-4 w-4 mr-2" />
                   {t("contact.form.submit")}
                 </Button>
