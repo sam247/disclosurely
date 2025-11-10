@@ -396,6 +396,8 @@ const ReportsManagement = () => {
         description: "Failed to archive report",
         variant: "destructive",
       });
+    } finally {
+      setProcessingReportId(null);
     }
   };
 
@@ -450,6 +452,8 @@ const ReportsManagement = () => {
         description: "Failed to delete report",
         variant: "destructive",
       });
+    } finally {
+      setProcessingReportId(null);
     }
   };
 
