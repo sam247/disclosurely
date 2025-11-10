@@ -145,7 +145,12 @@ const GDPRSettings = () => {
               </Select>
             </div>
           </div>
-          <Button onClick={handleExportRequest} disabled={loading || !exportEmail}>
+          <Button 
+            onClick={handleExportRequest} 
+            loading={loading}
+            loadingText="Creating..."
+            disabled={!exportEmail}
+          >
             <Download className="w-4 h-4 mr-2" />
             Create Export Request
           </Button>
@@ -232,7 +237,12 @@ const GDPRSettings = () => {
               placeholder="Please provide a reason for this erasure request..."
             />
           </div>
-          <Button onClick={handleErasureRequest} disabled={loading || !erasureEmail}>
+          <Button 
+            onClick={handleErasureRequest} 
+            loading={loading}
+            loadingText="Creating..."
+            disabled={!erasureEmail}
+          >
             <Trash2 className="w-4 h-4 mr-2" />
             Create Erasure Request
           </Button>
