@@ -356,6 +356,9 @@ const DynamicHelmet: React.FC<DynamicHelmetProps> = ({
 
   return (
     <Helmet>
+      {/* Set HTML lang attribute based on current language */}
+      <html lang={i18n.language || 'en'} />
+
       {/* Basic Meta Tags */}
       <title>{finalTitle}</title>
       <meta name="description" content={finalDescription} />
@@ -364,7 +367,7 @@ const DynamicHelmet: React.FC<DynamicHelmetProps> = ({
       )}
       <meta name="robots" content={finalRobots} />
       <link rel="canonical" href={finalCanonicalUrl} />
-      
+
       {/* Dynamic Hreflang Tags for All Language Versions */}
       {typeof window !== 'undefined' && Object.keys(hrefLangUrls).length > 0 && (
         <>
@@ -373,33 +376,6 @@ const DynamicHelmet: React.FC<DynamicHelmetProps> = ({
           ))}
         </>
       )}
-      {/* Hreflang Tags for All Language Versions - Dynamic based on current page */}
-      {typeof window !== 'undefined' && (() => {
-        const currentPath = window.location.pathname.replace(/\/$/, '') || '';
-        const baseUrl = 'https://disclosurely.com';
-        
-        // Remove language prefix if present (e.g., /es/pricing -> /pricing)
-        const pathWithoutLang = currentPath.replace(/^\/(en|es|fr|de|pl|sv|no|pt|it|nl|da|el)(\/|$)/, '/');
-        const normalizedPath = pathWithoutLang === '/' ? '' : pathWithoutLang;
-        
-        return (
-          <>
-            <link rel="alternate" hrefLang="x-default" href={`${baseUrl}${normalizedPath}`} />
-            <link rel="alternate" hrefLang="en" href={`${baseUrl}${normalizedPath}`} />
-            <link rel="alternate" hrefLang="es" href={`${baseUrl}/es${normalizedPath}`} />
-            <link rel="alternate" hrefLang="fr" href={`${baseUrl}/fr${normalizedPath}`} />
-            <link rel="alternate" hrefLang="de" href={`${baseUrl}/de${normalizedPath}`} />
-            <link rel="alternate" hrefLang="pl" href={`${baseUrl}/pl${normalizedPath}`} />
-            <link rel="alternate" hrefLang="sv" href={`${baseUrl}/sv${normalizedPath}`} />
-            <link rel="alternate" hrefLang="no" href={`${baseUrl}/no${normalizedPath}`} />
-            <link rel="alternate" hrefLang="pt" href={`${baseUrl}/pt${normalizedPath}`} />
-            <link rel="alternate" hrefLang="it" href={`${baseUrl}/it${normalizedPath}`} />
-            <link rel="alternate" hrefLang="nl" href={`${baseUrl}/nl${normalizedPath}`} />
-            <link rel="alternate" hrefLang="da" href={`${baseUrl}/da${normalizedPath}`} />
-            <link rel="alternate" hrefLang="el" href={`${baseUrl}/el${normalizedPath}`} />
-          </>
-        );
-      })()}
 
       {/* Open Graph Tags */}
       <meta property="og:title" content={seoData?.og_title || finalTitle} />
