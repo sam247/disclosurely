@@ -645,7 +645,7 @@ const LinkGenerator = () => {
                   <AlertCircle className="h-4 w-4" />
                   <AlertDescription className="text-xs">
                     <strong>Note:</strong> Switching will automatically redirect the old URL to the new one using a 301 permanent redirect. 
-                    This ensures all existing links continue to work while directing users to the active URL.
+                    The old URL will stop serving content and redirect to the new active URL.
                   </AlertDescription>
                 </Alert>
               )}
@@ -676,30 +676,6 @@ const LinkGenerator = () => {
             </div>
           </div>
 
-          {/* Token-based Link - Show as last resort */}
-          <div className="p-3 bg-gray-50 rounded-lg border border-dashed">
-            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-              <div className="flex-1 min-w-0 w-full">
-                <div className="flex flex-wrap items-center gap-2 mb-1">
-                  <p className="text-xs font-medium text-muted-foreground">Legacy Link (for testing only)</p>
-                </div>
-                <p className="text-xs text-muted-foreground mb-2 break-words">
-                  This link works but is not as professional. Use the links above for production.
-                </p>
-                <code className="text-xs bg-muted px-2 py-1 rounded border font-mono break-all block w-full">
-                  {tokenUrl}
-                </code>
-              </div>
-              <Button
-                size="sm"
-                variant="outline"
-                onClick={() => copyToClipboard(tokenUrl)}
-                className="whitespace-nowrap shrink-0 w-full sm:w-auto text-xs"
-              >
-                Copy
-              </Button>
-            </div>
-          </div>
 
           {/* Prompt to set up custom domain if they don't have one */}
           {!brandedUrl && (
