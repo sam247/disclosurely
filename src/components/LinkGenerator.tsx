@@ -129,8 +129,9 @@ const LinkGenerator = () => {
     : false;
 
   // Fetch organization info for subdomain and URL toggle settings
+  // Use primaryDomainRecord from customDomains query as source of truth for verification status
   const { data: organizationInfo } = useQuery({
-    queryKey: ['organization-info', user?.id],
+    queryKey: ['organization-info', user?.id, primaryDomainRecord?.status],
     queryFn: async () => {
       if (!user) return null;
 
@@ -148,27 +149,16 @@ const LinkGenerator = () => {
         .eq('id', profile.organization_id)
         .single();
 
-      // Also check custom_domains table to get the actual verification status
-      if (org) {
-        const { data: customDomainRecord } = await supabase
-          .from('custom_domains')
-          .select('status, is_active, is_primary, domain_name')
-          .eq('organization_id', profile.organization_id)
-          .eq('is_active', true)
-          .order('is_primary', { ascending: false })
-          .limit(1)
-          .maybeSingle();
-
-          // Sync custom_domain_verified with custom_domains table status
-        if (customDomainRecord) {
-          const isVerified = customDomainRecord.status === 'active' || customDomainRecord.status === 'verified';
-          // Return org with synced data from custom_domains table
-          return {
-            ...org,
-            custom_domain: customDomainRecord.domain_name,
-            custom_domain_verified: isVerified
-          };
-        }
+      // Use primaryDomainRecord from customDomains query as source of truth
+      // This is more reliable since it's already fetched and up-to-date
+      if (org && primaryDomainRecord) {
+        const isVerified = primaryDomainRecord.status === 'active' || primaryDomainRecord.status === 'verified';
+        // Return org with synced data from custom_domains table
+        return {
+          ...org,
+          custom_domain: primaryDomainRecord.domain_name,
+          custom_domain_verified: isVerified
+        };
       }
 
       return org;
