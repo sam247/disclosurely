@@ -26,20 +26,25 @@ const LoginForm = () => {
     setLoading(true);
 
     try {
-      // Check if account is locked before attempting login
-      const { data: lockoutData, error: lockoutError } = await supabase.rpc('is_account_locked', {
-        p_email: email,
-        p_organization_id: null
-      });
-
-      if (!lockoutError && lockoutData === true) {
-        toast({
-          title: "Account Temporarily Locked",
-          description: "Too many failed login attempts. Please try again later.",
-          variant: "destructive",
+      // Check if account is locked before attempting login (optional - gracefully handle if RPC doesn't exist)
+      try {
+        const { data: lockoutData, error: lockoutError } = await supabase.rpc('is_account_locked', {
+          p_email: email,
+          p_organization_id: null
         });
-        setLoading(false);
-        return;
+
+        if (!lockoutError && lockoutData === true) {
+          toast({
+            title: "Account Temporarily Locked",
+            description: "Too many failed login attempts. Please try again later.",
+            variant: "destructive",
+          });
+          setLoading(false);
+          return;
+        }
+      } catch (rpcError) {
+        // RPC function might not exist or be unavailable - continue with login
+        console.warn('Account lockout check failed, continuing with login:', rpcError);
       }
 
       // Use standard OTP authentication flow
