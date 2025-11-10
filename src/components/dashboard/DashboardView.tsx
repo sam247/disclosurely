@@ -248,6 +248,7 @@ const DashboardView = () => {
   const [processingReportId, setProcessingReportId] = useState<string | null>(null);
   const [exportingReportId, setExportingReportId] = useState<string | null>(null);
   const [resolvingReportId, setResolvingReportId] = useState<string | null>(null);
+  const [updatingStatusReportId, setUpdatingStatusReportId] = useState<string | null>(null);
 
   useEffect(() => {
     console.log('DashboardView useEffect - user:', !!user, 'rolesLoading:', rolesLoading, 'isOrgAdmin:', isOrgAdmin);
@@ -1587,8 +1588,8 @@ Additional Details: ${decryptedContent.additionalDetails || 'None provided'}
                                     </DropdownMenuItem>
                                     <DropdownMenuItem 
                                       onClick={async () => {
+                                        setUpdatingStatusReportId(report.id);
                                         try {
-                                          console.log('DashboardView: Starting status change to investigating for report:', report.id);
                                           const { error } = await supabase
                                             .from('reports')
                                             .update({ 
@@ -1617,11 +1618,14 @@ Additional Details: ${decryptedContent.additionalDetails || 'None provided'}
                                             title: 'Error updating report status',
                                             variant: 'destructive'
                                           });
+                                        } finally {
+                                          setUpdatingStatusReportId(null);
                                         }
                                       }}
+                                      disabled={updatingStatusReportId === report.id}
                                     >
                                       <Search className="h-4 w-4 mr-2" />
-                                      Mark as Investigating
+                                      {updatingStatusReportId === report.id ? 'Updating...' : 'Mark as Investigating'}
                                     </DropdownMenuItem>
                                     <DropdownMenuItem 
                                       onClick={async () => {
@@ -1815,6 +1819,7 @@ Additional Details: ${decryptedContent.additionalDetails || 'None provided'}
                               <DropdownMenuContent align="end" className="w-48">
                                 <DropdownMenuItem 
                                   onClick={async () => {
+                                    setUpdatingStatusReportId(report.id);
                                     try {
                                       const { error } = await supabase
                                         .from('reports')
@@ -1840,14 +1845,18 @@ Additional Details: ${decryptedContent.additionalDetails || 'None provided'}
                                         title: 'Error updating report status',
                                         variant: 'destructive'
                                       });
+                                    } finally {
+                                      setUpdatingStatusReportId(null);
                                     }
                                   }}
+                                  disabled={updatingStatusReportId === report.id}
                                 >
                                   <Eye className="h-4 w-4 mr-2" />
-                                  Mark as Reviewing
+                                  {updatingStatusReportId === report.id ? 'Updating...' : 'Mark as Reviewing'}
                                 </DropdownMenuItem>
                                 <DropdownMenuItem 
                                   onClick={async () => {
+                                    setUpdatingStatusReportId(report.id);
                                     try {
                                       const { error } = await supabase
                                         .from('reports')
@@ -1873,11 +1882,14 @@ Additional Details: ${decryptedContent.additionalDetails || 'None provided'}
                                         title: 'Error updating report status',
                                         variant: 'destructive'
                                       });
+                                    } finally {
+                                      setUpdatingStatusReportId(null);
                                     }
                                   }}
+                                  disabled={updatingStatusReportId === report.id}
                                 >
                                   <Search className="h-4 w-4 mr-2" />
-                                  Mark as Investigating
+                                  {updatingStatusReportId === report.id ? 'Updating...' : 'Mark as Investigating'}
                                 </DropdownMenuItem>
                                 <DropdownMenuItem 
                                   onClick={async () => {
