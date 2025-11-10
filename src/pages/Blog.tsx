@@ -354,7 +354,7 @@ const Blog = () => {
     return (
       <>
         <DynamicHelmet
-          pageIdentifier="blog-post"
+          pageIdentifier={`/blog/${currentPost.slug}`}
           fallbackTitle={currentPost.seoTitle || currentPost.title}
           fallbackDescription={currentPost.seoDescription || currentPost.excerpt}
         />

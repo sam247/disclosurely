@@ -129,8 +129,8 @@ function generateSitemapEntries(): UrlEntry[] {
       ],
     });
 
-    // Add language-specific versions
-    LANGUAGES.forEach(lang => {
+    // Add language-specific versions (exclude 'en' - English is at root path)
+    LANGUAGES.filter(lang => lang !== 'en').forEach(lang => {
       entries.push({
         loc: `${BASE_URL}/${lang}${basePath}`,
         lastmod: now,
