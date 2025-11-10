@@ -177,6 +177,17 @@ const DynamicHelmet: React.FC<DynamicHelmetProps> = ({
     fetchSEOData();
   }, [pageIdentifier, i18n.language]);
 
+  // CRITICAL FIX: react-helmet-async cannot reliably set <html lang> attribute in SPAs
+  // Use direct DOM manipulation instead
+  // MUST be called before any early returns to maintain hook order
+  useEffect(() => {
+    const currentLang = i18n.language || 'en';
+    if (typeof document !== 'undefined') {
+      document.documentElement.setAttribute('lang', currentLang);
+      console.log('✅ DynamicHelmet: Set HTML lang attribute to:', currentLang);
+    }
+  }, [i18n.language]);
+
   if (loading) {
     return (
       <Helmet>
@@ -309,16 +320,6 @@ const DynamicHelmet: React.FC<DynamicHelmetProps> = ({
   const finalRobots = seoData?.robots_directive || 'index,follow';
 
   const finalKeywords = seoData?.meta_keywords || [];
-
-  // CRITICAL FIX: react-helmet-async cannot reliably set <html lang> attribute in SPAs
-  // Use direct DOM manipulation instead
-  useEffect(() => {
-    const currentLang = i18n.language || 'en';
-    if (typeof document !== 'undefined') {
-      document.documentElement.setAttribute('lang', currentLang);
-      console.log('✅ DynamicHelmet: Set HTML lang attribute to:', currentLang);
-    }
-  }, [i18n.language]);
 
   // Get structured data from props, Contentful schema, or SEO data
   let baseStructuredData = structuredData || 
