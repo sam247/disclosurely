@@ -247,6 +247,7 @@ const DashboardView = () => {
   const [isBulkProcessing, setIsBulkProcessing] = useState(false);
   const [processingReportId, setProcessingReportId] = useState<string | null>(null);
   const [exportingReportId, setExportingReportId] = useState<string | null>(null);
+  const [resolvingReportId, setResolvingReportId] = useState<string | null>(null);
 
   useEffect(() => {
     console.log('DashboardView useEffect - user:', !!user, 'rolesLoading:', rolesLoading, 'isOrgAdmin:', isOrgAdmin);
@@ -1624,6 +1625,7 @@ Additional Details: ${decryptedContent.additionalDetails || 'None provided'}
                                     </DropdownMenuItem>
                                     <DropdownMenuItem 
                                       onClick={async () => {
+                                        setResolvingReportId(report.id);
                                         try {
                                           const { error } = await supabase
                                             .from('reports')
@@ -1653,11 +1655,14 @@ Additional Details: ${decryptedContent.additionalDetails || 'None provided'}
                                             title: 'Error resolving report',
                                             variant: 'destructive'
                                           });
+                                        } finally {
+                                          setResolvingReportId(null);
                                         }
                                       }}
+                                      disabled={resolvingReportId === report.id}
                                     >
                                       <CheckCircle className="h-4 w-4 mr-2" />
-                                      Mark as Resolved
+                                      {resolvingReportId === report.id ? 'Resolving...' : 'Mark as Resolved'}
                                     </DropdownMenuItem>
                                     <DropdownMenuItem 
                                       onClick={() => exportReportToPDF(report)}
@@ -1876,6 +1881,7 @@ Additional Details: ${decryptedContent.additionalDetails || 'None provided'}
                                 </DropdownMenuItem>
                                 <DropdownMenuItem 
                                   onClick={async () => {
+                                    setResolvingReportId(report.id);
                                     try {
                                       const { error } = await supabase
                                         .from('reports')
@@ -1901,11 +1907,14 @@ Additional Details: ${decryptedContent.additionalDetails || 'None provided'}
                                         title: 'Error resolving report',
                                         variant: 'destructive'
                                       });
+                                    } finally {
+                                      setResolvingReportId(null);
                                     }
                                   }}
+                                  disabled={resolvingReportId === report.id}
                                 >
                                   <CheckCircle className="h-4 w-4 mr-2" />
-                                  Mark as Resolved
+                                  {resolvingReportId === report.id ? 'Resolving...' : 'Mark as Resolved'}
                                 </DropdownMenuItem>
                                 <DropdownMenuItem 
                                   onClick={() => exportReportToPDF(report)}
