@@ -122,6 +122,11 @@ const LinkGenerator = () => {
 
   const primaryDomain = primaryDomainRecord?.domain_name ?? null;
   const primaryDomainStatus = primaryDomainRecord?.status ?? null;
+  
+  // Check if custom domain is verified (status is 'active' or 'verified')
+  const isCustomDomainVerified = primaryDomainRecord 
+    ? (primaryDomainRecord.status === 'active' || primaryDomainRecord.status === 'verified')
+    : false;
 
   // Fetch organization info for subdomain and URL toggle settings
   const { data: organizationInfo } = useQuery({
@@ -142,6 +147,29 @@ const LinkGenerator = () => {
         .select('id, domain, name, active_url_type, custom_domain, custom_domain_verified')
         .eq('id', profile.organization_id)
         .single();
+
+      // Also check custom_domains table to get the actual verification status
+      if (org) {
+        const { data: customDomainRecord } = await supabase
+          .from('custom_domains')
+          .select('status, is_active, is_primary, domain_name')
+          .eq('organization_id', profile.organization_id)
+          .eq('is_active', true)
+          .order('is_primary', { ascending: false })
+          .limit(1)
+          .maybeSingle();
+
+          // Sync custom_domain_verified with custom_domains table status
+        if (customDomainRecord) {
+          const isVerified = customDomainRecord.status === 'active' || customDomainRecord.status === 'verified';
+          // Return org with synced data from custom_domains table
+          return {
+            ...org,
+            custom_domain: customDomainRecord.domain_name,
+            custom_domain_verified: isVerified
+          };
+        }
+      }
 
       return org;
     },
