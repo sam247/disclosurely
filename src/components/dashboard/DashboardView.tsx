@@ -245,6 +245,7 @@ const DashboardView = () => {
   const [selectedReportIds, setSelectedReportIds] = useState<string[]>([]);
   const [smartFilters, setSmartFilters] = useState<SmartFilter[]>([]);
   const [isBulkProcessing, setIsBulkProcessing] = useState(false);
+  const [processingReportId, setProcessingReportId] = useState<string | null>(null);
 
   useEffect(() => {
     console.log('DashboardView useEffect - user:', !!user, 'rolesLoading:', rolesLoading, 'isOrgAdmin:', isOrgAdmin);
@@ -575,6 +576,7 @@ const DashboardView = () => {
   };
 
   const handleArchiveReport = async (reportId: string) => {
+    setProcessingReportId(reportId);
     try {
       const { error } = await supabase
         .from('reports')
@@ -615,10 +617,13 @@ const DashboardView = () => {
         description: "Failed to archive report. Please try again.",
         variant: "destructive",
       });
+    } finally {
+      setProcessingReportId(null);
     }
   };
 
   const handleUnarchiveReport = async (reportId: string) => {
+    setProcessingReportId(reportId);
     try {
       const { error } = await supabase
         .from('reports')
@@ -643,6 +648,8 @@ const DashboardView = () => {
         description: "Failed to unarchive report. Please try again.",
         variant: "destructive",
       });
+    } finally {
+      setProcessingReportId(null);
     }
   };
 
@@ -2020,9 +2027,12 @@ Additional Details: ${decryptedContent.additionalDetails || 'None provided'}
                                 </Button>
                               </DropdownMenuTrigger>
                               <DropdownMenuContent align="end" className="w-40">
-                                <DropdownMenuItem onClick={() => handleUnarchiveReport(report.id)}>
+                                <DropdownMenuItem 
+                                  onClick={() => handleUnarchiveReport(report.id)}
+                                  disabled={processingReportId === report.id}
+                                >
                                   <RotateCcw className="h-4 w-4 mr-2" />
-                                  Unarchive
+                                  {processingReportId === report.id ? 'Unarchiving...' : 'Unarchive'}
                                 </DropdownMenuItem>
                               </DropdownMenuContent>
                             </DropdownMenu>
