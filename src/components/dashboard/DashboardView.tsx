@@ -246,6 +246,7 @@ const DashboardView = () => {
   const [smartFilters, setSmartFilters] = useState<SmartFilter[]>([]);
   const [isBulkProcessing, setIsBulkProcessing] = useState(false);
   const [processingReportId, setProcessingReportId] = useState<string | null>(null);
+  const [exportingReportId, setExportingReportId] = useState<string | null>(null);
 
   useEffect(() => {
     console.log('DashboardView useEffect - user:', !!user, 'rolesLoading:', rolesLoading, 'isOrgAdmin:', isOrgAdmin);
@@ -759,6 +760,7 @@ Additional Details: ${decryptedContent.additionalDetails || 'None provided'}
 
   // Export individual report as PDF
   const exportReportToPDF = async (report: Report) => {
+    setExportingReportId(report.id);
     try {
       toast({ title: "Generating PDF...", description: "Please wait" });
 
@@ -823,8 +825,6 @@ Additional Details: ${decryptedContent.additionalDetails || 'None provided'}
 
       // Download the PDF
       downloadPDF(doc, `case-report-${report.tracking_id}`);
-
-      // Log export action
       await log.info(LogContext.CASE_MANAGEMENT, 'Case report exported as PDF', {
         reportId: report.id,
         userId: user?.id,
@@ -1902,9 +1902,12 @@ Additional Details: ${decryptedContent.additionalDetails || 'None provided'}
                                   <CheckCircle className="h-4 w-4 mr-2" />
                                   Mark as Resolved
                                 </DropdownMenuItem>
-                                <DropdownMenuItem onClick={() => exportReportToPDF(report)}>
+                                <DropdownMenuItem 
+                                  onClick={() => exportReportToPDF(report)}
+                                  disabled={exportingReportId === report.id}
+                                >
                                   <Download className="h-4 w-4 mr-2" />
-                                  Export PDF
+                                  {exportingReportId === report.id ? 'Exporting PDF...' : 'Export PDF'}
                                 </DropdownMenuItem>
                                 <DropdownMenuItem 
                                   onClick={() => handleArchiveReport(report.id)}
