@@ -954,12 +954,11 @@ const WorkflowsView = () => {
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label htmlFor="rule-assign-to" className="text-sm">Assign To User</Label>
-                <Select value={ruleAssignTo} onValueChange={setRuleAssignTo}>
+                <Select value={ruleAssignTo || undefined} onValueChange={(value) => setRuleAssignTo(value || '')}>
                   <SelectTrigger>
-                    <SelectValue placeholder="Select user" />
+                    <SelectValue placeholder="Select user (optional)" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">None</SelectItem>
                     {teamMembers.map((member) => (
                       <SelectItem key={member.id} value={member.id}>
                         {member.first_name && member.last_name
@@ -1064,13 +1063,12 @@ const WorkflowsView = () => {
             </div>
             {policyEscalate && (
               <div className="space-y-2">
-                <Label htmlFor="policy-escalate-to">Escalate To User</Label>
-                <Select value={policyEscalateTo} onValueChange={setPolicyEscalateTo}>
+                <Label htmlFor="policy-escalate-to" className="text-sm">Escalate To User</Label>
+                <Select value={policyEscalateTo || undefined} onValueChange={(value) => setPolicyEscalateTo(value || '')}>
                   <SelectTrigger>
-                    <SelectValue placeholder="Select user" />
+                    <SelectValue placeholder="Select user (optional)" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">None</SelectItem>
                     {teamMembers.map((member) => (
                       <SelectItem key={member.id} value={member.id}>
                         {member.first_name && member.last_name
