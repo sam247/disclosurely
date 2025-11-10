@@ -430,45 +430,48 @@ const WorkflowsView = () => {
   return (
     <div className="flex flex-col h-[calc(100vh-4rem)] overflow-hidden">
       {/* Fixed Header */}
-      <div className="flex-shrink-0 pb-4 border-b bg-background">
-        <div className="flex items-center justify-between">
+      <div className="flex-shrink-0 pb-3 md:pb-4 border-b bg-background px-4 md:px-6">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
           <div>
-            <h1 className="text-3xl font-bold">Workflows</h1>
-            <p className="text-muted-foreground">Automate case assignment and SLA management</p>
+            <h1 className="text-2xl md:text-3xl font-bold">Workflows</h1>
+            <p className="text-sm md:text-base text-muted-foreground">Automate case assignment and SLA management</p>
           </div>
         </div>
       </div>
       
       {/* Scrollable Content */}
-      <div className="flex-1 overflow-y-auto p-6">
+      <div className="flex-1 overflow-y-auto p-4 md:p-6">
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="grid w-full grid-cols-3">
-            <TabsTrigger value="rules">
-              <Settings className="h-4 w-4 mr-2" />
-              Assignment Rules
+          <TabsList className="grid w-full grid-cols-3 h-auto">
+            <TabsTrigger value="rules" className="text-xs sm:text-sm py-2 sm:py-2.5">
+              <Settings className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
+              <span className="hidden sm:inline">Assignment Rules</span>
+              <span className="sm:hidden">Rules</span>
             </TabsTrigger>
-            <TabsTrigger value="sla">
-              <Clock className="h-4 w-4 mr-2" />
-              SLA Policies
+            <TabsTrigger value="sla" className="text-xs sm:text-sm py-2 sm:py-2.5">
+              <Clock className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
+              <span className="hidden sm:inline">SLA Policies</span>
+              <span className="sm:hidden">SLA</span>
             </TabsTrigger>
-            <TabsTrigger value="history">
-              <History className="h-4 w-4 mr-2" />
-              Workflow History
+            <TabsTrigger value="history" className="text-xs sm:text-sm py-2 sm:py-2.5">
+              <History className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
+              <span className="hidden sm:inline">Workflow History</span>
+              <span className="sm:hidden">History</span>
             </TabsTrigger>
           </TabsList>
 
           {/* Assignment Rules Tab */}
-          <TabsContent value="rules" className="mt-6">
+          <TabsContent value="rules" className="mt-4 md:mt-6">
             <Card>
               <CardHeader>
-                <div className="flex items-center justify-between">
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
                   <div>
-                    <CardTitle>Assignment Rules</CardTitle>
-                    <CardDescription>
+                    <CardTitle className="text-lg md:text-xl">Assignment Rules</CardTitle>
+                    <CardDescription className="text-xs md:text-sm">
                       Configure automatic case assignment based on category, urgency, and keywords
                     </CardDescription>
                   </div>
-                  <Button onClick={handleCreateRule}>
+                  <Button onClick={handleCreateRule} size="sm" className="w-full sm:w-auto">
                     <Plus className="h-4 w-4 mr-2" />
                     Create Rule
                   </Button>
@@ -476,98 +479,175 @@ const WorkflowsView = () => {
               </CardHeader>
               <CardContent>
                 {rules.length === 0 ? (
-                  <div className="text-center py-12 text-muted-foreground">
-                    <Settings className="h-12 w-12 mx-auto mb-4 opacity-50" />
-                    <p>No assignment rules configured yet.</p>
-                    <p className="text-sm mt-2">Create your first rule to automate case assignment.</p>
+                  <div className="text-center py-8 md:py-12 text-muted-foreground">
+                    <Settings className="h-10 w-10 md:h-12 md:w-12 mx-auto mb-4 opacity-50" />
+                    <p className="text-sm md:text-base">No assignment rules configured yet.</p>
+                    <p className="text-xs md:text-sm mt-2">Create your first rule to automate case assignment.</p>
                   </div>
                 ) : (
-                  <Table>
-                    <TableHeader>
-                      <TableRow>
-                        <TableHead>Name</TableHead>
-                        <TableHead>Priority</TableHead>
-                        <TableHead>Conditions</TableHead>
-                        <TableHead>Assign To</TableHead>
-                        <TableHead>Status</TableHead>
-                        <TableHead>Actions</TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
+                  <>
+                    {/* Desktop Table View */}
+                    <div className="hidden md:block overflow-x-auto">
+                      <Table>
+                        <TableHeader>
+                          <TableRow>
+                            <TableHead>Name</TableHead>
+                            <TableHead>Priority</TableHead>
+                            <TableHead>Conditions</TableHead>
+                            <TableHead>Assign To</TableHead>
+                            <TableHead>Status</TableHead>
+                            <TableHead>Actions</TableHead>
+                          </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                          {rules.map((rule) => (
+                            <TableRow key={rule.id}>
+                              <TableCell className="font-medium">{rule.name}</TableCell>
+                              <TableCell>{rule.priority}</TableCell>
+                              <TableCell>
+                                <div className="text-sm space-y-1">
+                                  {rule.conditions.category && rule.conditions.category !== 'any' && (
+                                    <Badge variant="outline">Category: {rule.conditions.category}</Badge>
+                                  )}
+                                  {rule.conditions.urgency && rule.conditions.urgency !== 'any' && (
+                                    <Badge variant="outline">Urgency: {rule.conditions.urgency}</Badge>
+                                  )}
+                                  {rule.conditions.keywords && rule.conditions.keywords.length > 0 && (
+                                    <Badge variant="outline">Keywords: {rule.conditions.keywords.join(', ')}</Badge>
+                                  )}
+                                </div>
+                              </TableCell>
+                              <TableCell>
+                                {rule.assign_to_user_id ? (
+                                  teamMembers.find(m => m.id === rule.assign_to_user_id)?.email || 'User'
+                                ) : rule.assign_to_team || '-'}
+                              </TableCell>
+                              <TableCell>
+                                {rule.enabled ? (
+                                  <Badge variant="default" className="gap-1">
+                                    <CheckCircle className="h-3 w-3" />
+                                    Active
+                                  </Badge>
+                                ) : (
+                                  <Badge variant="secondary" className="gap-1">
+                                    <XCircle className="h-3 w-3" />
+                                    Inactive
+                                  </Badge>
+                                )}
+                              </TableCell>
+                              <TableCell>
+                                <div className="flex gap-2">
+                                  <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    onClick={() => handleEditRule(rule)}
+                                  >
+                                    <Edit className="h-4 w-4" />
+                                  </Button>
+                                  <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    onClick={() => handleDeleteRule(rule.id)}
+                                  >
+                                    <Trash2 className="h-4 w-4 text-destructive" />
+                                  </Button>
+                                </div>
+                              </TableCell>
+                            </TableRow>
+                          ))}
+                        </TableBody>
+                      </Table>
+                    </div>
+                    {/* Mobile Card View */}
+                    <div className="md:hidden space-y-4">
                       {rules.map((rule) => (
-                        <TableRow key={rule.id}>
-                          <TableCell className="font-medium">{rule.name}</TableCell>
-                          <TableCell>{rule.priority}</TableCell>
-                          <TableCell>
-                            <div className="text-sm space-y-1">
-                              {rule.conditions.category && rule.conditions.category !== 'any' && (
-                                <Badge variant="outline">Category: {rule.conditions.category}</Badge>
-                              )}
-                              {rule.conditions.urgency && rule.conditions.urgency !== 'any' && (
-                                <Badge variant="outline">Urgency: {rule.conditions.urgency}</Badge>
-                              )}
-                              {rule.conditions.keywords && rule.conditions.keywords.length > 0 && (
-                                <Badge variant="outline">Keywords: {rule.conditions.keywords.join(', ')}</Badge>
-                              )}
+                        <Card key={rule.id}>
+                          <CardContent className="pt-4">
+                            <div className="space-y-3">
+                              <div className="flex items-start justify-between">
+                                <div className="flex-1">
+                                  <h3 className="font-semibold text-sm">{rule.name}</h3>
+                                  <p className="text-xs text-muted-foreground mt-1">Priority: {rule.priority}</p>
+                                </div>
+                                {rule.enabled ? (
+                                  <Badge variant="default" className="gap-1 text-xs">
+                                    <CheckCircle className="h-3 w-3" />
+                                    Active
+                                  </Badge>
+                                ) : (
+                                  <Badge variant="secondary" className="gap-1 text-xs">
+                                    <XCircle className="h-3 w-3" />
+                                    Inactive
+                                  </Badge>
+                                )}
+                              </div>
+                              <div className="space-y-2">
+                                <div>
+                                  <p className="text-xs font-medium text-muted-foreground mb-1">Conditions</p>
+                                  <div className="flex flex-wrap gap-1">
+                                    {rule.conditions.category && rule.conditions.category !== 'any' && (
+                                      <Badge variant="outline" className="text-xs">Category: {rule.conditions.category}</Badge>
+                                    )}
+                                    {rule.conditions.urgency && rule.conditions.urgency !== 'any' && (
+                                      <Badge variant="outline" className="text-xs">Urgency: {rule.conditions.urgency}</Badge>
+                                    )}
+                                    {rule.conditions.keywords && rule.conditions.keywords.length > 0 && (
+                                      <Badge variant="outline" className="text-xs">Keywords: {rule.conditions.keywords.join(', ')}</Badge>
+                                    )}
+                                  </div>
+                                </div>
+                                <div>
+                                  <p className="text-xs font-medium text-muted-foreground mb-1">Assign To</p>
+                                  <p className="text-xs">
+                                    {rule.assign_to_user_id ? (
+                                      teamMembers.find(m => m.id === rule.assign_to_user_id)?.email || 'User'
+                                    ) : rule.assign_to_team || '-'}
+                                  </p>
+                                </div>
+                              </div>
+                              <div className="flex gap-2 pt-2 border-t">
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  className="flex-1"
+                                  onClick={() => handleEditRule(rule)}
+                                >
+                                  <Edit className="h-3 w-3 mr-1" />
+                                  Edit
+                                </Button>
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  className="flex-1 text-destructive"
+                                  onClick={() => handleDeleteRule(rule.id)}
+                                >
+                                  <Trash2 className="h-3 w-3 mr-1" />
+                                  Delete
+                                </Button>
+                              </div>
                             </div>
-                          </TableCell>
-                          <TableCell>
-                            {rule.assign_to_user_id ? (
-                              teamMembers.find(m => m.id === rule.assign_to_user_id)?.email || 'User'
-                            ) : rule.assign_to_team || '-'}
-                          </TableCell>
-                          <TableCell>
-                            {rule.enabled ? (
-                              <Badge variant="default" className="gap-1">
-                                <CheckCircle className="h-3 w-3" />
-                                Active
-                              </Badge>
-                            ) : (
-                              <Badge variant="secondary" className="gap-1">
-                                <XCircle className="h-3 w-3" />
-                                Inactive
-                              </Badge>
-                            )}
-                          </TableCell>
-                          <TableCell>
-                            <div className="flex gap-2">
-                              <Button
-                                variant="ghost"
-                                size="sm"
-                                onClick={() => handleEditRule(rule)}
-                              >
-                                <Edit className="h-4 w-4" />
-                              </Button>
-                              <Button
-                                variant="ghost"
-                                size="sm"
-                                onClick={() => handleDeleteRule(rule.id)}
-                              >
-                                <Trash2 className="h-4 w-4 text-destructive" />
-                              </Button>
-                            </div>
-                          </TableCell>
-                        </TableRow>
+                          </CardContent>
+                        </Card>
                       ))}
-                    </TableBody>
-                  </Table>
+                    </div>
+                  </>
                 )}
               </CardContent>
             </Card>
           </TabsContent>
 
           {/* SLA Policies Tab */}
-          <TabsContent value="sla" className="mt-6">
+          <TabsContent value="sla" className="mt-4 md:mt-6">
             <Card>
               <CardHeader>
-                <div className="flex items-center justify-between">
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
                   <div>
-                    <CardTitle>SLA Policies</CardTitle>
-                    <CardDescription>
+                    <CardTitle className="text-lg md:text-xl">SLA Policies</CardTitle>
+                    <CardDescription className="text-xs md:text-sm">
                       Set response time targets for different priority levels
                     </CardDescription>
                   </div>
-                  <Button onClick={handleCreatePolicy}>
+                  <Button onClick={handleCreatePolicy} size="sm" className="w-full sm:w-auto">
                     <Plus className="h-4 w-4 mr-2" />
                     Create Policy
                   </Button>
@@ -575,111 +655,203 @@ const WorkflowsView = () => {
               </CardHeader>
               <CardContent>
                 {policies.length === 0 ? (
-                  <div className="text-center py-12 text-muted-foreground">
-                    <Clock className="h-12 w-12 mx-auto mb-4 opacity-50" />
-                    <p>No SLA policies configured yet.</p>
-                    <p className="text-sm mt-2">Create your first policy to track response times.</p>
+                  <div className="text-center py-8 md:py-12 text-muted-foreground">
+                    <Clock className="h-10 w-10 md:h-12 md:w-12 mx-auto mb-4 opacity-50" />
+                    <p className="text-sm md:text-base">No SLA policies configured yet.</p>
+                    <p className="text-xs md:text-sm mt-2">Create your first policy to track response times.</p>
                   </div>
                 ) : (
-                  <Table>
-                    <TableHeader>
-                      <TableRow>
-                        <TableHead>Name</TableHead>
-                        <TableHead>Critical</TableHead>
-                        <TableHead>High</TableHead>
-                        <TableHead>Medium</TableHead>
-                        <TableHead>Low</TableHead>
-                        <TableHead>Default</TableHead>
-                        <TableHead>Actions</TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
+                  <>
+                    {/* Desktop Table View */}
+                    <div className="hidden md:block overflow-x-auto">
+                      <Table>
+                        <TableHeader>
+                          <TableRow>
+                            <TableHead>Name</TableHead>
+                            <TableHead>Critical</TableHead>
+                            <TableHead>High</TableHead>
+                            <TableHead>Medium</TableHead>
+                            <TableHead>Low</TableHead>
+                            <TableHead>Default</TableHead>
+                            <TableHead>Actions</TableHead>
+                          </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                          {policies.map((policy) => (
+                            <TableRow key={policy.id}>
+                              <TableCell className="font-medium">{policy.name}</TableCell>
+                              <TableCell>{policy.critical_response_time}h</TableCell>
+                              <TableCell>{policy.high_response_time}h</TableCell>
+                              <TableCell>{policy.medium_response_time}h</TableCell>
+                              <TableCell>{policy.low_response_time}h</TableCell>
+                              <TableCell>
+                                {policy.is_default ? (
+                                  <Badge variant="default">Default</Badge>
+                                ) : (
+                                  <span className="text-muted-foreground">-</span>
+                                )}
+                              </TableCell>
+                              <TableCell>
+                                <div className="flex gap-2">
+                                  <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    onClick={() => handleEditPolicy(policy)}
+                                  >
+                                    <Edit className="h-4 w-4" />
+                                  </Button>
+                                  <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    onClick={() => handleDeletePolicy(policy.id)}
+                                  >
+                                    <Trash2 className="h-4 w-4 text-destructive" />
+                                  </Button>
+                                </div>
+                              </TableCell>
+                            </TableRow>
+                          ))}
+                        </TableBody>
+                      </Table>
+                    </div>
+                    {/* Mobile Card View */}
+                    <div className="md:hidden space-y-4">
                       {policies.map((policy) => (
-                        <TableRow key={policy.id}>
-                          <TableCell className="font-medium">{policy.name}</TableCell>
-                          <TableCell>{policy.critical_response_time}h</TableCell>
-                          <TableCell>{policy.high_response_time}h</TableCell>
-                          <TableCell>{policy.medium_response_time}h</TableCell>
-                          <TableCell>{policy.low_response_time}h</TableCell>
-                          <TableCell>
-                            {policy.is_default ? (
-                              <Badge variant="default">Default</Badge>
-                            ) : (
-                              <span className="text-muted-foreground">-</span>
-                            )}
-                          </TableCell>
-                          <TableCell>
-                            <div className="flex gap-2">
-                              <Button
-                                variant="ghost"
-                                size="sm"
-                                onClick={() => handleEditPolicy(policy)}
-                              >
-                                <Edit className="h-4 w-4" />
-                              </Button>
-                              <Button
-                                variant="ghost"
-                                size="sm"
-                                onClick={() => handleDeletePolicy(policy.id)}
-                              >
-                                <Trash2 className="h-4 w-4 text-destructive" />
-                              </Button>
+                        <Card key={policy.id}>
+                          <CardContent className="pt-4">
+                            <div className="space-y-3">
+                              <div className="flex items-start justify-between">
+                                <h3 className="font-semibold text-sm">{policy.name}</h3>
+                                {policy.is_default && (
+                                  <Badge variant="default" className="text-xs">Default</Badge>
+                                )}
+                              </div>
+                              <div className="grid grid-cols-2 gap-2 text-xs">
+                                <div>
+                                  <p className="text-muted-foreground">Critical</p>
+                                  <p className="font-medium">{policy.critical_response_time}h</p>
+                                </div>
+                                <div>
+                                  <p className="text-muted-foreground">High</p>
+                                  <p className="font-medium">{policy.high_response_time}h</p>
+                                </div>
+                                <div>
+                                  <p className="text-muted-foreground">Medium</p>
+                                  <p className="font-medium">{policy.medium_response_time}h</p>
+                                </div>
+                                <div>
+                                  <p className="text-muted-foreground">Low</p>
+                                  <p className="font-medium">{policy.low_response_time}h</p>
+                                </div>
+                              </div>
+                              <div className="flex gap-2 pt-2 border-t">
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  className="flex-1"
+                                  onClick={() => handleEditPolicy(policy)}
+                                >
+                                  <Edit className="h-3 w-3 mr-1" />
+                                  Edit
+                                </Button>
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  className="flex-1 text-destructive"
+                                  onClick={() => handleDeletePolicy(policy.id)}
+                                >
+                                  <Trash2 className="h-3 w-3 mr-1" />
+                                  Delete
+                                </Button>
+                              </div>
                             </div>
-                          </TableCell>
-                        </TableRow>
+                          </CardContent>
+                        </Card>
                       ))}
-                    </TableBody>
-                  </Table>
+                    </div>
+                  </>
                 )}
               </CardContent>
             </Card>
           </TabsContent>
 
           {/* Workflow History Tab */}
-          <TabsContent value="history" className="mt-6">
+          <TabsContent value="history" className="mt-4 md:mt-6">
             <Card>
               <CardHeader>
-                <CardTitle>Workflow History</CardTitle>
-                <CardDescription>
+                <CardTitle className="text-lg md:text-xl">Workflow History</CardTitle>
+                <CardDescription className="text-xs md:text-sm">
                   View audit log of all workflow automation events
                 </CardDescription>
               </CardHeader>
               <CardContent>
                 {workflowLogs.length === 0 ? (
-                  <div className="text-center py-12 text-muted-foreground">
-                    <History className="h-12 w-12 mx-auto mb-4 opacity-50" />
-                    <p>No workflow history yet.</p>
-                    <p className="text-sm mt-2">Workflow events will appear here once automation is active.</p>
+                  <div className="text-center py-8 md:py-12 text-muted-foreground">
+                    <History className="h-10 w-10 md:h-12 md:w-12 mx-auto mb-4 opacity-50" />
+                    <p className="text-sm md:text-base">No workflow history yet.</p>
+                    <p className="text-xs md:text-sm mt-2">Workflow events will appear here once automation is active.</p>
                   </div>
                 ) : (
-                  <Table>
-                    <TableHeader>
-                      <TableRow>
-                        <TableHead>Action</TableHead>
-                        <TableHead>Report ID</TableHead>
-                        <TableHead>Details</TableHead>
-                        <TableHead>Date</TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
+                  <>
+                    {/* Desktop Table View */}
+                    <div className="hidden md:block overflow-x-auto">
+                      <Table>
+                        <TableHeader>
+                          <TableRow>
+                            <TableHead>Action</TableHead>
+                            <TableHead>Report ID</TableHead>
+                            <TableHead>Details</TableHead>
+                            <TableHead>Date</TableHead>
+                          </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                          {workflowLogs.map((log) => (
+                            <TableRow key={log.id}>
+                              <TableCell>
+                                <Badge variant="outline">{log.action}</Badge>
+                              </TableCell>
+                              <TableCell className="font-mono text-xs">{log.report_id.substring(0, 8)}...</TableCell>
+                              <TableCell>
+                                <pre className="text-xs bg-muted p-2 rounded max-w-md overflow-auto">
+                                  {JSON.stringify(log.details, null, 2)}
+                                </pre>
+                              </TableCell>
+                              <TableCell>
+                                {new Date(log.created_at).toLocaleString()}
+                              </TableCell>
+                            </TableRow>
+                          ))}
+                        </TableBody>
+                      </Table>
+                    </div>
+                    {/* Mobile Card View */}
+                    <div className="md:hidden space-y-4">
                       {workflowLogs.map((log) => (
-                        <TableRow key={log.id}>
-                          <TableCell>
-                            <Badge variant="outline">{log.action}</Badge>
-                          </TableCell>
-                          <TableCell className="font-mono text-xs">{log.report_id.substring(0, 8)}...</TableCell>
-                          <TableCell>
-                            <pre className="text-xs bg-muted p-2 rounded max-w-md overflow-auto">
-                              {JSON.stringify(log.details, null, 2)}
-                            </pre>
-                          </TableCell>
-                          <TableCell>
-                            {new Date(log.created_at).toLocaleString()}
-                          </TableCell>
-                        </TableRow>
+                        <Card key={log.id}>
+                          <CardContent className="pt-4">
+                            <div className="space-y-3">
+                              <div className="flex items-start justify-between">
+                                <Badge variant="outline" className="text-xs">{log.action}</Badge>
+                                <span className="text-xs text-muted-foreground">
+                                  {new Date(log.created_at).toLocaleDateString()}
+                                </span>
+                              </div>
+                              <div>
+                                <p className="text-xs font-medium text-muted-foreground mb-1">Report ID</p>
+                                <p className="font-mono text-xs">{log.report_id.substring(0, 8)}...</p>
+                              </div>
+                              <div>
+                                <p className="text-xs font-medium text-muted-foreground mb-1">Details</p>
+                                <pre className="text-xs bg-muted p-2 rounded overflow-auto max-h-32">
+                                  {JSON.stringify(log.details, null, 2)}
+                                </pre>
+                              </div>
+                            </div>
+                          </CardContent>
+                        </Card>
                       ))}
-                    </TableBody>
-                  </Table>
+                    </div>
+                  </>
                 )}
               </CardContent>
             </Card>
@@ -689,24 +861,25 @@ const WorkflowsView = () => {
 
       {/* Create/Edit Rule Dialog */}
       <Dialog open={showCreateRuleDialog} onOpenChange={setShowCreateRuleDialog}>
-        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto w-[calc(100vw-2rem)] sm:w-full">
           <DialogHeader>
-            <DialogTitle>{editingRule ? 'Edit Assignment Rule' : 'Create Assignment Rule'}</DialogTitle>
-            <DialogDescription>
+            <DialogTitle className="text-lg md:text-xl">{editingRule ? 'Edit Assignment Rule' : 'Create Assignment Rule'}</DialogTitle>
+            <DialogDescription className="text-xs md:text-sm">
               Configure automatic case assignment based on category, urgency, and keywords.
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4 py-4">
             <div className="space-y-2">
-              <Label htmlFor="rule-name">Rule Name *</Label>
+              <Label htmlFor="rule-name" className="text-sm">Rule Name *</Label>
               <Input
                 id="rule-name"
                 value={ruleName}
                 onChange={(e) => setRuleName(e.target.value)}
                 placeholder="e.g., Financial Misconduct → Finance Team"
+                className="text-sm"
               />
             </div>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label htmlFor="rule-priority">Priority</Label>
                 <Input
@@ -733,8 +906,8 @@ const WorkflowsView = () => {
               </div>
             </div>
             <div className="space-y-2">
-              <Label>Conditions</Label>
-              <div className="grid grid-cols-2 gap-4">
+              <Label className="text-sm">Conditions</Label>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label htmlFor="rule-category">Category</Label>
                   <Select value={ruleCategory} onValueChange={setRuleCategory}>
@@ -778,9 +951,9 @@ const WorkflowsView = () => {
               />
               <p className="text-xs text-muted-foreground">Rule matches if any keyword is found in report content</p>
             </div>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label htmlFor="rule-assign-to">Assign To User</Label>
+                <Label htmlFor="rule-assign-to" className="text-sm">Assign To User</Label>
                 <Select value={ruleAssignTo} onValueChange={setRuleAssignTo}>
                   <SelectTrigger>
                     <SelectValue placeholder="Select user" />
@@ -798,7 +971,7 @@ const WorkflowsView = () => {
                 </Select>
               </div>
               <div className="space-y-2">
-                <Label htmlFor="rule-assign-team">Assign To Team</Label>
+                <Label htmlFor="rule-assign-team" className="text-sm">Assign To Team</Label>
                 <Input
                   id="rule-assign-team"
                   value={ruleAssignTeam}
@@ -821,24 +994,25 @@ const WorkflowsView = () => {
 
       {/* Create/Edit Policy Dialog */}
       <Dialog open={showCreatePolicyDialog} onOpenChange={setShowCreatePolicyDialog}>
-        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto w-[calc(100vw-2rem)] sm:w-full">
           <DialogHeader>
-            <DialogTitle>{editingPolicy ? 'Edit SLA Policy' : 'Create SLA Policy'}</DialogTitle>
-            <DialogDescription>
+            <DialogTitle className="text-lg md:text-xl">{editingPolicy ? 'Edit SLA Policy' : 'Create SLA Policy'}</DialogTitle>
+            <DialogDescription className="text-xs md:text-sm">
               Set response time targets for different priority levels (in hours).
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4 py-4">
             <div className="space-y-2">
-              <Label htmlFor="policy-name">Policy Name *</Label>
+              <Label htmlFor="policy-name" className="text-sm">Policy Name *</Label>
               <Input
                 id="policy-name"
                 value={policyName}
                 onChange={(e) => setPolicyName(e.target.value)}
                 placeholder="e.g., Standard SLA Policy"
+                className="text-sm"
               />
             </div>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label htmlFor="policy-critical">Critical Response Time (hours)</Label>
                 <Input
