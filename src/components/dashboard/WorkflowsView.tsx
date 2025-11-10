@@ -3,11 +3,16 @@ import { useTranslation } from 'react-i18next';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Plus, Settings, Clock, History } from 'lucide-react';
+import { useToast } from '@/hooks/use-toast';
 
 const WorkflowsView = () => {
   const { t } = useTranslation();
+  const { toast } = useToast();
   const [activeTab, setActiveTab] = useState('rules');
+  const [showCreateRuleDialog, setShowCreateRuleDialog] = useState(false);
+  const [showCreatePolicyDialog, setShowCreatePolicyDialog] = useState(false);
 
   return (
     <div className="flex flex-col h-[calc(100vh-4rem)] overflow-hidden">
@@ -49,10 +54,44 @@ const WorkflowsView = () => {
                       Configure automatic case assignment based on category, urgency, and keywords
                     </CardDescription>
                   </div>
-                  <Button>
-                    <Plus className="h-4 w-4 mr-2" />
-                    Create Rule
-                  </Button>
+                  <Dialog open={showCreateRuleDialog} onOpenChange={setShowCreateRuleDialog}>
+                    <DialogTrigger asChild>
+                      <Button>
+                        <Plus className="h-4 w-4 mr-2" />
+                        Create Rule
+                      </Button>
+                    </DialogTrigger>
+                    <DialogContent>
+                      <DialogHeader>
+                        <DialogTitle>Create Assignment Rule</DialogTitle>
+                        <DialogDescription>
+                          Configure automatic case assignment based on category, urgency, and keywords.
+                        </DialogDescription>
+                      </DialogHeader>
+                      <div className="py-4">
+                        <p className="text-sm text-muted-foreground">
+                          Assignment rule creation will be available once the workflow automation backend is fully integrated.
+                        </p>
+                        <p className="text-sm text-muted-foreground mt-2">
+                          This feature requires the <code className="text-xs bg-muted px-1 py-0.5 rounded">case-workflow-engine</code> edge function to be deployed.
+                        </p>
+                      </div>
+                      <div className="flex justify-end gap-2">
+                        <Button variant="outline" onClick={() => setShowCreateRuleDialog(false)}>
+                          Close
+                        </Button>
+                        <Button onClick={() => {
+                          toast({
+                            title: "Coming Soon",
+                            description: "Assignment rule creation will be available after backend integration.",
+                          });
+                          setShowCreateRuleDialog(false);
+                        }}>
+                          Learn More
+                        </Button>
+                      </div>
+                    </DialogContent>
+                  </Dialog>
                 </div>
               </CardHeader>
               <CardContent>
@@ -75,10 +114,44 @@ const WorkflowsView = () => {
                       Set response time targets for different priority levels
                     </CardDescription>
                   </div>
-                  <Button>
-                    <Plus className="h-4 w-4 mr-2" />
-                    Create Policy
-                  </Button>
+                  <Dialog open={showCreatePolicyDialog} onOpenChange={setShowCreatePolicyDialog}>
+                    <DialogTrigger asChild>
+                      <Button>
+                        <Plus className="h-4 w-4 mr-2" />
+                        Create Policy
+                      </Button>
+                    </DialogTrigger>
+                    <DialogContent>
+                      <DialogHeader>
+                        <DialogTitle>Create SLA Policy</DialogTitle>
+                        <DialogDescription>
+                          Set response time targets for different priority levels.
+                        </DialogDescription>
+                      </DialogHeader>
+                      <div className="py-4">
+                        <p className="text-sm text-muted-foreground">
+                          SLA policy creation will be available once the workflow automation backend is fully integrated.
+                        </p>
+                        <p className="text-sm text-muted-foreground mt-2">
+                          This feature requires the <code className="text-xs bg-muted px-1 py-0.5 rounded">case-workflow-engine</code> edge function to be deployed.
+                        </p>
+                      </div>
+                      <div className="flex justify-end gap-2">
+                        <Button variant="outline" onClick={() => setShowCreatePolicyDialog(false)}>
+                          Close
+                        </Button>
+                        <Button onClick={() => {
+                          toast({
+                            title: "Coming Soon",
+                            description: "SLA policy creation will be available after backend integration.",
+                          });
+                          setShowCreatePolicyDialog(false);
+                        }}>
+                          Learn More
+                        </Button>
+                      </div>
+                    </DialogContent>
+                  </Dialog>
                 </div>
               </CardHeader>
               <CardContent>
