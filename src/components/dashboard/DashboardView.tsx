@@ -1659,9 +1659,12 @@ Additional Details: ${decryptedContent.additionalDetails || 'None provided'}
                                       <CheckCircle className="h-4 w-4 mr-2" />
                                       Mark as Resolved
                                     </DropdownMenuItem>
-                                    <DropdownMenuItem onClick={() => exportReportToPDF(report)}>
+                                    <DropdownMenuItem 
+                                      onClick={() => exportReportToPDF(report)}
+                                      disabled={exportingReportId === report.id}
+                                    >
                                       <Download className="h-4 w-4 mr-2" />
-                                      Export PDF
+                                      {exportingReportId === report.id ? 'Exporting PDF...' : 'Export PDF'}
                                     </DropdownMenuItem>
                                     <DropdownMenuItem 
                                       onClick={() => handleArchiveReport(report.id)}
