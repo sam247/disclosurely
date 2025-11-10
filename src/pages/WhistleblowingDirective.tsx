@@ -1,15 +1,17 @@
-import { Helmet } from "react-helmet-async";
 import { Footer } from "@/components/ui/footer";
 import { Link } from "react-router-dom";
 import PublicLanguageSelector from "@/components/PublicLanguageSelector";
 import { useLanguageFromUrl } from "@/hooks/useLanguageFromUrl";
+import DynamicHelmet from "@/components/DynamicHelmet";
+
 const WhistleblowingDirective = () => {
   useLanguageFromUrl();
   return <>
-      <Helmet>
-        <title>Whistleblowing Directive Summary - Disclosurely</title>
-        <meta name="description" content="Complete guide to the EU Whistleblowing Directive 2023 and what it means for organizations and employees across Europe." />
-      </Helmet>
+      <DynamicHelmet
+        pageIdentifier="/whistleblowing-directive"
+        fallbackTitle="EU Whistleblowing Directive 2019/1937 | Compliance Guide"
+        fallbackDescription="Complete guide to the EU Whistleblowing Directive 2019/1937 and what it means for organizations and employees across Europe. Understand your compliance obligations."
+      />
 
       <div className="min-h-screen bg-white">
         {/* Navigation */}
