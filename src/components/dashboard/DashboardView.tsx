@@ -1906,9 +1906,12 @@ Additional Details: ${decryptedContent.additionalDetails || 'None provided'}
                                   <Download className="h-4 w-4 mr-2" />
                                   Export PDF
                                 </DropdownMenuItem>
-                                <DropdownMenuItem onClick={() => handleArchiveReport(report.id)}>
+                                <DropdownMenuItem 
+                                  onClick={() => handleArchiveReport(report.id)}
+                                  disabled={processingReportId === report.id}
+                                >
                                   <Archive className="h-4 w-4 mr-2" />
-                                  Archive
+                                  {processingReportId === report.id ? 'Archiving...' : 'Archive'}
                                 </DropdownMenuItem>
                                 <DropdownMenuSeparator />
                                 <DropdownMenuItem 
