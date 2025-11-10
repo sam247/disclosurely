@@ -622,17 +622,6 @@ const LinkGenerator = () => {
                   </div>
                 </RadioGroup>
 
-          {/* Warning Message */}
-          {activeUrlType !== organizationInfo?.active_url_type && (
-            <Alert>
-              <AlertCircle className="h-4 w-4" />
-              <AlertDescription className="text-xs">
-                <strong>Note:</strong> Switching will automatically redirect the old URL to the new one using a 301 permanent redirect. 
-                The old URL will stop serving content and redirect to the new active URL.
-              </AlertDescription>
-            </Alert>
-          )}
-
           {/* Save Button */}
           {activeUrlType !== organizationInfo?.active_url_type && (
             <div className="flex justify-end">
