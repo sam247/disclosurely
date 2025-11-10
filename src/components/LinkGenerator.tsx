@@ -347,7 +347,7 @@ const LinkGenerator = () => {
   const handleSaveUrlType = async () => {
     if (!organizationInfo?.id) return;
     
-    if (activeUrlType === 'custom_domain' && !organizationInfo.custom_domain_verified) {
+    if (activeUrlType === 'custom_domain' && !isCustomDomainVerified) {
       toast({
         title: "Cannot Switch",
         description: "Custom domain must be verified before it can be set as active.",
@@ -568,12 +568,12 @@ const LinkGenerator = () => {
                       value="custom_domain" 
                       id="custom_domain" 
                       className="mt-1"
-                      disabled={!brandedUrl || !organizationInfo?.custom_domain_verified}
+                      disabled={!brandedUrl || !isCustomDomainVerified}
                     />
                     <div className="flex-1 min-w-0">
                       <Label 
                         htmlFor="custom_domain" 
-                        className={`text-sm font-semibold ${(!brandedUrl || !organizationInfo?.custom_domain_verified) ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}
+                        className={`text-sm font-semibold ${(!brandedUrl || !isCustomDomainVerified) ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}
                       >
                         Custom Domain
                       </Label>
@@ -582,7 +582,7 @@ const LinkGenerator = () => {
                           <AlertCircle className="h-3 w-3" />
                           <span>Not configured - Set up custom domain in Settings → Custom Domains</span>
                         </div>
-                      ) : !organizationInfo?.custom_domain_verified ? (
+                      ) : !isCustomDomainVerified ? (
                         <div className="mt-2 flex items-center gap-2 text-xs text-amber-600">
                           <AlertCircle className="h-3 w-3" />
                           <span>Pending verification - Domain must be verified before it can be activated</span>
