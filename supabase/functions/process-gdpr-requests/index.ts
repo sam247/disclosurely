@@ -34,17 +34,66 @@ serve(async (req) => {
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
     const resend = resendApiKey ? new Resend(resendApiKey) : null;
 
-    // If called with a specific action, enqueue the request first
-    if (body?.type === 'export' && body.email) {
+    // Check for authenticated user requests (delete_data or delete_account)
+    if (body?.type === 'delete_data' || body?.type === 'delete_account') {
+      // Verify authentication
+      const authHeader = req.headers.get('Authorization');
+      if (!authHeader) {
+        return new Response(
+          JSON.stringify({ error: 'Authentication required' }),
+          { status: 401, headers: { 'Content-Type': 'application/json', ...corsHeaders } }
+        );
+      }
+
+      // Verify user owns the email
+      const { data: { user }, error: authError } = await supabase.auth.getUser(
+        authHeader.replace('Bearer ', '')
+      );
+
+      if (authError || !user) {
+        return new Response(
+          JSON.stringify({ error: 'Invalid authentication' }),
+          { status: 401, headers: { 'Content-Type': 'application/json', ...corsHeaders } }
+        );
+      }
+
+      if (user.email !== body.email) {
+        return new Response(
+          JSON.stringify({ error: 'Cannot delete data for other users' }),
+          { status: 403, headers: { 'Content-Type': 'application/json', ...corsHeaders } }
+        );
+      }
+
+      // Enqueue the appropriate request
+      if (body.type === 'delete_data') {
+        console.log('[GDPR-PROCESSOR] Enqueuing data deletion (anonymize) for', body.email);
+        await supabase
+          .from('data_erasure_requests')
+          .insert({ 
+            email_address: body.email, 
+            status: 'approved', 
+            erasure_type: 'delete_personal_data',
+            requested_by: user.id
+          });
+      } else if (body.type === 'delete_account') {
+        console.log('[GDPR-PROCESSOR] Enqueuing full account deletion for', body.email);
+        await supabase
+          .from('data_erasure_requests')
+          .insert({ 
+            email_address: body.email, 
+            status: 'approved', 
+            erasure_type: 'full_erasure',
+            requested_by: user.id
+          });
+      }
+    }
+    
+    // Legacy support for unauthenticated requests (for backward compatibility)
+    else if (body?.type === 'export' && body.email) {
       console.log('[GDPR-PROCESSOR] Enqueuing export request for', body.email);
       await supabase
         .from('data_export_requests')
         .insert({ email_address: body.email, status: 'pending', request_type: 'full_export' });
-    } else if (body?.type === 'delete_account' && body.email) {
-      console.log('[GDPR-PROCESSOR] Enqueuing erasure request for', body.email);
-      await supabase
-        .from('data_erasure_requests')
-        .insert({ email_address: body.email, status: 'approved', erasure_type: 'full_erasure' });
     }
 
     // Process pending export and erasure requests
@@ -258,7 +307,7 @@ async function performDataErasure(supabase: any, request: GDPRRequest) {
   // Find user by email
   const { data: profile } = await supabase
     .from('profiles')
-    .select('*')
+    .select('id, email, organization_id')
     .eq('email', email_address)
     .single();
 
@@ -293,48 +342,183 @@ async function performDataErasure(supabase: any, request: GDPRRequest) {
       break;
 
     case 'full_erasure':
-      // Complete data deletion
+      // COMPLETE data deletion - GDPR compliant
+      console.log(`[GDPR-PROCESSOR] Starting full erasure for ${email_address}`);
+      
       if (profile) {
-        // Delete related data first
-        await supabase.from('report_messages').delete().eq('sender_id', profile.id);
-        await supabase.from('report_notes').delete().eq('author_id', profile.id);
-        await supabase.from('notifications').delete().eq('user_id', profile.id);
-        
-        // Delete reports owned by user
+        const userId = profile.id;
+        const orgId = profile.organization_id;
+
+        // 1. Delete storage files (profile pictures, report attachments, documents)
+        console.log('[GDPR-PROCESSOR] Deleting storage files...');
+        try {
+          // Delete from report-attachments bucket
+          const { data: reportFiles } = await supabase.storage
+            .from('report-attachments')
+            .list(`${userId}/`);
+          
+          if (reportFiles && reportFiles.length > 0) {
+            const filePaths = reportFiles.map((file: any) => `${userId}/${file.name}`);
+            await supabase.storage.from('report-attachments').remove(filePaths);
+          }
+
+          // Delete from ai-helper-docs bucket
+          const { data: aiFiles } = await supabase.storage
+            .from('ai-helper-docs')
+            .list(`${userId}/`);
+          
+          if (aiFiles && aiFiles.length > 0) {
+            const aiFilePaths = aiFiles.map((file: any) => `${userId}/${file.name}`);
+            await supabase.storage.from('ai-helper-docs').remove(aiFilePaths);
+          }
+
+          // Delete from organization-logos if user uploaded any
+          const { data: logoFiles } = await supabase.storage
+            .from('organization-logos')
+            .list(`${userId}/`);
+          
+          if (logoFiles && logoFiles.length > 0) {
+            const logoFilePaths = logoFiles.map((file: any) => `${userId}/${file.name}`);
+            await supabase.storage.from('organization-logos').remove(logoFilePaths);
+          }
+
+          console.log('[GDPR-PROCESSOR] Storage files deleted');
+        } catch (storageError) {
+          console.error('[GDPR-PROCESSOR] Error deleting storage files:', storageError);
+        }
+
+        // 2. Delete AI helper documents records
+        await supabase.from('ai_helper_documents').delete().eq('uploaded_by', userId);
+
+        // 3. Delete AI case analyses
+        await supabase.from('ai_case_analyses').delete().eq('created_by', userId);
+
+        // 4. Delete compliance evidence uploaded by user
+        await supabase.from('compliance_evidence').delete().eq('uploaded_by', userId);
+
+        // 5. Delete compliance calendar events created by user
+        await supabase.from('compliance_calendar').delete().eq('created_by', userId);
+
+        // 6. Delete compliance policies created by user
+        await supabase.from('compliance_policies').delete().eq('created_by', userId);
+
+        // 7. Delete compliance risks created by user
+        await supabase.from('compliance_risks').delete().eq('created_by', userId);
+
+        // 8. Delete user invitations (sent to and by user)
+        await supabase.from('user_invitations').delete().eq('invited_email', email_address);
+        await supabase.from('user_invitations').delete().eq('invited_by', userId);
+
+        // 9. Delete notifications for the user
+        await supabase.from('notifications').delete().eq('user_id', userId);
+
+        // 10. Delete email notifications
+        await supabase.from('email_notifications').delete().eq('user_id', userId);
+        await supabase.from('email_notifications').delete().eq('email_address', email_address);
+
+        // 11. Delete login attempts
+        await supabase.from('login_attempts').delete().eq('email', email_address);
+
+        // 12. Delete report messages sent by user
+        await supabase.from('report_messages').delete().eq('sender_id', userId);
+
+        // 13. Delete report notes created by user
+        await supabase.from('report_notes').delete().eq('author_id', userId);
+
+        // 14. Handle reports owned/assigned to user
         const { data: userReports } = await supabase
           .from('reports')
           .select('id')
-          .eq('assigned_to', profile.id);
+          .eq('assigned_to', userId);
         
-        if (userReports) {
+        if (userReports && userReports.length > 0) {
           for (const report of userReports) {
+            // Delete report attachments
+            await supabase.from('report_attachments').delete().eq('report_id', report.id);
+            // Delete report messages
+            await supabase.from('report_messages').delete().eq('report_id', report.id);
+            // Delete report notes
+            await supabase.from('report_notes').delete().eq('report_id', report.id);
+          }
+          // Delete the reports themselves
+          await supabase.from('reports').delete().eq('assigned_to', userId);
+        }
+
+        // 15. Handle reports submitted by email
+        const { data: submittedReports } = await supabase
+          .from('reports')
+          .select('id')
+          .eq('submitted_by_email', email_address);
+        
+        if (submittedReports && submittedReports.length > 0) {
+          for (const report of submittedReports) {
             await supabase.from('report_attachments').delete().eq('report_id', report.id);
             await supabase.from('report_messages').delete().eq('report_id', report.id);
             await supabase.from('report_notes').delete().eq('report_id', report.id);
           }
-          await supabase.from('reports').delete().eq('assigned_to', profile.id);
+          await supabase.from('reports').delete().eq('submitted_by_email', email_address);
         }
-        
-        // Delete profile
-        await supabase.from('profiles').delete().eq('id', profile.id);
-        
-        // Note: In a real implementation, you'd also need to delete from auth.users
-        // which requires the service role and special handling
-      }
-      
-      // Also delete any reports submitted by this email
-      const { data: submittedReports } = await supabase
-        .from('reports')
-        .select('id')
-        .eq('submitted_by_email', email_address);
-      
-      if (submittedReports) {
-        for (const report of submittedReports) {
-          await supabase.from('report_attachments').delete().eq('report_id', report.id);
-          await supabase.from('report_messages').delete().eq('report_id', report.id);
-          await supabase.from('report_notes').delete().eq('report_id', report.id);
+
+        // 16. Anonymize audit logs (keep for compliance but remove PII)
+        await supabase
+          .from('audit_logs')
+          .update({
+            actor_id: null,
+            actor_email: `deleted_${Date.now()}@deleted.local`,
+            actor_ip_address: null,
+            actor_user_agent: 'User Deleted'
+          })
+          .eq('actor_id', userId);
+
+        // Also anonymize logs where user is the target
+        await supabase
+          .from('audit_logs')
+          .update({
+            target_id: null,
+            metadata: { deleted: true, deleted_at: new Date().toISOString() }
+          })
+          .eq('target_id', userId);
+
+        // 17. Delete user roles
+        await supabase.from('user_roles').delete().eq('user_id', userId);
+
+        // 18. Delete from profiles table
+        await supabase.from('profiles').delete().eq('id', userId);
+
+        // 19. Delete from auth.users using admin API
+        console.log('[GDPR-PROCESSOR] Deleting from auth.users...');
+        try {
+          const { error: authDeleteError } = await supabase.auth.admin.deleteUser(userId);
+          if (authDeleteError) {
+            console.error('[GDPR-PROCESSOR] Error deleting from auth.users:', authDeleteError);
+            throw authDeleteError;
+          }
+          console.log('[GDPR-PROCESSOR] Successfully deleted from auth.users');
+        } catch (authError) {
+          console.error('[GDPR-PROCESSOR] Failed to delete auth user:', authError);
+          throw authError;
         }
-        await supabase.from('reports').delete().eq('submitted_by_email', email_address);
+
+        console.log(`[GDPR-PROCESSOR] Full erasure completed for user ${userId}`);
+      } else {
+        // No profile found, but check for anonymous reports
+        const { data: anonymousReports } = await supabase
+          .from('reports')
+          .select('id')
+          .eq('submitted_by_email', email_address);
+        
+        if (anonymousReports && anonymousReports.length > 0) {
+          for (const report of anonymousReports) {
+            await supabase.from('report_attachments').delete().eq('report_id', report.id);
+            await supabase.from('report_messages').delete().eq('report_id', report.id);
+            await supabase.from('report_notes').delete().eq('report_id', report.id);
+          }
+          await supabase.from('reports').delete().eq('submitted_by_email', email_address);
+        }
+
+        // Delete email notifications and login attempts for anonymous users
+        await supabase.from('email_notifications').delete().eq('email_address', email_address);
+        await supabase.from('login_attempts').delete().eq('email', email_address);
       }
       break;
 
