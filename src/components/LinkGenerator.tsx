@@ -507,32 +507,19 @@ const LinkGenerator = () => {
     <>
       <Card>
         <CardHeader>
-          <div className="flex items-center justify-between">
-            <div>
-              <CardTitle className="text-lg">{t('secureReportLink')}</CardTitle>
-              <CardDescription className="text-sm mt-1">
-                {t('yourOrganisationCanUse')}
-              </CardDescription>
-            </div>
-            <Badge variant={primaryLink.is_active ? "default" : "secondary"}>
-              {primaryLink.is_active ? t('active') : t('inactive')}
-            </Badge>
+          <div>
+            <CardTitle className="text-lg">{t('secureReportLink')}</CardTitle>
+            <CardDescription className="text-sm mt-1">
+              Choose which URL type should be active. Only one can be active at a time. The inactive URL will automatically redirect to the active one.
+            </CardDescription>
           </div>
         </CardHeader>
         <CardContent className="space-y-4">
-          {/* URL Type Toggle Section */}
-          <div className="p-4 bg-muted/50 rounded-lg border">
-            <div className="space-y-4">
-              <div>
-                <Label className="text-sm font-semibold mb-3 block">Active Reporting Portal URL</Label>
-                <p className="text-xs text-muted-foreground mb-4">
-                  Choose which URL type should be active. Only one can be active at a time. The inactive URL will automatically redirect to the active one.
-                </p>
-                <RadioGroup
-                  value={activeUrlType}
-                  onValueChange={(value) => setActiveUrlType(value as 'subdomain' | 'custom_domain')}
-                  className="space-y-3"
-                >
+          <RadioGroup
+            value={activeUrlType}
+            onValueChange={(value) => setActiveUrlType(value as 'subdomain' | 'custom_domain')}
+            className="space-y-3"
+          >
                   {/* Subdomain Option */}
                   <div className="flex items-start space-x-3 p-3 border rounded-lg bg-background">
                     <RadioGroupItem 
@@ -559,7 +546,7 @@ const LinkGenerator = () => {
                               {t('copyLink')}
                             </Button>
                           </div>
-                          {activeUrlType === 'subdomain' && (
+                          {activeUrlType === 'subdomain' && activeUrlType === organizationInfo?.active_url_type && (
                             <div className="flex items-center gap-2 text-xs text-green-600">
                               <CheckCircle className="h-3 w-3" />
                               <span>Currently active</span>
@@ -611,7 +598,7 @@ const LinkGenerator = () => {
                               {t('copyLink')}
                             </Button>
                           </div>
-                          {activeUrlType === 'custom_domain' && (
+                          {activeUrlType === 'custom_domain' && activeUrlType === organizationInfo?.active_url_type && (
                             <div className="flex items-center gap-2 text-xs text-green-600">
                               <CheckCircle className="h-3 w-3" />
                               <span>Currently active</span>
@@ -634,44 +621,41 @@ const LinkGenerator = () => {
                     </div>
                   </div>
                 </RadioGroup>
-              </div>
 
-              {/* Warning Message */}
-              {activeUrlType !== organizationInfo?.active_url_type && (
-                <Alert>
-                  <AlertCircle className="h-4 w-4" />
-                  <AlertDescription className="text-xs">
-                    <strong>Note:</strong> Switching will automatically redirect the old URL to the new one using a 301 permanent redirect. 
-                    The old URL will stop serving content and redirect to the new active URL.
-                  </AlertDescription>
-                </Alert>
-              )}
+          {/* Warning Message */}
+          {activeUrlType !== organizationInfo?.active_url_type && (
+            <Alert>
+              <AlertCircle className="h-4 w-4" />
+              <AlertDescription className="text-xs">
+                <strong>Note:</strong> Switching will automatically redirect the old URL to the new one using a 301 permanent redirect. 
+                The old URL will stop serving content and redirect to the new active URL.
+              </AlertDescription>
+            </Alert>
+          )}
 
-              {/* Save Button */}
-              {activeUrlType !== organizationInfo?.active_url_type && (
-                <div className="flex justify-end">
-                  <Button
-                    onClick={handleSaveUrlType}
-                    disabled={isSavingUrlType}
-                    size="sm"
-                    className="flex items-center gap-2"
-                  >
-                    {isSavingUrlType ? (
-                      <>
-                        <Loader2 className="h-4 w-4 animate-spin" />
-                        Saving...
-                      </>
-                    ) : (
-                      <>
-                        <CheckCircle className="h-4 w-4" />
-                        Save Changes
-                      </>
-                    )}
-                  </Button>
-                </div>
-              )}
+          {/* Save Button */}
+          {activeUrlType !== organizationInfo?.active_url_type && (
+            <div className="flex justify-end">
+              <Button
+                onClick={handleSaveUrlType}
+                disabled={isSavingUrlType}
+                size="sm"
+                className="flex items-center gap-2"
+              >
+                {isSavingUrlType ? (
+                  <>
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                    Saving...
+                  </>
+                ) : (
+                  <>
+                    <CheckCircle className="h-4 w-4" />
+                    Save Changes
+                  </>
+                )}
+              </Button>
             </div>
-          </div>
+          )}
 
 
           {/* Prompt to set up custom domain if they don't have one */}
