@@ -83,18 +83,32 @@ const CleanSubmissionWrapper = () => {
       currentHost: window.location.hostname
     });
 
-    if (!domainLoading && organizationId) {
+    // Wait for domain loading to complete before making decisions
+    if (domainLoading) {
+      // Still loading, keep loading state
+      return;
+    }
+
+    if (organizationId) {
       console.log('✅ Domain detected, fetching link data...', { isCustomDomain, organizationId });
       fetchOrgLinkData();
-    } else if (!domainLoading && !organizationId) {
-      // Not on a recognized domain
-      console.log('❌ Domain NOT detected:', { isCustomDomain, organizationId });
-      setLoading(false);
-      toast({
-        title: "Access Error",
-        description: "This reporting portal can only be accessed via your organization's configured domain.",
-        variant: "destructive",
-      });
+    } else {
+      // Give a small delay to allow async operations to complete
+      // This prevents the flash of error message
+      const timeoutId = setTimeout(() => {
+        // Double-check if organizationId is still null after delay
+        if (!organizationId) {
+          console.log('❌ Domain NOT detected after delay:', { isCustomDomain, organizationId });
+          setLoading(false);
+          toast({
+            title: "Access Error",
+            description: "This reporting portal can only be accessed via your organization's configured domain.",
+            variant: "destructive",
+          });
+        }
+      }, 500); // 500ms delay to allow async operations
+
+      return () => clearTimeout(timeoutId);
     }
   }, [domainLoading, isCustomDomain, organizationId]);
 
