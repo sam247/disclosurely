@@ -224,6 +224,13 @@ serve(async (req) => {
           break;
         }
 
+        // Get user_id from profiles table
+        const { data: profile } = await supabaseClient
+          .from("profiles")
+          .select("id")
+          .eq("email", customer.email)
+          .maybeSingle();
+
         // Get subscription details
         const priceId = subscription.items.data[0]?.price.id;
         const price = priceId ? await stripe.prices.retrieve(priceId) : null;
@@ -233,18 +240,39 @@ serve(async (req) => {
         const tier = amount <= 1999 ? 'basic' : 'pro';
         const subscriptionEnd = new Date(subscription.current_period_end * 1000).toISOString();
 
+        // Handle trial end - if subscription moves from trialing to active
+        let gracePeriodEndsAt: string | null = null;
+        if (subscription.status === 'active' && subscription.trial_end) {
+          // Trial just ended, subscription is now active
+          // No grace period needed for successful trial conversion
+        } else if (subscription.status === 'canceled') {
+          // Set grace period for canceled subscriptions
+          const graceEnd = new Date();
+          graceEnd.setDate(graceEnd.getDate() + 7);
+          gracePeriodEndsAt = graceEnd.toISOString();
+        }
+
         // Update subscriber record
-        await supabaseClient.from("subscribers").update({
+        const updateData: any = {
+          user_id: profile?.id || null,
           subscription_tier: tier,
           subscription_end: subscriptionEnd,
           subscription_status: subscription.status === 'active' ? 'active' : 
                                subscription.status === 'trialing' ? 'trialing' : 
                                subscription.status === 'past_due' ? 'past_due' : 
-                               subscription.status === 'canceled' ? 'canceled' : 'active',
+                               subscription.status === 'canceled' ? 'canceled' : 
+                               subscription.status === 'expired' ? 'expired' : 'active',
+          subscribed: ['active', 'trialing', 'past_due'].includes(subscription.status),
           updated_at: new Date().toISOString(),
-        }).eq('email', customer.email);
+        };
 
-        console.log(`[STRIPE-WEBHOOK] Updated subscription for ${customer.email}`);
+        if (gracePeriodEndsAt) {
+          updateData.grace_period_ends_at = gracePeriodEndsAt;
+        }
+
+        await supabaseClient.from("subscribers").upsert(updateData, { onConflict: 'email' });
+
+        console.log(`[STRIPE-WEBHOOK] Updated subscription for ${customer.email}`, { status: subscription.status, tier });
         break;
       }
 
@@ -264,9 +292,25 @@ serve(async (req) => {
           break;
         }
 
-        console.log(`[STRIPE-WEBHOOK] Trial ending soon for ${customer.email}`);
+        // Get user_id from profiles table
+        const { data: profile } = await supabaseClient
+          .from("profiles")
+          .select("id")
+          .eq("email", customer.email)
+          .maybeSingle();
+
+        // Update subscription status to reflect trial ending soon
+        // This helps the frontend show appropriate messaging
+        await supabaseClient.from("subscribers").update({
+          user_id: profile?.id || null,
+          subscription_status: 'trialing',
+          updated_at: new Date().toISOString(),
+        }).eq('email', customer.email);
+
+        console.log(`[STRIPE-WEBHOOK] Trial ending soon for ${customer.email} - trial ends at ${subscription.trial_end ? new Date(subscription.trial_end * 1000).toISOString() : 'unknown'}`);
         
         // TODO: Send email notification about trial ending
+        // This can be implemented via send-notification-emails edge function
         break;
       }
 
