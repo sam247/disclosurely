@@ -356,6 +356,20 @@ async function escalateCase(
       }
     })
 
+  // Create notification for escalation
+  const { error: notifyError } = await supabase.rpc('create_escalation_notification', {
+    p_report_id: reportId,
+    p_escalated_to: escalateTo,
+    p_escalated_from: report.assigned_to,
+    p_reason: reason,
+    p_sla_breached: slaBreached
+  })
+
+  if (notifyError) {
+    console.error('[Escalate] Error creating notification:', notifyError)
+    // Don't fail the escalation if notification fails
+  }
+
   console.log('[Escalate] Successfully escalated case')
   return new Response(
     JSON.stringify({ success: true }),
