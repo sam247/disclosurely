@@ -50,8 +50,9 @@ const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
     return <Navigate to="/login" replace />;
   }
 
-  // Check subscription access
-  if (!canAccess(subscriptionData)) {
+  // Check subscription access - only block if subscriptionData is loaded and explicitly shows no access
+  // Don't block if subscriptionData is still loading or is default/undefined
+  if (subscriptionData && !subscriptionLoading && !canAccess(subscriptionData)) {
     const statusForModal = getSubscriptionStatusForModal(subscriptionData);
     return (
       <>
@@ -59,6 +60,10 @@ const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
           open={true}
           subscriptionStatus={statusForModal || 'expired'}
           gracePeriodEndsAt={subscriptionData.grace_period_ends_at}
+          onManageSubscription={() => {
+            // Navigate to settings page
+            window.location.href = '/dashboard/settings';
+          }}
         />
         <div className="min-h-screen flex items-center justify-center">
           <div className="text-center">
@@ -81,8 +86,12 @@ const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
         <SubscriptionExpiredModal
           open={showSubscriptionModal}
           subscriptionStatus={getSubscriptionStatusForModal(subscriptionData) || 'expired'}
-          gracePeriodEndsAt={subscriptionData.grace_period_ends_at}
-          onManageSubscription={() => setShowSubscriptionModal(false)}
+          gracePeriodEndsAt={subscriptionData?.grace_period_ends_at}
+          onManageSubscription={() => {
+            setShowSubscriptionModal(false);
+            // Navigate to settings page
+            window.location.href = '/dashboard/settings';
+          }}
         />
       )}
       {children}

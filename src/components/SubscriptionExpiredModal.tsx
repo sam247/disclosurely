@@ -22,7 +22,8 @@ const SubscriptionExpiredModal = ({
     if (onManageSubscription) {
       onManageSubscription();
     } else {
-      navigate('/dashboard/settings?tab=subscription');
+      // Use window.location to ensure navigation works even if modal is blocking
+      window.location.href = '/dashboard/settings';
     }
   };
 

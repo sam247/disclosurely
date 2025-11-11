@@ -127,6 +127,9 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
           subscriptionStatus = 'expired';
         }
         
+        // Ensure isExpired is false if status is active or trialing
+        const isExpired = (isExpiredByDate && !isInGracePeriod && subscriptionStatus !== 'active' && subscriptionStatus !== 'trialing') || false;
+        
         const mappedData: SubscriptionData = {
           subscribed: subscribed || isInGracePeriod,
           subscription_tier: directData.subscription_tier as 'basic' | 'pro',
@@ -134,8 +137,19 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
           subscription_status: subscriptionStatus,
           grace_period_ends_at: directData.grace_period_ends_at,
           isInGracePeriod,
-          isExpired: isExpiredByDate && !isInGracePeriod && subscriptionStatus !== 'active' && subscriptionStatus !== 'trialing',
+          isExpired,
         };
+        
+        // Debug log to help diagnose
+        console.log('[useAuth] Mapped subscription data:', {
+          subscribed: mappedData.subscribed,
+          subscription_status: mappedData.subscription_status,
+          subscription_end: mappedData.subscription_end,
+          isExpired: mappedData.isExpired,
+          isInGracePeriod: mappedData.isInGracePeriod,
+          isExpiredByDate,
+          subscriptionStatus
+        });
         
         setSubscriptionData(mappedData);
         // Store with TTL (15 minutes) for security

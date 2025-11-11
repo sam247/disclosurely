@@ -100,6 +100,11 @@ export function canAccess(subscriptionData: SubscriptionData): boolean {
  * Gets the subscription status for display in modals
  */
 export function getSubscriptionStatusForModal(subscriptionData: SubscriptionData): 'expired' | 'past_due' | 'grace_period' | null {
+  // Don't show modal if subscription is active or trialing
+  if (subscriptionData.subscription_status === 'active' || subscriptionData.subscription_status === 'trialing') {
+    return null;
+  }
+
   if (subscriptionData.subscription_status === 'past_due') {
     return 'past_due';
   }
@@ -108,7 +113,13 @@ export function getSubscriptionStatusForModal(subscriptionData: SubscriptionData
     return 'grace_period';
   }
 
-  if (subscriptionData.isExpired || subscriptionData.subscription_status === 'expired') {
+  // Only return 'expired' if status is explicitly expired AND not in grace period
+  if (subscriptionData.subscription_status === 'expired' && !subscriptionData.isInGracePeriod) {
+    return 'expired';
+  }
+
+  // Only return 'expired' if isExpired is true AND not in grace period
+  if (subscriptionData.isExpired && !subscriptionData.isInGracePeriod) {
     return 'expired';
   }
 
