@@ -1,9 +1,8 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { Building2, Users, CreditCard, Globe, Shield } from 'lucide-react';
+import { Building2, CreditCard, Globe, Shield } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import OrganizationSettingsBranding from '@/components/OrganizationSettings';
-import UserManagement from '@/components/UserManagement';
 import SubscriptionManagement from '@/components/SubscriptionManagement';
 import CustomDomainSettings from '@/components/CustomDomainSettings';
 import SimpleGDPRSettings from '@/components/SimpleGDPRSettings';
@@ -17,7 +16,7 @@ const OrganizationSettings = () => {
     <div className="flex flex-col h-[calc(100vh-4rem)] overflow-hidden">
       {/* Fixed Header */}
       <div className="flex-shrink-0 pb-4 border-b bg-background">
-        <h1 className="text-3xl font-bold">Settings</h1>
+        <h1 className="text-xl sm:text-2xl font-bold">Settings</h1>
         <p className="text-muted-foreground">
           Manage your organization, team, subscription, and privacy settings. Profile settings are available in the top-right menu.
         </p>
@@ -41,22 +40,6 @@ const OrganizationSettings = () => {
                 </CardHeader>
                 <CardContent>
                   <OrganizationSettingsBranding />
-                </CardContent>
-              </Card>
-
-              {/* Team Management */}
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center space-x-2">
-                    <Users className="h-5 w-5 text-blue-600" />
-                    <span>Team</span>
-                  </CardTitle>
-                  <CardDescription>
-                    Manage your organization's team members and their roles
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <UserManagement />
                 </CardContent>
               </Card>
 

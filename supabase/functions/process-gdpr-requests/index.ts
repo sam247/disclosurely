@@ -148,21 +148,63 @@ async function processExportRequests(supabase: any, resend: any | null) {
       // Generate export data based on request type
       const exportData = await generateExportData(supabase, request);
       
-      // Create export file (in a real implementation, you'd upload to storage)
+      // Create export file
       const exportJson = JSON.stringify(exportData, null, 2);
-      const exportFileName = `data-export-${request.id}.json`;
+      const exportFileName = `exports/data-export-${request.id}.json`;
       
-      // For now, we'll simulate file creation and provide a download URL
-      const mockFileUrl = `https://example.com/exports/${exportFileName}`;
+      // Ensure data-exports bucket exists
+      const bucketName = 'data-exports';
+      const { data: buckets } = await supabase.storage.listBuckets();
+      const bucketExists = buckets?.some(b => b.id === bucketName);
+      
+      if (!bucketExists) {
+        // Create bucket if it doesn't exist
+        const { error: bucketError } = await supabase.storage.createBucket(bucketName, {
+          public: false,
+          fileSizeLimit: 10485760, // 10MB limit
+          allowedMimeTypes: ['application/json']
+        });
+        if (bucketError && !bucketError.message.includes('already exists')) {
+          console.error('[GDPR-PROCESSOR] Error creating bucket:', bucketError);
+        }
+      }
+      
+      // Upload file to storage
+      const { data: uploadData, error: uploadError } = await supabase.storage
+        .from(bucketName)
+        .upload(exportFileName, exportJson, {
+          contentType: 'application/json',
+          cacheControl: '3600',
+          upsert: false
+        });
+
+      if (uploadError) {
+        console.error('[GDPR-PROCESSOR] Error uploading file:', uploadError);
+        throw uploadError;
+      }
+
+      // Generate signed URL valid for 7 days
+      const expiresIn = 7 * 24 * 60 * 60; // 7 days in seconds
+      const { data: signedUrlData, error: urlError } = await supabase.storage
+        .from(bucketName)
+        .createSignedUrl(exportFileName, expiresIn);
+
+      if (urlError || !signedUrlData) {
+        console.error('[GDPR-PROCESSOR] Error creating signed URL:', urlError);
+        throw urlError || new Error('Failed to create signed URL');
+      }
+
+      const downloadUrl = signedUrlData.signedUrl;
+      const expiresAt = new Date(Date.now() + expiresIn * 1000).toISOString();
 
       // Update request as completed
       await supabase
         .from('data_export_requests')
         .update({
           status: 'completed',
-          export_file_url: mockFileUrl,
+          export_file_url: downloadUrl,
           completed_at: new Date().toISOString(),
-          expires_at: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString() // 7 days
+          expires_at: expiresAt
         })
         .eq('id', request.id);
 
@@ -176,8 +218,8 @@ async function processExportRequests(supabase: any, resend: any | null) {
             html: `
               <h2>Your data export is ready</h2>
               <p>Click the link below to download your data export. The link will expire in 7 days.</p>
-              <p><a href="${mockFileUrl}">Download your data export</a></p>
-              <p>If you did not request this, please ignore this email.</p>
+              <p><a href="${downloadUrl}" style="background-color: #2563eb; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px; display: inline-block; margin: 10px 0;">Download your data export</a></p>
+              <p style="color: #666; font-size: 12px;">If you did not request this, please ignore this email.</p>
             `,
           });
           console.log('[GDPR-PROCESSOR] Email sent:', emailResponse);

@@ -1328,7 +1328,7 @@ Additional Details: ${decryptedContent.additionalDetails || 'None provided'}
       <div className="space-y-4">
         {/* Title and Subtitle */}
         <div>
-          <h2 className="text-2xl font-bold">{t('reportsOverview')}</h2>
+          <h2 className="text-xl sm:text-2xl font-bold">{t('reportsOverview')}</h2>
           <p className="text-muted-foreground break-words hyphens-auto">{t('manageAndReviewReports')}</p>
         </div>
 

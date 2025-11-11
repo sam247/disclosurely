@@ -8,7 +8,7 @@ const TeamView = () => {
     <div className="flex flex-col h-[calc(100vh-4rem)] overflow-hidden">
       {/* Fixed Header */}
       <div className="flex-shrink-0 pb-4 border-b bg-background">
-        <h1 className="text-3xl font-bold">{t('teamManagementTitle')}</h1>
+        <h1 className="text-xl sm:text-2xl font-bold">{t('teamManagementTitle')}</h1>
         <p className="text-muted-foreground">{t('teamManagementDescription')}</p>
       </div>
       

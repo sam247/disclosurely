@@ -9,7 +9,7 @@ const SecureLinkView = () => {
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="text-3xl font-bold tracking-tight">Secure Report Link</h2>
+        <h2 className="text-xl sm:text-2xl font-bold tracking-tight">Secure Report Link</h2>
         <p className="text-muted-foreground mt-2">
           Manage your secure submission portal and share it with your stakeholders
         </p>

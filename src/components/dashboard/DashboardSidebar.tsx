@@ -139,7 +139,7 @@ const DashboardSidebar = ({
                         <Icon className="flex-shrink-0 text-primary h-5 w-5" />
                         <span className="flex-1">{item.title}</span>
                         {'badge' in item && item.badge && (
-                          <Badge variant="secondary" className="text-[10px] px-1.5 py-0">
+                          <Badge className="text-[10px] px-1.5 py-0 bg-blue-600 text-white">
                             {item.badge}
                           </Badge>
                         )}

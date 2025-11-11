@@ -14,7 +14,7 @@ const AIHelperView = () => {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-3xl font-bold">{t('aiCaseHelperTitle')}</h1>
+        <h1 className="text-xl sm:text-2xl font-bold">{t('aiCaseHelperTitle')}</h1>
         <div className="flex items-center gap-2 mt-2 flex-wrap">
           <p className="text-muted-foreground text-sm sm:text-base">{t('aiCaseHelperDescription')}</p>
           <TooltipProvider delayDuration={200}>
