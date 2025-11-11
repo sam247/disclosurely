@@ -30,7 +30,7 @@ const OrganizationSettings = () => {
             <Separator className="my-6 sm:my-8" />
 
             {/* Organization Settings */}
-            <section>
+            <section className="max-w-4xl">
               <div className="flex items-center gap-2 mb-4 sm:mb-6">
                 <Building2 className="h-5 w-5 text-primary" />
                 <h2 className="text-xl sm:text-2xl font-semibold">Organization</h2>
@@ -41,7 +41,7 @@ const OrganizationSettings = () => {
             <Separator className="my-6 sm:my-8" />
 
             {/* Team Management */}
-            <section>
+            <section className="max-w-4xl">
               <div className="flex items-center gap-2 mb-4 sm:mb-6">
                 <Users className="h-5 w-5 text-primary" />
                 <h2 className="text-xl sm:text-2xl font-semibold">Team</h2>
@@ -52,7 +52,7 @@ const OrganizationSettings = () => {
             <Separator className="my-6 sm:my-8" />
 
             {/* Subscription */}
-            <section>
+            <section className="max-w-4xl">
               <div className="flex items-center gap-2 mb-4 sm:mb-6">
                 <CreditCard className="h-5 w-5 text-primary" />
                 <h2 className="text-xl sm:text-2xl font-semibold">Subscription</h2>
@@ -63,7 +63,7 @@ const OrganizationSettings = () => {
             <Separator className="my-6 sm:my-8" />
 
             {/* Custom Domains */}
-            <section>
+            <section className="max-w-4xl">
               <div className="flex items-center gap-2 mb-4 sm:mb-6">
                 <Globe className="h-5 w-5 text-primary" />
                 <h2 className="text-xl sm:text-2xl font-semibold">Custom Domains</h2>
@@ -76,7 +76,7 @@ const OrganizationSettings = () => {
         <Separator className="my-6 sm:my-8" />
 
         {/* Privacy & Data - Always visible */}
-        <section>
+        <section className="max-w-4xl">
           <div className="flex items-center gap-2 mb-4 sm:mb-6">
             <Shield className="h-5 w-5 text-primary" />
             <h2 className="text-xl sm:text-2xl font-semibold">Privacy & Data</h2>
