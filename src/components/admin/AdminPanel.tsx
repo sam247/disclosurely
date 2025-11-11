@@ -71,8 +71,12 @@ export const AdminPanel = () => {
   
   
 
-  // Check if user has admin permissions
-  const isAdmin = isOrgAdmin || isSuperAdmin;
+  // STRICT OWNER CHECK - Only sampettiford@googlemail.com
+  // This is the final security layer - checks are also done in:
+  // 1. DashboardSidebar (to hide menu item)
+  // 2. OwnerOnlyRoute (to block direct URL access)
+  // 3. Here (as final check in component)
+  const isOwner = user?.email === 'sampettiford@googlemail.com';
 
   if (loading || rolesLoading) {
     return (
@@ -82,7 +86,8 @@ export const AdminPanel = () => {
     );
   }
 
-  if (!isAdmin) {
+  // STRICT CHECK: Block access if not owner
+  if (!isOwner) {
     return (
       <div className="min-h-screen bg-gray-50 p-8">
         <div className="max-w-4xl mx-auto">
