@@ -162,7 +162,7 @@ export const useMultipleSessionDetection = () => {
     }
   }, [user, session, trackSession, hasTrackedSession]);
 
-  // Check for other sessions on mount and periodically (even after refresh)
+  // Check for other sessions ONLY after session tracking is complete
   useEffect(() => {
     if (!user || !session) {
       // Clean up intervals when user logs out
@@ -177,30 +177,32 @@ export const useMultipleSessionDetection = () => {
       return;
     }
 
-    // Check immediately on mount (handles refresh case) - only once
-    if (!hasCheckedOnMount) {
-      // Delay initial check to avoid false positives on page load
-      // Wait longer to ensure session tracking has completed first
+    // Only check for other sessions AFTER we've tracked the current session
+    // This prevents false positives on page refresh
+    if (!hasCheckedOnMount && hasTrackedSession) {
+      // Delay check to ensure session is fully updated in database
       const timeoutId = setTimeout(() => {
         checkForOtherSessions();
         setHasCheckedOnMount(true);
-      }, 3000); // Wait 3 seconds after mount to ensure session is tracked
+      }, 2000); // Wait 2 seconds after session is tracked
 
       return () => clearTimeout(timeoutId);
     }
 
-    // Check periodically (every 5 minutes) to catch new sessions - much less frequent
-    checkIntervalRef.current = setInterval(() => {
-      checkForOtherSessions();
-    }, 5 * 60 * 1000); // Check every 5 minutes
+    // Check periodically (every 5 minutes) to catch new sessions - only if session is tracked
+    if (hasTrackedSession && hasCheckedOnMount) {
+      checkIntervalRef.current = setInterval(() => {
+        checkForOtherSessions();
+      }, 5 * 60 * 1000); // Check every 5 minutes
 
-    return () => {
-      if (checkIntervalRef.current) {
-        clearInterval(checkIntervalRef.current);
-        checkIntervalRef.current = null;
-      }
-    };
-  }, [user, session, checkForOtherSessions, hasCheckedOnMount]);
+      return () => {
+        if (checkIntervalRef.current) {
+          clearInterval(checkIntervalRef.current);
+          checkIntervalRef.current = null;
+        }
+      };
+    }
+  }, [user, session, checkForOtherSessions, hasCheckedOnMount, hasTrackedSession]);
 
   const handleDismiss = useCallback(() => {
     setShowModal(false);

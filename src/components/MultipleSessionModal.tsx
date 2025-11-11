@@ -109,7 +109,7 @@ const MultipleSessionModal: React.FC<MultipleSessionModalProps> = ({
     <AlertDialog open={open}>
       <AlertDialogContent className="w-[calc(100vw-2rem)] sm:w-[calc(100vw-4rem)] md:max-w-lg max-h-[calc(100vh-2rem)] sm:max-h-[85vh] flex flex-col p-0 overflow-hidden">
         {/* Header */}
-        <AlertDialogHeader className="px-4 sm:px-6 pt-4 sm:pt-6 pb-3 border-b flex-shrink-0">
+        <AlertDialogHeader className="px-4 sm:px-6 pt-4 sm:pt-6 pb-4 border-b flex-shrink-0">
           <div className="flex items-center gap-3">
             <div className="h-10 w-10 rounded-full bg-amber-100 dark:bg-amber-900/20 flex items-center justify-center flex-shrink-0">
               <Shield className="h-5 w-5 text-amber-600 dark:text-amber-500" />
@@ -121,7 +121,7 @@ const MultipleSessionModal: React.FC<MultipleSessionModalProps> = ({
         </AlertDialogHeader>
 
         {/* Scrollable content area */}
-        <div className="flex-1 overflow-y-auto px-4 sm:px-6 py-4 sm:py-5">
+        <div className="flex-1 overflow-y-auto px-4 sm:px-6 py-5">
           <AlertDialogDescription className="text-left space-y-4">
             <p className="text-sm text-muted-foreground">
               We detected a login from another device. For security, only one active session is allowed at a time.
@@ -153,7 +153,7 @@ const MultipleSessionModal: React.FC<MultipleSessionModalProps> = ({
                       href={mapUrl}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="block relative w-full"
+                      className="block relative w-full bg-muted"
                       style={{ paddingBottom: '56.25%' }}
                     >
                       <img
@@ -161,8 +161,11 @@ const MultipleSessionModal: React.FC<MultipleSessionModalProps> = ({
                         alt="Login location"
                         className="absolute inset-0 w-full h-full object-cover"
                         onError={(e) => {
-                          // Fallback if static map fails
-                          e.currentTarget.style.display = 'none';
+                          // Fallback if static map fails - show placeholder
+                          const parent = e.currentTarget.parentElement;
+                          if (parent) {
+                            parent.innerHTML = '<div class="absolute inset-0 flex items-center justify-center text-xs text-muted-foreground">Map unavailable</div>';
+                          }
                         }}
                       />
                     </a>
@@ -179,16 +182,16 @@ const MultipleSessionModal: React.FC<MultipleSessionModalProps> = ({
         </div>
         
         {/* Fixed footer */}
-        <AlertDialogFooter className="flex-col gap-2 p-4 sm:p-6 pt-3 border-t flex-shrink-0 bg-muted/30">
+        <AlertDialogFooter className="flex-col gap-2 p-4 sm:p-6 pt-4 border-t flex-shrink-0 bg-muted/30">
           <Button
             variant="destructive"
             onClick={onLogoutEverywhere}
-            className="w-full sm:w-auto order-1 text-sm"
+            className="w-full sm:w-auto text-sm"
           >
             <LogOut className="h-4 w-4 mr-2" />
             Log out everywhere
           </Button>
-          <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto order-2">
+          <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
             <Button
               variant="outline"
               onClick={onContinueOtherDevice}

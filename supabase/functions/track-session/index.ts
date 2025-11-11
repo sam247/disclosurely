@@ -223,27 +223,43 @@ serve(async (req) => {
         // Use maybeSingle() to avoid errors if session doesn't exist yet
         const { data: currentSession } = await supabase
           .from('user_sessions')
-          .select('id')
+          .select('id, last_activity_at')
           .eq('user_id', userId)
           .eq('session_id', sessionId)
           .eq('is_active', true)
           .maybeSingle();
+        
+        // If current session doesn't exist, there are no other sessions to check
+        if (!currentSession) {
+          return new Response(
+            JSON.stringify({
+              success: true,
+              hasOtherSessions: false,
+              otherSessions: null,
+            }),
+            {
+              status: 200,
+              headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+            }
+          );
+        }
         
         const { data: otherSessions, error: checkError } = await supabase
           .from('user_sessions')
           .select('*')
           .eq('user_id', userId)
           .eq('is_active', true)
-          .neq('session_id', sessionId)
+          .neq('session_id', sessionId) // Exclude by session_id
+          .neq('id', currentSession.id) // Also exclude by ID
           .gte('last_activity_at', twentyFourHoursAgo) // Only sessions active in last 24 hours
           .or(`expires_at.is.null,expires_at.gt.${now}`); // Only non-expired sessions
-        
-        // Also exclude by ID if we found the current session
-        const filteredSessions = currentSession 
-          ? otherSessions?.filter(s => s.id !== currentSession.id) || []
-          : otherSessions || [];
 
         if (checkError) throw checkError;
+
+        // Filter out any sessions that match the current session (double check)
+        const filteredSessions = (otherSessions || []).filter(s => 
+          s.session_id !== sessionId && s.id !== currentSession.id
+        );
 
         return new Response(
           JSON.stringify({
