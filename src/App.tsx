@@ -6,6 +6,7 @@ import { useSessionTimeout } from './hooks/useSessionTimeout';
 import { useAuth } from './hooks/useAuth';
 import { useMultipleSessionDetection } from './hooks/useMultipleSessionDetection';
 import ProtectedRoute from './components/ProtectedRoute';
+import OwnerOnlyRoute from './components/dashboard/OwnerOnlyRoute';
 import ScrollToTop from './components/ScrollToTop';
 import UrlRedirectMiddleware from './components/UrlRedirectMiddleware';
 
@@ -48,6 +49,7 @@ const IntegrationsView = lazy(() => import('./components/IntegrationsView'));
 const AnalyticsView = lazy(() => import('./components/AnalyticsView'));
 const AuditLogView = lazy(() => import('./components/AuditLogView'));
 const WorkflowsView = lazy(() => import('./components/dashboard/WorkflowsView'));
+const AdminPanel = lazy(() => import('./components/admin/AdminPanel').then(module => ({ default: module.AdminPanel })));
 
 // Lazy load form components
 const SubmissionFormWrapper = lazy(() => import('./components/forms/SubmissionFormWrapper'));
@@ -306,6 +308,18 @@ const AppContent = () => {
               <DashboardLayout>
                 <WorkflowsView />
               </DashboardLayout>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/dashboard/admin"
+          element={
+            <ProtectedRoute>
+              <OwnerOnlyRoute>
+                <DashboardLayout>
+                  <AdminPanel />
+                </DashboardLayout>
+              </OwnerOnlyRoute>
             </ProtectedRoute>
           }
         />

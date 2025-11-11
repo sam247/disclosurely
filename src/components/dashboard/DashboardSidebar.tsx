@@ -5,6 +5,7 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import { Sidebar, SidebarContent, SidebarFooter, SidebarGroup, SidebarGroupContent, SidebarHeader, SidebarMenu, SidebarMenuButton, SidebarMenuItem } from '@/components/ui/sidebar';
 import { useSubscriptionLimits } from '@/hooks/useSubscriptionLimits';
 import { useUserRoles } from '@/hooks/useUserRoles';
+import { useAuth } from '@/hooks/useAuth';
 import { cn } from '@/lib/utils';
 import { useTranslation } from 'react-i18next';
 import disclosurelyFullLogo from '@/assets/logos/disclosurely-full-logo.png';
@@ -27,53 +28,73 @@ const DashboardSidebar = ({
   const { t } = useTranslation();
   const { limits } = useSubscriptionLimits();
   const { isOrgAdmin, isCaseHandler } = useUserRoles();
+  const { user } = useAuth();
+  
+  // STRICT OWNER CHECK - Only sampettiford@googlemail.com
+  // This check is done here AND in the component itself for absolute security
+  const isOwner = user?.email === 'sampettiford@googlemail.com';
 
   const menuItems = [{
     title: t('dashboard'),
     icon: Home,
     path: '/dashboard',
-    locked: false
+    locked: false,
+    ownerOnly: false
   }, {
     title: t('aiCaseHelper'),
     icon: Bot,
     path: '/dashboard/ai-helper',
-    locked: !limits.hasAIHelper || !isOrgAdmin
+    locked: !limits.hasAIHelper || !isOrgAdmin,
+    ownerOnly: false
   }, {
     title: t('analytics'),
     icon: BarChart3,
     path: '/dashboard/analytics',
-    locked: !isOrgAdmin
+    locked: !isOrgAdmin,
+    ownerOnly: false
   }, {
     title: t('audit'),
     icon: ScrollText,
     path: '/dashboard/audit',
-    locked: !isOrgAdmin
+    locked: !isOrgAdmin,
+    ownerOnly: false
   }, {
     title: 'Workflows',
     icon: Workflow,
     path: '/dashboard/workflows',
     locked: !isOrgAdmin,
-    badge: 'NEW'
+    badge: 'NEW',
+    ownerOnly: false
   }, {
     title: 'Secure Link',
     icon: LinkIcon,
     path: '/dashboard/secure-link',
-    locked: false
+    locked: false,
+    ownerOnly: false
   }, {
     title: t('team'),
     icon: Users,
     path: '/dashboard/team',
-    locked: !isOrgAdmin
+    locked: !isOrgAdmin,
+    ownerOnly: false
   }, {
     title: 'Integrations',
     icon: Zap,
     path: '/dashboard/integrations',
-    locked: !isOrgAdmin
+    locked: !isOrgAdmin,
+    ownerOnly: false
   }, {
     title: 'Settings',
     icon: Settings,
     path: '/dashboard/settings',
-    locked: !isOrgAdmin
+    locked: !isOrgAdmin,
+    ownerOnly: false
+  }, {
+    title: 'Admin',
+    icon: Shield,
+    path: '/dashboard/admin',
+    locked: false,
+    ownerOnly: true // STRICT: Only visible to owner
   }];
 
   const handleNavigation = (item: typeof menuItems[0]) => {
@@ -97,6 +118,11 @@ const DashboardSidebar = ({
           <SidebarGroupContent>
             <SidebarMenu>
               {menuItems.map(item => {
+                // STRICT OWNER CHECK: Hide owner-only items from non-owners
+                if (item.ownerOnly && !isOwner) {
+                  return null;
+                }
+                
                 const isActive = location.pathname === item.path;
                 const Icon = item.icon;
                 return (
