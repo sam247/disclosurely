@@ -570,6 +570,7 @@ const AuditLogView = () => {
           <>
             {/* Desktop Table View */}
             <div className="hidden md:block flex-1 overflow-hidden min-h-0 flex flex-col">
+              {/* Scrollable table body */}
               <div className="flex-1 overflow-y-auto overflow-x-auto min-h-0">
                 <table className="w-full">
               {/* Fixed Header */}
@@ -721,6 +722,77 @@ const AuditLogView = () => {
               </tbody>
             </table>
               </div>
+              
+              {/* Pagination - Fixed at bottom of table container */}
+              {total > 0 && (
+                <div className="flex flex-col sm:flex-row items-center justify-between p-2 sm:p-3 border-t bg-gray-50 gap-2 sm:gap-0 flex-shrink-0">
+                  <div className="flex flex-col sm:flex-row items-start sm:items-center space-y-2 sm:space-y-0 sm:space-x-4 w-full sm:w-auto">
+                    <div className="flex items-center space-x-2">
+                      <Label className="text-xs whitespace-nowrap">Rows per page:</Label>
+                      <Select value={pageSize.toString()} onValueChange={(value) => handlePageSizeChange(Number(value))}>
+                        <SelectTrigger className="h-7 text-xs w-16">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="10">10</SelectItem>
+                          <SelectItem value="25">25</SelectItem>
+                          <SelectItem value="50">50</SelectItem>
+                          <SelectItem value="100">100</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    
+                    <div className="text-xs text-muted-foreground">
+                      Page {currentPage} of {totalPages}
+                    </div>
+                  </div>
+                  
+                  <div className="flex items-center space-x-1 sm:space-x-2 w-full sm:w-auto justify-center sm:justify-end">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => handlePageChange(currentPage - 1)}
+                      disabled={currentPage === 1 || loading}
+                      className="h-7 text-xs flex-1 sm:flex-initial"
+                    >
+                      <ChevronLeft className="h-3 w-3 sm:mr-1" />
+                      <span className="hidden sm:inline">Previous</span>
+                    </Button>
+                    
+                    {/* Page Numbers - Hide on mobile, show on tablet+ */}
+                    <div className="hidden sm:flex items-center space-x-1">
+                      {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
+                        const pageNum = Math.max(1, Math.min(totalPages - 4, currentPage - 2)) + i;
+                        if (pageNum > totalPages) return null;
+                        
+                        return (
+                          <Button
+                            key={pageNum}
+                            variant={pageNum === currentPage ? "default" : "outline"}
+                            size="sm"
+                            onClick={() => handlePageChange(pageNum)}
+                            disabled={loading}
+                            className="h-7 w-7 text-xs p-0"
+                          >
+                            {pageNum}
+                          </Button>
+                        );
+                      })}
+                    </div>
+                    
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => handlePageChange(currentPage + 1)}
+                      disabled={currentPage === totalPages || loading}
+                      className="h-7 text-xs flex-1 sm:flex-initial"
+                    >
+                      <span className="hidden sm:inline">Next</span>
+                      <ChevronRight className="h-3 w-3 sm:ml-1" />
+                    </Button>
+                  </div>
+                </div>
+              )}
             </div>
 
             {/* Mobile Card View */}
@@ -790,9 +862,9 @@ const AuditLogView = () => {
           </>
         )}
         
-        {/* Pagination */}
+        {/* Mobile Pagination */}
         {total > 0 && (
-          <div className="flex flex-col sm:flex-row items-center justify-between p-2 sm:p-3 border-t bg-gray-50 gap-2 sm:gap-0 flex-shrink-0">
+          <div className="md:hidden flex flex-col sm:flex-row items-center justify-between p-2 sm:p-3 border-t bg-gray-50 gap-2 sm:gap-0 flex-shrink-0">
             <div className="flex flex-col sm:flex-row items-start sm:items-center space-y-2 sm:space-y-0 sm:space-x-4 w-full sm:w-auto">
               <div className="flex items-center space-x-2">
                 <Label className="text-xs whitespace-nowrap">Rows per page:</Label>
