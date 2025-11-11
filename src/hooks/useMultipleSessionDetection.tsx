@@ -47,8 +47,11 @@ export const useMultipleSessionDetection = () => {
   }, [user, session]);
 
   // Check for other sessions
-  const checkForOtherSessions = useCallback(async () => {
+  const checkForOtherSessions = useCallback(async (signal?: AbortSignal) => {
     if (!user || !session) return;
+
+    // Add signal check
+    if (signal?.aborted) return false;
 
     // Don't check if modal was recently dismissed (cooldown period: 1 hour)
     if (dismissedAt && (Date.now() - dismissedAt) < 60 * 60 * 1000) {
@@ -61,6 +64,9 @@ export const useMultipleSessionDetection = () => {
     const sessionId = getSessionId();
     if (!sessionId) return;
 
+    // Check again after async operation
+    if (signal?.aborted) return false;
+
     try {
       const response = await supabase.functions.invoke('track-session', {
         body: {
@@ -69,6 +75,9 @@ export const useMultipleSessionDetection = () => {
           userId: user.id,
         },
       });
+
+      // Check if aborted before processing response
+      if (signal?.aborted) return false;
 
       if (response.error) throw response.error;
 
@@ -82,6 +91,7 @@ export const useMultipleSessionDetection = () => {
       
       return false; // No other sessions
     } catch (error) {
+      if (signal?.aborted) return false;
       console.error('Error checking for other sessions:', error);
       return false;
     }
@@ -153,7 +163,9 @@ export const useMultipleSessionDetection = () => {
       const timeoutId = setTimeout(() => {
         trackSession();
       }, 500);
-      return () => clearTimeout(timeoutId);
+      return () => {
+        clearTimeout(timeoutId);
+      };
     }
   }, [user, session, trackSession, hasTrackedSession]);
 
@@ -175,13 +187,19 @@ export const useMultipleSessionDetection = () => {
     // Only check for other sessions AFTER we've tracked the current session
     // This prevents false positives on page refresh
     if (!hasCheckedOnMount && hasTrackedSession) {
+      const abortController = new AbortController();
       // Delay check to ensure session is fully updated in database
       const timeoutId = setTimeout(() => {
-        checkForOtherSessions();
-        setHasCheckedOnMount(true);
+        checkForOtherSessions(abortController.signal);
+        if (!abortController.signal.aborted) {
+          setHasCheckedOnMount(true);
+        }
       }, 2000); // Wait 2 seconds after session is tracked
 
-      return () => clearTimeout(timeoutId);
+      return () => {
+        clearTimeout(timeoutId);
+        abortController.abort();
+      };
     }
 
     // Check periodically (every 5 minutes) to catch new sessions - only if session is tracked

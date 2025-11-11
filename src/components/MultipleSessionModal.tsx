@@ -107,9 +107,9 @@ const MultipleSessionModal: React.FC<MultipleSessionModalProps> = ({
 
   return (
     <AlertDialog open={open}>
-      <AlertDialogContent className="w-[calc(100vw-2rem)] sm:w-[calc(100vw-4rem)] md:max-w-lg max-h-[calc(100vh-2rem)] sm:max-h-[85vh] flex flex-col p-0 overflow-hidden">
+      <AlertDialogContent className="w-[calc(100vw-2rem)] sm:w-[calc(100vw-4rem)] md:max-w-lg max-h-[90vh] sm:max-h-[85vh] flex flex-col p-0 overflow-hidden">
         {/* Header */}
-        <AlertDialogHeader className="px-5 sm:px-6 pt-5 sm:pt-6 pb-4 border-b flex-shrink-0">
+        <AlertDialogHeader className="px-5 sm:px-6 pt-6 sm:pt-6 pb-4 border-b flex-shrink-0">
           <div className="flex items-center gap-3">
             <div className="h-10 w-10 rounded-full bg-amber-100 dark:bg-amber-900/20 flex items-center justify-center flex-shrink-0">
               <Shield className="h-5 w-5 text-amber-600 dark:text-amber-500" />
@@ -120,8 +120,11 @@ const MultipleSessionModal: React.FC<MultipleSessionModalProps> = ({
           </div>
         </AlertDialogHeader>
 
-        {/* Scrollable content area */}
-        <div className="flex-1 overflow-y-auto px-5 sm:px-6 py-5">
+        {/* Scrollable content area with visual indicator */}
+        <div className="flex-1 overflow-y-auto px-5 sm:px-6 py-5 relative">
+          {/* Scroll fade indicator at bottom */}
+          <div className="pointer-events-none absolute bottom-0 left-0 right-0 h-8 bg-gradient-to-t from-background/80 to-transparent z-10" />
+          
           <AlertDialogDescription className="text-left space-y-4">
             <p className="text-sm text-muted-foreground leading-relaxed">
               We detected a login from another device. For security, only one active session is allowed at a time.
@@ -129,16 +132,16 @@ const MultipleSessionModal: React.FC<MultipleSessionModalProps> = ({
 
             {otherSession && (
               <div className="bg-muted/50 rounded-lg p-4 sm:p-5 space-y-4 border">
-                {/* Device Info */}
+                {/* Device Info - more compact on mobile */}
                 <div className="flex items-start gap-3">
                   <div className="mt-0.5 flex-shrink-0 text-muted-foreground">
                     {getDeviceIcon(otherSession.device_type)}
                   </div>
                   <div className="flex-1 min-w-0 space-y-1.5">
-                    <p className="font-medium text-sm">{formatDevice()}</p>
-                    <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                      <MapPin className="h-3.5 w-3.5 flex-shrink-0" />
-                      <span>{formatLocation()}</span>
+                    <p className="font-medium text-sm sm:text-base break-words">{formatDevice()}</p>
+                    <div className="flex items-start sm:items-center gap-2 text-xs text-muted-foreground">
+                      <MapPin className="h-3.5 w-3.5 flex-shrink-0 mt-0.5 sm:mt-0" />
+                      <span className="break-words">{formatLocation()}</span>
                     </div>
                     <p className="text-xs text-muted-foreground">
                       Last active: {formatTime(otherSession.last_activity_at)}
@@ -153,8 +156,7 @@ const MultipleSessionModal: React.FC<MultipleSessionModalProps> = ({
                       href={mapUrl}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="block relative w-full bg-muted"
-                      style={{ paddingBottom: '56.25%' }}
+                      className="block relative w-full bg-muted aspect-video sm:aspect-[16/9]"
                     >
                       <img
                         src={`https://staticmap.openstreetmap.de/staticmap.php?center=${otherSession.location_lat},${otherSession.location_lng}&zoom=12&size=600x400&markers=${otherSession.location_lat},${otherSession.location_lng},red-pushpin`}
@@ -181,33 +183,38 @@ const MultipleSessionModal: React.FC<MultipleSessionModalProps> = ({
           </AlertDialogDescription>
         </div>
         
-        {/* Fixed footer */}
-        <AlertDialogFooter className="flex-col gap-2.5 p-4 sm:p-6 pt-4 border-t flex-shrink-0 bg-muted/30">
-          <Button
-            variant="destructive"
-            onClick={onLogoutEverywhere}
-            className="w-full sm:w-auto text-sm"
-          >
-            <LogOut className="h-4 w-4 mr-2" />
-            Log out everywhere
-          </Button>
-          <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
-            <Button
-              variant="outline"
-              onClick={onContinueOtherDevice}
-              className="w-full sm:w-auto text-sm"
-            >
-              Continue on another device
-            </Button>
+        {/* Fixed footer with better mobile layout */}
+        <AlertDialogFooter className="flex-col-reverse sm:flex-row gap-3 p-5 sm:p-6 border-t flex-shrink-0 bg-muted/30">
+          {/* Primary actions (mobile: bottom, desktop: right) */}
+          <div className="flex flex-col-reverse sm:flex-row gap-2 sm:gap-3 flex-1">
             <Button
               variant="outline"
               onClick={onDismiss}
-              className="w-full sm:w-auto text-sm"
+              className="w-full sm:flex-1 text-sm h-11"
             >
-              <X className="h-4 w-4 mr-2" />
-              Continue on this device
+              <X className="h-4 w-4 sm:mr-2" />
+              <span className="hidden sm:inline">Continue on this device</span>
+              <span className="sm:hidden">Continue here</span>
+            </Button>
+            <Button
+              variant="outline"
+              onClick={onContinueOtherDevice}
+              className="w-full sm:flex-1 text-sm h-11"
+            >
+              <span className="hidden sm:inline">Continue on other device</span>
+              <span className="sm:hidden">Switch device</span>
             </Button>
           </div>
+          
+          {/* Destructive action (mobile: top, desktop: right) */}
+          <Button
+            variant="destructive"
+            onClick={onLogoutEverywhere}
+            className="w-full sm:w-auto text-sm h-11 sm:min-w-[180px]"
+          >
+            <LogOut className="h-4 w-4 mr-2" />
+            <span>Log out everywhere</span>
+          </Button>
         </AlertDialogFooter>
       </AlertDialogContent>
     </AlertDialog>
