@@ -80,10 +80,12 @@ const MultipleSessionModal: React.FC<MultipleSessionModalProps> = ({
 
   const formatDevice = () => {
     if (!otherSession) return 'Unknown device';
+    // device_name already contains the formatted device info from the edge function
+    if (otherSession.device_name) return otherSession.device_name;
+    // Fallback to browser and OS if device_name is not available
     const parts = [];
-    if (otherSession.device_name) parts.push(otherSession.device_name);
     if (otherSession.browser) parts.push(otherSession.browser);
-    if (otherSession.os) parts.push(`(${otherSession.os})`);
+    if (otherSession.os) parts.push(otherSession.os);
     return parts.length > 0 ? parts.join(' ') : 'Unknown device';
   };
 
@@ -103,7 +105,7 @@ const MultipleSessionModal: React.FC<MultipleSessionModalProps> = ({
 
   return (
     <AlertDialog open={open}>
-      <AlertDialogContent className="w-[calc(100vw-2rem)] sm:w-[calc(100vw-4rem)] md:max-w-2xl max-h-[calc(100vh-2rem)] sm:max-h-[90vh] overflow-y-auto">
+      <AlertDialogContent className="w-[calc(100vw-2rem)] sm:w-[calc(100vw-4rem)] md:max-w-2xl max-h-[calc(100vh-2rem)] sm:max-h-[90vh] overflow-y-auto p-4 sm:p-6">
         <AlertDialogHeader>
           <div className="flex items-center gap-3 flex-wrap">
             <div className="h-10 w-10 rounded-full bg-amber-100 flex items-center justify-center flex-shrink-0">

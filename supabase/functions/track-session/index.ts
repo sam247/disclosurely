@@ -44,6 +44,8 @@ function detectDevice(userAgent: string) {
       deviceName = match ? `iPhone (iOS ${match[1]})` : 'iPhone';
     } else if (ua.includes('android')) {
       deviceName = 'Android Device';
+    } else {
+      deviceName = 'Mobile Device';
     }
   } else if (deviceType === 'tablet') {
     if (ua.includes('ipad')) {
@@ -52,7 +54,8 @@ function detectDevice(userAgent: string) {
       deviceName = 'Tablet';
     }
   } else {
-    deviceName = `${browser} on ${os}`;
+    // Desktop: show browser and OS separately
+    deviceName = `${browser} (${os})`;
   }
 
   return { deviceType, deviceName, browser, os };
@@ -163,8 +166,9 @@ serve(async (req) => {
 
         if (createError) throw createError;
 
-        // If there are other active sessions, return them
-        const otherSessions = existingSessions?.filter(s => s.session_id !== sessionId) || [];
+        // If there are other active sessions (excluding the one we just created), return them
+        // Filter out the current session ID to avoid false positives
+        const otherSessions = existingSessions?.filter(s => s.session_id !== sessionId && s.id !== newSession.id) || [];
 
         return new Response(
           JSON.stringify({
@@ -189,6 +193,15 @@ serve(async (req) => {
         const now = new Date().toISOString();
         const twentyFourHoursAgo = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
         
+        // First, get the current session to exclude it by ID as well
+        const { data: currentSession } = await supabase
+          .from('user_sessions')
+          .select('id')
+          .eq('user_id', userId)
+          .eq('session_id', sessionId)
+          .eq('is_active', true)
+          .single();
+        
         const { data: otherSessions, error: checkError } = await supabase
           .from('user_sessions')
           .select('*')
@@ -197,14 +210,19 @@ serve(async (req) => {
           .neq('session_id', sessionId)
           .gte('last_activity_at', twentyFourHoursAgo) // Only sessions active in last 24 hours
           .or(`expires_at.is.null,expires_at.gt.${now}`); // Only non-expired sessions
+        
+        // Also exclude by ID if we found the current session
+        const filteredSessions = currentSession 
+          ? otherSessions?.filter(s => s.id !== currentSession.id) || []
+          : otherSessions || [];
 
         if (checkError) throw checkError;
 
         return new Response(
           JSON.stringify({
             success: true,
-            hasOtherSessions: (otherSessions?.length || 0) > 0,
-            otherSessions: (otherSessions?.length || 0) > 0 ? otherSessions[0] : null, // Return first other session
+            hasOtherSessions: filteredSessions.length > 0,
+            otherSessions: filteredSessions.length > 0 ? filteredSessions[0] : null, // Return first other session
           }),
           {
             status: 200,

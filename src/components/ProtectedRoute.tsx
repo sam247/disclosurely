@@ -15,26 +15,29 @@ const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
   const location = useLocation();
   const [showSubscriptionModal, setShowSubscriptionModal] = useState(false);
 
-  // Check subscription status when data is available
+  // Check subscription status when data is available - only show modal if there's actually an issue
   useEffect(() => {
+    // Only check if everything is loaded and user is authenticated
     if (!loading && !subscriptionLoading && user && subscriptionData) {
-      // Debug: Log subscription data to help diagnose issues
-      console.log('[ProtectedRoute] Subscription Data:', {
-        subscribed: subscriptionData.subscribed,
-        subscription_status: subscriptionData.subscription_status,
-        subscription_end: subscriptionData.subscription_end,
-        isExpired: subscriptionData.isExpired,
-        isInGracePeriod: subscriptionData.isInGracePeriod,
-        canAccess: canAccess(subscriptionData),
-        statusForModal: getSubscriptionStatusForModal(subscriptionData)
-      });
-      
       const hasAccess = canAccess(subscriptionData);
       const statusForModal = getSubscriptionStatusForModal(subscriptionData);
       
-      if (!hasAccess || statusForModal) {
-        setShowSubscriptionModal(true);
+      // Only show modal if:
+      // 1. User doesn't have access AND subscription data is explicitly loaded (not default)
+      // 2. There's a specific status that requires showing the modal
+      // Don't show if subscription is active/trialing or if data is still defaulting
+      if (!hasAccess && subscriptionData.subscription_status !== undefined) {
+        // Only show if there's a specific status that requires the modal
+        if (statusForModal) {
+          setShowSubscriptionModal(true);
+        }
+      } else {
+        // Hide modal if user has access or subscription is active
+        setShowSubscriptionModal(false);
       }
+    } else {
+      // Hide modal while loading
+      setShowSubscriptionModal(false);
     }
   }, [loading, subscriptionLoading, user, subscriptionData]);
 
