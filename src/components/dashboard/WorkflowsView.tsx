@@ -428,20 +428,15 @@ const WorkflowsView = () => {
   }
 
   return (
-    <div className="flex flex-col h-[calc(100vh-4rem)] overflow-hidden">
-      {/* Fixed Header */}
-      <div className="flex-shrink-0 pb-3 md:pb-4 border-b bg-background px-4 md:px-6">
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-          <div>
-            <h1 className="text-2xl md:text-3xl font-bold">Workflows</h1>
-            <p className="text-sm md:text-base text-muted-foreground">Automate case assignment and SLA management</p>
-          </div>
-        </div>
+    <div className="space-y-6">
+      <div>
+        <h2 className="text-3xl font-bold tracking-tight">Workflows</h2>
+        <p className="text-muted-foreground mt-2">
+          Automate case assignment and SLA management
+        </p>
       </div>
-      
-      {/* Scrollable Content */}
-      <div className="flex-1 overflow-y-auto">
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
           <TabsList className="grid w-full grid-cols-3 h-auto">
             <TabsTrigger value="rules" className="text-xs sm:text-sm py-2 sm:py-2.5">
               <Settings className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
@@ -856,8 +851,7 @@ const WorkflowsView = () => {
               </CardContent>
             </Card>
           </TabsContent>
-        </Tabs>
-      </div>
+      </Tabs>
 
       {/* Create/Edit Rule Dialog */}
       <Dialog open={showCreateRuleDialog} onOpenChange={setShowCreateRuleDialog}>
