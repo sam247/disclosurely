@@ -2,16 +2,18 @@ import { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Settings, FileText, Globe, Users, ChevronRight, Flag } from 'lucide-react';
+import { Settings, FileText, Globe, Users, ChevronRight, Flag, MessageCircle } from 'lucide-react';
 import { BlogEditor } from './BlogEditor';
 import { SEOSettings } from './SEOSettings';
 import { FeatureFlagManager } from './FeatureFlagManager';
+import ChatAdminView from '@/components/dashboard/ChatAdminView';
 import { useOrganization } from '@/hooks/useOrganization';
 import { useTranslation } from 'react-i18next';
 import { useUserRoles } from '@/hooks/useUserRoles';
+import { useAuth } from '@/hooks/useAuth';
 import { cn } from '@/lib/utils';
 
-type AdminSection = 'blog' | 'seo' | 'features';
+type AdminSection = 'blog' | 'seo' | 'features' | 'chat';
 
 interface AdminMenuItem {
   id: AdminSection;
@@ -38,15 +40,25 @@ const adminMenuItems: AdminMenuItem[] = [
     label: 'SEO Settings',
     icon: Globe,
     description: 'Configure SEO and meta settings'
+  },
+  {
+    id: 'chat',
+    label: 'Chat Support',
+    icon: MessageCircle,
+    description: 'Manage AI chat conversations and support'
   }
 ];
 
 export const AdminPanel = () => {
   const { profile, loading } = useOrganization();
   const { t } = useTranslation();
+  const { user } = useAuth();
   const [activeSection, setActiveSection] = useState<AdminSection>('features');
 
   const { isOrgAdmin, isAdmin: isSuperAdmin, loading: rolesLoading } = useUserRoles();
+  
+  // Check if user is Disclosurely team member (by email domain or super admin)
+  const isDisclosurelyTeam = user?.email?.endsWith('@disclosurely.com') || isSuperAdmin;
   
   // Debug logging
   console.log('AdminPanel - Profile:', profile);
@@ -93,6 +105,20 @@ export const AdminPanel = () => {
         return <BlogEditor />;
       case 'seo':
         return <SEOSettings />;
+      case 'chat':
+        // Only show chat admin to Disclosurely team
+        if (!isDisclosurelyTeam) {
+          return (
+            <div className="text-center py-12">
+              <MessageCircle className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+              <h3 className="text-lg font-semibold mb-2">Access Restricted</h3>
+              <p className="text-muted-foreground">
+                Chat admin is only available to Disclosurely team members.
+              </p>
+            </div>
+          );
+        }
+        return <ChatAdminView />;
       default:
         return <FeatureFlagManager />;
     }
@@ -135,6 +161,10 @@ export const AdminPanel = () => {
                   {adminMenuItems.map((item) => {
                     const Icon = item.icon;
                     const isActive = activeSection === item.id;
+                    // Hide chat admin from non-Disclosurely team members
+                    if (item.id === 'chat' && !isDisclosurelyTeam) {
+                      return null;
+                    }
                     
                     return (
                       <button
