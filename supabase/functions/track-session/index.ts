@@ -128,54 +128,80 @@ serve(async (req) => {
         // First, clean up expired sessions
         await supabase.rpc('cleanup_expired_sessions');
 
-        // Check for existing active sessions (only non-expired ones with recent activity)
+        // Check if session already exists (for page refresh case)
+        const { data: existingSession } = await supabase
+          .from('user_sessions')
+          .select('*')
+          .eq('user_id', userId)
+          .eq('session_id', sessionId)
+          .maybeSingle();
+
+        let currentSession;
+        
+        if (existingSession) {
+          // Update existing session instead of creating a new one
+          const { data: updatedSession, error: updateError } = await supabase
+            .from('user_sessions')
+            .update({
+              last_activity_at: new Date().toISOString(),
+              is_active: true,
+              expires_at: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(), // 30 days
+            })
+            .eq('id', existingSession.id)
+            .select()
+            .single();
+
+          if (updateError) throw updateError;
+          currentSession = updatedSession;
+        } else {
+          // Create new session only if it doesn't exist
+          const { data: newSession, error: createError } = await supabase
+            .from('user_sessions')
+            .insert({
+              user_id: userId,
+              session_id: sessionId,
+              device_type: deviceInfo.deviceType,
+              device_name: deviceInfo.deviceName,
+              browser: deviceInfo.browser,
+              os: deviceInfo.os,
+              ip_address: clientIP !== 'unknown' ? clientIP : null,
+              location_city: location.city,
+              location_country: location.country,
+              location_lat: location.lat,
+              location_lng: location.lng,
+              user_agent: userAgent || req.headers.get('user-agent') || null,
+              is_active: true,
+              expires_at: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(), // 30 days
+            })
+            .select()
+            .single();
+
+          if (createError) throw createError;
+          currentSession = newSession;
+        }
+
+        // Check for OTHER active sessions (excluding the current one)
         const now = new Date().toISOString();
         const twentyFourHoursAgo = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
         
-        const { data: existingSessions, error: checkError } = await supabase
+        const { data: otherSessions, error: checkError } = await supabase
           .from('user_sessions')
           .select('*')
           .eq('user_id', userId)
           .eq('is_active', true)
+          .neq('session_id', sessionId) // Exclude current session
+          .neq('id', currentSession.id) // Also exclude by ID
           .gte('last_activity_at', twentyFourHoursAgo) // Only sessions active in last 24 hours
           .or(`expires_at.is.null,expires_at.gt.${now}`); // Only non-expired sessions
 
         if (checkError) throw checkError;
 
-        // Create new session
-        const { data: newSession, error: createError } = await supabase
-          .from('user_sessions')
-          .insert({
-            user_id: userId,
-            session_id: sessionId,
-            device_type: deviceInfo.deviceType,
-            device_name: deviceInfo.deviceName,
-            browser: deviceInfo.browser,
-            os: deviceInfo.os,
-            ip_address: clientIP !== 'unknown' ? clientIP : null,
-            location_city: location.city,
-            location_country: location.country,
-            location_lat: location.lat,
-            location_lng: location.lng,
-            user_agent: userAgent || req.headers.get('user-agent') || null,
-            is_active: true,
-            expires_at: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(), // 30 days
-          })
-          .select()
-          .single();
-
-        if (createError) throw createError;
-
-        // If there are other active sessions (excluding the one we just created), return them
-        // Filter out the current session ID to avoid false positives
-        const otherSessions = existingSessions?.filter(s => s.session_id !== sessionId && s.id !== newSession.id) || [];
-
         return new Response(
           JSON.stringify({
             success: true,
-            session: newSession,
-            hasOtherSessions: otherSessions.length > 0,
-            otherSessions: otherSessions.length > 0 ? otherSessions[0] : null, // Return first other session
+            session: currentSession,
+            hasOtherSessions: (otherSessions?.length || 0) > 0,
+            otherSessions: (otherSessions?.length || 0) > 0 ? otherSessions[0] : null, // Return first other session
           }),
           {
             status: 200,

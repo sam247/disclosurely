@@ -49,12 +49,11 @@ const MultipleSessionModal: React.FC<MultipleSessionModalProps> = ({
 
   useEffect(() => {
     if (otherSession?.location_lat && otherSession?.location_lng) {
-      // Generate static map URL using OpenStreetMap
+      // Use OpenStreetMap static map image (more reliable than iframe)
       const lat = otherSession.location_lat;
       const lng = otherSession.location_lng;
-      // Using OpenStreetMap embed with proper bbox and marker
-      const bbox = `${lng - 0.01},${lat - 0.01},${lng + 0.01},${lat + 0.01}`;
-      const mapUrl = `https://www.openstreetmap.org/export/embed.html?bbox=${bbox}&layer=mapnik&marker=${lat},${lng}`;
+      // Static map image from OpenStreetMap
+      const mapUrl = `https://www.openstreetmap.org/?mlat=${lat}&mlon=${lng}&zoom=12#map=12/${lat}/${lng}`;
       setMapUrl(mapUrl);
     } else {
       setMapUrl('');
@@ -108,100 +107,104 @@ const MultipleSessionModal: React.FC<MultipleSessionModalProps> = ({
 
   return (
     <AlertDialog open={open}>
-      <AlertDialogContent className="w-[calc(100vw-2rem)] sm:w-[calc(100vw-4rem)] md:max-w-2xl max-h-[calc(100vh-2rem)] sm:max-h-[90vh] flex flex-col p-0 overflow-hidden">
-        {/* Scrollable content area */}
-        <div className="flex-1 overflow-y-auto p-4 sm:p-6">
-          <AlertDialogHeader>
-            <div className="flex items-center gap-3 flex-wrap">
-              <div className="h-10 w-10 rounded-full bg-amber-100 flex items-center justify-center flex-shrink-0">
-                <Shield className="h-5 w-5 text-amber-600" />
-              </div>
-              <div className="min-w-0 flex-1">
-                <AlertDialogTitle className="text-lg sm:text-xl">Multiple Login Session Detected</AlertDialogTitle>
-              </div>
+      <AlertDialogContent className="w-[calc(100vw-2rem)] sm:w-[calc(100vw-4rem)] md:max-w-lg max-h-[calc(100vh-2rem)] sm:max-h-[85vh] flex flex-col p-0 overflow-hidden">
+        {/* Header */}
+        <AlertDialogHeader className="px-4 sm:px-6 pt-4 sm:pt-6 pb-3 border-b flex-shrink-0">
+          <div className="flex items-center gap-3">
+            <div className="h-10 w-10 rounded-full bg-amber-100 dark:bg-amber-900/20 flex items-center justify-center flex-shrink-0">
+              <Shield className="h-5 w-5 text-amber-600 dark:text-amber-500" />
             </div>
-            <AlertDialogDescription className="text-left mt-4 space-y-4">
-              <p>
-                We detected a new login from another device. For security, only one active session is allowed at a time.
-              </p>
+            <div className="min-w-0 flex-1">
+              <AlertDialogTitle className="text-base sm:text-lg font-semibold">Multiple Login Session Detected</AlertDialogTitle>
+            </div>
+          </div>
+        </AlertDialogHeader>
 
-              {otherSession && (
-                <div className="bg-muted rounded-lg p-3 sm:p-4 space-y-3 border">
-                  <div className="flex items-start gap-3 flex-wrap sm:flex-nowrap">
-                    <div className="mt-0.5 flex-shrink-0">
-                      {getDeviceIcon(otherSession.device_type)}
+        {/* Scrollable content area */}
+        <div className="flex-1 overflow-y-auto px-4 sm:px-6 py-4 sm:py-5">
+          <AlertDialogDescription className="text-left space-y-4">
+            <p className="text-sm text-muted-foreground">
+              We detected a login from another device. For security, only one active session is allowed at a time.
+            </p>
+
+            {otherSession && (
+              <div className="bg-muted/50 rounded-lg p-4 space-y-4 border">
+                {/* Device Info */}
+                <div className="flex items-start gap-3">
+                  <div className="mt-0.5 flex-shrink-0 text-muted-foreground">
+                    {getDeviceIcon(otherSession.device_type)}
+                  </div>
+                  <div className="flex-1 min-w-0 space-y-1.5">
+                    <p className="font-medium text-sm">{formatDevice()}</p>
+                    <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                      <MapPin className="h-3.5 w-3.5 flex-shrink-0" />
+                      <span>{formatLocation()}</span>
                     </div>
-                    <div className="flex-1 min-w-0">
-                      <p className="font-medium text-xs sm:text-sm break-words">{formatDevice()}</p>
-                      <div className="flex items-center gap-2 mt-1 text-xs text-muted-foreground flex-wrap">
-                        <MapPin className="h-3 w-3 flex-shrink-0" />
-                        <span className="break-words">{formatLocation()}</span>
-                      </div>
-                      <p className="text-xs text-muted-foreground mt-1">
-                        Last active: {formatTime(otherSession.last_activity_at)}
-                      </p>
+                    <p className="text-xs text-muted-foreground">
+                      Last active: {formatTime(otherSession.last_activity_at)}
+                    </p>
+                  </div>
+                </div>
+
+                {/* Map display if location data available */}
+                {otherSession.location_lat && otherSession.location_lng && (
+                  <div className="mt-4 border rounded-lg overflow-hidden bg-background">
+                    <a
+                      href={mapUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="block relative w-full"
+                      style={{ paddingBottom: '56.25%' }}
+                    >
+                      <img
+                        src={`https://staticmap.openstreetmap.de/staticmap.php?center=${otherSession.location_lat},${otherSession.location_lng}&zoom=12&size=600x400&markers=${otherSession.location_lat},${otherSession.location_lng},red-pushpin`}
+                        alt="Login location"
+                        className="absolute inset-0 w-full h-full object-cover"
+                        onError={(e) => {
+                          // Fallback if static map fails
+                          e.currentTarget.style.display = 'none';
+                        }}
+                      />
+                    </a>
+                    <div className="p-2 bg-muted/30 text-xs text-center text-muted-foreground border-t">
+                      Approximate location • <a href={mapUrl} target="_blank" rel="noopener noreferrer" className="underline hover:text-foreground">View on map</a>
                     </div>
                   </div>
+                )}
+              </div>
+            )}
 
-                  {/* Map display if location data available */}
-                  {otherSession.location_lat && otherSession.location_lng && mapUrl && (
-                    <div className="mt-3 border rounded-lg overflow-hidden">
-                      <div className="relative w-full" style={{ paddingBottom: '56.25%' }}>
-                        <iframe
-                          src={mapUrl}
-                          style={{ 
-                            position: 'absolute',
-                            top: 0,
-                            left: 0,
-                            width: '100%',
-                            height: '100%',
-                            border: 0
-                          }}
-                          loading="lazy"
-                          referrerPolicy="no-referrer-when-downgrade"
-                          title="Login location map"
-                          className="w-full"
-                          allow="geolocation"
-                        />
-                      </div>
-                      <div className="p-2 bg-muted/50 text-xs text-center text-muted-foreground">
-                        Approximate location of the other login
-                      </div>
-                    </div>
-                  )}
-                </div>
-              )}
-
-              <p className="text-sm font-medium mt-4">What would you like to do?</p>
-            </AlertDialogDescription>
-          </AlertDialogHeader>
+            <p className="text-sm font-medium pt-2">What would you like to do?</p>
+          </AlertDialogDescription>
         </div>
         
-        {/* Fixed footer that's always visible */}
-        <AlertDialogFooter className="flex-col sm:flex-row gap-2 p-4 sm:p-6 pt-0 border-t flex-shrink-0">
-          <Button
-            variant="outline"
-            onClick={onDismiss}
-            className="w-full sm:w-auto order-3 sm:order-1 text-xs sm:text-sm"
-          >
-            <X className="h-4 w-4 mr-2 flex-shrink-0" />
-            <span className="truncate">This wasn't me. Continue on this device</span>
-          </Button>
-          <Button
-            variant="outline"
-            onClick={onContinueOtherDevice}
-            className="w-full sm:w-auto order-2 text-xs sm:text-sm"
-          >
-            <span className="truncate">Continue on another device</span>
-          </Button>
+        {/* Fixed footer */}
+        <AlertDialogFooter className="flex-col gap-2 p-4 sm:p-6 pt-3 border-t flex-shrink-0 bg-muted/30">
           <Button
             variant="destructive"
             onClick={onLogoutEverywhere}
-            className="w-full sm:w-auto order-1 sm:order-3 text-xs sm:text-sm"
+            className="w-full sm:w-auto order-1 text-sm"
           >
-            <LogOut className="h-4 w-4 mr-2 flex-shrink-0" />
-            <span className="truncate">Log out everywhere</span>
+            <LogOut className="h-4 w-4 mr-2" />
+            Log out everywhere
           </Button>
+          <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto order-2">
+            <Button
+              variant="outline"
+              onClick={onContinueOtherDevice}
+              className="w-full sm:w-auto text-sm"
+            >
+              Continue on another device
+            </Button>
+            <Button
+              variant="outline"
+              onClick={onDismiss}
+              className="w-full sm:w-auto text-sm"
+            >
+              <X className="h-4 w-4 mr-2" />
+              Continue on this device
+            </Button>
+          </div>
         </AlertDialogFooter>
       </AlertDialogContent>
     </AlertDialog>

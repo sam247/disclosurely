@@ -151,10 +151,14 @@ export const useMultipleSessionDetection = () => {
     return () => clearInterval(interval);
   }, [user, session, getSessionId]);
 
-  // Track session on mount if user is logged in (only once)
+  // Track session on mount if user is logged in (only once per session)
   useEffect(() => {
     if (user && session && !hasTrackedSession) {
-      trackSession();
+      // Delay to ensure session is fully established
+      const timeoutId = setTimeout(() => {
+        trackSession();
+      }, 500);
+      return () => clearTimeout(timeoutId);
     }
   }, [user, session, trackSession, hasTrackedSession]);
 
@@ -176,10 +180,11 @@ export const useMultipleSessionDetection = () => {
     // Check immediately on mount (handles refresh case) - only once
     if (!hasCheckedOnMount) {
       // Delay initial check to avoid false positives on page load
+      // Wait longer to ensure session tracking has completed first
       const timeoutId = setTimeout(() => {
         checkForOtherSessions();
         setHasCheckedOnMount(true);
-      }, 2000); // Wait 2 seconds after mount
+      }, 3000); // Wait 3 seconds after mount to ensure session is tracked
 
       return () => clearTimeout(timeoutId);
     }
