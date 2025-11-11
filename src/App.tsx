@@ -24,6 +24,8 @@ const Features = lazy(() => import('./pages/Features'));
 const Careers = lazy(() => import('./pages/Careers'));
 const VsSpeakUp = lazy(() => import('./pages/VsSpeakUp'));
 const VsWhistleblowerSoftware = lazy(() => import('./pages/VsWhistleblowerSoftware'));
+const VsNavex = lazy(() => import('./pages/VsNavex'));
+const VsResolver = lazy(() => import('./pages/VsResolver'));
 const ComplianceSoftware = lazy(() => import('./pages/ComplianceSoftware'));
 const WhistleblowingDirective = lazy(() => import('./pages/WhistleblowingDirective'));
 const Blog = lazy(() => import('./pages/Blog'));
@@ -115,6 +117,8 @@ const AppContent = () => {
         <Route path="/careers" element={<Careers />} />
         <Route path="/vs-speakup" element={<VsSpeakUp />} />
         <Route path="/vs-whistleblower-software" element={<VsWhistleblowerSoftware />} />
+        <Route path="/vs-navex" element={<VsNavex />} />
+        <Route path="/vs-resolver" element={<VsResolver />} />
         <Route path="/compliance-software" element={<ComplianceSoftware />} />
         <Route path="/whistleblowing-directive" element={<WhistleblowingDirective />} />
 
@@ -180,6 +184,8 @@ const AppContent = () => {
         <Route path="/:lang/careers" element={<Careers />} />
         <Route path="/:lang/vs-speakup" element={<VsSpeakUp />} />
         <Route path="/:lang/vs-whistleblower-software" element={<VsWhistleblowerSoftware />} />
+        <Route path="/:lang/vs-navex" element={<VsNavex />} />
+        <Route path="/:lang/vs-resolver" element={<VsResolver />} />
         <Route path="/:lang/compliance-software" element={<ComplianceSoftware />} />
         <Route path="/:lang/auth/login" element={<Login />} />
         <Route path="/:lang/auth/signup" element={<Signup />} />
