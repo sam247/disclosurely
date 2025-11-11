@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { 
   Activity, 
   Database, 
@@ -12,12 +13,14 @@ import {
   RefreshCw,
   TrendingUp,
   Users,
-  FileText
+  FileText,
+  BarChart3
 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/hooks/useAuth';
 import { useUserRoles } from '@/hooks/useUserRoles';
+import MonitoringDashboard from './MonitoringDashboard';
 
 interface SystemHealthMetrics {
   database: {
@@ -194,6 +197,19 @@ const SystemHealthDashboard = () => {
   return (
     <div className="min-h-screen bg-background p-4 md:p-8">
       <div className="max-w-7xl mx-auto space-y-6">
+        <Tabs defaultValue="health" className="w-full">
+          <TabsList className="grid w-full max-w-md grid-cols-2">
+            <TabsTrigger value="health">
+              <Activity className="h-4 w-4 mr-2" />
+              System Health
+            </TabsTrigger>
+            <TabsTrigger value="monitoring">
+              <BarChart3 className="h-4 w-4 mr-2" />
+              Monitoring
+            </TabsTrigger>
+          </TabsList>
+          
+          <TabsContent value="health" className="space-y-6 mt-6">
         {/* Header */}
         <div className="flex items-center justify-between flex-col sm:flex-row gap-4">
           <div>
@@ -401,6 +417,12 @@ const SystemHealthDashboard = () => {
             </div>
           </CardContent>
         </Card>
+          </TabsContent>
+          
+          <TabsContent value="monitoring" className="mt-6">
+            <MonitoringDashboard />
+          </TabsContent>
+        </Tabs>
       </div>
     </div>
   );
