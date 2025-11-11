@@ -46,25 +46,24 @@ interface MonitoringMetrics {
 const MonitoringDashboard = () => {
   const { toast } = useToast();
   const { user } = useAuth();
-  const { isAdmin: isSuperAdmin } = useUserRoles();
   const [metrics, setMetrics] = useState<MonitoringMetrics | null>(null);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
 
-  // Only show to super admins (Disclosurely team)
-  const isDisclosurelyTeam = user?.email?.endsWith('@disclosurely.com') || isSuperAdmin;
+  // Only show to owner (sampettiford@googlemail.com)
+  const isOwner = user?.email === 'sampettiford@googlemail.com';
 
   useEffect(() => {
-    if (isDisclosurelyTeam) {
+    if (isOwner) {
       fetchMonitoringMetrics();
       // Refresh every 2 minutes
       const interval = setInterval(fetchMonitoringMetrics, 2 * 60 * 1000);
       return () => clearInterval(interval);
     }
-  }, [isDisclosurelyTeam]);
+  }, [isOwner]);
 
   const fetchMonitoringMetrics = async () => {
-    if (!isDisclosurelyTeam) return;
+    if (!isOwner) return;
 
     setRefreshing(true);
     try {
@@ -104,14 +103,14 @@ const MonitoringDashboard = () => {
     }
   };
 
-  if (!isDisclosurelyTeam) {
+  if (!isOwner) {
     return (
       <div className="min-h-screen bg-background p-8">
         <Card>
           <CardHeader>
             <CardTitle>Access Restricted</CardTitle>
             <CardDescription>
-              Monitoring dashboard is only available to Disclosurely team members.
+              Monitoring dashboard is only available to the owner.
             </CardDescription>
           </CardHeader>
         </Card>

@@ -55,25 +55,24 @@ interface SystemHealthMetrics {
 const SystemHealthDashboard = () => {
   const { toast } = useToast();
   const { user } = useAuth();
-  const { isAdmin: isSuperAdmin } = useUserRoles();
   const [metrics, setMetrics] = useState<SystemHealthMetrics | null>(null);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
 
-  // Only show to super admins (Disclosurely team)
-  const isDisclosurelyTeam = user?.email?.endsWith('@disclosurely.com') || isSuperAdmin;
+  // Only show to owner (sampettiford@googlemail.com)
+  const isOwner = user?.email === 'sampettiford@googlemail.com';
 
   useEffect(() => {
-    if (isDisclosurelyTeam) {
+    if (isOwner) {
       fetchHealthMetrics();
       // Refresh every 5 minutes
       const interval = setInterval(fetchHealthMetrics, 5 * 60 * 1000);
       return () => clearInterval(interval);
     }
-  }, [isDisclosurelyTeam]);
+  }, [isOwner]);
 
   const fetchHealthMetrics = async () => {
-    if (!isDisclosurelyTeam) return;
+    if (!isOwner) return;
 
     setRefreshing(true);
     try {
@@ -152,14 +151,14 @@ const SystemHealthDashboard = () => {
     }
   };
 
-  if (!isDisclosurelyTeam) {
+  if (!isOwner) {
     return (
       <div className="min-h-screen bg-background p-8">
         <Card>
           <CardHeader>
             <CardTitle>Access Restricted</CardTitle>
             <CardDescription>
-              System health dashboard is only available to Disclosurely team members.
+              System health dashboard is only available to the owner.
             </CardDescription>
           </CardHeader>
         </Card>

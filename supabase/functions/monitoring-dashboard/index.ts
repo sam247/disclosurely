@@ -45,8 +45,8 @@ serve(async (req) => {
 
     const user = userData.user;
     
-    // Check if user is Disclosurely team member
-    if (!user.email?.endsWith('@disclosurely.com')) {
+    // Check if user is the owner (only sampettiford@googlemail.com)
+    if (user.email !== 'sampettiford@googlemail.com') {
       return new Response(JSON.stringify({ error: "Access denied" }), {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
         status: 403,

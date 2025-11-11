@@ -64,8 +64,8 @@ export const AdminPanel = () => {
 
   const { isOrgAdmin, isAdmin: isSuperAdmin, loading: rolesLoading } = useUserRoles();
   
-  // Check if user is Disclosurely team member (by email domain or super admin)
-  const isDisclosurelyTeam = user?.email?.endsWith('@disclosurely.com') || isSuperAdmin;
+  // Check if user is the owner (only sampettiford@googlemail.com)
+  const isOwner = user?.email === 'sampettiford@googlemail.com';
   
   // Debug logging
   
@@ -113,28 +113,28 @@ export const AdminPanel = () => {
       case 'seo':
         return <SEOSettings />;
       case 'chat':
-        // Only show chat admin to Disclosurely team
-        if (!isDisclosurelyTeam) {
+        // Only show chat admin to owner
+        if (!isOwner) {
           return (
             <div className="text-center py-12">
               <MessageCircle className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
               <h3 className="text-lg font-semibold mb-2">Access Restricted</h3>
               <p className="text-muted-foreground">
-                Chat admin is only available to Disclosurely team members.
+                Chat admin is only available to the owner.
               </p>
             </div>
           );
         }
         return <ChatAdminView />;
       case 'health':
-        // Only show system health to Disclosurely team
-        if (!isDisclosurelyTeam) {
+        // Only show system health to owner
+        if (!isOwner) {
           return (
             <div className="text-center py-12">
               <Activity className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
               <h3 className="text-lg font-semibold mb-2">Access Restricted</h3>
               <p className="text-muted-foreground">
-                System health dashboard is only available to Disclosurely team members.
+                System health dashboard is only available to the owner.
               </p>
             </div>
           );
@@ -182,8 +182,8 @@ export const AdminPanel = () => {
                   {adminMenuItems.map((item) => {
                     const Icon = item.icon;
                     const isActive = activeSection === item.id;
-                    // Hide chat admin from non-Disclosurely team members
-                    if (item.id === 'chat' && !isDisclosurelyTeam) {
+                    // Hide chat admin and health from non-owner
+                    if ((item.id === 'chat' || item.id === 'health') && !isOwner) {
                       return null;
                     }
                     
