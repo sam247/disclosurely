@@ -77,11 +77,12 @@ const SessionTimeoutManager = () => {
 
 // Component to handle multiple session detection
 const MultipleSessionManager = () => {
-  const { user } = useAuth();
+  const { user, loading } = useAuth();
   const { ModalComponent } = useMultipleSessionDetection();
 
   // Only show multiple session detection for authenticated users
-  if (!user) {
+  // Also wait for auth to finish loading to prevent false triggers
+  if (loading || !user) {
     return null;
   }
   return ModalComponent;

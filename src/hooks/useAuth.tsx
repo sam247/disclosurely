@@ -259,8 +259,25 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
   }, []);
 
   const signOut = async () => {
-    // Clear session tracking from sessionStorage
+    // Deactivate session in database before clearing local storage
     if (user) {
+      const sessionId = sessionStorage.getItem(`session_id_${user.id}`);
+      if (sessionId) {
+        try {
+          // Deactivate this session in the database
+          await supabase.functions.invoke('track-session', {
+            body: {
+              action: 'deactivate_session',
+              sessionId: sessionId,
+              userId: user.id,
+            },
+          });
+        } catch (error) {
+          // Don't block logout if session deactivation fails
+          console.error('Error deactivating session on logout:', error);
+        }
+      }
+      // Clear session tracking from sessionStorage
       sessionStorage.removeItem(`session_id_${user.id}`);
     }
     await supabase.auth.signOut();

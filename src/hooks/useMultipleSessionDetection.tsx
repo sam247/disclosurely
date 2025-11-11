@@ -24,6 +24,7 @@ export const useMultipleSessionDetection = () => {
   const [isProcessing, setIsProcessing] = useState(false);
   const [hasTrackedSession, setHasTrackedSession] = useState(false);
   const [hasCheckedOnMount, setHasCheckedOnMount] = useState(false);
+  const [dismissedAt, setDismissedAt] = useState<number | null>(null);
   const sessionIdRef = useRef<string | null>(null);
   const checkIntervalRef = useRef<NodeJS.Timeout | null>(null);
 
@@ -48,6 +49,14 @@ export const useMultipleSessionDetection = () => {
   // Check for other sessions
   const checkForOtherSessions = useCallback(async () => {
     if (!user || !session) return;
+
+    // Don't check if modal was recently dismissed (cooldown period: 1 hour)
+    if (dismissedAt && (Date.now() - dismissedAt) < 60 * 60 * 1000) {
+      return false;
+    }
+
+    // Don't check if modal is already showing
+    if (showModal) return false;
 
     const sessionId = getSessionId();
     if (!sessionId) return;
@@ -76,7 +85,7 @@ export const useMultipleSessionDetection = () => {
       console.error('Error checking for other sessions:', error);
       return false;
     }
-  }, [user, session, getSessionId]);
+  }, [user, session, getSessionId, dismissedAt, showModal]);
 
   // Track session on login
   const trackSession = useCallback(async () => {
@@ -151,31 +160,47 @@ export const useMultipleSessionDetection = () => {
 
   // Check for other sessions on mount and periodically (even after refresh)
   useEffect(() => {
-    if (!user || !session) return;
-
-    // Check immediately on mount (handles refresh case)
-    if (!hasCheckedOnMount) {
-      checkForOtherSessions();
-      setHasCheckedOnMount(true);
+    if (!user || !session) {
+      // Clean up intervals when user logs out
+      if (checkIntervalRef.current) {
+        clearInterval(checkIntervalRef.current);
+        checkIntervalRef.current = null;
+      }
+      setShowModal(false);
+      setOtherSession(null);
+      setHasCheckedOnMount(false);
+      setDismissedAt(null);
+      return;
     }
 
-    // Also check periodically (every 30 seconds) to catch new sessions
-    checkIntervalRef.current = setInterval(() => {
-      if (!showModal) { // Only check if modal isn't already showing
+    // Check immediately on mount (handles refresh case) - only once
+    if (!hasCheckedOnMount) {
+      // Delay initial check to avoid false positives on page load
+      const timeoutId = setTimeout(() => {
         checkForOtherSessions();
-      }
-    }, 30000); // Check every 30 seconds
+        setHasCheckedOnMount(true);
+      }, 2000); // Wait 2 seconds after mount
+
+      return () => clearTimeout(timeoutId);
+    }
+
+    // Check periodically (every 5 minutes) to catch new sessions - much less frequent
+    checkIntervalRef.current = setInterval(() => {
+      checkForOtherSessions();
+    }, 5 * 60 * 1000); // Check every 5 minutes
 
     return () => {
       if (checkIntervalRef.current) {
         clearInterval(checkIntervalRef.current);
+        checkIntervalRef.current = null;
       }
     };
-  }, [user, session, checkForOtherSessions, hasCheckedOnMount, showModal]);
+  }, [user, session, checkForOtherSessions, hasCheckedOnMount]);
 
   const handleDismiss = useCallback(() => {
     setShowModal(false);
     setOtherSession(null);
+    setDismissedAt(Date.now()); // Record dismissal time for cooldown
   }, []);
 
   const handleContinueHere = useCallback(async () => {
