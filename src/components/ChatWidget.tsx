@@ -164,8 +164,8 @@ const ChatWidget = ({
   if (!enabled) return null;
 
   const positionClasses = {
-    'bottom-right': 'bottom-4 right-4',
-    'bottom-left': 'bottom-4 left-4',
+    'bottom-right': 'bottom-4 right-2 sm:right-4',
+    'bottom-left': 'bottom-4 left-2 sm:left-4',
   };
 
   return (
@@ -193,9 +193,10 @@ const ChatWidget = ({
         <div
           className={cn(
             'fixed z-50 bg-white rounded-lg shadow-2xl border border-gray-200',
-            'w-[calc(100vw-2rem)] sm:w-96 h-[calc(100vh-8rem)] sm:h-[600px]',
+            'w-[calc(100vw-2rem)] sm:w-96',
+            'h-[70vh] sm:h-[600px] max-h-[600px]',
             'flex flex-col',
-            position === 'bottom-right' ? 'bottom-20 right-4' : 'bottom-20 left-4',
+            position === 'bottom-right' ? 'bottom-20 sm:bottom-20 right-2 sm:right-4' : 'bottom-20 sm:bottom-20 left-2 sm:left-4',
             'max-w-full'
           )}
         >
