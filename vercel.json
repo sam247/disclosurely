@@ -68,8 +68,8 @@
   "rewrites": [
     { "source": "/sitemap.xml", "destination": "/api/sitemap.xml" },
     { "source": "/sitemap-index.xml", "destination": "/api/sitemap-index.xml" },
-    { 
-      "source": "/(.*)", 
+    {
+      "source": "/((?!assets|api|_next|favicon\\.ico|robots\\.txt|sitemap.*\\.xml|.*\\.[a-z]{2,4}$).*)",
       "destination": "/index.html"
     }
   ]
