@@ -2056,80 +2056,213 @@ Additional Details: ${decryptedContent.additionalDetails || 'None provided'}
                   )}
                 </div>
               ) : (
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Tracking ID</TableHead>
-                      <TableHead>Title</TableHead>
-                      <TableHead>Status</TableHead>
-                      <TableHead>Category</TableHead>
-                      <TableHead>Archived Date</TableHead>
-                      <TableHead className="text-right">Actions</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {archivedReports.map((report) => (
-                      <TableRow key={report.id}>
-                        <TableCell className="font-mono text-sm">
-                          <div className="flex items-center gap-2">
-                            <span>{report.tracking_id}</span>
-                            <button
-                              onClick={async () => {
-                                try {
-                                  await navigator.clipboard.writeText(report.tracking_id);
-                                  setCopiedTrackingId(report.tracking_id);
-                                  setTimeout(() => setCopiedTrackingId(null), 1000);
-                                } catch (error) {
-                                  console.error('Failed to copy:', error);
-                                }
-                              }}
-                              className="text-muted-foreground hover:text-foreground transition-colors"
-                              title="Copy tracking ID"
-                            >
-                              {copiedTrackingId === report.tracking_id ? (
-                                <Check className="h-3 w-3 text-green-600" />
+                <>
+                  {/* Desktop Table View */}
+                  <div className="hidden md:block overflow-x-auto">
+                    <Table>
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead>Tracking ID</TableHead>
+                          <TableHead>Title</TableHead>
+                          <TableHead>Status</TableHead>
+                          <TableHead>Category</TableHead>
+                          <TableHead>Archived Date</TableHead>
+                          <TableHead className="text-right">Actions</TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {archivedReports.map((report) => (
+                          <TableRow key={report.id}>
+                            <TableCell className="font-mono text-sm">
+                              <div className="flex items-center gap-2">
+                                <span>{report.tracking_id}</span>
+                                <button
+                                  onClick={async () => {
+                                    try {
+                                      await navigator.clipboard.writeText(report.tracking_id);
+                                      setCopiedTrackingId(report.tracking_id);
+                                      setTimeout(() => setCopiedTrackingId(null), 1000);
+                                    } catch (error) {
+                                      console.error('Failed to copy:', error);
+                                    }
+                                  }}
+                                  className="text-muted-foreground hover:text-foreground transition-colors"
+                                  title="Copy tracking ID"
+                                >
+                                  {copiedTrackingId === report.tracking_id ? (
+                                    <Check className="h-3 w-3 text-green-600" />
+                                  ) : (
+                                    <Copy className="h-3 w-3" />
+                                  )}
+                                </button>
+                              </div>
+                            </TableCell>
+                            <TableCell className="font-medium">{report.title}</TableCell>
+                            <TableCell>
+                              <Badge variant="secondary">{report.status}</Badge>
+                            </TableCell>
+                            <TableCell>
+                              {decryptedCategories[report.id] ? (
+                                <div className="text-sm">
+                                  <div className="font-medium">{decryptedCategories[report.id].main}</div>
+                                  {decryptedCategories[report.id].sub && (
+                                    <div className="text-muted-foreground text-xs">{decryptedCategories[report.id].sub}</div>
+                                  )}
+                                </div>
                               ) : (
-                                <Copy className="h-3 w-3" />
+                                <span className="text-sm text-muted-foreground">-</span>
                               )}
-                            </button>
+                            </TableCell>
+                            <TableCell className="text-sm text-muted-foreground">
+                              {new Date(report.created_at).toLocaleDateString()}
+                            </TableCell>
+                            <TableCell className="text-right">
+                              <div className="flex items-center justify-end gap-2">
+                                <Button 
+                                  variant="ghost" 
+                                  size="sm"
+                                  onClick={() => handleViewReport(report)}
+                                  className="text-primary hover:text-primary"
+                                >
+                                  View
+                                </Button>
+                                <DropdownMenu>
+                                  <DropdownMenuTrigger asChild>
+                                    <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+                                      <MoreVertical className="h-4 w-4" />
+                                    </Button>
+                                  </DropdownMenuTrigger>
+                                  <DropdownMenuContent align="end" className="w-40">
+                                    <DropdownMenuItem 
+                                      onClick={() => handleUnarchiveReport(report.id)}
+                                      disabled={processingReportId === report.id}
+                                    >
+                                      <RotateCcw className="h-4 w-4 mr-2" />
+                                      {processingReportId === report.id ? 'Unarchiving...' : 'Unarchive'}
+                                    </DropdownMenuItem>
+                                  </DropdownMenuContent>
+                                </DropdownMenu>
+                              </div>
+                            </TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
+                  </div>
+
+                  {/* Mobile Card View */}
+                  <div className="md:hidden space-y-4">
+                    {archivedReports.map((report) => (
+                      <Card key={report.id} className="overflow-hidden">
+                        <CardContent className="p-5 md:p-4 space-y-4 md:space-y-3">
+                          <div className="flex items-start justify-between gap-2">
+                            <div className="flex-1 min-w-0">
+                              <div className="flex items-center gap-2 mb-1">
+                                <span className="font-mono text-sm md:text-xs text-muted-foreground">{report.tracking_id}</span>
+                                <button
+                                  onClick={async () => {
+                                    try {
+                                      await navigator.clipboard.writeText(report.tracking_id);
+                                      setCopiedTrackingId(report.tracking_id);
+                                      setTimeout(() => setCopiedTrackingId(null), 1000);
+                                    } catch (error) {
+                                      console.error('Failed to copy:', error);
+                                    }
+                                  }}
+                                  className="text-muted-foreground hover:text-foreground transition-colors"
+                                  title="Copy tracking ID"
+                                >
+                                  {copiedTrackingId === report.tracking_id ? (
+                                    <Check className="h-3 w-3 text-green-600" />
+                                  ) : (
+                                    <Copy className="h-3 w-3" />
+                                  )}
+                                </button>
+                              </div>
+                              <h3 className="font-semibold text-base md:text-sm break-words">{report.title}</h3>
+                            </div>
+                            <Badge variant="secondary" className="shrink-0">
+                              {report.status}
+                            </Badge>
                           </div>
-                        </TableCell>
-                        <TableCell className="font-medium">{report.title}</TableCell>
-                        <TableCell>
-                          <Badge variant="secondary">{report.status}</Badge>
-                        </TableCell>
-                        <TableCell>
+                          
                           {decryptedCategories[report.id] ? (
-                            <div className="text-sm">
+                            <div className="text-base md:text-sm">
                               <div className="font-medium">{decryptedCategories[report.id].main}</div>
                               {decryptedCategories[report.id].sub && (
-                                <div className="text-muted-foreground text-xs">{decryptedCategories[report.id].sub}</div>
+                                <div className="text-muted-foreground text-sm md:text-xs">{decryptedCategories[report.id].sub}</div>
                               )}
                             </div>
                           ) : (
-                            <span className="text-sm text-muted-foreground">-</span>
+                            <span className="text-base md:text-sm text-muted-foreground">-</span>
                           )}
-                        </TableCell>
-                        <TableCell className="text-sm text-muted-foreground">
-                          {new Date(report.created_at).toLocaleDateString()}
-                        </TableCell>
-                        <TableCell className="text-right">
-                          <div className="flex items-center justify-end gap-2">
+                          
+                          <div className="flex flex-wrap items-center gap-2">
+                            <RiskLevelSelector
+                              reportId={report.id}
+                              currentLevel={report.manual_risk_level}
+                              onUpdate={(level) => updateManualRiskLevel(report.id, level)}
+                              isUpdating={updatingRiskLevel === report.id}
+                            />
+                            {report.ai_risk_level && (
+                              <div className="flex items-center gap-1 px-2 py-1 rounded-md bg-opacity-20 text-xs font-medium">
+                                {(() => {
+                                  const urgency = getUrgencyLevel(report.ai_risk_level);
+                                  const Icon = getUrgencyIcon(urgency);
+                                  return (
+                                    <div className={`flex items-center gap-1 px-2 py-1 rounded-md ${
+                                      urgency === 'HIGH' ? 'bg-red-100 text-red-800' :
+                                      urgency === 'MEDIUM' ? 'bg-yellow-100 text-yellow-800' :
+                                      'bg-green-100 text-green-800'
+                                    }`}>
+                                      <Icon className="w-3 h-3" />
+                                      <span>AI: {urgency}</span>
+                                    </div>
+                                  );
+                                })()}
+                              </div>
+                            )}
+                          </div>
+                          
+                          <div className="flex items-center justify-between text-sm md:text-xs text-muted-foreground">
+                            <span>{new Date(report.created_at).toLocaleDateString()}</span>
+                            <Select
+                              value={report.assigned_to || 'unassigned'}
+                              onValueChange={(value) => assignReport(report.id, value)}
+                            >
+                              <SelectTrigger className="h-7 text-xs w-32">
+                                <SelectValue placeholder="Assign..." />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="unassigned">Unassigned</SelectItem>
+                                {teamMembers.map((member) => (
+                                  <SelectItem key={member.id} value={member.id}>
+                                    {member.first_name && member.last_name 
+                                      ? `${member.first_name} ${member.last_name}`
+                                      : member.email
+                                    }
+                                  </SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
+                          </div>
+                          
+                          <div className="flex gap-2 pt-2 border-t">
                             <Button 
-                              variant="ghost" 
+                              variant="default" 
                               size="sm"
                               onClick={() => handleViewReport(report)}
-                              className="text-primary hover:text-primary"
+                              className="flex-1"
                             >
-                              View
+                              {t('viewReport')}
                             </Button>
                             <DropdownMenu>
                               <DropdownMenuTrigger asChild>
-                                <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+                                <Button variant="outline" size="sm">
                                   <MoreVertical className="h-4 w-4" />
                                 </Button>
                               </DropdownMenuTrigger>
-                              <DropdownMenuContent align="end" className="w-40">
+                              <DropdownMenuContent align="end" className="w-48">
                                 <DropdownMenuItem 
                                   onClick={() => handleUnarchiveReport(report.id)}
                                   disabled={processingReportId === report.id}
@@ -2140,11 +2273,11 @@ Additional Details: ${decryptedContent.additionalDetails || 'None provided'}
                               </DropdownMenuContent>
                             </DropdownMenu>
                           </div>
-                        </TableCell>
-                      </TableRow>
+                        </CardContent>
+                      </Card>
                     ))}
-                  </TableBody>
-                </Table>
+                  </div>
+                </>
               )}
             </CardContent>
           </Card>
