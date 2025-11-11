@@ -87,7 +87,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     try {
       const { data: directData, error: directError } = await supabase
         .from('subscribers')
-        .select('subscription_tier, subscription_end, subscription_status, grace_period_ends_at')
+        .select('subscribed, subscription_tier, subscription_end, subscription_status, grace_period_ends_at')
         .eq('user_id', userToUse.id)
         .maybeSingle();
 
@@ -96,28 +96,44 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
         const subscriptionEnd = directData.subscription_end ? new Date(directData.subscription_end) : null;
         const gracePeriodEnds = directData.grace_period_ends_at ? new Date(directData.grace_period_ends_at) : null;
         
-        // Check if subscription is expired
-        const isExpired = subscriptionEnd ? subscriptionEnd < now : false;
+        // Check if subscription is expired based on date
+        const isExpiredByDate = subscriptionEnd ? subscriptionEnd < now : false;
         const isInGracePeriod = gracePeriodEnds ? gracePeriodEnds > now : false;
         
+        // Use database subscribed value if available, otherwise calculate from status
+        let subscribed = directData.subscribed ?? false;
+        
+        // If subscription_status is 'active' or 'trialing', ensure subscribed is true
+        if (directData.subscription_status === 'active' || directData.subscription_status === 'trialing') {
+          subscribed = true;
+        }
+        
+        // If subscription_status is 'canceled' or 'expired', ensure subscribed is false (unless in grace period)
+        if (directData.subscription_status === 'canceled' || directData.subscription_status === 'expired') {
+          subscribed = isInGracePeriod; // Only subscribed if in grace period
+        }
+        
+        // If subscription_end is in the future and status is active, ensure subscribed is true
+        if (subscriptionEnd && subscriptionEnd > now && (directData.subscription_status === 'active' || directData.subscription_status === 'trialing')) {
+          subscribed = true;
+        }
+        
         // Determine subscription status
-        let subscriptionStatus: 'active' | 'past_due' | 'canceled' | 'trialing' | 'expired' = 'active';
-        if (directData.subscription_status) {
-          subscriptionStatus = directData.subscription_status as any;
-        } else if (isExpired && !isInGracePeriod) {
+        let subscriptionStatus: 'active' | 'past_due' | 'canceled' | 'trialing' | 'expired' = directData.subscription_status as any || 'active';
+        
+        // Only mark as expired if date is past AND not in grace period AND status allows it
+        if (isExpiredByDate && !isInGracePeriod && subscriptionStatus !== 'active' && subscriptionStatus !== 'trialing') {
           subscriptionStatus = 'expired';
-        } else if (isExpired && isInGracePeriod) {
-          subscriptionStatus = 'expired'; // Still expired but in grace period
         }
         
         const mappedData: SubscriptionData = {
-          subscribed: !isExpired || isInGracePeriod,
+          subscribed: subscribed || isInGracePeriod,
           subscription_tier: directData.subscription_tier as 'basic' | 'pro',
           subscription_end: directData.subscription_end,
           subscription_status: subscriptionStatus,
           grace_period_ends_at: directData.grace_period_ends_at,
           isInGracePeriod,
-          isExpired: isExpired && !isInGracePeriod,
+          isExpired: isExpiredByDate && !isInGracePeriod && subscriptionStatus !== 'active' && subscriptionStatus !== 'trialing',
         };
         
         setSubscriptionData(mappedData);
