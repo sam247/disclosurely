@@ -49,12 +49,15 @@ const MultipleSessionModal: React.FC<MultipleSessionModalProps> = ({
 
   useEffect(() => {
     if (otherSession?.location_lat && otherSession?.location_lng) {
-      // Generate static map URL (using OpenStreetMap or similar)
+      // Generate static map URL using OpenStreetMap
       const lat = otherSession.location_lat;
       const lng = otherSession.location_lng;
-      // Using OpenStreetMap static map (free alternative)
-      const mapUrl = `https://www.openstreetmap.org/export/embed.html?bbox=${lng - 0.01},${lat - 0.01},${lng + 0.01},${lat + 0.01}&layer=mapnik&marker=${lat},${lng}`;
+      // Using OpenStreetMap embed with proper bbox and marker
+      const bbox = `${lng - 0.01},${lat - 0.01},${lng + 0.01},${lat + 0.01}`;
+      const mapUrl = `https://www.openstreetmap.org/export/embed.html?bbox=${bbox}&layer=mapnik&marker=${lat},${lng}`;
       setMapUrl(mapUrl);
+    } else {
+      setMapUrl('');
     }
   }, [otherSession]);
 
@@ -105,71 +108,77 @@ const MultipleSessionModal: React.FC<MultipleSessionModalProps> = ({
 
   return (
     <AlertDialog open={open}>
-      <AlertDialogContent className="w-[calc(100vw-2rem)] sm:w-[calc(100vw-4rem)] md:max-w-2xl max-h-[calc(100vh-2rem)] sm:max-h-[90vh] overflow-y-auto p-4 sm:p-6">
-        <AlertDialogHeader>
-          <div className="flex items-center gap-3 flex-wrap">
-            <div className="h-10 w-10 rounded-full bg-amber-100 flex items-center justify-center flex-shrink-0">
-              <Shield className="h-5 w-5 text-amber-600" />
-            </div>
-            <div className="min-w-0 flex-1">
-              <AlertDialogTitle className="text-lg sm:text-xl">Multiple Login Session Detected</AlertDialogTitle>
-            </div>
-          </div>
-          <AlertDialogDescription className="text-left mt-4 space-y-4">
-            <p>
-              We detected a new login from another device. For security, only one active session is allowed at a time.
-            </p>
-
-            {otherSession && (
-              <div className="bg-muted rounded-lg p-3 sm:p-4 space-y-3 border">
-                <div className="flex items-start gap-3 flex-wrap sm:flex-nowrap">
-                  <div className="mt-0.5 flex-shrink-0">
-                    {getDeviceIcon(otherSession.device_type)}
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="font-medium text-xs sm:text-sm break-words">{formatDevice()}</p>
-                    <div className="flex items-center gap-2 mt-1 text-xs text-muted-foreground flex-wrap">
-                      <MapPin className="h-3 w-3 flex-shrink-0" />
-                      <span className="break-words">{formatLocation()}</span>
-                    </div>
-                    <p className="text-xs text-muted-foreground mt-1">
-                      Last active: {formatTime(otherSession.last_activity_at)}
-                    </p>
-                  </div>
-                </div>
-
-                {/* Map display if location data available */}
-                {otherSession.location_lat && otherSession.location_lng && (
-                  <div className="mt-3 border rounded-lg overflow-hidden">
-                    <div className="relative w-full" style={{ paddingBottom: '56.25%' }}>
-                      <iframe
-                        src={mapUrl}
-                        style={{ 
-                          position: 'absolute',
-                          top: 0,
-                          left: 0,
-                          width: '100%',
-                          height: '100%',
-                          border: 0
-                        }}
-                        loading="lazy"
-                        referrerPolicy="no-referrer-when-downgrade"
-                        title="Login location map"
-                        className="w-full"
-                      />
-                    </div>
-                    <div className="p-2 bg-muted/50 text-xs text-center text-muted-foreground">
-                      Approximate location of the other login
-                    </div>
-                  </div>
-                )}
+      <AlertDialogContent className="w-[calc(100vw-2rem)] sm:w-[calc(100vw-4rem)] md:max-w-2xl max-h-[calc(100vh-2rem)] sm:max-h-[90vh] flex flex-col p-0 overflow-hidden">
+        {/* Scrollable content area */}
+        <div className="flex-1 overflow-y-auto p-4 sm:p-6">
+          <AlertDialogHeader>
+            <div className="flex items-center gap-3 flex-wrap">
+              <div className="h-10 w-10 rounded-full bg-amber-100 flex items-center justify-center flex-shrink-0">
+                <Shield className="h-5 w-5 text-amber-600" />
               </div>
-            )}
+              <div className="min-w-0 flex-1">
+                <AlertDialogTitle className="text-lg sm:text-xl">Multiple Login Session Detected</AlertDialogTitle>
+              </div>
+            </div>
+            <AlertDialogDescription className="text-left mt-4 space-y-4">
+              <p>
+                We detected a new login from another device. For security, only one active session is allowed at a time.
+              </p>
 
-            <p className="text-sm font-medium mt-4">What would you like to do?</p>
-          </AlertDialogDescription>
-        </AlertDialogHeader>
-        <AlertDialogFooter className="flex-col sm:flex-row gap-2 sm:gap-0">
+              {otherSession && (
+                <div className="bg-muted rounded-lg p-3 sm:p-4 space-y-3 border">
+                  <div className="flex items-start gap-3 flex-wrap sm:flex-nowrap">
+                    <div className="mt-0.5 flex-shrink-0">
+                      {getDeviceIcon(otherSession.device_type)}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="font-medium text-xs sm:text-sm break-words">{formatDevice()}</p>
+                      <div className="flex items-center gap-2 mt-1 text-xs text-muted-foreground flex-wrap">
+                        <MapPin className="h-3 w-3 flex-shrink-0" />
+                        <span className="break-words">{formatLocation()}</span>
+                      </div>
+                      <p className="text-xs text-muted-foreground mt-1">
+                        Last active: {formatTime(otherSession.last_activity_at)}
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* Map display if location data available */}
+                  {otherSession.location_lat && otherSession.location_lng && mapUrl && (
+                    <div className="mt-3 border rounded-lg overflow-hidden">
+                      <div className="relative w-full" style={{ paddingBottom: '56.25%' }}>
+                        <iframe
+                          src={mapUrl}
+                          style={{ 
+                            position: 'absolute',
+                            top: 0,
+                            left: 0,
+                            width: '100%',
+                            height: '100%',
+                            border: 0
+                          }}
+                          loading="lazy"
+                          referrerPolicy="no-referrer-when-downgrade"
+                          title="Login location map"
+                          className="w-full"
+                          allow="geolocation"
+                        />
+                      </div>
+                      <div className="p-2 bg-muted/50 text-xs text-center text-muted-foreground">
+                        Approximate location of the other login
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )}
+
+              <p className="text-sm font-medium mt-4">What would you like to do?</p>
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+        </div>
+        
+        {/* Fixed footer that's always visible */}
+        <AlertDialogFooter className="flex-col sm:flex-row gap-2 p-4 sm:p-6 pt-0 border-t flex-shrink-0">
           <Button
             variant="outline"
             onClick={onDismiss}

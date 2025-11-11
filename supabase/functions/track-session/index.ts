@@ -194,13 +194,14 @@ serve(async (req) => {
         const twentyFourHoursAgo = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
         
         // First, get the current session to exclude it by ID as well
+        // Use maybeSingle() to avoid errors if session doesn't exist yet
         const { data: currentSession } = await supabase
           .from('user_sessions')
           .select('id')
           .eq('user_id', userId)
           .eq('session_id', sessionId)
           .eq('is_active', true)
-          .single();
+          .maybeSingle();
         
         const { data: otherSessions, error: checkError } = await supabase
           .from('user_sessions')
