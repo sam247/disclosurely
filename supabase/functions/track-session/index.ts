@@ -180,28 +180,14 @@ serve(async (req) => {
           currentSession = newSession;
         }
 
-        // Check for OTHER active sessions (excluding the current one)
-        const now = new Date().toISOString();
-        const twentyFourHoursAgo = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
-        
-        const { data: otherSessions, error: checkError } = await supabase
-          .from('user_sessions')
-          .select('*')
-          .eq('user_id', userId)
-          .eq('is_active', true)
-          .neq('session_id', sessionId) // Exclude current session
-          .neq('id', currentSession.id) // Also exclude by ID
-          .gte('last_activity_at', twentyFourHoursAgo) // Only sessions active in last 24 hours
-          .or(`expires_at.is.null,expires_at.gt.${now}`); // Only non-expired sessions
-
-        if (checkError) throw checkError;
-
+        // Don't check for other sessions in create action - that's handled by check_other_sessions
+        // This prevents false positives on page refresh
         return new Response(
           JSON.stringify({
             success: true,
             session: currentSession,
-            hasOtherSessions: (otherSessions?.length || 0) > 0,
-            otherSessions: (otherSessions?.length || 0) > 0 ? otherSessions[0] : null, // Return first other session
+            hasOtherSessions: false, // Always false in create action
+            otherSessions: null,
           }),
           {
             status: 200,
