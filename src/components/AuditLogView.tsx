@@ -31,8 +31,10 @@ import {
   ChevronDown,
   ChevronUp,
   RefreshCw,
-  MoreHorizontal
+  MoreHorizontal,
+  Info
 } from 'lucide-react';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { auditLogger, AuditLogEntry, AuditLogFilters, AuditChainVerification } from '@/utils/auditLogger';
 
 const AuditLogView = () => {
@@ -333,19 +335,37 @@ const AuditLogView = () => {
         {/* Chain Verification Status */}
         {chainVerification && (
           <div className="flex items-center space-x-2 flex-shrink-0">
-            {chainVerification.isValid ? (
-              <Badge variant="outline" className="text-green-600 border-green-600 text-xs sm:text-sm">
-                <CheckCircle className="h-3 w-3 sm:h-4 sm:w-4 mr-1" />
-                <span className="hidden sm:inline">Chain Verified</span>
-                <span className="sm:hidden">Verified</span>
-              </Badge>
-            ) : (
-              <Badge variant="destructive" className="text-xs sm:text-sm">
-                <XCircle className="h-3 w-3 sm:h-4 sm:w-4 mr-1" />
-                <span className="hidden sm:inline">Chain Invalid</span>
-                <span className="sm:hidden">Invalid</span>
-              </Badge>
-            )}
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  {chainVerification.isValid ? (
+                    <Badge variant="outline" className="text-green-600 border-green-600 text-xs sm:text-sm cursor-help">
+                      <CheckCircle className="h-3 w-3 sm:h-4 sm:w-4 mr-1" />
+                      <span className="hidden sm:inline">Chain Verified</span>
+                      <span className="sm:hidden">Verified</span>
+                    </Badge>
+                  ) : (
+                    <Badge variant="destructive" className="text-xs sm:text-sm cursor-help">
+                      <XCircle className="h-3 w-3 sm:h-4 sm:w-4 mr-1" />
+                      <span className="hidden sm:inline">Chain Invalid</span>
+                      <span className="sm:hidden">Invalid</span>
+                    </Badge>
+                  )}
+                </TooltipTrigger>
+                <TooltipContent side="bottom" className="max-w-xs">
+                  <div className="space-y-2">
+                    <p className="font-semibold text-sm">
+                      {chainVerification.isValid ? 'Chain Verified' : 'Chain Invalid'}
+                    </p>
+                    <p className="text-xs text-muted-foreground">
+                      {chainVerification.isValid 
+                        ? 'The audit trail chain has been verified. Each log entry is cryptographically linked to the previous one, ensuring data integrity and tamper-evidence. This means the audit log has not been modified or corrupted.'
+                        : 'The audit trail chain verification failed. This indicates potential tampering or corruption in the audit log. Please investigate immediately.'}
+                    </p>
+                  </div>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
             <span className="text-xs sm:text-sm text-muted-foreground">
               {chainVerification.totalRecords} records
             </span>
@@ -584,7 +604,7 @@ const AuditLogView = () => {
               <thead className="bg-gray-50 sticky top-0 z-10">
                 <tr className="border-b">
                   <th 
-                    className="px-2 py-1.5 text-left text-xs font-semibold text-gray-700 border-r cursor-pointer hover:bg-gray-100"
+                    className="px-2 py-1 text-left text-xs font-semibold text-gray-700 border-r cursor-pointer hover:bg-gray-100"
                     style={{ width: '140px' }}
                     onClick={() => handleSort('created_at')}
                   >
@@ -594,7 +614,7 @@ const AuditLogView = () => {
                     </div>
                   </th>
                   <th 
-                    className="px-2 py-1.5 text-left text-xs font-semibold text-gray-700 border-r cursor-pointer hover:bg-gray-100"
+                    className="px-2 py-1 text-left text-xs font-semibold text-gray-700 border-r cursor-pointer hover:bg-gray-100"
                     style={{ width: '110px' }}
                     onClick={() => handleSort('event_type')}
                   >
@@ -604,7 +624,7 @@ const AuditLogView = () => {
                     </div>
                   </th>
                   <th 
-                    className="px-2 py-1.5 text-left text-xs font-semibold text-gray-700 border-r cursor-pointer hover:bg-gray-100"
+                    className="px-2 py-1 text-left text-xs font-semibold text-gray-700 border-r cursor-pointer hover:bg-gray-100"
                     style={{ width: '90px' }}
                     onClick={() => handleSort('category')}
                   >
@@ -614,7 +634,7 @@ const AuditLogView = () => {
                     </div>
                   </th>
                   <th 
-                    className="px-2 py-1.5 text-left text-xs font-semibold text-gray-700 border-r cursor-pointer hover:bg-gray-100"
+                    className="px-2 py-1 text-left text-xs font-semibold text-gray-700 border-r cursor-pointer hover:bg-gray-100"
                     style={{ width: '100px' }}
                     onClick={() => handleSort('action')}
                   >
@@ -624,7 +644,7 @@ const AuditLogView = () => {
                     </div>
                   </th>
                   <th 
-                    className="px-2 py-1.5 text-left text-xs font-semibold text-gray-700 border-r cursor-pointer hover:bg-gray-100"
+                    className="px-2 py-1 text-left text-xs font-semibold text-gray-700 border-r cursor-pointer hover:bg-gray-100"
                     style={{ width: '130px' }}
                     onClick={() => handleSort('actor_email')}
                   >
@@ -634,7 +654,7 @@ const AuditLogView = () => {
                     </div>
                   </th>
                   <th 
-                    className="px-2 py-1.5 text-left text-xs font-semibold text-gray-700 border-r cursor-pointer hover:bg-gray-100"
+                    className="px-2 py-1 text-left text-xs font-semibold text-gray-700 border-r cursor-pointer hover:bg-gray-100"
                     style={{ width: '130px' }}
                     onClick={() => handleSort('target_name')}
                   >
@@ -644,7 +664,7 @@ const AuditLogView = () => {
                     </div>
                   </th>
                   <th 
-                    className="px-2 py-1.5 text-left text-xs font-semibold text-gray-700 border-r cursor-pointer hover:bg-gray-100"
+                    className="px-2 py-1 text-left text-xs font-semibold text-gray-700 border-r cursor-pointer hover:bg-gray-100"
                     style={{ width: '70px' }}
                     onClick={() => handleSort('severity')}
                   >
@@ -654,7 +674,7 @@ const AuditLogView = () => {
                     </div>
                   </th>
                   <th 
-                    className="px-2 py-1.5 text-left text-xs font-semibold text-gray-700 border-r cursor-pointer hover:bg-gray-100"
+                    className="px-2 py-1 text-left text-xs font-semibold text-gray-700 border-r cursor-pointer hover:bg-gray-100"
                     onClick={() => handleSort('summary')}
                   >
                     <div className="flex items-center justify-between">
@@ -663,7 +683,7 @@ const AuditLogView = () => {
                     </div>
                   </th>
                   <th 
-                    className="px-2 py-1.5 text-center text-xs font-semibold text-gray-700"
+                    className="px-2 py-1 text-center text-xs font-semibold text-gray-700"
                     style={{ width: '50px' }}
                   >
                     Actions
@@ -677,49 +697,49 @@ const AuditLogView = () => {
                   <tr 
                     key={log.id} 
                     className={`border-b hover:bg-gray-50 ${index % 2 === 0 ? 'bg-white' : 'bg-gray-50'}`}
-                    style={{ height: '28px' }}
+                    style={{ height: '22px' }}
                   >
-                    <td className="px-2 py-0.5 text-xs text-gray-900 border-r font-mono">
+                    <td className="px-2 py-0 text-xs text-gray-900 border-r font-mono">
                       {formatTimestamp(log.created_at)}
                     </td>
-                    <td className="px-2 py-0.5 text-xs text-gray-900 border-r">
+                    <td className="px-2 py-0 text-xs text-gray-900 border-r">
                       {log.event_type}
                     </td>
-                    <td className="px-2 py-0.5 text-xs border-r">
+                    <td className="px-2 py-0 text-xs border-r">
                       <Badge variant="outline" className="text-xs px-1 py-0">
                         {log.category}
                       </Badge>
                     </td>
-                    <td className="px-2 py-0.5 text-xs text-gray-900 border-r">
+                    <td className="px-2 py-0 text-xs text-gray-900 border-r">
                       {log.action}
                     </td>
-                    <td className="px-2 py-0.5 text-xs text-gray-900 border-r">
+                    <td className="px-2 py-0 text-xs text-gray-900 border-r">
                       <div className="truncate" title={log.actor_email || log.actor_type}>
                         {log.actor_email || log.actor_type}
                       </div>
                     </td>
-                    <td className="px-2 py-0.5 text-xs text-gray-900 border-r">
+                    <td className="px-2 py-0 text-xs text-gray-900 border-r">
                       <div className="truncate" title={log.target_name || log.target_type || ''}>
                         {log.target_name || log.target_type || '-'}
                       </div>
                     </td>
-                    <td className="px-2 py-0.5 text-xs border-r">
+                    <td className="px-2 py-0 text-xs border-r">
                       <Badge variant={getSeverityColor(log.severity)} className="text-xs px-1 py-0">
                         {getSeverityIcon(log.severity)}
                         <span className="ml-1 capitalize">{log.severity}</span>
                       </Badge>
                     </td>
-                    <td className="px-2 py-0.5 text-xs text-gray-900 border-r">
+                    <td className="px-2 py-0 text-xs text-gray-900 border-r">
                       <div className="truncate" title={log.summary}>
                         {log.summary}
                       </div>
                     </td>
-                    <td className="px-2 py-0.5 text-center">
+                    <td className="px-2 py-0 text-center">
                       <Button
                         variant="ghost"
                         size="sm"
                         onClick={() => setSelectedLog(log)}
-                        className="h-5 w-5 p-0"
+                        className="h-4 w-4 p-0"
                       >
                         <Eye className="h-3 w-3" />
                       </Button>
@@ -730,14 +750,14 @@ const AuditLogView = () => {
             </table>
               </div>
               
-              {/* Pagination - Fixed at bottom of table container */}
+              {/* Pagination Footer - Excel-style fixed at bottom */}
               {total > 0 && (
-                <div className="flex flex-col sm:flex-row items-center justify-between p-2 sm:p-3 border-t bg-gray-50 gap-2 sm:gap-0 flex-shrink-0">
-                  <div className="flex flex-col sm:flex-row items-start sm:items-center space-y-2 sm:space-y-0 sm:space-x-4 w-full sm:w-auto">
-                    <div className="flex items-center space-x-2">
-                      <Label className="text-xs whitespace-nowrap">Rows per page:</Label>
+                <div className="flex flex-col sm:flex-row items-center justify-between p-1.5 sm:p-2 border-t bg-gray-50 gap-1.5 sm:gap-0 flex-shrink-0">
+                  <div className="flex flex-col sm:flex-row items-start sm:items-center space-y-1 sm:space-y-0 sm:space-x-3 w-full sm:w-auto">
+                    <div className="flex items-center space-x-1.5">
+                      <Label className="text-xs whitespace-nowrap">Rows:</Label>
                       <Select value={pageSize.toString()} onValueChange={(value) => handlePageSizeChange(Number(value))}>
-                        <SelectTrigger className="h-7 text-xs w-16">
+                        <SelectTrigger className="h-6 text-xs w-14">
                           <SelectValue />
                         </SelectTrigger>
                         <SelectContent>
@@ -750,24 +770,24 @@ const AuditLogView = () => {
                     </div>
                     
                     <div className="text-xs text-muted-foreground">
-                      Page {currentPage} of {totalPages}
+                      {startRecord}-{endRecord} of {total}
                     </div>
                   </div>
                   
-                  <div className="flex items-center space-x-1 sm:space-x-2 w-full sm:w-auto justify-center sm:justify-end">
+                  <div className="flex items-center space-x-1 w-full sm:w-auto justify-center sm:justify-end">
                     <Button
                       variant="outline"
                       size="sm"
                       onClick={() => handlePageChange(currentPage - 1)}
                       disabled={currentPage === 1 || loading}
-                      className="h-7 text-xs flex-1 sm:flex-initial"
+                      className="h-6 text-xs px-2 flex-1 sm:flex-initial"
                     >
-                      <ChevronLeft className="h-3 w-3 sm:mr-1" />
-                      <span className="hidden sm:inline">Previous</span>
+                      <ChevronLeft className="h-3 w-3" />
+                      <span className="hidden sm:inline ml-1">Prev</span>
                     </Button>
                     
-                    {/* Page Numbers - Hide on mobile, show on tablet+ */}
-                    <div className="hidden sm:flex items-center space-x-1">
+                    {/* Page Numbers */}
+                    <div className="hidden sm:flex items-center space-x-0.5">
                       {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
                         const pageNum = Math.max(1, Math.min(totalPages - 4, currentPage - 2)) + i;
                         if (pageNum > totalPages) return null;
@@ -779,7 +799,7 @@ const AuditLogView = () => {
                             size="sm"
                             onClick={() => handlePageChange(pageNum)}
                             disabled={loading}
-                            className="h-7 w-7 text-xs p-0"
+                            className="h-6 w-6 text-xs p-0"
                           >
                             {pageNum}
                           </Button>
@@ -792,10 +812,10 @@ const AuditLogView = () => {
                       size="sm"
                       onClick={() => handlePageChange(currentPage + 1)}
                       disabled={currentPage === totalPages || loading}
-                      className="h-7 text-xs flex-1 sm:flex-initial"
+                      className="h-6 text-xs px-2 flex-1 sm:flex-initial"
                     >
-                      <span className="hidden sm:inline">Next</span>
-                      <ChevronRight className="h-3 w-3 sm:ml-1" />
+                      <span className="hidden sm:inline mr-1">Next</span>
+                      <ChevronRight className="h-3 w-3" />
                     </Button>
                   </div>
                 </div>
@@ -871,12 +891,12 @@ const AuditLogView = () => {
         
         {/* Mobile Pagination */}
         {total > 0 && (
-          <div className="md:hidden flex flex-col sm:flex-row items-center justify-between p-2 sm:p-3 border-t bg-gray-50 gap-2 sm:gap-0 flex-shrink-0">
-            <div className="flex flex-col sm:flex-row items-start sm:items-center space-y-2 sm:space-y-0 sm:space-x-4 w-full sm:w-auto">
-              <div className="flex items-center space-x-2">
-                <Label className="text-xs whitespace-nowrap">Rows per page:</Label>
+          <div className="md:hidden flex flex-col sm:flex-row items-center justify-between p-1.5 sm:p-2 border-t bg-gray-50 gap-1.5 sm:gap-0 flex-shrink-0">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center space-y-1 sm:space-y-0 sm:space-x-3 w-full sm:w-auto">
+              <div className="flex items-center space-x-1.5">
+                <Label className="text-xs whitespace-nowrap">Rows:</Label>
                 <Select value={pageSize.toString()} onValueChange={(value) => handlePageSizeChange(Number(value))}>
-                  <SelectTrigger className="h-7 text-xs w-16">
+                  <SelectTrigger className="h-6 text-xs w-14">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
@@ -889,24 +909,24 @@ const AuditLogView = () => {
               </div>
               
               <div className="text-xs text-muted-foreground">
-                Page {currentPage} of {totalPages}
+                {startRecord}-{endRecord} of {total}
               </div>
             </div>
             
-            <div className="flex items-center space-x-1 sm:space-x-2 w-full sm:w-auto justify-center sm:justify-end">
+            <div className="flex items-center space-x-1 w-full sm:w-auto justify-center sm:justify-end">
               <Button
                 variant="outline"
                 size="sm"
                 onClick={() => handlePageChange(currentPage - 1)}
                 disabled={currentPage === 1 || loading}
-                className="h-7 text-xs flex-1 sm:flex-initial"
+                className="h-6 text-xs px-2 flex-1 sm:flex-initial"
               >
-                <ChevronLeft className="h-3 w-3 sm:mr-1" />
-                <span className="hidden sm:inline">Previous</span>
+                <ChevronLeft className="h-3 w-3" />
+                <span className="hidden sm:inline ml-1">Prev</span>
               </Button>
               
-              {/* Page Numbers - Hide on mobile, show on tablet+ */}
-              <div className="hidden sm:flex items-center space-x-1">
+              {/* Page Numbers */}
+              <div className="hidden sm:flex items-center space-x-0.5">
                 {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
                   const pageNum = Math.max(1, Math.min(totalPages - 4, currentPage - 2)) + i;
                   if (pageNum > totalPages) return null;
@@ -918,7 +938,7 @@ const AuditLogView = () => {
                       size="sm"
                       onClick={() => handlePageChange(pageNum)}
                       disabled={loading}
-                      className="h-7 w-7 text-xs p-0"
+                      className="h-6 w-6 text-xs p-0"
                     >
                       {pageNum}
                     </Button>
@@ -931,10 +951,10 @@ const AuditLogView = () => {
                 size="sm"
                 onClick={() => handlePageChange(currentPage + 1)}
                 disabled={currentPage === totalPages || loading}
-                className="h-7 text-xs flex-1 sm:flex-initial"
+                className="h-6 text-xs px-2 flex-1 sm:flex-initial"
               >
-                <span className="hidden sm:inline">Next</span>
-                <ChevronRight className="h-3 w-3 sm:ml-1" />
+                <span className="hidden sm:inline mr-1">Next</span>
+                <ChevronRight className="h-3 w-3" />
               </Button>
             </div>
           </div>

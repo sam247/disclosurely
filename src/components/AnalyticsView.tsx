@@ -648,7 +648,7 @@ const AnalyticsView: React.FC = () => {
         </div>
 
         {/* Metric Cards */}
-        <div className="grid gap-2 grid-cols-3 md:grid-cols-4 flex-shrink-0 mt-2">
+        <div className="grid gap-4 grid-cols-3 md:grid-cols-4 flex-shrink-0 mt-4">
           <Card className="md:col-span-1">
             <CardContent className="pt-2 md:pt-3 pb-2 md:pb-3">
               <div className="text-center">
@@ -728,7 +728,7 @@ const AnalyticsView: React.FC = () => {
         </div>
 
         {/* Main Layout: Graph on left, other charts on right */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-2 sm:gap-3 flex-1 min-h-0 overflow-hidden">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 flex-1 min-h-0 overflow-hidden mt-4">
           {/* Main Chart - Left Half */}
           <Card className="flex flex-col min-h-0">
             <CardHeader className="pb-2 sm:pb-3 flex-shrink-0">
@@ -823,7 +823,7 @@ const AnalyticsView: React.FC = () => {
           </Card>
 
           {/* Right Side: Other Charts */}
-          <div className="flex flex-col gap-2 sm:gap-3 min-h-0 overflow-hidden">
+          <div className="flex flex-col gap-4 min-h-0 overflow-hidden">
             {/* Category Distribution */}
             <Card className="flex-1 flex flex-col min-h-0">
               <CardHeader className="pb-2 sm:pb-3 flex-shrink-0">
@@ -936,7 +936,7 @@ const AnalyticsView: React.FC = () => {
           </div>
 
           {/* Bottom Row: Additional Metrics */}
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 sm:gap-3 flex-shrink-0 lg:col-span-2">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 flex-shrink-0 lg:col-span-2 mt-4">
             {/* Priority Breakdown */}
             <Card>
               <CardHeader className="pb-2 sm:pb-3">
