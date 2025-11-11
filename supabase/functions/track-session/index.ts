@@ -126,13 +126,16 @@ serve(async (req) => {
         await supabase.rpc('cleanup_expired_sessions');
 
         // Check for existing active sessions (only non-expired ones with recent activity)
+        const now = new Date().toISOString();
+        const twentyFourHoursAgo = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
+        
         const { data: existingSessions, error: checkError } = await supabase
           .from('user_sessions')
           .select('*')
           .eq('user_id', userId)
           .eq('is_active', true)
-          .or(`expires_at.is.null,expires_at.gt.${new Date().toISOString()}`)
-          .gte('last_activity_at', new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString()); // Only sessions active in last 24 hours
+          .gte('last_activity_at', twentyFourHoursAgo) // Only sessions active in last 24 hours
+          .or(`expires_at.is.null,expires_at.gt.${now}`); // Only non-expired sessions
 
         if (checkError) throw checkError;
 
@@ -183,14 +186,17 @@ serve(async (req) => {
 
         // Check for other active sessions without creating a new one
         // Only include sessions that haven't expired and have recent activity (within last 24 hours)
+        const now = new Date().toISOString();
+        const twentyFourHoursAgo = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
+        
         const { data: otherSessions, error: checkError } = await supabase
           .from('user_sessions')
           .select('*')
           .eq('user_id', userId)
           .eq('is_active', true)
           .neq('session_id', sessionId)
-          .or(`expires_at.is.null,expires_at.gt.${new Date().toISOString()}`)
-          .gte('last_activity_at', new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString()); // Only sessions active in last 24 hours
+          .gte('last_activity_at', twentyFourHoursAgo) // Only sessions active in last 24 hours
+          .or(`expires_at.is.null,expires_at.gt.${now}`); // Only non-expired sessions
 
         if (checkError) throw checkError;
 
