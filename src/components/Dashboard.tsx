@@ -326,9 +326,6 @@ const Dashboard = () => {
     const urlParams = new URLSearchParams(window.location.search);
     const subscriptionStatus = urlParams.get('subscription');
     
-    // Checking subscription status
-    });
-    
     // Only check after both auth loading and subscription loading are complete
     if (user && !loading && !subscriptionLoading && !hasShownSubscriptionModal && !hasAnySubscription() && !subscriptionStatus && !isCheckingSubscription) {
       // Show trial modal after a short delay to allow dashboard to load
