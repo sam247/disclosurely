@@ -15,7 +15,6 @@ import {
 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
-import { useUserRoles } from '@/hooks/useUserRoles';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { cn } from '@/lib/utils';
@@ -39,7 +38,6 @@ interface ChatMessage {
 }
 
 const ChatAdminView = () => {
-  const { isOrgAdmin } = useUserRoles();
   const { toast } = useToast();
   const [conversations, setConversations] = useState<ChatConversation[]>([]);
   const [loading, setLoading] = useState(true);
@@ -49,19 +47,19 @@ const ChatAdminView = () => {
   const [statusFilter, setStatusFilter] = useState<string>('all');
 
   useEffect(() => {
-    if (isOrgAdmin) {
-      fetchConversations();
-    }
-  }, [isOrgAdmin, statusFilter]);
+    fetchConversations();
+  }, [statusFilter]);
 
   const fetchConversations = async () => {
     setLoading(true);
     try {
+      // Use service role to access all conversations across all organizations
+      // This is for Disclosurely internal team only
       let query = supabase
         .from('chat_conversations')
         .select('*')
         .order('updated_at', { ascending: false })
-        .limit(100);
+        .limit(500);
 
       if (statusFilter !== 'all') {
         query = query.eq('status', statusFilter);
@@ -168,19 +166,6 @@ const ChatAdminView = () => {
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleString();
   };
-
-  if (!isOrgAdmin) {
-    return (
-      <div className="space-y-6">
-        <div>
-          <h1 className="text-2xl sm:text-3xl font-bold">Chat Admin</h1>
-          <p className="text-sm sm:text-base text-muted-foreground mt-1 sm:mt-2">
-            Access restricted to organization administrators
-          </p>
-        </div>
-      </div>
-    );
-  }
 
   return (
     <div className="min-h-screen bg-background">

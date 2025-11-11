@@ -49,11 +49,6 @@ const DashboardSidebar = ({
     path: '/dashboard/audit',
     locked: !isOrgAdmin
   }, {
-    title: 'Chat Admin',
-    icon: MessageSquare,
-    path: '/dashboard/chat-admin',
-    locked: !isOrgAdmin
-  }, {
     title: 'Workflows',
     icon: Workflow,
     path: '/dashboard/workflows',

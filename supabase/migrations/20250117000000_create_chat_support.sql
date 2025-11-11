@@ -36,10 +36,17 @@ CREATE POLICY "Users can view their own conversations"
   ON chat_conversations FOR SELECT
   USING (auth.uid() = user_id OR user_id IS NULL);
 
--- Service role can do everything (for edge functions)
+-- Service role can do everything (for edge functions and admin)
 CREATE POLICY "Service role can manage all conversations"
   ON chat_conversations FOR ALL
   USING (auth.jwt()->>'role' = 'service_role');
+
+-- Allow authenticated users to view all conversations (for admin interface)
+-- This allows the admin view to work, but you may want to restrict this further
+-- based on user roles (e.g., only Disclosurely internal team)
+CREATE POLICY "Authenticated users can view all conversations for admin"
+  ON chat_conversations FOR SELECT
+  USING (auth.role() = 'authenticated');
 
 -- RLS Policies for chat_messages
 -- Users can view messages in their conversations
@@ -57,6 +64,11 @@ CREATE POLICY "Users can view messages in their conversations"
 CREATE POLICY "Service role can manage all messages"
   ON chat_messages FOR ALL
   USING (auth.jwt()->>'role' = 'service_role');
+
+-- Allow authenticated users to view all messages (for admin interface)
+CREATE POLICY "Authenticated users can view all messages for admin"
+  ON chat_messages FOR SELECT
+  USING (auth.role() = 'authenticated');
 
 -- Function to update updated_at timestamp
 CREATE OR REPLACE FUNCTION update_chat_conversation_updated_at()
