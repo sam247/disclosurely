@@ -5,7 +5,7 @@ import { Label } from '@/components/ui/label';
 import { Separator } from '@/components/ui/separator';
 import { useAuth } from '@/hooks/useAuth';
 import { useTranslation } from 'react-i18next';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 
@@ -15,10 +15,56 @@ const ProfileSettings = () => {
   const { toast } = useToast();
   const [isUpdating, setIsUpdating] = useState(false);
   const [formData, setFormData] = useState({
-    firstName: user?.user_metadata?.first_name || '',
-    lastName: user?.user_metadata?.last_name || '',
+    firstName: '',
+    lastName: '',
     email: user?.email || '',
   });
+
+  // Fetch profile data from profiles table on mount
+  useEffect(() => {
+    if (user) {
+      fetchProfile();
+    }
+  }, [user]);
+
+  const fetchProfile = async () => {
+    if (!user) return;
+
+    try {
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('first_name, last_name')
+        .eq('id', user.id)
+        .single();
+
+      if (error && error.code !== 'PGRST116') {
+        throw error;
+      }
+
+      if (data) {
+        setFormData(prev => ({
+          ...prev,
+          firstName: data.first_name || user?.user_metadata?.first_name || '',
+          lastName: data.last_name || user?.user_metadata?.last_name || '',
+        }));
+      } else {
+        // Fallback to user_metadata if profile doesn't exist
+        setFormData(prev => ({
+          ...prev,
+          firstName: user?.user_metadata?.first_name || '',
+          lastName: user?.user_metadata?.last_name || '',
+        }));
+      }
+    } catch (error: any) {
+      console.error('Error fetching profile:', error);
+      // Fallback to user_metadata on error
+      setFormData(prev => ({
+        ...prev,
+        firstName: user?.user_metadata?.first_name || '',
+        lastName: user?.user_metadata?.last_name || '',
+      }));
+    }
+  };
 
   const handleUpdateProfile = async () => {
     if (!user) return;
