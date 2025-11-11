@@ -16,7 +16,7 @@ const OrganizationSettings = () => {
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
-      <div className="px-4 sm:px-6 lg:px-8 pt-4 sm:pt-6 pb-4 sm:pb-6 border-b">
+      <div className="pt-4 sm:pt-6 pb-4 sm:pb-6 border-b">
         <h1 className="text-2xl sm:text-3xl font-bold">Settings</h1>
         <p className="text-sm sm:text-base text-muted-foreground mt-1 sm:mt-2">
           Manage your organization, team, subscription, and privacy settings. Profile settings are available in the top-right menu.
@@ -24,7 +24,7 @@ const OrganizationSettings = () => {
       </div>
 
       {/* Scrollable Content */}
-      <div className="px-4 sm:px-6 lg:px-8 py-4 sm:py-6 space-y-6 sm:space-y-8 max-w-5xl mx-auto">
+      <div className="space-y-6 sm:space-y-8 max-w-5xl mx-auto">
         {isOrgAdmin && (
           <>
             <Separator className="my-6 sm:my-8" />

@@ -313,7 +313,7 @@ const AuditLogView = () => {
   }
 
   return (
-    <div className="space-y-2 px-4 sm:px-6 lg:px-8 py-2 sm:py-3 h-screen flex flex-col overflow-hidden">
+    <div className="space-y-2 h-screen flex flex-col overflow-hidden">
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 flex-shrink-0">
         <div>

@@ -604,7 +604,7 @@ const AnalyticsView: React.FC = () => {
 
   return (
     <div className="h-screen bg-background overflow-hidden flex flex-col">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-2 sm:py-3 flex-1 flex flex-col overflow-hidden w-full">
+      <div className="max-w-7xl mx-auto flex-1 flex flex-col overflow-hidden w-full">
         {/* Header */}
         <div className="flex flex-col gap-2 flex-shrink-0">
           <div>
