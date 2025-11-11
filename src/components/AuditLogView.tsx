@@ -569,10 +569,9 @@ const AuditLogView = () => {
         ) : (
           <>
             {/* Desktop Table View */}
-            <div className="hidden md:block flex-1 overflow-hidden min-h-0">
-              <div className="h-full overflow-y-auto">
-                <div className="overflow-x-auto h-full">
-                  <table className="w-full">
+            <div className="hidden md:block flex-1 overflow-hidden min-h-0 flex flex-col">
+              <div className="flex-1 overflow-y-auto overflow-x-auto min-h-0">
+                <table className="w-full">
               {/* Fixed Header */}
               <thead className="bg-gray-50 sticky top-0 z-10">
                 <tr className="border-b">
@@ -723,7 +722,6 @@ const AuditLogView = () => {
             </table>
               </div>
             </div>
-          </div>
 
             {/* Mobile Card View */}
             <div className="md:hidden space-y-3 p-3">
