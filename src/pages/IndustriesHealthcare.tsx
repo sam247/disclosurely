@@ -68,8 +68,8 @@ const IndustriesHealthcare: React.FC = () => {
     <>
       <DynamicHelmet
         pageIdentifier="/industries/healthcare"
-        fallbackTitle="Healthcare Whistleblowing Software | HIPAA-Compliant Reporting | Disclosurely"
-        fallbackDescription="HIPAA-compliant whistleblowing platform for hospitals, clinics, and healthcare organizations. Secure patient safety reporting with automated compliance."
+        fallbackTitle="Healthcare Whistleblowing | HIPAA Compliant"
+        fallbackDescription="HIPAA-compliant reporting for hospitals and clinics. Secure patient safety concerns, medical malpractice, and billing fraud reporting."
       />
 
       <StandardHeader currentLanguage={currentLanguage} />

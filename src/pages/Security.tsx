@@ -122,8 +122,8 @@ const Security: React.FC = () => {
     <>
       <DynamicHelmet
         pageIdentifier="/security"
-        fallbackTitle="Security & Trust Center | Military-Grade Encryption | Disclosurely"
-        fallbackDescription="Learn how Disclosurely protects whistleblower anonymity with AES-256 encryption, zero-knowledge architecture, and GDPR compliance."
+        fallbackTitle="Security & Trust Center | Disclosurely"
+        fallbackDescription="AES-256 encryption, zero-knowledge architecture, and GDPR compliance. Learn how we protect whistleblower anonymity with bank-grade security."
       />
 
       <StandardHeader currentLanguage={currentLanguage} />

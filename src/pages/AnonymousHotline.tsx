@@ -96,8 +96,8 @@ const AnonymousHotline: React.FC = () => {
     <>
       <DynamicHelmet
         pageIdentifier="/anonymous-hotline"
-        fallbackTitle="Anonymous Whistleblower Hotline | Secure Reporting | Disclosurely"
-        fallbackDescription="24/7 anonymous whistleblower hotline with two-way messaging. Report workplace misconduct securely without revealing your identity. GDPR compliant."
+        fallbackTitle="Anonymous Whistleblower Hotline | Disclosurely"
+        fallbackDescription="24/7 anonymous hotline with two-way messaging. Report workplace misconduct securely without revealing your identity. 100% confidential."
       />
 
       <StandardHeader currentLanguage={currentLanguage} />

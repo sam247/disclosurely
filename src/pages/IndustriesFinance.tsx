@@ -79,8 +79,8 @@ const IndustriesFinance: React.FC = () => {
     <>
       <DynamicHelmet
         pageIdentifier="/industries/finance"
-        fallbackTitle="Financial Services Whistleblowing Software | SOX-Compliant | Disclosurely"
-        fallbackDescription="SOX-compliant whistleblowing platform for banks, financial institutions, and investment firms. Secure fraud reporting with automated compliance."
+        fallbackTitle="Finance Whistleblowing | SOX Compliant"
+        fallbackDescription="SOX-compliant fraud reporting for banks and financial institutions. Detect insider trading, money laundering, and accounting fraud early."
       />
 
       <StandardHeader currentLanguage={currentLanguage} />

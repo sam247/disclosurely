@@ -114,8 +114,8 @@ const Industries: React.FC = () => {
     <>
       <DynamicHelmet
         pageIdentifier="industries"
-        fallbackTitle="Industries - Whistleblowing Solutions by Industry | Disclosurely"
-        fallbackDescription="Industry-specific whistleblowing and compliance solutions. Healthcare, Finance, Manufacturing, Education, and more. HIPAA, SOX, GDPR compliant."
+        fallbackTitle="Industry Solutions | Disclosurely"
+        fallbackDescription="Whistleblowing solutions tailored for Healthcare, Finance, Manufacturing, Education, and more. HIPAA, SOX, and GDPR compliant reporting platforms."
       />
 
       <StandardHeader currentLanguage={currentLanguage} />
