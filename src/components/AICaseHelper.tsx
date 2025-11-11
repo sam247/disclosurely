@@ -749,24 +749,6 @@ Guidelines:
         >
           {/* Scrollable content area */}
           <div className="flex-1 overflow-y-auto p-4 space-y-4">
-            {/* Quick Start Guide */}
-            {!hasRunInitialAnalysis && chatMessages.length === 0 && (
-              <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 space-y-2">
-                <div className="flex items-start gap-2">
-                  <div className="text-blue-600 mt-0.5">ℹ️</div>
-                  <div className="flex-1">
-                    <p className="text-xs font-semibold text-blue-900 mb-1">Quick Start Guide</p>
-                    <ol className="text-xs text-blue-800 space-y-1 list-decimal list-inside">
-                      <li>Select a case from the dropdown below</li>
-                      <li>Click <strong>"Preview"</strong> to see what PII will be redacted</li>
-                      <li>Click <strong>"Analyze"</strong> to get AI compliance guidance</li>
-                      <li>Use the chat to ask follow-up questions</li>
-                    </ol>
-                  </div>
-                </div>
-              </div>
-            )}
-
             {/* Saved Analyses - Always visible */}
             <div className="space-y-2">
               <label className="text-sm font-semibold text-green-700">📁 Saved Analyses {savedAnalyses.length > 0 && `(${savedAnalyses.length})`}</label>
