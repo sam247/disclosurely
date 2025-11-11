@@ -70,14 +70,7 @@
     { "source": "/sitemap-index.xml", "destination": "/api/sitemap-index.xml" },
     { 
       "source": "/(.*)", 
-      "destination": "/index.html",
-      "has": [
-        {
-          "type": "header",
-          "key": "accept",
-          "value": "text/html"
-        }
-      ]
+      "destination": "/index.html"
     }
   ]
 }
