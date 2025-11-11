@@ -62,15 +62,8 @@ export const AdminPanel = () => {
   const { user } = useAuth();
   const [activeSection, setActiveSection] = useState<AdminSection>('features');
 
-  const { isOrgAdmin, isAdmin: isSuperAdmin, loading: rolesLoading } = useUserRoles();
+  const { loading: rolesLoading } = useUserRoles();
   
-  // Check if user is the owner (only sampettiford@googlemail.com)
-  const isOwner = user?.email === 'sampettiford@googlemail.com';
-  
-  // Debug logging
-  
-  
-
   // STRICT OWNER CHECK - Only sampettiford@googlemail.com
   // This is the final security layer - checks are also done in:
   // 1. DashboardSidebar (to hide menu item)
