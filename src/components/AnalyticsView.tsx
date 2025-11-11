@@ -641,95 +641,80 @@ const AnalyticsView: React.FC = () => {
         </div>
 
         {/* Metric Cards */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          <Card>
-            <CardContent className="p-4 sm:p-6">
-              <div className="flex items-start justify-between">
-                <div className="flex-1">
-                  <p className="text-xs sm:text-sm font-medium text-muted-foreground mb-1">Total Reports</p>
-                  <p className="text-2xl sm:text-3xl font-bold">{analyticsData.totalReports}</p>
-                  {totalReportsTrend && (
-                    <div className={`flex items-center gap-1 mt-2 text-xs flex-wrap ${totalReportsTrend.isPositive ? 'text-green-600' : 'text-red-600'}`}>
-                      {totalReportsTrend.isPositive ? (
-                        <ArrowUpRight className="h-3 w-3 flex-shrink-0" />
-                      ) : (
-                        <ArrowDownRight className="h-3 w-3 flex-shrink-0" />
-                      )}
-                      <span className="whitespace-nowrap">{totalReportsTrend.value.toFixed(1)}%</span>
-                      <span className="text-muted-foreground text-[10px] sm:text-xs">vs previous</span>
-                    </div>
-                  )}
-                </div>
-                <FileText className="h-8 w-8 sm:h-10 sm:w-10 text-muted-foreground flex-shrink-0" />
+        <div className="grid gap-4 grid-cols-3 md:grid-cols-4">
+          <Card className="md:col-span-1">
+            <CardContent className="pt-4 md:pt-6">
+              <div className="text-center">
+                <p className="text-lg md:text-2xl font-bold">{analyticsData.totalReports}</p>
+                <p className="text-xs md:text-sm text-muted-foreground mt-1">Total Reports</p>
+                {totalReportsTrend && (
+                  <div className={`flex items-center justify-center gap-1 mt-2 text-xs ${totalReportsTrend.isPositive ? 'text-green-600' : 'text-red-600'} hidden md:flex`}>
+                    {totalReportsTrend.isPositive ? (
+                      <ArrowUpRight className="h-3 w-3" />
+                    ) : (
+                      <ArrowDownRight className="h-3 w-3" />
+                    )}
+                    <span>{totalReportsTrend.value.toFixed(1)}%</span>
+                  </div>
+                )}
               </div>
             </CardContent>
           </Card>
 
-          <Card>
-            <CardContent className="p-4 sm:p-6">
-              <div className="flex items-start justify-between">
-                <div className="flex-1">
-                  <p className="text-xs sm:text-sm font-medium text-muted-foreground mb-1">Active Cases</p>
-                  <p className="text-2xl sm:text-3xl font-bold">{analyticsData.activeReports}</p>
-                  {activeReportsTrend && (
-                    <div className={`flex items-center gap-1 mt-2 text-xs flex-wrap ${activeReportsTrend.isPositive ? 'text-green-600' : 'text-red-600'}`}>
-                      {activeReportsTrend.isPositive ? (
-                        <ArrowUpRight className="h-3 w-3 flex-shrink-0" />
-                      ) : (
-                        <ArrowDownRight className="h-3 w-3 flex-shrink-0" />
-                      )}
-                      <span className="whitespace-nowrap">{activeReportsTrend.value.toFixed(1)}%</span>
-                      <span className="text-muted-foreground text-[10px] sm:text-xs">vs previous</span>
-                    </div>
-                  )}
-                </div>
-                <Activity className="h-8 w-8 sm:h-10 sm:w-10 text-muted-foreground flex-shrink-0" />
+          {/* Active Cases - Hidden on mobile, shown on desktop */}
+          <Card className="hidden md:block md:col-span-1">
+            <CardContent className="pt-4 md:pt-6">
+              <div className="text-center">
+                <p className="text-lg md:text-2xl font-bold">{analyticsData.activeReports}</p>
+                <p className="text-xs md:text-sm text-muted-foreground mt-1">Active Cases</p>
+                {activeReportsTrend && (
+                  <div className={`flex items-center justify-center gap-1 mt-2 text-xs ${activeReportsTrend.isPositive ? 'text-green-600' : 'text-red-600'} hidden md:flex`}>
+                    {activeReportsTrend.isPositive ? (
+                      <ArrowUpRight className="h-3 w-3" />
+                    ) : (
+                      <ArrowDownRight className="h-3 w-3" />
+                    )}
+                    <span>{activeReportsTrend.value.toFixed(1)}%</span>
+                  </div>
+                )}
               </div>
             </CardContent>
           </Card>
 
-          <Card>
-            <CardContent className="p-4 sm:p-6">
-              <div className="flex items-start justify-between">
-                <div className="flex-1">
-                  <p className="text-xs sm:text-sm font-medium text-muted-foreground mb-1">Avg Response Time</p>
-                  <p className="text-2xl sm:text-3xl font-bold">{analyticsData.avgResponseTime.toFixed(1)}d</p>
-                  {avgResponseTimeTrend && (
-                    <div className={`flex items-center gap-1 mt-2 text-xs flex-wrap ${avgResponseTimeTrend.isPositive ? 'text-green-600' : 'text-red-600'}`}>
-                      {avgResponseTimeTrend.isPositive ? (
-                        <ArrowDownRight className="h-3 w-3 flex-shrink-0" />
-                      ) : (
-                        <ArrowUpRight className="h-3 w-3 flex-shrink-0" />
-                      )}
-                      <span className="whitespace-nowrap">{avgResponseTimeTrend.value.toFixed(1)}d</span>
-                      <span className="text-muted-foreground text-[10px] sm:text-xs">vs previous</span>
-                    </div>
-                  )}
-                </div>
-                <Clock className="h-8 w-8 sm:h-10 sm:w-10 text-muted-foreground flex-shrink-0" />
+          <Card className="md:col-span-1">
+            <CardContent className="pt-4 md:pt-6">
+              <div className="text-center">
+                <p className="text-lg md:text-2xl font-bold">{analyticsData.avgResponseTime.toFixed(1)}d</p>
+                <p className="text-xs md:text-sm text-muted-foreground mt-1">Avg Response Time</p>
+                {avgResponseTimeTrend && (
+                  <div className={`flex items-center justify-center gap-1 mt-2 text-xs ${avgResponseTimeTrend.isPositive ? 'text-red-600' : 'text-green-600'} hidden md:flex`}>
+                    {avgResponseTimeTrend.isPositive ? (
+                      <ArrowUpRight className="h-3 w-3" />
+                    ) : (
+                      <ArrowDownRight className="h-3 w-3" />
+                    )}
+                    <span>{avgResponseTimeTrend.value.toFixed(1)}d</span>
+                  </div>
+                )}
               </div>
             </CardContent>
           </Card>
 
-          <Card>
-            <CardContent className="p-4 sm:p-6">
-              <div className="flex items-start justify-between">
-                <div className="flex-1">
-                  <p className="text-xs sm:text-sm font-medium text-muted-foreground mb-1">Resolution Rate</p>
-                  <p className="text-2xl sm:text-3xl font-bold">{analyticsData.resolutionRate.toFixed(1)}%</p>
-                  {resolutionRateTrend && (
-                    <div className={`flex items-center gap-1 mt-2 text-xs flex-wrap ${resolutionRateTrend.isPositive ? 'text-green-600' : 'text-red-600'}`}>
-                      {resolutionRateTrend.isPositive ? (
-                        <ArrowUpRight className="h-3 w-3 flex-shrink-0" />
-                      ) : (
-                        <ArrowDownRight className="h-3 w-3 flex-shrink-0" />
-                      )}
-                      <span className="whitespace-nowrap">{resolutionRateTrend.value.toFixed(1)}%</span>
-                      <span className="text-muted-foreground text-[10px] sm:text-xs">vs previous</span>
-                    </div>
-                  )}
-                </div>
-                <Target className="h-8 w-8 sm:h-10 sm:w-10 text-muted-foreground flex-shrink-0" />
+          <Card className="md:col-span-1">
+            <CardContent className="pt-4 md:pt-6">
+              <div className="text-center">
+                <p className="text-lg md:text-2xl font-bold">{analyticsData.resolutionRate.toFixed(1)}%</p>
+                <p className="text-xs md:text-sm text-muted-foreground mt-1">Resolution Rate</p>
+                {resolutionRateTrend && (
+                  <div className={`flex items-center justify-center gap-1 mt-2 text-xs ${resolutionRateTrend.isPositive ? 'text-green-600' : 'text-red-600'} hidden md:flex`}>
+                    {resolutionRateTrend.isPositive ? (
+                      <ArrowUpRight className="h-3 w-3" />
+                    ) : (
+                      <ArrowDownRight className="h-3 w-3" />
+                    )}
+                    <span>{resolutionRateTrend.value.toFixed(1)}%</span>
+                  </div>
+                )}
               </div>
             </CardContent>
           </Card>
