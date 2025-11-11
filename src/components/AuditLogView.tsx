@@ -313,12 +313,12 @@ const AuditLogView = () => {
   }
 
   return (
-    <div className="space-y-4 px-4 sm:px-6 lg:px-8 py-4 sm:py-6">
+    <div className="space-y-2 px-4 sm:px-6 lg:px-8 py-2 sm:py-3 h-screen flex flex-col overflow-hidden">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 flex-shrink-0">
         <div>
-          <h1 className="text-2xl sm:text-3xl font-bold">Audit Trail</h1>
-          <p className="text-sm sm:text-base text-muted-foreground mt-1 sm:mt-2">
+          <h1 className="text-xl sm:text-2xl font-bold">Audit Trail</h1>
+          <p className="text-xs sm:text-sm text-muted-foreground mt-0.5">
             Comprehensive system-wide audit log with tamper-evident chain verification
           </p>
         </div>
@@ -347,29 +347,29 @@ const AuditLogView = () => {
       </div>
 
       {/* Filters - Collapsible Horizontal Layout */}
-      <div className="border rounded-lg bg-white">
+      <div className="border rounded-lg bg-white flex-shrink-0">
         <div 
-          className="flex items-center justify-between p-3 cursor-pointer hover:bg-gray-50"
+          className="flex items-center justify-between p-2 cursor-pointer hover:bg-gray-50"
           onClick={() => setFiltersExpanded(!filtersExpanded)}
         >
           <div className="flex items-center space-x-2">
-            <Filter className="h-4 w-4" />
-            <span className="font-medium">Filters</span>
+            <Filter className="h-3 w-3" />
+            <span className="font-medium text-xs sm:text-sm">Filters</span>
             {activeFiltersCount > 0 && (
-              <Badge variant="secondary" className="text-xs">
+              <Badge variant="secondary" className="text-xs px-1 py-0">
                 {activeFiltersCount}
               </Badge>
             )}
           </div>
           {filtersExpanded ? (
-            <ChevronUp className="h-4 w-4" />
+            <ChevronUp className="h-3 w-3" />
           ) : (
-            <ChevronDown className="h-4 w-4" />
+            <ChevronDown className="h-3 w-3" />
           )}
         </div>
         
         {filtersExpanded && (
-          <div className="border-t p-3 sm:p-4 space-y-3 sm:space-y-4">
+          <div className="border-t p-2 sm:p-3 space-y-2 sm:space-y-3">
             {/* Horizontal Filter Row */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:flex lg:flex-wrap gap-3 sm:gap-4 items-end">
               {/* Date Range */}
@@ -509,12 +509,12 @@ const AuditLogView = () => {
       </div>
 
       {/* Excel-Style Table */}
-      <div className="border rounded-lg bg-white">
+      <div className="border rounded-lg bg-white flex-1 flex flex-col overflow-hidden min-h-0">
         {/* Table Header */}
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between p-3 sm:p-4 border-b bg-gray-50 gap-3 sm:gap-0">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between p-2 sm:p-3 border-b bg-gray-50 gap-2 sm:gap-0 flex-shrink-0">
           <div className="flex items-center space-x-2 sm:space-x-4">
             <div>
-              <h3 className="font-semibold text-sm sm:text-base">Audit Logs</h3>
+              <h3 className="font-semibold text-xs sm:text-sm">Audit Logs</h3>
               <p className="text-xs text-muted-foreground mt-0.5">
                 Showing {startRecord}-{endRecord} of {total} records
               </p>
@@ -569,16 +569,16 @@ const AuditLogView = () => {
         ) : (
           <>
             {/* Desktop Table View */}
-            <div className="hidden md:block border rounded-lg overflow-hidden">
-              <div className="h-[500px] overflow-y-auto">
-                <div className="overflow-x-auto">
+            <div className="hidden md:block flex-1 overflow-hidden min-h-0">
+              <div className="h-full overflow-y-auto">
+                <div className="overflow-x-auto h-full">
                   <table className="w-full">
               {/* Fixed Header */}
               <thead className="bg-gray-50 sticky top-0 z-10">
                 <tr className="border-b">
                   <th 
-                    className="px-3 py-2 text-left text-xs font-semibold text-gray-700 border-r cursor-pointer hover:bg-gray-100"
-                    style={{ width: '150px' }}
+                    className="px-2 py-1.5 text-left text-xs font-semibold text-gray-700 border-r cursor-pointer hover:bg-gray-100"
+                    style={{ width: '140px' }}
                     onClick={() => handleSort('created_at')}
                   >
                     <div className="flex items-center justify-between">
@@ -587,8 +587,8 @@ const AuditLogView = () => {
                     </div>
                   </th>
                   <th 
-                    className="px-3 py-2 text-left text-xs font-semibold text-gray-700 border-r cursor-pointer hover:bg-gray-100"
-                    style={{ width: '120px' }}
+                    className="px-2 py-1.5 text-left text-xs font-semibold text-gray-700 border-r cursor-pointer hover:bg-gray-100"
+                    style={{ width: '110px' }}
                     onClick={() => handleSort('event_type')}
                   >
                     <div className="flex items-center justify-between">
@@ -597,8 +597,8 @@ const AuditLogView = () => {
                     </div>
                   </th>
                   <th 
-                    className="px-3 py-2 text-left text-xs font-semibold text-gray-700 border-r cursor-pointer hover:bg-gray-100"
-                    style={{ width: '100px' }}
+                    className="px-2 py-1.5 text-left text-xs font-semibold text-gray-700 border-r cursor-pointer hover:bg-gray-100"
+                    style={{ width: '90px' }}
                     onClick={() => handleSort('category')}
                   >
                     <div className="flex items-center justify-between">
@@ -607,8 +607,8 @@ const AuditLogView = () => {
                     </div>
                   </th>
                   <th 
-                    className="px-3 py-2 text-left text-xs font-semibold text-gray-700 border-r cursor-pointer hover:bg-gray-100"
-                    style={{ width: '120px' }}
+                    className="px-2 py-1.5 text-left text-xs font-semibold text-gray-700 border-r cursor-pointer hover:bg-gray-100"
+                    style={{ width: '100px' }}
                     onClick={() => handleSort('action')}
                   >
                     <div className="flex items-center justify-between">
@@ -617,8 +617,8 @@ const AuditLogView = () => {
                     </div>
                   </th>
                   <th 
-                    className="px-3 py-2 text-left text-xs font-semibold text-gray-700 border-r cursor-pointer hover:bg-gray-100"
-                    style={{ width: '150px' }}
+                    className="px-2 py-1.5 text-left text-xs font-semibold text-gray-700 border-r cursor-pointer hover:bg-gray-100"
+                    style={{ width: '130px' }}
                     onClick={() => handleSort('actor_email')}
                   >
                     <div className="flex items-center justify-between">
@@ -627,8 +627,8 @@ const AuditLogView = () => {
                     </div>
                   </th>
                   <th 
-                    className="px-3 py-2 text-left text-xs font-semibold text-gray-700 border-r cursor-pointer hover:bg-gray-100"
-                    style={{ width: '150px' }}
+                    className="px-2 py-1.5 text-left text-xs font-semibold text-gray-700 border-r cursor-pointer hover:bg-gray-100"
+                    style={{ width: '130px' }}
                     onClick={() => handleSort('target_name')}
                   >
                     <div className="flex items-center justify-between">
@@ -637,8 +637,8 @@ const AuditLogView = () => {
                     </div>
                   </th>
                   <th 
-                    className="px-3 py-2 text-left text-xs font-semibold text-gray-700 border-r cursor-pointer hover:bg-gray-100"
-                    style={{ width: '80px' }}
+                    className="px-2 py-1.5 text-left text-xs font-semibold text-gray-700 border-r cursor-pointer hover:bg-gray-100"
+                    style={{ width: '70px' }}
                     onClick={() => handleSort('severity')}
                   >
                     <div className="flex items-center justify-between">
@@ -647,7 +647,7 @@ const AuditLogView = () => {
                     </div>
                   </th>
                   <th 
-                    className="px-3 py-2 text-left text-xs font-semibold text-gray-700 border-r cursor-pointer hover:bg-gray-100"
+                    className="px-2 py-1.5 text-left text-xs font-semibold text-gray-700 border-r cursor-pointer hover:bg-gray-100"
                     onClick={() => handleSort('summary')}
                   >
                     <div className="flex items-center justify-between">
@@ -656,8 +656,8 @@ const AuditLogView = () => {
                     </div>
                   </th>
                   <th 
-                    className="px-3 py-2 text-center text-xs font-semibold text-gray-700"
-                    style={{ width: '60px' }}
+                    className="px-2 py-1.5 text-center text-xs font-semibold text-gray-700"
+                    style={{ width: '50px' }}
                   >
                     Actions
                   </th>
@@ -670,49 +670,49 @@ const AuditLogView = () => {
                   <tr 
                     key={log.id} 
                     className={`border-b hover:bg-gray-50 ${index % 2 === 0 ? 'bg-white' : 'bg-gray-50'}`}
-                    style={{ height: '32px' }}
+                    style={{ height: '28px' }}
                   >
-                    <td className="px-3 py-1 text-xs text-gray-900 border-r font-mono">
+                    <td className="px-2 py-0.5 text-xs text-gray-900 border-r font-mono">
                       {formatTimestamp(log.created_at)}
                     </td>
-                    <td className="px-3 py-1 text-xs text-gray-900 border-r">
+                    <td className="px-2 py-0.5 text-xs text-gray-900 border-r">
                       {log.event_type}
                     </td>
-                    <td className="px-3 py-1 text-xs border-r">
+                    <td className="px-2 py-0.5 text-xs border-r">
                       <Badge variant="outline" className="text-xs px-1 py-0">
                         {log.category}
                       </Badge>
                     </td>
-                    <td className="px-3 py-1 text-xs text-gray-900 border-r">
+                    <td className="px-2 py-0.5 text-xs text-gray-900 border-r">
                       {log.action}
                     </td>
-                    <td className="px-3 py-1 text-xs text-gray-900 border-r">
+                    <td className="px-2 py-0.5 text-xs text-gray-900 border-r">
                       <div className="truncate" title={log.actor_email || log.actor_type}>
                         {log.actor_email || log.actor_type}
                       </div>
                     </td>
-                    <td className="px-3 py-1 text-xs text-gray-900 border-r">
+                    <td className="px-2 py-0.5 text-xs text-gray-900 border-r">
                       <div className="truncate" title={log.target_name || log.target_type || ''}>
                         {log.target_name || log.target_type || '-'}
                       </div>
                     </td>
-                    <td className="px-3 py-1 text-xs border-r">
+                    <td className="px-2 py-0.5 text-xs border-r">
                       <Badge variant={getSeverityColor(log.severity)} className="text-xs px-1 py-0">
                         {getSeverityIcon(log.severity)}
                         <span className="ml-1 capitalize">{log.severity}</span>
                       </Badge>
                     </td>
-                    <td className="px-3 py-1 text-xs text-gray-900 border-r">
+                    <td className="px-2 py-0.5 text-xs text-gray-900 border-r">
                       <div className="truncate" title={log.summary}>
                         {log.summary}
                       </div>
                     </td>
-                    <td className="px-3 py-1 text-center">
+                    <td className="px-2 py-0.5 text-center">
                       <Button
                         variant="ghost"
                         size="sm"
                         onClick={() => setSelectedLog(log)}
-                        className="h-6 w-6 p-0"
+                        className="h-5 w-5 p-0"
                       >
                         <Eye className="h-3 w-3" />
                       </Button>
@@ -794,7 +794,7 @@ const AuditLogView = () => {
         
         {/* Pagination */}
         {total > 0 && (
-          <div className="flex flex-col sm:flex-row items-center justify-between p-3 sm:p-4 border-t bg-gray-50 gap-3 sm:gap-0">
+          <div className="flex flex-col sm:flex-row items-center justify-between p-2 sm:p-3 border-t bg-gray-50 gap-2 sm:gap-0 flex-shrink-0">
             <div className="flex flex-col sm:flex-row items-start sm:items-center space-y-2 sm:space-y-0 sm:space-x-4 w-full sm:w-auto">
               <div className="flex items-center space-x-2">
                 <Label className="text-xs whitespace-nowrap">Rows per page:</Label>

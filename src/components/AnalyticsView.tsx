@@ -603,23 +603,23 @@ const AnalyticsView: React.FC = () => {
   if (!analyticsData) return null;
 
   return (
-    <div className="min-h-screen bg-background">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-6 space-y-6">
+    <div className="h-screen bg-background overflow-hidden flex flex-col">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-2 sm:py-3 flex-1 flex flex-col overflow-hidden w-full">
         {/* Header */}
-        <div className="flex flex-col gap-4">
+        <div className="flex flex-col gap-2 flex-shrink-0">
           <div>
-            <h1 className="text-2xl sm:text-3xl font-bold">Analytics</h1>
-            <p className="text-sm sm:text-base text-muted-foreground mt-1 sm:mt-2">
+            <h1 className="text-xl sm:text-2xl font-bold">Analytics</h1>
+            <p className="text-xs sm:text-sm text-muted-foreground mt-0.5">
               Decision-ready insights for compliance teams
             </p>
           </div>
-          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
             <div className="flex items-center gap-2 flex-1 sm:flex-initial">
-              <label className="text-sm font-medium whitespace-nowrap">Period:</label>
+              <label className="text-xs sm:text-sm font-medium whitespace-nowrap">Period:</label>
               <select 
                 value={selectedPeriod} 
                 onChange={(e) => setSelectedPeriod(e.target.value as any)}
-                className="px-3 py-2 sm:py-1.5 border rounded-md text-sm bg-background flex-1 sm:flex-initial touch-manipulation"
+                className="px-2 py-1 sm:py-1.5 border rounded-md text-xs sm:text-sm bg-background flex-1 sm:flex-initial touch-manipulation"
               >
                 <option value="7d">Last 7 days</option>
                 <option value="30d">Last 30 days</option>
@@ -632,21 +632,21 @@ const AnalyticsView: React.FC = () => {
               disabled={exporting}
               variant="outline"
               size="sm"
-              className="gap-2 w-full sm:w-auto touch-manipulation"
+              className="gap-2 w-full sm:w-auto touch-manipulation text-xs sm:text-sm h-7 sm:h-8"
             >
-              <Download className="h-4 w-4" />
+              <Download className="h-3 w-3 sm:h-4 sm:w-4" />
               {exporting ? 'Exporting...' : 'Export'}
             </Button>
           </div>
         </div>
 
         {/* Metric Cards */}
-        <div className="grid gap-4 grid-cols-3 md:grid-cols-4">
+        <div className="grid gap-2 grid-cols-3 md:grid-cols-4 flex-shrink-0 mt-2">
           <Card className="md:col-span-1">
-            <CardContent className="pt-4 md:pt-6">
+            <CardContent className="pt-2 md:pt-3 pb-2 md:pb-3">
               <div className="text-center">
-                <p className="text-lg md:text-2xl font-bold">{analyticsData.totalReports}</p>
-                <p className="text-xs md:text-sm text-muted-foreground mt-1">Total Reports</p>
+                <p className="text-base md:text-xl font-bold">{analyticsData.totalReports}</p>
+                <p className="text-xs text-muted-foreground mt-0.5">Total Reports</p>
                 {totalReportsTrend && (
                   <div className={`flex items-center justify-center gap-1 mt-2 text-xs ${totalReportsTrend.isPositive ? 'text-green-600' : 'text-red-600'} hidden md:flex`}>
                     {totalReportsTrend.isPositive ? (
@@ -663,10 +663,10 @@ const AnalyticsView: React.FC = () => {
 
           {/* Active Cases - Hidden on mobile, shown on desktop */}
           <Card className="hidden md:block md:col-span-1">
-            <CardContent className="pt-4 md:pt-6">
+            <CardContent className="pt-2 md:pt-3 pb-2 md:pb-3">
               <div className="text-center">
-                <p className="text-lg md:text-2xl font-bold">{analyticsData.activeReports}</p>
-                <p className="text-xs md:text-sm text-muted-foreground mt-1">Active Cases</p>
+                <p className="text-base md:text-xl font-bold">{analyticsData.activeReports}</p>
+                <p className="text-xs text-muted-foreground mt-0.5">Active Cases</p>
                 {activeReportsTrend && (
                   <div className={`flex items-center justify-center gap-1 mt-2 text-xs ${activeReportsTrend.isPositive ? 'text-green-600' : 'text-red-600'} hidden md:flex`}>
                     {activeReportsTrend.isPositive ? (
@@ -682,10 +682,10 @@ const AnalyticsView: React.FC = () => {
           </Card>
 
           <Card className="md:col-span-1">
-            <CardContent className="pt-4 md:pt-6">
+            <CardContent className="pt-2 md:pt-3 pb-2 md:pb-3">
               <div className="text-center">
-                <p className="text-lg md:text-2xl font-bold">{analyticsData.avgResponseTime.toFixed(1)}d</p>
-                <p className="text-xs md:text-sm text-muted-foreground mt-1">Avg Response Time</p>
+                <p className="text-base md:text-xl font-bold">{analyticsData.avgResponseTime.toFixed(1)}d</p>
+                <p className="text-xs text-muted-foreground mt-0.5">Avg Response Time</p>
                 {avgResponseTimeTrend && (
                   <div className={`flex items-center justify-center gap-1 mt-2 text-xs ${avgResponseTimeTrend.isPositive ? 'text-red-600' : 'text-green-600'} hidden md:flex`}>
                     {avgResponseTimeTrend.isPositive ? (
@@ -701,10 +701,10 @@ const AnalyticsView: React.FC = () => {
           </Card>
 
           <Card className="md:col-span-1">
-            <CardContent className="pt-4 md:pt-6">
+            <CardContent className="pt-2 md:pt-3 pb-2 md:pb-3">
               <div className="text-center">
-                <p className="text-lg md:text-2xl font-bold">{analyticsData.resolutionRate.toFixed(1)}%</p>
-                <p className="text-xs md:text-sm text-muted-foreground mt-1">Resolution Rate</p>
+                <p className="text-base md:text-xl font-bold">{analyticsData.resolutionRate.toFixed(1)}%</p>
+                <p className="text-xs text-muted-foreground mt-0.5">Resolution Rate</p>
                 {resolutionRateTrend && (
                   <div className={`flex items-center justify-center gap-1 mt-2 text-xs ${resolutionRateTrend.isPositive ? 'text-green-600' : 'text-red-600'} hidden md:flex`}>
                     {resolutionRateTrend.isPositive ? (
@@ -720,47 +720,49 @@ const AnalyticsView: React.FC = () => {
           </Card>
         </div>
 
-        {/* Main Chart */}
-        <Card>
-          <CardHeader className="pb-3 sm:pb-6">
-            <div className="flex flex-col gap-3 sm:gap-4">
-              <div>
-                <CardTitle className="text-lg sm:text-xl">Reports Received</CardTitle>
-                <CardDescription className="text-xs sm:text-sm mt-1">
-                  {chartPeriod === 'day' ? 'Daily view' : chartPeriod === 'week' ? 'Weekly view' : 'Monthly view'}
-                </CardDescription>
+        {/* Main Layout: Graph on left, other charts on right */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-2 sm:gap-3 flex-1 min-h-0 overflow-hidden">
+          {/* Main Chart - Left Half */}
+          <Card className="flex flex-col min-h-0">
+            <CardHeader className="pb-2 sm:pb-3 flex-shrink-0">
+              <div className="flex flex-col gap-2">
+                <div>
+                  <CardTitle className="text-sm sm:text-base">Reports Received</CardTitle>
+                  <CardDescription className="text-xs mt-0.5">
+                    {chartPeriod === 'day' ? 'Daily view' : chartPeriod === 'week' ? 'Weekly view' : 'Monthly view'}
+                  </CardDescription>
+                </div>
+                <div className="flex items-center gap-1.5 w-full sm:w-auto">
+                  <Button
+                    variant={chartPeriod === 'day' ? 'default' : 'outline'}
+                    size="sm"
+                    onClick={() => setChartPeriod('day')}
+                    className="text-xs flex-1 sm:flex-initial touch-manipulation h-6 sm:h-7 px-2"
+                  >
+                    Days
+                  </Button>
+                  <Button
+                    variant={chartPeriod === 'week' ? 'default' : 'outline'}
+                    size="sm"
+                    onClick={() => setChartPeriod('week')}
+                    className="text-xs flex-1 sm:flex-initial touch-manipulation h-6 sm:h-7 px-2"
+                  >
+                    Weeks
+                  </Button>
+                  <Button
+                    variant={chartPeriod === 'month' ? 'default' : 'outline'}
+                    size="sm"
+                    onClick={() => setChartPeriod('month')}
+                    className="text-xs flex-1 sm:flex-initial touch-manipulation h-6 sm:h-7 px-2"
+                  >
+                    Months
+                  </Button>
+                </div>
               </div>
-              <div className="flex items-center gap-2 w-full sm:w-auto">
-                <Button
-                  variant={chartPeriod === 'day' ? 'default' : 'outline'}
-                  size="sm"
-                  onClick={() => setChartPeriod('day')}
-                  className="text-xs sm:text-sm flex-1 sm:flex-initial touch-manipulation min-h-[36px] sm:min-h-0"
-                >
-                  Days
-                </Button>
-                <Button
-                  variant={chartPeriod === 'week' ? 'default' : 'outline'}
-                  size="sm"
-                  onClick={() => setChartPeriod('week')}
-                  className="text-xs sm:text-sm flex-1 sm:flex-initial touch-manipulation min-h-[36px] sm:min-h-0"
-                >
-                  Weeks
-                </Button>
-                <Button
-                  variant={chartPeriod === 'month' ? 'default' : 'outline'}
-                  size="sm"
-                  onClick={() => setChartPeriod('month')}
-                  className="text-xs sm:text-sm flex-1 sm:flex-initial touch-manipulation min-h-[36px] sm:min-h-0"
-                >
-                  Months
-                </Button>
-              </div>
-            </div>
-          </CardHeader>
-          <CardContent className="pt-0 sm:pt-0">
-            {getChartData() ? (
-              <div className="h-64 sm:h-80 -mx-2 sm:mx-0 px-2 sm:px-0">
+            </CardHeader>
+            <CardContent className="pt-0 flex-1 min-h-0 flex flex-col">
+              {getChartData() ? (
+                <div className="flex-1 min-h-0 -mx-2 sm:mx-0 px-2 sm:px-0">
                 <Line 
                   data={getChartData()!} 
                   options={{
@@ -806,24 +808,24 @@ const AnalyticsView: React.FC = () => {
                 />
               </div>
             ) : (
-              <div className="h-64 sm:h-80 flex items-center justify-center text-muted-foreground text-sm">
+              <div className="h-full flex items-center justify-center text-muted-foreground text-xs sm:text-sm">
                 No trend data available
               </div>
             )}
-          </CardContent>
-        </Card>
+            </CardContent>
+          </Card>
 
-        {/* Additional Charts and Metrics */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
-          {/* Category Distribution */}
-          <Card>
-            <CardHeader className="pb-3 sm:pb-6">
-              <CardTitle className="text-base sm:text-lg lg:text-xl">Category Distribution</CardTitle>
-              <CardDescription className="text-xs sm:text-sm">Breakdown by report type</CardDescription>
-            </CardHeader>
-            <CardContent className="pt-0 sm:pt-0">
-              {getCategoryChartData() ? (
-                <div className="h-56 sm:h-64 -mx-2 sm:mx-0 px-2 sm:px-0">
+          {/* Right Side: Other Charts */}
+          <div className="flex flex-col gap-2 sm:gap-3 min-h-0 overflow-hidden">
+            {/* Category Distribution */}
+            <Card className="flex-1 flex flex-col min-h-0">
+              <CardHeader className="pb-2 sm:pb-3 flex-shrink-0">
+                <CardTitle className="text-xs sm:text-sm">Category Distribution</CardTitle>
+                <CardDescription className="text-xs mt-0.5">Breakdown by report type</CardDescription>
+              </CardHeader>
+              <CardContent className="pt-0 flex-1 min-h-0 flex flex-col">
+                {getCategoryChartData() ? (
+                  <div className="flex-1 min-h-0 -mx-2 sm:mx-0 px-2 sm:px-0">
                   <Doughnut 
                     data={getCategoryChartData()!} 
                     options={{
@@ -861,22 +863,22 @@ const AnalyticsView: React.FC = () => {
                   />
                 </div>
               ) : (
-                <div className="h-56 sm:h-64 flex items-center justify-center text-muted-foreground text-sm">
+                <div className="h-full flex items-center justify-center text-muted-foreground text-xs sm:text-sm">
                   No category data available
                 </div>
               )}
-            </CardContent>
-          </Card>
+              </CardContent>
+            </Card>
 
-          {/* Status Breakdown */}
-          <Card>
-            <CardHeader className="pb-3 sm:pb-6">
-              <CardTitle className="text-base sm:text-lg lg:text-xl">Status Breakdown</CardTitle>
-              <CardDescription className="text-xs sm:text-sm">Cases by status</CardDescription>
-            </CardHeader>
-            <CardContent className="pt-0 sm:pt-0">
-              {getStatusChartData() ? (
-                <div className="h-56 sm:h-64 -mx-2 sm:mx-0 px-2 sm:px-0">
+            {/* Status Breakdown */}
+            <Card className="flex-1 flex flex-col min-h-0">
+              <CardHeader className="pb-2 sm:pb-3 flex-shrink-0">
+                <CardTitle className="text-xs sm:text-sm">Status Breakdown</CardTitle>
+                <CardDescription className="text-xs mt-0.5">Cases by status</CardDescription>
+              </CardHeader>
+              <CardContent className="pt-0 flex-1 min-h-0 flex flex-col">
+                {getStatusChartData() ? (
+                  <div className="flex-1 min-h-0 -mx-2 sm:mx-0 px-2 sm:px-0">
                   <Bar 
                     data={getStatusChartData()!} 
                     options={{
@@ -918,23 +920,23 @@ const AnalyticsView: React.FC = () => {
                   />
                 </div>
               ) : (
-                <div className="h-56 sm:h-64 flex items-center justify-center text-muted-foreground text-sm">
+                <div className="h-full flex items-center justify-center text-muted-foreground text-xs sm:text-sm">
                   No status data available
                 </div>
               )}
-            </CardContent>
-          </Card>
-        </div>
+              </CardContent>
+            </Card>
+          </div>
 
-        {/* Additional Metrics Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          {/* Priority Breakdown */}
-          <Card>
-            <CardHeader className="pb-3 sm:pb-6">
-              <CardTitle className="text-base sm:text-lg">Priority Breakdown</CardTitle>
-            </CardHeader>
-            <CardContent className="pt-0 sm:pt-0">
-              <div className="space-y-3">
+          {/* Bottom Row: Additional Metrics */}
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 sm:gap-3 flex-shrink-0 lg:col-span-2">
+            {/* Priority Breakdown */}
+            <Card>
+              <CardHeader className="pb-2 sm:pb-3">
+                <CardTitle className="text-xs sm:text-sm">Priority Breakdown</CardTitle>
+              </CardHeader>
+              <CardContent className="pt-0 pb-2 sm:pb-3">
+                <div className="space-y-1.5 sm:space-y-2">
                 {analyticsData.priorityBreakdown
                   .sort((a, b) => b.priority - a.priority)
                   .map((item, index) => (
@@ -952,16 +954,16 @@ const AnalyticsView: React.FC = () => {
                     </div>
                   ))}
               </div>
-            </CardContent>
-          </Card>
+              </CardContent>
+            </Card>
 
-          {/* Top Categories */}
-          <Card>
-            <CardHeader className="pb-3 sm:pb-6">
-              <CardTitle className="text-base sm:text-lg">Top Categories</CardTitle>
-            </CardHeader>
-            <CardContent className="pt-0 sm:pt-0">
-              <div className="space-y-3">
+            {/* Top Categories */}
+            <Card>
+              <CardHeader className="pb-2 sm:pb-3">
+                <CardTitle className="text-xs sm:text-sm">Top Categories</CardTitle>
+              </CardHeader>
+              <CardContent className="pt-0 pb-2 sm:pb-3">
+                <div className="space-y-1.5 sm:space-y-2">
                 {analyticsData.categories
                   .sort((a, b) => b.count - a.count)
                   .slice(0, 5)
@@ -980,16 +982,16 @@ const AnalyticsView: React.FC = () => {
                     </div>
                   ))}
               </div>
-            </CardContent>
-          </Card>
+              </CardContent>
+            </Card>
 
-          {/* Performance Indicators */}
-          <Card>
-            <CardHeader className="pb-3 sm:pb-6">
-              <CardTitle className="text-base sm:text-lg">Performance Indicators</CardTitle>
-            </CardHeader>
-            <CardContent className="pt-0 sm:pt-0">
-              <div className="space-y-3 sm:space-y-4">
+            {/* Performance Indicators */}
+            <Card>
+              <CardHeader className="pb-2 sm:pb-3">
+                <CardTitle className="text-xs sm:text-sm">Performance Indicators</CardTitle>
+              </CardHeader>
+              <CardContent className="pt-0 pb-2 sm:pb-3">
+                <div className="space-y-1.5 sm:space-y-2">
                 <div className="flex items-center justify-between py-1">
                   <span className="text-sm">Escalation Rate</span>
                   <Badge variant={analyticsData.escalationRate > 20 ? 'destructive' : 'secondary'} className="text-xs sm:text-sm">
@@ -1009,8 +1011,9 @@ const AnalyticsView: React.FC = () => {
                   </Badge>
                 </div>
               </div>
-            </CardContent>
-          </Card>
+              </CardContent>
+            </Card>
+          </div>
         </div>
       </div>
     </div>
