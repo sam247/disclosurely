@@ -1,7 +1,7 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { Separator } from '@/components/ui/separator';
 import { Building2, Users, CreditCard, Globe, Shield } from 'lucide-react';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import OrganizationSettingsBranding from '@/components/OrganizationSettings';
 import UserManagement from '@/components/UserManagement';
 import SubscriptionManagement from '@/components/SubscriptionManagement';
@@ -14,75 +14,102 @@ const OrganizationSettings = () => {
   const { isOrgAdmin } = useUserRoles();
 
   return (
-    <div className="min-h-screen bg-background">
-      {/* Header */}
-      <div className="pt-4 sm:pt-6 pb-4 sm:pb-6 border-b">
-        <h1 className="text-2xl sm:text-3xl font-bold">Settings</h1>
-        <p className="text-sm sm:text-base text-muted-foreground mt-1 sm:mt-2">
+    <div className="flex flex-col h-[calc(100vh-4rem)] overflow-hidden">
+      {/* Fixed Header */}
+      <div className="flex-shrink-0 pb-4 border-b bg-background">
+        <h1 className="text-3xl font-bold">Settings</h1>
+        <p className="text-muted-foreground">
           Manage your organization, team, subscription, and privacy settings. Profile settings are available in the top-right menu.
         </p>
       </div>
 
       {/* Scrollable Content */}
-      <div className="space-y-6 sm:space-y-8 max-w-5xl mx-auto">
-        {isOrgAdmin && (
-          <>
-            <Separator className="my-6 sm:my-8" />
+      <div className="flex-1 overflow-y-auto">
+        <div className="space-y-6">
+          {isOrgAdmin && (
+            <>
+              {/* Organization Settings */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center space-x-2">
+                    <Building2 className="h-5 w-5 text-blue-600" />
+                    <span>Organization</span>
+                  </CardTitle>
+                  <CardDescription>
+                    Manage your organization's branding and settings
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <OrganizationSettingsBranding />
+                </CardContent>
+              </Card>
 
-            {/* Organization Settings */}
-            <section className="max-w-4xl">
-              <div className="flex items-center gap-2 mb-4 sm:mb-6">
-                <Building2 className="h-5 w-5 text-primary" />
-                <h2 className="text-xl sm:text-2xl font-semibold">Organization</h2>
-              </div>
-              <OrganizationSettingsBranding />
-            </section>
+              {/* Team Management */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center space-x-2">
+                    <Users className="h-5 w-5 text-blue-600" />
+                    <span>Team</span>
+                  </CardTitle>
+                  <CardDescription>
+                    Manage your organization's team members and their roles
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <UserManagement />
+                </CardContent>
+              </Card>
 
-            <Separator className="my-6 sm:my-8" />
+              {/* Subscription */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center space-x-2">
+                    <CreditCard className="h-5 w-5 text-blue-600" />
+                    <span>Subscription</span>
+                  </CardTitle>
+                  <CardDescription>
+                    Manage your subscription and billing information
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <SubscriptionManagement />
+                </CardContent>
+              </Card>
 
-            {/* Team Management */}
-            <section className="max-w-4xl">
-              <div className="flex items-center gap-2 mb-4 sm:mb-6">
-                <Users className="h-5 w-5 text-primary" />
-                <h2 className="text-xl sm:text-2xl font-semibold">Team</h2>
-              </div>
-              <UserManagement />
-            </section>
+              {/* Custom Domains */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center space-x-2">
+                    <Globe className="h-5 w-5 text-blue-600" />
+                    <span>Custom Domains</span>
+                  </CardTitle>
+                  <CardDescription>
+                    Configure custom domains for your secure reporting links
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <CustomDomainSettings />
+                </CardContent>
+              </Card>
+            </>
+          )}
 
-            <Separator className="my-6 sm:my-8" />
-
-            {/* Subscription */}
-            <section className="max-w-4xl">
-              <div className="flex items-center gap-2 mb-4 sm:mb-6">
-                <CreditCard className="h-5 w-5 text-primary" />
-                <h2 className="text-xl sm:text-2xl font-semibold">Subscription</h2>
-              </div>
-              <SubscriptionManagement />
-            </section>
-
-            <Separator className="my-6 sm:my-8" />
-
-            {/* Custom Domains */}
-            <section className="max-w-4xl">
-              <div className="flex items-center gap-2 mb-4 sm:mb-6">
-                <Globe className="h-5 w-5 text-primary" />
-                <h2 className="text-xl sm:text-2xl font-semibold">Custom Domains</h2>
-              </div>
-              <CustomDomainSettings />
-            </section>
-          </>
-        )}
-
-        <Separator className="my-6 sm:my-8" />
-
-        {/* Privacy & Data - Always visible */}
-        <section className="max-w-4xl">
-          <div className="flex items-center gap-2 mb-4 sm:mb-6">
-            <Shield className="h-5 w-5 text-primary" />
-            <h2 className="text-xl sm:text-2xl font-semibold">Privacy & Data</h2>
-          </div>
-          <SimpleGDPRSettings />
-        </section>
+          {/* Privacy & Data - Always visible */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center space-x-2">
+                <Shield className="h-5 w-5 text-blue-600" />
+                <span>Privacy & Data</span>
+              </CardTitle>
+              <CardDescription>
+                Manage your privacy settings and data handling preferences
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <SimpleGDPRSettings />
+            </CardContent>
+          </Card>
+        </div>
       </div>
     </div>
   );
