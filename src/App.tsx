@@ -25,9 +25,17 @@ const Features = lazy(() => import('./pages/Features'));
 const Careers = lazy(() => import('./pages/Careers'));
 const VsSpeakUp = lazy(() => import('./pages/VsSpeakUp'));
 const VsWhistleblowerSoftware = lazy(() => import('./pages/VsWhistleblowerSoftware'));
+const VsNavex = lazy(() => import('./pages/VsNavex'));
+const VsResolver = lazy(() => import('./pages/VsResolver'));
 const ComplianceSoftware = lazy(() => import('./pages/ComplianceSoftware'));
 const WhistleblowingDirective = lazy(() => import('./pages/WhistleblowingDirective'));
 const Blog = lazy(() => import('./pages/Blog'));
+const Industries = lazy(() => import('./pages/Industries'));
+const IndustriesHealthcare = lazy(() => import('./pages/IndustriesHealthcare'));
+const IndustriesFinance = lazy(() => import('./pages/IndustriesFinance'));
+const AnonymousHotline = lazy(() => import('./pages/AnonymousHotline'));
+const Security = lazy(() => import('./pages/Security'));
+const FAQ = lazy(() => import('./pages/FAQ'));
 const ResumeDraft = lazy(() => import('./pages/ResumeDraft'));
 const TestAnonymousSubmission = lazy(() => import('./pages/TestAnonymousSubmission'));
 const AdminDashboard = lazy(() => import('./pages/AdminDashboard'));
@@ -118,8 +126,16 @@ const AppContent = () => {
         <Route path="/careers" element={<Careers />} />
         <Route path="/vs-speakup" element={<VsSpeakUp />} />
         <Route path="/vs-whistleblower-software" element={<VsWhistleblowerSoftware />} />
+        <Route path="/vs-navex" element={<VsNavex />} />
+        <Route path="/vs-resolver" element={<VsResolver />} />
         <Route path="/compliance-software" element={<ComplianceSoftware />} />
         <Route path="/whistleblowing-directive" element={<WhistleblowingDirective />} />
+        <Route path="/industries" element={<Industries />} />
+        <Route path="/industries/healthcare" element={<IndustriesHealthcare />} />
+        <Route path="/industries/finance" element={<IndustriesFinance />} />
+        <Route path="/anonymous-hotline" element={<AnonymousHotline />} />
+        <Route path="/security" element={<Security />} />
+        <Route path="/faq" element={<FAQ />} />
 
         {/* Authentication routes */}
         <Route path="/login" element={<Login />} />
@@ -183,7 +199,15 @@ const AppContent = () => {
         <Route path="/:lang/careers" element={<Careers />} />
         <Route path="/:lang/vs-speakup" element={<VsSpeakUp />} />
         <Route path="/:lang/vs-whistleblower-software" element={<VsWhistleblowerSoftware />} />
+        <Route path="/:lang/vs-navex" element={<VsNavex />} />
+        <Route path="/:lang/vs-resolver" element={<VsResolver />} />
         <Route path="/:lang/compliance-software" element={<ComplianceSoftware />} />
+        <Route path="/:lang/industries" element={<Industries />} />
+        <Route path="/:lang/industries/healthcare" element={<IndustriesHealthcare />} />
+        <Route path="/:lang/industries/finance" element={<IndustriesFinance />} />
+        <Route path="/:lang/anonymous-hotline" element={<AnonymousHotline />} />
+        <Route path="/:lang/security" element={<Security />} />
+        <Route path="/:lang/faq" element={<FAQ />} />
         <Route path="/:lang/auth/login" element={<Login />} />
         <Route path="/:lang/auth/signup" element={<Signup />} />
 

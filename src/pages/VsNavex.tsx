@@ -1,5 +1,4 @@
 import { Check, X, Shield, Zap, DollarSign, Users, Globe, Lock } from 'lucide-react';
-import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Link } from 'react-router-dom';
 import { Footer } from '@/components/ui/footer';
@@ -7,7 +6,7 @@ import PublicLanguageSelector from '@/components/PublicLanguageSelector';
 import { useLanguageFromUrl } from '@/hooks/useLanguageFromUrl';
 import DynamicHelmet from '@/components/DynamicHelmet';
 
-const VsSpeakUp = () => {
+const VsNavex = () => {
   useLanguageFromUrl();
 
   const comparisonPoints = [
@@ -15,21 +14,22 @@ const VsSpeakUp = () => {
       category: "Pricing & Value",
       icon: DollarSign,
       items: [
-        { feature: "Starting Price", disclosurely: "£39.99/month", competitor: "$99+/month", winner: "disclosurely" },
-        { feature: "Annual Savings", disclosurely: "Save $708+/year", competitor: "More expensive", winner: "disclosurely" },
+        { feature: "Starting Price", disclosurely: "£39.99/month", competitor: "$667+/month", winner: "disclosurely" },
+        { feature: "Annual Savings", disclosurely: "Save $7,500+/year", competitor: "Enterprise pricing", winner: "disclosurely" },
         { feature: "Transparent Pricing", disclosurely: "Public pricing", competitor: "Contact for quote", winner: "disclosurely" },
-        { feature: "Free Trial", disclosurely: "14 days, no credit card", competitor: "Custom demo", winner: "disclosurely" },
+        { feature: "Free Trial", disclosurely: "14 days, instant access", competitor: "Custom demo only", winner: "disclosurely" },
+        { feature: "Best For", disclosurely: "SMBs to Enterprise", competitor: "Large Enterprise", winner: "tie" },
       ]
     },
     {
-      category: "AI & Automation",
+      category: "AI & Modern Features",
       icon: Zap,
       items: [
-        { feature: "AI Case Analysis", disclosurely: true, competitor: false, winner: "disclosurely" },
-        { feature: "AI Risk Assessment", disclosurely: true, competitor: false, winner: "disclosurely" },
+        { feature: "AI Case Analysis", disclosurely: true, competitor: "Basic AI tools", winner: "disclosurely" },
+        { feature: "AI Risk Assessment", disclosurely: true, competitor: "Limited", winner: "disclosurely" },
         { feature: "AI Chat Support", disclosurely: true, competitor: false, winner: "disclosurely" },
-        { feature: "Pattern Detection", disclosurely: true, competitor: false, winner: "disclosurely" },
-        { feature: "Automated Assignment Rules", disclosurely: true, competitor: "Basic workflows", winner: "disclosurely" },
+        { feature: "Pattern Detection", disclosurely: true, competitor: "Basic", winner: "disclosurely" },
+        { feature: "Automated Assignment Rules", disclosurely: "Advanced", competitor: "Basic", winner: "disclosurely" },
         { feature: "SLA Management", disclosurely: "Automated", competitor: "Manual", winner: "disclosurely" },
       ]
     },
@@ -40,7 +40,7 @@ const VsSpeakUp = () => {
         { feature: "End-to-End Encryption", disclosurely: "AES-256-GCM", competitor: "Yes", winner: "tie" },
         { feature: "GDPR Compliant", disclosurely: true, competitor: true, winner: "tie" },
         { feature: "ISO 27001 Certified", disclosurely: true, competitor: true, winner: "tie" },
-        { feature: "ISO 27701 Certified", disclosurely: false, competitor: true, winner: "competitor" },
+        { feature: "Data Residency Options", disclosurely: "EU/US", competitor: "Global", winner: "competitor" },
         { feature: "Zero-Knowledge Architecture", disclosurely: true, competitor: false, winner: "disclosurely" },
         { feature: "Session Management", disclosurely: true, competitor: false, winner: "disclosurely" },
       ]
@@ -55,17 +55,18 @@ const VsSpeakUp = () => {
         { feature: "Custom Branding", disclosurely: true, competitor: true, winner: "tie" },
         { feature: "Custom Domain (CNAME)", disclosurely: true, competitor: true, winner: "tie" },
         { feature: "Real-time Analytics", disclosurely: true, competitor: true, winner: "tie" },
-        { feature: "Phone Hotline", disclosurely: false, competitor: true, winner: "competitor" },
+        { feature: "24/7 Phone Hotline", disclosurely: false, competitor: true, winner: "competitor" },
+        { feature: "Modern UI/UX", disclosurely: "Modern", competitor: "Legacy", winner: "disclosurely" },
       ]
     },
     {
       category: "Language & Global",
       icon: Globe,
       items: [
-        { feature: "Languages Supported", disclosurely: "40+ languages", competitor: "70+ languages", winner: "competitor" },
-        { feature: "AI Voice Reporting", disclosurely: false, competitor: true, winner: "competitor" },
-        { feature: "Auto Translation", disclosurely: true, competitor: true, winner: "tie" },
-        { feature: "Multi-Region Support", disclosurely: true, competitor: true, winner: "tie" },
+        { feature: "Languages Supported", disclosurely: "40+ languages", competitor: "150+ languages", winner: "competitor" },
+        { feature: "AI Translation", disclosurely: true, competitor: true, winner: "tie" },
+        { feature: "Multi-Channel Reporting", disclosurely: "Web, Mobile", competitor: "Web, Mobile, Phone", winner: "competitor" },
+        { feature: "Global Infrastructure", disclosurely: "Growing", competitor: "Extensive", winner: "competitor" },
       ]
     },
     {
@@ -76,6 +77,7 @@ const VsSpeakUp = () => {
         { feature: "Role-Based Access", disclosurely: true, competitor: true, winner: "tie" },
         { feature: "Assignment Automation", disclosurely: "Advanced rules", competitor: "Basic workflows", winner: "disclosurely" },
         { feature: "Case Escalation", disclosurely: "Automated SLA", competitor: "Manual", winner: "disclosurely" },
+        { feature: "PowerBI Integration", disclosurely: false, competitor: true, winner: "competitor" },
       ]
     },
   ];
@@ -83,9 +85,9 @@ const VsSpeakUp = () => {
   return (
     <>
       <DynamicHelmet
-        pageIdentifier="/vs-speakup"
-        fallbackTitle="Disclosurely vs SpeakUp - Save $708/Year with Advanced AI Features"
-        fallbackDescription="Compare Disclosurely and SpeakUp whistleblowing platforms. Get AI case analysis, transparent pricing (£39.99 vs $99+/mo), and better automation. See the difference."
+        pageIdentifier="/vs-navex"
+        fallbackTitle="Disclosurely vs NAVEX (EthicsPoint) - Save $7,500/Year with Modern AI"
+        fallbackDescription="Compare Disclosurely and NAVEX EthicsPoint. Get enterprise features at SMB pricing (£39.99 vs $667+/mo). Modern AI, better automation, transparent pricing."
       />
       <div className="min-h-screen bg-white">
         {/* Navigation */}
@@ -120,14 +122,14 @@ const VsSpeakUp = () => {
           <div className="text-center">
             <div className="inline-flex items-center gap-2 bg-green-100 px-4 py-2 rounded-full mb-6">
               <Check className="h-5 w-5 text-green-600" />
-              <span className="text-sm font-semibold text-green-900">Save $708+ per year</span>
+              <span className="text-sm font-semibold text-green-900">Save $7,500+ per year</span>
             </div>
             <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold text-gray-900 mb-6">
               Disclosurely vs
-              <span className="block text-blue-600 mt-2">SpeakUp</span>
+              <span className="block text-blue-600 mt-2">NAVEX (EthicsPoint)</span>
             </h1>
             <p className="text-xl text-gray-600 mb-8 max-w-3xl mx-auto">
-              Get AI-powered case analysis, transparent pricing, and advanced automation—without the enterprise price tag.
+              Get enterprise-grade whistleblowing with modern AI at SMB pricing. No enterprise price tag required.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
               <a
@@ -151,19 +153,19 @@ const VsSpeakUp = () => {
           <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="grid md:grid-cols-3 gap-6">
               <div className="bg-white p-6 rounded-lg shadow-sm text-center">
-                <div className="text-3xl font-bold text-blue-600 mb-2">60%</div>
+                <div className="text-3xl font-bold text-blue-600 mb-2">94%</div>
                 <div className="text-gray-900 font-semibold mb-1">Lower Cost</div>
-                <div className="text-sm text-gray-600">£39.99/mo vs $99+/mo</div>
+                <div className="text-sm text-gray-600">£39.99/mo vs $667/mo</div>
               </div>
               <div className="bg-white p-6 rounded-lg shadow-sm text-center">
-                <div className="text-3xl font-bold text-blue-600 mb-2">Transparent</div>
-                <div className="text-gray-900 font-semibold mb-1">Public Pricing</div>
-                <div className="text-sm text-gray-600">No need to contact sales</div>
+                <div className="text-3xl font-bold text-blue-600 mb-2">Modern</div>
+                <div className="text-gray-900 font-semibold mb-1">AI-Powered Platform</div>
+                <div className="text-sm text-gray-600">vs Legacy Infrastructure</div>
               </div>
               <div className="bg-white p-6 rounded-lg shadow-sm text-center">
-                <div className="text-3xl font-bold text-blue-600 mb-2">6+</div>
-                <div className="text-gray-900 font-semibold mb-1">Exclusive AI Features</div>
-                <div className="text-sm text-gray-600">Not available in SpeakUp</div>
+                <div className="text-3xl font-bold text-blue-600 mb-2">Instant</div>
+                <div className="text-gray-900 font-semibold mb-1">Start Today</div>
+                <div className="text-sm text-gray-600">No sales calls required</div>
               </div>
             </div>
           </div>
@@ -177,7 +179,7 @@ const VsSpeakUp = () => {
                 Feature-by-Feature Comparison
               </h2>
               <p className="text-lg text-gray-600">
-                See exactly how Disclosurely compares to SpeakUp across all key areas
+                Enterprise features without the enterprise price tag
               </p>
             </div>
 
@@ -198,7 +200,7 @@ const VsSpeakUp = () => {
                           <tr>
                             <th className="px-6 py-4 text-left text-sm font-semibold text-gray-900 w-1/3">Feature</th>
                             <th className="px-6 py-4 text-center text-sm font-semibold text-blue-600 w-1/3">Disclosurely</th>
-                            <th className="px-6 py-4 text-center text-sm font-semibold text-gray-600 w-1/3">SpeakUp</th>
+                            <th className="px-6 py-4 text-center text-sm font-semibold text-gray-600 w-1/3">NAVEX</th>
                           </tr>
                         </thead>
                         <tbody className="divide-y divide-gray-200">
@@ -266,34 +268,37 @@ const VsSpeakUp = () => {
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="text-center mb-12">
               <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-4">
-                Why Teams Choose Disclosurely Over SpeakUp
+                Modern Alternative to NAVEX EthicsPoint
               </h2>
+              <p className="text-lg text-gray-600 mb-8">
+                When NAVEX is too expensive and complex for your needs
+              </p>
             </div>
 
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
               <Card>
                 <CardHeader>
                   <CardTitle className="text-xl font-bold text-gray-900 flex items-center gap-2">
-                    <Zap className="h-5 w-5 text-blue-600" />
-                    AI-Powered Intelligence
+                    <DollarSign className="h-5 w-5 text-green-600" />
+                    Affordable Enterprise Features
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
                   <p className="text-gray-600 mb-4">
-                    Exclusive AI features that automatically analyze cases, assess risk, detect patterns, and provide 24/7 chat support.
+                    Get the same compliance features at 94% lower cost. Perfect for growing companies who need enterprise quality without enterprise pricing.
                   </p>
                   <ul className="space-y-2 text-sm text-gray-700">
                     <li className="flex items-start gap-2">
                       <Check className="h-4 w-4 text-green-600 mt-0.5 flex-shrink-0" />
-                      <span>AI analyzes every case automatically</span>
+                      <span>Save $7,500+ annually</span>
                     </li>
                     <li className="flex items-start gap-2">
                       <Check className="h-4 w-4 text-green-600 mt-0.5 flex-shrink-0" />
-                      <span>Risk scores with reasoning</span>
+                      <span>Transparent, public pricing</span>
                     </li>
                     <li className="flex items-start gap-2">
                       <Check className="h-4 w-4 text-green-600 mt-0.5 flex-shrink-0" />
-                      <span>Pattern detection across reports</span>
+                      <span>No hidden fees or add-ons</span>
                     </li>
                   </ul>
                 </CardContent>
@@ -302,26 +307,26 @@ const VsSpeakUp = () => {
               <Card>
                 <CardHeader>
                   <CardTitle className="text-xl font-bold text-gray-900 flex items-center gap-2">
-                    <DollarSign className="h-5 w-5 text-green-600" />
-                    Transparent Value
+                    <Zap className="h-5 w-5 text-blue-600" />
+                    Modern AI Technology
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
                   <p className="text-gray-600 mb-4">
-                    Clear, public pricing at £39.99/month vs SpeakUp's hidden costs requiring sales contact. Save over $700/year.
+                    Built-from-scratch with AI at the core, not bolted on. Get advanced case analysis, risk assessment, and automation that NAVEX's legacy platform can't match.
                   </p>
                   <ul className="space-y-2 text-sm text-gray-700">
                     <li className="flex items-start gap-2">
                       <Check className="h-4 w-4 text-green-600 mt-0.5 flex-shrink-0" />
-                      <span>60% lower monthly cost</span>
+                      <span>AI analyzes every case</span>
                     </li>
                     <li className="flex items-start gap-2">
                       <Check className="h-4 w-4 text-green-600 mt-0.5 flex-shrink-0" />
-                      <span>No surprise add-on fees</span>
+                      <span>Pattern detection across reports</span>
                     </li>
                     <li className="flex items-start gap-2">
                       <Check className="h-4 w-4 text-green-600 mt-0.5 flex-shrink-0" />
-                      <span>Start trial without sales call</span>
+                      <span>24/7 AI chat support</span>
                     </li>
                   </ul>
                 </CardContent>
@@ -331,25 +336,25 @@ const VsSpeakUp = () => {
                 <CardHeader>
                   <CardTitle className="text-xl font-bold text-gray-900 flex items-center gap-2">
                     <Shield className="h-5 w-5 text-purple-600" />
-                    Advanced Automation
+                    Quick Implementation
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
                   <p className="text-gray-600 mb-4">
-                    Sophisticated assignment rules and SLA management that go beyond SpeakUp's basic workflows.
+                    Start in minutes, not months. No lengthy sales cycles, complex contracts, or enterprise onboarding. Just sign up and go.
                   </p>
                   <ul className="space-y-2 text-sm text-gray-700">
                     <li className="flex items-start gap-2">
                       <Check className="h-4 w-4 text-green-600 mt-0.5 flex-shrink-0" />
-                      <span>Multi-condition assignment rules</span>
+                      <span>5-minute setup</span>
                     </li>
                     <li className="flex items-start gap-2">
                       <Check className="h-4 w-4 text-green-600 mt-0.5 flex-shrink-0" />
-                      <span>Automated SLA tracking & alerts</span>
+                      <span>No sales calls required</span>
                     </li>
                     <li className="flex items-start gap-2">
                       <Check className="h-4 w-4 text-green-600 mt-0.5 flex-shrink-0" />
-                      <span>Smart escalation workflows</span>
+                      <span>Instant 14-day trial</span>
                     </li>
                   </ul>
                 </CardContent>
@@ -358,30 +363,66 @@ const VsSpeakUp = () => {
           </div>
         </div>
 
-        {/* Migration Section */}
+        {/* Who Should Choose What */}
         <div className="bg-white py-16 sm:py-20">
-          <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-            <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-6">
-              Easy Migration from SpeakUp
-            </h2>
-            <p className="text-lg text-gray-600 mb-8">
-              Switch in days with our white-glove migration service. Zero downtime, zero hassle.
-            </p>
-            <div className="grid md:grid-cols-3 gap-6 text-left">
-              <div className="bg-gray-50 p-6 rounded-lg">
-                <div className="text-2xl font-bold text-blue-600 mb-2">1</div>
-                <h3 className="font-semibold text-gray-900 mb-2">Data Export</h3>
-                <p className="text-sm text-gray-600">We securely extract all your historical cases and data from SpeakUp</p>
+          <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="text-center mb-12">
+              <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-4">
+                Which Solution is Right for You?
+              </h2>
+            </div>
+
+            <div className="grid md:grid-cols-2 gap-8">
+              <div className="bg-blue-50 border-2 border-blue-200 rounded-lg p-8">
+                <h3 className="text-2xl font-bold text-blue-900 mb-4">Choose Disclosurely if you:</h3>
+                <ul className="space-y-3 text-gray-700">
+                  <li className="flex items-start gap-3">
+                    <Check className="h-5 w-5 text-blue-600 mt-0.5 flex-shrink-0" />
+                    <span>Need transparent, affordable pricing</span>
+                  </li>
+                  <li className="flex items-start gap-3">
+                    <Check className="h-5 w-5 text-blue-600 mt-0.5 flex-shrink-0" />
+                    <span>Want modern AI-powered case analysis</span>
+                  </li>
+                  <li className="flex items-start gap-3">
+                    <Check className="h-5 w-5 text-blue-600 mt-0.5 flex-shrink-0" />
+                    <span>Prefer self-service setup and onboarding</span>
+                  </li>
+                  <li className="flex items-start gap-3">
+                    <Check className="h-5 w-5 text-blue-600 mt-0.5 flex-shrink-0" />
+                    <span>Are a growing SMB or mid-market company</span>
+                  </li>
+                  <li className="flex items-start gap-3">
+                    <Check className="h-5 w-5 text-blue-600 mt-0.5 flex-shrink-0" />
+                    <span>Value modern UX and ease of use</span>
+                  </li>
+                </ul>
               </div>
-              <div className="bg-gray-50 p-6 rounded-lg">
-                <div className="text-2xl font-bold text-blue-600 mb-2">2</div>
-                <h3 className="font-semibold text-gray-900 mb-2">Setup & Configuration</h3>
-                <p className="text-sm text-gray-600">Configure Disclosurely with your branding and import all data</p>
-              </div>
-              <div className="bg-gray-50 p-6 rounded-lg">
-                <div className="text-2xl font-bold text-blue-600 mb-2">3</div>
-                <h3 className="font-semibold text-gray-900 mb-2">Training & Go-Live</h3>
-                <p className="text-sm text-gray-600">Comprehensive team training and dedicated onboarding support</p>
+
+              <div className="bg-gray-50 border-2 border-gray-200 rounded-lg p-8">
+                <h3 className="text-2xl font-bold text-gray-900 mb-4">Choose NAVEX if you:</h3>
+                <ul className="space-y-3 text-gray-700">
+                  <li className="flex items-start gap-3">
+                    <Check className="h-5 w-5 text-gray-600 mt-0.5 flex-shrink-0" />
+                    <span>Are a Fortune 500 with unlimited budget</span>
+                  </li>
+                  <li className="flex items-start gap-3">
+                    <Check className="h-5 w-5 text-gray-600 mt-0.5 flex-shrink-0" />
+                    <span>Need 150+ language support globally</span>
+                  </li>
+                  <li className="flex items-start gap-3">
+                    <Check className="h-5 w-5 text-gray-600 mt-0.5 flex-shrink-0" />
+                    <span>Require 24/7 phone hotline</span>
+                  </li>
+                  <li className="flex items-start gap-3">
+                    <Check className="h-5 w-5 text-gray-600 mt-0.5 flex-shrink-0" />
+                    <span>Have complex multi-national operations</span>
+                  </li>
+                  <li className="flex items-start gap-3">
+                    <Check className="h-5 w-5 text-gray-600 mt-0.5 flex-shrink-0" />
+                    <span>Want established enterprise vendor</span>
+                  </li>
+                </ul>
               </div>
             </div>
           </div>
@@ -391,10 +432,10 @@ const VsSpeakUp = () => {
         <div className="bg-blue-600 py-12 sm:py-16">
           <div className="max-w-4xl mx-auto text-center px-4 sm:px-6 lg:px-8">
             <h2 className="text-3xl sm:text-4xl font-bold text-white mb-4">
-              Ready to Save $708+/Year?
+              Ready to Save $7,500+/Year?
             </h2>
             <p className="text-xl text-blue-100 mb-8">
-              Get AI-powered case analysis, transparent pricing, and better automation. No sales call required.
+              Get enterprise-grade whistleblowing with modern AI. No enterprise price tag or sales calls required.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <a
@@ -420,4 +461,4 @@ const VsSpeakUp = () => {
   );
 };
 
-export default VsSpeakUp;
+export default VsNavex;
