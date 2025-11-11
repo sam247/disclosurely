@@ -4,6 +4,7 @@ import { AuthProvider } from './hooks/useAuth';
 import { OrganizationProvider } from './contexts/OrganizationContext';
 import { useSessionTimeout } from './hooks/useSessionTimeout';
 import { useAuth } from './hooks/useAuth';
+import { useMultipleSessionDetection } from './hooks/useMultipleSessionDetection';
 import ProtectedRoute from './components/ProtectedRoute';
 import ScrollToTop from './components/ScrollToTop';
 import UrlRedirectMiddleware from './components/UrlRedirectMiddleware';
@@ -70,6 +71,18 @@ const SessionTimeoutManager = () => {
       {AbsoluteWarningComponent}
     </>
   );
+};
+
+// Component to handle multiple session detection
+const MultipleSessionManager = () => {
+  const { user } = useAuth();
+  const { ModalComponent } = useMultipleSessionDetection();
+
+  // Only show multiple session detection for authenticated users
+  if (!user) {
+    return null;
+  }
+  return ModalComponent;
 };
 
 // Component inside AuthProvider but without session timeout for all routes
@@ -303,6 +316,8 @@ const AppContent = () => {
       </Suspense>
       {/* Session timeout only for authenticated users */}
       <SessionTimeoutManager />
+      {/* Multiple session detection */}
+      <MultipleSessionManager />
       </UrlRedirectMiddleware>
     </OrganizationProvider>
   );

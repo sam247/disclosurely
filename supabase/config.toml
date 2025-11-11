@@ -74,3 +74,6 @@ verify_jwt = true
 
 [functions.chat-support]
 verify_jwt = false
+
+[functions.track-session]
+verify_jwt = false
