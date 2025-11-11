@@ -110,13 +110,8 @@ export const useMultipleSessionDetection = () => {
 
       if (response.error) throw response.error;
 
-      const data = response.data;
-      
-      if (data?.hasOtherSessions && data.otherSessions) {
-        setOtherSession(data.otherSessions);
-        setShowModal(true);
-      }
-      
+      // Don't check for other sessions in trackSession - that's handled separately by checkForOtherSessions
+      // This prevents false positives on page refresh
       setHasTrackedSession(true);
     } catch (error) {
       console.error('Error tracking session:', error);
