@@ -11,13 +11,24 @@ interface ProtectedRouteProps {
 }
 
 const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
-  const { user, loading, subscriptionData, subscriptionLoading } = useAuth();
+  const { user, loading, subscriptionData, subscriptionLoading, refreshSubscription } = useAuth();
   const location = useLocation();
   const [showSubscriptionModal, setShowSubscriptionModal] = useState(false);
 
   // Check subscription status when data is available
   useEffect(() => {
     if (!loading && !subscriptionLoading && user && subscriptionData) {
+      // Debug: Log subscription data to help diagnose issues
+      console.log('[ProtectedRoute] Subscription Data:', {
+        subscribed: subscriptionData.subscribed,
+        subscription_status: subscriptionData.subscription_status,
+        subscription_end: subscriptionData.subscription_end,
+        isExpired: subscriptionData.isExpired,
+        isInGracePeriod: subscriptionData.isInGracePeriod,
+        canAccess: canAccess(subscriptionData),
+        statusForModal: getSubscriptionStatusForModal(subscriptionData)
+      });
+      
       const hasAccess = canAccess(subscriptionData);
       const statusForModal = getSubscriptionStatusForModal(subscriptionData);
       

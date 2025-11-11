@@ -6,9 +6,9 @@ export type SubscriptionAccessLevel = 'full' | 'readonly' | 'blocked';
  * Determines the access level based on subscription status
  */
 export function getSubscriptionAccessLevel(subscriptionData: SubscriptionData): SubscriptionAccessLevel {
-  // If subscription_status is 'active' or 'trialing', grant full access (even if dates suggest otherwise)
+  // If subscription_status is 'active' or 'trialing', grant full access
   if (subscriptionData.subscription_status === 'active' || subscriptionData.subscription_status === 'trialing') {
-    // Double-check that subscription_end is in the future
+    // If subscription_end exists, check it's in the future
     if (subscriptionData.subscription_end) {
       const subscriptionEnd = new Date(subscriptionData.subscription_end);
       const now = new Date();
@@ -19,6 +19,9 @@ export function getSubscriptionAccessLevel(subscriptionData: SubscriptionData): 
       if (subscriptionData.isInGracePeriod) {
         return 'readonly';
       }
+      // If date is past and no grace period, but status is still active, grant access anyway
+      // (Stripe might not have updated the status yet)
+      return 'full';
     } else {
       // No end date but status is active - grant access
       return 'full';

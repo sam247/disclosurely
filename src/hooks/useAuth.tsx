@@ -79,9 +79,10 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     const lastCheck = sessionStorage.getItem(cacheKey);
     const now = Date.now();
     
-    if (lastCheck && (now - parseInt(lastCheck)) < 900000) { // 15 minutes
-      return;
-    }
+    // Always refresh on login to ensure fresh data (remove cache check temporarily for debugging)
+    // if (lastCheck && (now - parseInt(lastCheck)) < 900000) { // 15 minutes
+    //   return;
+    // }
 
     // First try direct database query for speed (no edge function)
     try {
