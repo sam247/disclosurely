@@ -533,23 +533,25 @@ const AnalyticsView: React.FC = () => {
 
   if (loading || orgLoading) {
     return (
-      <div className="min-h-screen bg-background">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-6">
-          <div className="space-y-6">
-            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-              <div>
-                <h1 className="text-2xl sm:text-3xl font-bold">Analytics</h1>
-                <p className="text-sm sm:text-base text-muted-foreground mt-1 sm:mt-2">
-                  {orgLoading ? 'Loading organization...' : 'Loading insights...'}
-                </p>
-              </div>
+      <div className="h-screen bg-background overflow-hidden flex flex-col">
+        <div className="max-w-7xl mx-auto flex-1 flex flex-col overflow-hidden w-full">
+          {/* Header */}
+          <div className="flex flex-col gap-2 flex-shrink-0">
+            <div>
+              <h1 className="text-xl sm:text-2xl font-bold">Analytics</h1>
+              <p className="text-xs sm:text-sm text-muted-foreground mt-0.5">
+                {orgLoading ? 'Loading organization...' : 'Loading insights...'}
+              </p>
             </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          </div>
+          {/* Loading content area */}
+          <div className="flex-1 overflow-hidden min-h-0">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-4 pt-2 sm:pt-4">
               {[...Array(4)].map((_, i) => (
                 <Card key={i} className="animate-pulse">
-                  <CardContent className="p-4 sm:p-6">
-                    <div className="h-4 bg-muted rounded w-3/4 mb-2"></div>
-                    <div className="h-8 bg-muted rounded w-1/2"></div>
+                  <CardContent className="p-3 sm:p-4">
+                    <div className="h-3 sm:h-4 bg-muted rounded w-3/4 mb-2"></div>
+                    <div className="h-6 sm:h-8 bg-muted rounded w-1/2"></div>
                   </CardContent>
                 </Card>
               ))}
@@ -562,39 +564,44 @@ const AnalyticsView: React.FC = () => {
 
   if (!analyticsData && !loading && !orgLoading) {
     return (
-      <div className="min-h-screen bg-background">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-6">
-          <div className="space-y-6">
+      <div className="h-screen bg-background overflow-hidden flex flex-col">
+        <div className="max-w-7xl mx-auto flex-1 flex flex-col overflow-hidden w-full">
+          {/* Header */}
+          <div className="flex flex-col gap-2 flex-shrink-0">
             <div>
-              <h1 className="text-2xl sm:text-3xl font-bold">Analytics</h1>
-              <p className="text-sm sm:text-base text-muted-foreground mt-1 sm:mt-2">
+              <h1 className="text-xl sm:text-2xl font-bold">Analytics</h1>
+              <p className="text-xs sm:text-sm text-muted-foreground mt-0.5">
                 {!organization?.id ? 'No organization found. Please contact support.' : 'No data available for the selected period.'}
               </p>
-              <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 mt-4">
-                <Button 
-                  onClick={fetchAnalyticsData} 
-                  variant="outline"
-                >
-                  Retry
-                </Button>
-                {organization?.id && (
-                  <div className="flex items-center gap-2">
-                    <label className="text-sm font-medium">Period:</label>
-                    <select 
-                      value={selectedPeriod} 
-                      onChange={(e) => setSelectedPeriod(e.target.value as any)}
-                      className="px-3 py-1 border rounded-md text-sm"
-                    >
-                      <option value="7d">Last 7 days</option>
-                      <option value="30d">Last 30 days</option>
-                      <option value="90d">Last 90 days</option>
-                      <option value="1y">Last year</option>
-                    </select>
-                  </div>
-                )}
-              </div>
+            </div>
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
+              <Button 
+                onClick={fetchAnalyticsData} 
+                variant="outline"
+                size="sm"
+                className="text-xs sm:text-sm"
+              >
+                Retry
+              </Button>
+              {organization?.id && (
+                <div className="flex items-center gap-2">
+                  <label className="text-xs sm:text-sm font-medium whitespace-nowrap">Period:</label>
+                  <select 
+                    value={selectedPeriod} 
+                    onChange={(e) => setSelectedPeriod(e.target.value as any)}
+                    className="px-2 py-1 sm:py-1.5 border rounded-md text-xs sm:text-sm bg-background"
+                  >
+                    <option value="7d">Last 7 days</option>
+                    <option value="30d">Last 30 days</option>
+                    <option value="90d">Last 90 days</option>
+                    <option value="1y">Last year</option>
+                  </select>
+                </div>
+              )}
             </div>
           </div>
+          {/* Empty content area */}
+          <div className="flex-1 overflow-hidden min-h-0"></div>
         </div>
       </div>
     );

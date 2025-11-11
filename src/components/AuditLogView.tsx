@@ -303,11 +303,18 @@ const AuditLogView = () => {
 
   if (!organization) {
     return (
-      <div className="space-y-6">
-        <div>
-          <h1 className="text-3xl font-bold">Audit Trail</h1>
-          <p className="text-muted-foreground">Loading organization data...</p>
+      <div className="space-y-2 h-screen flex flex-col overflow-hidden">
+        {/* Header */}
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 flex-shrink-0">
+          <div>
+            <h1 className="text-xl sm:text-2xl font-bold">Audit Trail</h1>
+            <p className="text-xs sm:text-sm text-muted-foreground mt-0.5">
+              Loading organization data...
+            </p>
+          </div>
         </div>
+        {/* Empty content area */}
+        <div className="flex-1 overflow-hidden min-h-0"></div>
       </div>
     );
   }
