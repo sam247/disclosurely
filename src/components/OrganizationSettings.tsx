@@ -199,7 +199,7 @@ const OrganizationSettings = () => {
   return (
     <div className="space-y-6">
       <Card>
-        <CardContent className="space-y-6">
+        <CardContent className="space-y-6 p-4 sm:p-6">
           {/* Organization Name */}
           <div className="space-y-2">
             <Label htmlFor="org-name">Organization Name</Label>
@@ -208,6 +208,7 @@ const OrganizationSettings = () => {
               value={organization.name}
               onChange={(e) => setOrganization({ ...organization, name: e.target.value })}
               placeholder="Enter organization name"
+              className="max-w-md"
             />
           </div>
 
@@ -224,7 +225,7 @@ const OrganizationSettings = () => {
                   />
                 </div>
               )}
-              <div className="flex-1 min-w-0 w-full">
+              <div className="flex-1 min-w-0 max-w-md">
                 <Input
                   type="file"
                   accept="image/*"
@@ -241,7 +242,7 @@ const OrganizationSettings = () => {
           {/* Brand Color */}
           <div className="space-y-2">
             <Label htmlFor="brand-color">Brand Color</Label>
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-3 max-w-md">
               <Input
                 id="brand-color"
                 type="color"
