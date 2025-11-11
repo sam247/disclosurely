@@ -2,18 +2,19 @@ import { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Settings, FileText, Globe, Users, ChevronRight, Flag, MessageCircle } from 'lucide-react';
+import { Settings, FileText, Globe, Users, ChevronRight, Flag, MessageCircle, Activity } from 'lucide-react';
 import { BlogEditor } from './BlogEditor';
 import { SEOSettings } from './SEOSettings';
 import { FeatureFlagManager } from './FeatureFlagManager';
 import ChatAdminView from '@/components/dashboard/ChatAdminView';
+import SystemHealthDashboard from '@/components/dashboard/SystemHealthDashboard';
 import { useOrganization } from '@/hooks/useOrganization';
 import { useTranslation } from 'react-i18next';
 import { useUserRoles } from '@/hooks/useUserRoles';
 import { useAuth } from '@/hooks/useAuth';
 import { cn } from '@/lib/utils';
 
-type AdminSection = 'blog' | 'seo' | 'features' | 'chat';
+type AdminSection = 'blog' | 'seo' | 'features' | 'chat' | 'health';
 
 interface AdminMenuItem {
   id: AdminSection;
@@ -46,6 +47,12 @@ const adminMenuItems: AdminMenuItem[] = [
     label: 'Chat Support',
     icon: MessageCircle,
     description: 'Manage AI chat conversations and support'
+  },
+  {
+    id: 'health',
+    label: 'System Health',
+    icon: Activity,
+    description: 'Monitor system performance and health metrics'
   }
 ];
 
@@ -119,6 +126,20 @@ export const AdminPanel = () => {
           );
         }
         return <ChatAdminView />;
+      case 'health':
+        // Only show system health to Disclosurely team
+        if (!isDisclosurelyTeam) {
+          return (
+            <div className="text-center py-12">
+              <Activity className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+              <h3 className="text-lg font-semibold mb-2">Access Restricted</h3>
+              <p className="text-muted-foreground">
+                System health dashboard is only available to Disclosurely team members.
+              </p>
+            </div>
+          );
+        }
+        return <SystemHealthDashboard />;
       default:
         return <FeatureFlagManager />;
     }
