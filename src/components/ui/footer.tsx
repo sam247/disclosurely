@@ -42,6 +42,16 @@ export const Footer = () => {
                 </Link>
               </li>
               <li>
+                <Link to={`${langPrefix}/industries`} className="text-gray-400 hover:text-white">
+                  Industries
+                </Link>
+              </li>
+              <li>
+                <Link to={`${langPrefix}/anonymous-hotline`} className="text-gray-400 hover:text-white">
+                  Anonymous Hotline
+                </Link>
+              </li>
+              <li>
                 <Link to={`${langPrefix}/compliance-software`} className="text-gray-400 hover:text-white">
                   Compliance Software
                 </Link>
@@ -84,9 +94,19 @@ export const Footer = () => {
             <h3 className="font-semibold mb-4">Resources</h3>
             <ul className="space-y-2">
               <li>
+                <Link to={`${langPrefix}/faq`} className="text-gray-400 hover:text-white">
+                  FAQ
+                </Link>
+              </li>
+              <li>
                 <a href="https://docs.disclosurely.com" target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-white">
                   Documentation
                 </a>
+              </li>
+              <li>
+                <Link to={`${langPrefix}/security`} className="text-gray-400 hover:text-white">
+                  Security & Trust
+                </Link>
               </li>
               <li>
                 <Link to={`${langPrefix}/whistleblowing-directive`} className="text-gray-400 hover:text-white">
