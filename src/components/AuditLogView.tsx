@@ -598,7 +598,7 @@ const AuditLogView = () => {
             {/* Desktop Table View */}
             <div className="hidden md:block flex-1 overflow-hidden min-h-0 flex flex-col">
               {/* Scrollable table body */}
-              <div className="flex-1 overflow-y-auto overflow-x-auto min-h-0">
+              <div className="flex-1 overflow-y-auto overflow-x-auto min-h-0" style={{ maxHeight: 'calc(100vh - 500px)' }}>
                 <table className="w-full">
               {/* Fixed Header */}
               <thead className="bg-gray-50 sticky top-0 z-10">
@@ -750,14 +750,14 @@ const AuditLogView = () => {
             </table>
               </div>
               
-              {/* Pagination Footer - Excel-style fixed at bottom */}
+              {/* Pagination Footer - Airtable/Spreadsheet style fixed at bottom */}
               {total > 0 && (
-                <div className="flex flex-col sm:flex-row items-center justify-between p-1.5 sm:p-2 border-t bg-gray-50 gap-1.5 sm:gap-0 flex-shrink-0">
-                  <div className="flex flex-col sm:flex-row items-start sm:items-center space-y-1 sm:space-y-0 sm:space-x-3 w-full sm:w-auto">
-                    <div className="flex items-center space-x-1.5">
-                      <Label className="text-xs whitespace-nowrap">Rows:</Label>
+                <div className="flex flex-row items-center justify-between px-3 py-2 border-t bg-gray-50 flex-shrink-0 h-10">
+                  <div className="flex items-center space-x-3">
+                    <div className="flex items-center space-x-2">
+                      <Label className="text-xs whitespace-nowrap font-medium">Rows per page:</Label>
                       <Select value={pageSize.toString()} onValueChange={(value) => handlePageSizeChange(Number(value))}>
-                        <SelectTrigger className="h-6 text-xs w-14">
+                        <SelectTrigger className="h-7 text-xs w-16 border-gray-300">
                           <SelectValue />
                         </SelectTrigger>
                         <SelectContent>
@@ -769,25 +769,28 @@ const AuditLogView = () => {
                       </Select>
                     </div>
                     
-                    <div className="text-xs text-muted-foreground">
+                    <div className="text-xs text-gray-600 font-medium">
+                      Page {currentPage} of {totalPages}
+                    </div>
+                    
+                    <div className="text-xs text-gray-500">
                       {startRecord}-{endRecord} of {total}
                     </div>
                   </div>
                   
-                  <div className="flex items-center space-x-1 w-full sm:w-auto justify-center sm:justify-end">
+                  <div className="flex items-center space-x-1">
                     <Button
                       variant="outline"
                       size="sm"
                       onClick={() => handlePageChange(currentPage - 1)}
                       disabled={currentPage === 1 || loading}
-                      className="h-6 text-xs px-2 flex-1 sm:flex-initial"
+                      className="h-7 w-7 text-xs p-0 border-gray-300"
                     >
-                      <ChevronLeft className="h-3 w-3" />
-                      <span className="hidden sm:inline ml-1">Prev</span>
+                      <ChevronLeft className="h-3.5 w-3.5" />
                     </Button>
                     
                     {/* Page Numbers */}
-                    <div className="hidden sm:flex items-center space-x-0.5">
+                    <div className="flex items-center space-x-0.5">
                       {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
                         const pageNum = Math.max(1, Math.min(totalPages - 4, currentPage - 2)) + i;
                         if (pageNum > totalPages) return null;
@@ -799,7 +802,7 @@ const AuditLogView = () => {
                             size="sm"
                             onClick={() => handlePageChange(pageNum)}
                             disabled={loading}
-                            className="h-6 w-6 text-xs p-0"
+                            className={`h-7 w-7 text-xs p-0 ${pageNum === currentPage ? '' : 'border-gray-300'}`}
                           >
                             {pageNum}
                           </Button>
@@ -812,10 +815,9 @@ const AuditLogView = () => {
                       size="sm"
                       onClick={() => handlePageChange(currentPage + 1)}
                       disabled={currentPage === totalPages || loading}
-                      className="h-6 text-xs px-2 flex-1 sm:flex-initial"
+                      className="h-7 w-7 text-xs p-0 border-gray-300"
                     >
-                      <span className="hidden sm:inline mr-1">Next</span>
-                      <ChevronRight className="h-3 w-3" />
+                      <ChevronRight className="h-3.5 w-3.5" />
                     </Button>
                   </div>
                 </div>
