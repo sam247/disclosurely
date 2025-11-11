@@ -160,7 +160,7 @@ export const AdminPanel = () => {
             </div>
             <Badge variant="secondary" className="flex items-center gap-1">
               <Users className="h-3 w-3" />
-              {isSuperAdmin ? t('admin.superAdmin') : t('admin.orgAdmin')}
+              Owner
             </Badge>
           </div>
         </div>
