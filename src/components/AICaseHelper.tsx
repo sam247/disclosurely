@@ -739,16 +739,16 @@ Guidelines:
   };
 
   return (
-    <div className="flex flex-col h-[calc(100vh-12rem)]">
+    <div className="flex flex-col min-h-0 md:h-[calc(100vh-12rem)]">
       {/* Resizable Panel Layout */}
-      <div ref={containerRef} className="flex flex-col md:flex-row flex-1 overflow-hidden bg-gray-50" style={{ userSelect: isResizing ? 'none' : 'auto' }}>
+      <div ref={containerRef} className="flex flex-col md:flex-row flex-1 min-h-0 md:overflow-hidden bg-gray-50" style={{ userSelect: isResizing ? 'none' : 'auto' }}>
         {/* Left Panel - Controls */}
         <div 
           className="bg-white border-r flex flex-col w-full md:flex-col"
           style={{ width: typeof window !== 'undefined' && window.innerWidth >= 768 ? `${leftPanelWidth}%` : undefined }}
         >
           {/* Scrollable content area */}
-          <div className="flex-1 overflow-y-auto p-4 space-y-4">
+          <div className="flex-1 overflow-y-auto p-4 space-y-4 min-h-0">
             {/* Saved Analyses - Always visible */}
             <div className="space-y-2">
               <label className="text-sm font-semibold text-green-700">📁 Saved Analyses {savedAnalyses.length > 0 && `(${savedAnalyses.length})`}</label>
@@ -1021,9 +1021,9 @@ Guidelines:
         </div>
 
         {/* Right Panel - Chat Interface */}
-        <div className="flex-1 flex flex-col bg-white w-full md:w-auto">
+        <div className="flex-1 flex flex-col bg-white w-full md:w-auto min-h-0">
           {/* Chat Messages - Scrolling Area */}
-          <div className="flex-1 overflow-y-auto p-6 space-y-4">
+          <div className="flex-1 overflow-y-auto p-4 sm:p-6 space-y-4 min-h-0">
             {chatMessages.length === 0 ? (
               <div className="flex items-center justify-center h-full">
                 <div className="text-center text-muted-foreground max-w-md">
