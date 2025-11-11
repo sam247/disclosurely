@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { useAuth } from './useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import MultipleSessionModal from '@/components/MultipleSessionModal';
@@ -22,16 +22,43 @@ export const useMultipleSessionDetection = () => {
   const [showModal, setShowModal] = useState(false);
   const [otherSession, setOtherSession] = useState<SessionInfo | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
+  const [hasTrackedSession, setHasTrackedSession] = useState(false);
+  const sessionIdRef = useRef<string | null>(null);
+
+  // Generate a stable session ID (based on user ID and timestamp of first login)
+  const getSessionId = useCallback(() => {
+    if (!user || !session) return null;
+    
+    // Use a combination that's stable for this login session
+    // Store in sessionStorage to persist across page refreshes
+    const storageKey = `session_id_${user.id}`;
+    let storedSessionId = sessionStorage.getItem(storageKey);
+    
+    if (!storedSessionId) {
+      // Create new session ID on first login
+      storedSessionId = `${user.id}_${Date.now()}_${Math.random().toString(36).substring(7)}`;
+      sessionStorage.setItem(storageKey, storedSessionId);
+    }
+    
+    return storedSessionId;
+  }, [user, session]);
 
   // Track session on login
   const trackSession = useCallback(async () => {
-    if (!user || !session) return;
+    if (!user || !session || hasTrackedSession) return;
+
+    const sessionId = getSessionId();
+    if (!sessionId) return;
+
+    // Prevent duplicate tracking
+    if (sessionIdRef.current === sessionId) return;
+    sessionIdRef.current = sessionId;
 
     try {
       const response = await supabase.functions.invoke('track-session', {
         body: {
           action: 'create',
-          sessionId: session.access_token, // Using access token as session identifier
+          sessionId: sessionId,
           userId: user.id,
           userAgent: navigator.userAgent,
         },
@@ -45,19 +72,23 @@ export const useMultipleSessionDetection = () => {
         setOtherSession(data.otherSessions);
         setShowModal(true);
       }
+      
+      setHasTrackedSession(true);
     } catch (error) {
       console.error('Error tracking session:', error);
       // Don't block login if session tracking fails
     }
-  }, [user, session]);
+  }, [user, session, hasTrackedSession, getSessionId]);
 
   // Update session activity periodically
   useEffect(() => {
     if (!user || !session) return;
 
+    const sessionId = getSessionId();
+    if (!sessionId) return;
+
     const updateActivity = async () => {
       try {
-        const sessionId = `${user.id}_${session.access_token.substring(0, 20)}`;
         await supabase.functions.invoke('track-session', {
           body: {
             action: 'update_activity',
@@ -74,14 +105,14 @@ export const useMultipleSessionDetection = () => {
     const interval = setInterval(updateActivity, 5 * 60 * 1000);
 
     return () => clearInterval(interval);
-  }, [user, session]);
+  }, [user, session, getSessionId]);
 
-  // Track session on mount if user is logged in
+  // Track session on mount if user is logged in (only once)
   useEffect(() => {
-    if (user && session && !showModal) {
+    if (user && session && !hasTrackedSession) {
       trackSession();
     }
-  }, [user, session, trackSession, showModal]);
+  }, [user, session, trackSession, hasTrackedSession]);
 
   const handleDismiss = useCallback(() => {
     setShowModal(false);
@@ -93,7 +124,9 @@ export const useMultipleSessionDetection = () => {
 
     setIsProcessing(true);
     try {
-      const sessionId = `${user.id}_${session.access_token.substring(0, 20)}`;
+      const sessionId = getSessionId();
+      if (!sessionId) return;
+      
       // Deactivate other sessions
       await supabase.functions.invoke('track-session', {
         body: {
@@ -110,7 +143,7 @@ export const useMultipleSessionDetection = () => {
     } finally {
       setIsProcessing(false);
     }
-  }, [user, session, isProcessing]);
+  }, [user, session, isProcessing, getSessionId]);
 
   const handleContinueOtherDevice = useCallback(async () => {
     if (isProcessing) return;

@@ -167,6 +167,8 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
           setTimeout(() => {
             refreshSubscription(session);
           }, 1500);
+          // Clear session tracking flag on new sign-in to allow re-tracking
+          // This will be handled by useMultipleSessionDetection hook
         }
       }
     );
