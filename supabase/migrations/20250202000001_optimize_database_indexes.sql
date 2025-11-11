@@ -62,8 +62,8 @@ WHERE accepted_at IS NULL;
 
 -- Assignment rules - organization lookups
 CREATE INDEX IF NOT EXISTS idx_assignment_rules_org_enabled
-ON public.assignment_rules(organization_id, is_enabled, priority)
-WHERE is_enabled = true;
+ON public.assignment_rules(organization_id, enabled, priority)
+WHERE enabled = true;
 
 -- SLA policies - organization lookups
 CREATE INDEX IF NOT EXISTS idx_sla_policies_org_default
