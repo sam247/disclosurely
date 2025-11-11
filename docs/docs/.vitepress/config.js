@@ -78,9 +78,19 @@ export default defineConfig({
         collapsed: false,
         items: [
           { text: 'AI Case Helper', link: '/ai/case-helper' },
+          { text: 'AI Chat Support', link: '/features/ai-chat-support' },
           { text: 'Pattern Detection', link: '/ai/pattern-detection' },
           { text: 'Risk Assessment', link: '/ai/risk-assessment' },
           { text: 'Content Generation', link: '/ai/content-generation' }
+        ]
+      },
+      {
+        text: 'Workflows & Automation',
+        collapsed: false,
+        items: [
+          { text: 'Assignment Rules', link: '/features/assignment-rules' },
+          { text: 'SLA Management', link: '/features/sla-management' },
+          { text: 'Workflow Escalations', link: '/cases/workflow' }
         ]
       },
       {
@@ -106,6 +116,7 @@ export default defineConfig({
         items: [
           { text: 'Security Overview', link: '/security/overview' },
           { text: 'Authentication', link: '/security/authentication' },
+          { text: 'Session Management', link: '/security/session-management' },
           { text: 'Multi-Factor Authentication', link: '/security/mfa' },
           { text: 'Encryption & Privacy', link: '/security/encryption' },
           { text: 'Access Control', link: '/security/access-control' },
@@ -141,6 +152,17 @@ export default defineConfig({
           { text: 'For Case Handlers', link: '/guides/case-handlers' },
           { text: 'For Reviewers', link: '/guides/reviewers' },
           { text: 'For Whistleblowers', link: '/guides/whistleblowers' }
+        ]
+      },
+      {
+        text: 'Features',
+        collapsed: false,
+        items: [
+          { text: 'AI Case Analysis', link: '/features/ai-case-analysis' },
+          { text: 'AI Chat Support', link: '/features/ai-chat-support' },
+          { text: 'Anonymous Reporting', link: '/features/anonymous-reporting' },
+          { text: 'Assignment Rules', link: '/features/assignment-rules' },
+          { text: 'SLA Management', link: '/features/sla-management' }
         ]
       },
       {
