@@ -10,7 +10,7 @@ export const progressiveFormTranslations = {
       minutes: "~5 Minutes",
       minutesDesc: "Quick process with step-by-step guidance",
       beginButton: "Let's Begin →",
-      footer: "By continuing, you agree that the information you provide will be reviewed by authorized personnel."
+      footer: "By continuing, you agree that the information you provide will be reviewed by authorized personnel. Portal provided by Disclosurely."
     },
     step1: {
       title: "Give your report a title",

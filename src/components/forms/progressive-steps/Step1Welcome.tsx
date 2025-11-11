@@ -119,7 +119,16 @@ const Step1Welcome = ({ onContinue, brandColor, language, onLanguageChange, orga
       </div>
 
       <p className="text-xs sm:text-sm text-gray-500 max-w-md mx-auto px-4 break-words mt-2 sm:mt-4">
-        {t.welcome.footer}
+        By continuing, you agree that the information you provide will be reviewed by authorized personnel. Portal provided by{' '}
+        <a 
+          href="https://disclosurely.com" 
+          target="_blank" 
+          rel="noopener noreferrer"
+          className="text-primary hover:underline"
+        >
+          Disclosurely
+        </a>
+        .
       </p>
     </div>
   );
