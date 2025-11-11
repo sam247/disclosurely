@@ -121,7 +121,7 @@ async function autoAssignReport(supabase: any, reportId: string, organizationId:
         throw updateError
       }
 
-      // Log the action
+      // Log the action to workflow_logs
       const { error: logError } = await supabase
         .from('workflow_logs')
         .insert({
@@ -137,6 +137,51 @@ async function autoAssignReport(supabase: any, reportId: string, organizationId:
 
       if (logError) {
         console.error('[Auto-Assign] Error logging action:', logError)
+      }
+
+      // Also log to audit_logs for comprehensive audit trail
+      // Get report details for audit log
+      const { data: reportData } = await supabase
+        .from('reports')
+        .select('title, tracking_id, organization_id')
+        .eq('id', reportId)
+        .single()
+
+      if (reportData) {
+        // Get assigned user details
+        const { data: assignedUser } = await supabase
+          .from('profiles')
+          .select('email')
+          .eq('id', rule.assign_to_user_id)
+          .single()
+
+        // Create audit log entry
+        const { error: auditError } = await supabase
+          .from('audit_logs')
+          .insert({
+            event_type: 'case.auto_assigned',
+            category: 'case_management',
+            action: 'Auto-assigned via workflow',
+            severity: 'low',
+            actor_type: 'system',
+            organization_id: reportData.organization_id,
+            target_type: 'case',
+            target_id: reportId,
+            target_name: reportData.tracking_id,
+            summary: `Case ${reportData.tracking_id} auto-assigned via workflow rule "${rule.name}"`,
+            description: `Report "${reportData.title}" was automatically assigned to ${assignedUser?.email || 'user'} based on assignment rule "${rule.name}"`,
+            metadata: {
+              rule_id: rule.id,
+              rule_name: rule.name,
+              assigned_to: rule.assign_to_user_id,
+              assigned_to_email: assignedUser?.email,
+              conditions_matched: rule.conditions
+            }
+          })
+
+        if (auditError) {
+          console.error('[Auto-Assign] Error creating audit log:', auditError)
+        }
       }
 
       return new Response(

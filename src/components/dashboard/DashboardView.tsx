@@ -12,6 +12,7 @@ import { useOrganization } from '@/hooks/useOrganization';
 import { useToast } from '@/hooks/use-toast';
 import { useTranslation } from 'react-i18next';
 import { log, LogContext } from '@/utils/logger';
+import { auditLogger } from '@/utils/auditLogger';
 import { FileText, Eye, Archive, Trash2, RotateCcw, MoreVertical, XCircle, ChevronUp, ChevronDown, CheckCircle, Search, Download, FileSpreadsheet, Bot, Zap, AlertCircle, Clock, Flame, User, Copy, Check } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import ReportMessaging from '@/components/ReportMessaging';
@@ -499,12 +500,33 @@ const DashboardView = () => {
       if (error) throw error;
       
       // Log assignment to audit trail
-      if (report && effectiveOrganizationId) {
-        await log.info(LogContext.CASE_MANAGEMENT, 'Report assignment updated', {
-          reportId: reportId,
-          userId: user?.id,
-          userEmail: user?.email,
-          organizationId: effectiveOrganizationId
+      if (report && effectiveOrganizationId && user) {
+        await auditLogger.log({
+          eventType: 'case.update',
+          category: 'case_management',
+          action: assigneeId === 'unassigned' ? 'Unassigned' : 'Assigned',
+          severity: 'medium',
+          actorType: 'user',
+          actorId: user.id,
+          actorEmail: user.email,
+          organizationId: effectiveOrganizationId,
+          targetType: 'case',
+          targetId: reportId,
+          targetName: report.tracking_id,
+          summary: assigneeId === 'unassigned' 
+            ? `Case ${report.tracking_id} unassigned`
+            : `Case ${report.tracking_id} assigned to ${assignee?.first_name || assignee?.email || 'user'}`,
+          description: `Assignment changed for "${report.title}"`,
+          beforeState: { assigned_to: report.assigned_to },
+          afterState: { assigned_to: assigneeId === 'unassigned' ? null : assigneeId },
+          metadata: {
+            report_type: report.report_type,
+            priority: report.priority,
+            assignee_email: assignee?.email,
+            assignee_name: assignee?.first_name && assignee?.last_name 
+              ? `${assignee.first_name} ${assignee.last_name}`
+              : assignee?.email
+          },
         });
       }
       
@@ -927,6 +949,8 @@ Additional Details: ${decryptedContent.additionalDetails || 'None provided'}
   const updateManualRiskLevel = async (reportId: string, riskLevel: number) => {
     setUpdatingRiskLevel(reportId);
     try {
+      const report = reports.find(r => r.id === reportId);
+      
       const { error } = await supabase
         .from('reports')
         .update({
@@ -936,6 +960,31 @@ Additional Details: ${decryptedContent.additionalDetails || 'None provided'}
         .eq('id', reportId);
 
       if (error) throw error;
+
+      // Log to audit trail
+      if (report && effectiveOrganizationId && user) {
+        await auditLogger.log({
+          eventType: 'case.update',
+          category: 'case_management',
+          action: 'Risk level updated',
+          severity: 'medium',
+          actorType: 'user',
+          actorId: user.id,
+          actorEmail: user.email,
+          organizationId: effectiveOrganizationId,
+          targetType: 'case',
+          targetId: reportId,
+          targetName: report.tracking_id,
+          summary: `Manual risk level updated for case ${report.tracking_id} from ${report.manual_risk_level || 'N/A'} to ${riskLevel}`,
+          description: `Risk level changed for "${report.title}"`,
+          beforeState: { manual_risk_level: report.manual_risk_level },
+          afterState: { manual_risk_level: riskLevel },
+          metadata: {
+            report_type: report.report_type,
+            priority: report.priority,
+          },
+        });
+      }
 
       toast({
         title: "Risk Level Updated",
@@ -983,12 +1032,43 @@ Additional Details: ${decryptedContent.additionalDetails || 'None provided'}
   const handleBulkStatusUpdate = async (status: string) => {
     setIsBulkProcessing(true);
     try {
+      const reportsToUpdate = reports.filter(r => selectedReportIds.includes(r.id));
+      
       const { error } = await supabase
         .from('reports')
         .update({ status: status as Report['status'], updated_at: new Date().toISOString() })
         .in('id', selectedReportIds);
 
       if (error) throw error;
+
+      // Log bulk status update to audit trail
+      if (effectiveOrganizationId && user && reportsToUpdate.length > 0) {
+        for (const report of reportsToUpdate) {
+          await auditLogger.log({
+            eventType: 'case.update',
+            category: 'case_management',
+            action: 'Bulk status update',
+            severity: 'medium',
+            actorType: 'user',
+            actorId: user.id,
+            actorEmail: user.email,
+            organizationId: effectiveOrganizationId,
+            targetType: 'case',
+            targetId: report.id,
+            targetName: report.tracking_id,
+            summary: `Bulk status update: Case ${report.tracking_id} status changed to ${status}`,
+            description: `Status updated for "${report.title}" as part of bulk operation`,
+            beforeState: { status: report.status },
+            afterState: { status: status as Report['status'] },
+            metadata: {
+              report_type: report.report_type,
+              priority: report.priority,
+              bulk_operation: true,
+              total_reports_updated: selectedReportIds.length
+            },
+          });
+        }
+      }
 
       toast({
         title: "Status Updated",

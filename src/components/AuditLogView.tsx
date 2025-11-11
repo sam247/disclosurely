@@ -313,31 +313,33 @@ const AuditLogView = () => {
   }
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-4 px-4 sm:px-6 lg:px-8 py-4 sm:py-6">
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold">Audit Trail</h1>
-          <p className="text-muted-foreground">
+          <h1 className="text-2xl sm:text-3xl font-bold">Audit Trail</h1>
+          <p className="text-sm sm:text-base text-muted-foreground mt-1 sm:mt-2">
             Comprehensive system-wide audit log with tamper-evident chain verification
           </p>
         </div>
         
         {/* Chain Verification Status */}
         {chainVerification && (
-          <div className="flex items-center space-x-2">
+          <div className="flex items-center space-x-2 flex-shrink-0">
             {chainVerification.isValid ? (
-              <Badge variant="outline" className="text-green-600 border-green-600">
-                <CheckCircle className="h-3 w-3 mr-1" />
-                Chain Verified
+              <Badge variant="outline" className="text-green-600 border-green-600 text-xs sm:text-sm">
+                <CheckCircle className="h-3 w-3 sm:h-4 sm:w-4 mr-1" />
+                <span className="hidden sm:inline">Chain Verified</span>
+                <span className="sm:hidden">Verified</span>
               </Badge>
             ) : (
-              <Badge variant="destructive">
-                <XCircle className="h-3 w-3 mr-1" />
-                Chain Invalid
+              <Badge variant="destructive" className="text-xs sm:text-sm">
+                <XCircle className="h-3 w-3 sm:h-4 sm:w-4 mr-1" />
+                <span className="hidden sm:inline">Chain Invalid</span>
+                <span className="sm:hidden">Invalid</span>
               </Badge>
             )}
-            <span className="text-sm text-muted-foreground">
+            <span className="text-xs sm:text-sm text-muted-foreground">
               {chainVerification.totalRecords} records
             </span>
           </div>
@@ -367,9 +369,9 @@ const AuditLogView = () => {
         </div>
         
         {filtersExpanded && (
-          <div className="border-t p-4 space-y-4">
+          <div className="border-t p-3 sm:p-4 space-y-3 sm:space-y-4">
             {/* Horizontal Filter Row */}
-            <div className="flex flex-wrap gap-4 items-end">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:flex lg:flex-wrap gap-3 sm:gap-4 items-end">
               {/* Date Range */}
               <div className="flex items-center space-x-2">
                 <Label htmlFor="dateFrom" className="text-xs font-medium whitespace-nowrap">From:</Label>
@@ -472,22 +474,22 @@ const AuditLogView = () => {
               </div>
               
               {/* Search */}
-              <div className="flex items-center space-x-2">
+              <div className="flex items-center space-x-2 sm:col-span-2 lg:col-span-1">
                 <Label className="text-xs font-medium whitespace-nowrap">Search:</Label>
-                <div className="relative">
+                <div className="relative flex-1">
                   <Search className="absolute left-2 top-2 h-3 w-3 text-muted-foreground" />
                   <Input
                     placeholder="Search logs..."
                     value={searchText}
                     onChange={(e) => setSearchText(e.target.value)}
-                    className="h-8 text-xs pl-7 w-48"
+                    className="h-8 text-xs pl-7 w-full sm:w-48"
                   />
                 </div>
               </div>
             </div>
             
             {/* Action Buttons */}
-            <div className="flex items-center space-x-2">
+            <div className="flex items-center space-x-2 sm:col-span-2">
               <Button 
                 onClick={handleFilterChange} 
                 loading={loading}
@@ -509,11 +511,11 @@ const AuditLogView = () => {
       {/* Excel-Style Table */}
       <div className="border rounded-lg bg-white">
         {/* Table Header */}
-        <div className="flex items-center justify-between p-3 border-b bg-gray-50">
-          <div className="flex items-center space-x-4">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between p-3 sm:p-4 border-b bg-gray-50 gap-3 sm:gap-0">
+          <div className="flex items-center space-x-2 sm:space-x-4">
             <div>
-              <h3 className="font-semibold text-sm">Audit Logs</h3>
-              <p className="text-xs text-muted-foreground">
+              <h3 className="font-semibold text-sm sm:text-base">Audit Logs</h3>
+              <p className="text-xs text-muted-foreground mt-0.5">
                 Showing {startRecord}-{endRecord} of {total} records
               </p>
             </div>
@@ -530,17 +532,18 @@ const AuditLogView = () => {
               onClick={() => fetchLogs(true)}
               disabled={loading}
               size="sm"
-              className="h-8 text-xs"
+              className="h-8 text-xs flex-1 sm:flex-initial"
             >
-              <RefreshCw className={`h-3 w-3 mr-1 ${loading ? 'animate-spin' : ''}`} />
-              Refresh
+              <RefreshCw className={`h-3 w-3 sm:mr-1 ${loading ? 'animate-spin' : ''}`} />
+              <span className="hidden sm:inline">Refresh</span>
             </Button>
             
             {/* Export Dropdown */}
             <Select onValueChange={(value) => exportLogs(value as 'csv' | 'json' | 'excel')}>
-              <SelectTrigger className="h-8 text-xs w-24">
-                <Download className="h-3 w-3 mr-1" />
-                Export
+              <SelectTrigger className="h-8 text-xs w-full sm:w-24">
+                <Download className="h-3 w-3 sm:mr-1" />
+                <span className="hidden sm:inline">Export</span>
+                <span className="sm:hidden">Export</span>
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="csv">CSV</SelectItem>
@@ -553,21 +556,23 @@ const AuditLogView = () => {
         
         {/* Excel-Style Table */}
         {logs.length === 0 && !loading ? (
-          <div className="text-center py-12">
-            <Shield className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-            <h3 className="text-lg font-medium mb-2">No Audit Logs Yet</h3>
-            <p className="text-muted-foreground mb-4">
+          <div className="text-center py-8 sm:py-12 px-4">
+            <Shield className="h-10 w-10 sm:h-12 sm:w-12 text-muted-foreground mx-auto mb-4" />
+            <h3 className="text-base sm:text-lg font-medium mb-2">No Audit Logs Yet</h3>
+            <p className="text-sm sm:text-base text-muted-foreground mb-4">
               The audit trail system is ready, but no events have been logged yet.
             </p>
-            <p className="text-sm text-muted-foreground">
+            <p className="text-xs sm:text-sm text-muted-foreground">
               Audit logs will appear here as users interact with the system.
             </p>
           </div>
         ) : (
-          <div className="border rounded-lg overflow-hidden">
-            <div className="h-[500px] overflow-y-auto">
-              <div className="overflow-x-auto">
-                <table className="w-full">
+          <>
+            {/* Desktop Table View */}
+            <div className="hidden md:block border rounded-lg overflow-hidden">
+              <div className="h-[500px] overflow-y-auto">
+                <div className="overflow-x-auto">
+                  <table className="w-full">
               {/* Fixed Header */}
               <thead className="bg-gray-50 sticky top-0 z-10">
                 <tr className="border-b">
@@ -719,14 +724,80 @@ const AuditLogView = () => {
               </div>
             </div>
           </div>
+
+            {/* Mobile Card View */}
+            <div className="md:hidden space-y-3 p-3">
+              {logs.map((log) => (
+                <div
+                  key={log.id}
+                  className="border rounded-lg p-3 space-y-2 bg-white hover:bg-gray-50 transition-colors"
+                  onClick={() => setSelectedLog(log)}
+                >
+                  <div className="flex items-start justify-between gap-2">
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2 mb-1">
+                        <h4 className="text-sm font-medium truncate">{log.summary}</h4>
+                        {!log.is_read && (
+                          <div className="w-2 h-2 bg-red-500 rounded-full flex-shrink-0" />
+                        )}
+                      </div>
+                      <p className="text-xs text-muted-foreground font-mono mb-2">
+                        {formatTimestamp(log.created_at)}
+                      </p>
+                    </div>
+                    <Badge variant={getSeverityColor(log.severity)} className="text-xs px-1.5 py-0 flex-shrink-0">
+                      {getSeverityIcon(log.severity)}
+                      <span className="ml-1 capitalize hidden sm:inline">{log.severity}</span>
+                    </Badge>
+                  </div>
+                  
+                  <div className="grid grid-cols-2 gap-2 text-xs">
+                    <div>
+                      <span className="text-muted-foreground">Event:</span>
+                      <p className="font-medium truncate">{log.event_type}</p>
+                    </div>
+                    <div>
+                      <span className="text-muted-foreground">Category:</span>
+                      <Badge variant="outline" className="text-xs px-1 py-0 ml-1">
+                        {log.category}
+                      </Badge>
+                    </div>
+                    <div>
+                      <span className="text-muted-foreground">Actor:</span>
+                      <p className="truncate">{log.actor_email || log.actor_type}</p>
+                    </div>
+                    <div>
+                      <span className="text-muted-foreground">Target:</span>
+                      <p className="truncate">{log.target_name || log.target_type || '-'}</p>
+                    </div>
+                  </div>
+                  
+                  <div className="flex items-center justify-end pt-1">
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setSelectedLog(log);
+                      }}
+                      className="h-7 text-xs"
+                    >
+                      <Eye className="h-3 w-3 mr-1" />
+                      View Details
+                    </Button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </>
         )}
         
         {/* Pagination */}
         {total > 0 && (
-          <div className="flex items-center justify-between p-3 border-t bg-gray-50">
-            <div className="flex items-center space-x-4">
+          <div className="flex flex-col sm:flex-row items-center justify-between p-3 sm:p-4 border-t bg-gray-50 gap-3 sm:gap-0">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center space-y-2 sm:space-y-0 sm:space-x-4 w-full sm:w-auto">
               <div className="flex items-center space-x-2">
-                <Label className="text-xs">Rows per page:</Label>
+                <Label className="text-xs whitespace-nowrap">Rows per page:</Label>
                 <Select value={pageSize.toString()} onValueChange={(value) => handlePageSizeChange(Number(value))}>
                   <SelectTrigger className="h-7 text-xs w-16">
                     <SelectValue />
@@ -745,20 +816,20 @@ const AuditLogView = () => {
               </div>
             </div>
             
-            <div className="flex items-center space-x-2">
+            <div className="flex items-center space-x-1 sm:space-x-2 w-full sm:w-auto justify-center sm:justify-end">
               <Button
                 variant="outline"
                 size="sm"
                 onClick={() => handlePageChange(currentPage - 1)}
                 disabled={currentPage === 1 || loading}
-                className="h-7 text-xs"
+                className="h-7 text-xs flex-1 sm:flex-initial"
               >
-                <ChevronLeft className="h-3 w-3" />
-                Previous
+                <ChevronLeft className="h-3 w-3 sm:mr-1" />
+                <span className="hidden sm:inline">Previous</span>
               </Button>
               
-              {/* Page Numbers */}
-              <div className="flex items-center space-x-1">
+              {/* Page Numbers - Hide on mobile, show on tablet+ */}
+              <div className="hidden sm:flex items-center space-x-1">
                 {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
                   const pageNum = Math.max(1, Math.min(totalPages - 4, currentPage - 2)) + i;
                   if (pageNum > totalPages) return null;
@@ -783,10 +854,10 @@ const AuditLogView = () => {
                 size="sm"
                 onClick={() => handlePageChange(currentPage + 1)}
                 disabled={currentPage === totalPages || loading}
-                className="h-7 text-xs"
+                className="h-7 text-xs flex-1 sm:flex-initial"
               >
-                Next
-                <ChevronRight className="h-3 w-3" />
+                <span className="hidden sm:inline">Next</span>
+                <ChevronRight className="h-3 w-3 sm:ml-1" />
               </Button>
             </div>
           </div>
@@ -795,10 +866,10 @@ const AuditLogView = () => {
 
       {/* Details Dialog - Keep existing implementation */}
       <Dialog open={!!selectedLog} onOpenChange={() => setSelectedLog(null)}>
-        <DialogContent className="max-w-4xl max-h-[80vh]">
+        <DialogContent className="max-w-4xl max-h-[80vh] w-[calc(100vw-2rem)] sm:w-full">
           <DialogHeader>
-            <DialogTitle>Audit Log Details</DialogTitle>
-            <DialogDescription>
+            <DialogTitle className="text-lg sm:text-xl">Audit Log Details</DialogTitle>
+            <DialogDescription className="text-xs sm:text-sm">
               Detailed view of audit log entry
             </DialogDescription>
           </DialogHeader>
@@ -806,100 +877,100 @@ const AuditLogView = () => {
           {selectedLog && (
             <ScrollArea className="max-h-[60vh]">
               <Tabs defaultValue="overview" className="w-full">
-                <TabsList className="grid w-full grid-cols-4">
-                  <TabsTrigger value="overview">Overview</TabsTrigger>
-                  <TabsTrigger value="before">Before</TabsTrigger>
-                  <TabsTrigger value="after">After</TabsTrigger>
-                  <TabsTrigger value="raw">Raw JSON</TabsTrigger>
+                <TabsList className="grid w-full grid-cols-2 sm:grid-cols-4 h-auto">
+                  <TabsTrigger value="overview" className="text-xs sm:text-sm py-2">Overview</TabsTrigger>
+                  <TabsTrigger value="before" className="text-xs sm:text-sm py-2">Before</TabsTrigger>
+                  <TabsTrigger value="after" className="text-xs sm:text-sm py-2">After</TabsTrigger>
+                  <TabsTrigger value="raw" className="text-xs sm:text-sm py-2">Raw JSON</TabsTrigger>
                 </TabsList>
                 
                 <TabsContent value="overview" className="space-y-4">
-                  <div className="grid grid-cols-2 gap-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
-                      <Label className="text-sm font-medium">Event Type</Label>
-                      <p className="text-sm">{selectedLog.event_type}</p>
+                      <Label className="text-xs sm:text-sm font-medium">Event Type</Label>
+                      <p className="text-xs sm:text-sm">{selectedLog.event_type}</p>
                     </div>
                     <div>
-                      <Label className="text-sm font-medium">Category</Label>
-                      <p className="text-sm">{selectedLog.category}</p>
+                      <Label className="text-xs sm:text-sm font-medium">Category</Label>
+                      <p className="text-xs sm:text-sm">{selectedLog.category}</p>
                     </div>
                     <div>
-                      <Label className="text-sm font-medium">Action</Label>
-                      <p className="text-sm">{selectedLog.action}</p>
+                      <Label className="text-xs sm:text-sm font-medium">Action</Label>
+                      <p className="text-xs sm:text-sm">{selectedLog.action}</p>
                     </div>
                     <div>
-                      <Label className="text-sm font-medium">Severity</Label>
-                      <Badge variant={getSeverityColor(selectedLog.severity)}>
+                      <Label className="text-xs sm:text-sm font-medium">Severity</Label>
+                      <Badge variant={getSeverityColor(selectedLog.severity)} className="text-xs">
                         {selectedLog.severity}
                       </Badge>
                     </div>
                     <div>
-                      <Label className="text-sm font-medium">Actor</Label>
-                      <p className="text-sm">{selectedLog.actor_email || selectedLog.actor_type}</p>
+                      <Label className="text-xs sm:text-sm font-medium">Actor</Label>
+                      <p className="text-xs sm:text-sm">{selectedLog.actor_email || selectedLog.actor_type}</p>
                     </div>
                     <div>
-                      <Label className="text-sm font-medium">Target</Label>
-                      <p className="text-sm">{selectedLog.target_name || selectedLog.target_type || 'N/A'}</p>
+                      <Label className="text-xs sm:text-sm font-medium">Target</Label>
+                      <p className="text-xs sm:text-sm">{selectedLog.target_name || selectedLog.target_type || 'N/A'}</p>
                     </div>
-                    <div>
-                      <Label className="text-sm font-medium">Summary</Label>
-                      <p className="text-sm">{selectedLog.summary}</p>
+                    <div className="sm:col-span-2">
+                      <Label className="text-xs sm:text-sm font-medium">Summary</Label>
+                      <p className="text-xs sm:text-sm">{selectedLog.summary}</p>
                     </div>
-                    <div>
-                      <Label className="text-sm font-medium">Description</Label>
-                      <p className="text-sm">{selectedLog.description || 'N/A'}</p>
-                    </div>
-                  </div>
-                  
-                  <Separator />
-                  
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <Label className="text-sm font-medium">Timestamp</Label>
-                      <p className="text-sm">{new Date(selectedLog.created_at).toLocaleString()}</p>
-                    </div>
-                    <div>
-                      <Label className="text-sm font-medium">IP Address</Label>
-                      <p className="text-sm">{selectedLog.actor_ip_address || 'N/A'}</p>
-                    </div>
-                    <div>
-                      <Label className="text-sm font-medium">User Agent</Label>
-                      <p className="text-sm truncate">{selectedLog.actor_user_agent || 'N/A'}</p>
-                    </div>
-                    <div>
-                      <Label className="text-sm font-medium">Request Path</Label>
-                      <p className="text-sm">{selectedLog.request_path || 'N/A'}</p>
+                    <div className="sm:col-span-2">
+                      <Label className="text-xs sm:text-sm font-medium">Description</Label>
+                      <p className="text-xs sm:text-sm">{selectedLog.description || 'N/A'}</p>
                     </div>
                   </div>
                   
                   <Separator />
                   
-                  <div className="grid grid-cols-2 gap-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
-                      <Label className="text-sm font-medium">Hash</Label>
-                      <p className="text-sm font-mono text-xs break-all">{selectedLog.hash}</p>
+                      <Label className="text-xs sm:text-sm font-medium">Timestamp</Label>
+                      <p className="text-xs sm:text-sm">{new Date(selectedLog.created_at).toLocaleString()}</p>
                     </div>
                     <div>
-                      <Label className="text-sm font-medium">Chain Index</Label>
-                      <p className="text-sm">{selectedLog.chain_index}</p>
+                      <Label className="text-xs sm:text-sm font-medium">IP Address</Label>
+                      <p className="text-xs sm:text-sm">{selectedLog.actor_ip_address || 'N/A'}</p>
+                    </div>
+                    <div>
+                      <Label className="text-xs sm:text-sm font-medium">User Agent</Label>
+                      <p className="text-xs sm:text-sm truncate">{selectedLog.actor_user_agent || 'N/A'}</p>
+                    </div>
+                    <div>
+                      <Label className="text-xs sm:text-sm font-medium">Request Path</Label>
+                      <p className="text-xs sm:text-sm">{selectedLog.request_path || 'N/A'}</p>
+                    </div>
+                  </div>
+                  
+                  <Separator />
+                  
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div className="sm:col-span-2">
+                      <Label className="text-xs sm:text-sm font-medium">Hash</Label>
+                      <p className="text-xs sm:text-sm font-mono break-all">{selectedLog.hash}</p>
+                    </div>
+                    <div>
+                      <Label className="text-xs sm:text-sm font-medium">Chain Index</Label>
+                      <p className="text-xs sm:text-sm">{selectedLog.chain_index}</p>
                     </div>
                   </div>
                 </TabsContent>
                 
                 <TabsContent value="before">
-                  <pre className="text-sm bg-muted p-4 rounded-md overflow-auto">
+                  <pre className="text-xs sm:text-sm bg-muted p-3 sm:p-4 rounded-md overflow-auto">
                     {selectedLog.before_state ? JSON.stringify(selectedLog.before_state, null, 2) : 'No before state'}
                   </pre>
                 </TabsContent>
                 
                 <TabsContent value="after">
-                  <pre className="text-sm bg-muted p-4 rounded-md overflow-auto">
+                  <pre className="text-xs sm:text-sm bg-muted p-3 sm:p-4 rounded-md overflow-auto">
                     {selectedLog.after_state ? JSON.stringify(selectedLog.after_state, null, 2) : 'No after state'}
                   </pre>
                 </TabsContent>
                 
                 <TabsContent value="raw">
-                  <pre className="text-sm bg-muted p-4 rounded-md overflow-auto">
+                  <pre className="text-xs sm:text-sm bg-muted p-3 sm:p-4 rounded-md overflow-auto">
                     {JSON.stringify(selectedLog, null, 2)}
                   </pre>
                 </TabsContent>
