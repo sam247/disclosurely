@@ -102,26 +102,19 @@ const ReportDetailsForm = ({ formData, updateFormData, validationErrors = {} }: 
   const availableSubCategories = formData.mainCategory ? MAIN_CATEGORIES[formData.mainCategory as keyof typeof MAIN_CATEGORIES] || [] : [];
 
   const suggestCategory = useCallback(async () => {
-    console.log('🔍 suggestCategory called', {
-      hasTitle: !!formData.title.trim(),
-      hasDescription: !!formData.description.trim(),
-      hasAttemptedSuggestion,
-      hasCategories: !!(formData.mainCategory && formData.subCategory)
-    });
-
     // Only suggest if we have both title and description, haven't already suggested, and categories aren't already set
     if (!formData.title.trim() || !formData.description.trim() || hasAttemptedSuggestion) {
-      console.log('⏭️ Skipping suggestion - missing requirements');
+      
       return;
     }
 
     // Don't override if user has already selected categories
     if (formData.mainCategory && formData.subCategory) {
-      console.log('⏭️ Skipping suggestion - categories already set');
+      
       return;
     }
 
-    console.log('🤖 Calling AI for category suggestion...');
+    
     setIsLoadingSuggestion(true);
     setHasAttemptedSuggestion(true);
 
@@ -133,7 +126,7 @@ const ReportDetailsForm = ({ formData, updateFormData, validationErrors = {} }: 
         }
       });
 
-      console.log('🤖 AI response:', { data, error });
+      
 
       if (error) {
         console.error('❌ AI category suggestion error:', error);
@@ -143,7 +136,7 @@ const ReportDetailsForm = ({ formData, updateFormData, validationErrors = {} }: 
       if (data?.suggestion) {
         const { mainCategory, subCategory, confidence, reasoning } = data.suggestion;
 
-        console.log('✅ AI suggested:', { mainCategory, subCategory, confidence, reasoning });
+        
 
         // Auto-fill the categories
         updateFormData({
@@ -170,7 +163,7 @@ const ReportDetailsForm = ({ formData, updateFormData, validationErrors = {} }: 
 
     // Debounce: Wait 2 seconds after user stops typing
     const timer = setTimeout(() => {
-      console.log('⏰ Debounce timer triggered - calling AI suggestion');
+      
       suggestCategory();
     }, 2000);
 

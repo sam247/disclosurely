@@ -61,8 +61,8 @@ export const AdminPanel = () => {
   const isDisclosurelyTeam = user?.email?.endsWith('@disclosurely.com') || isSuperAdmin;
   
   // Debug logging
-  console.log('AdminPanel - Profile:', profile);
-  console.log('AdminPanel - Loading:', loading, 'Roles Loading:', rolesLoading);
+  
+  
 
   // Check if user has admin permissions
   const isAdmin = isOrgAdmin || isSuperAdmin;

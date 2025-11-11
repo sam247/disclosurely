@@ -95,7 +95,7 @@ const SecureReportMessaging = () => {
             filter: `report_id=eq.${report.id}`,
           },
           (payload) => {
-            console.log('Real-time message received:', payload.new);
+            
             const newMessage = payload.new as Message;
             setMessages(prev => {
               // Avoid duplicates
@@ -103,17 +103,17 @@ const SecureReportMessaging = () => {
                 return prev;
               }
               const updated = [...prev, newMessage];
-              console.log('Messages updated, count:', updated.length);
+              
               return updated;
             });
           }
         )
         .subscribe((status) => {
-          console.log('Real-time subscription status:', status);
+          
         });
 
       return () => {
-        console.log('Cleaning up real-time subscription');
+        
         supabase.removeChannel(channel);
       };
     }
@@ -122,7 +122,7 @@ const SecureReportMessaging = () => {
   const fetchReportAndMessages = async () => {
     try {
       setLoading(true);
-      console.log('Fetching report for tracking ID:', trackingId);
+      
 
       // Fetch report
       const { data: reportData, error: reportError } = await supabase
@@ -151,7 +151,7 @@ const SecureReportMessaging = () => {
 
       // Check if report is archived - don't show to whistleblowers
       if (reportData.status === 'archived') {
-        console.log('Report is archived, not showing to whistleblower');
+        
         toast({
           title: "Case Not Found",
           description: "Your case was either resolved or removed. Please submit a new case or check your case ID.",
@@ -160,7 +160,7 @@ const SecureReportMessaging = () => {
         return;
       }
 
-      console.log('Report found:', reportData);
+      
       setReport(reportData);
       
       // Set organization data if not already set
@@ -184,7 +184,7 @@ const SecureReportMessaging = () => {
       if (messagesError) {
         console.error('Messages fetch error:', messagesError);
       } else {
-        console.log('Messages fetched:', messagesResult?.messages?.length || 0);
+        
         setMessages(messagesResult?.messages || []);
       }
     } catch (error) {
@@ -203,7 +203,7 @@ const SecureReportMessaging = () => {
     if (!trackingId) return;
     
     try {
-      console.log('Fetching organization branding for tracking ID:', trackingId);
+      
       
       // Use the RPC function to get organization data by tracking ID
       const { data: orgData, error: orgError } = await supabase
@@ -215,7 +215,7 @@ const SecureReportMessaging = () => {
       }
 
       const org = orgData[0];
-      console.log('Found organization branding:', org);
+      
       
       setOrganizationData({
         id: org.organization_id,

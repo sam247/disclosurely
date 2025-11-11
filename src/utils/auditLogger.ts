@@ -120,8 +120,6 @@ class AuditLogger {
    */
   async log(data: AuditLogData): Promise<AuditLogEntry | null> {
     try {
-      console.log('AuditLogger: Attempting to log event:', data);
-      console.log('AuditLogger: About to call supabase.from(audit_logs).insert');
       
       const { data: result, error } = await supabase
         .from('audit_logs')
@@ -160,8 +158,8 @@ class AuditLogger {
         .select()
         .single();
 
-      console.log('AuditLogger: Insert completed. Result:', result);
-      console.log('AuditLogger: Error:', error);
+      
+      
 
       if (error) {
         console.error('Failed to log audit event:', error);
@@ -171,7 +169,7 @@ class AuditLogger {
         return null;
       }
 
-      console.log('AuditLogger: Log event successful:', result);
+      
       return result as unknown as AuditLogEntry;
     } catch (error) {
       console.error('Error logging audit event:', error);
@@ -188,7 +186,7 @@ class AuditLogger {
     hasMore: boolean;
   }> {
     try {
-      console.log('AuditLogger: Fetching logs with filters:', filters);
+      
       const baseQuery = supabase
         .from('audit_logs')
         .select('*', { count: 'exact' });
@@ -233,12 +231,12 @@ class AuditLogger {
 
       const { data, error, count } = await finalQuery;
 
-      console.log('AuditLogger: Query result:', { data, error, count });
+      
 
       if (error) {
         // Check if it's a table doesn't exist error
         if (error.code === '42703' || error.message.includes('does not exist')) {
-          console.warn('Audit logs table does not exist yet. Migration may not have been applied.');
+          
           return { logs: [], total: 0, hasMore: false };
         }
         console.error('Failed to fetch audit logs:', error);
@@ -301,7 +299,7 @@ class AuditLogger {
       if (error) {
         // Check if it's a function doesn't exist error
         if (error.code === 'PGRST202' || error.message.includes('Could not find the function')) {
-          console.warn('Audit chain verification function does not exist yet. Migration may not have been applied.');
+          
           return {
             isValid: true, // Assume valid if function doesn't exist yet
             totalRecords: 0,
@@ -447,7 +445,7 @@ export async function logCaseEvent(
   afterState?: Record<string, any>,
   metadata?: Record<string, any>
 ) {
-  console.log('logCaseEvent called with:', { action, actorId, actorEmail, organizationId, caseId, caseTitle });
+  
   return auditLogger.log({
     eventType: `case.${action}`,
     category: 'case_management',

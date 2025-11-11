@@ -45,12 +45,12 @@ export const SaveDraftButton = ({
         ? await updateDraft(existingDraftCode, request)
         : await saveDraft(request);
 
-      console.log('Draft save response:', response);
+      
 
       setIsSaving(false);
 
       if (response.success && response.draftCode) {
-        console.log('Draft saved successfully with code:', response.draftCode);
+        
         setSavedDraftCode(response.draftCode);
         setShowModal(true);
         onDraftSaved(response.draftCode);

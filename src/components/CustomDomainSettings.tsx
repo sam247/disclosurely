@@ -115,7 +115,7 @@ const CustomDomainSettings = () => {
         sessionStorage.getItem('custom-domain-records');
       
       if (hasStaleSessionStorage) {
-        console.log('No domains in database, clearing stale sessionStorage data');
+        
         setVerificationResult(null);
         sessionStorage.removeItem('custom-domain');
         sessionStorage.removeItem('custom-domain-records');

@@ -63,11 +63,11 @@ export async function saveDraft(request: SaveDraftRequest): Promise<SaveDraftRes
       };
     }
 
-    console.log('Edge function response data:', data);
+    
     
     // Ensure the response has the expected structure
     if (data.success && data.draftCode) {
-      console.log('Draft code received:', data.draftCode);
+      
       return data;
     } else if (data.error) {
       // Edge function returned an error in the data
@@ -113,7 +113,7 @@ export async function resumeDraft(request: ResumeDraftRequest): Promise<ResumeDr
     // Normalize draft code: trim whitespace and convert to uppercase
     const normalizedDraftCode = request.draftCode.trim().toUpperCase().replace(/\s+/g, '');
     
-    console.log('Resuming draft with code:', normalizedDraftCode);
+    
     
     const { data, error } = await supabase.functions.invoke('draft-operations', {
       body: {

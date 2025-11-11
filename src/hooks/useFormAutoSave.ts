@@ -31,7 +31,7 @@ export const useFormAutoSave = ({
           data: formData,
           timestamp: Date.now()
         }));
-        console.log('📝 Auto-saved form data');
+        
       } catch (error) {
         console.error('Failed to auto-save form data:', error);
       }
@@ -55,7 +55,7 @@ export const useFormAutoSave = ({
 
         // Only restore if less than 24 hours old
         if (ageMinutes < 24 * 60) {
-          console.log('📂 Restored auto-saved form data');
+          
           return parsed.data;
         } else {
           // Clean up old data
@@ -72,7 +72,7 @@ export const useFormAutoSave = ({
   const clearSavedData = useCallback(() => {
     try {
       localStorage.removeItem(key);
-      console.log('🗑️ Cleared auto-saved form data');
+      
     } catch (error) {
       console.error('Failed to clear saved form data:', error);
     }

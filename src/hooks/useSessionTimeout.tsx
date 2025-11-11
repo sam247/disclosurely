@@ -84,7 +84,7 @@ export const useSessionTimeout = () => {
         setShowIdleWarning(true);
       }, IDLE_TIMEOUT);
       
-      console.log('Idle timer reset - new timeout in', IDLE_TIMEOUT / 1000, 'seconds');
+      
     } catch (error) {
       console.error('Error resetting idle timer:', error);
     }
@@ -98,7 +98,7 @@ export const useSessionTimeout = () => {
       absoluteWarningShownRef.current = true;
       setAbsoluteTimeRemaining(5 * 60); // 5 minutes in seconds
       setShowAbsoluteWarning(true);
-      console.log('Absolute timeout warning shown');
+      
     } catch (error) {
       console.error('Error showing absolute timeout warning:', error);
     }
@@ -132,7 +132,7 @@ export const useSessionTimeout = () => {
         description: "Your session has been extended.",
       });
       
-      console.log('Session extended - new idle timeout in', IDLE_TIMEOUT / 1000, 'seconds');
+      
     } catch (error) {
       console.error('Error extending session:', error);
     }
@@ -145,7 +145,7 @@ export const useSessionTimeout = () => {
       setShowAbsoluteWarning(false);
       clearAllTimers();
       signOut();
-      console.log('User signed out from warning');
+      
     } catch (error) {
       console.error('Error signing out from warning:', error);
     }
@@ -182,7 +182,7 @@ export const useSessionTimeout = () => {
         }
       }, ABSOLUTE_TIMEOUT);
       
-      console.log('Absolute timeout set - warning in', warningTime / 1000, 'seconds, logout in', ABSOLUTE_TIMEOUT / 1000, 'seconds');
+      
     } catch (error) {
       console.error('Error setting up absolute timeout:', error);
     }
@@ -246,7 +246,7 @@ export const useSessionTimeout = () => {
       
       // Simple logic: when tab becomes visible, just continue with any existing modal
       // No complex deferred logic that might cause issues
-      console.log('Tab visibility changed:', visible);
+      
     };
 
     document.addEventListener('visibilitychange', handleVisibilityChange);

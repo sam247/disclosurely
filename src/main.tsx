@@ -76,9 +76,9 @@ if (import.meta.env.VITE_SENTRY_DSN) {
     ],
   })
   
-  console.log('✅ Sentry initialized:', import.meta.env.VITE_SENTRY_ENVIRONMENT)
+  // Sentry initialized
 } else {
-  console.warn('⚠️ Sentry DSN not found - error monitoring disabled')
+  // Sentry DSN not found - error monitoring disabled
 }
 
 const queryClient = new QueryClient({
@@ -90,7 +90,7 @@ const queryClient = new QueryClient({
   },
 })
 
-console.log('Main.tsx loading - audit trail version active');
+
 
 createRoot(document.getElementById("root")!).render(
   <ErrorBoundary>

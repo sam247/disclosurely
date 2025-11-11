@@ -77,3 +77,12 @@ verify_jwt = false
 
 [functions.track-session]
 verify_jwt = false
+
+[functions.enforce-subscription]
+verify_jwt = true
+
+[functions.stripe-webhook]
+verify_jwt = false
+
+[functions.check-team-limit]
+verify_jwt = false

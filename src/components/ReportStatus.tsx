@@ -137,7 +137,7 @@ const ReportStatus = () => {
     setIsLoading(true);
 
     try {
-      console.log("Looking up report with tracking ID:", trackingId.trim());
+      // Looking up report with tracking ID
 
       // Look up report by tracking ID only - no access key validation needed
       const { data: reportData, error: reportError } = await supabase
@@ -157,12 +157,12 @@ const ReportStatus = () => {
 
       // Check if report is archived - don't show to whistleblowers
       if (reportData.status === 'archived') {
-        console.log("Report is archived, not showing to whistleblower");
+        
         toast.error("Case Not Found. Your case was either resolved or removed. Please submit a new case or check your case ID.");
         return;
       }
 
-      console.log("Report found:", reportData);
+      
       setReport(reportData);
 
       // Fetch messages for this report
@@ -175,7 +175,7 @@ const ReportStatus = () => {
       if (messagesError) {
         console.error("Messages fetch error:", messagesError);
       } else {
-        console.log("Messages fetched:", messagesData?.length || 0);
+        
         setMessages(messagesData || []);
       }
 
@@ -205,7 +205,7 @@ const ReportStatus = () => {
     setIsSubmittingMessage(true);
 
     try {
-      console.log("Sending message for report:", report.id);
+      
 
       const { error } = await supabase
         .from("report_messages")

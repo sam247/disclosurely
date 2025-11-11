@@ -41,7 +41,7 @@ const AnonymousMessaging = () => {
     if (!organizationId) return;
 
     try {
-      console.log('Fetching organization branding for custom domain:', customDomain);
+      
 
       const { data: linkInfo, error: linkError } = await supabase
         .from('organization_links')
@@ -66,11 +66,11 @@ const AnonymousMessaging = () => {
       }
 
       if (!linkInfo) {
-        console.log('No organization link found for custom domain');
+        
         return;
       }
 
-      console.log('Organization branding found for custom domain:', linkInfo);
+      
 
       setDomainBranding({
         name: linkInfo.organizations.name,

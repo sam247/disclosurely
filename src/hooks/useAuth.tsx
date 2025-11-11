@@ -2,10 +2,14 @@ import { useState, useEffect, createContext, useContext, ReactNode } from 'react
 import { User, Session } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
 
-interface SubscriptionData {
+export interface SubscriptionData {
   subscribed: boolean;
   subscription_tier?: 'basic' | 'pro';
   subscription_end?: string;
+  subscription_status?: 'active' | 'past_due' | 'canceled' | 'trialing' | 'expired';
+  grace_period_ends_at?: string;
+  isInGracePeriod?: boolean;
+  isExpired?: boolean;
 }
 
 interface AuthContextType {
@@ -83,25 +87,47 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     try {
       const { data: directData, error: directError } = await supabase
         .from('subscribers')
-        .select('subscription_tier, subscription_end')
+        .select('subscription_tier, subscription_end, subscription_status, grace_period_ends_at')
         .eq('user_id', userToUse.id)
         .maybeSingle();
 
       if (!directError && directData) {
-        const mappedData = {
-          subscribed: true,
+        const now = new Date();
+        const subscriptionEnd = directData.subscription_end ? new Date(directData.subscription_end) : null;
+        const gracePeriodEnds = directData.grace_period_ends_at ? new Date(directData.grace_period_ends_at) : null;
+        
+        // Check if subscription is expired
+        const isExpired = subscriptionEnd ? subscriptionEnd < now : false;
+        const isInGracePeriod = gracePeriodEnds ? gracePeriodEnds > now : false;
+        
+        // Determine subscription status
+        let subscriptionStatus: 'active' | 'past_due' | 'canceled' | 'trialing' | 'expired' = 'active';
+        if (directData.subscription_status) {
+          subscriptionStatus = directData.subscription_status as any;
+        } else if (isExpired && !isInGracePeriod) {
+          subscriptionStatus = 'expired';
+        } else if (isExpired && isInGracePeriod) {
+          subscriptionStatus = 'expired'; // Still expired but in grace period
+        }
+        
+        const mappedData: SubscriptionData = {
+          subscribed: !isExpired || isInGracePeriod,
           subscription_tier: directData.subscription_tier as 'basic' | 'pro',
           subscription_end: directData.subscription_end,
+          subscription_status: subscriptionStatus,
+          grace_period_ends_at: directData.grace_period_ends_at,
+          isInGracePeriod,
+          isExpired: isExpired && !isInGracePeriod,
         };
         
         setSubscriptionData(mappedData);
         // Store with TTL (15 minutes) for security
         const dataWithTTL = {
           data: mappedData,
-          expiry: now + (15 * 60 * 1000)
+          expiry: now.getTime() + (15 * 60 * 1000)
         };
         sessionStorage.setItem('subscription_data', JSON.stringify(dataWithTTL));
-        sessionStorage.setItem(cacheKey, now.toString());
+        sessionStorage.setItem(cacheKey, now.getTime().toString());
         return;
       }
     } catch (error) {
@@ -121,10 +147,21 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
         return;
       }
       
-      const mappedData = {
+      const nowDate = new Date();
+      const subscriptionEnd = data?.subscription_end ? new Date(data.subscription_end) : null;
+      const gracePeriodEnds = data?.grace_period_ends_at ? new Date(data.grace_period_ends_at) : null;
+      
+      const isExpired = subscriptionEnd ? subscriptionEnd < nowDate : false;
+      const isInGracePeriod = gracePeriodEnds ? gracePeriodEnds > nowDate : false;
+      
+      const mappedData: SubscriptionData = {
         subscribed: data?.subscribed || false,
         subscription_tier: data?.subscription_tier || undefined,
         subscription_end: data?.subscription_end || undefined,
+        subscription_status: data?.subscription_status || undefined,
+        grace_period_ends_at: data?.grace_period_ends_at || undefined,
+        isInGracePeriod,
+        isExpired: isExpired && !isInGracePeriod,
       };
       
       setSubscriptionData(mappedData);

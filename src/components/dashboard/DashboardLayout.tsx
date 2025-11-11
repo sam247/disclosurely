@@ -54,7 +54,7 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
 
           // Redirect to onboarding if no organization
           if (!hasOrg) {
-            console.log('No organization found, redirecting to onboarding...');
+            
             navigate('/onboarding');
           }
         }

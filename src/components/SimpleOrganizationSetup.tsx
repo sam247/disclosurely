@@ -28,7 +28,7 @@ const SimpleOrganizationSetup = ({ onComplete }: SimpleOrganizationSetupProps) =
 
     setLoading(true);
     try {
-      console.log('Creating organization for user:', user.id);
+      
 
       // Create organization
       const { data: orgData, error: orgError } = await supabase
@@ -46,7 +46,7 @@ const SimpleOrganizationSetup = ({ onComplete }: SimpleOrganizationSetupProps) =
         throw orgError;
       }
 
-      console.log('Organization created:', orgData);
+      
 
       // Update user profile with organization
       const { error: profileError } = await supabase
@@ -64,7 +64,7 @@ const SimpleOrganizationSetup = ({ onComplete }: SimpleOrganizationSetupProps) =
         throw profileError;
       }
 
-      console.log('Profile updated successfully');
+      
 
       toast({
         title: "Organization created!",

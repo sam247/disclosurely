@@ -69,7 +69,7 @@ const CompanyStatusPage = () => {
     }
 
     try {
-      console.log('Fetching organization branding for link token:', linkToken);
+      
 
       const { data: linkInfo, error: linkError } = await supabase
         .from('organization_links')
@@ -98,7 +98,7 @@ const CompanyStatusPage = () => {
         return;
       }
 
-      console.log('Organization link found:', linkInfo);
+      
 
       setOrganizationBranding({
         name: linkInfo.organizations.name,
@@ -129,7 +129,7 @@ const CompanyStatusPage = () => {
     setIsLoading(true);
 
     try {
-      console.log("Looking up report with tracking ID:", trackingId.trim());
+      // Looking up report with tracking ID
 
       // Get the organization ID from the link token first
       const { data: linkInfo, error: linkError } = await supabase
@@ -144,7 +144,7 @@ const CompanyStatusPage = () => {
         return;
       }
 
-      console.log('Link validated, organization ID:', linkInfo.organization_id);
+      
 
       // Look up report by tracking ID and organization ID to ensure security
       const { data: reportData, error: reportError } = await supabase
@@ -164,19 +164,19 @@ const CompanyStatusPage = () => {
       }
 
       if (!reportData) {
-        console.log("Report not found for tracking ID:", trackingId.trim());
+        // Report not found for tracking ID
         toast.error("Report not found. Please check your tracking ID.");
         return;
       }
 
       // Check if report is archived - don't show to whistleblowers
       if (reportData.status === 'archived') {
-        console.log("Report is archived, not showing to whistleblower");
+        
         toast.error("Case Not Found. Your case was either resolved or removed. Please submit a new case or check your case ID.");
         return;
       }
 
-      console.log("Report found:", reportData);
+      
       setReport(reportData);
 
       // Fetch messages for this report
@@ -189,7 +189,7 @@ const CompanyStatusPage = () => {
       if (messagesError) {
         console.error("Messages fetch error:", messagesError);
       } else {
-        console.log("Messages fetched:", messagesData?.length || 0);
+        
         setMessages(messagesData || []);
       }
 
@@ -219,7 +219,7 @@ const CompanyStatusPage = () => {
     setIsSubmittingMessage(true);
 
     try {
-      console.log("Sending message for report:", report.id);
+      
 
       const { error } = await supabase
         .from("report_messages")

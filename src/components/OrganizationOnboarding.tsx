@@ -30,13 +30,13 @@ const OrganizationOnboarding = () => {
       return;
     }
 
-    console.log('Starting organization creation for user:', user.id);
-    console.log('Form data:', formData);
+    
+    
 
     setLoading(true);
     try {
       // Create organization first
-      console.log('Creating organization...');
+      
       const { data: orgData, error: orgError } = await supabase
         .from('organizations')
         .insert({
@@ -53,10 +53,10 @@ const OrganizationOnboarding = () => {
         throw orgError;
       }
 
-      console.log('Organization created successfully:', orgData);
+      
 
       // Update user profile with organization
-      console.log('Updating user profile...');
+      
       const { error: profileError } = await supabase
         .from('profiles')
         .upsert({
@@ -72,7 +72,7 @@ const OrganizationOnboarding = () => {
         throw profileError;
       }
 
-      console.log('Profile updated successfully');
+      
 
       toast({
         title: "Organization created successfully!",

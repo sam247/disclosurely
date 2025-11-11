@@ -35,15 +35,15 @@ const TypingAnimation: React.FC<TypingAnimationProps> = ({
 
   // Start typing immediately when phrases are first loaded
   useEffect(() => {
-    console.log('🎬 TypingAnimation - phrases:', phrases, 'currentText:', currentText, 'isDeleting:', isDeleting, 'isComplete:', isComplete, 'currentPhraseIndex:', currentPhraseIndex);
+    
     if (phrases && phrases.length > 0 && currentText === '' && !isDeleting && !isComplete && currentPhraseIndex === 0) {
       const firstPhrase = phrases[0];
-      console.log('🚀 Starting to type first phrase:', firstPhrase);
+      
       if (firstPhrase) {
         // Start typing immediately
         timeoutRef.current = setTimeout(() => {
           const firstChar = firstPhrase[0] || '';
-          console.log('✏️ Setting first character:', firstChar);
+          
           setCurrentText(firstChar);
           timeoutRef.current = null;
         }, typingSpeed);

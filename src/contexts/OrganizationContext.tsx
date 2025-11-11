@@ -93,7 +93,7 @@ export const OrganizationProvider = ({ children }: OrganizationProviderProps) =>
     setError(null);
 
     try {
-      console.log('Looking up report with tracking ID:', trackingId);
+      
       
       // Retry mechanism for newly created reports
       let retries = 3;
@@ -112,13 +112,13 @@ export const OrganizationProvider = ({ children }: OrganizationProviderProps) =>
             break;
           } else {
             orgError = error;
-            console.log(`Attempt ${4 - retries} failed, retrying in 1 second...`);
+            
             await new Promise(resolve => setTimeout(resolve, 1000));
             retries--;
           }
         } catch (err) {
           orgError = err;
-          console.log(`Attempt ${4 - retries} failed with error, retrying in 1 second...`);
+          
           await new Promise(resolve => setTimeout(resolve, 1000));
           retries--;
         }
@@ -130,7 +130,7 @@ export const OrganizationProvider = ({ children }: OrganizationProviderProps) =>
       }
 
       const org = orgData[0];
-      console.log('Found organization, setting organization data:', org);
+      
       
       setOrganizationData({
         id: org.organization_id,

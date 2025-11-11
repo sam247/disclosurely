@@ -44,7 +44,7 @@ const LoginForm = () => {
         }
       } catch (rpcError) {
         // RPC function might not exist or be unavailable - continue with login
-        console.warn('Account lockout check failed, continuing with login:', rpcError);
+        
       }
 
       // Use standard OTP authentication flow

@@ -34,6 +34,7 @@ serve(async (req) => {
         subscribed: false,
         subscription_tier: null,
         subscription_end: null,
+        subscription_status: 'expired',
         message: "Stripe not configured" 
       }), {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
@@ -90,9 +91,13 @@ serve(async (req) => {
         subscribed: false,
         subscription_tier: null,
         subscription_end: null,
+        subscription_status: 'expired',
         updated_at: new Date().toISOString(),
       }, { onConflict: 'email' });
-      return new Response(JSON.stringify({ subscribed: false }), {
+      return new Response(JSON.stringify({ 
+        subscribed: false,
+        subscription_status: 'expired'
+      }), {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
         status: 200,
       });
@@ -125,8 +130,13 @@ serve(async (req) => {
     const hasActiveSub = !!activeSubscription;
     let subscriptionTier = null;
     let subscriptionEnd = null;
+    let subscriptionStatus: 'active' | 'past_due' | 'canceled' | 'trialing' | 'expired' = 'active';
+    let gracePeriodEndsAt: string | null = null;
+    
     if (hasActiveSub && activeSubscription) {
       subscriptionEnd = new Date(activeSubscription.current_period_end * 1000).toISOString();
+      subscriptionStatus = activeSubscription.status as any;
+      
       logStep("Active subscription found", { 
         subscriptionId: activeSubscription.id, 
         status: activeSubscription.status,
@@ -150,29 +160,53 @@ serve(async (req) => {
       }
       
       logStep("Determined subscription tier", { priceId, amount, subscriptionTier });
+      
+      // Check if subscription is expired and set grace period
+      const now = new Date();
+      const endDate = new Date(subscriptionEnd);
+      if (endDate < now && subscriptionStatus === 'active') {
+        subscriptionStatus = 'expired';
+        // Set grace period to 7 days from expiration
+        const graceEnd = new Date(endDate);
+        graceEnd.setDate(graceEnd.getDate() + 7);
+        gracePeriodEndsAt = graceEnd.toISOString();
+      }
     } else {
       logStep("No active subscription found");
+      subscriptionStatus = 'expired';
     }
 
     // Always update the database with the latest info
-    const updateData = {
+    const updateData: any = {
       email: user.email,
       user_id: user.id,
       stripe_customer_id: customerId,
       subscribed: hasActiveSub,
       subscription_tier: subscriptionTier,
       subscription_end: subscriptionEnd,
+      subscription_status: subscriptionStatus,
       updated_at: new Date().toISOString(),
     };
+    
+    if (gracePeriodEndsAt) {
+      updateData.grace_period_ends_at = gracePeriodEndsAt;
+    }
 
     await supabaseClient.from("subscribers").upsert(updateData, { onConflict: 'email' });
 
-    logStep("Updated database with subscription info", { subscribed: hasActiveSub, subscriptionTier });
+    logStep("Updated database with subscription info", { subscribed: hasActiveSub, subscriptionTier, subscriptionStatus });
+    
+    // Calculate grace period status
+    const now = new Date();
+    const isInGracePeriod = gracePeriodEndsAt ? new Date(gracePeriodEndsAt) > now : false;
+    const isExpired = subscriptionEnd ? new Date(subscriptionEnd) < now && !isInGracePeriod : false;
     
     const responseData = {
-      subscribed: hasActiveSub,
+      subscribed: hasActiveSub || isInGracePeriod,
       subscription_tier: subscriptionTier,
-      subscription_end: subscriptionEnd
+      subscription_end: subscriptionEnd,
+      subscription_status: subscriptionStatus,
+      grace_period_ends_at: gracePeriodEndsAt,
     };
     
     logStep("Returning response", responseData);

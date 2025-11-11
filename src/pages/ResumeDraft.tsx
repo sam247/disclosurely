@@ -51,7 +51,7 @@ export const ResumeDraft = () => {
     }
 
     try {
-      console.log('Fetching organization branding for custom domain:', customDomain);
+      
 
       const { data: linkInfo, error: linkError } = await supabase
         .from('organization_links')
@@ -77,12 +77,12 @@ export const ResumeDraft = () => {
       }
 
       if (!linkInfo) {
-        console.log('No organization link found for custom domain');
+        
         setLoadingBranding(false);
         return;
       }
 
-      console.log('Organization branding found for custom domain:', linkInfo);
+      
 
       setDomainBranding({
         name: linkInfo.organizations.name,
@@ -146,7 +146,7 @@ export const ResumeDraft = () => {
     // Normalize draft code: trim, uppercase, remove spaces
     const normalizedCode = draftCode.trim().toUpperCase().replace(/\s+/g, '');
     
-    console.log('Resuming draft with normalized code:', normalizedCode);
+    
 
     const response = await resumeDraft({ draftCode: normalizedCode });
     setIsLoading(false);

@@ -81,34 +81,34 @@ const AnalyticsView: React.FC = () => {
   const [previousPeriodData, setPreviousPeriodData] = useState<SimpleAnalyticsData | null>(null);
 
   useEffect(() => {
-    console.log('Analytics useEffect - organization:', organization);
-    console.log('Analytics useEffect - organization ID:', organization?.id);
-    console.log('Analytics useEffect - orgLoading:', orgLoading);
+    
+    
+    
     
     // Wait for organization to finish loading
     if (orgLoading) {
-      console.log('Organization still loading...');
+      
       return;
     }
     
     // Only fetch data if we have an organization ID
     if (organization?.id) {
-      console.log('Organization ID available, fetching analytics data');
+      
       fetchAnalyticsData();
     } else {
-      console.log('No organization ID, setting loading to false');
+      
       setLoading(false);
     }
   }, [selectedPeriod, organization?.id, orgLoading]);
 
   const fetchAnalyticsData = async () => {
     if (!organization?.id) {
-      console.log('No organization ID available');
+      
       setLoading(false);
       return;
     }
     
-    console.log('Fetching analytics data for organization:', organization.id);
+    
     setLoading(true);
     
     try {
@@ -143,13 +143,13 @@ const AnalyticsView: React.FC = () => {
         .gte('created_at', previousPeriodStart)
         .lt('created_at', previousPeriodEnd);
 
-      console.log('Fetched reports:', currentReports?.length || 0);
+      
 
       // Process data
       const processedData = processSimpleAnalytics(currentReports || []);
       const previousData = previousReports ? processSimpleAnalytics(previousReports) : null;
       
-      console.log('Processed analytics data:', processedData);
+      
       setAnalyticsData(processedData);
       setPreviousPeriodData(previousData);
     } catch (error) {

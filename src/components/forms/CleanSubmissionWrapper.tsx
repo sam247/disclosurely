@@ -42,7 +42,7 @@ const CleanSubmissionWrapper = () => {
   // Sync organizationId from hook - this should happen first
   useEffect(() => {
     if (hookOrganizationId) {
-      console.log('🔄 Syncing organizationId from hook:', hookOrganizationId);
+      
       setOrganizationId(hookOrganizationId);
     }
   }, [hookOrganizationId]);
@@ -65,7 +65,7 @@ const CleanSubmissionWrapper = () => {
             .single()
             .then(({ data, error }) => {
               if (!error && data) {
-                console.log('🔄 Found organization via subdomain:', data.id);
+                
                 setOrganizationId(data.id);
               }
             });
@@ -75,13 +75,7 @@ const CleanSubmissionWrapper = () => {
   }, [domainLoading, organizationId, hookOrganizationId]);
 
   useEffect(() => {
-    console.log('CleanSubmissionWrapper: Domain detection:', {
-      domainLoading,
-      isCustomDomain,
-      organizationId,
-      customDomain,
-      currentHost: window.location.hostname
-    });
+    // Domain detection complete
 
     // Wait for domain loading to complete before making decisions
     if (domainLoading) {
@@ -90,7 +84,7 @@ const CleanSubmissionWrapper = () => {
     }
 
     if (organizationId) {
-      console.log('✅ Domain detected, fetching link data...', { isCustomDomain, organizationId });
+      
       fetchOrgLinkData();
     } else {
       // Give a small delay to allow async operations to complete
@@ -98,7 +92,7 @@ const CleanSubmissionWrapper = () => {
       const timeoutId = setTimeout(() => {
         // Double-check if organizationId is still null after delay
         if (!organizationId) {
-          console.log('❌ Domain NOT detected after delay:', { isCustomDomain, organizationId });
+          
           setLoading(false);
           toast({
             title: "Access Error",
@@ -154,21 +148,21 @@ const CleanSubmissionWrapper = () => {
           .maybeSingle();
         
         isOnCustomDomain = !!customDomainData;
-        console.log('Custom domain check:', { currentHost, customDomainData, isOnCustomDomain });
+        
       }
 
       // Check if we're on the correct domain based on active_url_type
       const activeUrlType = orgData.active_url_type || 'subdomain';
-      console.log('Domain validation:', { activeUrlType, isOnSubdomain, isOnCustomDomain, currentHost });
+      
       
       if (activeUrlType === 'custom_domain' && !isOnCustomDomain) {
         // Should be on custom domain but we're not - redirect middleware should handle this
-        console.log('Should be on custom domain but on subdomain - redirect should occur');
+        
         setLoading(false);
         return;
       } else if (activeUrlType === 'subdomain' && !isOnSubdomain) {
         // Should be on subdomain but we're not - redirect middleware should handle this
-        console.log('Should be on subdomain but on custom domain - redirect should occur');
+        
         setLoading(false);
         return;
       }
@@ -288,7 +282,7 @@ const CleanSubmissionWrapper = () => {
 
     // Normalize draft code: trim, uppercase, remove spaces
     const normalizedCode = draftCode.trim().toUpperCase().replace(/\s+/g, '');
-    console.log('Loading draft with normalized code:', normalizedCode);
+    
 
     const response = await resumeDraft({ draftCode: normalizedCode });
     if (response.success) {

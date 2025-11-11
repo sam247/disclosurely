@@ -18,11 +18,6 @@ import { documentToHtmlString } from '@contentful/rich-text-html-renderer';
 const CONTENTFUL_SPACE_ID = import.meta.env.VITE_CONTENTFUL_SPACE_ID || 'rm7hib748uv7';
 const CONTENTFUL_DELIVERY_TOKEN = import.meta.env.VITE_CONTENTFUL_DELIVERY_TOKEN || 'e3JfeWQKBvfCQoqi22f6F_XzWgbZPXR9JWTyuSTGcFw';
 
-console.log('Contentful config:', { 
-  spaceId: CONTENTFUL_SPACE_ID, 
-  hasToken: !!CONTENTFUL_DELIVERY_TOKEN,
-  tokenLength: CONTENTFUL_DELIVERY_TOKEN?.length 
-});
 
 const client = createClient({
   space: CONTENTFUL_SPACE_ID,
@@ -146,7 +141,7 @@ const Blog = () => {
 
   const fetchPosts = async () => {
     try {
-      console.log('Fetching blog posts from Contentful...');
+      
       
       const query: any = {
         content_type: '9oYANGj5uBRT6UHsl5LxO', // Blog Post content type ID
@@ -154,24 +149,16 @@ const Blog = () => {
         include: 2, // Include linked author and categories
       };
 
-      console.log('Contentful query:', query);
+      
       
       const response = await client.getEntries<ContentfulBlogPost>(query);
-      console.log('Contentful response:', response);
+      
       
       const fetchedPosts: BlogPostDisplay[] = response.items.map(item => {
         const authorEntry = item.fields.author as unknown as ContentfulAuthor;
         const categoryEntries = item.fields.categories as unknown as ContentfulCategory[];
 
-        console.log('Processing blog post:', {
-          id: item.sys.id,
-          title: item.fields.title,
-          slug: item.fields.slug,
-          fields: Object.keys(item.fields),
-          rawFields: item.fields,
-          titleField: item.fields.title,
-          slugField: item.fields.slug
-        });
+        // Processing blog post
 
         return {
           id: item.sys.id,
@@ -203,7 +190,7 @@ const Blog = () => {
         );
       }
       
-      console.log('Transformed posts:', filteredPosts);
+      
       setPosts(filteredPosts);
     } catch (error) {
       console.error('Error fetching blog posts from Contentful:', error);
@@ -271,20 +258,20 @@ const Blog = () => {
   const renderRichText = (richTextDocument: any) => {
     if (!richTextDocument) return null;
     
-    console.log('Rendering Rich Text document:', richTextDocument);
-    console.log('Document nodeType:', richTextDocument.nodeType);
-    console.log('Document content length:', richTextDocument.content?.length);
-    console.log('First content item:', richTextDocument.content?.[0]);
+    
+    
+    
+    
     
     try {
       const htmlString = documentToHtmlString(richTextDocument, {
         renderNode: {
           'document': (node, next) => {
-            console.log('Rendering document node:', node);
+            
             return next(node.content);
           },
           'paragraph': (node, next) => {
-            console.log('Rendering paragraph node:', node);
+            
             return `<p class="mb-4">${next(node.content)}</p>`;
           },
           'heading-1': (node, next) => `<h1 class="text-3xl font-bold mb-6">${next(node.content)}</h1>`,
@@ -306,7 +293,7 @@ const Blog = () => {
         },
       });
       
-      console.log('Rendered HTML:', htmlString);
+      
       return <div dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(htmlString) }} />;
     } catch (error) {
       console.error('Error rendering rich text:', error);
@@ -368,7 +355,7 @@ const Blog = () => {
                 <Link 
                   to="/blog" 
                   className="inline-flex items-center text-sm text-muted-foreground hover:text-foreground mb-8"
-                  onClick={() => console.log('Back to blog clicked')}
+                  onClick={() => {}}
                 >
                   <ArrowRight className="h-4 w-4 mr-2 rotate-180" />
                   Back to Blog
@@ -757,8 +744,8 @@ const RelatedArticles = ({ currentPost }: { currentPost: BlogPostDisplay }) => {
   useEffect(() => {
     const fetchRelatedPosts = async () => {
       try {
-        console.log('Fetching related posts for:', currentPost.title);
-        console.log('Current post categories:', currentPost.categories);
+        
+        
         
         // Simplified query - just get recent posts, excluding current post
         const response = await client.getEntries({
@@ -768,7 +755,7 @@ const RelatedArticles = ({ currentPost }: { currentPost: BlogPostDisplay }) => {
           order: ['-sys.createdAt'] as any
         }) as any;
 
-        console.log('Fetched posts:', response.items.length);
+        
         
         // Filter out current post and transform
         const posts = response.items
@@ -776,7 +763,7 @@ const RelatedArticles = ({ currentPost }: { currentPost: BlogPostDisplay }) => {
           .map(transformContentfulPost)
           .slice(0, 2); // Show only 2 related posts
 
-        console.log('Related posts after filtering:', posts.length);
+        
         setRelatedPosts(posts);
       } catch (error) {
         console.error('Error fetching related posts:', error);

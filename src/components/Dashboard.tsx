@@ -161,7 +161,7 @@ const Dashboard = () => {
         // Clear categories from memory after a delay for security
         setTimeout(() => {
           // This doesn't actually clear React state but signals cleanup intent
-          console.debug('Category processing completed');
+          
         }, 5000);
       }
     };
@@ -198,9 +198,9 @@ const Dashboard = () => {
 
   // Refetch reports when user roles are loaded (for proper filtering)
   useEffect(() => {
-    console.log('useEffect triggered - rolesLoading:', rolesLoading, 'isOrgAdmin:', isOrgAdmin, 'user:', !!user);
+    
     if (!rolesLoading && user) {
-      console.log('User roles loaded, refetching reports with isOrgAdmin:', isOrgAdmin);
+      
       fetchData();
     }
   }, [rolesLoading, isOrgAdmin, user]);
@@ -252,7 +252,7 @@ const Dashboard = () => {
     return report.report_type?.charAt(0).toUpperCase() + report.report_type?.slice(1) || 'Unknown';
   };
 
-  console.log('Dashboard - Current subscription data:', subscriptionData);
+  
 
   // Check for successful subscription return from Stripe
   useEffect(() => {
@@ -277,7 +277,7 @@ const Dashboard = () => {
           // Check if subscription is now active after 2 seconds
           setTimeout(() => {
             if (!subscriptionData.subscribed && attempt < 5) {
-              console.log(`Subscription check attempt ${attempt + 1}`);
+              
               checkSubscription(attempt + 1);
             } else {
               setIsCheckingSubscription(false);
@@ -326,21 +326,14 @@ const Dashboard = () => {
     const urlParams = new URLSearchParams(window.location.search);
     const subscriptionStatus = urlParams.get('subscription');
     
-    console.log('Checking if should show subscription modal:', {
-      user: !!user,
-      loading,
-      subscriptionLoading,
-      hasShownSubscriptionModal,
-      subscribed: subscriptionData.subscribed,
-      subscriptionStatus,
-      isCheckingSubscription
+    // Checking subscription status
     });
     
     // Only check after both auth loading and subscription loading are complete
     if (user && !loading && !subscriptionLoading && !hasShownSubscriptionModal && !hasAnySubscription() && !subscriptionStatus && !isCheckingSubscription) {
       // Show trial modal after a short delay to allow dashboard to load
       const timer = setTimeout(() => {
-        console.log('Showing trial modal for user without subscription');
+        
         setShowTrialModal(true);
         setHasShownSubscriptionModal(true);
       }, 1500);
@@ -393,23 +386,23 @@ const Dashboard = () => {
         .limit(20);
 
       // If user is not org admin, only show reports assigned to them
-      console.log('isOrgAdmin value:', isOrgAdmin, 'type:', typeof isOrgAdmin);
-      console.log('rolesLoading:', rolesLoading);
+      
+      
       
       // Fallback: if roles are still loading or isOrgAdmin is undefined, assume team member
       const shouldFilter = !isOrgAdmin || rolesLoading || isOrgAdmin === undefined;
       
       if (shouldFilter) {
-        console.log('Filtering reports for team member:', user.id);
+        
         reportsQuery = reportsQuery.eq('assigned_to', user.id);
       } else {
-        console.log('Showing all reports for org admin');
+        
       }
 
       const { data: reportsData, error: reportsError } = await reportsQuery;
 
-      console.log('Reports query executed, results:', reportsData?.length || 0);
-      console.log('Query was filtered for team member:', shouldFilter);
+      
+      
 
       if (reportsError) {
         console.error('Error fetching reports:', reportsError);
@@ -425,16 +418,16 @@ const Dashboard = () => {
         .limit(20);
 
       // If user is not org admin, only show reports assigned to them
-      console.log('Archived reports - isOrgAdmin value:', isOrgAdmin, 'type:', typeof isOrgAdmin);
+      
       
       // Fallback: if roles are still loading or isOrgAdmin is undefined, assume team member
       const shouldFilterArchived = !isOrgAdmin || rolesLoading || isOrgAdmin === undefined;
       
       if (shouldFilterArchived) {
-        console.log('Filtering archived reports for team member:', user.id);
+        
         archivedQuery = archivedQuery.eq('assigned_to', user.id);
       } else {
-        console.log('Showing all archived reports for org admin');
+        
       }
 
       const { data: archivedData, error: archivedError } = await archivedQuery;
@@ -466,7 +459,7 @@ const Dashboard = () => {
         .eq('organization_id', profile.organization_id)
         .eq('is_active', true);
 
-      console.log('About to set reports:', reportsData?.length || 0, 'archived:', archivedData?.length || 0);
+      
       setReports(reportsData || []);
       setArchivedReports(archivedData || []);
       setLinks(linksData || []);

@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
 import { useAuth } from '@/hooks/useAuth';
 import { useUserRoles } from '@/hooks/useUserRoles';
@@ -205,7 +206,7 @@ const getHandlerRecommendation = (urgency: 'HIGH' | 'MEDIUM' | 'LOW'): string =>
 };
 
 const DashboardView = () => {
-  const { user } = useAuth();
+  const { user, subscriptionData } = useAuth();
   const { isOrgAdmin, loading: rolesLoading } = useUserRoles();
   const { customDomain, organizationId } = useCustomDomain();
   const { organization } = useOrganization();
@@ -215,12 +216,6 @@ const DashboardView = () => {
   
   // Get organization ID from multiple sources
   const effectiveOrganizationId = organizationId || organization?.id;
-  
-  // Debug: Log organization ID sources
-  console.log('DashboardView: organizationId from useCustomDomain:', organizationId);
-  console.log('DashboardView: organization?.id from useOrganization:', organization?.id);
-  console.log('DashboardView: effectiveOrganizationId:', effectiveOrganizationId);
-  console.log('DashboardView: Component loaded with latest code!');
   
   const [reports, setReports] = useState<Report[]>([]);
   const [archivedReports, setArchivedReports] = useState<Report[]>([]);
@@ -252,12 +247,8 @@ const DashboardView = () => {
   const [updatingStatusReportId, setUpdatingStatusReportId] = useState<string | null>(null);
 
   useEffect(() => {
-    console.log('DashboardView useEffect - user:', !!user, 'rolesLoading:', rolesLoading, 'isOrgAdmin:', isOrgAdmin);
     if (user && !rolesLoading) {
-      console.log('DashboardView - Roles loaded, fetching data with isOrgAdmin:', isOrgAdmin);
       fetchData();
-    } else if (user && rolesLoading) {
-      console.log('DashboardView - Waiting for roles to load...');
     }
   }, [user, rolesLoading, isOrgAdmin]);
 
@@ -266,7 +257,6 @@ const DashboardView = () => {
     const runPatternDetection = async () => {
       if (reports.length < 3 || patternsDismissed) return; // Need minimum data for patterns
 
-      console.log('🔍 Running pattern detection on', reports.length, 'reports...');
 
       // Decrypt report contents for name detection
       const decryptedContents = new Map<string, string>();
@@ -278,14 +268,13 @@ const DashboardView = () => {
             decryptedContents.set(report.id, decrypted);
           }
         } catch (error) {
-          console.error('Failed to decrypt report for pattern detection:', report.id, error);
+          log.error(LogContext.ENCRYPTION, 'Failed to decrypt report for pattern detection', error as Error, { reportId: report.id });
         }
       }
 
       // Run pattern detection
       const detectedPatterns = await detectAllPatterns(reports, decryptedContents);
 
-      console.log('🔍 Pattern detection results:', detectedPatterns);
 
       if (detectedPatterns.totalPatterns > 0) {
         setPatterns(detectedPatterns);
@@ -313,12 +302,10 @@ const DashboardView = () => {
         .single();
 
       if (!profile?.organization_id) {
-        console.log('No organization_id found for user:', user.id);
         setLoading(false);
         return;
       }
 
-      console.log('Fetching reports for organization:', profile.organization_id);
 
       // First, let's check what reports exist in the database
       const { data: allReports, error: allReportsError } = await supabase
@@ -326,8 +313,6 @@ const DashboardView = () => {
         .select('id, title, tracking_id, status, organization_id')
         .eq('organization_id', profile.organization_id);
       
-      console.log('All reports for this organization:', allReports);
-      console.log('All reports error:', allReportsError);
 
       // First, try to fetch with AI fields, fallback to basic fields if they don't exist
       let reportsData, archivedData;
@@ -344,22 +329,17 @@ const DashboardView = () => {
           .limit(20);
 
         // Add filtering for team members
-        console.log('DashboardView - isOrgAdmin:', isOrgAdmin, 'rolesLoading:', rolesLoading);
         if (isOrgAdmin === false && rolesLoading === false) {
-          console.log('DashboardView - Filtering reports for team member:', user?.id);
           reportsQuery = reportsQuery.eq('assigned_to', user?.id);
         } else {
-          console.log('DashboardView - Showing all reports for org admin (isOrgAdmin:', isOrgAdmin, 'rolesLoading:', rolesLoading, ')');
         }
 
         const { data: reportsWithAI, error: reportsError } = await reportsQuery;
 
         if (reportsError) {
-          console.log('AI fields query failed, falling back to basic query:', reportsError);
           throw reportsError;
         }
         reportsData = reportsWithAI;
-        console.log('Successfully fetched reports with AI fields:', reportsData);
 
         const { data: archivedWithAI, error: archivedError } = await supabase
           .from('reports')
@@ -372,7 +352,6 @@ const DashboardView = () => {
 
         // Add filtering for archived reports
         if (isOrgAdmin === false && rolesLoading === false) {
-          console.log('DashboardView - Filtering archived reports for team member:', user?.id);
           // Note: We can't modify the query after it's executed, so we'll filter the results
           if (archivedWithAI) {
             archivedData = archivedWithAI.filter(report => report.assigned_to === user?.id);
@@ -382,7 +361,6 @@ const DashboardView = () => {
         }
 
       } catch (aiError) {
-        console.log('AI fields not available, falling back to basic query:', aiError);
         
         // Fallback to basic query without AI fields
         let reportsBasicQuery = supabase
@@ -396,7 +374,6 @@ const DashboardView = () => {
 
         // Add filtering for team members in fallback query
         if (isOrgAdmin === false && rolesLoading === false) {
-          console.log('DashboardView - Fallback: Filtering reports for team member:', user?.id);
           reportsBasicQuery = reportsBasicQuery.eq('assigned_to', user?.id);
         }
 
@@ -418,15 +395,12 @@ const DashboardView = () => {
         
         // Add filtering for archived reports in fallback
         if (isOrgAdmin === false && rolesLoading === false) {
-          console.log('DashboardView - Fallback: Filtering archived reports for team member:', user?.id);
           archivedData = archivedBasic?.filter(report => report.assigned_to === user?.id) || [];
         } else {
           archivedData = archivedBasic;
         }
       }
 
-      console.log('Reports fetched:', reportsData);
-      console.log('Archived reports fetched:', archivedData);
       setReports(reportsData || []);
       setArchivedReports(archivedData || []);
 
@@ -447,7 +421,7 @@ const DashboardView = () => {
               }
             }
           } catch (error) {
-            console.error('Failed to decrypt category for report:', report.id, error);
+            log.error(LogContext.ENCRYPTION, 'Failed to decrypt category for report', error as Error, { reportId: report.id });
           }
         }
         setDecryptedCategories(categories);
@@ -468,12 +442,12 @@ const DashboardView = () => {
         .eq('user_roles.is_active', true);
 
       if (teamError) {
-        console.error('Error fetching team members:', teamError);
+        log.error(LogContext.DATABASE, 'Error fetching team members', teamError as Error);
       } else {
         setTeamMembers(teamData || []);
       }
     } catch (error) {
-      console.error('Error fetching dashboard data:', error);
+      log.error(LogContext.DATABASE, 'Error fetching dashboard data', error as Error);
       toast({
         title: "Error",
         description: "Failed to load reports. Please try refreshing the page.",
@@ -538,7 +512,7 @@ const DashboardView = () => {
           : `Report assigned to ${assignee?.first_name || assignee?.email}`,
       });
     } catch (error) {
-      console.error('Error assigning report:', error);
+      log.error(LogContext.CASE_MANAGEMENT, 'Error assigning report', error as Error, { reportId, assigneeId });
       toast({
         title: "Error",
         description: "Failed to assign report",
@@ -572,8 +546,6 @@ const DashboardView = () => {
           if (error) throw error;
 
         // Log audit event
-        console.log('DashboardView: organizationId from useCustomDomain:', organizationId);
-        console.log('DashboardView: effectiveOrganizationId:', effectiveOrganizationId);
         if (effectiveOrganizationId) {
           await log.info(LogContext.CASE_MANAGEMENT, 'Report status updated', {
             reportId: report.id,
@@ -582,7 +554,6 @@ const DashboardView = () => {
             organizationId: effectiveOrganizationId
           });
         } else {
-          console.log('DashboardView: effectiveOrganizationId is null/undefined, cannot log audit event');
         }
 
         // Update local state
@@ -594,7 +565,7 @@ const DashboardView = () => {
           )
         );
         } catch (error) {
-          console.error('Error updating report status:', error);
+          log.error(LogContext.CASE_MANAGEMENT, 'Error updating report status', error as Error, { reportId: report.id });
         }
       }
     }
@@ -681,7 +652,6 @@ const DashboardView = () => {
   const assessRisk = async (reportId: string) => {
     setIsAssessingRisk(reportId);
     try {
-      console.log('Starting AI risk assessment for report:', reportId);
       
       // Get the report data
       const report = reports.find(r => r.id === reportId);
@@ -711,7 +681,6 @@ Evidence: ${decryptedContent.evidence || 'No evidence provided'}
 Additional Details: ${decryptedContent.additionalDetails || 'None provided'}
       `.trim();
 
-      console.log('Calling AI risk assessment function...');
       
       // Call the AI risk assessment function
       const { data, error } = await supabase.functions.invoke('assess-risk-with-ai', {
@@ -728,11 +697,10 @@ Additional Details: ${decryptedContent.additionalDetails || 'None provided'}
       });
 
       if (error) {
-        console.error('AI risk assessment error:', error);
+        log.error(LogContext.AI_ANALYSIS, 'AI risk assessment error', error as Error, { reportId });
         throw error;
       }
 
-      console.log('AI risk assessment response:', data);
 
       // Update the report with AI risk assessment
       const { error: updateError } = await supabase
@@ -749,11 +717,10 @@ Additional Details: ${decryptedContent.additionalDetails || 'None provided'}
         .eq('id', reportId);
 
       if (updateError) {
-        console.error('Database update error:', updateError);
+        log.error(LogContext.DATABASE, 'Database update error during AI risk assessment', updateError as Error, { reportId });
         throw updateError;
       }
 
-      console.log('AI risk assessment completed successfully');
 
       // Log AI risk assessment to audit trail
       await log.info(LogContext.CASE_MANAGEMENT, 'AI risk assessment completed', {
@@ -771,7 +738,7 @@ Additional Details: ${decryptedContent.additionalDetails || 'None provided'}
       // Refresh the data
       fetchData();
     } catch (error) {
-      console.error('Error assessing risk:', error);
+      log.error(LogContext.AI_ANALYSIS, 'Error assessing risk', error as Error, { reportId });
       toast({
         title: "Error",
         description: `Failed to assess risk: ${error instanceof Error ? error.message : 'Unknown error'}`,
@@ -861,7 +828,7 @@ Additional Details: ${decryptedContent.additionalDetails || 'None provided'}
         description: "Case report downloaded successfully" 
       });
     } catch (error) {
-      console.error('Error generating PDF:', error);
+      log.error(LogContext.CASE_MANAGEMENT, 'Error generating PDF', error as Error, { reportId });
       toast({
         title: "Error",
         description: "Failed to generate PDF",
@@ -937,7 +904,7 @@ Additional Details: ${decryptedContent.additionalDetails || 'None provided'}
         description: `${csvData.length} cases exported successfully` 
       });
     } catch (error) {
-      console.error('Error generating CSV:', error);
+      log.error(LogContext.CASE_MANAGEMENT, 'Error generating CSV', error as Error);
       toast({
         title: "Error",
         description: "Failed to generate CSV",
@@ -1000,7 +967,7 @@ Additional Details: ${decryptedContent.additionalDetails || 'None provided'}
         )
       );
     } catch (error) {
-      console.error('Error updating risk level:', error);
+      log.error(LogContext.CASE_MANAGEMENT, 'Error updating risk level', error as Error, { reportId, riskLevel });
       toast({
         title: "Error",
         description: "Failed to update risk level. Please try again.",
@@ -1086,7 +1053,7 @@ Additional Details: ${decryptedContent.additionalDetails || 'None provided'}
 
       setSelectedReportIds([]);
     } catch (error) {
-      console.error('Error bulk updating status:', error);
+      log.error(LogContext.CASE_MANAGEMENT, 'Error bulk updating status', error as Error);
       toast({
         title: "Error",
         description: "Failed to update report status",
@@ -1125,7 +1092,7 @@ Additional Details: ${decryptedContent.additionalDetails || 'None provided'}
 
       setSelectedReportIds([]);
     } catch (error) {
-      console.error('Error bulk assigning:', error);
+      log.error(LogContext.CASE_MANAGEMENT, 'Error bulk assigning', error as Error);
       toast({
         title: "Error",
         description: "Failed to assign reports",
@@ -1158,7 +1125,7 @@ Additional Details: ${decryptedContent.additionalDetails || 'None provided'}
 
       setSelectedReportIds([]);
     } catch (error) {
-      console.error('Error bulk archiving:', error);
+      log.error(LogContext.CASE_MANAGEMENT, 'Error bulk archiving', error as Error);
       toast({
         title: "Error",
         description: "Failed to archive reports",
@@ -1187,7 +1154,7 @@ Additional Details: ${decryptedContent.additionalDetails || 'None provided'}
       setReports(prevReports => prevReports.filter(r => !selectedReportIds.includes(r.id)));
       setSelectedReportIds([]);
     } catch (error) {
-      console.error('Error bulk deleting:', error);
+      log.error(LogContext.CASE_MANAGEMENT, 'Error bulk deleting', error as Error);
       toast({
         title: "Error",
         description: "Failed to delete reports",
@@ -1318,6 +1285,37 @@ Additional Details: ${decryptedContent.additionalDetails || 'None provided'}
         </Card>
       </div>
 
+      {/* Subscription Grace Period Warning */}
+      {subscriptionData && (subscriptionData.isInGracePeriod || subscriptionData.subscription_status === 'past_due') && (
+        <Alert className="border-yellow-500 bg-yellow-50">
+          <Clock className="h-4 w-4 text-yellow-600" />
+          <AlertTitle className="text-yellow-800">Subscription Notice</AlertTitle>
+          <AlertDescription className="text-yellow-700">
+            {subscriptionData.isInGracePeriod ? (
+              <>
+                Your subscription has expired. You're currently in a grace period with read-only access.
+                {subscriptionData.grace_period_ends_at && (
+                  <> Grace period ends: {new Date(subscriptionData.grace_period_ends_at).toLocaleString()}</>
+                )}
+                {' '}Please renew your subscription to restore full access.
+              </>
+            ) : (
+              <>
+                Your payment failed and your subscription is past due. Please update your payment method to restore full access.
+              </>
+            )}
+            <Button
+              variant="outline"
+              size="sm"
+              className="ml-4 mt-2"
+              onClick={() => navigate('/dashboard/settings?tab=subscription')}
+            >
+              Manage Subscription
+            </Button>
+          </AlertDescription>
+        </Alert>
+      )}
+
       {/* Pattern Detection Alerts */}
       {patterns && patterns.totalPatterns > 0 && (
         <PatternAlerts
@@ -1420,9 +1418,9 @@ Additional Details: ${decryptedContent.additionalDetails || 'None provided'}
                                       await navigator.clipboard.writeText(report.tracking_id);
                                       setCopiedTrackingId(report.tracking_id);
                                       setTimeout(() => setCopiedTrackingId(null), 1000);
-                                    } catch (error) {
-                                      console.error('Failed to copy:', error);
-                                    }
+                                } catch (error) {
+                                  log.error(LogContext.FRONTEND, 'Failed to copy tracking ID', error as Error);
+                                }
                                   }}
                                   className="text-muted-foreground hover:text-foreground transition-colors"
                                   title="Copy tracking ID"
@@ -1640,7 +1638,7 @@ Additional Details: ${decryptedContent.additionalDetails || 'None provided'}
                                           toast({ title: 'Report marked as Reviewing' });
                                           fetchData();
                                         } catch (error) {
-                                          console.error('Error updating report status:', error);
+                                          log.error(LogContext.CASE_MANAGEMENT, 'Error updating report status', error as Error, { reportId: report.id });
                                           toast({ 
                                             title: 'Error updating report status',
                                             variant: 'destructive'
@@ -1722,7 +1720,7 @@ Additional Details: ${decryptedContent.additionalDetails || 'None provided'}
                                           toast({ title: 'Report marked as resolved' });
                                           fetchData();
                                         } catch (error) {
-                                          console.error('Error resolving report:', error);
+                                          log.error(LogContext.CASE_MANAGEMENT, 'Error resolving report', error as Error, { reportId: report.id });
                                           toast({ 
                                             title: 'Error resolving report',
                                             variant: 'destructive'
@@ -1787,9 +1785,9 @@ Additional Details: ${decryptedContent.additionalDetails || 'None provided'}
                                       await navigator.clipboard.writeText(report.tracking_id);
                                       setCopiedTrackingId(report.tracking_id);
                                       setTimeout(() => setCopiedTrackingId(null), 1000);
-                                    } catch (error) {
-                                      console.error('Failed to copy:', error);
-                                    }
+                                } catch (error) {
+                                  log.error(LogContext.FRONTEND, 'Failed to copy tracking ID', error as Error);
+                                }
                                   }}
                                   className="text-muted-foreground hover:text-foreground transition-colors"
                                   title="Copy tracking ID"
@@ -1982,7 +1980,7 @@ Additional Details: ${decryptedContent.additionalDetails || 'None provided'}
                                       toast({ title: 'Report marked as resolved' });
                                       fetchData();
                                     } catch (error) {
-                                      console.error('Error resolving report:', error);
+                                      log.error(LogContext.CASE_MANAGEMENT, 'Error resolving report', error as Error, { reportId: report.id });
                                       toast({ 
                                         title: 'Error resolving report',
                                         variant: 'destructive'
@@ -2082,9 +2080,9 @@ Additional Details: ${decryptedContent.additionalDetails || 'None provided'}
                                       await navigator.clipboard.writeText(report.tracking_id);
                                       setCopiedTrackingId(report.tracking_id);
                                       setTimeout(() => setCopiedTrackingId(null), 1000);
-                                    } catch (error) {
-                                      console.error('Failed to copy:', error);
-                                    }
+                                } catch (error) {
+                                  log.error(LogContext.FRONTEND, 'Failed to copy tracking ID', error as Error);
+                                }
                                   }}
                                   className="text-muted-foreground hover:text-foreground transition-colors"
                                   title="Copy tracking ID"
@@ -2165,9 +2163,9 @@ Additional Details: ${decryptedContent.additionalDetails || 'None provided'}
                                       await navigator.clipboard.writeText(report.tracking_id);
                                       setCopiedTrackingId(report.tracking_id);
                                       setTimeout(() => setCopiedTrackingId(null), 1000);
-                                    } catch (error) {
-                                      console.error('Failed to copy:', error);
-                                    }
+                                } catch (error) {
+                                  log.error(LogContext.FRONTEND, 'Failed to copy tracking ID', error as Error);
+                                }
                                   }}
                                   className="text-muted-foreground hover:text-foreground transition-colors"
                                   title="Copy tracking ID"
@@ -2347,7 +2345,7 @@ Additional Details: ${decryptedContent.additionalDetails || 'None provided'}
                   setIsDeleteDialogOpen(false);
                   fetchData();
                 } catch (error: any) {
-                  console.error('Error deleting report:', error);
+                  log.error(LogContext.CASE_MANAGEMENT, 'Error deleting report', error as Error, { reportId: deleteReportId });
                   toast({ 
                     title: '❌ Error deleting report',
                     description: error.message || 'Failed to delete report. Please try again.',

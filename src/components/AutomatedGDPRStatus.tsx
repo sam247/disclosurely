@@ -19,7 +19,7 @@ const AutomatedGDPRStatus = () => {
     
     setProcessing(true);
     try {
-      console.log('Triggering GDPR request processing...');
+      
       
       const { data, error } = await supabase.functions.invoke('process-gdpr-requests', {
         headers: {
@@ -50,7 +50,7 @@ const AutomatedGDPRStatus = () => {
     if (!user) return;
     
     try {
-      console.log('Triggering erasure auto-approval...');
+      
       
       const { data, error } = await supabase.functions.invoke('auto-approve-erasure', {
         headers: {

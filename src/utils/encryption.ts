@@ -86,7 +86,7 @@ export const encryptReport = async (reportData: any, organizationId: string): Pr
 // DEPRECATED: This function uses hardcoded salts and is insecure
 // Use server-side decryption edge functions instead
 export const decryptReportCategory = (encryptedData: string, organizationId: string): string => {
-  console.warn('⚠️ SECURITY WARNING: decryptReportCategory uses hardcoded salts and is deprecated. Use server-side decryption instead.');
+  
   
   // Return a safe fallback instead of attempting decryption
   return 'General';

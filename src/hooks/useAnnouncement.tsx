@@ -30,9 +30,9 @@ export const useAnnouncement = () => {
         setError(null);
 
         // Fetch published announcements (content type: 'announcement')
-        console.log('Fetching announcements from Contentful...');
-        console.log('Space ID:', CONTENTFUL_SPACE_ID);
-        console.log('Token length:', CONTENTFUL_DELIVERY_TOKEN?.length);
+        
+        
+        
         
         const response = await client.getEntries({
           content_type: 'announcement',
@@ -40,14 +40,14 @@ export const useAnnouncement = () => {
           limit: 1,
         });
 
-        console.log('Announcements response:', response);
-        console.log('Total items:', response.items.length);
+        
+        
 
         if (response.items.length > 0) {
           const item = response.items[0];
           const fields = item.fields as any;
 
-          console.log('Announcement fields:', fields);
+          
 
           setAnnouncement({
             id: item.sys.id,
@@ -58,7 +58,7 @@ export const useAnnouncement = () => {
             linkText: fields.linkText,
           });
         } else {
-          console.log('No announcements found');
+          
         }
       } catch (err) {
         console.error('Error fetching announcement:', err);

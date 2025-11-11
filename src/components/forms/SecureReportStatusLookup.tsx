@@ -63,7 +63,7 @@ const SecureReportStatusLookup = () => {
     }
 
     try {
-      console.log('Fetching organization branding for custom domain:', customDomain);
+      
 
       const { data: linkInfo, error: linkError } = await supabase
         .from('organization_links')
@@ -89,12 +89,12 @@ const SecureReportStatusLookup = () => {
       }
 
       if (!linkInfo) {
-        console.log('No organization link found for custom domain');
+        
         setLoadingBranding(false);
         return;
       }
 
-      console.log('Organization branding found for custom domain:', linkInfo);
+      
 
       setDomainBranding({
         name: linkInfo.organizations.name,
@@ -122,7 +122,7 @@ const SecureReportStatusLookup = () => {
   };
 
   const lookupReport = async (data: { trackingId: string }) => {
-    console.log('Checking report status for tracking ID:', data.trackingId);
+    
 
     // Use secure RPC to validate existence and get branding without exposing report data
     const { data: orgRows, error: orgError } = await supabase.rpc(

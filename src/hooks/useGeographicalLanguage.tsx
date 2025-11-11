@@ -68,7 +68,7 @@ export const useGeographicalLanguage = () => {
       } catch (error) {
         // Silently fail - just use default English
         sessionStorage.setItem('language-detected', 'true');
-        console.log('Geographical language detection unavailable');
+        
       }
     };
 

@@ -54,8 +54,8 @@ export const useCustomDomains = () => {
 
   const addDomain = async (domainName: string): Promise<AddDomainResult> => {
     try {
-      console.log('🔍 Starting addDomain with:', domainName);
-      console.log('🔍 Current session:', session?.user?.id);
+      
+      
       
       const { data, error } = await supabase.functions.invoke('custom-domains', {
         body: {
@@ -64,14 +64,14 @@ export const useCustomDomains = () => {
         }
       });
 
-      console.log('🔍 API Response:', { data, error });
+      
 
       if (error) {
         console.error('❌ Supabase error:', error);
         throw error;
       }
 
-      console.log('✅ Domain added successfully, refreshing list...');
+      
       // Refresh domains list
       await fetchDomains();
       
@@ -84,7 +84,7 @@ export const useCustomDomains = () => {
 
   const verifyDomain = async (domainId: string): Promise<DomainVerificationResult> => {
     try {
-      console.log('🔍 Starting verifyDomain with:', domainId);
+      
       
       const { data, error } = await supabase.functions.invoke('custom-domains', {
         body: {
@@ -93,14 +93,14 @@ export const useCustomDomains = () => {
         }
       });
 
-      console.log('🔍 Verify API Response:', { data, error });
+      
 
       if (error) {
         console.error('❌ Supabase verify error:', error);
         throw error;
       }
 
-      console.log('✅ Domain verified successfully, refreshing list...');
+      
       // Refresh domains list to get updated status
       await fetchDomains();
       

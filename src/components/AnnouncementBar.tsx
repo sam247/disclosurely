@@ -13,10 +13,10 @@ export const AnnouncementBar: React.FC<AnnouncementBarProps> = ({
   const [isVisible, setIsVisible] = React.useState(true);
   const [isDismissed, setIsDismissed] = React.useState(false);
 
-  console.log('AnnouncementBar - showOnDashboard:', showOnDashboard);
-  console.log('AnnouncementBar - loading:', loading);
-  console.log('AnnouncementBar - error:', error);
-  console.log('AnnouncementBar - announcement:', announcement);
+  
+  
+  
+  
 
   // Check localStorage for dismissal
   React.useEffect(() => {

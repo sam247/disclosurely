@@ -107,18 +107,18 @@ const Landing = () => {
                     returnObjects: true
                   });
                   // Debug: log what we get
-                  console.log('🔍 Typing phrases from i18n:', phrases, 'Type:', typeof phrases, 'Is Array:', Array.isArray(phrases));
+                  // Typing phrases initialized
                   // Ensure we always have an array
                   if (Array.isArray(phrases) && phrases.length > 0) {
-                    console.log('✅ Using i18n phrases:', phrases);
+                    
                     return phrases;
                   }
                 } catch (error) {
-                  console.warn('⚠️ Failed to load typing phrases:', error);
+                  
                 }
                 // Fallback to English phrases if translation fails
                 const fallback = ["AI-Powered Workflows", "Anonymous Reporting", "Real-Time Audit Trails", "Private AI Assistance", "Military-Grade Security", "Automated Risk Scoring", "Proactive Risk Detection", "Trust-First Technology"];
-                console.log('🔄 Using fallback phrases:', fallback);
+                
                 return fallback;
               })()} typingSpeed={100} deletingSpeed={50} pauseDuration={2000} />
             </span>

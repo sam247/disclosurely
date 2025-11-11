@@ -20,12 +20,12 @@ export const useCustomDomain = (): CustomDomainInfo => {
 
   const checkCustomDomain = async () => {
       const currentHost = window.location.hostname;
-      console.log('🔍 useCustomDomain: Checking domain:', currentHost);
+      
 
       // Skip if on localhost or default Lovable domains
       if (currentHost === 'localhost' ||
           currentHost.includes('lovable.app')) {
-        console.log('⏭️ useCustomDomain: Skipping localhost/lovable domain');
+        
         setDomainInfo({
           customDomain: null,
           organizationId: null,
@@ -42,7 +42,7 @@ export const useCustomDomain = (): CustomDomainInfo => {
 
         // Skip if it's the main app domain or secure domain
         if (slug === 'app' || slug === 'www' || slug === 'secure') {
-          console.log('⏭️ useCustomDomain: Skipping app/www/secure subdomain');
+          
           setDomainInfo({
             customDomain: null,
             organizationId: null,
@@ -52,7 +52,7 @@ export const useCustomDomain = (): CustomDomainInfo => {
           return;
         }
 
-        console.log('📡 useCustomDomain: Detected subdomain slug:', slug);
+        
 
         try {
           // Look up organization by domain slug
@@ -63,10 +63,10 @@ export const useCustomDomain = (): CustomDomainInfo => {
             .eq('is_active', true)
             .single();
 
-          console.log('📡 useCustomDomain: Subdomain query result:', { data: org, error });
+          
 
           if (!error && org) {
-            console.log('✅ useCustomDomain: Organization found via subdomain!', org);
+            
             setDomainInfo({
               customDomain: null, // Subdomain, not custom domain
               organizationId: org.id,
@@ -75,7 +75,7 @@ export const useCustomDomain = (): CustomDomainInfo => {
             });
             return;
           } else {
-            console.log('❌ useCustomDomain: No organization found for subdomain:', slug);
+            
           }
         } catch (error) {
           console.error('❌ useCustomDomain: Error checking subdomain:', error);
@@ -84,7 +84,7 @@ export const useCustomDomain = (): CustomDomainInfo => {
 
       // Check for custom domains (e.g., testing.betterranking.co.uk)
       try {
-        console.log('📡 useCustomDomain: Querying custom_domains table for:', currentHost);
+        
 
         const { data: customDomain, error } = await supabase
           .from('custom_domains')
@@ -94,7 +94,7 @@ export const useCustomDomain = (): CustomDomainInfo => {
           .eq('status', 'active')
           .maybeSingle(); // Use maybeSingle() to avoid errors when no domain found
 
-        console.log('📡 useCustomDomain: Query result:', { data: customDomain, error });
+        
 
         if (error) {
           console.error('❌ useCustomDomain: Database error:', error);
@@ -108,7 +108,7 @@ export const useCustomDomain = (): CustomDomainInfo => {
         }
 
         if (customDomain) {
-          console.log('✅ useCustomDomain: Custom domain found!', customDomain);
+          
           setDomainInfo({
             customDomain: currentHost,
             organizationId: customDomain.organization_id,
@@ -117,14 +117,14 @@ export const useCustomDomain = (): CustomDomainInfo => {
           });
           return;
         } else {
-          console.log('❌ useCustomDomain: No custom domain found');
+          
         }
       } catch (error) {
         console.error('❌ useCustomDomain: Error checking custom domain:', error);
       }
 
       // Default case
-      console.log('⚠️ useCustomDomain: Defaulting to no custom domain');
+      
       setDomainInfo({
         customDomain: null,
         organizationId: null,

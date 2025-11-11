@@ -67,7 +67,7 @@ const LinkGenerator = () => {
     staleTime: 0, // Don't cache - always fetch fresh
     queryFn: async () => {
       if (!user) {
-        console.log('🔍 LinkGenerator: No user, returning empty domains');
+        
         return [];
       }
 
@@ -87,11 +87,11 @@ const LinkGenerator = () => {
 
       const result = response.data;
       if (result?.success) {
-        console.log('🔍 LinkGenerator: Domains fetched from edge function:', result.domains);
+        
         return (result.domains || []) as CustomDomainRecord[];
       }
 
-      console.warn('🔍 LinkGenerator: list-domains returned without success', result);
+      
       return [];
     },
   });
@@ -99,7 +99,7 @@ const LinkGenerator = () => {
   // Listen for domain verification events to immediately refetch
   useEffect(() => {
     const handleDomainVerified = () => {
-      console.log('Domain verified event received, refetching custom domains...');
+      
       refetchDomains();
       // Also invalidate the query cache
       queryClient.invalidateQueries({ queryKey: ['custom-domains', user?.id] });
@@ -132,10 +132,10 @@ const LinkGenerator = () => {
   // Debug logging
   useEffect(() => {
     if (customDomains.length > 0) {
-      console.log('🔍 LinkGenerator: Custom domains:', customDomains);
-      console.log('🔍 LinkGenerator: Primary domain record:', primaryDomainRecord);
-      console.log('🔍 LinkGenerator: Is custom domain verified?', isCustomDomainVerified);
-      console.log('🔍 LinkGenerator: Primary domain status:', primaryDomainStatus);
+      
+      
+      
+      
     }
   }, [customDomains, primaryDomainRecord, isCustomDomainVerified, primaryDomainStatus]);
 
@@ -414,14 +414,7 @@ const LinkGenerator = () => {
 
   // Debug logging - MUST be after primaryLink is defined
   useEffect(() => {
-    if (user) {
-      console.log('🔍 LinkGenerator Debug:', {
-        customDomains,
-        primaryDomain,
-        brandedUrl: primaryDomain && primaryLink ? `https://${primaryDomain}/report` : null,
-        user: user.id
-      });
-    }
+    // LinkGenerator initialized
   }, [customDomains, primaryDomain, primaryLink, user, brandedUrl]);
   
   // Check if branded link is actually accessible via edge function

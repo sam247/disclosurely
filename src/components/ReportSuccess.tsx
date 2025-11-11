@@ -64,7 +64,7 @@ const ReportSuccess = () => {
         .maybeSingle();
 
       if (reportError || !report) {
-        console.log('Could not find report for tracking ID:', trackingId);
+        
         return;
       }
 

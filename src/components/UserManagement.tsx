@@ -25,6 +25,7 @@ import {
 } from 'lucide-react';
 
 import { useUserRoles, UserRole } from '@/hooks/useUserRoles';
+import { useSubscriptionLimits } from '@/hooks/useSubscriptionLimits';
 
 interface TeamMember {
   id: string;
@@ -52,7 +53,7 @@ interface Invitation {
 }
 
 const UserManagement = () => {
-  const { user } = useAuth();
+  const { user, subscriptionData } = useAuth();
   const { organization, profile } = useOrganization();
   const { toast } = useToast();
   const [teamMembers, setTeamMembers] = useState<TeamMember[]>([]);
@@ -64,6 +65,7 @@ const UserManagement = () => {
   const [isSendingInvitation, setIsSendingInvitation] = useState(false);
   const [cancellingInvitation, setCancellingInvitation] = useState<string | null>(null);
   const { isOrgAdmin } = useUserRoles();
+  const { limits } = useSubscriptionLimits();
 
   useEffect(() => {
     if (organization && isOrgAdmin) {
@@ -143,13 +145,6 @@ const UserManagement = () => {
   };
 
   const sendInvitation = async () => {
-    console.log('Send invitation clicked', { inviteEmail, organization: organization?.id, userId: user?.id });
-    console.log('User auth state:', { 
-      user: user, 
-      profile: profile, 
-      organization: organization,
-      isOrgAdmin: isOrgAdmin
-    });
     
     if (!inviteEmail.trim()) {
       toast({
@@ -187,7 +182,20 @@ const UserManagement = () => {
       return;
     }
 
-    console.log('Proceeding with invitation');
+    // Check team member limit
+    const currentTeamCount = teamMembers.length;
+    const pendingInvitationsCount = invitations.length;
+    const totalTeamSize = currentTeamCount + pendingInvitationsCount;
+    
+    if (limits.maxTeamMembers > 0 && totalTeamSize >= limits.maxTeamMembers) {
+      toast({
+        title: "Team Limit Reached",
+        description: `Your ${subscriptionData?.subscription_tier || 'subscription'} plan allows up to ${limits.maxTeamMembers} team members. Please upgrade to add more members.`,
+        variant: "destructive",
+      });
+      return;
+    }
+
     
     setIsSendingInvitation(true);
     try {
@@ -233,7 +241,6 @@ const UserManagement = () => {
       // If there's an existing invitation, handle it appropriately
       if (existingInvitations && existingInvitations.length > 0) {
         const existingInvitation = existingInvitations[0];
-        console.log('Found existing invitation:', existingInvitation);
         
         if (existingInvitation.accepted_at) {
           // Invitation was already accepted - user is already a team member
@@ -245,7 +252,6 @@ const UserManagement = () => {
           return;
         } else {
           // Invitation exists but not accepted - delete it and create new one
-          console.log('Deleting existing unaccepted invitation');
           const { error: deleteError } = await supabase
             .from('user_invitations')
             .delete()
@@ -253,7 +259,6 @@ const UserManagement = () => {
             .eq('email', emailToInvite);
 
           if (deleteError) throw deleteError;
-          console.log('Existing invitation deleted successfully');
         }
       }
 
@@ -507,7 +512,6 @@ const UserManagement = () => {
         .eq('organization_id', organization.id);
 
       if (invitationError) {
-        console.warn('Error cleaning up invitations:', invitationError);
         // Don't throw here - invitation cleanup is not critical
       }
 
@@ -630,7 +634,7 @@ const UserManagement = () => {
                       placeholder="user@example.com"
                       value={inviteEmail}
                       onChange={(e) => {
-                        console.log('Email input changed:', e.target.value);
+                        
                         setInviteEmail(e.target.value);
                       }}
                     />
@@ -651,7 +655,6 @@ const UserManagement = () => {
                     <Button
                       variant="outline"
                       onClick={() => {
-                        console.log('Cancel button clicked');
                         setIsInviteDialogOpen(false);
                       }}
                       className="transition-all duration-200 hover:scale-105 active:scale-95"
@@ -660,7 +663,6 @@ const UserManagement = () => {
                     </Button>
                     <Button 
                       onClick={() => {
-                        console.log('Send invitation button clicked, disabled:', !inviteEmail.trim());
                         sendInvitation();
                       }} 
                       loading={isSendingInvitation}

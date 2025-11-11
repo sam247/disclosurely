@@ -74,14 +74,14 @@ const DynamicHelmet: React.FC<DynamicHelmetProps> = ({
   useEffect(() => {
     const fetchSEOData = async () => {
       try {
-        console.log('🔍 DynamicHelmet: Fetching SEO data for page:', pageIdentifier);
+        
         
         // Fetch SEO data from Contentful
         // Try both with and without leading slash
         const pagePathWithSlash = pageIdentifier.startsWith('/') ? pageIdentifier : `/${pageIdentifier}`;
         const pagePathWithoutSlash = pageIdentifier.startsWith('/') ? pageIdentifier.slice(1) : pageIdentifier;
         
-        console.log('🔍 DynamicHelmet: Searching for pagePath:', { pageIdentifier, pagePathWithSlash, pagePathWithoutSlash });
+        
         
         const response = await contentfulClient.getEntries({
           content_type: 'seoPage',
@@ -90,13 +90,13 @@ const DynamicHelmet: React.FC<DynamicHelmetProps> = ({
           limit: 1,
         });
 
-        console.log('📊 DynamicHelmet: Contentful response:', response);
+        
 
         if (response.items.length > 0) {
           const item = response.items[0];
           const fields = item.fields as any;
           
-          console.log('✅ DynamicHelmet: Found SEO data:', fields);
+          
           
           // Ensure OG image URL is absolute (add https: if missing)
           let ogImageUrl = fields.ogImage?.fields?.file?.url;
@@ -114,7 +114,7 @@ const DynamicHelmet: React.FC<DynamicHelmetProps> = ({
             robots_directive: fields.robotsMeta,
           });
         } else {
-          console.log('⚠️ DynamicHelmet: No SEO data found for page:', pageIdentifier);
+          
         }
 
         // Fetch global site settings
@@ -128,7 +128,7 @@ const DynamicHelmet: React.FC<DynamicHelmetProps> = ({
           const siteItem = siteSettingsResponse.items[0];
           const siteFields = siteItem.fields as any;
           
-          console.log('✅ DynamicHelmet: Found site settings:', siteFields);
+          
           
           // Ensure default OG image URL is absolute (add https: if missing)
           let defaultOgImageUrl = siteFields.defaultOgImage?.fields?.file?.url;
@@ -164,7 +164,7 @@ const DynamicHelmet: React.FC<DynamicHelmetProps> = ({
             data: item.fields.schemaData,
           }));
           
-          console.log('✅ DynamicHelmet: Found schema data:', schemaItems);
+          
           setSchemaData(schemaItems);
         }
       } catch (error) {
@@ -184,7 +184,7 @@ const DynamicHelmet: React.FC<DynamicHelmetProps> = ({
     const currentLang = i18n.language || 'en';
     if (typeof document !== 'undefined') {
       document.documentElement.setAttribute('lang', currentLang);
-      console.log('✅ DynamicHelmet: Set HTML lang attribute to:', currentLang);
+      
     }
   }, [i18n.language]);
 
@@ -369,13 +369,7 @@ const DynamicHelmet: React.FC<DynamicHelmetProps> = ({
   
   const finalStructuredData = baseStructuredData;
 
-  // Debug logging
-  console.log('🎯 DynamicHelmet: Final title determination:', {
-    seoData: seoData?.meta_title,
-    fallbackTitle,
-    finalTitle,
-    loading
-  });
+  // Title determination complete
 
   return (
     <Helmet>

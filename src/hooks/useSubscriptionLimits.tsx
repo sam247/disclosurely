@@ -10,6 +10,7 @@ interface SubscriptionLimits {
   hasCustomBranding: boolean;
   hasCustomDomain: boolean;
   maxCustomDomains: number;
+  maxTeamMembers: number;
 }
 
 export const useSubscriptionLimits = () => {
@@ -23,6 +24,7 @@ export const useSubscriptionLimits = () => {
     hasCustomBranding: false,
     hasCustomDomain: false,
     maxCustomDomains: 0,
+    maxTeamMembers: 0,
   });
 
   useEffect(() => {
@@ -39,6 +41,7 @@ export const useSubscriptionLimits = () => {
         hasCustomBranding: false, // ❌ Pro only
         hasCustomDomain: false, // ❌ Pro only
         maxCustomDomains: 0,
+        maxTeamMembers: 5, // Basic: 5 team members
       });
     } else if (isSubscribed && tier === 'pro') {
       setLimits({
@@ -49,6 +52,7 @@ export const useSubscriptionLimits = () => {
         hasCustomBranding: true, // ✅ Custom branding
         hasCustomDomain: true, // ✅ Custom domain
         maxCustomDomains: 1, // 1 custom domain per Pro subscription
+        maxTeamMembers: 20, // Pro: 20 team members
       });
     } else {
       // No subscription - no features allowed
@@ -60,6 +64,7 @@ export const useSubscriptionLimits = () => {
         hasCustomBranding: false,
         hasCustomDomain: false,
         maxCustomDomains: 0,
+        maxTeamMembers: 0,
       });
     }
   }, [subscriptionData.subscription_tier, subscriptionData.subscribed]);

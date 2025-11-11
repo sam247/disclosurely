@@ -81,7 +81,7 @@ const SecureMessaging = ({ report, onClose }: SecureMessagingProps) => {
     // Prevent multiple simultaneous fetches using ref instead of state
     // Also prevent fetching during navigation transitions (eager gestures)
     if (fetchingRef.current || !isMountedRef.current || isNavigatingRef.current) {
-      console.log('Already fetching messages, component unmounted, or navigating - skipping...');
+      
       return;
     }
     
@@ -90,7 +90,7 @@ const SecureMessaging = ({ report, onClose }: SecureMessagingProps) => {
       if (isMountedRef.current) {
         setIsLoading(true);
       }
-      console.log('Fetching messages for report:', report.id);
+      
       
       // Use Edge Function for encrypted message loading instead of direct database query
       const { data: result, error } = await supabase.functions.invoke('anonymous-report-messaging', {
@@ -102,7 +102,7 @@ const SecureMessaging = ({ report, onClose }: SecureMessagingProps) => {
 
       // Check if component is still mounted before updating state
       if (!isMountedRef.current) {
-        console.log('Component unmounted during fetch, aborting state update');
+        
         return;
       }
 
@@ -118,7 +118,7 @@ const SecureMessaging = ({ report, onClose }: SecureMessagingProps) => {
         return;
       }
 
-      console.log('Messages loaded:', result?.messages);
+      
       if (isMountedRef.current) {
       setMessages(result?.messages || []);
       }
@@ -204,7 +204,7 @@ const SecureMessaging = ({ report, onClose }: SecureMessagingProps) => {
   };
 
   const submitMessage = async (data: { message: string }) => {
-    console.log('Sending secure message for report:', report.id);
+    
     
     // Use Edge Function for encrypted messaging instead of direct database insert
     const { data: result, error } = await supabase.functions.invoke('anonymous-report-messaging', {
@@ -221,7 +221,7 @@ const SecureMessaging = ({ report, onClose }: SecureMessagingProps) => {
       throw new Error('Failed to send message');
     }
 
-    console.log('Message sent successfully');
+    
     
     // Log to audit trail
     if (user && organization?.id) {

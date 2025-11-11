@@ -12,7 +12,7 @@ async function generateBlogPostWithDeepSeekAndContentful() {
 
   try {
     // Step 1: Generate content with DeepSeek AI
-    console.log("🤖 Generating content with DeepSeek AI...");
+    
     
     const deepSeekResponse = await fetch('https://api.deepseek.com/v1/chat/completions', {
       method: 'POST',
@@ -66,12 +66,12 @@ Format the response as JSON with this exact structure:
     const jsonMatch = generatedContent.match(/\{[\s\S]*\}/);
     const blogData = JSON.parse(jsonMatch[0]);
     
-    console.log("✅ Content generated successfully!");
-    console.log(`📝 Title: ${blogData.title}`);
-    console.log(`🔗 Slug: ${blogData.slug}`);
+    
+    
+    
 
     // Step 2: Create Contentful entry using MCP tools
-    console.log("📝 Creating Contentful entry...");
+    
     
     // This is where you would use the Contentful MCP tools
     // The blogData object contains all the structured content ready for Contentful
@@ -93,12 +93,10 @@ Format the response as JSON with this exact structure:
       }
     };
 
-    console.log("📋 Contentful entry data ready:");
-    console.log(JSON.stringify(contentfulEntryData, null, 2));
 
     // Step 3: Use Contentful MCP to create the entry
     // This would be done through the MCP tools in your environment
-    console.log("🚀 Ready to create Contentful entry via MCP tools!");
+    
 
   } catch (error) {
     console.error("❌ Error:", error);

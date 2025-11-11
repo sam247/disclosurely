@@ -81,7 +81,7 @@ const SecurityHeaders = () => {
   const loadConfiguration = () => {
     // In a real implementation, this would load from your server configuration
     // For now, we'll use default values
-    console.log('Loading security header configuration...');
+    
   };
 
   const saveConfiguration = async () => {

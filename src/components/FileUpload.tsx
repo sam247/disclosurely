@@ -158,7 +158,7 @@ const FileUpload: React.FC<FileUploadProps> = ({
                   { description: 'Your identity is protected' }
                 );
               } else {
-                console.log(`No metadata found in ${file.name}`);
+                
               }
             } catch (fetchError) {
               if (progressInterval) clearInterval(progressInterval);

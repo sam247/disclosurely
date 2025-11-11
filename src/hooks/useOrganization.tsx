@@ -45,7 +45,7 @@ export const useOrganization = () => {
 
     try {
       setLoading(true);
-      console.log('Fetching profile for user:', user.email);
+      
 
       // Get user's profile
       const { data: profileData, error: profileError } = await supabase
@@ -60,7 +60,7 @@ export const useOrganization = () => {
         return;
       }
 
-      console.log('Profile found:', profileData);
+      
       setProfile(profileData);
 
       // If profile has organization, fetch organization details
@@ -74,7 +74,7 @@ export const useOrganization = () => {
         if (orgError) {
           console.error('Error fetching organization:', orgError);
         } else {
-          console.log('Organization found:', orgData);
+          
           setOrganization(orgData);
         }
       } else {

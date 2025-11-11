@@ -39,6 +39,7 @@ export default tseslint.config(
       "security/detect-no-csrf-before-method-override": "error",
       "security/detect-possible-timing-attacks": "error",
       "security/detect-pseudoRandomBytes": "error",
+      "no-console": ["error", { "allow": ["error"] }],
     },
   }
 );

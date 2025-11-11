@@ -385,7 +385,7 @@ Case Details:
         const doc = documents.find(d => d.id === docId);
         if (doc && doc.content_type === 'application/pdf') {
           try {
-            console.log(`[PDF Extract] Starting extraction for: ${doc.name}`);
+            
             const { data: extractData, error: extractError } = await supabase.functions.invoke('extract-pdf-text', {
               body: { filePath: doc.file_path }
             });
@@ -396,8 +396,8 @@ Case Details:
             }
 
             const extractedText = extractData.text || '';
-            console.log(`[PDF Extract] SUCCESS! Extracted ${extractedText.length} chars from ${doc.name}`);
-            console.log(`[PDF Extract] Preview: ${extractedText.substring(0, 200)}...`);
+            
+            // PDF text extracted
 
             companyDocuments.push({
               name: doc.name,
@@ -654,7 +654,7 @@ Additional Details: ${decrypted.additionalDetails || 'None provided'}`;
 
     setIsChatting(true); // Use different state for chat vs analysis
     
-    console.log('[Chat] Sending follow-up message:', userMessage);
+    
 
     try {
       // Build chat context (last 4 messages for brevity)
@@ -712,11 +712,11 @@ Guidelines:
       }
 
       const aiResponse = data.choices[0].message.content;
-      console.log('[Chat] AI response received:', aiResponse.substring(0, 100) + '...');
+      // AI response received
       
       // Log PII redaction if any
       if (data.metadata?.pii_redacted) {
-        console.log('[Chat] PII redacted in chat:', data.metadata.pii_stats);
+        
       }
 
       // Add AI response to chat

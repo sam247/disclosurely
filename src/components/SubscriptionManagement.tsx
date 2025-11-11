@@ -24,7 +24,7 @@ const SubscriptionManagement = () => {
     formatCaseLimit
   } = useSubscriptionLimits();
 
-  console.log('SubscriptionManagement - Current subscription data:', subscriptionData);
+  
 
   const handleManageSubscription = async () => {
     setIsLoading(true);

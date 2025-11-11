@@ -22,7 +22,7 @@ const AuthenticatedApp = () => {
     if (!user) return;
 
     try {
-      console.log('Checking profile for user:', user.email);
+      
 
       // First check if profile exists
       const { data: profile, error: profileError } = await supabase
@@ -42,11 +42,11 @@ const AuthenticatedApp = () => {
         return;
       }
 
-      console.log('Profile data:', profile);
+      
 
       // If no profile exists, create one and mark as needs setup
       if (!profile) {
-        console.log('No profile found, creating basic profile and marking for setup');
+        
         const { error: createError } = await supabase
           .from('profiles')
           .insert({
@@ -69,11 +69,11 @@ const AuthenticatedApp = () => {
         return;
       }
 
-      console.log('Profile found, checking organization_id:', profile.organization_id);
+      
 
       // If profile exists but no organization, needs setup
       if (!profile.organization_id) {
-        console.log('Profile exists but no organization_id, needs setup');
+        
         setProfileStatus('needs_setup');
         return;
       }
@@ -92,7 +92,7 @@ const AuthenticatedApp = () => {
       }
 
       if (!organization) {
-        console.log('Organization reference exists but organization not found, needs setup');
+        
         // Clear the invalid organization_id from profile
         await supabase
           .from('profiles')
@@ -103,7 +103,7 @@ const AuthenticatedApp = () => {
         return;
       }
 
-      console.log('Profile and organization found, setup complete');
+      
       setProfileStatus('complete');
     } catch (error) {
       console.error('Error in checkUserProfile:', error);
@@ -112,7 +112,7 @@ const AuthenticatedApp = () => {
   };
 
   const handleSetupComplete = () => {
-    console.log('Setup completed, refreshing profile check');
+    
     setProfileStatus('loading');
     checkUserProfile();
   };
@@ -129,7 +129,7 @@ const AuthenticatedApp = () => {
   }
 
   if (profileStatus === 'needs_setup') {
-    console.log('Rendering SimpleOrganizationSetup component');
+    
     return (
       <>
         <SimpleOrganizationSetup onComplete={handleSetupComplete} />
@@ -137,7 +137,7 @@ const AuthenticatedApp = () => {
     );
   }
 
-  console.log('Rendering Dashboard component');
+  
   return (
     <>
       <Dashboard />

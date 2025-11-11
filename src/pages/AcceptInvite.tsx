@@ -245,6 +245,27 @@ const AcceptInvite = () => {
       // Skip Supabase verifyOtp since we issue our own OTP; allow brief propagation before linking
       await new Promise((resolve) => setTimeout(resolve, 500));
 
+      // Check team limit before accepting invitation
+      log.info(LogContext.AUTH, 'Checking team limit before accepting invitation', { userId, token });
+      
+      const { data: teamLimitCheck, error: teamLimitError } = await supabase.functions.invoke('check-team-limit', {
+        body: { 
+          organizationId: invitation.organization_id,
+          invitationId: invitation.id
+        },
+      });
+
+      if (teamLimitError || !teamLimitCheck?.allowed) {
+        log.error(LogContext.AUTH, 'Team limit check failed', teamLimitError, { userId, token, teamLimitCheck });
+        toast({
+          title: "Team Limit Reached",
+          description: teamLimitCheck?.reason || `This organization has reached its team member limit (${teamLimitCheck?.maxTeamMembers || 'unknown'}). Please contact the organization administrator.`,
+          variant: "destructive",
+        });
+        setSubmitting(false);
+        return;
+      }
+
       // Accept the invitation via edge function with retry (handles eventual consistency)
       log.info(LogContext.AUTH, 'Attempting to accept team invitation', { userId, token });
       

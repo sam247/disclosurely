@@ -131,7 +131,7 @@ Format the response as JSON with this exact structure:
         };
       }
     } catch (error) {
-      console.warn('Failed to parse JSON from DeepSeek response:', error);
+      
     }
 
     // Fallback: generate basic structure from content

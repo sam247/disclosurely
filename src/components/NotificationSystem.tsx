@@ -41,7 +41,7 @@ const NotificationSystem = () => {
             filter: `user_id=eq.${user.id}`,
           },
           (payload) => {
-            console.log('New notification received:', payload);
+            
             fetchNotifications();
             // Show toast for new notification
             const newNotification = payload.new as Notification;

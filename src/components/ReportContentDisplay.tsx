@@ -59,7 +59,7 @@ const ReportContentDisplay = ({
 
   const attemptDecryption = async () => {
     if (!encryptedContent || !user) {
-      console.log('Missing encrypted content or user for decryption');
+      
       return;
     }
     
@@ -67,10 +67,10 @@ const ReportContentDisplay = ({
     setDecryptionError(null);
     
     try {
-      console.log('=== STARTING DECRYPTION PROCESS ===');
-      console.log('User:', user.email);
-      console.log('Encrypted content available:', !!encryptedContent);
-      console.log('Encrypted content length:', encryptedContent?.length);
+      
+      
+      
+      
       
       // Get user's organization ID
       const { data: profile, error: profileError } = await supabase
@@ -89,14 +89,14 @@ const ReportContentDisplay = ({
         throw new Error('User is not associated with any organization');
       }
 
-      console.log('User organization ID:', profile.organization_id);
+      
       setOrganizationId(profile.organization_id);
 
       // Attempt to decrypt the report via server
       const decrypted = await decryptReport(encryptedContent, profile.organization_id);
       
-      console.log('Successfully decrypted report content');
-      console.log('Decrypted data:', decrypted);
+      
+      
       setDecryptedContent(decrypted);
       setRetryCount(0);
       
