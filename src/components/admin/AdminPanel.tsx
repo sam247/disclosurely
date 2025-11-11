@@ -91,9 +91,9 @@ export const AdminPanel = () => {
               <div className="flex items-center gap-3">
                 <Settings className="h-6 w-6 text-destructive" />
                 <div>
-                  <CardTitle className="text-destructive">{t('admin.accessDenied')}</CardTitle>
+                  <CardTitle className="text-destructive">Access Denied</CardTitle>
                   <CardDescription>
-                    {t('admin.accessDeniedDescription')}
+                    This area is restricted to the owner only.
                   </CardDescription>
                 </div>
               </div>
