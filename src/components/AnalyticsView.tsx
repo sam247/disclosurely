@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -17,7 +17,11 @@ import {
   Zap,
   Calendar,
   Eye,
-  Filter
+  Filter,
+  ArrowUpRight,
+  ArrowDownRight,
+  CheckCircle2,
+  XCircle
 } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { useOrganization } from '@/hooks/useOrganization';
@@ -72,8 +76,9 @@ const AnalyticsView: React.FC = () => {
   const [analyticsData, setAnalyticsData] = useState<SimpleAnalyticsData | null>(null);
   const [loading, setLoading] = useState(true);
   const [selectedPeriod, setSelectedPeriod] = useState<'7d' | '30d' | '90d' | '1y'>('30d');
-  const [chartPeriod, setChartPeriod] = useState<'week' | 'month' | 'year'>('month');
+  const [chartPeriod, setChartPeriod] = useState<'day' | 'week' | 'month'>('month');
   const [exporting, setExporting] = useState(false);
+  const [previousPeriodData, setPreviousPeriodData] = useState<SimpleAnalyticsData | null>(null);
 
   useEffect(() => {
     console.log('Analytics useEffect - organization:', organization);
@@ -107,34 +112,46 @@ const AnalyticsView: React.FC = () => {
     setLoading(true);
     
     try {
-      // Query all reports (not filtered by date for total count)
-      const queryPromise = supabase
+      // Get date filter for current period
+      const currentPeriodStart = getDateFilter(selectedPeriod);
+      
+      // Get date filter for previous period (for comparison)
+      const previousPeriodStart = getPreviousPeriodStart(selectedPeriod);
+      const previousPeriodEnd = currentPeriodStart;
+
+      // Query current period reports
+      const { data: currentReports, error: currentError } = await supabase
         .from('reports')
         .select('id, title, status, created_at, updated_at, report_type, priority, manual_risk_level')
         .eq('organization_id', organization.id)
         .not('status', 'in', '(archived,closed,deleted)')
-        .is('deleted_at', null);
+        .is('deleted_at', null)
+        .gte('created_at', currentPeriodStart);
 
-      const timeoutPromise = new Promise((_, reject) => 
-        setTimeout(() => reject(new Error('Query timeout')), 5000)
-      );
-
-      const { data: reports, error: reportsError } = await Promise.race([
-        queryPromise,
-        timeoutPromise
-      ]) as any;
-
-      if (reportsError) {
-        console.error('Reports query error:', reportsError);
-        throw reportsError;
+      if (currentError) {
+        console.error('Reports query error:', currentError);
+        throw currentError;
       }
 
-      console.log('Fetched reports:', reports?.length || 0);
+      // Query previous period reports for comparison
+      const { data: previousReports } = await supabase
+        .from('reports')
+        .select('id, title, status, created_at, updated_at, report_type, priority, manual_risk_level')
+        .eq('organization_id', organization.id)
+        .not('status', 'in', '(archived,closed,deleted)')
+        .is('deleted_at', null)
+        .gte('created_at', previousPeriodStart)
+        .lt('created_at', previousPeriodEnd);
 
-      // Simple processing
-      const processedData = processSimpleAnalytics(reports || []);
+      console.log('Fetched reports:', currentReports?.length || 0);
+
+      // Process data
+      const processedData = processSimpleAnalytics(currentReports || []);
+      const previousData = previousReports ? processSimpleAnalytics(previousReports) : null;
+      
       console.log('Processed analytics data:', processedData);
       setAnalyticsData(processedData);
+      setPreviousPeriodData(previousData);
     } catch (error) {
       console.error('Error fetching analytics:', error);
       toast({
@@ -145,6 +162,14 @@ const AnalyticsView: React.FC = () => {
     } finally {
       setLoading(false);
     }
+  };
+
+  const getPreviousPeriodStart = (period: string) => {
+    const now = new Date();
+    const currentStart = getDateFilter(period);
+    const currentStartDate = new Date(currentStart);
+    const periodDuration = now.getTime() - currentStartDate.getTime();
+    return new Date(currentStartDate.getTime() - periodDuration).toISOString();
   };
 
   const getDateFilter = (period: string) => {
@@ -384,12 +409,24 @@ const AnalyticsView: React.FC = () => {
     let trends, labels, data;
     
     switch (chartPeriod) {
+      case 'day':
+        trends = analyticsData.dailyTrends.slice(-30); // Last 30 days
+        labels = trends.map(t => {
+          const date = new Date(t.date);
+          return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+        });
+        data = trends.map(t => t.count);
+        break;
       case 'week':
         trends = analyticsData.weeklyTrends;
-        labels = trends.map(t => new Date(t.week).toLocaleDateString());
+        labels = trends.map(t => {
+          const date = new Date(t.week);
+          return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+        });
         data = trends.map(t => t.count);
         break;
       case 'month':
+      default:
         trends = analyticsData.monthlyTrends;
         labels = trends.map(t => {
           const [year, month] = t.month.split('-');
@@ -397,22 +434,13 @@ const AnalyticsView: React.FC = () => {
         });
         data = trends.map(t => t.count);
         break;
-      case 'year':
-        trends = analyticsData.yearlyTrends;
-        labels = trends.map(t => t.year);
-        data = trends.map(t => t.count);
-        break;
-      default:
-        trends = analyticsData.dailyTrends.slice(-30); // Last 30 days
-        labels = trends.map(t => new Date(t.date).toLocaleDateString());
-        data = trends.map(t => t.count);
     }
 
     return {
       labels,
       datasets: [
         {
-          label: 'Reports Submitted',
+          label: 'Reports Received',
           data,
           borderColor: 'rgb(59, 130, 246)',
           backgroundColor: 'rgba(59, 130, 246, 0.1)',
@@ -420,6 +448,16 @@ const AnalyticsView: React.FC = () => {
           fill: true,
         },
       ],
+    };
+  };
+
+  // Calculate trend percentage for metrics
+  const calculateTrend = (current: number, previous: number | null): { value: number; isPositive: boolean } | null => {
+    if (!previous || previous === 0) return null;
+    const change = ((current - previous) / previous) * 100;
+    return {
+      value: Math.abs(change),
+      isPositive: change >= 0
     };
   };
 
@@ -468,26 +506,55 @@ const AnalyticsView: React.FC = () => {
     };
   };
 
+  // Calculate trends for metrics
+  const totalReportsTrend = useMemo(() => 
+    calculateTrend(analyticsData?.totalReports || 0, previousPeriodData?.totalReports || null),
+    [analyticsData?.totalReports, previousPeriodData?.totalReports]
+  );
+  const activeReportsTrend = useMemo(() => 
+    calculateTrend(analyticsData?.activeReports || 0, previousPeriodData?.activeReports || null),
+    [analyticsData?.activeReports, previousPeriodData?.activeReports]
+  );
+  const avgResponseTimeTrend = useMemo(() => {
+    if (!analyticsData || !previousPeriodData) return null;
+    const current = analyticsData.avgResponseTime;
+    const previous = previousPeriodData.avgResponseTime;
+    if (previous === 0) return null;
+    const change = current - previous;
+    return {
+      value: Math.abs(change),
+      isPositive: change <= 0 // Lower response time is better
+    };
+  }, [analyticsData?.avgResponseTime, previousPeriodData?.avgResponseTime]);
+  const resolutionRateTrend = useMemo(() => 
+    calculateTrend(analyticsData?.resolutionRate || 0, previousPeriodData?.resolutionRate || null),
+    [analyticsData?.resolutionRate, previousPeriodData?.resolutionRate]
+  );
+
   if (loading || orgLoading) {
     return (
-      <div className="space-y-6">
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-3xl font-bold">Analytics</h1>
-            <p className="text-muted-foreground mt-2">
-              {orgLoading ? 'Loading organization...' : 'Loading insights...'}
-            </p>
+      <div className="min-h-screen bg-background">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-6">
+          <div className="space-y-6">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+              <div>
+                <h1 className="text-2xl sm:text-3xl font-bold">Analytics</h1>
+                <p className="text-sm sm:text-base text-muted-foreground mt-1 sm:mt-2">
+                  {orgLoading ? 'Loading organization...' : 'Loading insights...'}
+                </p>
+              </div>
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+              {[...Array(4)].map((_, i) => (
+                <Card key={i} className="animate-pulse">
+                  <CardContent className="p-4 sm:p-6">
+                    <div className="h-4 bg-muted rounded w-3/4 mb-2"></div>
+                    <div className="h-8 bg-muted rounded w-1/2"></div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
           </div>
-        </div>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-          {[...Array(4)].map((_, i) => (
-            <Card key={i} className="animate-pulse">
-              <CardContent className="p-6">
-                <div className="h-4 bg-muted rounded w-3/4 mb-2"></div>
-                <div className="h-8 bg-muted rounded w-1/2"></div>
-              </CardContent>
-            </Card>
-          ))}
         </div>
       </div>
     );
@@ -495,34 +562,38 @@ const AnalyticsView: React.FC = () => {
 
   if (!analyticsData && !loading && !orgLoading) {
     return (
-      <div className="space-y-6">
-        <div>
-          <h1 className="text-3xl font-bold">Analytics</h1>
-          <p className="text-muted-foreground mt-2">
-            {!organization?.id ? 'No organization found. Please contact support.' : 'No data available for the selected period.'}
-          </p>
-          <div className="flex items-center gap-3 mt-4">
-            <Button 
-              onClick={fetchAnalyticsData} 
-              variant="outline"
-            >
-              Retry
-            </Button>
-            {organization?.id && (
-              <div className="flex items-center gap-2">
-                <label className="text-sm font-medium">Period:</label>
-                <select 
-                  value={selectedPeriod} 
-                  onChange={(e) => setSelectedPeriod(e.target.value as any)}
-                  className="px-3 py-1 border rounded-md text-sm"
+      <div className="min-h-screen bg-background">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-6">
+          <div className="space-y-6">
+            <div>
+              <h1 className="text-2xl sm:text-3xl font-bold">Analytics</h1>
+              <p className="text-sm sm:text-base text-muted-foreground mt-1 sm:mt-2">
+                {!organization?.id ? 'No organization found. Please contact support.' : 'No data available for the selected period.'}
+              </p>
+              <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 mt-4">
+                <Button 
+                  onClick={fetchAnalyticsData} 
+                  variant="outline"
                 >
-                  <option value="7d">Last 7 days</option>
-                  <option value="30d">Last 30 days</option>
-                  <option value="90d">Last 90 days</option>
-                  <option value="1y">Last year</option>
-                </select>
+                  Retry
+                </Button>
+                {organization?.id && (
+                  <div className="flex items-center gap-2">
+                    <label className="text-sm font-medium">Period:</label>
+                    <select 
+                      value={selectedPeriod} 
+                      onChange={(e) => setSelectedPeriod(e.target.value as any)}
+                      className="px-3 py-1 border rounded-md text-sm"
+                    >
+                      <option value="7d">Last 7 days</option>
+                      <option value="30d">Last 30 days</option>
+                      <option value="90d">Last 90 days</option>
+                      <option value="1y">Last year</option>
+                    </select>
+                  </div>
+                )}
               </div>
-            )}
+            </div>
           </div>
         </div>
       </div>
@@ -532,151 +603,179 @@ const AnalyticsView: React.FC = () => {
   if (!analyticsData) return null;
 
   return (
-    <div className="flex flex-col h-[calc(100vh-4rem)] overflow-hidden">
-      {/* Fixed Header */}
-      <div className="flex-shrink-0 pb-4 border-b bg-background">
-        <div className="flex items-center justify-between">
+    <div className="min-h-screen bg-background">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-6 space-y-6">
+        {/* Header */}
+        <div className="flex flex-col gap-4">
           <div>
-            <h1 className="text-3xl font-bold">Analytics</h1>
-            <p className="text-muted-foreground">
+            <h1 className="text-2xl sm:text-3xl font-bold">Analytics</h1>
+            <p className="text-sm sm:text-base text-muted-foreground mt-1 sm:mt-2">
               Decision-ready insights for compliance teams
             </p>
           </div>
-          <div className="flex items-center gap-3">
-          <div className="flex items-center gap-2">
-            <label className="text-sm font-medium">Period:</label>
-            <select 
-              value={selectedPeriod} 
-              onChange={(e) => setSelectedPeriod(e.target.value as any)}
-              className="px-3 py-1 border rounded-md text-sm"
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+            <div className="flex items-center gap-2 flex-1 sm:flex-initial">
+              <label className="text-sm font-medium whitespace-nowrap">Period:</label>
+              <select 
+                value={selectedPeriod} 
+                onChange={(e) => setSelectedPeriod(e.target.value as any)}
+                className="px-3 py-2 sm:py-1.5 border rounded-md text-sm bg-background flex-1 sm:flex-initial touch-manipulation"
+              >
+                <option value="7d">Last 7 days</option>
+                <option value="30d">Last 30 days</option>
+                <option value="90d">Last 90 days</option>
+                <option value="1y">Last year</option>
+              </select>
+            </div>
+            <Button
+              onClick={handleExport}
+              disabled={exporting}
+              variant="outline"
+              size="sm"
+              className="gap-2 w-full sm:w-auto touch-manipulation"
             >
-              <option value="7d">Last 7 days</option>
-              <option value="30d">Last 30 days</option>
-              <option value="90d">Last 90 days</option>
-              <option value="1y">Last year</option>
-            </select>
+              <Download className="h-4 w-4" />
+              {exporting ? 'Exporting...' : 'Export'}
+            </Button>
           </div>
-          <Button
-            onClick={handleExport}
-            disabled={exporting}
-            variant="outline"
-            size="sm"
-            className="gap-2"
-          >
-            <Download className="h-4 w-4" />
-            {exporting ? 'Exporting...' : 'Export CSV'}
-          </Button>
         </div>
-        </div>
-      </div>
 
-      {/* Scrollable Content */}
-      <div className="flex-1 overflow-y-auto space-y-6">
-      {/* Overview Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        <Card>
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-muted-foreground">Total Reports</p>
-                <p className="text-2xl font-bold">{analyticsData.totalReports}</p>
-              </div>
-              <FileText className="h-8 w-8 text-muted-foreground" />
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-muted-foreground">Active Cases</p>
-                <p className="text-2xl font-bold">{analyticsData.activeReports}</p>
-              </div>
-              <Activity className="h-8 w-8 text-muted-foreground" />
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-muted-foreground">Avg Response Time</p>
-                <p className="text-2xl font-bold">{analyticsData.avgResponseTime}d</p>
-              </div>
-              <Clock className="h-8 w-8 text-muted-foreground" />
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-muted-foreground">Resolution Rate</p>
-                <p className="text-2xl font-bold">{analyticsData.resolutionRate}%</p>
-              </div>
-              <Target className="h-8 w-8 text-muted-foreground" />
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* Main Analytics Content - Two Column Layout */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Left Column */}
-        <div className="space-y-6">
-          {/* Performance Metrics */}
+        {/* Metric Cards */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           <Card>
-            <CardHeader>
-              <CardTitle>Performance Metrics</CardTitle>
-              <CardDescription>Key performance indicators</CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="flex items-center justify-between">
-                <span className="text-sm font-medium">Resolution Rate</span>
-                <Badge variant="default">{analyticsData.resolutionRate}%</Badge>
-              </div>
-              <div className="flex items-center justify-between">
-                <span className="text-sm font-medium">Escalation Rate</span>
-                <Badge variant={analyticsData.escalationRate > 20 ? 'destructive' : 'secondary'}>
-                  {analyticsData.escalationRate}%
-                </Badge>
-              </div>
-              <div className="flex items-center justify-between">
-                <span className="text-sm font-medium">Avg Response Time</span>
-                <Badge variant={analyticsData.avgResponseTime > 7 ? 'destructive' : 'default'}>
-                  {analyticsData.avgResponseTime} days
-                </Badge>
+            <CardContent className="p-4 sm:p-6">
+              <div className="flex items-start justify-between">
+                <div className="flex-1">
+                  <p className="text-xs sm:text-sm font-medium text-muted-foreground mb-1">Total Reports</p>
+                  <p className="text-2xl sm:text-3xl font-bold">{analyticsData.totalReports}</p>
+                  {totalReportsTrend && (
+                    <div className={`flex items-center gap-1 mt-2 text-xs flex-wrap ${totalReportsTrend.isPositive ? 'text-green-600' : 'text-red-600'}`}>
+                      {totalReportsTrend.isPositive ? (
+                        <ArrowUpRight className="h-3 w-3 flex-shrink-0" />
+                      ) : (
+                        <ArrowDownRight className="h-3 w-3 flex-shrink-0" />
+                      )}
+                      <span className="whitespace-nowrap">{totalReportsTrend.value.toFixed(1)}%</span>
+                      <span className="text-muted-foreground text-[10px] sm:text-xs">vs previous</span>
+                    </div>
+                  )}
+                </div>
+                <FileText className="h-8 w-8 sm:h-10 sm:w-10 text-muted-foreground flex-shrink-0" />
               </div>
             </CardContent>
           </Card>
 
-          {/* Report Trends */}
           <Card>
-            <CardHeader>
-              <div className="flex items-center justify-between">
-                <div>
-                  <CardTitle>Report Trends</CardTitle>
-                  <CardDescription>Track submission patterns and identify spikes</CardDescription>
+            <CardContent className="p-4 sm:p-6">
+              <div className="flex items-start justify-between">
+                <div className="flex-1">
+                  <p className="text-xs sm:text-sm font-medium text-muted-foreground mb-1">Active Cases</p>
+                  <p className="text-2xl sm:text-3xl font-bold">{analyticsData.activeReports}</p>
+                  {activeReportsTrend && (
+                    <div className={`flex items-center gap-1 mt-2 text-xs flex-wrap ${activeReportsTrend.isPositive ? 'text-green-600' : 'text-red-600'}`}>
+                      {activeReportsTrend.isPositive ? (
+                        <ArrowUpRight className="h-3 w-3 flex-shrink-0" />
+                      ) : (
+                        <ArrowDownRight className="h-3 w-3 flex-shrink-0" />
+                      )}
+                      <span className="whitespace-nowrap">{activeReportsTrend.value.toFixed(1)}%</span>
+                      <span className="text-muted-foreground text-[10px] sm:text-xs">vs previous</span>
+                    </div>
+                  )}
                 </div>
-                <div className="flex items-center gap-2">
-                  <label className="text-sm font-medium">View:</label>
-                  <select 
-                    value={chartPeriod} 
-                    onChange={(e) => setChartPeriod(e.target.value as any)}
-                    className="px-3 py-1 border rounded-md text-sm"
-                  >
-                    <option value="week">Weekly</option>
-                    <option value="month">Monthly</option>
-                    <option value="year">Yearly</option>
-                  </select>
-                </div>
+                <Activity className="h-8 w-8 sm:h-10 sm:w-10 text-muted-foreground flex-shrink-0" />
               </div>
-            </CardHeader>
-            <CardContent>
-              {getChartData() ? (
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardContent className="p-4 sm:p-6">
+              <div className="flex items-start justify-between">
+                <div className="flex-1">
+                  <p className="text-xs sm:text-sm font-medium text-muted-foreground mb-1">Avg Response Time</p>
+                  <p className="text-2xl sm:text-3xl font-bold">{analyticsData.avgResponseTime.toFixed(1)}d</p>
+                  {avgResponseTimeTrend && (
+                    <div className={`flex items-center gap-1 mt-2 text-xs flex-wrap ${avgResponseTimeTrend.isPositive ? 'text-green-600' : 'text-red-600'}`}>
+                      {avgResponseTimeTrend.isPositive ? (
+                        <ArrowDownRight className="h-3 w-3 flex-shrink-0" />
+                      ) : (
+                        <ArrowUpRight className="h-3 w-3 flex-shrink-0" />
+                      )}
+                      <span className="whitespace-nowrap">{avgResponseTimeTrend.value.toFixed(1)}d</span>
+                      <span className="text-muted-foreground text-[10px] sm:text-xs">vs previous</span>
+                    </div>
+                  )}
+                </div>
+                <Clock className="h-8 w-8 sm:h-10 sm:w-10 text-muted-foreground flex-shrink-0" />
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardContent className="p-4 sm:p-6">
+              <div className="flex items-start justify-between">
+                <div className="flex-1">
+                  <p className="text-xs sm:text-sm font-medium text-muted-foreground mb-1">Resolution Rate</p>
+                  <p className="text-2xl sm:text-3xl font-bold">{analyticsData.resolutionRate.toFixed(1)}%</p>
+                  {resolutionRateTrend && (
+                    <div className={`flex items-center gap-1 mt-2 text-xs flex-wrap ${resolutionRateTrend.isPositive ? 'text-green-600' : 'text-red-600'}`}>
+                      {resolutionRateTrend.isPositive ? (
+                        <ArrowUpRight className="h-3 w-3 flex-shrink-0" />
+                      ) : (
+                        <ArrowDownRight className="h-3 w-3 flex-shrink-0" />
+                      )}
+                      <span className="whitespace-nowrap">{resolutionRateTrend.value.toFixed(1)}%</span>
+                      <span className="text-muted-foreground text-[10px] sm:text-xs">vs previous</span>
+                    </div>
+                  )}
+                </div>
+                <Target className="h-8 w-8 sm:h-10 sm:w-10 text-muted-foreground flex-shrink-0" />
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Main Chart */}
+        <Card>
+          <CardHeader className="pb-3 sm:pb-6">
+            <div className="flex flex-col gap-3 sm:gap-4">
+              <div>
+                <CardTitle className="text-lg sm:text-xl">Reports Received</CardTitle>
+                <CardDescription className="text-xs sm:text-sm mt-1">
+                  {chartPeriod === 'day' ? 'Daily view' : chartPeriod === 'week' ? 'Weekly view' : 'Monthly view'}
+                </CardDescription>
+              </div>
+              <div className="flex items-center gap-2 w-full sm:w-auto">
+                <Button
+                  variant={chartPeriod === 'day' ? 'default' : 'outline'}
+                  size="sm"
+                  onClick={() => setChartPeriod('day')}
+                  className="text-xs sm:text-sm flex-1 sm:flex-initial touch-manipulation min-h-[36px] sm:min-h-0"
+                >
+                  Days
+                </Button>
+                <Button
+                  variant={chartPeriod === 'week' ? 'default' : 'outline'}
+                  size="sm"
+                  onClick={() => setChartPeriod('week')}
+                  className="text-xs sm:text-sm flex-1 sm:flex-initial touch-manipulation min-h-[36px] sm:min-h-0"
+                >
+                  Weeks
+                </Button>
+                <Button
+                  variant={chartPeriod === 'month' ? 'default' : 'outline'}
+                  size="sm"
+                  onClick={() => setChartPeriod('month')}
+                  className="text-xs sm:text-sm flex-1 sm:flex-initial touch-manipulation min-h-[36px] sm:min-h-0"
+                >
+                  Months
+                </Button>
+              </div>
+            </div>
+          </CardHeader>
+          <CardContent className="pt-0 sm:pt-0">
+            {getChartData() ? (
+              <div className="h-64 sm:h-80 -mx-2 sm:mx-0 px-2 sm:px-0">
                 <Line 
                   data={getChartData()!} 
                   options={{
@@ -684,174 +783,250 @@ const AnalyticsView: React.FC = () => {
                     maintainAspectRatio: false,
                     plugins: {
                       legend: {
-                        position: 'top' as const,
+                        display: false,
                       },
                       tooltip: {
-                        callbacks: {
-                          afterLabel: function(context) {
-                            const dataIndex = context.dataIndex;
-                            const trends = chartPeriod === 'week' ? analyticsData?.weeklyTrends :
-                                         chartPeriod === 'month' ? analyticsData?.monthlyTrends :
-                                         analyticsData?.yearlyTrends;
-                            if (trends && trends[dataIndex]) {
-                              const categories = trends[dataIndex].categories;
-                              return categories.length > 0 ? `Categories: ${categories.join(', ')}` : '';
-                            }
-                            return '';
-                          }
+                        mode: 'index',
+                        intersect: false,
+                        padding: 12,
+                        titleFont: {
+                          size: 12
+                        },
+                        bodyFont: {
+                          size: 11
                         }
                       }
                     },
                     scales: {
+                      x: {
+                        ticks: {
+                          font: {
+                            size: 10
+                          },
+                          maxRotation: 45,
+                          minRotation: 45
+                        }
+                      },
                       y: {
                         beginAtZero: true,
                         ticks: {
-                          stepSize: 1
-                        }
-                      }
-                    }
-                  }}
-                />
-              ) : (
-                <div className="h-64 flex items-center justify-center text-muted-foreground">
-                  No trend data available
-                </div>
-              )}
-            </CardContent>
-          </Card>
-
-          {/* Recent Reports */}
-          <Card>
-            <CardHeader>
-              <CardTitle>Recent Reports</CardTitle>
-              <CardDescription>Latest activity in your organization</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-3">
-                {analyticsData.recentReports.map((report, index) => (
-                  <div key={index} className="flex items-center justify-between p-3 border rounded-lg">
-                    <div>
-                      <p className="text-sm font-medium">{report.title}</p>
-                      <p className="text-xs text-muted-foreground">
-                        {new Date(report.created_at).toLocaleDateString()}
-                      </p>
-                    </div>
-                    <Badge variant={
-                      report.status === 'closed' ? 'default' :
-                      report.status === 'investigating' ? 'secondary' :
-                      'outline'
-                    }>
-                      {report.status}
-                    </Badge>
-                  </div>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-
-        {/* Right Column */}
-        <div className="space-y-6">
-          {/* Quick Insights */}
-          <Card>
-            <CardHeader>
-              <CardTitle>Quick Insights</CardTitle>
-              <CardDescription>AI-generated insights</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-3">
-                {analyticsData.avgResponseTime > 7 && (
-                  <div className="p-3 border border-orange-200 bg-orange-50 rounded-lg">
-                    <p className="text-sm font-medium text-orange-800">Slow Response Times</p>
-                    <p className="text-xs text-orange-600">Consider implementing automated triage</p>
-                  </div>
-                )}
-                {analyticsData.escalationRate > 20 && (
-                  <div className="p-3 border border-red-200 bg-red-50 rounded-lg">
-                    <p className="text-sm font-medium text-red-800">High Escalation Rate</p>
-                    <p className="text-xs text-red-600">Review case prioritization process</p>
-                  </div>
-                )}
-                {analyticsData.resolutionRate < 50 && (
-                  <div className="p-3 border border-yellow-200 bg-yellow-50 rounded-lg">
-                    <p className="text-sm font-medium text-yellow-800">Low Resolution Rate</p>
-                    <p className="text-xs text-yellow-600">Consider additional resources or training</p>
-                  </div>
-                )}
-                {analyticsData.avgResponseTime <= 3 && analyticsData.resolutionRate >= 70 && (
-                  <div className="p-3 border border-green-200 bg-green-50 rounded-lg">
-                    <p className="text-sm font-medium text-green-800">Excellent Performance</p>
-                    <p className="text-xs text-green-600">Team is performing well</p>
-                  </div>
-                )}
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Category Distribution */}
-          <Card>
-            <CardHeader>
-              <CardTitle>Category Distribution</CardTitle>
-              <CardDescription>Visual breakdown of report types</CardDescription>
-            </CardHeader>
-            <CardContent>
-              {getCategoryChartData() ? (
-                <Doughnut 
-                  data={getCategoryChartData()!} 
-                  options={{
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                      legend: {
-                        position: 'bottom' as const,
-                      },
-                      tooltip: {
-                        callbacks: {
-                          label: function(context) {
-                            const total = analyticsData?.totalReports || 1;
-                            const percentage = ((context.parsed / total) * 100).toFixed(1);
-                            return `${context.label}: ${context.parsed} (${percentage}%)`;
+                          stepSize: 1,
+                          font: {
+                            size: 10
                           }
                         }
                       }
                     }
                   }}
                 />
+              </div>
+            ) : (
+              <div className="h-64 sm:h-80 flex items-center justify-center text-muted-foreground text-sm">
+                No trend data available
+              </div>
+            )}
+          </CardContent>
+        </Card>
+
+        {/* Additional Charts and Metrics */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
+          {/* Category Distribution */}
+          <Card>
+            <CardHeader className="pb-3 sm:pb-6">
+              <CardTitle className="text-base sm:text-lg lg:text-xl">Category Distribution</CardTitle>
+              <CardDescription className="text-xs sm:text-sm">Breakdown by report type</CardDescription>
+            </CardHeader>
+            <CardContent className="pt-0 sm:pt-0">
+              {getCategoryChartData() ? (
+                <div className="h-56 sm:h-64 -mx-2 sm:mx-0 px-2 sm:px-0">
+                  <Doughnut 
+                    data={getCategoryChartData()!} 
+                    options={{
+                      responsive: true,
+                      maintainAspectRatio: false,
+                      plugins: {
+                        legend: {
+                          position: 'bottom' as const,
+                          labels: {
+                            padding: 8,
+                            font: {
+                              size: 10
+                            },
+                            boxWidth: 12
+                          }
+                        },
+                        tooltip: {
+                          padding: 12,
+                          titleFont: {
+                            size: 12
+                          },
+                          bodyFont: {
+                            size: 11
+                          },
+                          callbacks: {
+                            label: function(context) {
+                              const total = analyticsData?.totalReports || 1;
+                              const percentage = ((context.parsed / total) * 100).toFixed(1);
+                              return `${context.label}: ${context.parsed} (${percentage}%)`;
+                            }
+                          }
+                        }
+                      }
+                    }}
+                  />
+                </div>
               ) : (
-                <div className="h-64 flex items-center justify-center text-muted-foreground">
+                <div className="h-56 sm:h-64 flex items-center justify-center text-muted-foreground text-sm">
                   No category data available
                 </div>
               )}
             </CardContent>
           </Card>
 
-          {/* Report Categories List */}
+          {/* Status Breakdown */}
           <Card>
-            <CardHeader>
-              <CardTitle>Report Categories</CardTitle>
-              <CardDescription>Distribution by report type</CardDescription>
+            <CardHeader className="pb-3 sm:pb-6">
+              <CardTitle className="text-base sm:text-lg lg:text-xl">Status Breakdown</CardTitle>
+              <CardDescription className="text-xs sm:text-sm">Cases by status</CardDescription>
             </CardHeader>
-            <CardContent>
+            <CardContent className="pt-0 sm:pt-0">
+              {getStatusChartData() ? (
+                <div className="h-56 sm:h-64 -mx-2 sm:mx-0 px-2 sm:px-0">
+                  <Bar 
+                    data={getStatusChartData()!} 
+                    options={{
+                      responsive: true,
+                      maintainAspectRatio: false,
+                      plugins: {
+                        legend: {
+                          display: false,
+                        },
+                        tooltip: {
+                          padding: 12,
+                          titleFont: {
+                            size: 12
+                          },
+                          bodyFont: {
+                            size: 11
+                          }
+                        }
+                      },
+                      scales: {
+                        x: {
+                          ticks: {
+                            font: {
+                              size: 10
+                            }
+                          }
+                        },
+                        y: {
+                          beginAtZero: true,
+                          ticks: {
+                            stepSize: 1,
+                            font: {
+                              size: 10
+                            }
+                          }
+                        }
+                      }
+                    }}
+                  />
+                </div>
+              ) : (
+                <div className="h-56 sm:h-64 flex items-center justify-center text-muted-foreground text-sm">
+                  No status data available
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Additional Metrics Grid */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          {/* Priority Breakdown */}
+          <Card>
+            <CardHeader className="pb-3 sm:pb-6">
+              <CardTitle className="text-base sm:text-lg">Priority Breakdown</CardTitle>
+            </CardHeader>
+            <CardContent className="pt-0 sm:pt-0">
               <div className="space-y-3">
-                {analyticsData.categories.map((category, index) => (
-                  <div key={index} className="flex items-center justify-between">
-                    <span className="text-sm">{category.category}</span>
-                    <div className="flex items-center gap-2">
-                      <span className="text-sm font-medium">{category.count}</span>
-                      <div className="w-20 bg-gray-200 rounded-full h-2">
-                        <div 
-                          className="bg-primary h-2 rounded-full" 
-                          style={{ width: `${(category.count / analyticsData.totalReports) * 100}%` }}
-                        ></div>
+                {analyticsData.priorityBreakdown
+                  .sort((a, b) => b.priority - a.priority)
+                  .map((item, index) => (
+                    <div key={index} className="flex items-center justify-between py-1">
+                      <div className="flex items-center gap-2 min-w-0 flex-1">
+                        <div className={`h-3 w-3 rounded-full flex-shrink-0 ${
+                          item.priority >= 4 ? 'bg-red-500' :
+                          item.priority === 3 ? 'bg-orange-500' :
+                          item.priority === 2 ? 'bg-yellow-500' :
+                          'bg-green-500'
+                        }`} />
+                        <span className="text-sm truncate">Priority {item.priority}</span>
+                      </div>
+                      <span className="text-sm font-medium ml-2 flex-shrink-0">{item.count}</span>
+                    </div>
+                  ))}
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Top Categories */}
+          <Card>
+            <CardHeader className="pb-3 sm:pb-6">
+              <CardTitle className="text-base sm:text-lg">Top Categories</CardTitle>
+            </CardHeader>
+            <CardContent className="pt-0 sm:pt-0">
+              <div className="space-y-3">
+                {analyticsData.categories
+                  .sort((a, b) => b.count - a.count)
+                  .slice(0, 5)
+                  .map((category, index) => (
+                    <div key={index} className="flex items-center justify-between gap-2 py-1">
+                      <span className="text-sm truncate flex-1 min-w-0">{category.category}</span>
+                      <div className="flex items-center gap-2 flex-shrink-0">
+                        <span className="text-sm font-medium">{category.count}</span>
+                        <div className="w-12 sm:w-16 bg-gray-200 rounded-full h-2">
+                          <div 
+                            className="bg-primary h-2 rounded-full" 
+                            style={{ width: `${(category.count / analyticsData.totalReports) * 100}%` }}
+                          ></div>
+                        </div>
                       </div>
                     </div>
-                  </div>
-                ))}
+                  ))}
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Performance Indicators */}
+          <Card>
+            <CardHeader className="pb-3 sm:pb-6">
+              <CardTitle className="text-base sm:text-lg">Performance Indicators</CardTitle>
+            </CardHeader>
+            <CardContent className="pt-0 sm:pt-0">
+              <div className="space-y-3 sm:space-y-4">
+                <div className="flex items-center justify-between py-1">
+                  <span className="text-sm">Escalation Rate</span>
+                  <Badge variant={analyticsData.escalationRate > 20 ? 'destructive' : 'secondary'} className="text-xs sm:text-sm">
+                    {analyticsData.escalationRate.toFixed(1)}%
+                  </Badge>
+                </div>
+                <div className="flex items-center justify-between py-1">
+                  <span className="text-sm">Resolution Rate</span>
+                  <Badge variant={analyticsData.resolutionRate >= 70 ? 'default' : 'secondary'} className="text-xs sm:text-sm">
+                    {analyticsData.resolutionRate.toFixed(1)}%
+                  </Badge>
+                </div>
+                <div className="flex items-center justify-between py-1">
+                  <span className="text-sm">Response Time</span>
+                  <Badge variant={analyticsData.avgResponseTime > 7 ? 'destructive' : 'default'} className="text-xs sm:text-sm">
+                    {analyticsData.avgResponseTime.toFixed(1)} days
+                  </Badge>
+                </div>
               </div>
             </CardContent>
           </Card>
         </div>
-      </div>
       </div>
     </div>
   );

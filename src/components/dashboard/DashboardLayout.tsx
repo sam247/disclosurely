@@ -14,6 +14,7 @@ import { supabase } from '@/integrations/supabase/client';
 import NotificationSystem from '@/components/NotificationSystem';
 import { useTranslation } from 'react-i18next';
 import { AnnouncementBar } from '@/components/AnnouncementBar';
+import ChatWidget from '@/components/ChatWidget';
 
 interface DashboardLayoutProps {
   children: ReactNode;
@@ -194,6 +195,12 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
           </main>
         </div>
       </div>
+
+      {/* Chat Widget for Dashboard */}
+      <ChatWidget 
+        enabled={true}
+        position="bottom-right"
+      />
 
       {/* Profile Modal */}
       <Dialog open={showProfileModal} onOpenChange={setShowProfileModal}>
