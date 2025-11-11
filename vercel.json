@@ -68,6 +68,9 @@
   "rewrites": [
     { "source": "/sitemap.xml", "destination": "/api/sitemap.xml" },
     { "source": "/sitemap-index.xml", "destination": "/api/sitemap-index.xml" },
-    { "source": "/((?!api/).*)", "destination": "/index.html" }
+    { 
+      "source": "/((?!api/|assets/|_next/|.*\\.(js|css|png|jpg|jpeg|gif|svg|ico|woff|woff2|ttf|eot|json|map|webp|avif)).*)", 
+      "destination": "/index.html" 
+    }
   ]
 }

@@ -45,6 +45,10 @@ export default defineConfig(({ mode }) => ({
           'vendor': ['react', 'react-dom', 'react-router-dom'],
           'i18n': ['react-i18next', 'i18next'],
         },
+        // Ensure consistent chunk file names
+        chunkFileNames: 'assets/[name]-[hash].js',
+        entryFileNames: 'assets/[name]-[hash].js',
+        assetFileNames: 'assets/[name]-[hash].[ext]',
       },
     },
     // Increase chunk size warning limit

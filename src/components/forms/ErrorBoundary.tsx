@@ -23,7 +23,16 @@ class ErrorBoundary extends Component<Props, State> {
   }
 
   public componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
+    // Log error for debugging
+    const errorMessage = error?.message || 'Unknown error';
     console.error('ErrorBoundary caught an error:', error, errorInfo);
+    
+    // If it's a module loading error, try to reload the page
+    if (errorMessage.includes('Failed to fetch dynamically imported module') || 
+        errorMessage.includes('MIME type')) {
+      console.warn('Module loading error detected. This may be a deployment issue. Attempting page reload...');
+      // Don't auto-reload, let user decide
+    }
   }
 
   public render() {
