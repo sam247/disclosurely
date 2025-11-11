@@ -9,6 +9,8 @@ import ProtectedRoute from './components/ProtectedRoute';
 import OwnerOnlyRoute from './components/dashboard/OwnerOnlyRoute';
 import ScrollToTop from './components/ScrollToTop';
 import UrlRedirectMiddleware from './components/UrlRedirectMiddleware';
+import ErrorBoundary from './components/forms/ErrorBoundary';
+import { lazyWithRetry } from './utils/lazyWithRetry';
 
 // Lazy load page components for better code splitting
 const Index = lazy(() => import('./pages/Index'));
@@ -42,21 +44,21 @@ const AdminDashboard = lazy(() => import('./pages/AdminDashboard'));
 const WhistleblowerMessagingPage = lazy(() => import('./pages/WhistleblowerMessaging'));
 const ReportDetails = lazy(() => import('./pages/ReportDetails'));
 
-// Lazy load dashboard and authenticated components
+// Lazy load dashboard and authenticated components with retry logic for critical components
 const AuthenticatedApp = lazy(() => import('./components/AuthenticatedApp'));
-const DashboardLayout = lazy(() => import('./components/dashboard/DashboardLayout'));
-const DashboardView = lazy(() => import('./components/dashboard/DashboardView'));
-const AIHelperView = lazy(() => import('./components/dashboard/AIHelperView'));
-const SettingsView = lazy(() => import('./components/dashboard/SettingsView'));
-const OrganizationSettings = lazy(() => import('./components/dashboard/OrganizationSettings'));
+const DashboardLayout = lazyWithRetry(() => import('./components/dashboard/DashboardLayout'));
+const DashboardView = lazyWithRetry(() => import('./components/dashboard/DashboardView'));
+const AIHelperView = lazyWithRetry(() => import('./components/dashboard/AIHelperView'));
+const SettingsView = lazyWithRetry(() => import('./components/dashboard/SettingsView'));
+const OrganizationSettings = lazyWithRetry(() => import('./components/dashboard/OrganizationSettings'));
 const OrganizationOnboarding = lazy(() => import('./components/OrganizationOnboarding'));
-const TeamView = lazy(() => import('./components/dashboard/TeamView'));
-const BrandingView = lazy(() => import('./components/dashboard/BrandingView'));
-const SecureLinkView = lazy(() => import('./components/dashboard/SecureLinkView'));
-const IntegrationsView = lazy(() => import('./components/IntegrationsView'));
-const AnalyticsView = lazy(() => import('./components/AnalyticsView'));
-const AuditLogView = lazy(() => import('./components/AuditLogView'));
-const WorkflowsView = lazy(() => import('./components/dashboard/WorkflowsView'));
+const TeamView = lazyWithRetry(() => import('./components/dashboard/TeamView'));
+const BrandingView = lazyWithRetry(() => import('./components/dashboard/BrandingView'));
+const SecureLinkView = lazyWithRetry(() => import('./components/dashboard/SecureLinkView'));
+const IntegrationsView = lazyWithRetry(() => import('./components/IntegrationsView'));
+const AnalyticsView = lazyWithRetry(() => import('./components/AnalyticsView'));
+const AuditLogView = lazyWithRetry(() => import('./components/AuditLogView'));
+const WorkflowsView = lazyWithRetry(() => import('./components/dashboard/WorkflowsView'));
 const AdminPanel = lazy(() => import('./components/admin/AdminPanel').then(module => ({ default: module.AdminPanel })));
 
 // Lazy load form components
@@ -261,7 +263,18 @@ const AppContent = () => {
           element={
             <ProtectedRoute>
               <DashboardLayout>
-                <OrganizationSettings />
+                <ErrorBoundary>
+                  <Suspense fallback={
+                    <div className="flex items-center justify-center p-8">
+                      <div className="text-center">
+                        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
+                        <p className="text-sm text-muted-foreground">Loading settings...</p>
+                      </div>
+                    </div>
+                  }>
+                    <OrganizationSettings />
+                  </Suspense>
+                </ErrorBoundary>
               </DashboardLayout>
             </ProtectedRoute>
           }
