@@ -23,7 +23,9 @@ export const useMultipleSessionDetection = () => {
   const [otherSession, setOtherSession] = useState<SessionInfo | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
   const [hasTrackedSession, setHasTrackedSession] = useState(false);
+  const [hasCheckedOnMount, setHasCheckedOnMount] = useState(false);
   const sessionIdRef = useRef<string | null>(null);
+  const checkIntervalRef = useRef<NodeJS.Timeout | null>(null);
 
   // Generate a stable session ID (based on user ID and timestamp of first login)
   const getSessionId = useCallback(() => {
@@ -43,15 +45,48 @@ export const useMultipleSessionDetection = () => {
     return storedSessionId;
   }, [user, session]);
 
+  // Check for other sessions
+  const checkForOtherSessions = useCallback(async () => {
+    if (!user || !session) return;
+
+    const sessionId = getSessionId();
+    if (!sessionId) return;
+
+    try {
+      const response = await supabase.functions.invoke('track-session', {
+        body: {
+          action: 'check_other_sessions',
+          sessionId: sessionId,
+          userId: user.id,
+        },
+      });
+
+      if (response.error) throw response.error;
+
+      const data = response.data;
+      
+      if (data?.hasOtherSessions && data.otherSessions) {
+        setOtherSession(data.otherSessions);
+        setShowModal(true);
+        return true; // Other sessions found
+      }
+      
+      return false; // No other sessions
+    } catch (error) {
+      console.error('Error checking for other sessions:', error);
+      return false;
+    }
+  }, [user, session, getSessionId]);
+
   // Track session on login
   const trackSession = useCallback(async () => {
-    if (!user || !session || hasTrackedSession) return;
+    if (!user || !session) return;
 
     const sessionId = getSessionId();
     if (!sessionId) return;
 
     // Prevent duplicate tracking
-    if (sessionIdRef.current === sessionId) return;
+    if (sessionIdRef.current === sessionId && hasTrackedSession) return;
     sessionIdRef.current = sessionId;
 
     try {
@@ -113,6 +148,30 @@ export const useMultipleSessionDetection = () => {
       trackSession();
     }
   }, [user, session, trackSession, hasTrackedSession]);
+
+  // Check for other sessions on mount and periodically (even after refresh)
+  useEffect(() => {
+    if (!user || !session) return;
+
+    // Check immediately on mount (handles refresh case)
+    if (!hasCheckedOnMount) {
+      checkForOtherSessions();
+      setHasCheckedOnMount(true);
+    }
+
+    // Also check periodically (every 30 seconds) to catch new sessions
+    checkIntervalRef.current = setInterval(() => {
+      if (!showModal) { // Only check if modal isn't already showing
+        checkForOtherSessions();
+      }
+    }, 30000); // Check every 30 seconds
+
+    return () => {
+      if (checkIntervalRef.current) {
+        clearInterval(checkIntervalRef.current);
+      }
+    };
+  }, [user, session, checkForOtherSessions, hasCheckedOnMount, showModal]);
 
   const handleDismiss = useCallback(() => {
     setShowModal(false);

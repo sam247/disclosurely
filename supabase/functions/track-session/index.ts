@@ -172,6 +172,30 @@ serve(async (req) => {
         );
       }
 
+      case 'check_other_sessions': {
+        // Check for other active sessions without creating a new one
+        const { data: otherSessions, error: checkError } = await supabase
+          .from('user_sessions')
+          .select('*')
+          .eq('user_id', userId)
+          .eq('is_active', true)
+          .neq('session_id', sessionId);
+
+        if (checkError) throw checkError;
+
+        return new Response(
+          JSON.stringify({
+            success: true,
+            hasOtherSessions: (otherSessions?.length || 0) > 0,
+            otherSessions: (otherSessions?.length || 0) > 0 ? otherSessions[0] : null, // Return first other session
+          }),
+          {
+            status: 200,
+            headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+          }
+        );
+      }
+
       case 'update_activity': {
         const { error: updateError } = await supabase
           .from('user_sessions')

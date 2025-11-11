@@ -103,14 +103,14 @@ const MultipleSessionModal: React.FC<MultipleSessionModalProps> = ({
 
   return (
     <AlertDialog open={open}>
-      <AlertDialogContent className="sm:max-w-2xl">
+      <AlertDialogContent className="w-[calc(100vw-2rem)] sm:max-w-2xl max-h-[90vh] overflow-y-auto">
         <AlertDialogHeader>
-          <div className="flex items-center gap-3">
-            <div className="h-10 w-10 rounded-full bg-amber-100 flex items-center justify-center">
+          <div className="flex items-center gap-3 flex-wrap">
+            <div className="h-10 w-10 rounded-full bg-amber-100 flex items-center justify-center flex-shrink-0">
               <Shield className="h-5 w-5 text-amber-600" />
             </div>
-            <div>
-              <AlertDialogTitle>Multiple Login Session Detected</AlertDialogTitle>
+            <div className="min-w-0 flex-1">
+              <AlertDialogTitle className="text-lg sm:text-xl">Multiple Login Session Detected</AlertDialogTitle>
             </div>
           </div>
           <AlertDialogDescription className="text-left mt-4 space-y-4">
@@ -119,16 +119,16 @@ const MultipleSessionModal: React.FC<MultipleSessionModalProps> = ({
             </p>
 
             {otherSession && (
-              <div className="bg-muted rounded-lg p-4 space-y-3 border">
-                <div className="flex items-start gap-3">
-                  <div className="mt-0.5">
+              <div className="bg-muted rounded-lg p-3 sm:p-4 space-y-3 border">
+                <div className="flex items-start gap-3 flex-wrap sm:flex-nowrap">
+                  <div className="mt-0.5 flex-shrink-0">
                     {getDeviceIcon(otherSession.device_type)}
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className="font-medium text-sm">{formatDevice()}</p>
-                    <div className="flex items-center gap-2 mt-1 text-xs text-muted-foreground">
-                      <MapPin className="h-3 w-3" />
-                      <span>{formatLocation()}</span>
+                    <p className="font-medium text-xs sm:text-sm break-words">{formatDevice()}</p>
+                    <div className="flex items-center gap-2 mt-1 text-xs text-muted-foreground flex-wrap">
+                      <MapPin className="h-3 w-3 flex-shrink-0" />
+                      <span className="break-words">{formatLocation()}</span>
                     </div>
                     <p className="text-xs text-muted-foreground mt-1">
                       Last active: {formatTime(otherSession.last_activity_at)}
@@ -139,16 +139,23 @@ const MultipleSessionModal: React.FC<MultipleSessionModalProps> = ({
                 {/* Map display if location data available */}
                 {otherSession.location_lat && otherSession.location_lng && (
                   <div className="mt-3 border rounded-lg overflow-hidden">
-                    <iframe
-                      src={mapUrl}
-                      width="100%"
-                      height="200"
-                      style={{ border: 0 }}
-                      loading="lazy"
-                      referrerPolicy="no-referrer-when-downgrade"
-                      title="Login location map"
-                      className="w-full"
-                    />
+                    <div className="relative w-full" style={{ paddingBottom: '56.25%' }}>
+                      <iframe
+                        src={mapUrl}
+                        style={{ 
+                          position: 'absolute',
+                          top: 0,
+                          left: 0,
+                          width: '100%',
+                          height: '100%',
+                          border: 0
+                        }}
+                        loading="lazy"
+                        referrerPolicy="no-referrer-when-downgrade"
+                        title="Login location map"
+                        className="w-full"
+                      />
+                    </div>
                     <div className="p-2 bg-muted/50 text-xs text-center text-muted-foreground">
                       Approximate location of the other login
                     </div>
@@ -164,25 +171,25 @@ const MultipleSessionModal: React.FC<MultipleSessionModalProps> = ({
           <Button
             variant="outline"
             onClick={onDismiss}
-            className="w-full sm:w-auto order-3 sm:order-1"
+            className="w-full sm:w-auto order-3 sm:order-1 text-xs sm:text-sm"
           >
-            <X className="h-4 w-4 mr-2" />
-            This wasn't me. Continue on this device
+            <X className="h-4 w-4 mr-2 flex-shrink-0" />
+            <span className="truncate">This wasn't me. Continue on this device</span>
           </Button>
           <Button
             variant="outline"
             onClick={onContinueOtherDevice}
-            className="w-full sm:w-auto order-2"
+            className="w-full sm:w-auto order-2 text-xs sm:text-sm"
           >
-            Continue on another device
+            <span className="truncate">Continue on another device</span>
           </Button>
           <Button
             variant="destructive"
             onClick={onLogoutEverywhere}
-            className="w-full sm:w-auto order-1 sm:order-3"
+            className="w-full sm:w-auto order-1 sm:order-3 text-xs sm:text-sm"
           >
-            <LogOut className="h-4 w-4 mr-2" />
-            Log out everywhere
+            <LogOut className="h-4 w-4 mr-2 flex-shrink-0" />
+            <span className="truncate">Log out everywhere</span>
           </Button>
         </AlertDialogFooter>
       </AlertDialogContent>
