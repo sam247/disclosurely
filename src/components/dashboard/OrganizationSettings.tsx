@@ -24,7 +24,7 @@ const OrganizationSettings = () => {
       </div>
 
       {/* Scrollable Content */}
-      <div className="px-4 sm:px-6 lg:px-8 py-4 sm:py-6 space-y-6 sm:space-y-8">
+      <div className="px-4 sm:px-6 lg:px-8 py-4 sm:py-6 space-y-6 sm:space-y-8 max-w-5xl mx-auto">
         {isOrgAdmin && (
           <>
             <Separator className="my-6 sm:my-8" />

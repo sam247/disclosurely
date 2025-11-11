@@ -103,7 +103,7 @@ const MultipleSessionModal: React.FC<MultipleSessionModalProps> = ({
 
   return (
     <AlertDialog open={open}>
-      <AlertDialogContent className="w-[calc(100vw-2rem)] sm:max-w-2xl max-h-[90vh] overflow-y-auto">
+      <AlertDialogContent className="w-[calc(100vw-2rem)] sm:w-[calc(100vw-4rem)] md:max-w-2xl max-h-[calc(100vh-2rem)] sm:max-h-[90vh] overflow-y-auto">
         <AlertDialogHeader>
           <div className="flex items-center gap-3 flex-wrap">
             <div className="h-10 w-10 rounded-full bg-amber-100 flex items-center justify-center flex-shrink-0">
