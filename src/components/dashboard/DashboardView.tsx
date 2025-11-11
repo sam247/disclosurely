@@ -1679,7 +1679,7 @@ Additional Details: ${decryptedContent.additionalDetails || 'None provided'}
                                           toast({ title: 'Report marked as Investigating' });
                                           fetchData();
                                         } catch (error) {
-                                          console.error('Error updating report status:', error);
+                                          log.error(LogContext.CASE_MANAGEMENT, 'Error updating report status', error as Error, { reportId: report.id });
                                           toast({ 
                                             title: 'Error updating report status',
                                             variant: 'destructive'
