@@ -191,6 +191,10 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
   }, []);
 
   const signOut = async () => {
+    // Clear session tracking from sessionStorage
+    if (user) {
+      sessionStorage.removeItem(`session_id_${user.id}`);
+    }
     await supabase.auth.signOut();
     setSubscriptionData({ subscribed: false });
     // Redirect to main domain instead of app subdomain
