@@ -1,8 +1,7 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { Separator } from '@/components/ui/separator';
-import { User, Building2, Users, CreditCard, Globe, Shield } from 'lucide-react';
-import ProfileSettings from '@/components/ProfileSettings';
+import { Building2, Users, CreditCard, Globe, Shield } from 'lucide-react';
 import OrganizationSettingsBranding from '@/components/OrganizationSettings';
 import UserManagement from '@/components/UserManagement';
 import SubscriptionManagement from '@/components/SubscriptionManagement';
@@ -20,21 +19,12 @@ const OrganizationSettings = () => {
       <div className="px-4 sm:px-6 lg:px-8 pt-4 sm:pt-6 pb-4 sm:pb-6 border-b">
         <h1 className="text-2xl sm:text-3xl font-bold">Settings</h1>
         <p className="text-sm sm:text-base text-muted-foreground mt-1 sm:mt-2">
-          Manage your profile, organization, team, subscription, and privacy settings
+          Manage your organization, team, subscription, and privacy settings. Profile settings are available in the top-right menu.
         </p>
       </div>
 
       {/* Scrollable Content */}
       <div className="px-4 sm:px-6 lg:px-8 py-4 sm:py-6 space-y-6 sm:space-y-8 max-w-5xl mx-auto">
-        {/* Profile Settings - Always visible */}
-        <section>
-          <div className="flex items-center gap-2 mb-4 sm:mb-6">
-            <User className="h-5 w-5 text-primary" />
-            <h2 className="text-xl sm:text-2xl font-semibold">Profile</h2>
-          </div>
-          <ProfileSettings />
-        </section>
-
         {isOrgAdmin && (
           <>
             <Separator className="my-6 sm:my-8" />
