@@ -2,25 +2,18 @@ import { Link } from "react-router-dom";
 import { SystemStatusIndicator } from "@/components/SystemStatusIndicator";
 import { useTranslation } from "react-i18next";
 import { Linkedin, Facebook, Instagram } from "lucide-react";
-
 export const Footer = () => {
-  const { i18n } = useTranslation();
+  const {
+    i18n
+  } = useTranslation();
   const currentLanguage = i18n.language;
   const langPrefix = currentLanguage && currentLanguage !== "en" ? `/${currentLanguage}` : "";
-
-  return (
-    <footer className="bg-gray-900 text-white">
+  return <footer className="bg-gray-900 text-white">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
           <div className="col-span-1">
             <div className="flex items-center space-x-3 mb-4">
-              <img
-                src="/lovable-uploads/416d39db-53ff-402e-a2cf-26d1a3618601.png"
-                alt="Disclosurely"
-                className="h-7 w-auto"
-                loading="lazy"
-                decoding="async"
-              />
+              <img src="/lovable-uploads/416d39db-53ff-402e-a2cf-26d1a3618601.png" alt="Disclosurely" className="h-7 w-auto" loading="lazy" decoding="async" />
             </div>
             <p className="text-gray-400 mb-4">
               Secure whistleblowing platform for organizations. Anonymous reporting, end-to-end encryption, and
@@ -46,11 +39,7 @@ export const Footer = () => {
                   Industries
                 </Link>
               </li>
-              <li>
-                <Link to={`${langPrefix}/anonymous-hotline`} className="text-gray-400 hover:text-white">
-                  Anonymous Hotline
-                </Link>
-              </li>
+              
               <li>
                 <Link to={`${langPrefix}/compliance-software`} className="text-gray-400 hover:text-white">
                   Compliance Software
@@ -114,9 +103,7 @@ export const Footer = () => {
                 </Link>
               </li>
               <li>
-                <Link to={`${langPrefix}/contact`} className="text-gray-400 hover:text-white">
-                  Support
-                </Link>
+                
               </li>
               <li>
                 <Link to={`${langPrefix}/privacy`} className="text-gray-400 hover:text-white">
@@ -137,28 +124,13 @@ export const Footer = () => {
             <p className="text-gray-400 text-sm">© 2025 Disclosurely. All rights reserved.</p>
             <div className="flex items-center gap-4">
               <div className="flex items-center gap-3">
-                <a
-                  href="https://linkedin.com/company/disclosurely"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-gray-400 hover:text-white transition-colors"
-                >
+                <a href="https://linkedin.com/company/disclosurely" target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-white transition-colors">
                   <Linkedin className="h-5 w-5" />
                 </a>
-                <a
-                  href="https://facebook.com/disclosurely"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-gray-400 hover:text-white transition-colors"
-                >
+                <a href="https://facebook.com/disclosurely" target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-white transition-colors">
                   <Facebook className="h-5 w-5" />
                 </a>
-                <a
-                  href="https://instagram.com/disclosurely"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-gray-400 hover:text-white transition-colors"
-                >
+                <a href="https://instagram.com/disclosurely" target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-white transition-colors">
                   <Instagram className="h-5 w-5" />
                 </a>
               </div>
@@ -166,6 +138,5 @@ export const Footer = () => {
           </div>
         </div>
       </div>
-    </footer>
-  );
+    </footer>;
 };
