@@ -115,8 +115,8 @@ const Pricing = () => {
                 <CheckCircle className="w-5 h-5 sm:w-7 sm:h-7 text-white" />
               </div>
               <div>
-                <div className="font-bold text-gray-900 text-base sm:text-lg">Highly Rated on G2</div>
-                <div className="text-xs sm:text-sm text-gray-600">100+ verified reviews from compliance teams</div>
+                <div className="font-bold text-gray-900 text-base sm:text-lg">Enterprise-Grade Security</div>
+                <div className="text-xs sm:text-sm text-gray-600">ISO 27001, SOC 2 Type II, GDPR compliant</div>
               </div>
             </div>
           </div>
@@ -152,12 +152,14 @@ const Pricing = () => {
                     </>
                   ) : (
                     <>
-                      <div className="flex items-center justify-center gap-2">
-                        <span className="text-3xl sm:text-4xl font-bold">£199.90</span>
-                        <span className="text-sm text-gray-500 line-through">£239.88</span>
+                      <div className="flex flex-col items-center">
+                        <div className="flex items-baseline gap-2">
+                          <span className="text-3xl sm:text-4xl font-bold">£199.90</span>
+                          <span className="text-xs text-gray-500 line-through">£239.88</span>
+                        </div>
+                        <span className="text-gray-600 text-sm sm:text-base">/year</span>
+                        <div className="text-xs text-green-600 font-semibold mt-0.5">Save 2 months</div>
                       </div>
-                      <span className="text-gray-600 text-sm sm:text-base">/year</span>
-                      <div className="text-xs text-green-600 font-semibold mt-1">Save 2 months</div>
                     </>
                   )}
                 </div>
@@ -191,6 +193,14 @@ const Pricing = () => {
                     <X className="h-5 w-5 text-red-500" />
                     <span className="text-gray-500 text-sm sm:text-base">{t("pricing.features.customBranding")}</span>
                   </div>
+                  <div className="flex items-center space-x-3">
+                    <X className="h-5 w-5 text-red-500" />
+                    <span className="text-gray-500 text-sm sm:text-base">{t("pricing.features.cname")}</span>
+                  </div>
+                  <div className="flex items-center space-x-3">
+                    <X className="h-5 w-5 text-red-500" />
+                    <span className="text-gray-500 text-sm sm:text-base">{t("pricing.features.workflows")}</span>
+                  </div>
                 </div>
                 <Button 
                   className="w-full mt-6" 
@@ -219,12 +229,14 @@ const Pricing = () => {
                     </>
                   ) : (
                     <>
-                      <div className="flex items-center justify-center gap-2">
-                        <span className="text-3xl sm:text-4xl font-bold">£399.90</span>
-                        <span className="text-sm text-gray-500 line-through">£479.88</span>
+                      <div className="flex flex-col items-center">
+                        <div className="flex items-baseline gap-2">
+                          <span className="text-3xl sm:text-4xl font-bold">£399.90</span>
+                          <span className="text-xs text-gray-500 line-through">£479.88</span>
+                        </div>
+                        <span className="text-gray-600 text-sm sm:text-base">/year</span>
+                        <div className="text-xs text-green-600 font-semibold mt-0.5">Save 2 months</div>
                       </div>
-                      <span className="text-gray-600 text-sm sm:text-base">/year</span>
-                      <div className="text-xs text-green-600 font-semibold mt-1">Save 2 months</div>
                     </>
                   )}
                 </div>
@@ -256,6 +268,14 @@ const Pricing = () => {
                     <CheckCircle className="h-5 w-5 text-green-600" />
                     <span className="text-gray-700 text-sm sm:text-base">{t("pricing.features.customBranding")}</span>
                   </div>
+                  <div className="flex items-center space-x-3">
+                    <CheckCircle className="h-5 w-5 text-green-600" />
+                    <span className="text-gray-700 text-sm sm:text-base">{t("pricing.features.cname")}</span>
+                  </div>
+                  <div className="flex items-center space-x-3">
+                    <CheckCircle className="h-5 w-5 text-green-600" />
+                    <span className="text-gray-700 text-sm sm:text-base">{t("pricing.features.workflows")}</span>
+                  </div>
                 </div>
                 <Button 
                   className="w-full mt-6" 
@@ -286,7 +306,7 @@ const Pricing = () => {
                   </div>
                   <div className="flex items-center space-x-3">
                     <CheckCircle className="h-5 w-5 text-green-600" />
-                    <span className="text-gray-700 text-sm sm:text-base">{t("pricing.features.customDomain")}</span>
+                    <span className="text-gray-700 text-sm sm:text-base">Multiple custom domains</span>
                   </div>
                   <div className="flex items-center space-x-3">
                     <CheckCircle className="h-5 w-5 text-green-600" />
@@ -298,13 +318,15 @@ const Pricing = () => {
                   </div>
                   <div className="flex items-center space-x-3">
                     <CheckCircle className="h-5 w-5 text-green-600" />
-                    <span className="text-gray-700 text-sm sm:text-base">
-                      {t("pricing.features.customIntegrations")}
-                    </span>
+                    <span className="text-gray-700 text-sm sm:text-base">{t("pricing.features.customIntegrations")}</span>
                   </div>
                   <div className="flex items-center space-x-3">
-                    <CheckCircle className="h-5 w-5 text-grey-600" />
-                    <span className="text-gray-500 text-sm sm:text-base">{t("pricing.features.api")}</span>
+                    <CheckCircle className="h-5 w-5 text-green-600" />
+                    <span className="text-gray-700 text-sm sm:text-base">{t("pricing.features.api")}</span>
+                  </div>
+                  <div className="flex items-center space-x-3">
+                    <CheckCircle className="h-5 w-5 text-green-600" />
+                    <span className="text-gray-700 text-sm sm:text-base">{t("pricing.features.teamManagement")}</span>
                   </div>
                 </div>
                 <Button className="w-full mt-6" variant="outline">
@@ -327,6 +349,134 @@ const Pricing = () => {
             <div className="flex items-center gap-2 text-blue-600">
               <CheckCircle className="w-5 h-5" />
               <span className="font-semibold text-gray-900">Cancel Anytime</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Testimonials & Benefits Section */}
+      <section className="py-16 px-4 sm:px-6 lg:px-8 bg-gray-50">
+        <div className="max-w-7xl mx-auto">
+          <div className="grid md:grid-cols-2 gap-8 lg:gap-12">
+            {/* Testimonial */}
+            <div className="bg-white rounded-2xl p-8 shadow-sm">
+              <div className="text-6xl font-bold text-blue-600 mb-4 leading-none">"</div>
+              <p className="text-lg text-gray-700 mb-6 leading-relaxed">
+                Disclosurely has transformed how we handle sensitive reports. The platform is intuitive, secure, and our employees feel confident reporting issues. Implementation was seamless and the support team was excellent.
+              </p>
+              <div className="flex items-center gap-4">
+                <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-blue-700 rounded-full flex items-center justify-center text-white font-semibold">
+                  SJ
+                </div>
+                <div>
+                  <div className="font-semibold text-gray-900">Sarah Johnson</div>
+                  <div className="text-sm text-gray-600">Chief Compliance Officer</div>
+                </div>
+              </div>
+            </div>
+
+            {/* Benefits */}
+            <div className="bg-gradient-to-br from-blue-600 to-blue-800 rounded-2xl p-8 text-white shadow-lg">
+              <h3 className="text-2xl font-bold mb-6">Why Organizations Choose Disclosurely</h3>
+              <div className="space-y-6">
+                <div className="flex items-start gap-4">
+                  <div className="w-10 h-10 bg-white/20 rounded-lg flex items-center justify-center flex-shrink-0">
+                    <CheckCircle className="w-6 h-6 text-white" />
+                  </div>
+                  <div>
+                    <div className="text-xl font-semibold mb-1">35% Faster Resolution</div>
+                    <div className="text-blue-100 text-sm">AI-powered case analysis speeds up investigations</div>
+                  </div>
+                </div>
+                <div className="flex items-start gap-4">
+                  <div className="w-10 h-10 bg-white/20 rounded-lg flex items-center justify-center flex-shrink-0">
+                    <CheckCircle className="w-6 h-6 text-white" />
+                  </div>
+                  <div>
+                    <div className="text-xl font-semibold mb-1">100% Compliance Ready</div>
+                    <div className="text-blue-100 text-sm">ISO 27001, GDPR, SOX compliant out of the box</div>
+                  </div>
+                </div>
+                <div className="flex items-start gap-4">
+                  <div className="w-10 h-10 bg-white/20 rounded-lg flex items-center justify-center flex-shrink-0">
+                    <CheckCircle className="w-6 h-6 text-white" />
+                  </div>
+                  <div>
+                    <div className="text-xl font-semibold mb-1">Enterprise-Grade Security</div>
+                    <div className="text-blue-100 text-sm">Military-grade encryption and tamper-evident audit logs</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Security Features Section */}
+      <section className="py-16 px-4 sm:px-6 lg:px-8 bg-white">
+        <div className="max-w-7xl mx-auto">
+          <div className="grid md:grid-cols-2 gap-12 items-center">
+            <div>
+              <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+                Enterprise-grade security for every team
+              </h2>
+              <p className="text-lg text-gray-600 mb-6">
+                Your data is protected with industry-leading security standards and compliance certifications.
+              </p>
+              <Button variant="outline" size="lg" className="border-gray-300">
+                Learn more about security
+              </Button>
+            </div>
+            <div className="space-y-4">
+              <div className="flex items-start gap-3">
+                <CheckCircle className="w-6 h-6 text-green-600 flex-shrink-0 mt-0.5" />
+                <div>
+                  <div className="font-semibold text-gray-900 mb-1">Zero data retention by third-party LLMs</div>
+                  <div className="text-sm text-gray-600">Your data never leaves our secure infrastructure</div>
+                </div>
+              </div>
+              <div className="flex items-start gap-3">
+                <CheckCircle className="w-6 h-6 text-green-600 flex-shrink-0 mt-0.5" />
+                <div>
+                  <div className="font-semibold text-gray-900 mb-1">Private AI model</div>
+                  <div className="text-sm text-gray-600">Dedicated AI processing for enhanced privacy</div>
+                </div>
+              </div>
+              <div className="flex items-start gap-3">
+                <CheckCircle className="w-6 h-6 text-green-600 flex-shrink-0 mt-0.5" />
+                <div>
+                  <div className="font-semibold text-gray-900 mb-1">SOC 2 Type II & GDPR Ready</div>
+                  <div className="text-sm text-gray-600">Certified compliance with industry standards</div>
+                </div>
+              </div>
+              <div className="flex items-start gap-3">
+                <CheckCircle className="w-6 h-6 text-green-600 flex-shrink-0 mt-0.5" />
+                <div>
+                  <div className="font-semibold text-gray-900 mb-1">Data encryption in transit and at rest</div>
+                  <div className="text-sm text-gray-600">AES-256 encryption for maximum protection</div>
+                </div>
+              </div>
+              <div className="flex items-start gap-3">
+                <CheckCircle className="w-6 h-6 text-green-600 flex-shrink-0 mt-0.5" />
+                <div>
+                  <div className="font-semibold text-gray-900 mb-1">Role-based access control</div>
+                  <div className="text-sm text-gray-600">Granular permissions for team members</div>
+                </div>
+              </div>
+              <div className="flex items-start gap-3">
+                <CheckCircle className="w-6 h-6 text-green-600 flex-shrink-0 mt-0.5" />
+                <div>
+                  <div className="font-semibold text-gray-900 mb-1">SAML-based SSO & SCIM provisioning</div>
+                  <div className="text-sm text-gray-600">Enterprise identity management integration</div>
+                </div>
+              </div>
+              <div className="flex items-start gap-3">
+                <CheckCircle className="w-6 h-6 text-green-600 flex-shrink-0 mt-0.5" />
+                <div>
+                  <div className="font-semibold text-gray-900 mb-1">IP Whitelisting</div>
+                  <div className="text-sm text-gray-600">Restrict access to approved IP addresses</div>
+                </div>
+              </div>
             </div>
           </div>
         </div>
