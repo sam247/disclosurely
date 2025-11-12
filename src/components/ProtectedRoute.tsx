@@ -1,5 +1,5 @@
 
-import { ReactNode, useState, useEffect } from 'react';
+import { ReactNode, useState, useEffect, useRef } from 'react';
 import { Navigate, useLocation } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import AuthenticatedApp from './AuthenticatedApp';
@@ -14,31 +14,70 @@ const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
   const { user, loading, subscriptionData, subscriptionLoading, refreshSubscription } = useAuth();
   const location = useLocation();
   const [showSubscriptionModal, setShowSubscriptionModal] = useState(false);
+  const stabilityTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const hasCheckedRef = useRef(false);
+  const lastSubscriptionStatusRef = useRef<string | undefined>(undefined);
 
   // Check subscription status when data is available - only show modal if there's actually an issue
   useEffect(() => {
+    // Clear any existing timeout
+    if (stabilityTimeoutRef.current) {
+      clearTimeout(stabilityTimeoutRef.current);
+      stabilityTimeoutRef.current = null;
+    }
+
     // Only check if everything is loaded and user is authenticated
     if (!loading && !subscriptionLoading && user && subscriptionData) {
-      const hasAccess = canAccess(subscriptionData);
-      const statusForModal = getSubscriptionStatusForModal(subscriptionData);
-      
-      // Only show modal if:
-      // 1. User doesn't have access AND subscription data is explicitly loaded (not default)
-      // 2. There's a specific status that requires showing the modal
-      // Don't show if subscription is active/trialing or if data is still defaulting
-      if (!hasAccess && subscriptionData.subscription_status !== undefined) {
-        // Only show if there's a specific status that requires the modal
-        if (statusForModal) {
-          setShowSubscriptionModal(true);
-        }
-      } else {
-        // Hide modal if user has access or subscription is active
+      // Never show modal for pro users
+      if (subscriptionData.subscription_tier === 'pro') {
         setShowSubscriptionModal(false);
+        hasCheckedRef.current = true;
+        return;
       }
+
+      // Check if subscription status has changed (data is stable)
+      const currentStatus = subscriptionData.subscription_status;
+      const statusChanged = currentStatus !== lastSubscriptionStatusRef.current;
+      
+      // Wait for data to stabilize (prevent flashing during updates)
+      stabilityTimeoutRef.current = setTimeout(() => {
+        const hasAccess = canAccess(subscriptionData);
+        const statusForModal = getSubscriptionStatusForModal(subscriptionData);
+        
+        // Only show modal if:
+        // 1. User doesn't have access AND subscription data is explicitly loaded (not default)
+        // 2. There's a specific status that requires showing the modal
+        // 3. Subscription status is 'active' or 'trialing' - never show modal
+        // 4. We haven't already checked and determined no modal is needed
+        const shouldShow = !hasAccess && 
+                          subscriptionData.subscription_status !== undefined &&
+                          subscriptionData.subscription_status !== 'active' &&
+                          subscriptionData.subscription_status !== 'trialing' &&
+                          statusForModal !== null;
+        
+        if (shouldShow && (statusChanged || !hasCheckedRef.current)) {
+          setShowSubscriptionModal(true);
+          hasCheckedRef.current = true;
+        } else {
+          setShowSubscriptionModal(false);
+          if (!hasCheckedRef.current) {
+            hasCheckedRef.current = true;
+          }
+        }
+        
+        lastSubscriptionStatusRef.current = currentStatus;
+      }, 300); // Wait 300ms for data to stabilize
     } else {
       // Hide modal while loading
       setShowSubscriptionModal(false);
     }
+
+    return () => {
+      if (stabilityTimeoutRef.current) {
+        clearTimeout(stabilityTimeoutRef.current);
+        stabilityTimeoutRef.current = null;
+      }
+    };
   }, [loading, subscriptionLoading, user, subscriptionData]);
 
   if (loading || subscriptionLoading) {
