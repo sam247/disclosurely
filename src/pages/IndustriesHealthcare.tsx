@@ -103,7 +103,7 @@ const IndustriesHealthcare: React.FC = () => {
                 Schedule Demo
               </Link>
             </div>
-            <p className="text-sm text-gray-500 mt-4">14-day free trial • No credit card required • HIPAA-compliant</p>
+            <p className="text-sm text-gray-500 mt-4">7-day free trial • HIPAA-compliant</p>
           </div>
         </div>
       </section>

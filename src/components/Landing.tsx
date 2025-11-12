@@ -1,7 +1,10 @@
+import { useState } from "react";
 import { Shield, CheckCircle, BarChart3, X, ShieldCheck } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Badge } from "@/components/ui/badge";
 import { Link } from "react-router-dom";
 import { Footer } from "@/components/ui/footer";
 import CookieConsentBanner from "@/components/CookieConsentBanner";
@@ -11,6 +14,8 @@ import { AnnouncementBar } from "@/components/AnnouncementBar";
 import { useTranslation } from "react-i18next";
 import DynamicHelmet from "@/components/DynamicHelmet";
 import TypingAnimation from "@/components/TypingAnimation";
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
 import anonymousReportingIcon from "@/assets/icons/anonymous_reporting.png";
 import secureMessagingIcon from "@/assets/icons/secure_messaging.png";
 import caseManagementIcon from "@/assets/icons/case_management.png";
@@ -50,6 +55,49 @@ const Landing = () => {
     t,
     i18n
   } = useTranslation();
+  const { toast } = useToast();
+  const [billingInterval, setBillingInterval] = useState<'monthly' | 'annual'>('monthly');
+  const [loading, setLoading] = useState<string | null>(null);
+
+  const handleSubscribe = async (tier: 'tier1' | 'tier2') => {
+    setLoading(tier);
+    try {
+      // Check if user is logged in (optional - checkout works without auth)
+      const { data: { session } } = await supabase.auth.getSession();
+      
+      const requestBody: any = {
+        tier,
+        employee_count: tier === 'tier1' ? '0-49' : '50+',
+        interval: billingInterval,
+      };
+
+      // If not logged in, we'll let Stripe collect email during checkout
+      // If logged in, include auth token
+      const headers: any = {};
+      if (session?.access_token) {
+        headers.Authorization = `Bearer ${session.access_token}`;
+      }
+
+      const { data, error } = await supabase.functions.invoke('create-checkout', {
+        headers,
+        body: requestBody
+      });
+
+      if (error) throw error;
+
+      if (data?.url) {
+        window.location.href = data.url;
+      }
+    } catch (error) {
+      console.error('Error creating checkout session:', error);
+      toast({
+        title: "Error",
+        description: "Failed to start subscription process. Please try again.",
+        variant: "destructive",
+      });
+      setLoading(null);
+    }
+  };
   const currentLanguage = i18n.language;
   const langPrefix = currentLanguage && currentLanguage !== "en" ? `/${currentLanguage}` : "";
   return <>
@@ -490,14 +538,40 @@ const Landing = () => {
             <p className="text-lg sm:text-xl text-gray-600 max-w-3xl mx-auto px-4">{t("landing.pricing.subtitle")}</p>
           </div>
 
+          {/* Billing Interval Tabs */}
+          <div className="flex justify-center mb-8">
+            <Tabs value={billingInterval} onValueChange={(v) => setBillingInterval(v as 'monthly' | 'annual')} className="w-auto">
+              <TabsList className="grid w-full grid-cols-2">
+                <TabsTrigger value="monthly" className="text-sm sm:text-base">Monthly</TabsTrigger>
+                <TabsTrigger value="annual" className="text-sm sm:text-base">
+                  Annual
+                  <Badge className="ml-2 bg-green-600 text-white text-[10px] px-1.5 py-0">Save 17%</Badge>
+                </TabsTrigger>
+              </TabsList>
+            </Tabs>
+          </div>
+
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8 max-w-5xl mx-auto">
             {/* Starter */}
             <Card>
               <CardHeader className="text-center pb-6">
                 <CardTitle className="text-xl sm:text-2xl font-bold">{t("pricing.plans.starter.name")}</CardTitle>
                 <div className="mt-4">
-                  <span className="text-3xl sm:text-4xl font-bold">{t("pricing.plans.starter.price")}</span>
-                  <span className="text-gray-600 text-sm sm:text-base">{t("pricing.plans.perMonth")}</span>
+                  {billingInterval === 'monthly' ? (
+                    <>
+                      <span className="text-3xl sm:text-4xl font-bold">£19.99</span>
+                      <span className="text-gray-600 text-sm sm:text-base">/month</span>
+                    </>
+                  ) : (
+                    <>
+                      <div className="flex items-center justify-center gap-2">
+                        <span className="text-3xl sm:text-4xl font-bold">£199.90</span>
+                        <span className="text-sm text-gray-500 line-through">£239.88</span>
+                      </div>
+                      <span className="text-gray-600 text-sm sm:text-base">/year</span>
+                      <div className="text-xs text-green-600 font-semibold mt-1">Save 2 months</div>
+                    </>
+                  )}
                 </div>
                 <CardDescription className="text-sm sm:text-base">
                   {t("pricing.plans.starter.description")}
@@ -530,8 +604,13 @@ const Landing = () => {
                     <span className="text-gray-500 text-sm sm:text-base">{t("pricing.features.customBranding")}</span>
                   </div>
                 </div>
-                <Button className="w-full mt-6" variant="outline" asChild>
-                  <a href="https://app.disclosurely.com/auth/signup">{t("pricing.cta.startTrial")}</a>
+                <Button 
+                  className="w-full mt-6" 
+                  variant="outline"
+                  onClick={() => handleSubscribe('tier1')}
+                  disabled={loading === 'tier1'}
+                >
+                  {loading === 'tier1' ? 'Loading...' : t("pricing.cta.startTrial")}
                 </Button>
               </CardContent>
             </Card>
@@ -546,8 +625,21 @@ const Landing = () => {
               <CardHeader className="text-center pb-6">
                 <CardTitle className="text-xl sm:text-2xl font-bold">{t("pricing.plans.pro.name")}</CardTitle>
                 <div className="mt-4">
-                  <span className="text-3xl sm:text-4xl font-bold">{t("pricing.plans.pro.price")}</span>
-                  <span className="text-gray-600 text-sm sm:text-base">{t("pricing.plans.perMonth")}</span>
+                  {billingInterval === 'monthly' ? (
+                    <>
+                      <span className="text-3xl sm:text-4xl font-bold">£39.99</span>
+                      <span className="text-gray-600 text-sm sm:text-base">/month</span>
+                    </>
+                  ) : (
+                    <>
+                      <div className="flex items-center justify-center gap-2">
+                        <span className="text-3xl sm:text-4xl font-bold">£399.90</span>
+                        <span className="text-sm text-gray-500 line-through">£479.88</span>
+                      </div>
+                      <span className="text-gray-600 text-sm sm:text-base">/year</span>
+                      <div className="text-xs text-green-600 font-semibold mt-1">Save 2 months</div>
+                    </>
+                  )}
                 </div>
                 <CardDescription className="text-sm sm:text-base">{t("pricing.plans.pro.description")}</CardDescription>
               </CardHeader>
@@ -578,8 +670,12 @@ const Landing = () => {
                     <span className="text-gray-700 text-sm sm:text-base">{t("pricing.features.customBranding")}</span>
                   </div>
                 </div>
-                <Button className="w-full mt-6" asChild>
-                  <a href="https://app.disclosurely.com/auth/signup">{t("pricing.cta.startTrial")}</a>
+                <Button 
+                  className="w-full mt-6" 
+                  onClick={() => handleSubscribe('tier2')}
+                  disabled={loading === 'tier2'}
+                >
+                  {loading === 'tier2' ? 'Loading...' : t("pricing.cta.startTrial")}
                 </Button>
               </CardContent>
             </Card>

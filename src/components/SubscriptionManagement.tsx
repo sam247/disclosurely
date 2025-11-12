@@ -48,10 +48,13 @@ const SubscriptionManagement = () => {
     setIsLoading(true);
     try {
       // Call Supabase edge function to create checkout session
+      // If user has 'basic' (Starter), upgrade to 'tier2' (Pro)
+      // If user has 'pro', they're already on the highest tier
       const { data, error } = await supabase.functions.invoke('create-checkout', {
         body: { 
           tier: subscriptionData.subscription_tier === 'basic' ? 'tier2' : 'tier1',
-          employee_count: '50+'
+          employee_count: '50+',
+          interval: 'month' // Default to monthly for upgrades
         }
       });
       

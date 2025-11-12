@@ -26,78 +26,118 @@ serve(async (req) => {
   try {
     logStep("Function started");
 
-    const authHeader = req.headers.get("Authorization")!;
-    const token = authHeader.replace("Bearer ", "");
-    const { data } = await supabaseClient.auth.getUser(token);
-    const user = data.user;
-    if (!user?.email) throw new Error("User not authenticated or email not available");
-    logStep("User authenticated", { userId: user.id, email: user.email });
-
-    const { tier, employee_count, rdt_cid } = await req.json();
+    const { tier, employee_count, rdt_cid, interval = 'month', email } = await req.json();
     if (!tier || !employee_count) {
       throw new Error("Missing required fields: tier and employee_count");
     }
-    logStep("Request data", { tier, employee_count, rdt_cid });
+
+    // Check for authentication (optional - can be unauthenticated for new signups)
+    const authHeader = req.headers.get("Authorization");
+    let userEmail: string;
+    let userId: string | null = null;
+
+    if (authHeader) {
+      const token = authHeader.replace("Bearer ", "");
+      const { data } = await supabaseClient.auth.getUser(token);
+      if (data.user?.email) {
+        userEmail = data.user.email;
+        userId = data.user.id;
+        logStep("User authenticated", { userId, email: userEmail });
+      } else {
+        // Auth header provided but invalid - use email from body if provided
+        if (!email) throw new Error("Invalid authentication and no email provided");
+        userEmail = email;
+        logStep("Invalid auth, using email from body", { email: userEmail });
+      }
+    } else {
+      // No auth header - email optional (Stripe will collect it during checkout)
+      if (email) {
+        userEmail = email;
+        logStep("Unauthenticated checkout with email", { email: userEmail });
+      } else {
+        // No email provided - Stripe will collect it during checkout
+        userEmail = ''; // Will be set by Stripe
+        logStep("Unauthenticated checkout - Stripe will collect email");
+      }
+    }
+
+    logStep("Request data", { tier, employee_count, rdt_cid, interval, email: userEmail, userId });
 
     const stripe = new Stripe(Deno.env.get("STRIPE_SECRET_KEY") || "", { 
       apiVersion: "2023-10-16" 
     });
 
     // Check if customer exists
-    const customers = await stripe.customers.list({ email: user.email, limit: 1 });
+    const customers = await stripe.customers.list({ email: userEmail, limit: 1 });
     let customerId;
     if (customers.data.length > 0) {
       customerId = customers.data[0].id;
       logStep("Existing customer found", { customerId });
     } else {
-      logStep("Creating new customer");
+      logStep("Will create new customer in Stripe checkout");
     }
 
-    // Define pricing based on tier
-    let unitAmount: number;
+    // Map tier and interval to Stripe price IDs
+    // Monthly: tier1 = price_1SPigrL0ZFRbQvFnV3TSt0DR (£19.99), tier2 = price_1SPigsL0ZFRbQvFnI1TzxUCT (£39.99)
+    // Annual: tier1 = price_1SSb33L0ZFRbQvFnwwvZzyR0 (£199.90), tier2 = price_1SSb37L0ZFRbQvFnKKobOXBU (£399.90)
+    let priceId: string;
     let tierName: string;
     
-    switch (tier) {
-      case 'tier1':
-        unitAmount = 1999; // £19.99 in pence
-        tierName = 'Starter';
-        break;
-      case 'tier2':
-        unitAmount = 4999; // £49.99 in pence
-        tierName = 'Pro';
-        break;
-      default:
-        throw new Error("Invalid tier selected");
+    if (interval === 'year' || interval === 'annual') {
+      // Annual pricing
+      switch (tier) {
+        case 'tier1':
+          priceId = 'price_1SSb33L0ZFRbQvFnwwvZzyR0'; // £199.90/year
+          tierName = 'Starter';
+          break;
+        case 'tier2':
+          priceId = 'price_1SSb37L0ZFRbQvFnKKobOXBU'; // £399.90/year
+          tierName = 'Pro';
+          break;
+        default:
+          throw new Error("Invalid tier selected");
+      }
+    } else {
+      // Monthly pricing
+      switch (tier) {
+        case 'tier1':
+          priceId = 'price_1SPigrL0ZFRbQvFnV3TSt0DR'; // £19.99/month
+          tierName = 'Starter';
+          break;
+        case 'tier2':
+          priceId = 'price_1SPigsL0ZFRbQvFnI1TzxUCT'; // £39.99/month
+          tierName = 'Pro';
+          break;
+        default:
+          throw new Error("Invalid tier selected");
+      }
     }
 
-    logStep("Creating checkout session", { unitAmount, tierName });
+    logStep("Creating checkout session", { priceId, tierName, interval, trialDays: 7 });
 
     const session = await stripe.checkout.sessions.create({
-      customer: customerId,
-      customer_email: customerId ? undefined : user.email,
+      customer: customerId || undefined,
+      customer_email: customerId ? undefined : (userEmail || undefined),
       line_items: [
         {
-          price_data: {
-            currency: "gbp",
-            product_data: { 
-              name: `Disclosurely ${tierName}`,
-              description: `Secure whistleblower reporting platform for ${employee_count} employees`
-            },
-            unit_amount: unitAmount,
-            recurring: { interval: "month" },
-          },
+          price: priceId,
           quantity: 1,
         },
       ],
       mode: "subscription",
+      subscription_data: {
+        trial_period_days: 7,
+      },
       success_url: `${req.headers.get("origin")}/dashboard?subscription=success`,
-      cancel_url: `${req.headers.get("origin")}/dashboard?subscription=cancelled`,
+      cancel_url: `${req.headers.get("origin")}/pricing?subscription=cancelled`,
       metadata: {
-        user_id: user.id,
+        user_id: userId || '',
+        email: userEmail,
         tier: tier,
         employee_count: employee_count.toString(),
+        interval: interval === 'year' || interval === 'annual' ? 'year' : 'month',
         rdt_cid: rdt_cid || null,
-        source: 'reddit'
+        source: 'website'
       }
     });
 

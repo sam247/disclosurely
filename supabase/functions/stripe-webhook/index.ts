@@ -67,22 +67,91 @@ serve(async (req) => {
         const priceId = subscription.items.data[0]?.price.id;
         const price = priceId ? await stripe.prices.retrieve(priceId) : null;
         const amount = price?.unit_amount || 0;
+        const interval = price?.recurring?.interval || 'month';
         
-        // Determine tier
-        const tier = amount <= 1999 ? 'basic' : 'pro';
+        // Determine tier using price IDs (more reliable than amount)
+        let tier: string;
+        if (priceId === 'price_1SPigrL0ZFRbQvFnV3TSt0DR' || priceId === 'price_1SSb33L0ZFRbQvFnwwvZzyR0') {
+          tier = 'basic';
+        } else if (priceId === 'price_1SPigsL0ZFRbQvFnI1TzxUCT' || priceId === 'price_1SSb37L0ZFRbQvFnKKobOXBU') {
+          tier = 'pro';
+        } else {
+          // Fallback to amount-based logic
+          tier = interval === 'year' ? (amount <= 19990 ? 'basic' : 'pro') : (amount <= 1999 ? 'basic' : 'pro');
+        }
+        
         const subscriptionEnd = new Date(subscription.current_period_end * 1000).toISOString();
 
-        // Get user_id from profiles table
+        // Check if user exists, create if not
+        let userId: string | null = null;
         const { data: profile } = await supabaseClient
           .from("profiles")
           .select("id")
           .eq("email", customer.email)
           .maybeSingle();
 
+        if (profile) {
+          userId = profile.id;
+          console.log(`[STRIPE-WEBHOOK] Found existing user: ${userId}`);
+        } else {
+          // User doesn't exist - create account
+          // Get user_id from metadata if available (from authenticated checkout)
+          const metadataUserId = session.metadata?.user_id;
+          
+          if (metadataUserId && metadataUserId !== '') {
+            // User was authenticated during checkout
+            userId = metadataUserId;
+            console.log(`[STRIPE-WEBHOOK] Using user_id from metadata: ${userId}`);
+          } else {
+            // Create new user account via Supabase Auth Admin API
+            // Generate a random password - user will need to reset it
+            const randomPassword = crypto.getRandomValues(new Uint8Array(32))
+              .reduce((str, byte) => str + byte.toString(16).padStart(2, '0'), '');
+            
+            const { data: authData, error: authError } = await supabaseClient.auth.admin.createUser({
+              email: customer.email,
+              password: randomPassword,
+              email_confirm: true, // Auto-confirm email since they've completed checkout
+              user_metadata: {
+                first_name: customer.name?.split(' ')[0] || '',
+                last_name: customer.name?.split(' ').slice(1).join(' ') || '',
+              }
+            });
+
+            if (authError) {
+              console.error(`[STRIPE-WEBHOOK] Error creating user: ${authError.message}`);
+              // Continue anyway - we'll create profile later
+            } else if (authData.user) {
+              userId = authData.user.id;
+              console.log(`[STRIPE-WEBHOOK] Created new user account: ${userId}`);
+              
+              // Create profile
+              await supabaseClient.from("profiles").insert({
+                id: userId,
+                email: customer.email,
+                organization_id: null, // Will be set during onboarding
+                is_active: true
+              });
+              
+              // Send password reset email so user can set their password
+              const { data: linkData, error: linkError } = await supabaseClient.auth.admin.generateLink({
+                type: 'recovery',
+                email: customer.email,
+              });
+              
+              if (linkError) {
+                console.error(`[STRIPE-WEBHOOK] Error generating password reset link: ${linkError.message}`);
+              } else {
+                console.log(`[STRIPE-WEBHOOK] Password reset link generated for ${customer.email}`);
+              }
+            }
+          }
+        }
+
         // Update or create subscriber record
         await supabaseClient.from("subscribers").upsert({
           email: customer.email,
-          user_id: profile?.id || null,
+          user_id: userId,
           stripe_customer_id: customerId,
           subscribed: true,
           subscription_tier: tier,
@@ -91,7 +160,7 @@ serve(async (req) => {
           updated_at: new Date().toISOString(),
         }, { onConflict: 'email' });
 
-        console.log(`[STRIPE-WEBHOOK] Updated subscription for ${customer.email}`);
+        console.log(`[STRIPE-WEBHOOK] Updated subscription for ${customer.email} (user: ${userId || 'pending'})`);
         break;
       }
 

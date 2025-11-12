@@ -30,6 +30,7 @@ const SubscriptionPromptModal = ({ open, onOpenChange }: SubscriptionPromptModal
         body: { 
           tier: plan === 'starter' ? 'tier1' : 'tier2',
           employee_count: plan === 'starter' ? '0-49' : '50+',
+          interval: 'month', // Default to monthly for modal
           rdt_cid: rdtCid
         }
       });

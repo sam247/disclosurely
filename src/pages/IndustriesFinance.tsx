@@ -114,7 +114,7 @@ const IndustriesFinance: React.FC = () => {
                 Schedule Demo
               </Link>
             </div>
-            <p className="text-sm text-gray-500 mt-4">14-day free trial • No credit card required • SOX, SEC & FINRA compliant</p>
+            <p className="text-sm text-gray-500 mt-4">7-day free trial • SOX, SEC & FINRA compliant</p>
           </div>
         </div>
       </section>

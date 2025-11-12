@@ -1,13 +1,18 @@
+import { useState } from "react";
 import { CheckCircle, X, Zap } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Badge } from "@/components/ui/badge";
 import { Link } from "react-router-dom";
 import { Footer } from "@/components/ui/footer";
 import { StandardHeader } from "@/components/StandardHeader";
 import DynamicHelmet from "@/components/DynamicHelmet";
 import { useLanguageFromUrl } from "@/hooks/useLanguageFromUrl";
 import { useTranslation } from "react-i18next";
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
 const Pricing = () => {
   const {
     currentLanguage
@@ -15,7 +20,50 @@ const Pricing = () => {
   const {
     t
   } = useTranslation();
+  const { toast } = useToast();
+  const [billingInterval, setBillingInterval] = useState<'monthly' | 'annual'>('monthly');
+  const [loading, setLoading] = useState<string | null>(null);
   const langPrefix = currentLanguage && currentLanguage !== "en" ? `/${currentLanguage}` : "";
+
+  const handleSubscribe = async (tier: 'tier1' | 'tier2') => {
+    setLoading(tier);
+    try {
+      // Check if user is logged in (optional - checkout works without auth)
+      const { data: { session } } = await supabase.auth.getSession();
+      
+      const requestBody: any = {
+        tier,
+        employee_count: tier === 'tier1' ? '0-49' : '50+',
+        interval: billingInterval,
+      };
+
+      // If not logged in, we'll let Stripe collect email during checkout
+      // If logged in, include auth token
+      const headers: any = {};
+      if (session?.access_token) {
+        headers.Authorization = `Bearer ${session.access_token}`;
+      }
+
+      const { data, error } = await supabase.functions.invoke('create-checkout', {
+        headers,
+        body: requestBody
+      });
+
+      if (error) throw error;
+
+      if (data?.url) {
+        window.location.href = data.url;
+      }
+    } catch (error) {
+      console.error('Error creating checkout session:', error);
+      toast({
+        title: "Error",
+        description: "Failed to start subscription process. Please try again.",
+        variant: "destructive",
+      });
+      setLoading(null);
+    }
+  };
   return <>
       <DynamicHelmet pageIdentifier="pricing" fallbackTitle={t("pricing.meta.title")} fallbackDescription={t("pricing.meta.description")} />
       
@@ -31,7 +79,7 @@ const Pricing = () => {
                 Start Free. Get Secure Whistleblowing.
               </h1>
               <p className="text-xl text-gray-600 max-w-3xl mx-auto mb-4">
-                14-day free trial • Unlimited reports included • No credit card required
+                7-day free trial • Unlimited reports included
               </p>
               <p className="text-lg text-gray-600 max-w-3xl mx-auto">
                 All plans include military-grade encryption, GDPR compliance, and real-time analytics. Choose the plan that matches your compliance needs and scale as you grow.
@@ -78,14 +126,40 @@ const Pricing = () => {
       {/* Pricing Section */}
       <div className="bg-white py-16 sm:py-20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          {/* Billing Interval Tabs */}
+          <div className="flex justify-center mb-8">
+            <Tabs value={billingInterval} onValueChange={(v) => setBillingInterval(v as 'monthly' | 'annual')} className="w-auto">
+              <TabsList className="grid w-full grid-cols-2">
+                <TabsTrigger value="monthly" className="text-sm sm:text-base">Monthly</TabsTrigger>
+                <TabsTrigger value="annual" className="text-sm sm:text-base">
+                  Annual
+                  <Badge className="ml-2 bg-green-600 text-white text-[10px] px-1.5 py-0">Save 17%</Badge>
+                </TabsTrigger>
+              </TabsList>
+            </Tabs>
+          </div>
+
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8 max-w-5xl mx-auto">
             {/* Starter Plan */}
             <Card className="relative">
               <CardHeader className="text-center pb-6">
                 <CardTitle className="text-xl sm:text-2xl font-bold">{t("pricing.plans.starter.name")}</CardTitle>
                 <div className="mt-4">
-                  <span className="text-3xl sm:text-4xl font-bold">{t("pricing.plans.starter.price")}</span>
-                  <span className="text-gray-600 text-sm sm:text-base">{t("pricing.plans.perMonth")}</span>
+                  {billingInterval === 'monthly' ? (
+                    <>
+                      <span className="text-3xl sm:text-4xl font-bold">£19.99</span>
+                      <span className="text-gray-600 text-sm sm:text-base">/month</span>
+                    </>
+                  ) : (
+                    <>
+                      <div className="flex items-center justify-center gap-2">
+                        <span className="text-3xl sm:text-4xl font-bold">£199.90</span>
+                        <span className="text-sm text-gray-500 line-through">£239.88</span>
+                      </div>
+                      <span className="text-gray-600 text-sm sm:text-base">/year</span>
+                      <div className="text-xs text-green-600 font-semibold mt-1">Save 2 months</div>
+                    </>
+                  )}
                 </div>
                 <CardDescription className="text-sm sm:text-base">
                   {t("pricing.plans.starter.description")}
@@ -118,8 +192,12 @@ const Pricing = () => {
                     <span className="text-gray-500 text-sm sm:text-base">{t("pricing.features.customBranding")}</span>
                   </div>
                 </div>
-                <Button className="w-full mt-6" asChild>
-                  <a href="https://app.disclosurely.com/auth/signup">{t("pricing.cta.startTrial")}</a>
+                <Button 
+                  className="w-full mt-6" 
+                  onClick={() => handleSubscribe('tier1')}
+                  disabled={loading === 'tier1'}
+                >
+                  {loading === 'tier1' ? 'Loading...' : t("pricing.cta.startTrial")}
                 </Button>
               </CardContent>
             </Card>
@@ -134,8 +212,21 @@ const Pricing = () => {
               <CardHeader className="text-center pb-6">
                 <CardTitle className="text-xl sm:text-2xl font-bold">{t("pricing.plans.pro.name")}</CardTitle>
                 <div className="mt-4">
-                  <span className="text-3xl sm:text-4xl font-bold">{t("pricing.plans.pro.price")}</span>
-                  <span className="text-gray-600 text-sm sm:text-base">{t("pricing.plans.perMonth")}</span>
+                  {billingInterval === 'monthly' ? (
+                    <>
+                      <span className="text-3xl sm:text-4xl font-bold">£39.99</span>
+                      <span className="text-gray-600 text-sm sm:text-base">/month</span>
+                    </>
+                  ) : (
+                    <>
+                      <div className="flex items-center justify-center gap-2">
+                        <span className="text-3xl sm:text-4xl font-bold">£399.90</span>
+                        <span className="text-sm text-gray-500 line-through">£479.88</span>
+                      </div>
+                      <span className="text-gray-600 text-sm sm:text-base">/year</span>
+                      <div className="text-xs text-green-600 font-semibold mt-1">Save 2 months</div>
+                    </>
+                  )}
                 </div>
                 <CardDescription className="text-sm sm:text-base">{t("pricing.plans.pro.description")}</CardDescription>
               </CardHeader>
@@ -166,8 +257,12 @@ const Pricing = () => {
                     <span className="text-gray-700 text-sm sm:text-base">{t("pricing.features.customBranding")}</span>
                   </div>
                 </div>
-                <Button className="w-full mt-6" asChild>
-                  <a href="https://app.disclosurely.com/auth/signup">{t("pricing.cta.startTrial")}</a>
+                <Button 
+                  className="w-full mt-6" 
+                  onClick={() => handleSubscribe('tier2')}
+                  disabled={loading === 'tier2'}
+                >
+                  {loading === 'tier2' ? 'Loading...' : t("pricing.cta.startTrial")}
                 </Button>
               </CardContent>
             </Card>
@@ -227,11 +322,7 @@ const Pricing = () => {
           <div className="flex flex-col md:flex-row justify-center items-center gap-8 mb-12">
             <div className="flex items-center gap-2 text-blue-600">
               <CheckCircle className="w-5 h-5" />
-              <span className="font-semibold text-gray-900">14-Day Free Trial</span>
-            </div>
-            <div className="flex items-center gap-2 text-blue-600">
-              <CheckCircle className="w-5 h-5" />
-              <span className="font-semibold text-gray-900">No Credit Card Required</span>
+              <span className="font-semibold text-gray-900">7-Day Free Trial</span>
             </div>
             <div className="flex items-center gap-2 text-blue-600">
               <CheckCircle className="w-5 h-5" />
@@ -240,123 +331,6 @@ const Pricing = () => {
           </div>
         </div>
       </section>
-
-      {/* Comparison Section */}
-      <section className="py-16 px-4 sm:px-6 lg:px-8 bg-gray-50">
-        <div className="max-w-7xl mx-auto">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
-              Why Choose Disclosurely?
-            </h2>
-            <p className="text-lg text-gray-600 mb-4">
-              Save £40+ per month compared to competitors, plus exclusive AI-powered features
-            </p>
-            <p className="text-sm text-gray-500 max-w-3xl mx-auto">
-              While our competitors charge £80-120/month for basic whistleblowing software, Disclosurely Pro delivers advanced AI case analysis, 
-              unlimited reports, and enterprise-grade security at just £39.99/month. Same protection, smarter technology, better value.
-            </p>
-          </div>
-
-          <div className="overflow-x-auto -mx-4 sm:mx-0">
-            <table className="w-full border-collapse shadow-xl min-w-[600px] sm:min-w-0">
-              <thead>
-                <tr className="bg-gradient-to-r from-blue-600 to-blue-700">
-                  <th className="px-3 sm:px-6 py-3 sm:py-4 text-left text-xs sm:text-sm font-semibold text-white">Feature</th>
-                  <th className="px-3 sm:px-6 py-3 sm:py-4 text-center text-xs sm:text-sm font-semibold text-white">Disclosurely Pro</th>
-                  <th className="px-3 sm:px-6 py-3 sm:py-4 text-center text-xs sm:text-sm font-semibold text-blue-100">Typical Competitor</th>
-                </tr>
-              </thead>
-              <tbody className="bg-white">
-                <tr className="border-b border-gray-100">
-                  <td className="px-3 sm:px-6 py-3 sm:py-4 text-gray-900 font-medium text-sm sm:text-base">Monthly Price</td>
-                  <td className="px-3 sm:px-6 py-3 sm:py-4 text-center">
-                    <span className="text-xl sm:text-2xl font-bold text-blue-600">£39.99</span>
-                    <span className="text-xs sm:text-sm text-gray-600">/month</span>
-                    <div className="text-xs text-green-600 font-semibold mt-1">Save £40-80/mo</div>
-                  </td>
-                  <td className="px-3 sm:px-6 py-3 sm:py-4 text-center text-gray-500">
-                    <span className="text-lg sm:text-xl font-semibold">£80-120</span>
-                    <span className="text-xs sm:text-sm">/month</span>
-                  </td>
-                </tr>
-                <tr className="border-b border-gray-100 bg-gray-50">
-                  <td className="px-3 sm:px-6 py-3 sm:py-4 text-gray-900 font-semibold text-sm sm:text-base">AI Case Analysis</td>
-                  <td className="px-3 sm:px-6 py-3 sm:py-4 text-center">
-                    <CheckCircle className="w-5 h-5 sm:w-6 sm:h-6 text-blue-600 mx-auto" />
-                  </td>
-                  <td className="px-3 sm:px-6 py-3 sm:py-4 text-center">
-                    <X className="w-5 h-5 sm:w-6 sm:h-6 text-gray-400 mx-auto" />
-                  </td>
-                </tr>
-                <tr className="border-b border-gray-100">
-                  <td className="px-3 sm:px-6 py-3 sm:py-4 text-gray-900 text-sm sm:text-base">Unlimited Reports</td>
-                  <td className="px-3 sm:px-6 py-3 sm:py-4 text-center">
-                    <CheckCircle className="w-5 h-5 sm:w-6 sm:h-6 text-blue-600 mx-auto" />
-                  </td>
-                  <td className="px-3 sm:px-6 py-3 sm:py-4 text-center">
-                    <CheckCircle className="w-5 h-5 sm:w-6 sm:h-6 text-gray-400 mx-auto" />
-                  </td>
-                </tr>
-                <tr className="border-b border-gray-100 bg-gray-50">
-                  <td className="px-3 sm:px-6 py-3 sm:py-4 text-gray-900 text-sm sm:text-base">Military-Grade Encryption</td>
-                  <td className="px-3 sm:px-6 py-3 sm:py-4 text-center">
-                    <CheckCircle className="w-5 h-5 sm:w-6 sm:h-6 text-blue-600 mx-auto" />
-                  </td>
-                  <td className="px-3 sm:px-6 py-3 sm:py-4 text-center">
-                    <CheckCircle className="w-5 h-5 sm:w-6 sm:h-6 text-gray-400 mx-auto" />
-                  </td>
-                </tr>
-                <tr className="border-b border-gray-100">
-                  <td className="px-3 sm:px-6 py-3 sm:py-4 text-gray-900 text-sm sm:text-base">GDPR Compliance</td>
-                  <td className="px-3 sm:px-6 py-3 sm:py-4 text-center">
-                    <CheckCircle className="w-5 h-5 sm:w-6 sm:h-6 text-blue-600 mx-auto" />
-                  </td>
-                  <td className="px-3 sm:px-6 py-3 sm:py-4 text-center">
-                    <CheckCircle className="w-5 h-5 sm:w-6 sm:h-6 text-gray-400 mx-auto" />
-                  </td>
-                </tr>
-                <tr className="border-b border-gray-100 bg-gray-50">
-                  <td className="px-3 sm:px-6 py-3 sm:py-4 text-gray-900 text-sm sm:text-base">AI Risk Assessment</td>
-                  <td className="px-3 sm:px-6 py-3 sm:py-4 text-center">
-                    <CheckCircle className="w-5 h-5 sm:w-6 sm:h-6 text-blue-600 mx-auto" />
-                  </td>
-                  <td className="px-3 sm:px-6 py-3 sm:py-4 text-center">
-                    <X className="w-5 h-5 sm:w-6 sm:h-6 text-gray-400 mx-auto" />
-                  </td>
-                </tr>
-                <tr className="border-b border-gray-100">
-                  <td className="px-3 sm:px-6 py-3 sm:py-4 text-gray-900 text-sm sm:text-base">Real-time Analytics</td>
-                  <td className="px-3 sm:px-6 py-3 sm:py-4 text-center">
-                    <CheckCircle className="w-5 h-5 sm:w-6 sm:h-6 text-blue-600 mx-auto" />
-                  </td>
-                  <td className="px-3 sm:px-6 py-3 sm:py-4 text-center">
-                    <CheckCircle className="w-5 h-5 sm:w-6 sm:h-6 text-gray-400 mx-auto" />
-                  </td>
-                </tr>
-                <tr className="border-b border-gray-100 bg-gray-50">
-                  <td className="px-3 sm:px-6 py-3 sm:py-4 text-gray-900 text-sm sm:text-base">Custom Branding</td>
-                  <td className="px-3 sm:px-6 py-3 sm:py-4 text-center">
-                    <CheckCircle className="w-5 h-5 sm:w-6 sm:h-6 text-blue-600 mx-auto" />
-                  </td>
-                  <td className="px-3 sm:px-6 py-3 sm:py-4 text-center">
-                    <CheckCircle className="w-5 h-5 sm:w-6 sm:h-6 text-gray-400 mx-auto" />
-                  </td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-
-          <div className="mt-8 text-center">
-            <div className="inline-flex items-center gap-2 bg-blue-100 px-6 py-3 rounded-lg">
-              <Zap className="w-5 h-5 text-blue-600" />
-              <span className="text-gray-900 font-semibold">
-                AI Case Analysis - Exclusive to Disclosurely
-              </span>
-            </div>
-          </div>
-        </div>
-      </section>
-
 
       {/* Detailed Feature Comparison */}
       <section className="py-16 px-4 sm:px-6 lg:px-8 bg-gray-50">
@@ -432,6 +406,12 @@ const Pricing = () => {
                   <td className="px-6 py-4 text-center"><CheckCircle className="w-5 h-5 text-blue-600 mx-auto" /></td>
                   <td className="px-6 py-4 text-center"><CheckCircle className="w-5 h-5 text-blue-600 mx-auto" /></td>
                 </tr>
+                <tr className="hover:bg-gray-50">
+                  <td className="px-6 py-4 text-sm text-gray-900">AI Chat Support</td>
+                  <td className="px-6 py-4 text-center"><X className="w-5 h-5 text-gray-400 mx-auto" /></td>
+                  <td className="px-6 py-4 text-center"><CheckCircle className="w-5 h-5 text-blue-600 mx-auto" /></td>
+                  <td className="px-6 py-4 text-center"><CheckCircle className="w-5 h-5 text-blue-600 mx-auto" /></td>
+                </tr>
                 <tr className="bg-gray-50">
                   <td colSpan={4} className="px-6 py-3 text-sm font-semibold text-gray-900">Communication</td>
                 </tr>
@@ -442,7 +422,7 @@ const Pricing = () => {
                   <td className="px-6 py-4 text-center"><CheckCircle className="w-5 h-5 text-green-600 mx-auto" /></td>
                 </tr>
                 <tr className="hover:bg-gray-50 bg-white">
-                  <td className="px-6 py-4 text-sm text-gray-900">Anonymous Messaging</td>
+                  <td className="px-6 py-4 text-sm text-gray-900">Anonymous Report Submission</td>
                   <td className="px-6 py-4 text-center"><CheckCircle className="w-5 h-5 text-green-600 mx-auto" /></td>
                   <td className="px-6 py-4 text-center"><CheckCircle className="w-5 h-5 text-green-600 mx-auto" /></td>
                   <td className="px-6 py-4 text-center"><CheckCircle className="w-5 h-5 text-green-600 mx-auto" /></td>
@@ -452,18 +432,18 @@ const Pricing = () => {
                 </tr>
                 <tr className="hover:bg-gray-50">
                   <td className="px-6 py-4 text-sm text-gray-900">Team Members</td>
-                  <td className="px-6 py-4 text-center text-sm text-gray-700">1</td>
-                  <td className="px-6 py-4 text-center text-sm text-gray-700 font-semibold">Unlimited</td>
+                  <td className="px-6 py-4 text-center text-sm text-gray-700 font-semibold">5</td>
+                  <td className="px-6 py-4 text-center text-sm text-gray-700 font-semibold">20</td>
                   <td className="px-6 py-4 text-center text-sm text-gray-700 font-semibold">Unlimited</td>
                 </tr>
                 <tr className="hover:bg-gray-50 bg-white">
-                  <td className="px-6 py-4 text-sm text-gray-900">Role-Based Access Control</td>
+                  <td className="px-6 py-4 text-sm text-gray-900">Automated Assignment Rules</td>
                   <td className="px-6 py-4 text-center"><X className="w-5 h-5 text-gray-400 mx-auto" /></td>
                   <td className="px-6 py-4 text-center"><CheckCircle className="w-5 h-5 text-green-600 mx-auto" /></td>
                   <td className="px-6 py-4 text-center"><CheckCircle className="w-5 h-5 text-green-600 mx-auto" /></td>
                 </tr>
                 <tr className="hover:bg-gray-50">
-                  <td className="px-6 py-4 text-sm text-gray-900">Team Assignments</td>
+                  <td className="px-6 py-4 text-sm text-gray-900">SLA Management</td>
                   <td className="px-6 py-4 text-center"><X className="w-5 h-5 text-gray-400 mx-auto" /></td>
                   <td className="px-6 py-4 text-center"><CheckCircle className="w-5 h-5 text-green-600 mx-auto" /></td>
                   <td className="px-6 py-4 text-center"><CheckCircle className="w-5 h-5 text-green-600 mx-auto" /></td>
@@ -480,12 +460,12 @@ const Pricing = () => {
                 <tr className="hover:bg-gray-50 bg-white">
                   <td className="px-6 py-4 text-sm text-gray-900">Custom Domain (CNAME)</td>
                   <td className="px-6 py-4 text-center"><X className="w-5 h-5 text-gray-400 mx-auto" /></td>
-                  <td className="px-6 py-4 text-center"><CheckCircle className="w-5 h-5 text-blue-600 mx-auto" /></td>
-                  <td className="px-6 py-4 text-center"><CheckCircle className="w-5 h-5 text-blue-600 mx-auto" /></td>
+                  <td className="px-6 py-4 text-center text-sm text-gray-700">1 domain</td>
+                  <td className="px-6 py-4 text-center text-sm text-gray-700 font-semibold">Multiple domains</td>
                 </tr>
                 <tr className="hover:bg-gray-50">
-                  <td className="px-6 py-4 text-sm text-gray-900">Custom Reports & Analytics</td>
-                  <td className="px-6 py-4 text-center"><X className="w-5 h-5 text-gray-400 mx-auto" /></td>
+                  <td className="px-6 py-4 text-sm text-gray-900">Real-time Analytics Dashboard</td>
+                  <td className="px-6 py-4 text-center"><CheckCircle className="w-5 h-5 text-green-600 mx-auto" /></td>
                   <td className="px-6 py-4 text-center"><CheckCircle className="w-5 h-5 text-green-600 mx-auto" /></td>
                   <td className="px-6 py-4 text-center"><CheckCircle className="w-5 h-5 text-green-600 mx-auto" /></td>
                 </tr>

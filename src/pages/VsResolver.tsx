@@ -311,7 +311,7 @@ const VsResolver = () => {
                 Schedule Demo
               </a>
             </div>
-            <p className="text-blue-100 text-sm mt-4">14-day free trial • No credit card required • Cancel anytime</p>
+            <p className="text-blue-100 text-sm mt-4">7-day free trial • Cancel anytime</p>
           </div>
         </div>
 

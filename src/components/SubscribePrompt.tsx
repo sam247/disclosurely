@@ -15,9 +15,22 @@ const SubscribePrompt = ({ feature, description }: SubscribePromptProps) => {
   const handleSubscribe = async () => {
     setIsLoading(true);
     try {
+      // Check if user is logged in (optional - checkout works without auth)
+      const { data: { session } } = await supabase.auth.getSession();
+      
+      const headers: any = {};
+      if (session?.access_token) {
+        headers.Authorization = `Bearer ${session.access_token}`;
+      }
+
       // Call Supabase edge function to create checkout session
       const { data, error } = await supabase.functions.invoke('create-checkout', {
-        body: { priceId: 'price_basic' }
+        headers,
+        body: { 
+          tier: 'tier1', // Default to Starter
+          employee_count: '0-49',
+          interval: 'month'
+        }
       });
       
       if (error) throw error;

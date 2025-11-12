@@ -70,7 +70,7 @@ const FAQ: React.FC = () => {
     {
       category: 'Pricing & Plans',
       question: 'Is there a free trial?',
-      answer: 'Yes! We offer a 14-day free trial with full access to all Pro features. No credit card required to start.'
+      answer: 'Yes! We offer a 7-day free trial with full access to all Pro features.'
     },
     {
       category: 'Pricing & Plans',

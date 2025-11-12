@@ -761,7 +761,7 @@ const Features: React.FC = () => {
                 <div className="bg-white p-6 rounded-lg shadow-sm hover:shadow-lg transition-shadow h-full">
                   <h3 className="text-lg font-semibold text-gray-900 mb-2 group-hover:text-blue-600">Start Free Trial</h3>
                   <p className="text-gray-600 text-sm">
-                    Try Disclosurely free for 14 days. No credit card required. Set up your secure reporting platform in minutes.
+                    Try Disclosurely free for 7 days. Set up your secure reporting platform in minutes.
                   </p>
                 </div>
               </a>

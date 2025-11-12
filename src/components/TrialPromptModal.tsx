@@ -23,10 +23,20 @@ const TrialPromptModal = ({ open, onOpenChange }: TrialPromptModalProps) => {
         document.cookie.split('; ').find(row => row.startsWith('rdt_cid='))?.split('=')[1] || 
         null;
 
+      // Check if user is logged in (optional - checkout works without auth)
+      const { data: { session } } = await supabase.auth.getSession();
+      
+      const headers: any = {};
+      if (session?.access_token) {
+        headers.Authorization = `Bearer ${session.access_token}`;
+      }
+
       const { data, error } = await supabase.functions.invoke('create-checkout', {
+        headers,
         body: { 
-          plan,
-          mode: 'subscription',
+          tier: plan === 'basic' ? 'tier1' : 'tier2',
+          employee_count: plan === 'basic' ? '0-49' : '50+',
+          interval: 'month',
           rdt_cid: rdtCid
         }
       });
@@ -186,7 +196,7 @@ const TrialPromptModal = ({ open, onOpenChange }: TrialPromptModalProps) => {
         </div>
 
         <div className="text-center text-sm text-gray-600 mt-4">
-          <p>Start your 14-day free trial • No credit card required • Cancel anytime</p>
+          <p>Start your 7-day free trial • Cancel anytime</p>
         </div>
       </DialogContent>
     </Dialog>

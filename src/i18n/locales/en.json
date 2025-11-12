@@ -306,7 +306,7 @@
       },
       "question6": {
         "question": "Can we cancel or change our plan anytime?",
-        "answer": "Yes, you can upgrade, downgrade, or cancel your subscription at any time. If you cancel, you'll retain access until the end of your billing period. We also offer a 14-day free trial so you can test all features before committing."
+        "answer": "Yes, you can upgrade, downgrade, or cancel your subscription at any time. If you cancel, you'll retain access until the end of your billing period. We also offer a 7-day free trial so you can test all features before committing."
       }
     },
     "cta": {
@@ -379,7 +379,7 @@
       "title": "Frequently Asked Questions",
       "trial": {
         "question": "Is there a free trial?",
-        "answer": "Yes, all plans come with a 7-day free trial so you can see how the platform works and how you can use it in your organisation. No credit card required."
+        "answer": "Yes, all plans come with a 7-day free trial so you can see how the platform works and how you can use it in your organisation."
       },
       "limit": {
         "question": "What's the difference between Starter and Pro?",

@@ -143,23 +143,35 @@ serve(async (req) => {
         endDate: subscriptionEnd 
       });
       
-      // Determine subscription tier from price
+      // Determine subscription tier from price ID
       const priceId = activeSubscription.items.data[0].price.id;
       const price = await stripe.prices.retrieve(priceId);
       const amount = price.unit_amount || 0;
+      const interval = price.recurring?.interval || 'month';
       
-      logStep("Price details", { priceId, amount, currency: price.currency });
+      logStep("Price details", { priceId, amount, currency: price.currency, interval });
       
-      // Updated pricing logic to match your tiers
-      if (amount <= 1999) { // £19.99 or less
+      // Map price IDs to tiers (more reliable than amount-based logic)
+      // Monthly: tier1 = price_1SPigrL0ZFRbQvFnV3TSt0DR (£19.99), tier2 = price_1SPigsL0ZFRbQvFnI1TzxUCT (£39.99)
+      // Annual: tier1 = price_1SSb33L0ZFRbQvFnwwvZzyR0 (£199.90), tier2 = price_1SSb37L0ZFRbQvFnKKobOXBU (£399.90)
+      if (priceId === 'price_1SPigrL0ZFRbQvFnV3TSt0DR' || priceId === 'price_1SSb33L0ZFRbQvFnwwvZzyR0') {
+        // Starter tier (monthly or annual)
         subscriptionTier = "basic";
-      } else if (amount >= 2000) { // £20.00 or more (£49.99)
+      } else if (priceId === 'price_1SPigsL0ZFRbQvFnI1TzxUCT' || priceId === 'price_1SSb37L0ZFRbQvFnKKobOXBU') {
+        // Pro tier (monthly or annual)
         subscriptionTier = "pro";
       } else {
-        subscriptionTier = "basic"; // Default fallback
+        // Fallback to amount-based logic for any other prices
+        if (interval === 'year') {
+          // Annual: £199.90 or less = basic, more = pro
+          subscriptionTier = amount <= 19990 ? "basic" : "pro";
+        } else {
+          // Monthly: £19.99 or less = basic, more = pro
+          subscriptionTier = amount <= 1999 ? "basic" : "pro";
+        }
       }
       
-      logStep("Determined subscription tier", { priceId, amount, subscriptionTier });
+      logStep("Determined subscription tier", { priceId, amount, interval, subscriptionTier });
       
       // Check if subscription is expired and set grace period
       const now = new Date();

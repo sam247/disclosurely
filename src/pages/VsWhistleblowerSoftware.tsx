@@ -17,7 +17,7 @@ const VsWhistleblowerSoftware = () => {
       items: [
         { feature: "Starting Price", disclosurely: "£39.99/month (~€47)", competitor: "€70/month", winner: "disclosurely" },
         { feature: "Annual Savings", disclosurely: "Save €276/year", competitor: "More expensive", winner: "disclosurely" },
-        { feature: "Free Trial", disclosurely: "14 days, no credit card", competitor: "14 days", winner: "disclosurely" },
+        { feature: "Free Trial", disclosurely: "7 days", competitor: "14 days", winner: "disclosurely" },
         { feature: "Setup Complexity", disclosurely: "5 minutes", competitor: "45 minutes", winner: "disclosurely" },
       ]
     },
@@ -409,7 +409,7 @@ const VsWhistleblowerSoftware = () => {
                 Schedule Demo
               </a>
             </div>
-            <p className="text-blue-100 text-sm mt-4">14-day free trial • No credit card required • Cancel anytime</p>
+            <p className="text-blue-100 text-sm mt-4">7-day free trial • Cancel anytime</p>
           </div>
         </div>
 

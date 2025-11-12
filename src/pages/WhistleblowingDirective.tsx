@@ -299,7 +299,7 @@ What You Need to Know
                 <div className="bg-white p-6 rounded-lg shadow-sm hover:shadow-lg transition-shadow h-full">
                   <h3 className="text-lg font-semibold text-gray-900 mb-2 group-hover:text-blue-600">Get Started</h3>
                   <p className="text-gray-600 text-sm">
-                    View pricing plans and start your compliance journey with a 14-day free trial. No credit card required.
+                    View pricing plans and start your compliance journey with a 7-day free trial.
                   </p>
                 </div>
               </Link>
