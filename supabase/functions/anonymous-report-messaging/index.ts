@@ -118,8 +118,9 @@ serve(async (req) => {
       const report = await getReportWithOrg();
 
       if (!report) {
-        return new Response(JSON.stringify({ error: "Report not found" }), {
-          status: 404,
+        // Generic error message to prevent tracking ID enumeration
+        return new Response(JSON.stringify({ error: "Invalid request" }), {
+          status: 400,
           headers: { ...corsHeaders, "Content-Type": "application/json" },
         });
       }
@@ -229,8 +230,9 @@ serve(async (req) => {
 
       const report = await getReportWithOrg();
       if (!report) {
-        return new Response(JSON.stringify({ error: "Report not found" }), {
-          status: 404,
+        // Generic error message to prevent tracking ID enumeration
+        return new Response(JSON.stringify({ error: "Invalid request" }), {
+          status: 400,
           headers: { ...corsHeaders, "Content-Type": "application/json" },
         });
       }

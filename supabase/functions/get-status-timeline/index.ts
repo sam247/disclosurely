@@ -103,6 +103,7 @@ serve(async (req) => {
       .single();
 
     if (reportError || !report) {
+      // Generic error message to prevent tracking ID enumeration
       console.error('Report access check failed:', reportError);
       return new Response(
         JSON.stringify({ error: 'Invalid request' }),
@@ -120,10 +121,11 @@ serve(async (req) => {
       .single();
 
     if (profileError || !profile) {
+      // Generic error message to prevent tracking ID enumeration
       console.error('Organization membership check failed:', profileError);
       return new Response(
-        JSON.stringify({ error: 'Access denied' }),
-        { status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        JSON.stringify({ error: 'Invalid request' }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
 
