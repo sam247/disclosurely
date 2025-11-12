@@ -152,14 +152,8 @@ const Pricing = () => {
                     </>
                   ) : (
                     <>
-                      <div className="flex flex-col items-center">
-                        <div className="flex items-baseline gap-2">
-                          <span className="text-3xl sm:text-4xl font-bold">£199.90</span>
-                          <span className="text-xs text-gray-500 line-through">£239.88</span>
-                        </div>
-                        <span className="text-gray-600 text-sm sm:text-base">/year</span>
-                        <div className="text-xs text-green-600 font-semibold mt-0.5">Save 2 months</div>
-                      </div>
+                      <span className="text-3xl sm:text-4xl font-bold">£199.90</span>
+                      <span className="text-gray-600 text-sm sm:text-base">/year</span>
                     </>
                   )}
                 </div>
@@ -229,14 +223,8 @@ const Pricing = () => {
                     </>
                   ) : (
                     <>
-                      <div className="flex flex-col items-center">
-                        <div className="flex items-baseline gap-2">
-                          <span className="text-3xl sm:text-4xl font-bold">£399.90</span>
-                          <span className="text-xs text-gray-500 line-through">£479.88</span>
-                        </div>
-                        <span className="text-gray-600 text-sm sm:text-base">/year</span>
-                        <div className="text-xs text-green-600 font-semibold mt-0.5">Save 2 months</div>
-                      </div>
+                      <span className="text-3xl sm:text-4xl font-bold">£399.90</span>
+                      <span className="text-gray-600 text-sm sm:text-base">/year</span>
                     </>
                   )}
                 </div>
@@ -306,6 +294,10 @@ const Pricing = () => {
                   </div>
                   <div className="flex items-center space-x-3">
                     <CheckCircle className="h-5 w-5 text-green-600" />
+                    <span className="text-gray-700 text-sm sm:text-base">{t("pricing.features.teamManagement")}</span>
+                  </div>
+                  <div className="flex items-center space-x-3">
+                    <CheckCircle className="h-5 w-5 text-green-600" />
                     <span className="text-gray-700 text-sm sm:text-base">Multiple custom domains</span>
                   </div>
                   <div className="flex items-center space-x-3">
@@ -317,16 +309,12 @@ const Pricing = () => {
                     <span className="text-gray-700 text-sm sm:text-base">{t("pricing.features.slaGuarantee")}</span>
                   </div>
                   <div className="flex items-center space-x-3">
-                    <CheckCircle className="h-5 w-5 text-green-600" />
+                    <CheckCircle className="h-5 w-5 text-gray-400" />
                     <span className="text-gray-700 text-sm sm:text-base">{t("pricing.features.customIntegrations")}</span>
                   </div>
                   <div className="flex items-center space-x-3">
-                    <CheckCircle className="h-5 w-5 text-green-600" />
+                    <CheckCircle className="h-5 w-5 text-gray-400" />
                     <span className="text-gray-700 text-sm sm:text-base">{t("pricing.features.api")}</span>
-                  </div>
-                  <div className="flex items-center space-x-3">
-                    <CheckCircle className="h-5 w-5 text-green-600" />
-                    <span className="text-gray-700 text-sm sm:text-base">{t("pricing.features.teamManagement")}</span>
                   </div>
                 </div>
                 <Button className="w-full mt-6" variant="outline">
