@@ -16,7 +16,7 @@ const VsResolver = () => {
       items: [
         { feature: "Starting Price", disclosurely: "£39.99/month", competitor: "Custom enterprise", winner: "disclosurely" },
         { feature: "Transparent Pricing", disclosurely: "Public pricing", competitor: "Contact for quote", winner: "disclosurely" },
-        { feature: "Free Trial", disclosurely: "14 days, instant", competitor: "Custom demo", winner: "disclosurely" },
+        { feature: "Free Trial", disclosurely: "7 days, instant", competitor: "Custom demo", winner: "disclosurely" },
         { feature: "Best For", disclosurely: "SMB to mid-market", competitor: "Large enterprise", winner: "tie" },
       ]
     },

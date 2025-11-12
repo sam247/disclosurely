@@ -17,7 +17,7 @@ const VsNavex = () => {
         { feature: "Starting Price", disclosurely: "£39.99/month", competitor: "$667+/month", winner: "disclosurely" },
         { feature: "Annual Savings", disclosurely: "Save $7,500+/year", competitor: "Enterprise pricing", winner: "disclosurely" },
         { feature: "Transparent Pricing", disclosurely: "Public pricing", competitor: "Contact for quote", winner: "disclosurely" },
-        { feature: "Free Trial", disclosurely: "14 days, instant access", competitor: "Custom demo only", winner: "disclosurely" },
+        { feature: "Free Trial", disclosurely: "7 days, instant access", competitor: "Custom demo only", winner: "disclosurely" },
         { feature: "Best For", disclosurely: "SMBs to Enterprise", competitor: "Large Enterprise", winner: "tie" },
       ]
     },
@@ -354,7 +354,7 @@ const VsNavex = () => {
                     </li>
                     <li className="flex items-start gap-2">
                       <Check className="h-4 w-4 text-green-600 mt-0.5 flex-shrink-0" />
-                      <span>Instant 14-day trial</span>
+                      <span>Instant 7-day trial</span>
                     </li>
                   </ul>
                 </CardContent>

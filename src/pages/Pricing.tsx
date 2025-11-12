@@ -97,7 +97,7 @@ const Pricing = () => {
                 <CheckCircle className="w-5 h-5 sm:w-7 sm:h-7 text-white" />
               </div>
               <div>
-                <div className="font-bold text-gray-900 text-base sm:text-lg">14-Day Money-Back Guarantee</div>
+                <div className="font-bold text-gray-900 text-base sm:text-lg">7-Day Money-Back Guarantee</div>
                 <div className="text-xs sm:text-sm text-gray-600">Try risk-free, cancel anytime</div>
               </div>
             </div>
