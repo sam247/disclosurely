@@ -11,6 +11,7 @@ import ScrollToTop from './components/ScrollToTop';
 import UrlRedirectMiddleware from './components/UrlRedirectMiddleware';
 import ErrorBoundary from './components/forms/ErrorBoundary';
 import { lazyWithRetry } from './utils/lazyWithRetry';
+import ChatWidget from './components/ChatWidget';
 
 // Lazy load page components for better code splitting
 const Index = lazy(() => import('./pages/Index'));
@@ -370,6 +371,11 @@ const AppContent = () => {
       <SessionTimeoutManager />
       {/* Multiple session detection */}
       <MultipleSessionManager />
+      {/* Chat Widget - Available on all pages */}
+      <ChatWidget 
+        enabled={true}
+        position="bottom-right"
+      />
       </UrlRedirectMiddleware>
     </OrganizationProvider>
   );

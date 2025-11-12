@@ -11,7 +11,6 @@ import { AnnouncementBar } from "@/components/AnnouncementBar";
 import { useTranslation } from "react-i18next";
 import DynamicHelmet from "@/components/DynamicHelmet";
 import TypingAnimation from "@/components/TypingAnimation";
-import ChatWidget from "@/components/ChatWidget";
 import anonymousReportingIcon from "@/assets/icons/anonymous_reporting.png";
 import secureMessagingIcon from "@/assets/icons/secure_messaging.png";
 import caseManagementIcon from "@/assets/icons/case_management.png";
@@ -795,12 +794,6 @@ const Landing = () => {
 
       <CookieConsentBanner />
       <Footer />
-      
-      {/* Chat Widget for Marketing Site */}
-      <ChatWidget 
-        enabled={true}
-        position="bottom-right"
-      />
       </div>
     </>;
 };
