@@ -48,6 +48,7 @@ interface DynamicHelmetProps {
 }
 
 // Contentful configuration
+// NOTE: Uses Contentful Delivery API (read-only) for SEO data - independent of MCP status
 const CONTENTFUL_SPACE_ID = import.meta.env.VITE_CONTENTFUL_SPACE_ID || 'rm7hib748uv7';
 const CONTENTFUL_DELIVERY_TOKEN = import.meta.env.VITE_CONTENTFUL_DELIVERY_TOKEN || 'e3JfeWQKBvfCQoqi22f6F_XzWgbZPXR9JWTyuSTGcFw';
 

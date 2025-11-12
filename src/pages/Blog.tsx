@@ -15,9 +15,11 @@ import { createClient, Entry } from 'contentful';
 import { documentToHtmlString } from '@contentful/rich-text-html-renderer';
 
 // Contentful configuration
+// NOTE: Blog uses Contentful Delivery API (read-only) for fetching published content.
+// This is separate from Contentful MCP which is used for content management.
+// The blog will continue to work regardless of MCP status.
 const CONTENTFUL_SPACE_ID = import.meta.env.VITE_CONTENTFUL_SPACE_ID || 'rm7hib748uv7';
 const CONTENTFUL_DELIVERY_TOKEN = import.meta.env.VITE_CONTENTFUL_DELIVERY_TOKEN || 'e3JfeWQKBvfCQoqi22f6F_XzWgbZPXR9JWTyuSTGcFw';
-
 
 const client = createClient({
   space: CONTENTFUL_SPACE_ID,

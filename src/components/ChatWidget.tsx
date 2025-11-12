@@ -46,7 +46,7 @@ const ChatWidget = ({
   chatUrl,
   className,
   position = 'bottom-right',
-  title = 'Support Chat'
+  title = 'Disclosurely Chat'
 }: ChatWidgetProps) => {
   const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState<ChatMessage[]>([]);
@@ -201,20 +201,23 @@ const ChatWidget = ({
           )}
         >
           {/* Chat Header */}
-          <div className="flex items-center justify-between p-4 border-b bg-primary text-primary-foreground rounded-t-lg">
-            <div className="flex items-center gap-2">
-              <MessageCircle className="h-5 w-5" />
-              <h3 className="font-semibold text-sm sm:text-base">{title}</h3>
+          <div className="flex flex-col p-4 border-b bg-primary text-primary-foreground rounded-t-lg">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <MessageCircle className="h-5 w-5" />
+                <h3 className="font-semibold text-sm sm:text-base">{title}</h3>
+              </div>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setIsOpen(false)}
+                className="h-8 w-8 p-0 text-primary-foreground hover:bg-primary-foreground/20"
+                aria-label="Close chat"
+              >
+                <X className="h-4 w-4" />
+              </Button>
             </div>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => setIsOpen(false)}
-              className="h-8 w-8 p-0 text-primary-foreground hover:bg-primary-foreground/20"
-              aria-label="Close chat"
-            >
-              <X className="h-4 w-4" />
-            </Button>
+            <p className="text-xs text-primary-foreground/80 mt-1 ml-7">All chats are encrypted and confidential</p>
           </div>
 
           {/* Chat Content */}
@@ -223,9 +226,9 @@ const ChatWidget = ({
               <div className="flex flex-col items-center justify-center h-full text-center space-y-4">
                 <MessageCircle className="h-12 w-12 text-muted-foreground" />
                 <div>
-                  <h4 className="font-semibold text-lg mb-2">AI Support Chat</h4>
+                  <h4 className="font-semibold text-lg mb-2">Ask Me Anything</h4>
                   <p className="text-sm text-muted-foreground max-w-xs">
-                    Ask me anything about Disclosurely! I'm here to help.
+                    Tell me about your business challenges and I'll explain how Disclosurely can help!
                   </p>
                 </div>
               </div>
@@ -293,7 +296,7 @@ const ChatWidget = ({
               </Button>
             </div>
             <p className="text-xs text-muted-foreground mt-2 text-center">
-              Powered by AI • <a href="mailto:support@disclosurely.com" className="text-primary hover:underline">Email support</a>
+              Powered by Disclosurely • <a href="mailto:support@disclosurely.com" className="text-primary hover:underline">Email support</a>
             </p>
           </div>
         </div>

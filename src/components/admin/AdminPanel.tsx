@@ -2,19 +2,20 @@ import { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Settings, FileText, Globe, Users, ChevronRight, Flag, MessageCircle, Activity } from 'lucide-react';
+import { Settings, FileText, Globe, Users, ChevronRight, Flag, MessageCircle, Activity, Mail } from 'lucide-react';
 import { BlogEditor } from './BlogEditor';
 import { SEOSettings } from './SEOSettings';
 import { FeatureFlagManager } from './FeatureFlagManager';
 import ChatAdminView from '@/components/dashboard/ChatAdminView';
 import SystemHealthDashboard from '@/components/dashboard/SystemHealthDashboard';
+import { InstantlyAdminView } from './InstantlyAdminView';
 import { useOrganization } from '@/hooks/useOrganization';
 import { useTranslation } from 'react-i18next';
 import { useUserRoles } from '@/hooks/useUserRoles';
 import { useAuth } from '@/hooks/useAuth';
 import { cn } from '@/lib/utils';
 
-type AdminSection = 'blog' | 'seo' | 'features' | 'chat' | 'health';
+type AdminSection = 'blog' | 'seo' | 'features' | 'chat' | 'health' | 'instantly';
 
 interface AdminMenuItem {
   id: AdminSection;
@@ -53,6 +54,12 @@ const adminMenuItems: AdminMenuItem[] = [
     label: 'System Health',
     icon: Activity,
     description: 'Monitor system performance and health metrics'
+  },
+  {
+    id: 'instantly',
+    label: 'Instantly.ai',
+    icon: Mail,
+    description: 'Manage cold email campaigns and leads'
   }
 ];
 
@@ -138,6 +145,20 @@ export const AdminPanel = () => {
           );
         }
         return <SystemHealthDashboard />;
+      case 'instantly':
+        // Only show Instantly.ai admin to owner
+        if (!isOwner) {
+          return (
+            <div className="text-center py-12">
+              <Mail className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+              <h3 className="text-lg font-semibold mb-2">Access Restricted</h3>
+              <p className="text-muted-foreground">
+                Instantly.ai management is only available to the owner.
+              </p>
+            </div>
+          );
+        }
+        return <InstantlyAdminView />;
       default:
         return <FeatureFlagManager />;
     }
@@ -180,8 +201,8 @@ export const AdminPanel = () => {
                   {adminMenuItems.map((item) => {
                     const Icon = item.icon;
                     const isActive = activeSection === item.id;
-                    // Hide chat admin and health from non-owner
-                    if ((item.id === 'chat' || item.id === 'health') && !isOwner) {
+                    // Hide chat admin, health, and instantly from non-owner
+                    if ((item.id === 'chat' || item.id === 'health' || item.id === 'instantly') && !isOwner) {
                       return null;
                     }
                     

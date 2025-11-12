@@ -86,3 +86,12 @@ verify_jwt = false
 
 [functions.check-team-limit]
 verify_jwt = false
+
+[functions.resend-email-webhook]
+verify_jwt = false
+
+[functions.send-email-instantly]
+verify_jwt = true
+
+[functions.send-email-uptics]
+verify_jwt = true

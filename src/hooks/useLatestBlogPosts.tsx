@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { createClient } from 'contentful';
 
+// NOTE: Uses Contentful Delivery API (read-only) - independent of MCP status
 const CONTENTFUL_SPACE_ID = import.meta.env.VITE_CONTENTFUL_SPACE_ID;
 const CONTENTFUL_DELIVERY_TOKEN = import.meta.env.VITE_CONTENTFUL_DELIVERY_TOKEN;
 
