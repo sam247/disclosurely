@@ -1285,8 +1285,10 @@ Additional Details: ${decryptedContent.additionalDetails || 'None provided'}
         </Card>
       </div>
 
-      {/* Subscription Grace Period Warning */}
-      {subscriptionData && (subscriptionData.isInGracePeriod || subscriptionData.subscription_status === 'past_due') && (
+      {/* Subscription Grace Period Warning - Hidden for pro users on mobile */}
+      {subscriptionData && 
+       (subscriptionData.isInGracePeriod || subscriptionData.subscription_status === 'past_due') && 
+       subscriptionData.subscription_tier !== 'pro' && (
         <Alert className="border-yellow-500 bg-yellow-50">
           <Clock className="h-4 w-4 text-yellow-600" />
           <AlertTitle className="text-yellow-800">Subscription Notice</AlertTitle>

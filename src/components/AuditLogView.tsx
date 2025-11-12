@@ -825,39 +825,39 @@ const AuditLogView = () => {
             </div>
 
             {/* Mobile Card View */}
-            <div className="md:hidden space-y-3 p-3">
+            <div className="md:hidden space-y-2 p-2 overflow-y-auto flex-1 min-h-0" style={{ maxHeight: 'calc(100vh - 500px)' }}>
               {logs.map((log) => (
                 <div
                   key={log.id}
-                  className="border rounded-lg p-3 space-y-2 bg-white hover:bg-gray-50 transition-colors"
+                  className="border rounded-lg p-2 space-y-1.5 bg-white hover:bg-gray-50 transition-colors"
                   onClick={() => setSelectedLog(log)}
                 >
                   <div className="flex items-start justify-between gap-2">
                     <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2 mb-1">
-                        <h4 className="text-sm font-medium truncate">{log.summary}</h4>
+                      <div className="flex items-center gap-1.5 mb-0.5">
+                        <h4 className="text-xs font-medium truncate">{log.summary}</h4>
                         {!log.is_read && (
-                          <div className="w-2 h-2 bg-red-500 rounded-full flex-shrink-0" />
+                          <div className="w-1.5 h-1.5 bg-red-500 rounded-full flex-shrink-0" />
                         )}
                       </div>
-                      <p className="text-xs text-muted-foreground font-mono mb-2">
+                      <p className="text-[10px] text-muted-foreground font-mono mb-1">
                         {formatTimestamp(log.created_at)}
                       </p>
                     </div>
-                    <Badge variant={getSeverityColor(log.severity)} className="text-xs px-1.5 py-0 flex-shrink-0">
+                    <Badge variant={getSeverityColor(log.severity)} className="text-[10px] px-1 py-0 flex-shrink-0">
                       {getSeverityIcon(log.severity)}
-                      <span className="ml-1 capitalize hidden sm:inline">{log.severity}</span>
+                      <span className="ml-0.5 capitalize hidden sm:inline">{log.severity}</span>
                     </Badge>
                   </div>
                   
-                  <div className="grid grid-cols-2 gap-2 text-xs">
+                  <div className="grid grid-cols-2 gap-1.5 text-[10px]">
                     <div>
                       <span className="text-muted-foreground">Event:</span>
                       <p className="font-medium truncate">{log.event_type}</p>
                     </div>
                     <div>
                       <span className="text-muted-foreground">Category:</span>
-                      <Badge variant="outline" className="text-xs px-1 py-0 ml-1">
+                      <Badge variant="outline" className="text-[10px] px-0.5 py-0 ml-0.5">
                         {log.category}
                       </Badge>
                     </div>
@@ -871,7 +871,7 @@ const AuditLogView = () => {
                     </div>
                   </div>
                   
-                  <div className="flex items-center justify-end pt-1">
+                  <div className="flex items-center justify-end pt-0.5">
                     <Button
                       variant="ghost"
                       size="sm"
@@ -879,10 +879,10 @@ const AuditLogView = () => {
                         e.stopPropagation();
                         setSelectedLog(log);
                       }}
-                      className="h-7 text-xs"
+                      className="h-5 text-[10px] px-2"
                     >
-                      <Eye className="h-3 w-3 mr-1" />
-                      View Details
+                      <Eye className="h-2.5 w-2.5 mr-0.5" />
+                      View
                     </Button>
                   </div>
                 </div>
@@ -893,7 +893,7 @@ const AuditLogView = () => {
         
         {/* Mobile Pagination */}
         {total > 0 && (
-          <div className="md:hidden flex flex-col sm:flex-row items-center justify-between p-1.5 sm:p-2 border-t bg-gray-50 gap-1.5 sm:gap-0 flex-shrink-0">
+          <div className="md:hidden flex flex-col sm:flex-row items-center justify-between p-1.5 sm:p-2 border-t bg-gray-50 gap-1.5 sm:gap-0 flex-shrink-0 h-auto">
             <div className="flex flex-col sm:flex-row items-start sm:items-center space-y-1 sm:space-y-0 sm:space-x-3 w-full sm:w-auto">
               <div className="flex items-center space-x-1.5">
                 <Label className="text-xs whitespace-nowrap">Rows:</Label>

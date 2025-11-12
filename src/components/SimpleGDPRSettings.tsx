@@ -17,7 +17,6 @@ const SimpleGDPRSettings = () => {
   const { toast } = useToast();
   const [exportEmail, setExportEmail] = useState(user?.email || '');
   const [loading, setLoading] = useState(false);
-  const [deleteDataConfirm, setDeleteDataConfirm] = useState(false);
   const [deleteAccountConfirm, setDeleteAccountConfirm] = useState(false);
 
   const handleDataExport = async () => {
@@ -44,41 +43,6 @@ const SimpleGDPRSettings = () => {
       toast({
         title: "Request Failed",
         description: error.message || "Failed to request data export.",
-        variant: "destructive",
-      });
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleDataDeletion = async () => {
-    if (!user || !deleteDataConfirm) return;
-
-    setLoading(true);
-    try {
-      const { error } = await supabase.functions.invoke('process-gdpr-requests', {
-        body: { 
-          type: 'delete_data',
-          email: user.email 
-        },
-        headers: {
-          Authorization: `Bearer ${(await supabase.auth.getSession()).data.session?.access_token}`,
-        }
-      });
-
-      if (error) throw error;
-
-      toast({
-        title: "Data Deletion Requested",
-        description: "Your personal data will be anonymized within 24 hours while preserving necessary records for legal compliance.",
-        duration: 10000,
-      });
-      
-      setDeleteDataConfirm(false);
-    } catch (error: any) {
-      toast({
-        title: "Request Failed",
-        description: error.message || "Failed to request data deletion.",
         variant: "destructive",
       });
     } finally {
@@ -204,83 +168,6 @@ const SimpleGDPRSettings = () => {
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
-          {/* Delete Personal Data */}
-          <div className="space-y-4">
-            <div className="flex items-start gap-3">
-              <Trash2 className="w-5 h-5 text-orange-600 mt-1 flex-shrink-0" />
-              <div className="flex-1">
-                <h4 className="font-semibold text-base sm:text-lg">Delete My Personal Data</h4>
-                <p className="text-sm text-muted-foreground mt-1">
-                  Remove your personal information while keeping your account. Reports will be anonymized.
-                </p>
-                <ul className="list-disc list-inside mt-2 text-xs sm:text-sm text-muted-foreground space-y-1">
-                  <li>Your name and profile information will be removed</li>
-                  <li>Your reports will be anonymized (kept for compliance)</li>
-                  <li>Account remains active with anonymized data</li>
-                  <li>Cannot be undone after 24 hours</li>
-                </ul>
-              </div>
-            </div>
-            
-            <AlertDialog>
-              <AlertDialogTrigger asChild>
-                <Button variant="outline" className="w-full border-orange-300 hover:bg-orange-50">
-                  <Trash2 className="w-4 h-4 mr-2" />
-                  Delete My Data (Keep Account)
-                </Button>
-              </AlertDialogTrigger>
-              <AlertDialogContent className="sm:max-w-[500px] mx-4">
-                <AlertDialogHeader>
-                  <AlertDialogTitle className="flex items-center gap-2 text-orange-600">
-                    <AlertTriangle className="w-5 h-5" />
-                    Delete Personal Data?
-                  </AlertDialogTitle>
-                  <AlertDialogDescription className="space-y-3 text-sm">
-                    <p className="font-medium">This will permanently remove:</p>
-                    <ul className="list-disc list-inside space-y-1 ml-2">
-                      <li>Your name and contact information</li>
-                      <li>Your email address (replaced with anonymized ID)</li>
-                      <li>Any profile pictures or personal documents</li>
-                    </ul>
-                    <p className="font-medium mt-3">This will keep (anonymized):</p>
-                    <ul className="list-disc list-inside space-y-1 ml-2">
-                      <li>Reports you submitted (for legal compliance)</li>
-                      <li>Audit logs (with your identity removed)</li>
-                      <li>Your account (you can still log in)</li>
-                    </ul>
-                    <div className="flex items-start gap-2 p-3 bg-orange-50 rounded-lg mt-4">
-                      <Clock className="w-4 h-4 text-orange-600 mt-0.5 flex-shrink-0" />
-                      <p className="text-xs">Process completes in 24 hours. After that, your data cannot be recovered.</p>
-                    </div>
-                    
-                    <div className="flex items-center gap-2 mt-4">
-                      <Checkbox 
-                        id="delete-data-confirm" 
-                        checked={deleteDataConfirm}
-                        onCheckedChange={(checked) => setDeleteDataConfirm(checked as boolean)}
-                      />
-                      <Label htmlFor="delete-data-confirm" className="text-sm cursor-pointer">
-                        I understand this action cannot be undone
-                      </Label>
-                    </div>
-                  </AlertDialogDescription>
-                </AlertDialogHeader>
-                <AlertDialogFooter className="flex-col-reverse sm:flex-row gap-2">
-                  <AlertDialogCancel className="w-full sm:w-auto">Cancel</AlertDialogCancel>
-                  <Button
-                    onClick={handleDataDeletion}
-                    disabled={!deleteDataConfirm || loading}
-                    className="bg-orange-600 hover:bg-orange-700 w-full sm:w-auto"
-                  >
-                    {loading ? 'Processing...' : 'Yes, Delete My Data'}
-                  </Button>
-                </AlertDialogFooter>
-              </AlertDialogContent>
-            </AlertDialog>
-          </div>
-
-          <Separator className="bg-orange-200" />
-
           {/* Delete Account Completely */}
           <div className="space-y-4">
             <div className="flex items-start gap-3">
