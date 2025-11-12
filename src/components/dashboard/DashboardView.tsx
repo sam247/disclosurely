@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -213,6 +213,9 @@ const DashboardView = () => {
   const { toast } = useToast();
   const { t } = useTranslation();
   const navigate = useNavigate();
+  
+  // Navigation lock to prevent gesture racing
+  const isNavigatingRef = useRef(false);
   
   // Get organization ID from multiple sources
   const effectiveOrganizationId = organizationId || organization?.id;
@@ -522,11 +525,24 @@ const DashboardView = () => {
   };
 
   const handleViewReport = async (report: Report) => {
+    // Prevent rapid navigation (gesture racing protection)
+    if (isNavigatingRef.current) {
+      return;
+    }
+
     // On mobile, navigate to full page. On desktop, use modal
     const isMobile = window.innerWidth < 768;
     
     if (isMobile) {
+      // Set navigation lock
+      isNavigatingRef.current = true;
+      
       navigate(`/dashboard/reports/${report.id}`);
+      
+      // Release lock after navigation completes
+      setTimeout(() => {
+        isNavigatingRef.current = false;
+      }, 500);
     } else {
       setSelectedReport(report);
       setIsReportDialogOpen(true);

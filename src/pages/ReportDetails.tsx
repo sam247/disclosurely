@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft } from 'lucide-react';
@@ -38,6 +38,9 @@ const ReportDetails = () => {
   const { toast } = useToast();
   const [report, setReport] = useState<Report | null>(null);
   const [loading, setLoading] = useState(true);
+  
+  // Navigation lock to prevent gesture racing
+  const isNavigatingRef = useRef(false);
 
   useEffect(() => {
     if (reportId) {
@@ -117,7 +120,18 @@ const ReportDetails = () => {
         <Button
           variant="ghost"
           size="icon"
-          onClick={() => navigate('/dashboard')}
+          onClick={() => {
+            // Prevent rapid navigation (gesture racing protection)
+            if (isNavigatingRef.current) {
+              return;
+            }
+            isNavigatingRef.current = true;
+            navigate('/dashboard');
+            // Release lock after navigation completes
+            setTimeout(() => {
+              isNavigatingRef.current = false;
+            }, 500);
+          }}
           className="h-9 w-9"
         >
           <ArrowLeft className="h-5 w-5" />
