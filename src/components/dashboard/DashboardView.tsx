@@ -1478,11 +1478,6 @@ Additional Details: ${decryptedContent.additionalDetails || 'None provided'}
                                           'bg-green-500 text-white hover:ring-green-400'
                                         }`}
                                       >
-                                        {(() => {
-                                          const urgency = getUrgencyLevel(report.ai_risk_level);
-                                          const Icon = getUrgencyIcon(urgency);
-                                          return <Icon className="w-3 h-3" />;
-                                        })()}
                                         <span>{getUrgencyLevel(report.ai_risk_level)}</span>
                                         <Eye className="w-3 h-3 opacity-70" />
                                       </button>
@@ -1827,21 +1822,15 @@ Additional Details: ${decryptedContent.additionalDetails || 'None provided'}
                               isUpdating={updatingRiskLevel === report.id}
                             />
                             {report.ai_risk_level && (
-                              <div className="flex items-center gap-1 px-2 py-1 rounded-md bg-opacity-20 text-xs font-medium">
-                                {(() => {
+                              <div className={`flex items-center gap-1 px-2 py-1 rounded-md text-xs font-medium ${
+                                (() => {
                                   const urgency = getUrgencyLevel(report.ai_risk_level);
-                                  const Icon = getUrgencyIcon(urgency);
-                                  return (
-                                    <div className={`flex items-center gap-1 px-2 py-1 rounded-md ${
-                                      urgency === 'HIGH' ? 'bg-red-100 text-red-800' :
-                                      urgency === 'MEDIUM' ? 'bg-yellow-100 text-yellow-800' :
-                                      'bg-green-100 text-green-800'
-                                    }`}>
-                                      <Icon className="w-3 h-3" />
-                                      <span>AI: {urgency}</span>
-                                    </div>
-                                  );
-                                })()}
+                                  return urgency === 'HIGH' ? 'bg-red-100 text-red-800' :
+                                         urgency === 'MEDIUM' ? 'bg-yellow-100 text-yellow-800' :
+                                         'bg-green-100 text-green-800';
+                                })()
+                              }`}>
+                                <span>AI Triage: {getUrgencyLevel(report.ai_risk_level)}</span>
                               </div>
                             )}
                           </div>
@@ -2205,21 +2194,15 @@ Additional Details: ${decryptedContent.additionalDetails || 'None provided'}
                               isUpdating={updatingRiskLevel === report.id}
                             />
                             {report.ai_risk_level && (
-                              <div className="flex items-center gap-1 px-2 py-1 rounded-md bg-opacity-20 text-xs font-medium">
-                                {(() => {
+                              <div className={`flex items-center gap-1 px-2 py-1 rounded-md text-xs font-medium ${
+                                (() => {
                                   const urgency = getUrgencyLevel(report.ai_risk_level);
-                                  const Icon = getUrgencyIcon(urgency);
-                                  return (
-                                    <div className={`flex items-center gap-1 px-2 py-1 rounded-md ${
-                                      urgency === 'HIGH' ? 'bg-red-100 text-red-800' :
-                                      urgency === 'MEDIUM' ? 'bg-yellow-100 text-yellow-800' :
-                                      'bg-green-100 text-green-800'
-                                    }`}>
-                                      <Icon className="w-3 h-3" />
-                                      <span>AI: {urgency}</span>
-                                    </div>
-                                  );
-                                })()}
+                                  return urgency === 'HIGH' ? 'bg-red-100 text-red-800' :
+                                         urgency === 'MEDIUM' ? 'bg-yellow-100 text-yellow-800' :
+                                         'bg-green-100 text-green-800';
+                                })()
+                              }`}>
+                                <span>AI Triage: {getUrgencyLevel(report.ai_risk_level)}</span>
                               </div>
                             )}
                           </div>
