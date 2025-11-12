@@ -28,8 +28,8 @@ const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
 
     // Only check if everything is loaded and user is authenticated
     if (!loading && !subscriptionLoading && user && subscriptionData) {
-      // Never show modal for pro users
-      if (subscriptionData.subscription_tier === 'pro') {
+      // Never show modal for pro or starter (basic) users
+      if (subscriptionData.subscription_tier === 'pro' || subscriptionData.subscription_tier === 'basic') {
         setShowSubscriptionModal(false);
         hasCheckedRef.current = true;
         return;
