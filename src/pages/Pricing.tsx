@@ -75,142 +75,6 @@ const Pricing = () => {
         </div>
       </section>
 
-      {/* Comparison Section */}
-      <section className="py-16 px-4 sm:px-6 lg:px-8 bg-gray-50">
-        <div className="max-w-7xl mx-auto">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
-              Why Choose Disclosurely?
-            </h2>
-            <p className="text-lg text-gray-600 mb-4">
-              Save £40+ per month compared to competitors, plus exclusive AI-powered features
-            </p>
-            <p className="text-sm text-gray-500 max-w-3xl mx-auto">
-              While our competitors charge £80-120/month for basic whistleblowing software, Disclosurely Pro delivers advanced AI case analysis, 
-              unlimited reports, and enterprise-grade security at just £39.99/month. Same protection, smarter technology, better value.
-            </p>
-          </div>
-
-          <div className="overflow-x-auto -mx-4 sm:mx-0">
-            <table className="w-full border-collapse shadow-xl min-w-[600px] sm:min-w-0">
-              <thead>
-                <tr className="bg-gradient-to-r from-blue-600 to-blue-700">
-                  <th className="px-3 sm:px-6 py-3 sm:py-4 text-left text-xs sm:text-sm font-semibold text-white">Feature</th>
-                  <th className="px-3 sm:px-6 py-3 sm:py-4 text-center text-xs sm:text-sm font-semibold text-white">Disclosurely Pro</th>
-                  <th className="px-3 sm:px-6 py-3 sm:py-4 text-center text-xs sm:text-sm font-semibold text-blue-100">Typical Competitor</th>
-                </tr>
-              </thead>
-              <tbody className="bg-white">
-                <tr className="border-b border-gray-100">
-                  <td className="px-3 sm:px-6 py-3 sm:py-4 text-gray-900 font-medium text-sm sm:text-base">Monthly Price</td>
-                  <td className="px-3 sm:px-6 py-3 sm:py-4 text-center">
-                    <span className="text-xl sm:text-2xl font-bold text-blue-600">£39.99</span>
-                    <span className="text-xs sm:text-sm text-gray-600">/month</span>
-                    <div className="text-xs text-green-600 font-semibold mt-1">Save £40-80/mo</div>
-                  </td>
-                  <td className="px-3 sm:px-6 py-3 sm:py-4 text-center text-gray-500">
-                    <span className="text-lg sm:text-xl font-semibold">£80-120</span>
-                    <span className="text-xs sm:text-sm">/month</span>
-                  </td>
-                </tr>
-                <tr className="border-b border-gray-100 bg-gray-50">
-                  <td className="px-3 sm:px-6 py-3 sm:py-4 text-gray-900 font-semibold text-sm sm:text-base">AI Case Analysis</td>
-                  <td className="px-3 sm:px-6 py-3 sm:py-4 text-center">
-                    <CheckCircle className="w-5 h-5 sm:w-6 sm:h-6 text-blue-600 mx-auto" />
-                  </td>
-                  <td className="px-3 sm:px-6 py-3 sm:py-4 text-center">
-                    <X className="w-5 h-5 sm:w-6 sm:h-6 text-gray-400 mx-auto" />
-                  </td>
-                </tr>
-                <tr className="border-b border-gray-100">
-                  <td className="px-3 sm:px-6 py-3 sm:py-4 text-gray-900 text-sm sm:text-base">Unlimited Reports</td>
-                  <td className="px-3 sm:px-6 py-3 sm:py-4 text-center">
-                    <CheckCircle className="w-5 h-5 sm:w-6 sm:h-6 text-blue-600 mx-auto" />
-                  </td>
-                  <td className="px-3 sm:px-6 py-3 sm:py-4 text-center">
-                    <CheckCircle className="w-5 h-5 sm:w-6 sm:h-6 text-gray-400 mx-auto" />
-                  </td>
-                </tr>
-                <tr className="border-b border-gray-100 bg-gray-50">
-                  <td className="px-3 sm:px-6 py-3 sm:py-4 text-gray-900 text-sm sm:text-base">Military-Grade Encryption</td>
-                  <td className="px-3 sm:px-6 py-3 sm:py-4 text-center">
-                    <CheckCircle className="w-5 h-5 sm:w-6 sm:h-6 text-blue-600 mx-auto" />
-                  </td>
-                  <td className="px-3 sm:px-6 py-3 sm:py-4 text-center">
-                    <CheckCircle className="w-5 h-5 sm:w-6 sm:h-6 text-gray-400 mx-auto" />
-                  </td>
-                </tr>
-                <tr className="border-b border-gray-100">
-                  <td className="px-3 sm:px-6 py-3 sm:py-4 text-gray-900 text-sm sm:text-base">GDPR Compliance</td>
-                  <td className="px-3 sm:px-6 py-3 sm:py-4 text-center">
-                    <CheckCircle className="w-5 h-5 sm:w-6 sm:h-6 text-blue-600 mx-auto" />
-                  </td>
-                  <td className="px-3 sm:px-6 py-3 sm:py-4 text-center">
-                    <CheckCircle className="w-5 h-5 sm:w-6 sm:h-6 text-gray-400 mx-auto" />
-                  </td>
-                </tr>
-                <tr className="border-b border-gray-100 bg-gray-50">
-                  <td className="px-3 sm:px-6 py-3 sm:py-4 text-gray-900 text-sm sm:text-base">AI Risk Assessment</td>
-                  <td className="px-3 sm:px-6 py-3 sm:py-4 text-center">
-                    <CheckCircle className="w-5 h-5 sm:w-6 sm:h-6 text-blue-600 mx-auto" />
-                  </td>
-                  <td className="px-3 sm:px-6 py-3 sm:py-4 text-center">
-                    <X className="w-5 h-5 sm:w-6 sm:h-6 text-gray-400 mx-auto" />
-                  </td>
-                </tr>
-                <tr className="border-b border-gray-100">
-                  <td className="px-3 sm:px-6 py-3 sm:py-4 text-gray-900 text-sm sm:text-base">Real-time Analytics</td>
-                  <td className="px-3 sm:px-6 py-3 sm:py-4 text-center">
-                    <CheckCircle className="w-5 h-5 sm:w-6 sm:h-6 text-blue-600 mx-auto" />
-                  </td>
-                  <td className="px-3 sm:px-6 py-3 sm:py-4 text-center">
-                    <CheckCircle className="w-5 h-5 sm:w-6 sm:h-6 text-gray-400 mx-auto" />
-                  </td>
-                </tr>
-                <tr className="border-b border-gray-100 bg-gray-50">
-                  <td className="px-3 sm:px-6 py-3 sm:py-4 text-gray-900 text-sm sm:text-base">Custom Branding</td>
-                  <td className="px-3 sm:px-6 py-3 sm:py-4 text-center">
-                    <CheckCircle className="w-5 h-5 sm:w-6 sm:h-6 text-blue-600 mx-auto" />
-                  </td>
-                  <td className="px-3 sm:px-6 py-3 sm:py-4 text-center">
-                    <CheckCircle className="w-5 h-5 sm:w-6 sm:h-6 text-gray-400 mx-auto" />
-                  </td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-
-          <div className="mt-8 text-center">
-            <div className="inline-flex items-center gap-2 bg-blue-100 px-6 py-3 rounded-lg">
-              <Zap className="w-5 h-5 text-blue-600" />
-              <span className="text-gray-900 font-semibold">
-                AI Case Analysis - Exclusive to Disclosurely
-              </span>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Trust Indicators */}
-      <section className="py-12 px-4 sm:px-6 lg:px-8 bg-white">
-        <div className="max-w-7xl mx-auto">
-          <div className="flex flex-col md:flex-row justify-center items-center gap-8 mb-12">
-            <div className="flex items-center gap-2 text-blue-600">
-              <CheckCircle className="w-5 h-5" />
-              <span className="font-semibold text-gray-900">14-Day Free Trial</span>
-            </div>
-            <div className="flex items-center gap-2 text-blue-600">
-              <CheckCircle className="w-5 h-5" />
-              <span className="font-semibold text-gray-900">No Credit Card Required</span>
-            </div>
-            <div className="flex items-center gap-2 text-blue-600">
-              <CheckCircle className="w-5 h-5" />
-              <span className="font-semibold text-gray-900">Cancel Anytime</span>
-            </div>
-          </div>
-        </div>
-      </section>
-
       {/* Pricing Section */}
       <div className="bg-white py-16 sm:py-20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -356,6 +220,143 @@ const Pricing = () => {
           </div>
         </div>
       </div>
+
+      {/* Trust Indicators */}
+      <section className="py-12 px-4 sm:px-6 lg:px-8 bg-white">
+        <div className="max-w-7xl mx-auto">
+          <div className="flex flex-col md:flex-row justify-center items-center gap-8 mb-12">
+            <div className="flex items-center gap-2 text-blue-600">
+              <CheckCircle className="w-5 h-5" />
+              <span className="font-semibold text-gray-900">14-Day Free Trial</span>
+            </div>
+            <div className="flex items-center gap-2 text-blue-600">
+              <CheckCircle className="w-5 h-5" />
+              <span className="font-semibold text-gray-900">No Credit Card Required</span>
+            </div>
+            <div className="flex items-center gap-2 text-blue-600">
+              <CheckCircle className="w-5 h-5" />
+              <span className="font-semibold text-gray-900">Cancel Anytime</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Comparison Section */}
+      <section className="py-16 px-4 sm:px-6 lg:px-8 bg-gray-50">
+        <div className="max-w-7xl mx-auto">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+              Why Choose Disclosurely?
+            </h2>
+            <p className="text-lg text-gray-600 mb-4">
+              Save £40+ per month compared to competitors, plus exclusive AI-powered features
+            </p>
+            <p className="text-sm text-gray-500 max-w-3xl mx-auto">
+              While our competitors charge £80-120/month for basic whistleblowing software, Disclosurely Pro delivers advanced AI case analysis, 
+              unlimited reports, and enterprise-grade security at just £39.99/month. Same protection, smarter technology, better value.
+            </p>
+          </div>
+
+          <div className="overflow-x-auto -mx-4 sm:mx-0">
+            <table className="w-full border-collapse shadow-xl min-w-[600px] sm:min-w-0">
+              <thead>
+                <tr className="bg-gradient-to-r from-blue-600 to-blue-700">
+                  <th className="px-3 sm:px-6 py-3 sm:py-4 text-left text-xs sm:text-sm font-semibold text-white">Feature</th>
+                  <th className="px-3 sm:px-6 py-3 sm:py-4 text-center text-xs sm:text-sm font-semibold text-white">Disclosurely Pro</th>
+                  <th className="px-3 sm:px-6 py-3 sm:py-4 text-center text-xs sm:text-sm font-semibold text-blue-100">Typical Competitor</th>
+                </tr>
+              </thead>
+              <tbody className="bg-white">
+                <tr className="border-b border-gray-100">
+                  <td className="px-3 sm:px-6 py-3 sm:py-4 text-gray-900 font-medium text-sm sm:text-base">Monthly Price</td>
+                  <td className="px-3 sm:px-6 py-3 sm:py-4 text-center">
+                    <span className="text-xl sm:text-2xl font-bold text-blue-600">£39.99</span>
+                    <span className="text-xs sm:text-sm text-gray-600">/month</span>
+                    <div className="text-xs text-green-600 font-semibold mt-1">Save £40-80/mo</div>
+                  </td>
+                  <td className="px-3 sm:px-6 py-3 sm:py-4 text-center text-gray-500">
+                    <span className="text-lg sm:text-xl font-semibold">£80-120</span>
+                    <span className="text-xs sm:text-sm">/month</span>
+                  </td>
+                </tr>
+                <tr className="border-b border-gray-100 bg-gray-50">
+                  <td className="px-3 sm:px-6 py-3 sm:py-4 text-gray-900 font-semibold text-sm sm:text-base">AI Case Analysis</td>
+                  <td className="px-3 sm:px-6 py-3 sm:py-4 text-center">
+                    <CheckCircle className="w-5 h-5 sm:w-6 sm:h-6 text-blue-600 mx-auto" />
+                  </td>
+                  <td className="px-3 sm:px-6 py-3 sm:py-4 text-center">
+                    <X className="w-5 h-5 sm:w-6 sm:h-6 text-gray-400 mx-auto" />
+                  </td>
+                </tr>
+                <tr className="border-b border-gray-100">
+                  <td className="px-3 sm:px-6 py-3 sm:py-4 text-gray-900 text-sm sm:text-base">Unlimited Reports</td>
+                  <td className="px-3 sm:px-6 py-3 sm:py-4 text-center">
+                    <CheckCircle className="w-5 h-5 sm:w-6 sm:h-6 text-blue-600 mx-auto" />
+                  </td>
+                  <td className="px-3 sm:px-6 py-3 sm:py-4 text-center">
+                    <CheckCircle className="w-5 h-5 sm:w-6 sm:h-6 text-gray-400 mx-auto" />
+                  </td>
+                </tr>
+                <tr className="border-b border-gray-100 bg-gray-50">
+                  <td className="px-3 sm:px-6 py-3 sm:py-4 text-gray-900 text-sm sm:text-base">Military-Grade Encryption</td>
+                  <td className="px-3 sm:px-6 py-3 sm:py-4 text-center">
+                    <CheckCircle className="w-5 h-5 sm:w-6 sm:h-6 text-blue-600 mx-auto" />
+                  </td>
+                  <td className="px-3 sm:px-6 py-3 sm:py-4 text-center">
+                    <CheckCircle className="w-5 h-5 sm:w-6 sm:h-6 text-gray-400 mx-auto" />
+                  </td>
+                </tr>
+                <tr className="border-b border-gray-100">
+                  <td className="px-3 sm:px-6 py-3 sm:py-4 text-gray-900 text-sm sm:text-base">GDPR Compliance</td>
+                  <td className="px-3 sm:px-6 py-3 sm:py-4 text-center">
+                    <CheckCircle className="w-5 h-5 sm:w-6 sm:h-6 text-blue-600 mx-auto" />
+                  </td>
+                  <td className="px-3 sm:px-6 py-3 sm:py-4 text-center">
+                    <CheckCircle className="w-5 h-5 sm:w-6 sm:h-6 text-gray-400 mx-auto" />
+                  </td>
+                </tr>
+                <tr className="border-b border-gray-100 bg-gray-50">
+                  <td className="px-3 sm:px-6 py-3 sm:py-4 text-gray-900 text-sm sm:text-base">AI Risk Assessment</td>
+                  <td className="px-3 sm:px-6 py-3 sm:py-4 text-center">
+                    <CheckCircle className="w-5 h-5 sm:w-6 sm:h-6 text-blue-600 mx-auto" />
+                  </td>
+                  <td className="px-3 sm:px-6 py-3 sm:py-4 text-center">
+                    <X className="w-5 h-5 sm:w-6 sm:h-6 text-gray-400 mx-auto" />
+                  </td>
+                </tr>
+                <tr className="border-b border-gray-100">
+                  <td className="px-3 sm:px-6 py-3 sm:py-4 text-gray-900 text-sm sm:text-base">Real-time Analytics</td>
+                  <td className="px-3 sm:px-6 py-3 sm:py-4 text-center">
+                    <CheckCircle className="w-5 h-5 sm:w-6 sm:h-6 text-blue-600 mx-auto" />
+                  </td>
+                  <td className="px-3 sm:px-6 py-3 sm:py-4 text-center">
+                    <CheckCircle className="w-5 h-5 sm:w-6 sm:h-6 text-gray-400 mx-auto" />
+                  </td>
+                </tr>
+                <tr className="border-b border-gray-100 bg-gray-50">
+                  <td className="px-3 sm:px-6 py-3 sm:py-4 text-gray-900 text-sm sm:text-base">Custom Branding</td>
+                  <td className="px-3 sm:px-6 py-3 sm:py-4 text-center">
+                    <CheckCircle className="w-5 h-5 sm:w-6 sm:h-6 text-blue-600 mx-auto" />
+                  </td>
+                  <td className="px-3 sm:px-6 py-3 sm:py-4 text-center">
+                    <CheckCircle className="w-5 h-5 sm:w-6 sm:h-6 text-gray-400 mx-auto" />
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div className="mt-8 text-center">
+            <div className="inline-flex items-center gap-2 bg-blue-100 px-6 py-3 rounded-lg">
+              <Zap className="w-5 h-5 text-blue-600" />
+              <span className="text-gray-900 font-semibold">
+                AI Case Analysis - Exclusive to Disclosurely
+              </span>
+            </div>
+          </div>
+        </div>
+      </section>
+
 
       {/* Detailed Feature Comparison */}
       <section className="py-16 px-4 sm:px-6 lg:px-8 bg-gray-50">
