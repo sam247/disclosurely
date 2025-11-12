@@ -84,12 +84,12 @@ const RiskLevelSelector = ({
         <div className="space-y-1">
           <div className="text-xs font-medium text-gray-600 mb-2">Select Risk Level</div>
           {[
-            { level: 1, text: 'Critical', desc: 'Immediate danger/serious violation' },
-            { level: 2, text: 'High', desc: 'Significant impact' },
-            { level: 3, text: 'Medium', desc: 'Standard concern' },
-            { level: 4, text: 'Low', desc: 'Minor issue' },
-            { level: 5, text: 'Info', desc: 'General feedback' }
-          ].map(({ level, text, desc }) => (
+            { level: 1, text: 'Critical', desc: 'Serious violation', dotColor: 'bg-red-500' },
+            { level: 2, text: 'High', desc: 'Significant impact', dotColor: 'bg-orange-500' },
+            { level: 3, text: 'Medium', desc: 'Standard concern', dotColor: 'bg-yellow-500' },
+            { level: 4, text: 'Low', desc: 'Minor issue', dotColor: 'bg-blue-500' },
+            { level: 5, text: 'Info', desc: 'General feedback', dotColor: 'bg-green-500' }
+          ].map(({ level, text, desc, dotColor }) => (
             <Button
               key={level}
               variant="ghost"
@@ -97,7 +97,7 @@ const RiskLevelSelector = ({
               className={`w-full justify-start text-xs ${currentLevel === level ? 'bg-primary/10' : ''}`}
               onClick={() => onUpdate(level)}
             >
-              <div className={`w-2 h-2 rounded-full mr-2 ${getRiskLevelColor(level).split(' ')[0]}`} />
+              <div className={`w-3 h-3 rounded-full mr-2 flex-shrink-0 ${dotColor}`} />
               <div className="text-left">
                 <div className="font-medium">{text} ({level}/5)</div>
                 <div className="text-xs text-gray-500">{desc}</div>
