@@ -17,6 +17,22 @@ const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
   const stabilityTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const hasCheckedRef = useRef(false);
   const lastSubscriptionStatusRef = useRef<string | undefined>(undefined);
+  const subscriptionDataLoadedRef = useRef(false);
+
+  // Track when subscription data has been explicitly loaded (not just default)
+  useEffect(() => {
+    // Mark as loaded only when loading is complete and we have actual data
+    if (!loading && !subscriptionLoading && user) {
+      // Check if subscriptionData has been explicitly loaded (has subscription_status or other indicators)
+      const hasExplicitData = subscriptionData.subscription_status !== undefined || 
+                              subscriptionData.subscription_tier !== undefined ||
+                              subscriptionData.subscription_end !== undefined;
+      
+      if (hasExplicitData) {
+        subscriptionDataLoadedRef.current = true;
+      }
+    }
+  }, [loading, subscriptionLoading, user, subscriptionData]);
 
   // Check subscription status when data is available - only show modal if there's actually an issue
   useEffect(() => {
@@ -26,8 +42,12 @@ const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
       stabilityTimeoutRef.current = null;
     }
 
-    // Only check if everything is loaded and user is authenticated
-    if (!loading && !subscriptionLoading && user && subscriptionData) {
+    // CRITICAL: Only check if:
+    // 1. Auth is loaded
+    // 2. Subscription loading is complete
+    // 3. User is authenticated
+    // 4. Subscription data has been explicitly loaded (not just default)
+    if (!loading && !subscriptionLoading && user && subscriptionDataLoadedRef.current) {
       // Never show modal for pro or starter (basic) users
       if (subscriptionData.subscription_tier === 'pro' || subscriptionData.subscription_tier === 'basic') {
         setShowSubscriptionModal(false);
@@ -68,7 +88,7 @@ const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
         lastSubscriptionStatusRef.current = currentStatus;
       }, 300); // Wait 300ms for data to stabilize
     } else {
-      // Hide modal while loading
+      // Hide modal while loading OR if subscription data hasn't been explicitly loaded yet
       setShowSubscriptionModal(false);
     }
 
@@ -127,7 +147,8 @@ const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
 
   return (
     <>
-      {showSubscriptionModal && (
+      {/* Only render modal if subscription data has been explicitly loaded AND modal should show */}
+      {showSubscriptionModal && subscriptionDataLoadedRef.current && subscriptionData && (
         <SubscriptionExpiredModal
           open={showSubscriptionModal}
           subscriptionStatus={getSubscriptionStatusForModal(subscriptionData) || 'expired'}
