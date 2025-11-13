@@ -86,15 +86,15 @@ const MultipleSessionModal: React.FC<MultipleSessionModalProps> = ({
 
   return (
     <AlertDialog open={open}>
-      <AlertDialogContent className="max-w-md">
-        <AlertDialogHeader>
+      <AlertDialogContent className="w-[calc(100vw-2rem)] sm:w-full max-w-md bg-background">
+        <AlertDialogHeader className="pb-4">
           <div className="flex items-center gap-3 mb-1">
             <div className="h-10 w-10 rounded-full bg-amber-100 dark:bg-amber-900/20 flex items-center justify-center flex-shrink-0">
               <Shield className="h-5 w-5 text-amber-600 dark:text-amber-500" />
             </div>
-            <AlertDialogTitle className="text-lg">Multiple Sessions Detected</AlertDialogTitle>
+            <AlertDialogTitle className="text-lg sm:text-xl">Multiple Sessions Detected</AlertDialogTitle>
           </div>
-          <AlertDialogDescription className="text-sm">
+          <AlertDialogDescription className="text-sm sm:text-base">
             Only one active session is allowed. Choose which device to continue on.
           </AlertDialogDescription>
         </AlertDialogHeader>
@@ -106,12 +106,12 @@ const MultipleSessionModal: React.FC<MultipleSessionModalProps> = ({
                 {getDeviceIcon(otherSession.device_type)}
               </div>
               <div className="flex-1 min-w-0">
-                <p className="font-medium text-sm">{formatDevice()}</p>
-                <div className="flex items-center gap-1.5 mt-1 text-xs text-muted-foreground">
+                <p className="font-medium text-sm sm:text-base">{formatDevice()}</p>
+                <div className="flex items-center gap-1.5 mt-1 text-xs sm:text-sm text-muted-foreground">
                   <MapPin className="h-3 w-3 flex-shrink-0" />
                   <span className="truncate">{formatLocation()}</span>
                 </div>
-                <p className="text-xs text-muted-foreground mt-1.5">
+                <p className="text-xs sm:text-sm text-muted-foreground mt-1.5">
                   Last active: <span className="font-medium text-foreground">{formatTime(otherSession.last_activity_at)}</span>
                 </p>
               </div>
@@ -119,7 +119,7 @@ const MultipleSessionModal: React.FC<MultipleSessionModalProps> = ({
           </div>
         )}
 
-        <AlertDialogFooter className="flex-col gap-2 sm:flex-row sm:justify-end">
+        <AlertDialogFooter className="flex-col gap-2 sm:flex-row sm:justify-end pt-4">
           <Button
             variant="default"
             onClick={onDismiss}
