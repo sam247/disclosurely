@@ -12,10 +12,10 @@ import {
   Loader2,
   Info,
   Shield,
-  BarChart3,
-  Calendar,
-  FileText,
-  Brain
+  Workflow,
+  Bot,
+  MessageCircle,
+  MessageSquare
 } from 'lucide-react';
 import { useAllFeatureFlags, updateFeatureFlag } from '@/hooks/useFeatureFlag';
 import { useToast } from '@/hooks/use-toast';
@@ -23,12 +23,10 @@ import { useQueryClient } from '@tanstack/react-query';
 
 const featureIcons: Record<string, React.ReactNode> = {
   ai_gateway: <Shield className="h-5 w-5" />,
-  ai_gateway_multi_model: <Brain className="h-5 w-5" />,
-  risk_compliance_module: <BarChart3 className="h-5 w-5" />,
-  policy_tracker: <FileText className="h-5 w-5" />,
-  risk_register: <AlertTriangle className="h-5 w-5" />,
-  compliance_calendar: <Calendar className="h-5 w-5" />,
-  ai_insights: <Brain className="h-5 w-5" />
+  workflows: <Workflow className="h-5 w-5" />,
+  ai_case_helper: <Bot className="h-5 w-5" />,
+  secure_messaging: <MessageCircle className="h-5 w-5" />,
+  chat_widget: <MessageSquare className="h-5 w-5" />
 };
 
 export const FeatureFlagManager: React.FC = () => {
@@ -91,11 +89,11 @@ export const FeatureFlagManager: React.FC = () => {
   }
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
+    <div className="space-y-4 sm:space-y-6">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div>
-          <h2 className="text-3xl font-bold">Feature Flags</h2>
-          <p className="text-gray-500 mt-1">
+          <h2 className="text-2xl sm:text-3xl font-bold">Feature Flags</h2>
+          <p className="text-sm sm:text-base text-gray-500 mt-1">
             Control feature rollout and instant rollback
           </p>
         </div>
@@ -120,24 +118,26 @@ export const FeatureFlagManager: React.FC = () => {
           return (
             <Card key={flag.id} className={flag.is_enabled ? 'border-green-200' : ''}>
               <CardHeader>
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    <div className="p-2 bg-gray-100 rounded-lg">
+                <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                  <div className="flex items-start sm:items-center gap-3 flex-1 min-w-0">
+                    <div className="p-2 bg-gray-100 rounded-lg flex-shrink-0">
                       {icon}
                     </div>
-                    <div>
-                      <CardTitle className="flex items-center gap-2">
-                        {flag.feature_name.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}
+                    <div className="min-w-0 flex-1">
+                      <CardTitle className="flex flex-col sm:flex-row sm:items-center gap-2">
+                        <span className="text-base sm:text-lg break-words">
+                          {flag.feature_name.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}
+                        </span>
                         {flag.is_enabled ? (
-                          <Badge variant="default" className="bg-green-500">
+                          <Badge variant="default" className="bg-green-500 w-fit">
                             <CheckCircle2 className="h-3 w-3 mr-1" />
                             Enabled
                           </Badge>
                         ) : (
-                          <Badge variant="secondary">Disabled</Badge>
+                          <Badge variant="secondary" className="w-fit">Disabled</Badge>
                         )}
                       </CardTitle>
-                      <CardDescription className="mt-1">
+                      <CardDescription className="mt-1 text-sm">
                         {flag.description}
                       </CardDescription>
                     </div>
@@ -147,6 +147,7 @@ export const FeatureFlagManager: React.FC = () => {
                     checked={flag.is_enabled}
                     disabled={isUpdating}
                     onCheckedChange={(checked) => handleToggle(flag.feature_name, checked)}
+                    className="flex-shrink-0"
                   />
                 </div>
               </CardHeader>
@@ -204,17 +205,18 @@ export const FeatureFlagManager: React.FC = () => {
       {/* Emergency Disable All Button */}
       <Card className="border-red-200 bg-red-50">
         <CardHeader>
-          <CardTitle className="flex items-center gap-2 text-red-700">
+          <CardTitle className="flex flex-col sm:flex-row sm:items-center gap-2 text-red-700 text-lg sm:text-xl">
             <AlertTriangle className="h-5 w-5" />
             Emergency Controls
           </CardTitle>
-          <CardDescription>
+          <CardDescription className="text-sm">
             Use these controls only in case of critical issues
           </CardDescription>
         </CardHeader>
         <CardContent>
           <Button
             variant="destructive"
+            className="w-full sm:w-auto"
             onClick={async () => {
               if (!confirm('Are you sure you want to disable ALL features? This will revert to safe mode.')) {
                 return;

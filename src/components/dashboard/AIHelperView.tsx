@@ -1,15 +1,41 @@
 import AICaseHelper from '@/components/AICaseHelper';
 import { useTranslation } from 'react-i18next';
-import { Info } from 'lucide-react';
+import { Info, AlertTriangle } from 'lucide-react';
 import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
 } from '@/components/ui/tooltip';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { useOrganization } from '@/hooks/useOrganization';
+import { useFeatureFlag } from '@/hooks/useFeatureFlag';
 
 const AIHelperView = () => {
   const { t } = useTranslation();
+  const { organization } = useOrganization();
+  const { data: aiCaseHelperEnabled, isLoading: aiCaseHelperLoading } = useFeatureFlag('ai_case_helper', organization?.id);
+  
+  if (aiCaseHelperLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-[400px]">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+      </div>
+    );
+  }
+
+  if (aiCaseHelperEnabled === false) {
+    return (
+      <div className="space-y-6">
+        <Alert>
+          <AlertTriangle className="h-4 w-4" />
+          <AlertDescription>
+            AI Case Helper feature is currently disabled. Please contact support if you need access.
+          </AlertDescription>
+        </Alert>
+      </div>
+    );
+  }
   
   return (
     <div className="space-y-6">

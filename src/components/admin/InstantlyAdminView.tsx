@@ -176,17 +176,17 @@ export const InstantlyAdminView = () => {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 sm:space-y-6">
       <div>
-        <h2 className="text-2xl font-bold mb-2">Instantly.ai Campaign Management</h2>
-        <p className="text-gray-600">
+        <h2 className="text-xl sm:text-2xl font-bold mb-2">Instantly.ai Campaign Management</h2>
+        <p className="text-sm sm:text-base text-gray-600">
           Manage cold email campaigns, send emails, and add leads to campaigns.
           The Instantly.ai MCP is configured in Cursor for AI assistant use.
         </p>
       </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-        <TabsList className="grid w-full grid-cols-2">
+        <TabsList className="grid w-full grid-cols-2 h-auto">
           <TabsTrigger value="send">
             <Send className="h-4 w-4 mr-2" />
             Send Email
@@ -206,14 +206,14 @@ export const InstantlyAdminView = () => {
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <Label htmlFor="provider">Email Provider</Label>
                   <select
                     id="provider"
                     value={emailForm.provider}
                     onChange={(e) => setEmailForm({ ...emailForm, provider: e.target.value as 'instantly' | 'uptics' })}
-                    className="w-full mt-1 px-3 py-2 border border-gray-300 rounded-md"
+                    className="w-full mt-1 px-3 py-2 border border-gray-300 rounded-md text-sm sm:text-base"
                   >
                     <option value="instantly">Instantly.ai (Unlimited)</option>
                     <option value="uptics">Uptics.io (Good Limits)</option>
@@ -227,6 +227,7 @@ export const InstantlyAdminView = () => {
                     value={emailForm.to}
                     onChange={(e) => setEmailForm({ ...emailForm, to: e.target.value })}
                     placeholder="email@example.com or email1@example.com, email2@example.com"
+                    className="text-sm sm:text-base"
                   />
                   <p className="text-xs text-gray-500 mt-1">Separate multiple emails with commas</p>
                 </div>
@@ -242,13 +243,14 @@ export const InstantlyAdminView = () => {
                 />
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <Label htmlFor="from_name">From Name</Label>
                   <Input
                     id="from_name"
                     value={emailForm.from_name}
                     onChange={(e) => setEmailForm({ ...emailForm, from_name: e.target.value })}
+                    className="text-sm sm:text-base"
                   />
                 </div>
                 <div>
@@ -258,6 +260,7 @@ export const InstantlyAdminView = () => {
                     type="email"
                     value={emailForm.from_email}
                     onChange={(e) => setEmailForm({ ...emailForm, from_email: e.target.value })}
+                    className="text-sm sm:text-base"
                   />
                 </div>
               </div>

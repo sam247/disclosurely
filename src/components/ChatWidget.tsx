@@ -5,6 +5,8 @@ import { cn } from '@/lib/utils';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
+import { useOrganization } from '@/hooks/useOrganization';
+import { useFeatureFlag } from '@/hooks/useFeatureFlag';
 
 interface ChatWidgetProps {
   /**
@@ -56,6 +58,8 @@ const ChatWidget = ({
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const { user } = useAuth();
   const { toast } = useToast();
+  const { organization } = useOrganization();
+  const { data: chatWidgetEnabled } = useFeatureFlag('chat_widget', organization?.id);
 
   // Scroll to bottom when messages change
   useEffect(() => {

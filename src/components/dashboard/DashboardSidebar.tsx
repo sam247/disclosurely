@@ -1,8 +1,9 @@
-import { Home, Bot, Users, Palette, Lock, BarChart3, ScrollText, Link as LinkIcon, MessageSquare, Info, FileText, Zap, Settings, Shield, Workflow } from 'lucide-react';
+import { Home, Bot, Users, Palette, Lock, BarChart3, ScrollText, Link as LinkIcon, MessageSquare, Info, FileText, Zap, Settings, Shield, Workflow, Flag, Activity, Mail, ChevronRight } from 'lucide-react';
 import { Separator } from '@/components/ui/separator';
 import { Badge } from '@/components/ui/badge';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { Sidebar, SidebarContent, SidebarFooter, SidebarGroup, SidebarGroupContent, SidebarHeader, SidebarMenu, SidebarMenuButton, SidebarMenuItem } from '@/components/ui/sidebar';
+import { Sidebar, SidebarContent, SidebarFooter, SidebarGroup, SidebarGroupContent, SidebarHeader, SidebarMenu, SidebarMenuButton, SidebarMenuItem, SidebarMenuSub, SidebarMenuSubItem, SidebarMenuSubButton } from '@/components/ui/sidebar';
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { useSubscriptionLimits } from '@/hooks/useSubscriptionLimits';
 import { useUserRoles } from '@/hooks/useUserRoles';
 import { useAuth } from '@/hooks/useAuth';
@@ -94,8 +95,32 @@ const DashboardSidebar = ({
     icon: Shield,
     path: '/dashboard/admin',
     locked: false,
-    ownerOnly: true // STRICT: Only visible to owner
+    ownerOnly: true, // STRICT: Only visible to owner
+    hasSubMenu: true
   }];
+
+  const adminSubMenuItems = [
+    {
+      title: 'Feature Flags',
+      icon: Flag,
+      path: '/dashboard/admin/features'
+    },
+    {
+      title: 'Chat Support',
+      icon: MessageSquare,
+      path: '/dashboard/admin/chat'
+    },
+    {
+      title: 'System Health',
+      icon: Activity,
+      path: '/dashboard/admin/health'
+    },
+    {
+      title: 'Instantly.ai',
+      icon: Mail,
+      path: '/dashboard/admin/instantly'
+    }
+  ];
 
   const handleNavigation = (item: typeof menuItems[0]) => {
     if (item.locked) {
@@ -123,8 +148,67 @@ const DashboardSidebar = ({
                   return null;
                 }
                 
-                const isActive = location.pathname === item.path;
+                const isActive = location.pathname === item.path || (item.hasSubMenu && location.pathname.startsWith(item.path));
                 const Icon = item.icon;
+                const isAdminItem = item.path === '/dashboard/admin';
+                
+                // Handle Admin with sub-menu
+                if (isAdminItem && item.hasSubMenu) {
+                  const isAdminOpen = location.pathname.startsWith('/dashboard/admin');
+                  return (
+                    <Collapsible key={item.path} open={isAdminOpen} asChild>
+                      <SidebarMenuItem>
+                        <CollapsibleTrigger asChild>
+                          <SidebarMenuButton 
+                            className={cn(
+                              "w-full justify-start transition-colors px-4", 
+                              isActive && "bg-primary/10 text-primary font-medium"
+                            )}
+                          >
+                            <div className="flex items-center gap-3 w-full">
+                              <Icon className="flex-shrink-0 text-primary h-5 w-5" />
+                              <span className="flex-1">{item.title}</span>
+                              <ChevronRight className={cn(
+                                "h-4 w-4 transition-transform",
+                                isAdminOpen && "rotate-90"
+                              )} />
+                            </div>
+                          </SidebarMenuButton>
+                        </CollapsibleTrigger>
+                        <CollapsibleContent>
+                          <SidebarMenuSub>
+                            {adminSubMenuItems.map((subItem) => {
+                              const SubIcon = subItem.icon;
+                              const isSubActive = location.pathname === subItem.path;
+                              return (
+                                <SidebarMenuSubItem key={subItem.path}>
+                                  <SidebarMenuSubButton
+                                    asChild
+                                    isActive={isSubActive}
+                                  >
+                                    <a
+                                      href={subItem.path}
+                                      onClick={(e) => {
+                                        e.preventDefault();
+                                        navigate(subItem.path);
+                                      }}
+                                      className="flex items-center gap-2"
+                                    >
+                                      <SubIcon className="h-4 w-4" />
+                                      <span>{subItem.title}</span>
+                                    </a>
+                                  </SidebarMenuSubButton>
+                                </SidebarMenuSubItem>
+                              );
+                            })}
+                          </SidebarMenuSub>
+                        </CollapsibleContent>
+                      </SidebarMenuItem>
+                    </Collapsible>
+                  );
+                }
+                
+                // Regular menu items
                 return (
                   <SidebarMenuItem key={item.path}>
                     <SidebarMenuButton 

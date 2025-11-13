@@ -15,6 +15,9 @@ import TranslateButton from '@/components/TranslateButton';
 import { auditLogger } from '@/utils/auditLogger';
 import { useAuth } from '@/hooks/useAuth';
 import { useOrganization } from '@/hooks/useOrganization';
+import { useFeatureFlag } from '@/hooks/useFeatureFlag';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { AlertTriangle } from 'lucide-react';
 
 interface Report {
   id: string;
@@ -50,6 +53,7 @@ const SecureMessaging = ({ report, onClose }: SecureMessagingProps) => {
   const { user } = useAuth();
   const { organization } = useOrganization();
   const location = useLocation();
+  const { data: secureMessagingEnabled, isLoading: secureMessagingLoading } = useFeatureFlag('secure_messaging', organization?.id);
   const [messages, setMessages] = useState<Message[]>([]);
   const [newMessage, setNewMessage] = useState('');
   const [isLoading, setIsLoading] = useState(true);
@@ -269,7 +273,7 @@ const SecureMessaging = ({ report, onClose }: SecureMessagingProps) => {
     }
   };
 
-  if (isLoading) {
+  if (isLoading || secureMessagingLoading) {
     return (
       <Card>
         <CardContent className="p-6">
@@ -277,6 +281,28 @@ const SecureMessaging = ({ report, onClose }: SecureMessagingProps) => {
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
             <span className="ml-2">Loading messages...</span>
           </div>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  // Check feature flag
+  if (secureMessagingEnabled === false) {
+    return (
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2 text-xl">
+            <MessageSquare className="h-5 w-5" />
+            {t('secureMessaging')}
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <Alert>
+            <AlertTriangle className="h-4 w-4" />
+            <AlertDescription>
+              Secure messaging feature is currently disabled. Please contact support if you need access.
+            </AlertDescription>
+          </Alert>
         </CardContent>
       </Card>
     );

@@ -17,6 +17,9 @@ import { supabase } from '@/integrations/supabase/client';
 import { useOrganization } from '@/hooks/useOrganization';
 import { useCustomDomain } from '@/hooks/useCustomDomain';
 import { useAuth } from '@/hooks/useAuth';
+import { useFeatureFlag } from '@/hooks/useFeatureFlag';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { AlertTriangle } from 'lucide-react';
 
 interface AssignmentRule {
   id: string;
@@ -70,6 +73,7 @@ const WorkflowsView = () => {
   const { organization } = useOrganization();
   const { organizationId: customDomainOrgId } = useCustomDomain();
   const organizationId = organization?.id || customDomainOrgId;
+  const { data: workflowsEnabled, isLoading: workflowsLoading } = useFeatureFlag('workflows', organizationId);
 
   const [activeTab, setActiveTab] = useState('rules');
   const [rules, setRules] = useState<AssignmentRule[]>([]);
@@ -416,13 +420,27 @@ const WorkflowsView = () => {
     }
   };
 
-  if (loading) {
+  if (workflowsLoading || loading) {
     return (
       <div className="flex items-center justify-center h-[calc(100vh-4rem)]">
         <div className="text-center">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
           <p className="text-muted-foreground">Loading workflow data...</p>
         </div>
+      </div>
+    );
+  }
+
+  // Check feature flag
+  if (workflowsEnabled === false) {
+    return (
+      <div className="space-y-6">
+        <Alert>
+          <AlertTriangle className="h-4 w-4" />
+          <AlertDescription>
+            Workflows feature is currently disabled. Please contact support if you need access.
+          </AlertDescription>
+        </Alert>
       </div>
     );
   }
