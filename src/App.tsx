@@ -14,10 +14,11 @@ import { lazyWithRetry } from './utils/lazyWithRetry';
 import ChatWidget from './components/ChatWidget';
 
 // Lazy load page components for better code splitting
-const Index = lazy(() => import('./pages/Index'));
-const Login = lazy(() => import('./pages/Login'));
-const Signup = lazy(() => import('./pages/Signup'));
-const AcceptInvite = lazy(() => import('./pages/AcceptInvite'));
+// Use lazyWithRetry for critical auth pages to handle deployment updates gracefully
+const Index = lazyWithRetry(() => import('./pages/Index'));
+const Login = lazyWithRetry(() => import('./pages/Login'));
+const Signup = lazyWithRetry(() => import('./pages/Signup'));
+const AcceptInvite = lazyWithRetry(() => import('./pages/AcceptInvite'));
 const NotFound = lazy(() => import('./pages/NotFound'));
 const Pricing = lazy(() => import('./pages/Pricing'));
 const Contact = lazy(() => import('./pages/Contact'));
@@ -43,7 +44,7 @@ const ResumeDraft = lazy(() => import('./pages/ResumeDraft'));
 const TestAnonymousSubmission = lazy(() => import('./pages/TestAnonymousSubmission'));
 const AdminDashboard = lazy(() => import('./pages/AdminDashboard'));
 const WhistleblowerMessagingPage = lazy(() => import('./pages/WhistleblowerMessaging'));
-const ReportDetails = lazy(() => import('./pages/ReportDetails'));
+const ReportDetails = lazyWithRetry(() => import('./pages/ReportDetails'));
 
 // Lazy load dashboard and authenticated components with retry logic for critical components
 const AuthenticatedApp = lazy(() => import('./components/AuthenticatedApp'));

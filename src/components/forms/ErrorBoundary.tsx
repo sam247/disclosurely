@@ -30,14 +30,30 @@ class ErrorBoundary extends Component<Props, State> {
     const errorMessage = error?.message || 'Unknown error';
     console.error('ErrorBoundary caught an error:', error, errorInfo);
     
-    // If it's a module loading error, log it but don't auto-reload
+    // Check if it's a module loading error (stale chunks after deployment)
     const isModuleError = 
       errorMessage.includes('Failed to fetch dynamically imported module') ||
       errorMessage.includes('MIME type') ||
-      errorMessage.includes('ChunkLoadError');
+      errorMessage.includes('ChunkLoadError') ||
+      errorMessage.includes('404') ||
+      error?.name === 'ChunkLoadError';
 
     if (isModuleError) {
-      console.warn('Module loading error detected. This may be a deployment issue.');
+      console.warn('Module loading error detected. This may be due to a deployment update. Auto-reloading with cache clear...');
+      
+      // Auto-reload with cache clear after a short delay to show the error message
+      setTimeout(() => {
+        // Clear all caches
+        if ('caches' in window) {
+          caches.keys().then((names) => {
+            names.forEach((name) => {
+              caches.delete(name);
+            });
+          });
+        }
+        // Force hard reload to get fresh HTML and chunks
+        window.location.reload();
+      }, 2000); // 2 second delay so user sees the message
     }
   }
 
