@@ -513,37 +513,6 @@ const SystemHealthDashboard = () => {
           </Card>
         </div>
 
-        {/* Additional Information */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Monitoring & Alerts</CardTitle>
-            <CardDescription>
-              System health is monitored via Sentry for errors and Supabase dashboard for infrastructure metrics.
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
-              <div>
-                <h4 className="font-semibold mb-2">Sentry Monitoring</h4>
-                <ul className="space-y-1 text-muted-foreground">
-                  <li>• Error tracking enabled</li>
-                  <li>• Session replay (10% sample rate)</li>
-                  <li>• Performance monitoring (disabled for free tier)</li>
-                  <li>• Source maps uploaded on build</li>
-                </ul>
-              </div>
-              <div>
-                <h4 className="font-semibold mb-2">Supabase Metrics</h4>
-                <ul className="space-y-1 text-muted-foreground">
-                  <li>• Database performance monitoring</li>
-                  <li>• Edge function execution logs</li>
-                  <li>• API request metrics</li>
-                  <li>• Storage usage tracking</li>
-                </ul>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
           </TabsContent>
           
           <TabsContent value="monitoring" className="mt-6 flex-1 min-h-0 overflow-y-auto pr-2">

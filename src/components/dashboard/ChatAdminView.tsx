@@ -3,6 +3,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
 import { 
   MessageCircle, 
   Search, 
@@ -11,7 +12,8 @@ import {
   Calendar,
   Eye,
   Archive,
-  RefreshCw
+  RefreshCw,
+  Send
 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
@@ -45,6 +47,8 @@ const ChatAdminView = () => {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('all');
+  const [replyMessage, setReplyMessage] = useState('');
+  const [sendingReply, setSendingReply] = useState(false);
 
   useEffect(() => {
     fetchConversations();
@@ -121,6 +125,60 @@ const ChatAdminView = () => {
   const handleViewConversation = async (conversation: ChatConversation) => {
     setSelectedConversation(conversation);
     await fetchMessages(conversation.id);
+  };
+
+  const handleSendReply = async () => {
+    if (!selectedConversation || !replyMessage.trim() || sendingReply) return;
+
+    const messageText = replyMessage.trim();
+    setReplyMessage('');
+    setSendingReply(true);
+
+    try {
+      // Insert admin reply directly as 'assistant' message (no AI processing)
+      const { data, error } = await supabase
+        .from('chat_messages')
+        .insert({
+          conversation_id: selectedConversation.id,
+          role: 'assistant',
+          content: messageText,
+          metadata: {
+            sender_type: 'admin',
+            sender_email: 'admin@disclosurely.com'
+          }
+        })
+        .select()
+        .single();
+
+      if (error) throw error;
+
+      // Update conversation updated_at
+      await supabase
+        .from('chat_conversations')
+        .update({ updated_at: new Date().toISOString() })
+        .eq('id', selectedConversation.id);
+
+      // Refresh messages to show the new reply
+      await fetchMessages(selectedConversation.id);
+      
+      // Refresh conversations list to update the updated_at timestamp
+      await fetchConversations();
+      
+      toast({
+        title: "Success",
+        description: "Reply sent successfully",
+      });
+    } catch (error: any) {
+      console.error('Error sending reply:', error);
+      setReplyMessage(messageText); // Restore message on error
+      toast({
+        title: "Error",
+        description: error.message || "Failed to send reply. Please check RLS policies.",
+        variant: "destructive",
+      });
+    } finally {
+      setSendingReply(false);
+    }
   };
 
   const handleArchiveConversation = async (conversationId: string) => {
@@ -366,40 +424,68 @@ const ChatAdminView = () => {
                   )}
                 </div>
               </CardHeader>
-              <CardContent className="flex-1 min-h-0 overflow-hidden">
+              <CardContent className="flex-1 min-h-0 overflow-hidden flex flex-col p-0">
                 {selectedConversation ? (
-                  <ScrollArea className="h-full">
-                    <div className="space-y-4 pr-4">
-                      {messages.map((message) => (
-                        <div
-                          key={message.id}
-                          className={cn(
-                            'flex',
-                            message.role === 'user' ? 'justify-end' : 'justify-start'
-                          )}
-                        >
+                  <>
+                    <ScrollArea className="flex-1 min-h-0 px-6 py-4">
+                      <div className="space-y-4 pr-4">
+                        {messages.map((message) => (
                           <div
+                            key={message.id}
                             className={cn(
-                              'max-w-[80%] rounded-lg px-4 py-2 text-sm',
-                              message.role === 'user'
-                                ? 'bg-primary text-primary-foreground'
-                                : 'bg-muted text-foreground'
+                              'flex',
+                              message.role === 'user' ? 'justify-end' : 'justify-start'
                             )}
                           >
-                            <p className="whitespace-pre-wrap">{message.content}</p>
-                            <p className={cn(
-                              'text-xs mt-1',
-                              message.role === 'user' ? 'text-primary-foreground/70' : 'text-muted-foreground'
-                            )}>
-                              {formatDate(message.created_at)}
-                            </p>
+                            <div
+                              className={cn(
+                                'max-w-[80%] rounded-lg px-4 py-2 text-sm',
+                                message.role === 'user'
+                                  ? 'bg-primary text-primary-foreground'
+                                  : 'bg-muted text-foreground'
+                              )}
+                            >
+                              <p className="whitespace-pre-wrap">{message.content}</p>
+                              <p className={cn(
+                                'text-xs mt-1',
+                                message.role === 'user' ? 'text-primary-foreground/70' : 'text-muted-foreground'
+                              )}>
+                                {formatDate(message.created_at)}
+                              </p>
+                            </div>
                           </div>
-                        </div>
-                      ))}
+                        ))}
+                      </div>
+                    </ScrollArea>
+                    {/* Reply Input */}
+                    <div className="border-t p-4 flex-shrink-0">
+                      <div className="flex gap-2">
+                        <Textarea
+                          placeholder="Type your reply..."
+                          value={replyMessage}
+                          onChange={(e) => setReplyMessage(e.target.value)}
+                          onKeyDown={(e) => {
+                            if (e.key === 'Enter' && !e.shiftKey) {
+                              e.preventDefault();
+                              handleSendReply();
+                            }
+                          }}
+                          className="min-h-[60px] resize-none"
+                          disabled={sendingReply}
+                        />
+                        <Button
+                          onClick={handleSendReply}
+                          disabled={!replyMessage.trim() || sendingReply}
+                          size="icon"
+                          className="h-[60px] w-[60px] flex-shrink-0"
+                        >
+                          <Send className="h-4 w-4" />
+                        </Button>
+                      </div>
                     </div>
-                  </ScrollArea>
+                  </>
                 ) : (
-                  <div className="flex flex-col items-center justify-center h-full text-center">
+                  <div className="flex flex-col items-center justify-center h-full text-center px-6">
                     <MessageCircle className="h-12 w-12 text-muted-foreground mb-4" />
                     <p className="text-muted-foreground">
                       Select a conversation to view messages
