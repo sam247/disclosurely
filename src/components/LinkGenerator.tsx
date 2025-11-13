@@ -552,7 +552,7 @@ const LinkGenerator = () => {
   }
 
   // Generate subdomain URL from organization domain slug
-  // If domain is missing, generate it from organization name
+  // If domain is missing, generate it from organization name (lowercase, remove spaces only)
   const getDomainSlug = () => {
     if (organizationInfo?.domain) {
       return organizationInfo.domain;
@@ -562,10 +562,7 @@ const LinkGenerator = () => {
       return organizationInfo.name
         .toLowerCase()
         .trim()
-        .replace(/\s+/g, '-')  // Replace spaces with hyphens
-        .replace(/[^a-z0-9-]/g, '')  // Remove special characters
-        .replace(/-+/g, '-')  // Replace multiple hyphens with single hyphen
-        .replace(/^-|-$/g, '');  // Remove leading/trailing hyphens
+        .replace(/\s+/g, '');  // Remove all spaces
     }
     return null;
   };

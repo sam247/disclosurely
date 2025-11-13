@@ -159,14 +159,11 @@ const OrganizationSettings = () => {
         logoUrl = urlData.publicUrl;
       }
 
-      // Generate domain slug from organization name (lowercase, remove spaces and special chars)
+      // Generate domain slug from organization name (lowercase, remove spaces only)
       const domainSlug = organization.name
         .toLowerCase()
         .trim()
-        .replace(/\s+/g, '-')  // Replace spaces with hyphens
-        .replace(/[^a-z0-9-]/g, '')  // Remove special characters
-        .replace(/-+/g, '-')  // Replace multiple hyphens with single hyphen
-        .replace(/^-|-$/g, '');  // Remove leading/trailing hyphens
+        .replace(/\s+/g, '');  // Remove all spaces
 
       // Update organization with name, domain, logo, and branding
       const { error: updateError } = await supabase
