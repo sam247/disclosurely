@@ -14,7 +14,6 @@ const SignupForm = () => {
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
   const [organizationName, setOrganizationName] = useState('');
-  const [organizationDomain, setOrganizationDomain] = useState('');
   const [loading, setLoading] = useState(false);
   const [googleLoading, setGoogleLoading] = useState(false);
   const navigate = useNavigate();
@@ -32,10 +31,10 @@ const SignupForm = () => {
       return;
     }
 
-    if (!organizationName.trim() || !organizationDomain.trim()) {
+    if (!organizationName.trim()) {
       toast({
         title: "Error",
-        description: "Please provide your organization name and domain",
+        description: "Please provide your organization name",
         variant: "destructive",
       });
       return;
@@ -80,11 +79,17 @@ const SignupForm = () => {
       }
 
       // Step 2: Create organization
+      // Auto-generate domain from organization name (lowercase, remove spaces)
+      const domainSlug = organizationName
+        .toLowerCase()
+        .trim()
+        .replace(/\s+/g, ''); // Remove all spaces
+
       const { data: orgData, error: orgError } = await supabase
         .from('organizations')
         .insert({
           name: organizationName.trim(),
-          domain: organizationDomain.toLowerCase().trim().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, ''),
+          domain: domainSlug,
           description: `${organizationName} organization`,
         })
         .select()
@@ -301,32 +306,11 @@ const SignupForm = () => {
                 type="text"
                 required
                 value={organizationName}
-                onChange={(e) => {
-                  setOrganizationName(e.target.value);
-                  // Auto-generate domain suggestion
-                  if (!organizationDomain) {
-                    const suggested = e.target.value.toLowerCase().replace(/[^a-z0-9]/g, '-');
-                    setOrganizationDomain(suggested);
-                  }
-                }}
+                onChange={(e) => setOrganizationName(e.target.value)}
                 placeholder="Your company name"
               />
-            </div>
-          </div>
-          <div className="mt-4">
-            <Label htmlFor="organizationDomain">Organization Domain</Label>
-            <div className="mt-1">
-              <Input
-                id="organizationDomain"
-                name="organizationDomain"
-                type="text"
-                required
-                value={organizationDomain}
-                onChange={(e) => setOrganizationDomain(e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, ''))}
-                placeholder="your-company"
-              />
               <p className="mt-1 text-xs text-gray-500">
-                Used for your submission links (e.g., disclosurely.com/{organizationDomain || 'your-company'})
+                Your submission link will be automatically generated from your organization name
               </p>
             </div>
           </div>
