@@ -551,9 +551,28 @@ const LinkGenerator = () => {
     );
   }
 
-  // Generate subdomain URL if organization has a domain slug
-  const subdomainUrl = organizationInfo?.domain
-    ? `https://${organizationInfo.domain}.disclosurely.com/report`
+  // Generate subdomain URL from organization domain slug
+  // If domain is missing, generate it from organization name
+  const getDomainSlug = () => {
+    if (organizationInfo?.domain) {
+      return organizationInfo.domain;
+    }
+    // Fallback: generate from organization name if domain is missing
+    if (organizationInfo?.name) {
+      return organizationInfo.name
+        .toLowerCase()
+        .trim()
+        .replace(/\s+/g, '-')  // Replace spaces with hyphens
+        .replace(/[^a-z0-9-]/g, '')  // Remove special characters
+        .replace(/-+/g, '-')  // Replace multiple hyphens with single hyphen
+        .replace(/^-|-$/g, '');  // Remove leading/trailing hyphens
+    }
+    return null;
+  };
+
+  const domainSlug = getDomainSlug();
+  const subdomainUrl = domainSlug
+    ? `https://${domainSlug}.disclosurely.com/report`
     : null;
 
   return (
