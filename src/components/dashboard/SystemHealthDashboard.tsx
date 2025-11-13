@@ -93,34 +93,37 @@ const SystemHealthDashboard = () => {
 
     setRefreshing(true);
     try {
-      // Database health check
+      // Database health check - Supabase database response time
       const dbStartTime = Date.now();
       const { error: dbError } = await supabase.from('organizations').select('id').limit(1);
       const dbResponseTime = Date.now() - dbStartTime;
       
-      // Fetch subscription metrics
+      // Subscription metrics - Synced with Stripe via webhooks (stripe-webhook edge function)
+      // Status is updated in real-time when Stripe events occur (payment succeeded, failed, subscription updated, etc.)
       const { data: subscriptions, error: subError } = await supabase
         .from('subscribers')
         .select('subscription_status')
         .eq('subscribed', true);
 
-      // Fetch report metrics
+      // Report metrics - From database
       const { data: reports, error: reportsError } = await supabase
         .from('reports')
         .select('status, created_at')
         .is('deleted_at', null);
 
-      // Fetch organization metrics
+      // Organization metrics - From database
       const { data: orgs, error: orgsError } = await supabase
         .from('organizations')
         .select('id, created_at');
 
-      // Fetch AI usage metrics
+      // AI usage metrics - From ai_gateway_logs table (logged when AI requests are made)
       const { data: aiLogs, error: aiLogsError } = await supabase
         .from('ai_gateway_logs')
         .select('total_tokens, latency_ms, pii_detected, created_at');
 
-      // Fetch email usage metrics
+      // Email usage metrics - Synced with Resend API
+      // Status is updated when emails are sent via Resend (process-pending-email-notifications, send-notification-emails)
+      // 'sent' = successfully sent via Resend, 'failed' = Resend API error, 'pending' = queued but not yet sent
       const { data: emailNotifications, error: emailError } = await supabase
         .from('email_notifications')
         .select('status, created_at, sent_at');
@@ -165,12 +168,12 @@ const SystemHealthDashboard = () => {
         database: {
           status: dbError ? 'down' : dbResponseTime > 1000 ? 'degraded' : 'healthy',
           responseTime: dbResponseTime,
-          activeConnections: 0, // Would need Supabase API to get this
+          activeConnections: 0, // Note: Would need Supabase Management API to get actual connection count
         },
         edgeFunctions: {
-          status: 'healthy', // Would need to check each function
-          totalFunctions: 10, // Approximate count
-          activeFunctions: 10,
+          status: 'healthy', // Note: Would need to check each function's health endpoint or Supabase API
+          totalFunctions: 10, // Note: Approximate count - would need to query Supabase API for actual count
+          activeFunctions: 10, // Note: Would need Supabase API to check which functions are deployed
         },
         subscriptions: subscriptionCounts,
         reports: {
@@ -253,12 +256,12 @@ const SystemHealthDashboard = () => {
             </TabsTrigger>
           </TabsList>
           
-          <TabsContent value="health" className="space-y-6 mt-6 flex-1 min-h-0 overflow-y-auto pr-2">
+          <TabsContent value="health" className="space-y-4 mt-4 flex-1 min-h-0 overflow-y-auto pr-2">
         {/* Header */}
-        <div className="flex items-center justify-between flex-col sm:flex-row gap-4">
+        <div className="flex items-center justify-between flex-col sm:flex-row gap-3 flex-shrink-0">
           <div>
-            <h1 className="text-3xl font-bold">System Health Dashboard</h1>
-            <p className="text-muted-foreground mt-1">
+            <h1 className="text-2xl sm:text-3xl font-bold">System Health Dashboard</h1>
+            <p className="text-xs sm:text-sm text-muted-foreground mt-1">
               Last updated: {new Date(metrics.lastUpdated).toLocaleString()}
             </p>
           </div>
@@ -266,6 +269,7 @@ const SystemHealthDashboard = () => {
             onClick={fetchHealthMetrics}
             disabled={refreshing}
             variant="outline"
+            size="sm"
           >
             <RefreshCw className={`h-4 w-4 mr-2 ${refreshing ? 'animate-spin' : ''}`} />
             Refresh
@@ -273,7 +277,7 @@ const SystemHealthDashboard = () => {
         </div>
 
         {/* System Status Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
           {/* Database Status */}
           <Card>
             <CardHeader>
@@ -324,7 +328,7 @@ const SystemHealthDashboard = () => {
         </div>
 
         {/* Metrics Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3">
           {/* Subscriptions */}
           <Card>
             <CardHeader className="pb-3">
@@ -431,40 +435,40 @@ const SystemHealthDashboard = () => {
         </div>
 
         {/* AI & Email Usage Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
           {/* AI Usage */}
           <Card>
-            <CardHeader>
+            <CardHeader className="pb-3">
               <div className="flex items-center gap-2">
-                <Bot className="h-5 w-5 text-primary" />
-                <CardTitle>AI Usage</CardTitle>
+                <Bot className="h-4 w-4 text-primary" />
+                <CardTitle className="text-base">AI Usage</CardTitle>
               </div>
             </CardHeader>
             <CardContent>
-              <div className="space-y-3">
+              <div className="space-y-2">
                 <div className="flex justify-between">
-                  <span className="text-sm text-muted-foreground">Total Requests</span>
-                  <span className="font-semibold">{metrics.aiUsage.totalRequests.toLocaleString()}</span>
+                  <span className="text-xs text-muted-foreground">Total Requests</span>
+                  <span className="font-semibold text-sm">{metrics.aiUsage.totalRequests.toLocaleString()}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-sm text-muted-foreground">Total Tokens</span>
-                  <span className="font-semibold">{metrics.aiUsage.totalTokens.toLocaleString()}</span>
+                  <span className="text-xs text-muted-foreground">Total Tokens</span>
+                  <span className="font-semibold text-sm">{metrics.aiUsage.totalTokens.toLocaleString()}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-sm text-muted-foreground">Today Requests</span>
-                  <span className="font-semibold text-blue-600">{metrics.aiUsage.todayRequests.toLocaleString()}</span>
+                  <span className="text-xs text-muted-foreground">Today Requests</span>
+                  <span className="font-semibold text-sm text-blue-600">{metrics.aiUsage.todayRequests.toLocaleString()}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-sm text-muted-foreground">Today Tokens</span>
-                  <span className="font-semibold text-blue-600">{metrics.aiUsage.todayTokens.toLocaleString()}</span>
+                  <span className="text-xs text-muted-foreground">Today Tokens</span>
+                  <span className="font-semibold text-sm text-blue-600">{metrics.aiUsage.todayTokens.toLocaleString()}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-sm text-muted-foreground">Avg Latency</span>
-                  <span className="font-semibold">{metrics.aiUsage.avgLatency}ms</span>
+                  <span className="text-xs text-muted-foreground">Avg Latency</span>
+                  <span className="font-semibold text-sm">{metrics.aiUsage.avgLatency}ms</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-sm text-muted-foreground">PII Detected</span>
-                  <span className="font-semibold text-orange-600">{metrics.aiUsage.piiDetected}</span>
+                  <span className="text-xs text-muted-foreground">PII Detected</span>
+                  <span className="font-semibold text-sm text-orange-600">{metrics.aiUsage.piiDetected}</span>
                 </div>
               </div>
             </CardContent>
@@ -472,39 +476,39 @@ const SystemHealthDashboard = () => {
 
           {/* Email Usage */}
           <Card>
-            <CardHeader>
+            <CardHeader className="pb-3">
               <div className="flex items-center gap-2">
-                <Mail className="h-5 w-5 text-primary" />
-                <CardTitle>Email Usage</CardTitle>
+                <Mail className="h-4 w-4 text-primary" />
+                <CardTitle className="text-base">Email Usage</CardTitle>
               </div>
             </CardHeader>
             <CardContent>
-              <div className="space-y-3">
+              <div className="space-y-2">
                 <div className="flex justify-between">
-                  <span className="text-sm text-muted-foreground">Total Sent</span>
-                  <span className="font-semibold text-green-600">{metrics.emailUsage.totalSent.toLocaleString()}</span>
+                  <span className="text-xs text-muted-foreground">Total Sent</span>
+                  <span className="font-semibold text-sm text-green-600">{metrics.emailUsage.totalSent.toLocaleString()}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-sm text-muted-foreground">Total Failed</span>
-                  <span className="font-semibold text-red-600">{metrics.emailUsage.totalFailed.toLocaleString()}</span>
+                  <span className="text-xs text-muted-foreground">Total Failed</span>
+                  <span className="font-semibold text-sm text-red-600">{metrics.emailUsage.totalFailed.toLocaleString()}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-sm text-muted-foreground">Today Sent</span>
-                  <span className="font-semibold text-blue-600">{metrics.emailUsage.todaySent.toLocaleString()}</span>
+                  <span className="text-xs text-muted-foreground">Today Sent</span>
+                  <span className="font-semibold text-sm text-blue-600">{metrics.emailUsage.todaySent.toLocaleString()}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-sm text-muted-foreground">Today Failed</span>
-                  <span className="font-semibold text-red-600">{metrics.emailUsage.todayFailed.toLocaleString()}</span>
+                  <span className="text-xs text-muted-foreground">Today Failed</span>
+                  <span className="font-semibold text-sm text-red-600">{metrics.emailUsage.todayFailed.toLocaleString()}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-sm text-muted-foreground">Pending</span>
-                  <span className="font-semibold text-yellow-600">{metrics.emailUsage.pending.toLocaleString()}</span>
+                  <span className="text-xs text-muted-foreground">Pending</span>
+                  <span className="font-semibold text-sm text-yellow-600">{metrics.emailUsage.pending.toLocaleString()}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-sm text-muted-foreground">Success Rate</span>
-                  <span className="font-semibold">
+                  <span className="text-xs text-muted-foreground">Success Rate</span>
+                  <span className="font-semibold text-sm">
                     {metrics.emailUsage.totalSent + metrics.emailUsage.totalFailed > 0
-                      ? Math.round((metrics.emailUsage.totalSent / (metrics.emailUsage.totalSent + metrics.emailUsage.totalFailed)) * 100)
+                      ? Math.round((metrics.emailUsage.totalSent / (metrics.emailUsage.totalFailed + metrics.emailUsage.totalSent)) * 100)
                       : 0}%
                   </span>
                 </div>
