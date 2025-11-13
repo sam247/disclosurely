@@ -421,4 +421,3 @@ async function escalateCase(
     { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
   )
 }
-

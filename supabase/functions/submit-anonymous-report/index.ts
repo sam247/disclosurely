@@ -442,6 +442,69 @@ serve(async (req) => {
     
     console.log('✅ Report created successfully:', report.id)
 
+    // 🔄 WORKFLOW AUTOMATION: Auto-assign and calculate SLA
+    console.log('🔄 Running workflow automation...')
+    try {
+      // Call case-workflow-engine for auto-assignment
+      const autoAssignResponse = await fetch(
+        `${Deno.env.get('SUPABASE_URL')}/functions/v1/case-workflow-engine`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')}`
+          },
+          body: JSON.stringify({
+            action: 'auto_assign',
+            reportId: report.id,
+            organizationId: linkData.organization_id
+          })
+        }
+      )
+
+      if (autoAssignResponse.ok) {
+        const autoAssignResult = await autoAssignResponse.json()
+        if (autoAssignResult.assigned_to) {
+          console.log('✅ Report auto-assigned via rule:', autoAssignResult.rule_name)
+        } else {
+          console.log('ℹ️ No matching assignment rule found')
+        }
+      } else {
+        console.warn('⚠️ Auto-assignment failed (non-blocking):', await autoAssignResponse.text())
+      }
+
+      // Call case-workflow-engine for SLA calculation
+      const slaResponse = await fetch(
+        `${Deno.env.get('SUPABASE_URL')}/functions/v1/case-workflow-engine`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')}`
+          },
+          body: JSON.stringify({
+            action: 'calculate_sla',
+            reportId: report.id,
+            organizationId: linkData.organization_id
+          })
+        }
+      )
+
+      if (slaResponse.ok) {
+        const slaResult = await slaResponse.json()
+        if (slaResult.success && slaResult.sla_deadline) {
+          console.log('✅ SLA deadline calculated:', slaResult.sla_deadline, `(${slaResult.hours}h)`)
+        } else {
+          console.log('ℹ️ No SLA policy configured for organization')
+        }
+      } else {
+        console.warn('⚠️ SLA calculation failed (non-blocking):', await slaResponse.text())
+      }
+    } catch (workflowError) {
+      // Don't block submission if workflow automation fails
+      console.error('⚠️ Workflow automation error (non-blocking):', workflowError)
+    }
+
     // 🤖 AUTO-TRIAGE: Trigger AI risk assessment immediately
     console.log('🤖 Starting auto-triage with AI...')
     try {

@@ -55,17 +55,17 @@ const DashboardSidebar = ({
     locked: !isOrgAdmin,
     ownerOnly: false
   }, {
-    title: t('audit'),
-    icon: ScrollText,
-    path: '/dashboard/audit',
-    locked: !isOrgAdmin,
-    ownerOnly: false
-  }, {
     title: 'Workflows',
     icon: Workflow,
     path: '/dashboard/workflows',
     locked: !isOrgAdmin,
     badge: 'NEW',
+    ownerOnly: false
+  }, {
+    title: t('audit'),
+    icon: ScrollText,
+    path: '/dashboard/audit',
+    locked: !isOrgAdmin,
     ownerOnly: false
   }, {
     title: 'Secure Link',
