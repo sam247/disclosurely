@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import {
   AlertDialog,
   AlertDialogContent,
@@ -9,9 +9,6 @@ import {
 } from '@/components/ui/alert-dialog';
 import { Button } from '@/components/ui/button';
 import { Shield, MapPin, Smartphone, Monitor, Tablet, LogOut } from 'lucide-react';
-import { supabase } from '@/integrations/supabase/client';
-import { useAuth } from '@/hooks/useAuth';
-import { useToast } from '@/hooks/use-toast';
 
 interface SessionInfo {
   id: string;
@@ -44,31 +41,15 @@ const MultipleSessionModal: React.FC<MultipleSessionModalProps> = ({
   onContinueOtherDevice,
   onLogoutEverywhere,
 }) => {
-  const { toast } = useToast();
-  const [mapUrl, setMapUrl] = useState<string>('');
-
-  useEffect(() => {
-    if (otherSession?.location_lat && otherSession?.location_lng) {
-      // Use OpenStreetMap static map image (more reliable than iframe)
-      const lat = otherSession.location_lat;
-      const lng = otherSession.location_lng;
-      // Static map image from OpenStreetMap
-      const mapUrl = `https://www.openstreetmap.org/?mlat=${lat}&mlon=${lng}&zoom=12#map=12/${lat}/${lng}`;
-      setMapUrl(mapUrl);
-    } else {
-      setMapUrl('');
-    }
-  }, [otherSession]);
-
   const getDeviceIcon = (deviceType: string | null) => {
     switch (deviceType?.toLowerCase()) {
       case 'mobile':
-        return <Smartphone className="h-5 w-5" />;
+        return <Smartphone className="h-4 w-4" />;
       case 'tablet':
-        return <Tablet className="h-5 w-5" />;
+        return <Tablet className="h-4 w-4" />;
       case 'desktop':
       default:
-        return <Monitor className="h-5 w-5" />;
+        return <Monitor className="h-4 w-4" />;
     }
   };
 
@@ -82,9 +63,7 @@ const MultipleSessionModal: React.FC<MultipleSessionModalProps> = ({
 
   const formatDevice = () => {
     if (!otherSession) return 'Unknown device';
-    // device_name already contains the formatted device info from the edge function
     if (otherSession.device_name) return otherSession.device_name;
-    // Fallback to browser and OS if device_name is not available
     const parts = [];
     if (otherSession.browser) parts.push(otherSession.browser);
     if (otherSession.os) parts.push(otherSession.os);
@@ -107,95 +86,58 @@ const MultipleSessionModal: React.FC<MultipleSessionModalProps> = ({
 
   return (
     <AlertDialog open={open}>
-      <AlertDialogContent className="w-[calc(100vw-2rem)] sm:w-full max-w-md p-0 gap-0 overflow-hidden">
-        {/* Header - Cleaner design */}
-        <AlertDialogHeader className="px-6 pt-6 pb-4">
-          <div className="flex items-center gap-3 mb-2">
-            <div className="h-10 w-10 rounded-full bg-amber-100 dark:bg-amber-900/30 flex items-center justify-center flex-shrink-0">
+      <AlertDialogContent className="max-w-md">
+        <AlertDialogHeader>
+          <div className="flex items-center gap-3 mb-1">
+            <div className="h-10 w-10 rounded-full bg-amber-100 dark:bg-amber-900/20 flex items-center justify-center flex-shrink-0">
               <Shield className="h-5 w-5 text-amber-600 dark:text-amber-500" />
             </div>
-            <AlertDialogTitle className="text-lg font-semibold">Multiple Sessions Detected</AlertDialogTitle>
+            <AlertDialogTitle className="text-lg">Multiple Sessions Detected</AlertDialogTitle>
           </div>
-          <AlertDialogDescription className="text-sm text-muted-foreground">
+          <AlertDialogDescription className="text-sm">
             Only one active session is allowed. Choose which device to continue on.
           </AlertDialogDescription>
         </AlertDialogHeader>
 
-        {/* Content - Simplified */}
-        <div className="px-6 pb-6">
-          {otherSession && (
-            <div className="bg-muted/50 rounded-lg p-4 border space-y-3">
-              {/* Device Info - Cleaner layout */}
-              <div className="flex items-center gap-3">
-                <div className="h-10 w-10 rounded-lg bg-background border flex items-center justify-center flex-shrink-0 text-muted-foreground">
-                  {getDeviceIcon(otherSession.device_type)}
-                </div>
-                <div className="flex-1 min-w-0">
-                  <p className="font-medium text-sm">{formatDevice()}</p>
-                  <div className="flex items-center gap-1.5 mt-1 text-xs text-muted-foreground">
-                    <MapPin className="h-3 w-3 flex-shrink-0" />
-                    <span className="truncate">{formatLocation()}</span>
-                  </div>
-                </div>
+        {otherSession && (
+          <div className="my-4 p-4 bg-muted/50 rounded-lg border space-y-3">
+            <div className="flex items-start gap-3">
+              <div className="h-9 w-9 rounded-md bg-background border flex items-center justify-center flex-shrink-0 text-muted-foreground mt-0.5">
+                {getDeviceIcon(otherSession.device_type)}
               </div>
-              
-              {/* Last active time */}
-              <div className="pt-2 border-t text-xs text-muted-foreground">
-                Last active: <span className="font-medium text-foreground">{formatTime(otherSession.last_activity_at)}</span>
-              </div>
-
-              {/* Map - Only show if location data exists */}
-              {otherSession.location_lat && otherSession.location_lng && (
-                <div className="mt-3 border rounded-md overflow-hidden bg-background">
-                  <a
-                    href={mapUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="block relative w-full bg-muted aspect-video"
-                  >
-                    <img
-                      src={`https://staticmap.openstreetmap.de/staticmap.php?center=${otherSession.location_lat},${otherSession.location_lng}&zoom=12&size=400x300&markers=${otherSession.location_lat},${otherSession.location_lng},red-pushpin`}
-                      alt="Login location"
-                      className="w-full h-full object-cover"
-                      onError={(e) => {
-                        const parent = e.currentTarget.parentElement;
-                        if (parent) {
-                          parent.innerHTML = '<div class="absolute inset-0 flex items-center justify-center text-xs text-muted-foreground">Map unavailable</div>';
-                        }
-                      }}
-                    />
-                  </a>
-                  <div className="px-3 py-2 bg-muted/50 text-xs text-center text-muted-foreground border-t">
-                    <a href={mapUrl} target="_blank" rel="noopener noreferrer" className="underline hover:text-foreground transition-colors">
-                      View on map
-                    </a>
-                  </div>
+              <div className="flex-1 min-w-0">
+                <p className="font-medium text-sm">{formatDevice()}</p>
+                <div className="flex items-center gap-1.5 mt-1 text-xs text-muted-foreground">
+                  <MapPin className="h-3 w-3 flex-shrink-0" />
+                  <span className="truncate">{formatLocation()}</span>
                 </div>
-              )}
+                <p className="text-xs text-muted-foreground mt-1.5">
+                  Last active: <span className="font-medium text-foreground">{formatTime(otherSession.last_activity_at)}</span>
+                </p>
+              </div>
             </div>
-          )}
-        </div>
-        
-        {/* Footer - Cleaner button layout */}
-        <AlertDialogFooter className="px-6 pb-6 pt-0 gap-3 flex-col sm:flex-row">
+          </div>
+        )}
+
+        <AlertDialogFooter className="flex-col gap-2 sm:flex-row sm:justify-end">
           <Button
             variant="default"
             onClick={onDismiss}
-            className="w-full sm:flex-1 order-2 sm:order-1"
+            className="w-full sm:w-auto"
           >
             Continue on this device
           </Button>
           <Button
             variant="outline"
             onClick={onContinueOtherDevice}
-            className="w-full sm:flex-1 order-3 sm:order-2"
+            className="w-full sm:w-auto"
           >
             Continue on other device
           </Button>
           <Button
             variant="ghost"
             onClick={onLogoutEverywhere}
-            className="w-full sm:w-auto order-1 sm:order-3 text-destructive hover:text-destructive hover:bg-destructive/10"
+            className="w-full sm:w-auto text-destructive hover:text-destructive hover:bg-destructive/10"
           >
             <LogOut className="h-4 w-4 mr-2" />
             Log out everywhere
@@ -207,4 +149,3 @@ const MultipleSessionModal: React.FC<MultipleSessionModalProps> = ({
 };
 
 export default MultipleSessionModal;
-
