@@ -62,19 +62,25 @@ export const FeatureFlagManager: React.FC = () => {
 
   const handleRolloutChange = async (featureName: string, percentage: number) => {
     try {
-      await updateFeatureFlag(featureName, { rollout_percentage: percentage });
+      const result = await updateFeatureFlag(featureName, { rollout_percentage: percentage });
       
-      queryClient.invalidateQueries({ queryKey: ['feature-flags'] });
+      if (!result) {
+        throw new Error('Update returned no data');
+      }
+      
+      // Invalidate and refetch
+      await queryClient.invalidateQueries({ queryKey: ['feature-flags'] });
+      await queryClient.refetchQueries({ queryKey: ['feature-flags'] });
       
       toast({
         title: 'Rollout Updated',
         description: `${featureName} now rolled out to ${percentage}% of organizations`,
       });
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error updating rollout:', error);
       toast({
         title: 'Error',
-        description: 'Failed to update rollout percentage',
+        description: error.message || 'Failed to update rollout percentage. Please check RLS policies.',
         variant: 'destructive',
       });
     }
@@ -89,8 +95,8 @@ export const FeatureFlagManager: React.FC = () => {
   }
 
   return (
-    <div className="space-y-4 sm:space-y-6">
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+    <div className="flex flex-col h-[calc(100vh-8rem)] gap-4 overflow-hidden">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 flex-shrink-0">
         <div>
           <h2 className="text-2xl sm:text-3xl font-bold">Feature Flags</h2>
           <p className="text-sm sm:text-base text-gray-500 mt-1">
@@ -103,14 +109,14 @@ export const FeatureFlagManager: React.FC = () => {
         </Badge>
       </div>
 
-      <Alert>
+      <Alert className="flex-shrink-0">
         <Info className="h-4 w-4" />
         <AlertDescription>
           <strong>Safety First:</strong> All new features are disabled by default. Enable for testing, then gradually roll out to production.
         </AlertDescription>
       </Alert>
 
-      <div className="grid gap-4">
+      <div className="grid gap-4 flex-1 min-h-0 overflow-y-auto pr-2">
         {flags?.map((flag) => {
           const icon = featureIcons[flag.feature_name] || <Flag className="h-5 w-5" />;
           const isUpdating = updating === flag.feature_name;
@@ -166,7 +172,20 @@ export const FeatureFlagManager: React.FC = () => {
                       </div>
                       <Slider
                         value={[flag.rollout_percentage]}
-                        onValueChange={(values) => handleRolloutChange(flag.feature_name, values[0])}
+                        onValueChange={(values) => {
+                          // Update optimistically
+                          const newValue = values[0];
+                          queryClient.setQueryData(['feature-flags'], (old: any) => {
+                            if (!old) return old;
+                            return old.map((f: any) => 
+                              f.feature_name === flag.feature_name 
+                                ? { ...f, rollout_percentage: newValue }
+                                : f
+                            );
+                          });
+                          // Then persist
+                          handleRolloutChange(flag.feature_name, newValue);
+                        }}
                         max={100}
                         step={5}
                         className="w-full"
@@ -203,7 +222,7 @@ export const FeatureFlagManager: React.FC = () => {
       </div>
 
       {/* Emergency Disable All Button */}
-      <Card className="border-red-200 bg-red-50">
+      <Card className="border-red-200 bg-red-50 flex-shrink-0">
         <CardHeader>
           <CardTitle className="flex flex-col sm:flex-row sm:items-center gap-2 text-red-700 text-lg sm:text-xl">
             <AlertTriangle className="h-5 w-5" />

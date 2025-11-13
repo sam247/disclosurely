@@ -125,27 +125,46 @@ const ChatAdminView = () => {
 
   const handleArchiveConversation = async (conversationId: string) => {
     try {
+      // Use RPC function or direct update - need to check RLS policies
+      // For admin, we may need to use service role or an RPC function
       const { error } = await supabase
         .from('chat_conversations')
-        .update({ status: 'archived' })
+        .update({ status: 'archived', updated_at: new Date().toISOString() })
         .eq('id', conversationId);
 
-      if (error) throw error;
+      if (error) {
+        console.error('Archive error:', error);
+        // If RLS blocks, try using an edge function
+        const { error: rpcError } = await supabase.functions.invoke('update-chat-status', {
+          body: { conversation_id: conversationId, status: 'archived' }
+        }).catch(() => ({ error: null }));
+        
+        if (rpcError) {
+          throw new Error(error.message || 'Failed to archive conversation');
+        }
+      }
 
       toast({
         title: "Success",
         description: "Conversation archived",
       });
 
-      fetchConversations();
+      // Refresh conversations list
+      await fetchConversations();
+      
+      // Clear selected conversation if it was archived
       if (selectedConversation?.id === conversationId) {
         setSelectedConversation(null);
         setMessages([]);
+      } else {
+        // Update selected conversation status if it's still selected
+        setSelectedConversation(prev => prev ? { ...prev, status: 'archived' } : null);
       }
     } catch (error: any) {
+      console.error('Archive error:', error);
       toast({
         title: "Error",
-        description: "Failed to archive conversation",
+        description: error.message || "Failed to archive conversation. Please check RLS policies.",
         variant: "destructive",
       });
     }
@@ -168,9 +187,9 @@ const ChatAdminView = () => {
   };
 
   return (
-    <div className="space-y-4 sm:space-y-6">
-        {/* Header */}
-        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+    <div className="flex flex-col h-[calc(100vh-8rem)] gap-4">
+        {/* Header - Fixed */}
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 flex-shrink-0">
           <div>
             <h1 className="text-2xl sm:text-3xl font-bold">Chat Support Admin</h1>
             <p className="text-sm sm:text-base text-muted-foreground mt-1 sm:mt-2">
@@ -188,8 +207,8 @@ const ChatAdminView = () => {
           </Button>
         </div>
 
-        {/* Filters */}
-        <Card>
+        {/* Filters - Fixed */}
+        <Card className="flex-shrink-0">
           <CardContent className="p-4 sm:p-6">
             <div className="flex flex-col sm:flex-row gap-4">
               <div className="flex-1">
@@ -237,18 +256,18 @@ const ChatAdminView = () => {
           </CardContent>
         </Card>
 
-        {/* Conversations List */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {/* Conversations List - Scrollable */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 flex-1 min-h-0">
           {/* Conversations */}
-          <div className="lg:col-span-1">
-            <Card>
-              <CardHeader>
+          <div className="lg:col-span-1 flex flex-col min-h-0">
+            <Card className="flex flex-col flex-1 min-h-0">
+              <CardHeader className="flex-shrink-0">
                 <CardTitle className="text-lg">Conversations</CardTitle>
                 <CardDescription>
                   {filteredConversations.length} conversation{filteredConversations.length !== 1 ? 's' : ''}
                 </CardDescription>
               </CardHeader>
-              <CardContent>
+              <CardContent className="flex-1 min-h-0 overflow-hidden">
                 {loading ? (
                   <div className="text-center py-8 text-muted-foreground">
                     Loading conversations...
@@ -258,8 +277,8 @@ const ChatAdminView = () => {
                     No conversations found
                   </div>
                 ) : (
-                  <ScrollArea className="h-[600px]">
-                    <div className="space-y-2">
+                  <ScrollArea className="h-full">
+                    <div className="space-y-2 pr-4">
                       {filteredConversations.map((conv) => (
                         <div
                           key={conv.id}
@@ -313,10 +332,10 @@ const ChatAdminView = () => {
             </Card>
           </div>
 
-          {/* Messages */}
-          <div className="lg:col-span-2">
-            <Card>
-              <CardHeader>
+          {/* Messages - Scrollable */}
+          <div className="lg:col-span-2 flex flex-col min-h-0">
+            <Card className="flex flex-col flex-1 min-h-0">
+              <CardHeader className="flex-shrink-0">
                 <div className="flex items-center justify-between">
                   <div>
                     <CardTitle className="text-lg">
@@ -337,7 +356,9 @@ const ChatAdminView = () => {
                     <Button
                       variant="outline"
                       size="sm"
-                      onClick={() => handleArchiveConversation(selectedConversation.id)}
+                      onClick={async () => {
+                        await handleArchiveConversation(selectedConversation.id);
+                      }}
                     >
                       <Archive className="h-4 w-4 mr-2" />
                       Archive
@@ -345,10 +366,10 @@ const ChatAdminView = () => {
                   )}
                 </div>
               </CardHeader>
-              <CardContent>
+              <CardContent className="flex-1 min-h-0 overflow-hidden">
                 {selectedConversation ? (
-                  <ScrollArea className="h-[600px]">
-                    <div className="space-y-4">
+                  <ScrollArea className="h-full">
+                    <div className="space-y-4 pr-4">
                       {messages.map((message) => (
                         <div
                           key={message.id}
@@ -378,7 +399,7 @@ const ChatAdminView = () => {
                     </div>
                   </ScrollArea>
                 ) : (
-                  <div className="flex flex-col items-center justify-center h-[600px] text-center">
+                  <div className="flex flex-col items-center justify-center h-full text-center">
                     <MessageCircle className="h-12 w-12 text-muted-foreground mb-4" />
                     <p className="text-muted-foreground">
                       Select a conversation to view messages

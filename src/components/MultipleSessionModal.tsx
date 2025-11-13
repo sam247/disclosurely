@@ -107,112 +107,99 @@ const MultipleSessionModal: React.FC<MultipleSessionModalProps> = ({
 
   return (
     <AlertDialog open={open}>
-      <AlertDialogContent className="w-[calc(100vw-1rem)] sm:w-[calc(100vw-2rem)] md:max-w-lg max-h-[90vh] sm:max-h-[85vh] flex flex-col p-0 overflow-hidden">
-        {/* Header */}
-        <AlertDialogHeader className="px-4 sm:px-6 pt-5 sm:pt-6 pb-4 border-b flex-shrink-0">
-          <div className="flex items-start gap-3">
-            <div className="h-10 w-10 sm:h-12 sm:w-12 rounded-full bg-amber-100 dark:bg-amber-900/20 flex items-center justify-center flex-shrink-0 mt-0.5">
-              <Shield className="h-5 w-5 sm:h-6 sm:w-6 text-amber-600 dark:text-amber-500" />
+      <AlertDialogContent className="w-[calc(100vw-2rem)] sm:w-full max-w-md p-0 gap-0 overflow-hidden">
+        {/* Header - Cleaner design */}
+        <AlertDialogHeader className="px-6 pt-6 pb-4">
+          <div className="flex items-center gap-3 mb-2">
+            <div className="h-10 w-10 rounded-full bg-amber-100 dark:bg-amber-900/30 flex items-center justify-center flex-shrink-0">
+              <Shield className="h-5 w-5 text-amber-600 dark:text-amber-500" />
             </div>
-            <div className="min-w-0 flex-1 pt-0.5">
-              <AlertDialogTitle className="text-base sm:text-lg font-semibold leading-tight">Multiple Login Session Detected</AlertDialogTitle>
-              <p className="text-xs sm:text-sm text-muted-foreground mt-1.5 sm:mt-2">
-                For security, only one active session is allowed at a time.
-              </p>
-            </div>
+            <AlertDialogTitle className="text-lg font-semibold">Multiple Sessions Detected</AlertDialogTitle>
           </div>
+          <AlertDialogDescription className="text-sm text-muted-foreground">
+            Only one active session is allowed. Choose which device to continue on.
+          </AlertDialogDescription>
         </AlertDialogHeader>
 
-        {/* Scrollable content area with visual indicator */}
-        <div className="flex-1 overflow-y-auto px-4 sm:px-6 py-4 sm:py-5 relative">
-          {/* Scroll fade indicator at bottom */}
-          <div className="pointer-events-none absolute bottom-0 left-0 right-0 h-8 bg-gradient-to-t from-background/80 to-transparent z-10" />
-          
-          <AlertDialogDescription className="text-left space-y-4">
-            {otherSession && (
-              <div className="bg-muted/50 rounded-lg p-4 sm:p-5 space-y-4 border">
-                {/* Device Info - more compact on mobile */}
-                <div className="flex items-start gap-3">
-                  <div className="mt-0.5 flex-shrink-0 text-muted-foreground">
-                    {getDeviceIcon(otherSession.device_type)}
-                  </div>
-                  <div className="flex-1 min-w-0 space-y-1.5">
-                    <p className="font-semibold text-sm sm:text-base break-words">{formatDevice()}</p>
-                    <div className="flex items-start gap-2 text-xs sm:text-sm text-muted-foreground">
-                      <MapPin className="h-3.5 w-3.5 sm:h-4 sm:w-4 flex-shrink-0 mt-0.5" />
-                      <span className="break-words leading-relaxed">{formatLocation()}</span>
-                    </div>
-                    <p className="text-xs sm:text-sm text-muted-foreground">
-                      Last active: <span className="font-medium">{formatTime(otherSession.last_activity_at)}</span>
-                    </p>
+        {/* Content - Simplified */}
+        <div className="px-6 pb-6">
+          {otherSession && (
+            <div className="bg-muted/50 rounded-lg p-4 border space-y-3">
+              {/* Device Info - Cleaner layout */}
+              <div className="flex items-center gap-3">
+                <div className="h-10 w-10 rounded-lg bg-background border flex items-center justify-center flex-shrink-0 text-muted-foreground">
+                  {getDeviceIcon(otherSession.device_type)}
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="font-medium text-sm">{formatDevice()}</p>
+                  <div className="flex items-center gap-1.5 mt-1 text-xs text-muted-foreground">
+                    <MapPin className="h-3 w-3 flex-shrink-0" />
+                    <span className="truncate">{formatLocation()}</span>
                   </div>
                 </div>
-
-                {/* Map display if location data available */}
-                {otherSession.location_lat && otherSession.location_lng && (
-                  <div className="mt-4 border rounded-lg overflow-hidden bg-background">
-                    <a
-                      href={mapUrl}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="block relative w-full bg-muted aspect-video sm:aspect-[16/9]"
-                    >
-                      <img
-                        src={`https://staticmap.openstreetmap.de/staticmap.php?center=${otherSession.location_lat},${otherSession.location_lng}&zoom=12&size=600x400&markers=${otherSession.location_lat},${otherSession.location_lng},red-pushpin`}
-                        alt="Login location"
-                        className="absolute inset-0 w-full h-full object-cover"
-                        onError={(e) => {
-                          // Fallback if static map fails - show placeholder
-                          const parent = e.currentTarget.parentElement;
-                          if (parent) {
-                            parent.innerHTML = '<div class="absolute inset-0 flex items-center justify-center text-xs text-muted-foreground">Map unavailable</div>';
-                          }
-                        }}
-                      />
-                    </a>
-                    <div className="p-2 sm:p-2.5 bg-muted/30 text-xs text-center text-muted-foreground border-t">
-                      Approximate location • <a href={mapUrl} target="_blank" rel="noopener noreferrer" className="underline hover:text-foreground transition-colors">View on map</a>
-                    </div>
-                  </div>
-                )}
               </div>
-            )}
+              
+              {/* Last active time */}
+              <div className="pt-2 border-t text-xs text-muted-foreground">
+                Last active: <span className="font-medium text-foreground">{formatTime(otherSession.last_activity_at)}</span>
+              </div>
 
-            <div className="pt-2 sm:pt-3">
-              <p className="text-sm sm:text-base font-semibold text-foreground">What would you like to do?</p>
+              {/* Map - Only show if location data exists */}
+              {otherSession.location_lat && otherSession.location_lng && (
+                <div className="mt-3 border rounded-md overflow-hidden bg-background">
+                  <a
+                    href={mapUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="block relative w-full bg-muted aspect-video"
+                  >
+                    <img
+                      src={`https://staticmap.openstreetmap.de/staticmap.php?center=${otherSession.location_lat},${otherSession.location_lng}&zoom=12&size=400x300&markers=${otherSession.location_lat},${otherSession.location_lng},red-pushpin`}
+                      alt="Login location"
+                      className="w-full h-full object-cover"
+                      onError={(e) => {
+                        const parent = e.currentTarget.parentElement;
+                        if (parent) {
+                          parent.innerHTML = '<div class="absolute inset-0 flex items-center justify-center text-xs text-muted-foreground">Map unavailable</div>';
+                        }
+                      }}
+                    />
+                  </a>
+                  <div className="px-3 py-2 bg-muted/50 text-xs text-center text-muted-foreground border-t">
+                    <a href={mapUrl} target="_blank" rel="noopener noreferrer" className="underline hover:text-foreground transition-colors">
+                      View on map
+                    </a>
+                  </div>
+                </div>
+              )}
             </div>
-          </AlertDialogDescription>
+          )}
         </div>
         
-        {/* Fixed footer with better mobile layout */}
-        <AlertDialogFooter className="flex-col gap-2.5 sm:gap-3 p-4 sm:p-6 border-t flex-shrink-0 bg-muted/30">
-          {/* Destructive action (mobile: top, desktop: top) */}
+        {/* Footer - Cleaner button layout */}
+        <AlertDialogFooter className="px-6 pb-6 pt-0 gap-3 flex-col sm:flex-row">
           <Button
-            variant="destructive"
+            variant="default"
+            onClick={onDismiss}
+            className="w-full sm:flex-1 order-2 sm:order-1"
+          >
+            Continue on this device
+          </Button>
+          <Button
+            variant="outline"
+            onClick={onContinueOtherDevice}
+            className="w-full sm:flex-1 order-3 sm:order-2"
+          >
+            Continue on other device
+          </Button>
+          <Button
+            variant="ghost"
             onClick={onLogoutEverywhere}
-            className="w-full text-sm sm:text-base h-11 sm:h-10 order-1"
+            className="w-full sm:w-auto order-1 sm:order-3 text-destructive hover:text-destructive hover:bg-destructive/10"
           >
             <LogOut className="h-4 w-4 mr-2" />
-            <span>Log out everywhere</span>
+            Log out everywhere
           </Button>
-          
-          {/* Primary actions (mobile: bottom, desktop: bottom) */}
-          <div className="flex flex-col sm:flex-row gap-2.5 sm:gap-3 w-full order-2">
-            <Button
-              variant="outline"
-              onClick={onContinueOtherDevice}
-              className="w-full sm:flex-1 text-sm sm:text-base h-11 sm:h-10"
-            >
-              <span>Continue on other device</span>
-            </Button>
-            <Button
-              variant="default"
-              onClick={onDismiss}
-              className="w-full sm:flex-1 text-sm sm:text-base h-11 sm:h-10"
-            >
-              <span>Continue on this device</span>
-            </Button>
-          </div>
         </AlertDialogFooter>
       </AlertDialogContent>
     </AlertDialog>

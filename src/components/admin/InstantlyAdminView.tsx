@@ -176,8 +176,8 @@ export const InstantlyAdminView = () => {
   };
 
   return (
-    <div className="space-y-4 sm:space-y-6">
-      <div>
+    <div className="flex flex-col h-[calc(100vh-8rem)] gap-4 overflow-hidden">
+      <div className="flex-shrink-0">
         <h2 className="text-xl sm:text-2xl font-bold mb-2">Instantly.ai Campaign Management</h2>
         <p className="text-sm sm:text-base text-gray-600">
           Manage cold email campaigns, send emails, and add leads to campaigns.
@@ -185,8 +185,8 @@ export const InstantlyAdminView = () => {
         </p>
       </div>
 
-      <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-        <TabsList className="grid w-full grid-cols-2 h-auto">
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full flex flex-col flex-1 min-h-0">
+        <TabsList className="grid w-full grid-cols-2 h-auto flex-shrink-0">
           <TabsTrigger value="send">
             <Send className="h-4 w-4 mr-2" />
             Send Email
@@ -197,7 +197,7 @@ export const InstantlyAdminView = () => {
           </TabsTrigger>
         </TabsList>
 
-        <TabsContent value="send" className="space-y-4">
+        <TabsContent value="send" className="space-y-4 flex-1 min-h-0 overflow-y-auto pr-2">
           <Card>
             <CardHeader>
               <CardTitle>Send Cold Email</CardTitle>
@@ -308,7 +308,7 @@ export const InstantlyAdminView = () => {
           </Card>
         </TabsContent>
 
-        <TabsContent value="campaign" className="space-y-4">
+        <TabsContent value="campaign" className="space-y-4 flex-1 min-h-0 overflow-y-auto pr-2">
           <Card>
             <CardHeader>
               <CardTitle>Add Leads to Campaign</CardTitle>

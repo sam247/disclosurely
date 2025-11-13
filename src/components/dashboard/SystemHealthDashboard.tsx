@@ -240,9 +240,9 @@ const SystemHealthDashboard = () => {
   };
 
   return (
-    <div className="space-y-4 sm:space-y-6">
-        <Tabs defaultValue="health" className="w-full">
-          <TabsList className="grid w-full max-w-md grid-cols-2">
+    <div className="flex flex-col h-[calc(100vh-8rem)] gap-4 overflow-hidden">
+        <Tabs defaultValue="health" className="w-full flex flex-col flex-1 min-h-0">
+          <TabsList className="grid w-full max-w-md grid-cols-2 flex-shrink-0">
             <TabsTrigger value="health">
               <Activity className="h-4 w-4 mr-2" />
               System Health
@@ -253,7 +253,7 @@ const SystemHealthDashboard = () => {
             </TabsTrigger>
           </TabsList>
           
-          <TabsContent value="health" className="space-y-6 mt-6">
+          <TabsContent value="health" className="space-y-6 mt-6 flex-1 min-h-0 overflow-y-auto pr-2">
         {/* Header */}
         <div className="flex items-center justify-between flex-col sm:flex-row gap-4">
           <div>
@@ -546,7 +546,7 @@ const SystemHealthDashboard = () => {
         </Card>
           </TabsContent>
           
-          <TabsContent value="monitoring" className="mt-6">
+          <TabsContent value="monitoring" className="mt-6 flex-1 min-h-0 overflow-y-auto pr-2">
             <MonitoringDashboard />
           </TabsContent>
         </Tabs>
