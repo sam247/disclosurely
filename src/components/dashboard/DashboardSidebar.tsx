@@ -1,3 +1,4 @@
+import React, { useState, useEffect } from 'react';
 import { Home, Bot, Users, Palette, Lock, BarChart3, ScrollText, Link as LinkIcon, MessageSquare, Info, FileText, Zap, Settings, Shield, Workflow, Flag, Activity, Mail, ChevronRight } from 'lucide-react';
 import { Separator } from '@/components/ui/separator';
 import { Badge } from '@/components/ui/badge';
@@ -130,6 +131,15 @@ const DashboardSidebar = ({
     }
   };
 
+  // Track admin menu open state
+  const isAdminOpen = location.pathname.startsWith('/dashboard/admin');
+  const [adminMenuOpen, setAdminMenuOpen] = useState(isAdminOpen);
+  
+  // Sync admin menu state with route
+  useEffect(() => {
+    setAdminMenuOpen(location.pathname.startsWith('/dashboard/admin'));
+  }, [location.pathname]);
+
   return (
     <Sidebar className="border-r">
       <SidebarHeader className="p-4">
@@ -154,27 +164,42 @@ const DashboardSidebar = ({
                 
                 // Handle Admin with sub-menu
                 if (isAdminItem && item.hasSubMenu) {
-                  const isAdminOpen = location.pathname.startsWith('/dashboard/admin');
                   return (
-                    <Collapsible key={item.path} open={isAdminOpen} asChild>
+                    <Collapsible key={item.path} open={adminMenuOpen} onOpenChange={setAdminMenuOpen}>
                       <SidebarMenuItem>
-                        <CollapsibleTrigger asChild>
-                          <SidebarMenuButton 
-                            className={cn(
-                              "w-full justify-start transition-colors px-4", 
-                              isActive && "bg-primary/10 text-primary font-medium"
-                            )}
-                          >
-                            <div className="flex items-center gap-3 w-full">
-                              <Icon className="flex-shrink-0 text-primary h-5 w-5" />
-                              <span className="flex-1">{item.title}</span>
+                        <SidebarMenuButton 
+                          onClick={() => {
+                            // Navigate to first admin sub-item (features) if not already on admin page
+                            if (!location.pathname.startsWith('/dashboard/admin')) {
+                              navigate('/dashboard/admin/features');
+                            } else {
+                              // Toggle menu if already on admin page
+                              setAdminMenuOpen(!adminMenuOpen);
+                            }
+                          }}
+                          className={cn(
+                            "w-full justify-start transition-colors px-4 cursor-pointer", 
+                            isActive && "bg-primary/10 text-primary font-medium"
+                          )}
+                        >
+                          <div className="flex items-center gap-3 w-full">
+                            <Icon className="flex-shrink-0 text-primary h-5 w-5" />
+                            <span className="flex-1">{item.title}</span>
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setAdminMenuOpen(!adminMenuOpen);
+                              }}
+                              className="p-0.5 hover:bg-primary/10 rounded transition-colors flex-shrink-0"
+                              aria-label="Toggle admin menu"
+                            >
                               <ChevronRight className={cn(
                                 "h-4 w-4 transition-transform",
-                                isAdminOpen && "rotate-90"
+                                adminMenuOpen && "rotate-90"
                               )} />
-                            </div>
-                          </SidebarMenuButton>
-                        </CollapsibleTrigger>
+                            </button>
+                          </div>
+                        </SidebarMenuButton>
                         <CollapsibleContent>
                           <SidebarMenuSub>
                             {adminSubMenuItems.map((subItem) => {
