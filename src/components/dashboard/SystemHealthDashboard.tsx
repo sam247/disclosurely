@@ -14,7 +14,9 @@ import {
   TrendingUp,
   Users,
   FileText,
-  BarChart3
+  BarChart3,
+  Bot,
+  Mail
 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
@@ -48,6 +50,21 @@ interface SystemHealthMetrics {
   organizations: {
     total: number;
     active: number;
+  };
+  aiUsage: {
+    totalRequests: number;
+    totalTokens: number;
+    todayRequests: number;
+    todayTokens: number;
+    avgLatency: number;
+    piiDetected: number;
+  };
+  emailUsage: {
+    totalSent: number;
+    totalFailed: number;
+    todaySent: number;
+    todayFailed: number;
+    pending: number;
   };
   lastUpdated: string;
 }
@@ -98,12 +115,43 @@ const SystemHealthDashboard = () => {
         .from('organizations')
         .select('id, created_at');
 
+      // Fetch AI usage metrics
+      const { data: aiLogs, error: aiLogsError } = await supabase
+        .from('ai_gateway_logs')
+        .select('total_tokens, latency_ms, pii_detected, created_at');
+
+      // Fetch email usage metrics
+      const { data: emailNotifications, error: emailError } = await supabase
+        .from('email_notifications')
+        .select('status, created_at, sent_at');
+
       // Count reports by status
       const activeReports = reports?.filter(r => r.status !== 'archived' && r.status !== 'resolved').length || 0;
       const archivedReports = reports?.filter(r => r.status === 'archived').length || 0;
       const today = new Date();
       today.setHours(0, 0, 0, 0);
       const todayReports = reports?.filter(r => new Date(r.created_at) >= today).length || 0;
+
+      // Calculate AI usage metrics
+      const aiUsageData = {
+        totalRequests: aiLogs?.length || 0,
+        totalTokens: aiLogs?.reduce((sum, log) => sum + (log.total_tokens || 0), 0) || 0,
+        todayRequests: aiLogs?.filter(log => new Date(log.created_at || '') >= today).length || 0,
+        todayTokens: aiLogs?.filter(log => new Date(log.created_at || '') >= today).reduce((sum, log) => sum + (log.total_tokens || 0), 0) || 0,
+        avgLatency: aiLogs && aiLogs.length > 0 
+          ? Math.round(aiLogs.reduce((sum, log) => sum + (log.latency_ms || 0), 0) / aiLogs.length)
+          : 0,
+        piiDetected: aiLogs?.filter(log => log.pii_detected === true).length || 0,
+      };
+
+      // Calculate email usage metrics
+      const emailUsageData = {
+        totalSent: emailNotifications?.filter(e => e.status === 'sent').length || 0,
+        totalFailed: emailNotifications?.filter(e => e.status === 'failed').length || 0,
+        todaySent: emailNotifications?.filter(e => e.status === 'sent' && new Date(e.sent_at || e.created_at || '') >= today).length || 0,
+        todayFailed: emailNotifications?.filter(e => e.status === 'failed' && new Date(e.created_at || '') >= today).length || 0,
+        pending: emailNotifications?.filter(e => e.status === 'pending').length || 0,
+      };
 
       // Count subscriptions by status
       const subscriptionCounts = {
@@ -135,6 +183,8 @@ const SystemHealthDashboard = () => {
           total: orgs?.length || 0,
           active: orgs?.filter(o => o.created_at).length || 0,
         },
+        aiUsage: aiUsageData,
+        emailUsage: emailUsageData,
         lastUpdated: new Date().toISOString(),
       };
 
@@ -153,7 +203,7 @@ const SystemHealthDashboard = () => {
 
   if (!isOwner) {
     return (
-      <div className="min-h-screen bg-background p-8">
+      <div className="flex items-center justify-center min-h-[400px]">
         <Card>
           <CardHeader>
             <CardTitle>Access Restricted</CardTitle>
@@ -168,12 +218,8 @@ const SystemHealthDashboard = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-background p-8">
-        <div className="max-w-7xl mx-auto">
-          <div className="flex items-center justify-center h-64">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-          </div>
-        </div>
+      <div className="flex items-center justify-center min-h-[400px]">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
       </div>
     );
   }
@@ -194,8 +240,7 @@ const SystemHealthDashboard = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background p-4 md:p-8">
-      <div className="max-w-7xl mx-auto space-y-6">
+    <div className="space-y-4 sm:space-y-6">
         <Tabs defaultValue="health" className="w-full">
           <TabsList className="grid w-full max-w-md grid-cols-2">
             <TabsTrigger value="health">
@@ -385,6 +430,89 @@ const SystemHealthDashboard = () => {
           </Card>
         </div>
 
+        {/* AI & Email Usage Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {/* AI Usage */}
+          <Card>
+            <CardHeader>
+              <div className="flex items-center gap-2">
+                <Bot className="h-5 w-5 text-primary" />
+                <CardTitle>AI Usage</CardTitle>
+              </div>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-3">
+                <div className="flex justify-between">
+                  <span className="text-sm text-muted-foreground">Total Requests</span>
+                  <span className="font-semibold">{metrics.aiUsage.totalRequests.toLocaleString()}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-sm text-muted-foreground">Total Tokens</span>
+                  <span className="font-semibold">{metrics.aiUsage.totalTokens.toLocaleString()}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-sm text-muted-foreground">Today Requests</span>
+                  <span className="font-semibold text-blue-600">{metrics.aiUsage.todayRequests.toLocaleString()}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-sm text-muted-foreground">Today Tokens</span>
+                  <span className="font-semibold text-blue-600">{metrics.aiUsage.todayTokens.toLocaleString()}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-sm text-muted-foreground">Avg Latency</span>
+                  <span className="font-semibold">{metrics.aiUsage.avgLatency}ms</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-sm text-muted-foreground">PII Detected</span>
+                  <span className="font-semibold text-orange-600">{metrics.aiUsage.piiDetected}</span>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Email Usage */}
+          <Card>
+            <CardHeader>
+              <div className="flex items-center gap-2">
+                <Mail className="h-5 w-5 text-primary" />
+                <CardTitle>Email Usage</CardTitle>
+              </div>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-3">
+                <div className="flex justify-between">
+                  <span className="text-sm text-muted-foreground">Total Sent</span>
+                  <span className="font-semibold text-green-600">{metrics.emailUsage.totalSent.toLocaleString()}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-sm text-muted-foreground">Total Failed</span>
+                  <span className="font-semibold text-red-600">{metrics.emailUsage.totalFailed.toLocaleString()}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-sm text-muted-foreground">Today Sent</span>
+                  <span className="font-semibold text-blue-600">{metrics.emailUsage.todaySent.toLocaleString()}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-sm text-muted-foreground">Today Failed</span>
+                  <span className="font-semibold text-red-600">{metrics.emailUsage.todayFailed.toLocaleString()}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-sm text-muted-foreground">Pending</span>
+                  <span className="font-semibold text-yellow-600">{metrics.emailUsage.pending.toLocaleString()}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-sm text-muted-foreground">Success Rate</span>
+                  <span className="font-semibold">
+                    {metrics.emailUsage.totalSent + metrics.emailUsage.totalFailed > 0
+                      ? Math.round((metrics.emailUsage.totalSent / (metrics.emailUsage.totalSent + metrics.emailUsage.totalFailed)) * 100)
+                      : 0}%
+                  </span>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+
         {/* Additional Information */}
         <Card>
           <CardHeader>
@@ -422,7 +550,6 @@ const SystemHealthDashboard = () => {
             <MonitoringDashboard />
           </TabsContent>
         </Tabs>
-      </div>
     </div>
   );
 };
