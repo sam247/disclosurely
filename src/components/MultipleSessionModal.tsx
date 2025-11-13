@@ -8,7 +8,7 @@ import {
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
 import { Button } from '@/components/ui/button';
-import { Shield, MapPin, Smartphone, Monitor, Tablet, LogOut, X } from 'lucide-react';
+import { Shield, MapPin, Smartphone, Monitor, Tablet, LogOut } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
@@ -107,29 +107,28 @@ const MultipleSessionModal: React.FC<MultipleSessionModalProps> = ({
 
   return (
     <AlertDialog open={open}>
-      <AlertDialogContent className="w-[calc(100vw-2rem)] sm:w-[calc(100vw-4rem)] md:max-w-lg max-h-[90vh] sm:max-h-[85vh] flex flex-col p-0 overflow-hidden">
+      <AlertDialogContent className="w-[calc(100vw-1rem)] sm:w-[calc(100vw-2rem)] md:max-w-lg max-h-[90vh] sm:max-h-[85vh] flex flex-col p-0 overflow-hidden">
         {/* Header */}
-        <AlertDialogHeader className="px-5 sm:px-6 pt-6 sm:pt-6 pb-4 border-b flex-shrink-0">
-          <div className="flex items-center gap-3">
-            <div className="h-10 w-10 rounded-full bg-amber-100 dark:bg-amber-900/20 flex items-center justify-center flex-shrink-0">
-              <Shield className="h-5 w-5 text-amber-600 dark:text-amber-500" />
+        <AlertDialogHeader className="px-4 sm:px-6 pt-5 sm:pt-6 pb-4 border-b flex-shrink-0">
+          <div className="flex items-start gap-3">
+            <div className="h-10 w-10 sm:h-12 sm:w-12 rounded-full bg-amber-100 dark:bg-amber-900/20 flex items-center justify-center flex-shrink-0 mt-0.5">
+              <Shield className="h-5 w-5 sm:h-6 sm:w-6 text-amber-600 dark:text-amber-500" />
             </div>
-            <div className="min-w-0 flex-1">
-              <AlertDialogTitle className="text-base sm:text-lg font-semibold">Multiple Login Session Detected</AlertDialogTitle>
+            <div className="min-w-0 flex-1 pt-0.5">
+              <AlertDialogTitle className="text-base sm:text-lg font-semibold leading-tight">Multiple Login Session Detected</AlertDialogTitle>
+              <p className="text-xs sm:text-sm text-muted-foreground mt-1.5 sm:mt-2">
+                For security, only one active session is allowed at a time.
+              </p>
             </div>
           </div>
         </AlertDialogHeader>
 
         {/* Scrollable content area with visual indicator */}
-        <div className="flex-1 overflow-y-auto px-5 sm:px-6 py-5 relative">
+        <div className="flex-1 overflow-y-auto px-4 sm:px-6 py-4 sm:py-5 relative">
           {/* Scroll fade indicator at bottom */}
           <div className="pointer-events-none absolute bottom-0 left-0 right-0 h-8 bg-gradient-to-t from-background/80 to-transparent z-10" />
           
           <AlertDialogDescription className="text-left space-y-4">
-            <p className="text-sm text-muted-foreground leading-relaxed">
-              We detected a login from another device. For security, only one active session is allowed at a time.
-            </p>
-
             {otherSession && (
               <div className="bg-muted/50 rounded-lg p-4 sm:p-5 space-y-4 border">
                 {/* Device Info - more compact on mobile */}
@@ -138,13 +137,13 @@ const MultipleSessionModal: React.FC<MultipleSessionModalProps> = ({
                     {getDeviceIcon(otherSession.device_type)}
                   </div>
                   <div className="flex-1 min-w-0 space-y-1.5">
-                    <p className="font-medium text-sm sm:text-base break-words">{formatDevice()}</p>
-                    <div className="flex items-start sm:items-center gap-2 text-xs text-muted-foreground">
-                      <MapPin className="h-3.5 w-3.5 flex-shrink-0 mt-0.5 sm:mt-0" />
-                      <span className="break-words">{formatLocation()}</span>
+                    <p className="font-semibold text-sm sm:text-base break-words">{formatDevice()}</p>
+                    <div className="flex items-start gap-2 text-xs sm:text-sm text-muted-foreground">
+                      <MapPin className="h-3.5 w-3.5 sm:h-4 sm:w-4 flex-shrink-0 mt-0.5" />
+                      <span className="break-words leading-relaxed">{formatLocation()}</span>
                     </div>
-                    <p className="text-xs text-muted-foreground">
-                      Last active: {formatTime(otherSession.last_activity_at)}
+                    <p className="text-xs sm:text-sm text-muted-foreground">
+                      Last active: <span className="font-medium">{formatTime(otherSession.last_activity_at)}</span>
                     </p>
                   </div>
                 </div>
@@ -171,7 +170,7 @@ const MultipleSessionModal: React.FC<MultipleSessionModalProps> = ({
                         }}
                       />
                     </a>
-                    <div className="p-2.5 bg-muted/30 text-xs text-center text-muted-foreground border-t">
+                    <div className="p-2 sm:p-2.5 bg-muted/30 text-xs text-center text-muted-foreground border-t">
                       Approximate location • <a href={mapUrl} target="_blank" rel="noopener noreferrer" className="underline hover:text-foreground transition-colors">View on map</a>
                     </div>
                   </div>
@@ -179,42 +178,41 @@ const MultipleSessionModal: React.FC<MultipleSessionModalProps> = ({
               </div>
             )}
 
-            <p className="text-sm font-medium pt-2">What would you like to do?</p>
+            <div className="pt-2 sm:pt-3">
+              <p className="text-sm sm:text-base font-semibold text-foreground">What would you like to do?</p>
+            </div>
           </AlertDialogDescription>
         </div>
         
         {/* Fixed footer with better mobile layout */}
-        <AlertDialogFooter className="flex-col-reverse sm:flex-row gap-3 p-5 sm:p-6 border-t flex-shrink-0 bg-muted/30">
-          {/* Primary actions (mobile: bottom, desktop: right) */}
-          <div className="flex flex-col-reverse sm:flex-row gap-2 sm:gap-3 flex-1">
-            <Button
-              variant="outline"
-              onClick={onDismiss}
-              className="w-full sm:flex-1 text-sm h-11"
-            >
-              <X className="h-4 w-4 sm:mr-2" />
-              <span className="hidden sm:inline">Continue on this device</span>
-              <span className="sm:hidden">Continue here</span>
-            </Button>
-            <Button
-              variant="outline"
-              onClick={onContinueOtherDevice}
-              className="w-full sm:flex-1 text-sm h-11"
-            >
-              <span className="hidden sm:inline">Continue on other device</span>
-              <span className="sm:hidden">Switch device</span>
-            </Button>
-          </div>
-          
-          {/* Destructive action (mobile: top, desktop: right) */}
+        <AlertDialogFooter className="flex-col gap-2.5 sm:gap-3 p-4 sm:p-6 border-t flex-shrink-0 bg-muted/30">
+          {/* Destructive action (mobile: top, desktop: top) */}
           <Button
             variant="destructive"
             onClick={onLogoutEverywhere}
-            className="w-full sm:w-auto text-sm h-11 sm:min-w-[180px]"
+            className="w-full text-sm sm:text-base h-11 sm:h-10 order-1"
           >
             <LogOut className="h-4 w-4 mr-2" />
             <span>Log out everywhere</span>
           </Button>
+          
+          {/* Primary actions (mobile: bottom, desktop: bottom) */}
+          <div className="flex flex-col sm:flex-row gap-2.5 sm:gap-3 w-full order-2">
+            <Button
+              variant="outline"
+              onClick={onContinueOtherDevice}
+              className="w-full sm:flex-1 text-sm sm:text-base h-11 sm:h-10"
+            >
+              <span>Continue on other device</span>
+            </Button>
+            <Button
+              variant="default"
+              onClick={onDismiss}
+              className="w-full sm:flex-1 text-sm sm:text-base h-11 sm:h-10"
+            >
+              <span>Continue on this device</span>
+            </Button>
+          </div>
         </AlertDialogFooter>
       </AlertDialogContent>
     </AlertDialog>

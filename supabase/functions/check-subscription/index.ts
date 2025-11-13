@@ -68,23 +68,51 @@ serve(async (req) => {
     }
     logStep("User authenticated", { userId: user.id, email: user.email });
 
+    // Get user's organization_id from profile
+    const { data: profile, error: profileError } = await supabaseClient
+      .from("profiles")
+      .select("organization_id")
+      .eq("id", user.id)
+      .eq("is_active", true)
+      .maybeSingle();
+
+    if (profileError || !profile?.organization_id) {
+      logStep("User has no organization", { error: profileError?.message });
+      return new Response(JSON.stringify({ 
+        subscribed: false,
+        subscription_tier: null,
+        subscription_end: null,
+        subscription_status: 'expired',
+        message: "User is not associated with an organization"
+      }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+        status: 200,
+      });
+    }
+
+    const organizationId = profile.organization_id;
+    logStep("User organization found", { organizationId });
+
     const stripe = new Stripe(stripeKey, { apiVersion: "2023-10-16" });
     
-    // First check if we have an existing customer record in our database
+    // Check if we have an existing subscription for this organization
     const { data: existingSubscriber } = await supabaseClient
       .from("subscribers")
-      .select("stripe_customer_id, subscribed, subscription_tier")
-      .eq("email", user.email)
-      .single();
+      .select("stripe_customer_id, subscribed, subscription_tier, email, user_id")
+      .eq("organization_id", organizationId)
+      .maybeSingle();
     
     logStep("Existing subscriber record", existingSubscriber);
 
-    // Look for Stripe customer by email
-    const customers = await stripe.customers.list({ email: user.email, limit: 1 });
+    // Look for Stripe customer by email (use existing subscriber's email if available, otherwise user's email)
+    const customerEmail = existingSubscriber?.email || user.email;
+    const customers = await stripe.customers.list({ email: customerEmail, limit: 1 });
     
     if (customers.data.length === 0) {
       logStep("No customer found, updating unsubscribed state");
+      // Upsert subscription record for organization (no Stripe customer yet)
       await supabaseClient.from("subscribers").upsert({
+        organization_id: organizationId,
         email: user.email,
         user_id: user.id,
         stripe_customer_id: null,
@@ -93,7 +121,7 @@ serve(async (req) => {
         subscription_end: null,
         subscription_status: 'expired',
         updated_at: new Date().toISOString(),
-      }, { onConflict: 'email' });
+      }, { onConflict: 'organization_id' });
       return new Response(JSON.stringify({ 
         subscribed: false,
         subscription_status: 'expired'
@@ -190,6 +218,7 @@ serve(async (req) => {
 
     // Always update the database with the latest info
     const updateData: any = {
+      organization_id: organizationId,
       email: user.email,
       user_id: user.id,
       stripe_customer_id: customerId,
@@ -204,7 +233,8 @@ serve(async (req) => {
       updateData.grace_period_ends_at = gracePeriodEndsAt;
     }
 
-    await supabaseClient.from("subscribers").upsert(updateData, { onConflict: 'email' });
+    // Upsert by organization_id (one subscription per organization)
+    await supabaseClient.from("subscribers").upsert(updateData, { onConflict: 'organization_id' });
 
     logStep("Updated database with subscription info", { subscribed: hasActiveSub, subscriptionTier, subscriptionStatus });
     

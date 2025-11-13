@@ -148,8 +148,36 @@ serve(async (req) => {
           }
         }
 
-        // Update or create subscriber record
+        // Get organization_id - try metadata first (from checkout), then user's profile
+        let organizationId: string | null = null;
+        
+        // Check metadata from checkout session (set during signup)
+        const metadataOrgId = session.metadata?.organization_id;
+        if (metadataOrgId && metadataOrgId !== '') {
+          organizationId = metadataOrgId;
+          console.log(`[STRIPE-WEBHOOK] Using organization_id from metadata: ${organizationId}`);
+        } else if (userId) {
+          // Fallback: get from user's profile
+          const { data: userProfile } = await supabaseClient
+            .from("profiles")
+            .select("organization_id")
+            .eq("id", userId)
+            .eq("is_active", true)
+            .maybeSingle();
+          organizationId = userProfile?.organization_id || null;
+          if (organizationId) {
+            console.log(`[STRIPE-WEBHOOK] Using organization_id from profile: ${organizationId}`);
+          }
+        }
+
+        if (!organizationId) {
+          console.error(`[STRIPE-WEBHOOK] User ${userId} has no organization, cannot create subscription`);
+          break;
+        }
+
+        // Update or create subscriber record by organization_id
         await supabaseClient.from("subscribers").upsert({
+          organization_id: organizationId,
           email: customer.email,
           user_id: userId,
           stripe_customer_id: customerId,
@@ -158,7 +186,7 @@ serve(async (req) => {
           subscription_end: subscriptionEnd,
           subscription_status: subscription.status === 'active' ? 'active' : subscription.status === 'trialing' ? 'trialing' : 'active',
           updated_at: new Date().toISOString(),
-        }, { onConflict: 'email' });
+        }, { onConflict: 'organization_id' });
 
         console.log(`[STRIPE-WEBHOOK] Updated subscription for ${customer.email} (user: ${userId || 'pending'})`);
         break;
@@ -191,24 +219,31 @@ serve(async (req) => {
         const tier = amount <= 1999 ? 'basic' : 'pro';
         const subscriptionEnd = new Date(subscription.current_period_end * 1000).toISOString();
 
-        // Get user_id from profiles table
+        // Get user_id and organization_id from profiles table
         const { data: profile } = await supabaseClient
           .from("profiles")
-          .select("id")
+          .select("id, organization_id")
           .eq("email", customer.email)
+          .eq("is_active", true)
           .maybeSingle();
 
-        // Update subscriber record
+        if (!profile?.organization_id) {
+          console.error(`[STRIPE-WEBHOOK] User ${profile?.id} has no organization, cannot update subscription`);
+          break;
+        }
+
+        // Update subscriber record by organization_id
         await supabaseClient.from("subscribers").upsert({
+          organization_id: profile.organization_id,
           email: customer.email,
-          user_id: profile?.id || null,
+          user_id: profile.id,
           stripe_customer_id: customerId,
           subscribed: true,
           subscription_tier: tier,
           subscription_end: subscriptionEnd,
           subscription_status: subscription.status === 'active' ? 'active' : subscription.status === 'trialing' ? 'trialing' : 'active',
           updated_at: new Date().toISOString(),
-        }, { onConflict: 'email' });
+        }, { onConflict: 'organization_id' });
 
         console.log(`[STRIPE-WEBHOOK] Renewed subscription for ${customer.email}`);
         break;
@@ -230,12 +265,22 @@ serve(async (req) => {
           break;
         }
 
-        // Update subscriber to past_due status
-        await supabaseClient.from("subscribers").update({
-          subscription_status: 'past_due',
-          last_payment_failed_at: new Date().toISOString(),
-          updated_at: new Date().toISOString(),
-        }).eq('email', customer.email);
+        // Get organization_id from profiles table
+        const { data: profile } = await supabaseClient
+          .from("profiles")
+          .select("organization_id")
+          .eq("email", customer.email)
+          .eq("is_active", true)
+          .maybeSingle();
+
+        if (profile?.organization_id) {
+          // Update subscriber to past_due status by organization_id
+          await supabaseClient.from("subscribers").update({
+            subscription_status: 'past_due',
+            last_payment_failed_at: new Date().toISOString(),
+            updated_at: new Date().toISOString(),
+          }).eq('organization_id', profile.organization_id);
+        }
 
         console.log(`[STRIPE-WEBHOOK] Marked subscription as past_due for ${customer.email}`);
         
@@ -263,13 +308,23 @@ serve(async (req) => {
         const gracePeriodEnds = new Date();
         gracePeriodEnds.setDate(gracePeriodEnds.getDate() + 7);
 
-        // Update subscriber to canceled status with grace period
-        await supabaseClient.from("subscribers").update({
-          subscribed: false,
-          subscription_status: 'canceled',
-          grace_period_ends_at: gracePeriodEnds.toISOString(),
-          updated_at: new Date().toISOString(),
-        }).eq('email', customer.email);
+        // Get organization_id from profiles table
+        const { data: profile } = await supabaseClient
+          .from("profiles")
+          .select("organization_id")
+          .eq("email", customer.email)
+          .eq("is_active", true)
+          .maybeSingle();
+
+        if (profile?.organization_id) {
+          // Update subscriber to canceled status with grace period by organization_id
+          await supabaseClient.from("subscribers").update({
+            subscribed: false,
+            subscription_status: 'canceled',
+            grace_period_ends_at: gracePeriodEnds.toISOString(),
+            updated_at: new Date().toISOString(),
+          }).eq('organization_id', profile.organization_id);
+        }
 
         console.log(`[STRIPE-WEBHOOK] Canceled subscription for ${customer.email}, grace period until ${gracePeriodEnds.toISOString()}`);
         
@@ -293,20 +348,35 @@ serve(async (req) => {
           break;
         }
 
-        // Get user_id from profiles table
+        // Get user_id and organization_id from profiles table
         const { data: profile } = await supabaseClient
           .from("profiles")
-          .select("id")
+          .select("id, organization_id")
           .eq("email", customer.email)
+          .eq("is_active", true)
           .maybeSingle();
+
+        if (!profile?.organization_id) {
+          console.error(`[STRIPE-WEBHOOK] User ${profile?.id} has no organization, cannot update subscription`);
+          break;
+        }
 
         // Get subscription details
         const priceId = subscription.items.data[0]?.price.id;
         const price = priceId ? await stripe.prices.retrieve(priceId) : null;
         const amount = price?.unit_amount || 0;
         
-        // Determine tier
-        const tier = amount <= 1999 ? 'basic' : 'pro';
+        // Determine tier using price IDs (more reliable)
+        let tier: string;
+        if (priceId === 'price_1SPigrL0ZFRbQvFnV3TSt0DR' || priceId === 'price_1SSb33L0ZFRbQvFnwwvZzyR0') {
+          tier = 'basic';
+        } else if (priceId === 'price_1SPigsL0ZFRbQvFnI1TzxUCT' || priceId === 'price_1SSb37L0ZFRbQvFnKKobOXBU') {
+          tier = 'pro';
+        } else {
+          // Fallback to amount-based logic
+          tier = amount <= 1999 ? 'basic' : 'pro';
+        }
+        
         const subscriptionEnd = new Date(subscription.current_period_end * 1000).toISOString();
 
         // Handle trial end - if subscription moves from trialing to active
@@ -321,9 +391,11 @@ serve(async (req) => {
           gracePeriodEndsAt = graceEnd.toISOString();
         }
 
-        // Update subscriber record
+        // Update subscriber record by organization_id
         const updateData: any = {
-          user_id: profile?.id || null,
+          organization_id: profile.organization_id,
+          email: customer.email,
+          user_id: profile.id,
           subscription_tier: tier,
           subscription_end: subscriptionEnd,
           subscription_status: subscription.status === 'active' ? 'active' : 
@@ -339,7 +411,7 @@ serve(async (req) => {
           updateData.grace_period_ends_at = gracePeriodEndsAt;
         }
 
-        await supabaseClient.from("subscribers").upsert(updateData, { onConflict: 'email' });
+        await supabaseClient.from("subscribers").upsert(updateData, { onConflict: 'organization_id' });
 
         console.log(`[STRIPE-WEBHOOK] Updated subscription for ${customer.email}`, { status: subscription.status, tier });
         break;

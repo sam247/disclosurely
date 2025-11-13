@@ -1,4 +1,4 @@
-import { AlertDialog, AlertDialogAction, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
+import { AlertDialog, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import { Button } from '@/components/ui/button';
 import { CreditCard, AlertTriangle, Clock } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
@@ -18,12 +18,15 @@ const SubscriptionExpiredModal = ({
 }: SubscriptionExpiredModalProps) => {
   const navigate = useNavigate();
 
-  const handleManageSubscription = () => {
+  const handleManageSubscription = (e?: React.MouseEvent) => {
+    e?.preventDefault();
+    e?.stopPropagation();
+    
     if (onManageSubscription) {
       onManageSubscription();
     } else {
-      // Use window.location to ensure navigation works even if modal is blocking
-      window.location.href = '/dashboard/settings';
+      // Close modal first, then navigate
+      navigate('/dashboard/settings?tab=subscription');
     }
   };
 
@@ -91,13 +94,13 @@ const SubscriptionExpiredModal = ({
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
-          <AlertDialogAction
+          <Button
             onClick={handleManageSubscription}
             className="w-full sm:w-auto"
           >
             <CreditCard className="h-4 w-4 mr-2" />
             Manage Subscription
-          </AlertDialogAction>
+          </Button>
         </AlertDialogFooter>
       </AlertDialogContent>
     </AlertDialog>

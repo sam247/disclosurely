@@ -44,9 +44,8 @@ const AuthenticatedApp = () => {
 
       
 
-      // If no profile exists, create one and mark as needs setup
+      // If no profile exists, create one (shouldn't happen with new signup flow, but handle legacy users)
       if (!profile) {
-        
         const { error: createError } = await supabase
           .from('profiles')
           .insert({
@@ -65,15 +64,14 @@ const AuthenticatedApp = () => {
           });
         }
         
+        // Legacy user without organization - redirect to setup
         setProfileStatus('needs_setup');
         return;
       }
 
-      
-
-      // If profile exists but no organization, needs setup
+      // If profile exists but no organization, needs setup (legacy users only)
+      // New signups create organization during signup, so this should be rare
       if (!profile.organization_id) {
-        
         setProfileStatus('needs_setup');
         return;
       }

@@ -38,11 +38,29 @@ serve(async (req) => {
 
     const user = userData.user;
 
-    // Check subscription status
+    // Get user's organization_id from profile
+    const { data: profile, error: profileError } = await supabaseClient
+      .from("profiles")
+      .select("organization_id")
+      .eq("id", user.id)
+      .eq("is_active", true)
+      .maybeSingle();
+
+    if (profileError || !profile?.organization_id) {
+      return new Response(JSON.stringify({ 
+        allowed: false, 
+        reason: "User is not associated with an organization" 
+      }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+        status: 200,
+      });
+    }
+
+    // Check subscription status by organization_id
     const { data: subscriber, error: subError } = await supabaseClient
       .from("subscribers")
       .select("subscribed, subscription_end, subscription_status, grace_period_ends_at")
-      .eq("user_id", user.id)
+      .eq("organization_id", profile.organization_id)
       .maybeSingle();
 
     if (subError || !subscriber) {

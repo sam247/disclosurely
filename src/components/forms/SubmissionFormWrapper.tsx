@@ -151,51 +151,20 @@ const SubmissionFormWrapper = () => {
 
   const fetchSubscriptionTier = async (organizationId: string) => {
     try {
-      // Get organization admins from user_roles table
-      const { data: orgAdminRoles, error: rolesError } = await supabase
-        .from('user_roles')
-        .select('user_id')
+      // Query subscription directly by organization_id
+      const { data: subscription, error: subsError } = await supabase
+        .from('subscribers')
+        .select('subscribed, subscription_tier')
         .eq('organization_id', organizationId)
-        .eq('role', 'org_admin')
-        .eq('is_active', true);
+        .maybeSingle();
 
-      if (rolesError) {
-        return null;
-      }
-
-      const adminUserIds = (orgAdminRoles || []).map(r => r.user_id);
-      
-      if (adminUserIds.length === 0) {
-        return null;
-      }
-
-      const { data: orgAdmins, error: adminsError } = await supabase
-        .from('profiles')
-        .select('email')
-        .in('id', adminUserIds)
-        .eq('is_active', true);
-
-      if (adminsError) {
+      if (subsError || !subscription) {
         return;
       }
 
-      const adminEmails = (orgAdmins || []).map(a => a.email).filter((e): e is string => Boolean(e));
-
-      if (adminEmails.length > 0) {
-        const { data: subs, error: subsError } = await supabase
-          .from('subscribers')
-          .select('email, subscribed, subscription_tier')
-          .in('email', adminEmails);
-
-        if (subsError) {
-          return;
-        }
-
-        const anyActive = subs?.some(s => s.subscribed) ?? false;
-        const tierRaw = subs?.find(s => s.subscribed)?.subscription_tier ?? subs?.[0]?.subscription_tier ?? null;
-        const normalizedTier = tierRaw === 'starter' ? 'basic' : tierRaw; // normalize historic values
-
-        if (anyActive && normalizedTier) {
+      if (subscription.subscribed) {
+        const normalizedTier = subscription.subscription_tier === 'starter' ? 'basic' : subscription.subscription_tier;
+        if (normalizedTier) {
           setSubscriptionTier(normalizedTier as 'basic' | 'pro');
         }
       }
@@ -206,75 +175,80 @@ const SubmissionFormWrapper = () => {
 
   const checkSubscriptionStatus = async (organizationId: string) => {
     try {
-      // Get organization admins from user_roles table
-      const { data: orgAdminRoles, error: rolesError } = await supabase
-        .from('user_roles')
-        .select('user_id')
+      // Query subscription directly by organization_id
+      const { data: subscription, error: subsError } = await supabase
+        .from('subscribers')
+        .select('subscribed, subscription_tier, subscription_end, subscription_status, grace_period_ends_at')
         .eq('organization_id', organizationId)
-        .eq('role', 'org_admin')
-        .eq('is_active', true);
+        .maybeSingle();
 
-      if (rolesError || !orgAdminRoles || orgAdminRoles.length === 0) {
+      if (subsError || !subscription) {
+        // No subscription found - allow submission (might be free tier or new org)
         return;
       }
 
-      const adminUserIds = orgAdminRoles.map(r => r.user_id);
-
-      const { data: orgAdmins, error: adminsError } = await supabase
-        .from('profiles')
-        .select('email')
-        .in('id', adminUserIds)
-        .eq('is_active', true);
-
-      if (adminsError || !orgAdmins || orgAdmins.length === 0) {
-        return;
-      }
-
-      const adminEmails = orgAdmins.map(a => a.email).filter((e): e is string => Boolean(e));
-
-      if (adminEmails.length > 0) {
-        const { data: subs, error: subsError } = await supabase
-          .from('subscribers')
-          .select('email, subscribed, subscription_tier, subscription_end, subscription_status, grace_period_ends_at')
-          .in('email', adminEmails);
-
-        if (subsError || !subs || subs.length === 0) {
-          return;
-        }
-
-        // Check if any admin has an active subscription
-        const now = new Date();
-        const hasActiveSubscription = subs.some(sub => {
-          if (!sub.subscribed) return false;
-          
-          // Check subscription_end
-          if (sub.subscription_end) {
-            const subscriptionEnd = new Date(sub.subscription_end);
-            if (subscriptionEnd < now) {
-              // Check grace period
-              if (sub.grace_period_ends_at) {
-                const gracePeriodEnds = new Date(sub.grace_period_ends_at);
-                return gracePeriodEnds > now;
-              }
-              return false;
-            }
-          }
-          
-          // Check subscription_status
-          if (sub.subscription_status === 'expired' || sub.subscription_status === 'canceled') {
-            return false;
-          }
-          
-          return true;
+      // Check if subscription is active
+      if (!subscription.subscribed) {
+        toast({
+          title: "Subscription Expired",
+          description: "This organization's subscription has expired. Report submissions are currently unavailable.",
+          variant: "destructive",
         });
+        navigate('/404');
+        return;
+      }
 
-        if (!hasActiveSubscription) {
+      // Check subscription_end and grace period
+      const now = new Date();
+      if (subscription.subscription_end) {
+        const subscriptionEnd = new Date(subscription.subscription_end);
+        if (subscriptionEnd < now) {
+          // Check grace period
+          if (subscription.grace_period_ends_at) {
+            const gracePeriodEnds = new Date(subscription.grace_period_ends_at);
+            if (gracePeriodEnds <= now) {
+              toast({
+                title: "Subscription Expired",
+                description: "This organization's subscription has expired. Report submissions are currently unavailable.",
+                variant: "destructive",
+              });
+              navigate('/404');
+              return;
+            }
+          } else {
+            toast({
+              title: "Subscription Expired",
+              description: "This organization's subscription has expired. Report submissions are currently unavailable.",
+              variant: "destructive",
+            });
+            navigate('/404');
+            return;
+          }
+        }
+      }
+
+      // Check subscription_status
+      if (subscription.subscription_status === 'expired' || subscription.subscription_status === 'canceled') {
+        // Check if in grace period
+        if (subscription.grace_period_ends_at) {
+          const gracePeriodEnds = new Date(subscription.grace_period_ends_at);
+          if (gracePeriodEnds <= now) {
+            toast({
+              title: "Subscription Expired",
+              description: "This organization's subscription has expired. Report submissions are currently unavailable.",
+              variant: "destructive",
+            });
+            navigate('/404');
+            return;
+          }
+        } else {
           toast({
             title: "Subscription Expired",
             description: "This organization's subscription has expired. Report submissions are currently unavailable.",
             variant: "destructive",
           });
           navigate('/404');
+          return;
         }
       }
     } catch (error) {

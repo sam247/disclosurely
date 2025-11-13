@@ -27,7 +27,7 @@ serve(async (req) => {
     logStep("Function started");
 
     // interval can be 'month', 'monthly', 'year', or 'annual' (frontend sends 'monthly' or 'annual')
-    const { tier, employee_count, rdt_cid, interval = 'month', email } = await req.json();
+    const { tier, employee_count, rdt_cid, interval = 'month', email, organization_id } = await req.json();
     if (!tier || !employee_count) {
       throw new Error("Missing required fields: tier and employee_count");
     }
@@ -37,6 +37,8 @@ serve(async (req) => {
     let userEmail: string;
     let userId: string | null = null;
 
+    let organizationId: string | null = null;
+    
     if (authHeader) {
       const token = authHeader.replace("Bearer ", "");
       const { data } = await supabaseClient.auth.getUser(token);
@@ -44,6 +46,27 @@ serve(async (req) => {
         userEmail = data.user.email;
         userId = data.user.id;
         logStep("User authenticated", { userId, email: userEmail });
+        
+        // Get user's organization_id
+        const { data: profile } = await supabaseClient
+          .from("profiles")
+          .select("organization_id")
+          .eq("id", userId)
+          .eq("is_active", true)
+          .maybeSingle();
+        
+        // Try to get organization_id from request body first (for new signups), then profile
+        if (organization_id && organization_id !== '') {
+          organizationId = organization_id;
+          logStep("Organization ID provided in request", { organizationId });
+        } else {
+          organizationId = profile?.organization_id || null;
+          if (organizationId) {
+            logStep("User organization found in profile", { organizationId });
+          } else {
+            logStep("User has no organization - subscription will require organization setup", { userId });
+          }
+        }
       } else {
         // Auth header provided but invalid - use email from body if provided
         if (!email) throw new Error("Invalid authentication and no email provided");
@@ -142,6 +165,7 @@ serve(async (req) => {
       metadata: {
         user_id: userId || '',
         email: userEmail,
+        organization_id: organizationId || '',
         tier: tier,
         employee_count: employee_count.toString(),
         interval: interval === 'year' || interval === 'annual' ? 'year' : 'month',

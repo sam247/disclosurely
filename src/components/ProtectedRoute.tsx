@@ -103,8 +103,11 @@ const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
           subscriptionStatus={statusForModal || 'expired'}
           gracePeriodEndsAt={subscriptionData.grace_period_ends_at}
           onManageSubscription={() => {
-            // Navigate to settings page
-            window.location.href = '/dashboard/settings';
+            setShowSubscriptionModal(false);
+            // Use setTimeout to ensure modal closes before navigation
+            setTimeout(() => {
+              window.location.href = '/dashboard/settings?tab=subscription';
+            }, 100);
           }}
         />
         <div className="min-h-screen flex items-center justify-center">
@@ -131,8 +134,10 @@ const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
           gracePeriodEndsAt={subscriptionData?.grace_period_ends_at}
           onManageSubscription={() => {
             setShowSubscriptionModal(false);
-            // Navigate to settings page
-            window.location.href = '/dashboard/settings';
+            // Use setTimeout to ensure modal closes before navigation
+            setTimeout(() => {
+              window.location.href = '/dashboard/settings?tab=subscription';
+            }, 100);
           }}
         />
       )}

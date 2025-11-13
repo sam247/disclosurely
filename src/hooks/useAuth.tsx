@@ -85,11 +85,29 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     // }
 
     // First try direct database query for speed (no edge function)
+    // Get user's organization_id first, then query subscription
     try {
+      // Get user's organization_id from profile
+      const { data: profile, error: profileError } = await supabase
+        .from('profiles')
+        .select('organization_id')
+        .eq('id', userToUse.id)
+        .eq('is_active', true)
+        .maybeSingle();
+
+      if (profileError || !profile?.organization_id) {
+        // User has no organization - set default subscription data
+        const defaultData = { subscribed: false };
+        setSubscriptionData(defaultData);
+        sessionStorage.removeItem('subscription_data');
+        return;
+      }
+
+      // Query subscription by organization_id
       const { data: directData, error: directError } = await supabase
         .from('subscribers')
         .select('subscribed, subscription_tier, subscription_end, subscription_status, grace_period_ends_at')
-        .eq('user_id', userToUse.id)
+        .eq('organization_id', profile.organization_id)
         .maybeSingle();
 
       if (!directError && directData) {

@@ -13,6 +13,8 @@ const SignupForm = () => {
   const [confirmPassword, setConfirmPassword] = useState('');
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
+  const [organizationName, setOrganizationName] = useState('');
+  const [organizationDomain, setOrganizationDomain] = useState('');
   const [loading, setLoading] = useState(false);
   const [googleLoading, setGoogleLoading] = useState(false);
   const navigate = useNavigate();
@@ -30,12 +32,22 @@ const SignupForm = () => {
       return;
     }
 
+    if (!organizationName.trim() || !organizationDomain.trim()) {
+      toast({
+        title: "Error",
+        description: "Please provide your organization name and domain",
+        variant: "destructive",
+      });
+      return;
+    }
+
     setLoading(true);
 
     try {
       const redirectUrl = `https://app.disclosurely.com/dashboard`;
       
-      const { error } = await supabase.auth.signUp({
+      // Step 1: Create auth user
+      const { data: authData, error: authError } = await supabase.auth.signUp({
         email,
         password,
         options: {
@@ -47,23 +59,82 @@ const SignupForm = () => {
         },
       });
 
-      if (error) {
+      if (authError) {
         toast({
           title: "Signup Failed",
-          description: error.message,
+          description: authError.message,
           variant: "destructive",
         });
-      } else {
-        toast({
-          title: "Success",
-          description: "Account created! Please check your email to verify your account.",
-        });
-        window.location.href = 'https://app.disclosurely.com/auth/login';
+        setLoading(false);
+        return;
       }
-    } catch (error) {
+
+      if (!authData.user) {
+        toast({
+          title: "Error",
+          description: "Failed to create account",
+          variant: "destructive",
+        });
+        setLoading(false);
+        return;
+      }
+
+      // Step 2: Create organization
+      const { data: orgData, error: orgError } = await supabase
+        .from('organizations')
+        .insert({
+          name: organizationName.trim(),
+          domain: organizationDomain.toLowerCase().trim().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, ''),
+          description: `${organizationName} organization`,
+        })
+        .select()
+        .single();
+
+      if (orgError) {
+        console.error('Organization creation error:', orgError);
+        toast({
+          title: "Error",
+          description: `Failed to create organization: ${orgError.message}`,
+          variant: "destructive",
+        });
+        setLoading(false);
+        return;
+      }
+
+      // Step 3: Create profile with organization_id
+      const { error: profileError } = await supabase
+        .from('profiles')
+        .upsert({
+          id: authData.user.id,
+          email: email,
+          first_name: firstName,
+          last_name: lastName,
+          organization_id: orgData.id,
+          role: 'org_admin',
+          is_active: true,
+        });
+
+      if (profileError) {
+        console.error('Profile creation error:', profileError);
+        toast({
+          title: "Error",
+          description: `Account created but failed to set up organization: ${profileError.message}`,
+          variant: "destructive",
+        });
+        setLoading(false);
+        return;
+      }
+
+      toast({
+        title: "Success",
+        description: "Account created! Please check your email to verify your account.",
+      });
+      window.location.href = 'https://app.disclosurely.com/auth/login';
+    } catch (error: any) {
+      console.error('Signup error:', error);
       toast({
         title: "Error",
-        description: "An unexpected error occurred",
+        description: error.message || "An unexpected error occurred",
         variant: "destructive",
       });
     } finally {
@@ -216,6 +287,48 @@ const SignupForm = () => {
               onChange={(e) => setConfirmPassword(e.target.value)}
               placeholder="Confirm your password"
             />
+          </div>
+        </div>
+
+        <div className="pt-4 border-t">
+          <p className="text-sm font-medium text-gray-900 mb-4">Organization Details</p>
+          <div>
+            <Label htmlFor="organizationName">Organization Name</Label>
+            <div className="mt-1">
+              <Input
+                id="organizationName"
+                name="organizationName"
+                type="text"
+                required
+                value={organizationName}
+                onChange={(e) => {
+                  setOrganizationName(e.target.value);
+                  // Auto-generate domain suggestion
+                  if (!organizationDomain) {
+                    const suggested = e.target.value.toLowerCase().replace(/[^a-z0-9]/g, '-');
+                    setOrganizationDomain(suggested);
+                  }
+                }}
+                placeholder="Your company name"
+              />
+            </div>
+          </div>
+          <div className="mt-4">
+            <Label htmlFor="organizationDomain">Organization Domain</Label>
+            <div className="mt-1">
+              <Input
+                id="organizationDomain"
+                name="organizationDomain"
+                type="text"
+                required
+                value={organizationDomain}
+                onChange={(e) => setOrganizationDomain(e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, ''))}
+                placeholder="your-company"
+              />
+              <p className="mt-1 text-xs text-gray-500">
+                Used for your submission links (e.g., disclosurely.com/{organizationDomain || 'your-company'})
+              </p>
+            </div>
           </div>
         </div>
 
