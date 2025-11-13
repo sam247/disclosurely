@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { 
   Activity, 
   Database, 
@@ -14,7 +13,6 @@ import {
   TrendingUp,
   Users,
   FileText,
-  BarChart3,
   Bot,
   Mail
 } from 'lucide-react';
@@ -22,7 +20,6 @@ import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/hooks/useAuth';
 import { useUserRoles } from '@/hooks/useUserRoles';
-import MonitoringDashboard from './MonitoringDashboard';
 
 interface SystemHealthMetrics {
   database: {
@@ -244,19 +241,7 @@ const SystemHealthDashboard = () => {
 
   return (
     <div className="flex flex-col h-[calc(100vh-8rem)] gap-4 overflow-hidden">
-        <Tabs defaultValue="health" className="w-full flex flex-col flex-1 min-h-0">
-          <TabsList className="grid w-full max-w-md grid-cols-2 flex-shrink-0">
-            <TabsTrigger value="health">
-              <Activity className="h-4 w-4 mr-2" />
-              System Health
-            </TabsTrigger>
-            <TabsTrigger value="monitoring">
-              <BarChart3 className="h-4 w-4 mr-2" />
-              Monitoring
-            </TabsTrigger>
-          </TabsList>
-          
-          <TabsContent value="health" className="space-y-4 mt-4 flex-1 min-h-0 overflow-y-auto pr-2">
+      <div className="space-y-4 flex-1 min-h-0 overflow-y-auto pr-2">
         {/* Header */}
         <div className="flex items-center justify-between flex-col sm:flex-row gap-3 flex-shrink-0">
           <div>
@@ -517,12 +502,7 @@ const SystemHealthDashboard = () => {
           </Card>
         </div>
 
-          </TabsContent>
-          
-          <TabsContent value="monitoring" className="mt-6 flex-1 min-h-0 overflow-y-auto pr-2">
-            <MonitoringDashboard />
-          </TabsContent>
-        </Tabs>
+      </div>
     </div>
   );
 };

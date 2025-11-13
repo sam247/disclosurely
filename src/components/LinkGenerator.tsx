@@ -188,8 +188,8 @@ const LinkGenerator = () => {
   }, [organizationInfo?.active_url_type]);
 
   // Fetch the primary active link
-  const { data: primaryLink, isLoading } = useQuery({
-    queryKey: ['primary-link'],
+  const { data: primaryLink, isLoading, refetch: refetchPrimaryLink } = useQuery({
+    queryKey: ['primary-link', user?.id],
     queryFn: async () => {
       if (!user) return null;
 
@@ -201,13 +201,56 @@ const LinkGenerator = () => {
 
       if (!profile?.organization_id) return null;
 
-      const { data: links } = await supabase
+      // First, try to get active links
+      let { data: links } = await supabase
         .from('organization_links')
         .select('*')
         .eq('organization_id', profile.organization_id)
         .eq('is_active', true)
         .order('created_at', { ascending: false })
         .limit(1);
+
+      // If no active link, get any link (including inactive)
+      if (!links || links.length === 0) {
+        const { data: allLinks } = await supabase
+          .from('organization_links')
+          .select('*')
+          .eq('organization_id', profile.organization_id)
+          .order('created_at', { ascending: false })
+          .limit(1);
+        links = allLinks;
+      }
+
+      // If still no link exists, create a default one
+      if (!links || links.length === 0) {
+        // Create default link
+        const { data: org } = await supabase
+          .from('organizations')
+          .select('name')
+          .eq('id', profile.organization_id)
+          .single();
+
+        const { data: newLink, error: createError } = await supabase
+          .from('organization_links')
+          .insert({
+            organization_id: profile.organization_id,
+            name: org?.name || 'Default Submission Link',
+            description: 'Default secure submission link',
+            is_active: true,
+            default_language: 'en',
+            available_languages: ['en'],
+            created_by: user.id
+          })
+          .select()
+          .single();
+
+        if (createError) {
+          console.error('Error creating default link:', createError);
+          return null;
+        }
+
+        links = [newLink];
+      }
 
       const link = links?.[0];
       if (link && link.available_languages) {
@@ -487,8 +530,25 @@ const LinkGenerator = () => {
     };
   }, [brandedUrl, primaryDomain, primaryLink?.link_token, customDomains, user]);
 
-  if (isLoading || !primaryLink) {
-    return null;
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center py-8">
+        <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+      </div>
+    );
+  }
+
+  if (!primaryLink) {
+    return (
+      <Card>
+        <CardHeader>
+          <CardTitle>Secure Report Link</CardTitle>
+          <CardDescription>
+            No active link found. Please contact support to set up your secure submission portal.
+          </CardDescription>
+        </CardHeader>
+      </Card>
+    );
   }
 
   // Generate subdomain URL if organization has a domain slug
