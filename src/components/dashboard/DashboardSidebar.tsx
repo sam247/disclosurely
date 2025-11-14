@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Home, Bot, Users, Palette, Lock, BarChart3, ScrollText, Link as LinkIcon, MessageSquare, Info, FileText, Zap, Settings, Shield, Workflow, Flag, Activity, Mail, ChevronRight } from 'lucide-react';
+import { Home, Bot, Users, Palette, Lock, BarChart3, ScrollText, Link as LinkIcon, MessageSquare, Info, FileText, Zap, Settings, Shield, Workflow, Flag, Activity, ChevronRight } from 'lucide-react';
 import { Separator } from '@/components/ui/separator';
 import { Badge } from '@/components/ui/badge';
 import { useLocation, useNavigate } from 'react-router-dom';
@@ -115,11 +115,6 @@ const DashboardSidebar = ({
       title: 'System Health',
       icon: Activity,
       path: '/dashboard/admin/health'
-    },
-    {
-      title: 'Instantly.ai',
-      icon: Mail,
-      path: '/dashboard/admin/instantly'
     }
   ];
 

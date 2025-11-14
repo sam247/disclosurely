@@ -3,11 +3,10 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { FeatureFlagManager } from './FeatureFlagManager';
 import ChatAdminView from '@/components/dashboard/ChatAdminView';
 import SystemHealthDashboard from '@/components/dashboard/SystemHealthDashboard';
-import { InstantlyAdminView } from './InstantlyAdminView';
 import { useUserRoles } from '@/hooks/useUserRoles';
 import { useAuth } from '@/hooks/useAuth';
 
-type AdminSection = 'features' | 'chat' | 'health' | 'instantly';
+type AdminSection = 'features' | 'chat' | 'health';
 
 export const AdminPanel = () => {
   const { user } = useAuth();
@@ -52,7 +51,7 @@ export const AdminPanel = () => {
   }
 
   // Validate section and render content
-  const validSection = (section && ['features', 'chat', 'health', 'instantly'].includes(section)) 
+  const validSection = (section && ['features', 'chat', 'health'].includes(section)) 
     ? section as AdminSection 
     : 'features';
 
@@ -64,8 +63,6 @@ export const AdminPanel = () => {
         return <ChatAdminView />;
       case 'health':
         return <SystemHealthDashboard />;
-      case 'instantly':
-        return <InstantlyAdminView />;
       default:
         return <FeatureFlagManager />;
     }

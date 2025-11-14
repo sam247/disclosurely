@@ -1,5 +1,5 @@
 /**
- * Example component showing how to send cold emails via Instantly.ai or Uptics.io
+ * Example component showing how to send cold emails via Uptics.io
  * 
  * This is a reference implementation - adapt it to your needs!
  */
@@ -10,15 +10,11 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useToast } from '@/hooks/use-toast';
-
-type EmailProvider = 'instantly' | 'uptics';
 
 export const ColdEmailSender: React.FC = () => {
   const { toast } = useToast();
   const [loading, setLoading] = useState(false);
-  const [provider, setProvider] = useState<EmailProvider>('instantly');
   const [formData, setFormData] = useState({
     to: '',
     subject: '',
@@ -40,11 +36,7 @@ export const ColdEmailSender: React.FC = () => {
     setLoading(true);
 
     try {
-      const functionName = provider === 'instantly' 
-        ? 'send-email-instantly' 
-        : 'send-email-uptics';
-
-      const { data, error } = await supabase.functions.invoke(functionName, {
+      const { data, error } = await supabase.functions.invoke('send-email-uptics', {
         body: {
           to: formData.to,
           subject: formData.subject,
@@ -60,7 +52,7 @@ export const ColdEmailSender: React.FC = () => {
 
       toast({
         title: 'Success!',
-        description: `Email sent via ${provider === 'instantly' ? 'Instantly.ai' : 'Uptics.io'}`,
+        description: 'Email sent via Uptics.io',
       });
 
       // Reset form
@@ -87,23 +79,10 @@ export const ColdEmailSender: React.FC = () => {
     <div className="max-w-2xl mx-auto p-6 space-y-6">
       <div>
         <h2 className="text-2xl font-bold mb-2">Send Cold Email</h2>
-        <p className="text-gray-600">Send emails via Instantly.ai or Uptics.io</p>
+        <p className="text-gray-600">Send emails via Uptics.io</p>
       </div>
 
       <div className="space-y-4">
-        <div>
-          <Label htmlFor="provider">Email Provider</Label>
-          <Select value={provider} onValueChange={(value) => setProvider(value as EmailProvider)}>
-            <SelectTrigger>
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="instantly">Instantly.ai (Unlimited)</SelectItem>
-              <SelectItem value="uptics">Uptics.io (Good Limits)</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
-
         <div>
           <Label htmlFor="to">To Email *</Label>
           <Input
@@ -160,7 +139,7 @@ export const ColdEmailSender: React.FC = () => {
           disabled={loading}
           className="w-full"
         >
-          {loading ? 'Sending...' : `Send via ${provider === 'instantly' ? 'Instantly.ai' : 'Uptics.io'}`}
+          {loading ? 'Sending...' : 'Send via Uptics.io'}
         </Button>
       </div>
     </div>
