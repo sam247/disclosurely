@@ -105,6 +105,46 @@ export interface AuditChainVerification {
   firstInvalidAt?: string;
 }
 
+/**
+ * Sanitize audit log data to remove PII (PRIVACY FIX C3)
+ * Similar to logger sanitization but preserves structure for audit trail
+ */
+function sanitizeAuditData(data: any): any {
+  if (!data) return data;
+  
+  if (typeof data === 'string') {
+    let sanitized = data;
+    sanitized = sanitized.replace(/[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/g, '[EMAIL_REDACTED]');
+    sanitized = sanitized.replace(/(\+?\d{1,3}[-.\s]?)?\(?\d{3}\)?[-.\s]?\d{3}[-.\s]?\d{4}/g, '[PHONE_REDACTED]');
+    sanitized = sanitized.replace(/\b\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}\b/g, '[IP_REDACTED]');
+    sanitized = sanitized.replace(/\b\d{3}-\d{2}-\d{4}\b/g, '[SSN_REDACTED]');
+    return sanitized;
+  }
+  
+  if (typeof data === 'object' && !Array.isArray(data)) {
+    const sanitized: any = {};
+    for (const [key, value] of Object.entries(data)) {
+      const lowerKey = key.toLowerCase();
+      if (lowerKey.includes('email') || lowerKey.includes('phone') || lowerKey.includes('ssn') || 
+          lowerKey.includes('password') || lowerKey.includes('token') || lowerKey.includes('secret') ||
+          lowerKey.includes('key') || lowerKey.includes('ip_address') || lowerKey.includes('address')) {
+        sanitized[key] = '[REDACTED]';
+      } else if (lowerKey.includes('name') && typeof value === 'string' && value.length > 0) {
+        sanitized[key] = `[NAME_${value.length}_CHARS]`;
+      } else {
+        sanitized[key] = sanitizeAuditData(value);
+      }
+    }
+    return sanitized;
+  }
+  
+  if (Array.isArray(data)) {
+    return data.map(item => sanitizeAuditData(item));
+  }
+  
+  return data;
+}
+
 class AuditLogger {
   private static instance: AuditLogger;
   
@@ -120,6 +160,13 @@ class AuditLogger {
    */
   async log(data: AuditLogData): Promise<AuditLogEntry | null> {
     try {
+      // Sanitize metadata, before_state, and after_state to remove PII (PRIVACY FIX C3)
+      const sanitizedMetadata = sanitizeAuditData(data.metadata || {});
+      const sanitizedBeforeState = sanitizeAuditData(data.beforeState);
+      const sanitizedAfterState = sanitizeAuditData(data.afterState);
+      const sanitizedSummary = sanitizeAuditData(data.summary);
+      const sanitizedDescription = sanitizeAuditData(data.description);
+      const sanitizedRequestParams = sanitizeAuditData(data.requestParams);
       
       const { data: result, error } = await supabase
         .from('audit_logs')
@@ -131,21 +178,21 @@ class AuditLogger {
           actor_type: data.actorType,
           actor_id: data.actorId,
           actor_email: data.actorEmail,
-          actor_ip_address: data.actorIpAddress,
+          actor_ip_address: data.actorIpAddress, // Already nulled for anonymous in edge functions
           actor_user_agent: data.actorUserAgent,
           actor_session_id: data.actorSessionId,
           target_type: data.targetType,
           target_id: data.targetId,
           target_name: data.targetName,
-          summary: data.summary,
-          description: data.description,
-          metadata: data.metadata || {},
-          before_state: data.beforeState,
-          after_state: data.afterState,
+          summary: typeof sanitizedSummary === 'string' ? sanitizedSummary : data.summary,
+          description: typeof sanitizedDescription === 'string' ? sanitizedDescription : data.description,
+          metadata: sanitizedMetadata,
+          before_state: sanitizedBeforeState,
+          after_state: sanitizedAfterState,
           request_id: data.requestId,
           request_method: data.requestMethod,
           request_path: data.requestPath,
-          request_params: data.requestParams,
+          request_params: sanitizedRequestParams,
           geo_country: data.geoCountry,
           geo_region: data.geoRegion,
           geo_city: data.geoCity,
@@ -179,6 +226,7 @@ class AuditLogger {
 
   /**
    * Get audit logs with filtering
+   * Uses filtered view for non-owner users to hide sensitive data for anonymous cases (PRIVACY FIX H3)
    */
   async getLogs(filters: AuditLogFilters = {}): Promise<{
     logs: AuditLogEntry[];
@@ -186,9 +234,15 @@ class AuditLogger {
     hasMore: boolean;
   }> {
     try {
+      // Check if current user is owner (has full access)
+      const { data: { user } } = await supabase.auth.getUser();
+      const isOwner = user?.email === 'sampettiford@googlemail.com';
+      
+      // Use filtered view for non-owners to hide sensitive data for anonymous cases
+      const tableName = isOwner ? 'audit_logs' : 'audit_logs_filtered';
       
       const baseQuery = supabase
-        .from('audit_logs')
+        .from(tableName)
         .select('*', { count: 'exact' });
 
       // Build filters with explicit typing to avoid deep instantiation
@@ -256,6 +310,7 @@ class AuditLogger {
 
   /**
    * Get audit logs for a specific entity (e.g., case, user)
+   * Uses filtered view for non-owner users (PRIVACY FIX H3)
    */
   async getEntityLogs(
     organizationId: string,
@@ -264,8 +319,13 @@ class AuditLogger {
     limit: number = 50
   ): Promise<AuditLogEntry[]> {
     try {
+      // Check if current user is owner
+      const { data: { user } } = await supabase.auth.getUser();
+      const isOwner = user?.email === 'sampettiford@googlemail.com';
+      const tableName = isOwner ? 'audit_logs' : 'audit_logs_filtered';
+      
       // Type cast at the start to avoid deep type instantiation issues
-      const auditLogsTable: any = supabase.from('audit_logs');
+      const auditLogsTable: any = supabase.from(tableName);
       const query = auditLogsTable
         .select('*')
         .eq('organization_id', organizationId)

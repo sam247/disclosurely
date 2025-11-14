@@ -1028,18 +1028,29 @@ const AuditLogView = () => {
                       <Label className="text-xs sm:text-sm font-medium">Timestamp</Label>
                       <p className="text-xs sm:text-sm">{new Date(selectedLog.created_at).toLocaleString()}</p>
                     </div>
-                    <div>
-                      <Label className="text-xs sm:text-sm font-medium">IP Address</Label>
-                      <p className="text-xs sm:text-sm">{selectedLog.actor_ip_address || 'N/A'}</p>
-                    </div>
-                    <div>
-                      <Label className="text-xs sm:text-sm font-medium">User Agent</Label>
-                      <p className="text-xs sm:text-sm truncate">{selectedLog.actor_user_agent || 'N/A'}</p>
-                    </div>
-                    <div>
-                      <Label className="text-xs sm:text-sm font-medium">Request Path</Label>
-                      <p className="text-xs sm:text-sm">{selectedLog.request_path || 'N/A'}</p>
-                    </div>
+                    {/* Hide sensitive fields for anonymous cases (PRIVACY FIX H3) */}
+                    {selectedLog.actor_type !== 'anonymous' || user?.email === 'sampettiford@googlemail.com' ? (
+                      <>
+                        <div>
+                          <Label className="text-xs sm:text-sm font-medium">IP Address</Label>
+                          <p className="text-xs sm:text-sm">{selectedLog.actor_ip_address || 'N/A'}</p>
+                        </div>
+                        <div>
+                          <Label className="text-xs sm:text-sm font-medium">User Agent</Label>
+                          <p className="text-xs sm:text-sm truncate">{selectedLog.actor_user_agent || 'N/A'}</p>
+                        </div>
+                        <div>
+                          <Label className="text-xs sm:text-sm font-medium">Request Path</Label>
+                          <p className="text-xs sm:text-sm">{selectedLog.request_path || 'N/A'}</p>
+                        </div>
+                      </>
+                    ) : (
+                      <div className="sm:col-span-2">
+                        <p className="text-xs text-muted-foreground italic">
+                          Sensitive fields (IP address, user agent, session data) are hidden for anonymous actions to protect privacy.
+                        </p>
+                      </div>
+                    )}
                   </div>
                   
                   <Separator />

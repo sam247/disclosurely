@@ -81,9 +81,12 @@ const SecurityMonitoring = () => {
         setAlerts(typedAlerts);
       }
 
-      // Fetch audit logs for metrics
+      // Fetch audit logs for metrics (use filtered view for non-owners - PRIVACY FIX H3)
+      const isOwner = user?.email === 'sampettiford@googlemail.com';
+      const tableName = isOwner ? 'audit_logs' : 'audit_logs_filtered';
+      
       const { data: auditData, error: auditError } = await supabase
-        .from('audit_logs')
+        .from(tableName)
         .select('event_type, action, severity')
         .gte('created_at', new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString());
 

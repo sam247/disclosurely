@@ -4,6 +4,7 @@ import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.50.0'
 import { Resend } from "https://esm.sh/resend@4.0.0"
 import { checkRateLimit, rateLimiters, rateLimitResponse } from '../_shared/rateLimit.ts'
+import { scanReportData } from '../_shared/pii-scanner.ts'
 
 const DISCLOSURELY_PRIMARY_COLOR = '#2563eb'
 const DISCLOSURELY_LOGO_URL = 'https://app.disclosurely.com/lovable-uploads/416d39db-53ff-402e-a2cf-26d1a3618601.png'
@@ -327,6 +328,31 @@ serve(async (req) => {
     
     console.log('✅ Link token verified for organization:', linkData.organization_id)
     
+    // 🔍 SERVER-SIDE PII SCANNING (PRIVACY FIX C2)
+    console.log('🔍 Scanning report data for PII...')
+    const piiScanResult = scanReportData(reportData)
+    
+    if (piiScanResult.hasPII) {
+      console.warn(`⚠️ PII detected in report: ${piiScanResult.detected.length} items (${piiScanResult.highSeverityCount} high, ${piiScanResult.mediumSeverityCount} medium, ${piiScanResult.lowSeverityCount} low)`)
+      
+      // Log PII detection for compliance
+      await logToSystem(supabase, 'warn', 'submission', 'PII detected in report submission', {
+        report_tracking_id: reportData.tracking_id,
+        pii_count: piiScanResult.detected.length,
+        high_severity: piiScanResult.highSeverityCount,
+        medium_severity: piiScanResult.mediumSeverityCount,
+        low_severity: piiScanResult.lowSeverityCount,
+        pii_types: [...new Set(piiScanResult.detected.map(d => d.type))],
+        // Don't log the actual PII text - just metadata
+        organization_id: linkData.organization_id,
+      })
+      
+      // Store PII detection metadata (without the actual PII) for compliance reporting
+      // This will be stored in the report metadata or a separate compliance log
+    } else {
+      console.log('✅ No PII detected in report')
+    }
+    
     // 🔐 SERVER-SIDE ENCRYPTION
     console.log('🔐 Encrypting report data server-side...')
     const ENCRYPTION_SALT = Deno.env.get('ENCRYPTION_SALT')
@@ -399,6 +425,18 @@ serve(async (req) => {
     
     console.log('Priority value:', priorityValue, 'Type:', typeof priorityValue);
     
+    // Store PII detection metadata in report metadata field
+    const reportMetadata: any = {
+      pii_scan_performed: true,
+      pii_detected: piiScanResult.hasPII,
+      pii_detection_count: piiScanResult.detected.length,
+      pii_high_severity_count: piiScanResult.highSeverityCount,
+      pii_medium_severity_count: piiScanResult.mediumSeverityCount,
+      pii_low_severity_count: piiScanResult.lowSeverityCount,
+      pii_types_detected: piiScanResult.hasPII ? [...new Set(piiScanResult.detected.map(d => d.type))] : [],
+      // Note: We don't store the actual PII text or positions for privacy
+    }
+
     const { data: report, error: reportError } = await supabase
       .from('reports')
       .insert({
@@ -413,6 +451,7 @@ serve(async (req) => {
         manual_risk_level: priorityValue, // Map priority to risk level
         tags: reportData.tags,
         organization_id: linkData.organization_id,
+        metadata: reportMetadata, // Store PII scan results
         // Contextual fields (not encrypted - stored as plain columns)
         incident_date: reportData.incident_date || null,
         location: reportData.location || null,
@@ -565,7 +604,7 @@ serve(async (req) => {
       eventType: 'report_created',
       category: 'security',
       action: 'create',
-      severity: 'medium',
+      severity: piiScanResult.hasPII && piiScanResult.highSeverityCount > 0 ? 'high' : 'medium',
       actorType: 'anonymous',
       actorId: null,
       actorEmail: reportData.submitted_by_email,
@@ -575,12 +614,15 @@ serve(async (req) => {
       targetId: report.id,
       targetName: reportData.title,
       summary: `Anonymous report submitted: ${reportData.title}`,
-      description: `Report ${reportData.tracking_id} submitted via secure link`,
+      description: `Report ${reportData.tracking_id} submitted via secure link${piiScanResult.hasPII ? ` (PII detected: ${piiScanResult.detected.length} items)` : ''}`,
       metadata: {
         linkToken: linkToken.substring(0, 8) + '...',
         organizationId: linkData.organization_id,
         reportType: reportData.report_type,
-        priority: reportData.priority
+        priority: reportData.priority,
+        pii_detected: piiScanResult.hasPII,
+        pii_count: piiScanResult.detected.length,
+        pii_high_severity: piiScanResult.highSeverityCount,
       }
     })
     

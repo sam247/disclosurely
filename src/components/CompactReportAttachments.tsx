@@ -3,7 +3,7 @@ import { Button } from '@/components/ui/button';
 import { Download, File, Eye } from 'lucide-react';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
-import { downloadReportFile } from '@/utils/fileUpload';
+import { downloadReportFile, getAttachmentDisplayName } from '@/utils/fileUpload';
 
 interface ReportAttachment {
   id: string;
@@ -53,18 +53,19 @@ const CompactReportAttachments: React.FC<CompactReportAttachmentsProps> = ({ rep
     setDownloading(attachment.id);
     
     try {
-      const fileBlob = await downloadReportFile(attachment.filename);
+      const fileBlob = await downloadReportFile(attachment.filename, attachment.id, reportId);
       
       if (!fileBlob) {
         toast.error('Failed to download file');
         return;
       }
 
-      // Create download link
+      // Create download link with sanitized display name
+      const displayName = getAttachmentDisplayName(attachment);
       const url = window.URL.createObjectURL(fileBlob);
       const link = document.createElement('a');
       link.href = url;
-      link.download = attachment.original_filename || 'download';
+      link.download = displayName || 'download';
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
@@ -119,7 +120,7 @@ const CompactReportAttachments: React.FC<CompactReportAttachmentsProps> = ({ rep
           >
             {getFileIcon(attachment.content_type)}
             <span className="text-xs max-w-32 truncate">
-              {attachment.original_filename}
+              {getAttachmentDisplayName(attachment)}
             </span>
             <span className="text-xs text-gray-500">
               ({formatFileSize(attachment.file_size)})

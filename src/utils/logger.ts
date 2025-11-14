@@ -28,6 +28,55 @@ export enum LogContext {
   CASE_MANAGEMENT = 'case_management'
 }
 
+/**
+ * Sanitize log data to remove PII (PRIVACY FIX C3)
+ * Removes emails, phones, names, IPs, and other identifying information
+ */
+function sanitizeLogData(data: any): any {
+  if (!data) return data;
+  
+  // If data is a string, check for PII patterns
+  if (typeof data === 'string') {
+    let sanitized = data;
+    // Remove email addresses
+    sanitized = sanitized.replace(/[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/g, '[EMAIL_REDACTED]');
+    // Remove phone numbers (various formats)
+    sanitized = sanitized.replace(/(\+?\d{1,3}[-.\s]?)?\(?\d{3}\)?[-.\s]?\d{3}[-.\s]?\d{4}/g, '[PHONE_REDACTED]');
+    // Remove IP addresses
+    sanitized = sanitized.replace(/\b\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}\b/g, '[IP_REDACTED]');
+    // Remove SSN patterns
+    sanitized = sanitized.replace(/\b\d{3}-\d{2}-\d{4}\b/g, '[SSN_REDACTED]');
+    return sanitized;
+  }
+  
+  // If data is an object, recursively sanitize
+  if (typeof data === 'object' && !Array.isArray(data)) {
+    const sanitized: any = {};
+    for (const [key, value] of Object.entries(data)) {
+      // Skip sensitive keys entirely or hash them
+      const lowerKey = key.toLowerCase();
+      if (lowerKey.includes('email') || lowerKey.includes('phone') || lowerKey.includes('ssn') || 
+          lowerKey.includes('password') || lowerKey.includes('token') || lowerKey.includes('secret') ||
+          lowerKey.includes('key') || lowerKey.includes('ip') || lowerKey.includes('address')) {
+        sanitized[key] = '[REDACTED]';
+      } else if (lowerKey.includes('name') && typeof value === 'string' && value.length > 0) {
+        // Hash names instead of removing
+        sanitized[key] = `[NAME_${value.length}_CHARS]`;
+      } else {
+        sanitized[key] = sanitizeLogData(value);
+      }
+    }
+    return sanitized;
+  }
+  
+  // If data is an array, sanitize each element
+  if (Array.isArray(data)) {
+    return data.map(item => sanitizeLogData(item));
+  }
+  
+  return data;
+}
+
 export interface LogEntry {
   timestamp: string;
   level: LogLevel;
@@ -78,17 +127,21 @@ class Logger {
     data?: any,
     error?: Error
   ): LogEntry {
+    // Sanitize data to remove PII before logging (PRIVACY FIX C3)
+    const sanitizedData = sanitizeLogData(data);
+    const sanitizedMessage = sanitizeLogData(message);
+    
     return {
       timestamp: new Date().toISOString(),
       level,
       context,
-      message,
-      data,
+      message: typeof sanitizedMessage === 'string' ? sanitizedMessage : message,
+      data: sanitizedData,
       userId: this.userId,
       organizationId: this.organizationId,
       sessionId: this.sessionId,
       requestId: this.requestId,
-      stack: error?.stack,
+      stack: error?.stack ? sanitizeLogData(error.stack) as string : undefined,
       url: typeof window !== 'undefined' ? window.location.href : undefined,
       userAgent: typeof navigator !== 'undefined' ? navigator.userAgent : undefined
     };

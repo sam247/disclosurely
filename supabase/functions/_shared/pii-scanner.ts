@@ -1,0 +1,255 @@
+/**
+ * Server-side PII Scanner (PRIVACY FIX C2)
+ * Scans text for Personally Identifiable Information before encryption
+ * This is a server-side version of the client-side privacy detection
+ */
+
+export interface PIIDetection {
+  type: 'email' | 'phone' | 'employeeId' | 'ssn' | 'creditCard' | 'ipAddress' | 'url' | 'possibleName' | 'standaloneName' | 'specificDate' | 'address';
+  text: string;
+  position: { start: number; end: number };
+  severity: 'high' | 'medium' | 'low';
+  description: string;
+}
+
+export interface PIIScanResult {
+  detected: PIIDetection[];
+  hasPII: boolean;
+  highSeverityCount: number;
+  mediumSeverityCount: number;
+  lowSeverityCount: number;
+}
+
+// PII detection patterns (server-side version)
+const PII_PATTERNS = {
+  email: {
+    pattern: /\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b/gi,
+    severity: 'high' as const,
+    description: 'Email addresses can identify you',
+  },
+  phone: {
+    pattern: /(\+?\d{1,3}[-.\s]?)?\(?\d{3}\)?[-.\s]?\d{3}[-.\s]?\d{4}\b/g,
+    severity: 'high' as const,
+    description: 'Phone numbers can identify you',
+  },
+  employeeId: {
+    pattern: /\b(EMP|emp|EMPLOYEE|Employee|ID|id|Staff|STAFF|Office|OFFICE)[-_\s#:]*[A-Z0-9]{2,3}[-_]?\d{3,8}\b/gi,
+    severity: 'high' as const,
+    description: 'Employee/Office IDs can identify you',
+  },
+  ssn: {
+    pattern: /\b\d{3}[-\s]?\d{2}[-\s]?\d{4}\b/g,
+    severity: 'high' as const,
+    description: 'Social Security Numbers must be protected',
+  },
+  creditCard: {
+    pattern: /\b\d{4}[-\s]?\d{4}[-\s]?\d{4}[-\s]?\d{4}\b/g,
+    severity: 'medium' as const,
+    description: 'Credit card numbers detected',
+  },
+  ipAddress: {
+    pattern: /\b(?:\d{1,3}\.){3}\d{1,3}\b/g,
+    severity: 'medium' as const,
+    description: 'IP addresses can be used to trace you',
+  },
+  url: {
+    pattern: /https?:\/\/[^\s<>"{}|\\^`\[\]]+/gi,
+    severity: 'low' as const,
+    description: 'URLs may contain identifying information',
+  },
+  possibleName: {
+    pattern: /\b(my\s+name\s+is|I\s+am|my\s+(?:manager|supervisor|boss|colleague|coworker)|Mr\.|Mrs\.|Ms\.|Dr\.)\s+([A-Z][a-z]+(?:\s+[A-Z][a-z]+)?)\b/gi,
+    severity: 'high' as const,
+    description: 'Names detected - highly identifying',
+  },
+  standaloneName: {
+    pattern: /\b[A-Z][a-z]{2,}\s+[A-Z][a-z]{2,}(?:\s+[A-Z][a-z]{2,})?\b/g,
+    severity: 'medium' as const,
+    description: 'Possible full name detected',
+  },
+  specificDate: {
+    pattern: /\b(?:on|since|from|started|joined|hired)\s+(?:(?:January|February|March|April|May|June|July|August|September|October|November|December)\s+\d{1,2}|\d{1,2}\s+(?:January|February|March|April|May|June|July|August|September|October|November|December)),?\s+\d{4}\b/gi,
+    severity: 'low' as const,
+    description: 'Specific dates (hire date, etc.) could narrow identification',
+  },
+  address: {
+    pattern: /\b\d+\s+[A-Z][a-z]+(?:\s+[A-Z][a-z]+)*(?:\s+(?:Street|St|Avenue|Ave|Road|Rd|Lane|Ln|Drive|Dr|Boulevard|Blvd|Court|Ct|Place|Pl|Way|Circle|Cir))[,\s]+[A-Z][a-z]+[,\s]+[A-Z]{2}\s+\d{5}(?:-\d{4})?\b/gi,
+    severity: 'high' as const,
+    description: 'Street addresses can identify locations',
+  },
+};
+
+// Common false positives to exclude
+const FALSE_POSITIVES = [
+  /New York/gi,
+  /United Kingdom/gi,
+  /United States/gi,
+  /Los Angeles/gi,
+  /San Francisco/gi,
+  /New Jersey/gi,
+  /New Mexico/gi,
+  /North Carolina/gi,
+  /South Carolina/gi,
+  /New Hampshire/gi,
+  /Rhode Island/gi,
+];
+
+/**
+ * Scan text for PII patterns
+ */
+export function scanForPII(text: string): PIIScanResult {
+  if (!text || typeof text !== 'string') {
+    return {
+      detected: [],
+      hasPII: false,
+      highSeverityCount: 0,
+      mediumSeverityCount: 0,
+      lowSeverityCount: 0,
+    };
+  }
+
+  const detected: PIIDetection[] = [];
+  const processedMatches = new Set<string>(); // Track processed positions to avoid duplicates
+
+  // Scan each PII pattern
+  for (const [type, config] of Object.entries(PII_PATTERNS)) {
+    const pattern = config.pattern;
+    let match;
+
+    // Reset regex lastIndex to ensure fresh search
+    pattern.lastIndex = 0;
+
+    while ((match = pattern.exec(text)) !== null) {
+      const matchText = match[0];
+      const start = match.index;
+      const end = start + matchText.length;
+      const positionKey = `${start}-${end}-${type}`;
+
+      // Skip if we've already processed this position
+      if (processedMatches.has(positionKey)) {
+        continue;
+      }
+
+      // Check for false positives (for name patterns)
+      if (type === 'standaloneName' || type === 'possibleName') {
+        let isFalsePositive = false;
+        for (const fpPattern of FALSE_POSITIVES) {
+          if (fpPattern.test(matchText)) {
+            isFalsePositive = true;
+            break;
+          }
+        }
+        if (isFalsePositive) {
+          continue;
+        }
+      }
+
+      // Validate credit card using Luhn algorithm
+      if (type === 'creditCard') {
+        const digits = matchText.replace(/[-\s]/g, '');
+        if (!isValidCreditCard(digits)) {
+          continue;
+        }
+      }
+
+      detected.push({
+        type: type as PIIDetection['type'],
+        text: matchText,
+        position: { start, end },
+        severity: config.severity,
+        description: config.description,
+      });
+
+      processedMatches.add(positionKey);
+    }
+  }
+
+  // Count by severity
+  const highSeverityCount = detected.filter(d => d.severity === 'high').length;
+  const mediumSeverityCount = detected.filter(d => d.severity === 'medium').length;
+  const lowSeverityCount = detected.filter(d => d.severity === 'low').length;
+
+  return {
+    detected,
+    hasPII: detected.length > 0,
+    highSeverityCount,
+    mediumSeverityCount,
+    lowSeverityCount,
+  };
+}
+
+/**
+ * Validate credit card using Luhn algorithm
+ */
+function isValidCreditCard(cardNumber: string): boolean {
+  if (!/^\d{13,19}$/.test(cardNumber)) {
+    return false;
+  }
+
+  let sum = 0;
+  let isEven = false;
+
+  for (let i = cardNumber.length - 1; i >= 0; i--) {
+    let digit = parseInt(cardNumber[i], 10);
+
+    if (isEven) {
+      digit *= 2;
+      if (digit > 9) {
+        digit -= 9;
+      }
+    }
+
+    sum += digit;
+    isEven = !isEven;
+  }
+
+  return sum % 10 === 0;
+}
+
+/**
+ * Scan report data object for PII
+ */
+export function scanReportData(reportData: any): PIIScanResult {
+  const allDetections: PIIDetection[] = [];
+  let currentOffset = 0;
+
+  // Scan all text fields
+  const textFields = [
+    reportData.title,
+    reportData.description,
+    reportData.incident_details,
+    reportData.location,
+    reportData.witnesses,
+    reportData.evidence,
+    reportData.additionalDetails,
+  ].filter(Boolean);
+
+  for (const field of textFields) {
+    if (typeof field === 'string') {
+      const result = scanForPII(field);
+      // Adjust positions to account for field boundaries
+      const adjustedDetections = result.detected.map(detection => ({
+        ...detection,
+        position: {
+          start: detection.position.start + currentOffset,
+          end: detection.position.end + currentOffset,
+        },
+      }));
+      allDetections.push(...adjustedDetections);
+      currentOffset += field.length + 1; // +1 for separator
+    }
+  }
+
+  const highSeverityCount = allDetections.filter(d => d.severity === 'high').length;
+  const mediumSeverityCount = allDetections.filter(d => d.severity === 'medium').length;
+  const lowSeverityCount = allDetections.filter(d => d.severity === 'low').length;
+
+  return {
+    detected: allDetections,
+    hasPII: allDetections.length > 0,
+    highSeverityCount,
+    mediumSeverityCount,
+    lowSeverityCount,
+  };
+}
+
