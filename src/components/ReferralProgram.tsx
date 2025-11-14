@@ -156,7 +156,7 @@ const ReferralProgram = () => {
             onClick={() => {
               const subject = encodeURIComponent('Check out Disclosurely - Secure Whistleblowing Platform');
               const body = encodeURIComponent(
-                `I've been using Disclosurely for secure whistleblowing and compliance. Check it out using my referral link:\n\n${fullReferralLink}`
+                `I have been using Disclosurely for secure whistleblowing and compliance. Check it out using my referral link:\n\n${fullReferralLink}`
               );
               window.location.href = `mailto:?subject=${subject}&body=${body}`;
             }}
@@ -170,7 +170,7 @@ const ReferralProgram = () => {
               if (navigator.share) {
                 navigator.share({
                   title: 'Check out Disclosurely',
-                  text: 'I've been using Disclosurely for secure whistleblowing and compliance.',
+                  text: "I've been using Disclosurely for secure whistleblowing and compliance.",
                   url: fullReferralLink,
                 });
               } else {
