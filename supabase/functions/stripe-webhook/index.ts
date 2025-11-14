@@ -1,6 +1,7 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import Stripe from "https://esm.sh/stripe@14.21.0";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.50.0";
+import { createOrUpdatePartneroCustomer, trackPartneroTransaction } from "../_shared/partnero.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -189,6 +190,43 @@ serve(async (req) => {
         }, { onConflict: 'organization_id' });
 
         console.log(`[STRIPE-WEBHOOK] Updated subscription for ${customer.email} (user: ${userId || 'pending'})`);
+
+        // Track referral in Partnero if referral code exists
+        const referralCode = session.metadata?.referral_code;
+        if (referralCode && referralCode !== '') {
+          try {
+            // Create/update customer in Partnero
+            const partneroCustomer = await createOrUpdatePartneroCustomer(
+              customer.email,
+              {
+                firstName: customer.name?.split(' ')[0],
+                lastName: customer.name?.split(' ').slice(1).join(' '),
+                customerKey: userId || customerId,
+              }
+            );
+
+            // Track transaction with referral code
+            await trackPartneroTransaction({
+              customer: partneroCustomer,
+              amount: amount / 100, // Convert from cents to currency unit
+              currency: price?.currency?.toUpperCase() || 'GBP',
+              transaction_id: subscriptionId,
+              transaction_date: new Date().toISOString(),
+              metadata: {
+                referral_code: referralCode,
+                stripe_customer_id: customerId,
+                subscription_id: subscriptionId,
+                tier: tier,
+                interval: interval,
+              },
+            });
+
+            console.log(`[STRIPE-WEBHOOK] Tracked referral transaction in Partnero for ${customer.email}`);
+          } catch (partneroError) {
+            console.error('[STRIPE-WEBHOOK] Error tracking referral in Partnero:', partneroError);
+            // Don't fail the webhook if Partnero tracking fails
+          }
+        }
         break;
       }
 

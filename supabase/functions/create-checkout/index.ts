@@ -27,7 +27,7 @@ serve(async (req) => {
     logStep("Function started");
 
     // interval can be 'month', 'monthly', 'year', or 'annual' (frontend sends 'monthly' or 'annual')
-    const { tier, employee_count, rdt_cid, interval = 'month', email, organization_id } = await req.json();
+    const { tier, employee_count, rdt_cid, interval = 'month', email, organization_id, referral_code } = await req.json();
     if (!tier || !employee_count) {
       throw new Error("Missing required fields: tier and employee_count");
     }
@@ -170,6 +170,7 @@ serve(async (req) => {
         employee_count: employee_count.toString(),
         interval: interval === 'year' || interval === 'annual' ? 'year' : 'month',
         rdt_cid: rdt_cid || null,
+        referral_code: referral_code || '',
         source: 'website'
       }
     });

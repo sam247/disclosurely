@@ -114,7 +114,16 @@ const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
 
   // Check subscription access - only block if subscriptionData is loaded and explicitly shows no access
   // Don't block if subscriptionData is still loading or is default/undefined
-  if (subscriptionData && !subscriptionLoading && !canAccess(subscriptionData)) {
+  // NEVER block users with active/trialing status or pro/basic tier
+  const shouldBlockAccess = subscriptionData && 
+                            !subscriptionLoading && 
+                            subscriptionData.subscription_status !== 'active' &&
+                            subscriptionData.subscription_status !== 'trialing' &&
+                            subscriptionData.subscription_tier !== 'pro' &&
+                            subscriptionData.subscription_tier !== 'basic' &&
+                            !canAccess(subscriptionData);
+  
+  if (shouldBlockAccess) {
     const statusForModal = getSubscriptionStatusForModal(subscriptionData);
     return (
       <>

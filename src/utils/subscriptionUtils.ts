@@ -6,26 +6,10 @@ export type SubscriptionAccessLevel = 'full' | 'readonly' | 'blocked';
  * Determines the access level based on subscription status
  */
 export function getSubscriptionAccessLevel(subscriptionData: SubscriptionData): SubscriptionAccessLevel {
-  // If subscription_status is 'active' or 'trialing', grant full access
+  // If subscription_status is 'active' or 'trialing', ALWAYS grant full access
+  // This takes precedence over any date checks
   if (subscriptionData.subscription_status === 'active' || subscriptionData.subscription_status === 'trialing') {
-    // If subscription_end exists, check it's in the future
-    if (subscriptionData.subscription_end) {
-      const subscriptionEnd = new Date(subscriptionData.subscription_end);
-      const now = new Date();
-      if (subscriptionEnd > now) {
-        return 'full';
-      }
-      // If date is past but status is active, check grace period
-      if (subscriptionData.isInGracePeriod) {
-        return 'readonly';
-      }
-      // If date is past and no grace period, but status is still active, grant access anyway
-      // (Stripe might not have updated the status yet)
-      return 'full';
-    } else {
-      // No end date but status is active - grant access
-      return 'full';
-    }
+    return 'full';
   }
 
   // Check if subscription is explicitly expired
@@ -100,8 +84,13 @@ export function canAccess(subscriptionData: SubscriptionData): boolean {
  * Gets the subscription status for display in modals
  */
 export function getSubscriptionStatusForModal(subscriptionData: SubscriptionData): 'expired' | 'past_due' | 'grace_period' | null {
-  // Don't show modal if subscription is active or trialing
+  // Don't show modal if subscription is active or trialing - ALWAYS allow access
   if (subscriptionData.subscription_status === 'active' || subscriptionData.subscription_status === 'trialing') {
+    return null;
+  }
+  
+  // Also don't show modal if subscribed is true and status is not explicitly expired/canceled
+  if (subscriptionData.subscribed && subscriptionData.subscription_status !== 'expired' && subscriptionData.subscription_status !== 'canceled') {
     return null;
   }
 

@@ -140,13 +140,21 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
         // Determine subscription status
         let subscriptionStatus: 'active' | 'past_due' | 'canceled' | 'trialing' | 'expired' = directData.subscription_status as any || 'active';
         
-        // Only mark as expired if date is past AND not in grace period AND status allows it
-        if (isExpiredByDate && !isInGracePeriod && subscriptionStatus !== 'active' && subscriptionStatus !== 'trialing') {
-          subscriptionStatus = 'expired';
+        // If status is active or trialing, never mark as expired regardless of date
+        if (subscriptionStatus === 'active' || subscriptionStatus === 'trialing') {
+          subscribed = true;
+          // Don't override status if it's already active/trialing
+        } else {
+          // Only mark as expired if date is past AND not in grace period AND status allows it
+          if (isExpiredByDate && !isInGracePeriod && subscriptionStatus !== 'active' && subscriptionStatus !== 'trialing') {
+            subscriptionStatus = 'expired';
+          }
         }
         
-        // Ensure isExpired is false if status is active or trialing
-        const isExpired = (isExpiredByDate && !isInGracePeriod && subscriptionStatus !== 'active' && subscriptionStatus !== 'trialing') || false;
+        // Ensure isExpired is false if status is active or trialing (even if subscription_end is null or in past)
+        const isExpired = (subscriptionStatus === 'active' || subscriptionStatus === 'trialing') 
+          ? false 
+          : (isExpiredByDate && !isInGracePeriod && subscriptionStatus !== 'active' && subscriptionStatus !== 'trialing');
         
         const mappedData: SubscriptionData = {
           subscribed: subscribed || isInGracePeriod,

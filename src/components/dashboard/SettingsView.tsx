@@ -1,8 +1,9 @@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { CreditCard, Shield } from 'lucide-react';
+import { CreditCard, Shield, Gift } from 'lucide-react';
 import ProfileSettings from '@/components/ProfileSettings';
 import SubscriptionManagement from '@/components/SubscriptionManagement';
 import SimpleGDPRSettings from '@/components/SimpleGDPRSettings';
+import ReferralProgram from '@/components/ReferralProgram';
 import { useTranslation } from 'react-i18next';
 
 const SettingsView = () => {
@@ -16,13 +17,17 @@ const SettingsView = () => {
       </div>
 
       <Tabs defaultValue="profile" className="space-y-6">
-        <TabsList className="grid w-full grid-cols-3">
+        <TabsList className="grid w-full grid-cols-4">
           <TabsTrigger value="profile" className="flex items-center gap-2">
             {t('account')}
           </TabsTrigger>
           <TabsTrigger value="subscription" className="flex items-center gap-2">
             <CreditCard className="h-4 w-4" />
             {t('subscription')}
+          </TabsTrigger>
+          <TabsTrigger value="referral" className="flex items-center gap-2">
+            <Gift className="h-4 w-4" />
+            Referral
           </TabsTrigger>
           <TabsTrigger value="privacy" className="flex items-center gap-2">
             <Shield className="h-4 w-4" />
@@ -36,6 +41,10 @@ const SettingsView = () => {
 
         <TabsContent value="subscription">
           <SubscriptionManagement />
+        </TabsContent>
+
+        <TabsContent value="referral">
+          <ReferralProgram />
         </TabsContent>
 
         <TabsContent value="privacy">

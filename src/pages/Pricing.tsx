@@ -25,17 +25,30 @@ const Pricing = () => {
   const [loading, setLoading] = useState<string | null>(null);
   const langPrefix = currentLanguage && currentLanguage !== "en" ? `/${currentLanguage}` : "";
 
+  // Get referral code from URL params
+  const getReferralCode = () => {
+    const params = new URLSearchParams(window.location.search);
+    return params.get('ref') || params.get('referral');
+  };
+
   const handleSubscribe = async (tier: 'tier1' | 'tier2') => {
     setLoading(tier);
     try {
       // Check if user is logged in (optional - checkout works without auth)
       const { data: { session } } = await supabase.auth.getSession();
       
+      const referralCode = getReferralCode();
+      
       const requestBody: any = {
         tier,
         employee_count: tier === 'tier1' ? '0-49' : '50+',
         interval: billingInterval,
       };
+
+      // Add referral code if present
+      if (referralCode) {
+        requestBody.referral_code = referralCode;
+      }
 
       // If not logged in, we'll let Stripe collect email during checkout
       // If logged in, include auth token
