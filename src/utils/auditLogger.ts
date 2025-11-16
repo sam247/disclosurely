@@ -320,6 +320,7 @@ class AuditLogger {
     try {
       // Check if current user is owner
       const { data: { user } } = await supabase.auth.getUser();
+      const isOwner = user?.email === 'sampettiford@googlemail.com';
       // Type cast at the start to avoid deep type instantiation issues
       const query = supabase
         .from(isOwner ? 'audit_logs' as any : 'audit_logs_filtered')
