@@ -1,4 +1,3 @@
-
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import Stripe from "https://esm.sh/stripe@14.21.0";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.50.0";
@@ -12,6 +11,9 @@ const logStep = (step: string, details?: any) => {
   const detailsStr = details ? ` - ${JSON.stringify(details)}` : '';
   console.log(`[CHECK-SUBSCRIPTION] ${step}${detailsStr}`);
 };
+
+// Cache TTL: 10 minutes (600 seconds)
+const CACHE_TTL_SECONDS = 600;
 
 serve(async (req) => {
   if (req.method === "OPTIONS") {
@@ -93,52 +95,68 @@ serve(async (req) => {
     const organizationId = profile.organization_id;
     logStep("User organization found", { organizationId });
 
-    const stripe = new Stripe(stripeKey, { apiVersion: "2023-10-16" });
-    
-    // Check if we have an existing subscription for this organization
+    // ===== PHASE 2: SERVER-SIDE CACHE CHECK =====
+    // Check if we have fresh cached data (< 10 minutes old)
     const { data: existingSubscriber } = await supabaseClient
       .from("subscribers")
-      .select("stripe_customer_id, subscribed, subscription_tier, email, user_id, subscription_end, subscription_status, grace_period_ends_at, stripe_data_cached_at")
+      .select("*")
       .eq("organization_id", organizationId)
       .maybeSingle();
     
     logStep("Existing subscriber record", existingSubscriber);
 
-    // CHECK SERVER-SIDE CACHE: If we have fresh cached data (< 10 minutes old), return it without calling Stripe
+    // Calculate cache age in seconds
+    const now = new Date();
+    let cacheAgeSeconds = Infinity;
+    
     if (existingSubscriber?.stripe_data_cached_at) {
-      const cacheAge = Date.now() - new Date(existingSubscriber.stripe_data_cached_at).getTime();
-      const cacheTTL = 10 * 60 * 1000; // 10 minutes in milliseconds
-      
-      if (cacheAge < cacheTTL) {
-        logStep("Using cached subscription data", { 
-          cacheAgeSeconds: Math.round(cacheAge / 1000),
-          cacheTTL: 600 
-        });
-        
-        // Calculate grace period status from cached data
-        const now = new Date();
-        const isInGracePeriod = existingSubscriber.grace_period_ends_at ? new Date(existingSubscriber.grace_period_ends_at) > now : false;
-        
-        return new Response(JSON.stringify({
-          subscribed: existingSubscriber.subscribed || isInGracePeriod,
-          subscription_tier: existingSubscriber.subscription_tier,
-          subscription_end: existingSubscriber.subscription_end,
-          subscription_status: existingSubscriber.subscription_status,
-          grace_period_ends_at: existingSubscriber.grace_period_ends_at,
-          cached: true, // Indicate this is cached data
-          cache_age_seconds: Math.round(cacheAge / 1000)
-        }), {
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
-          status: 200,
-        });
-      } else {
-        logStep("Cache expired, fetching fresh data from Stripe", { 
-          cacheAgeSeconds: Math.round(cacheAge / 1000) 
-        });
-      }
+      const cacheTimestamp = new Date(existingSubscriber.stripe_data_cached_at);
+      cacheAgeSeconds = (now.getTime() - cacheTimestamp.getTime()) / 1000;
+      logStep("Cache age calculated", { 
+        cacheAgeSeconds, 
+        cacheTimestamp: cacheTimestamp.toISOString(),
+        isFresh: cacheAgeSeconds < CACHE_TTL_SECONDS 
+      });
     } else {
-      logStep("No cached data, fetching from Stripe");
+      logStep("No cache timestamp found - cache miss");
     }
+
+    // If cache is fresh (< 10 minutes), return existing data without calling Stripe
+    if (cacheAgeSeconds < CACHE_TTL_SECONDS && existingSubscriber) {
+      logStep("✅ CACHE HIT - Returning cached data without Stripe API call", {
+        cacheAgeSeconds,
+        subscriptionTier: existingSubscriber.subscription_tier,
+        subscriptionStatus: existingSubscriber.subscription_status
+      });
+
+      // Calculate grace period status from cached data
+      const subscriptionEnd = existingSubscriber.subscription_end 
+        ? new Date(existingSubscriber.subscription_end) 
+        : null;
+      const gracePeriodEnds = existingSubscriber.grace_period_ends_at 
+        ? new Date(existingSubscriber.grace_period_ends_at) 
+        : null;
+      
+      const isInGracePeriod = gracePeriodEnds ? gracePeriodEnds > now : false;
+      
+      return new Response(JSON.stringify({
+        subscribed: existingSubscriber.subscribed || isInGracePeriod,
+        subscription_tier: existingSubscriber.subscription_tier,
+        subscription_end: existingSubscriber.subscription_end,
+        subscription_status: existingSubscriber.subscription_status,
+        grace_period_ends_at: existingSubscriber.grace_period_ends_at,
+        cached: true, // Flag to indicate this was served from cache
+        cache_age_seconds: Math.round(cacheAgeSeconds)
+      }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+        status: 200,
+      });
+    }
+
+    // ===== CACHE MISS OR STALE - FETCH FROM STRIPE API =====
+    logStep("❌ CACHE MISS or STALE - Calling Stripe API", { cacheAgeSeconds });
+
+    const stripe = new Stripe(stripeKey, { apiVersion: "2023-10-16" });
 
     // Look for Stripe customer by email (use existing subscriber's email if available, otherwise user's email)
     const customerEmail = existingSubscriber?.email || user.email;
@@ -156,11 +174,14 @@ serve(async (req) => {
         subscription_tier: null,
         subscription_end: null,
         subscription_status: 'expired',
-        updated_at: new Date().toISOString(),
+        stripe_data_cached_at: now.toISOString(), // Set cache timestamp
+        updated_at: now.toISOString(),
       }, { onConflict: 'organization_id' });
+      
       return new Response(JSON.stringify({ 
         subscribed: false,
-        subscription_status: 'expired'
+        subscription_status: 'expired',
+        cached: false
       }), {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
         status: 200,
@@ -173,8 +194,8 @@ serve(async (req) => {
     // Check for ALL subscription statuses (active, trialing, past_due)
     const subscriptions = await stripe.subscriptions.list({
       customer: customerId,
-      status: "all", // Check all statuses
-      limit: 10, // Get more subscriptions to be thorough
+      status: "all",
+      limit: 10,
     });
     
     logStep("All subscriptions found", { 
@@ -215,22 +236,16 @@ serve(async (req) => {
       
       logStep("Price details", { priceId, amount, currency: price.currency, interval });
       
-      // Map price IDs to tiers (more reliable than amount-based logic)
-      // Monthly: tier1 = price_1SPigrL0ZFRbQvFnV3TSt0DR (£19.99), tier2 = price_1SPigsL0ZFRbQvFnI1TzxUCT (£39.99)
-      // Annual: tier1 = price_1SSb33L0ZFRbQvFnwwvZzyR0 (£199.90), tier2 = price_1SSb37L0ZFRbQvFnKKobOXBU (£399.90)
+      // Map price IDs to tiers
       if (priceId === 'price_1SPigrL0ZFRbQvFnV3TSt0DR' || priceId === 'price_1SSb33L0ZFRbQvFnwwvZzyR0') {
-        // Starter tier (monthly or annual)
         subscriptionTier = "basic";
       } else if (priceId === 'price_1SPigsL0ZFRbQvFnI1TzxUCT' || priceId === 'price_1SSb37L0ZFRbQvFnKKobOXBU') {
-        // Pro tier (monthly or annual)
         subscriptionTier = "pro";
       } else {
-        // Fallback to amount-based logic for any other prices
+        // Fallback to amount-based logic
         if (interval === 'year') {
-          // Annual: £199.90 or less = basic, more = pro
           subscriptionTier = amount <= 19990 ? "basic" : "pro";
         } else {
-          // Monthly: £19.99 or less = basic, more = pro
           subscriptionTier = amount <= 1999 ? "basic" : "pro";
         }
       }
@@ -238,11 +253,9 @@ serve(async (req) => {
       logStep("Determined subscription tier", { priceId, amount, interval, subscriptionTier });
       
       // Check if subscription is expired and set grace period
-      const now = new Date();
       const endDate = new Date(subscriptionEnd);
       if (endDate < now && subscriptionStatus === 'active') {
         subscriptionStatus = 'expired';
-        // Set grace period to 7 days from expiration
         const graceEnd = new Date(endDate);
         graceEnd.setDate(graceEnd.getDate() + 7);
         gracePeriodEndsAt = graceEnd.toISOString();
@@ -252,7 +265,7 @@ serve(async (req) => {
       subscriptionStatus = 'expired';
     }
 
-    // Always update the database with the latest info from Stripe
+    // Update database with fresh Stripe data AND cache timestamp
     const updateData: any = {
       organization_id: organizationId,
       email: user.email,
@@ -262,23 +275,26 @@ serve(async (req) => {
       subscription_tier: subscriptionTier,
       subscription_end: subscriptionEnd,
       subscription_status: subscriptionStatus,
-      updated_at: new Date().toISOString(),
-      stripe_data_cached_at: new Date().toISOString(), // Update cache timestamp after Stripe API call
+      stripe_data_cached_at: now.toISOString(), // ⭐ SET CACHE TIMESTAMP
+      updated_at: now.toISOString(),
     };
     
     if (gracePeriodEndsAt) {
       updateData.grace_period_ends_at = gracePeriodEndsAt;
     }
 
-    // Upsert by organization_id (one subscription per organization)
+    // Upsert by organization_id
     await supabaseClient.from("subscribers").upsert(updateData, { onConflict: 'organization_id' });
 
-    logStep("Updated database with subscription info", { subscribed: hasActiveSub, subscriptionTier, subscriptionStatus });
+    logStep("✅ Updated database with fresh Stripe data + cache timestamp", { 
+      subscribed: hasActiveSub, 
+      subscriptionTier, 
+      subscriptionStatus,
+      cacheTimestamp: now.toISOString()
+    });
     
     // Calculate grace period status
-    const now = new Date();
     const isInGracePeriod = gracePeriodEndsAt ? new Date(gracePeriodEndsAt) > now : false;
-    const isExpired = subscriptionEnd ? new Date(subscriptionEnd) < now && !isInGracePeriod : false;
     
     const responseData = {
       subscribed: hasActiveSub || isInGracePeriod,
@@ -286,9 +302,11 @@ serve(async (req) => {
       subscription_end: subscriptionEnd,
       subscription_status: subscriptionStatus,
       grace_period_ends_at: gracePeriodEndsAt,
+      cached: false, // Flag to indicate this was fresh from Stripe
+      cache_age_seconds: 0
     };
     
-    logStep("Returning response", responseData);
+    logStep("Returning fresh response from Stripe API", responseData);
     
     return new Response(JSON.stringify(responseData), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
