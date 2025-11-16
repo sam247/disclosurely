@@ -129,7 +129,7 @@ const WorkflowsView = () => {
         .order('priority', { ascending: false });
 
       if (rulesError) throw rulesError;
-      setRules(rulesData || []);
+      setRules((rulesData || []) as any);
 
       // Fetch SLA policies
       const { data: policiesData, error: policiesError } = await supabase

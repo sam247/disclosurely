@@ -158,8 +158,8 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
         subscribed = true;
         // Don't override status if it's already active/trialing
       } else {
-        // Only mark as expired if date is past AND not in grace period AND status allows it
-        if (isExpiredByDate && !isInGracePeriod && subscriptionStatus !== 'active' && subscriptionStatus !== 'trialing') {
+        // Only mark as expired if date is past AND not in grace period
+        if (isExpiredByDate && !isInGracePeriod) {
           subscriptionStatus = 'expired';
         }
       }
@@ -167,7 +167,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
       // Ensure isExpired is false if status is active or trialing (even if subscription_end is null or in past)
       const isExpired = (subscriptionStatus === 'active' || subscriptionStatus === 'trialing')
         ? false
-        : (isExpiredByDate && !isInGracePeriod && subscriptionStatus !== 'active' && subscriptionStatus !== 'trialing');
+        : (isExpiredByDate && !isInGracePeriod);
 
       const mappedData: SubscriptionData = {
         subscribed: subscribed || isInGracePeriod,

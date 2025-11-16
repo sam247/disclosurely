@@ -239,10 +239,9 @@ class AuditLogger {
       const isOwner = user?.email === 'sampettiford@googlemail.com';
       
       // Use filtered view for non-owners to hide sensitive data for anonymous cases
-      const tableName = isOwner ? 'audit_logs' : 'audit_logs_filtered';
       
       const baseQuery = supabase
-        .from(tableName)
+        .from(isOwner ? 'audit_logs' as any : 'audit_logs_filtered')
         .select('*', { count: 'exact' });
 
       // Build filters with explicit typing to avoid deep instantiation
@@ -321,12 +320,9 @@ class AuditLogger {
     try {
       // Check if current user is owner
       const { data: { user } } = await supabase.auth.getUser();
-      const isOwner = user?.email === 'sampettiford@googlemail.com';
-      const tableName = isOwner ? 'audit_logs' : 'audit_logs_filtered';
-      
       // Type cast at the start to avoid deep type instantiation issues
-      const auditLogsTable: any = supabase.from(tableName);
-      const query = auditLogsTable
+      const query = supabase
+        .from(isOwner ? 'audit_logs' as any : 'audit_logs_filtered')
         .select('*')
         .eq('organization_id', organizationId)
         .eq('target_type', targetType)

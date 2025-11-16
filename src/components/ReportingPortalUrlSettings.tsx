@@ -57,7 +57,7 @@ const ReportingPortalUrlSettings = () => {
 
       if (error) throw error;
 
-      setOrganization(orgData);
+      setOrganization(orgData as Organization);
     } catch (error) {
       console.error('Error fetching organization:', error);
       toast({

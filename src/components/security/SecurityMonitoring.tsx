@@ -83,24 +83,30 @@ const SecurityMonitoring = () => {
 
       // Fetch audit logs for metrics (use filtered view for non-owners - PRIVACY FIX H3)
       const isOwner = user?.email === 'sampettiford@googlemail.com';
-      const tableName = isOwner ? 'audit_logs' : 'audit_logs_filtered';
       
       const { data: auditData, error: auditError } = await supabase
-        .from(tableName)
+        .from(isOwner ? 'audit_logs' as any : 'audit_logs_filtered')
         .select('event_type, action, severity')
         .gte('created_at', new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString());
 
       if (auditError) {
         console.error('Error fetching audit data:', auditError);
         // Continue with empty metrics if audit_logs doesn't exist
-      } else if (auditData) {
-        const totalEvents = auditData.length;
-        const failedLogins = auditData.filter(event => 
-          event.event_type === 'authentication' && event.action.includes('failed')
-        ).length;
-        const suspiciousActivity = auditData.filter(event => 
-          event.severity === 'high' || event.severity === 'critical'
-        ).length;
+        return {
+          totalEvents: 0,
+          criticalEvents: 0,
+          failedLogins: 0
+        };
+      }
+
+      const typedAuditData = (auditData || []) as any[];
+      const totalEvents = typedAuditData.length;
+      const failedLogins = typedAuditData.filter(event => 
+        event.event_type === 'authentication' && event.action.includes('failed')
+      ).length;
+      const suspiciousActivity = typedAuditData.filter(event => 
+        event.severity === 'high' || event.severity === 'critical'
+      ).length;
         const activeAlerts = (alertsData || []).filter(alert => !alert.resolved).length;
 
         setMetrics({
@@ -109,7 +115,6 @@ const SecurityMonitoring = () => {
           suspiciousActivity,
           activeAlerts
         });
-      }
     } catch (error: any) {
       console.error('Error fetching security data:', error);
       toast({

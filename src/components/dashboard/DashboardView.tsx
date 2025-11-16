@@ -844,7 +844,7 @@ Additional Details: ${decryptedContent.additionalDetails || 'None provided'}
         description: "Case report downloaded successfully" 
       });
     } catch (error) {
-      log.error(LogContext.CASE_MANAGEMENT, 'Error generating PDF', error as Error, { reportId });
+      log.error(LogContext.CASE_MANAGEMENT, 'Error generating PDF', error as Error, { reportId: report.id });
       toast({
         title: "Error",
         description: "Failed to generate PDF",

@@ -350,7 +350,8 @@ export const downloadReportFile = async (
       const userEmail = user?.email || 'unknown';
 
       if (report?.organization_id) {
-        const displayName = attachment?.encryption_metadata?.sanitized_display_name || 'document';
+        const encryptionMetadata = (attachment?.encryption_metadata || {}) as any;
+        const displayName = encryptionMetadata.sanitized_display_name || 'document';
         
         await auditLogger.log({
           eventType: 'report.attachment_downloaded',

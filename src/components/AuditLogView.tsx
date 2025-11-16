@@ -836,9 +836,6 @@ const AuditLogView = () => {
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-1.5 mb-0.5">
                         <h4 className="text-xs font-medium truncate">{log.summary}</h4>
-                        {!log.is_read && (
-                          <div className="w-1.5 h-1.5 bg-red-500 rounded-full flex-shrink-0" />
-                        )}
                       </div>
                       <p className="text-[10px] text-muted-foreground font-mono mb-1">
                         {formatTimestamp(log.created_at)}

@@ -44,6 +44,7 @@ const UrlRedirectMiddleware = ({ children }: { children: React.ReactNode }) => {
         let activeUrlType: string | null = null;
         let customDomain: string | null = null;
         let orgDomain: string | null = null;
+        let customDomainVerified = false;
 
         if (subdomainMatch) {
           const slug = subdomainMatch[1];
@@ -66,6 +67,7 @@ const UrlRedirectMiddleware = ({ children }: { children: React.ReactNode }) => {
             activeUrlType = org.active_url_type || 'subdomain';
             customDomain = org.custom_domain;
             orgDomain = org.domain;
+            customDomainVerified = org.custom_domain_verified || false;
           }
         } else {
           // Check if we're on a custom domain
@@ -82,6 +84,7 @@ const UrlRedirectMiddleware = ({ children }: { children: React.ReactNode }) => {
             activeUrlType = org.active_url_type || 'subdomain';
             customDomain = org.custom_domain;
             orgDomain = org.domain;
+            customDomainVerified = org.custom_domain_verified || false;
           }
         }
 
@@ -95,7 +98,7 @@ const UrlRedirectMiddleware = ({ children }: { children: React.ReactNode }) => {
 
         if (activeUrlType === 'custom_domain') {
           // Should be on custom domain
-          if (isOnSubdomain && customDomain && org.custom_domain_verified) {
+          if (isOnSubdomain && customDomain && customDomainVerified) {
             // Redirect from subdomain to custom domain
             const newUrl = `${currentProtocol}//${customDomain}${currentPath}${window.location.search}`;
             setRedirectUrl(newUrl);
