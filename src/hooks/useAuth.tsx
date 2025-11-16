@@ -19,7 +19,7 @@ interface AuthContextType {
   subscriptionLoading: boolean;
   subscriptionData: SubscriptionData;
   signOut: () => Promise<void>;
-  refreshSubscription: (currentSession?: Session | null) => Promise<void>;
+  refreshSubscription: (currentSession?: Session | null, forceRefresh?: boolean) => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -48,7 +48,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
       const cached = sessionStorage.getItem('subscription_data');
       if (cached) {
         const parsed = JSON.parse(cached);
-        // Check TTL (15 minutes)
+        // Check TTL (5 minutes)
         if (parsed.expiry && parsed.expiry > Date.now()) {
           return parsed.data;
         }
@@ -61,11 +61,11 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     }
   });
 
-  const refreshSubscription = async (currentSession?: Session | null) => {
+  const refreshSubscription = async (currentSession?: Session | null, forceRefresh: boolean = false) => {
     // Use passed session or current session state
     const sessionToUse = currentSession || session;
     const userToUse = currentSession?.user || user;
-    
+
     if (!userToUse || !sessionToUse?.access_token) {
       // Clear cached subscription data when no session
       const defaultData = { subscribed: false };
@@ -73,120 +73,132 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
       sessionStorage.removeItem('subscription_data');
       return;
     }
-    
-    // Check cache freshness - refresh if older than 15 minutes (reduced from 1 hour for security)
+
+    // Check cache freshness - refresh if older than 5 minutes (optimized for performance)
     const cacheKey = `subscription_check_${userToUse.id}`;
     const lastCheck = sessionStorage.getItem(cacheKey);
     const now = Date.now();
-    
-    // Always refresh on login to ensure fresh data (remove cache check temporarily for debugging)
-    // if (lastCheck && (now - parseInt(lastCheck)) < 900000) { // 15 minutes
-    //   return;
-    // }
+
+    // Return early if cache is still fresh (5 minutes) unless force refresh is requested
+    if (!forceRefresh && lastCheck && (now - parseInt(lastCheck)) < 300000) { // 5 minutes in milliseconds
+      return;
+    }
+
+    // If force refresh, clear cache
+    if (forceRefresh) {
+      sessionStorage.removeItem('subscription_data');
+      sessionStorage.removeItem(cacheKey);
+    }
 
     // First try direct database query for speed (no edge function)
-    // Get user's organization_id first, then query subscription
+    // Use single JOIN query for optimal performance
     try {
-      // Get user's organization_id from profile
-      const { data: profile, error: profileError } = await supabase
+      // Single query with JOIN - gets both profile and subscription data in one round trip
+      const { data: directData, error: directError } = await supabase
         .from('profiles')
-        .select('organization_id')
+        .select(`
+          organization_id,
+          subscribers!inner(
+            subscribed,
+            subscription_tier,
+            subscription_end,
+            subscription_status,
+            grace_period_ends_at
+          )
+        `)
         .eq('id', userToUse.id)
         .eq('is_active', true)
         .maybeSingle();
 
-      if (profileError || !profile?.organization_id) {
-        // User has no organization - set default subscription data
+      if (directError || !directData?.organization_id || !directData.subscribers) {
+        // User has no organization or subscription - set default subscription data
         const defaultData = { subscribed: false };
         setSubscriptionData(defaultData);
         sessionStorage.removeItem('subscription_data');
         return;
       }
 
-      // Query subscription by organization_id
-      const { data: directData, error: directError } = await supabase
-        .from('subscribers')
-        .select('subscribed, subscription_tier, subscription_end, subscription_status, grace_period_ends_at')
-        .eq('organization_id', profile.organization_id)
-        .maybeSingle();
+      // Extract subscription data from the joined result
+      const subData = Array.isArray(directData.subscribers)
+        ? directData.subscribers[0]
+        : directData.subscribers;
 
-      if (!directError && directData) {
-        const now = new Date();
-        const subscriptionEnd = directData.subscription_end ? new Date(directData.subscription_end) : null;
-        const gracePeriodEnds = directData.grace_period_ends_at ? new Date(directData.grace_period_ends_at) : null;
+      // Process subscription data
+      const now = new Date();
+      const subscriptionEnd = subData.subscription_end ? new Date(subData.subscription_end) : null;
+      const gracePeriodEnds = subData.grace_period_ends_at ? new Date(subData.grace_period_ends_at) : null;
         
-        // Check if subscription is expired based on date
-        const isExpiredByDate = subscriptionEnd ? subscriptionEnd < now : false;
-        const isInGracePeriod = gracePeriodEnds ? gracePeriodEnds > now : false;
-        
-        // Use database subscribed value if available, otherwise calculate from status
-        let subscribed = directData.subscribed ?? false;
-        
-        // If subscription_status is 'active' or 'trialing', ensure subscribed is true
-        if (directData.subscription_status === 'active' || directData.subscription_status === 'trialing') {
-          subscribed = true;
-        }
-        
-        // If subscription_status is 'canceled' or 'expired', ensure subscribed is false (unless in grace period)
-        if (directData.subscription_status === 'canceled' || directData.subscription_status === 'expired') {
-          subscribed = isInGracePeriod; // Only subscribed if in grace period
-        }
-        
-        // If subscription_end is in the future and status is active, ensure subscribed is true
-        if (subscriptionEnd && subscriptionEnd > now && (directData.subscription_status === 'active' || directData.subscription_status === 'trialing')) {
-          subscribed = true;
-        }
-        
-        // Determine subscription status
-        let subscriptionStatus: 'active' | 'past_due' | 'canceled' | 'trialing' | 'expired' = directData.subscription_status as any || 'active';
-        
-        // If status is active or trialing, never mark as expired regardless of date
-        if (subscriptionStatus === 'active' || subscriptionStatus === 'trialing') {
-          subscribed = true;
-          // Don't override status if it's already active/trialing
-        } else {
-          // Only mark as expired if date is past AND not in grace period AND status allows it
-          if (isExpiredByDate && !isInGracePeriod && subscriptionStatus !== 'active' && subscriptionStatus !== 'trialing') {
-            subscriptionStatus = 'expired';
-          }
-        }
-        
-        // Ensure isExpired is false if status is active or trialing (even if subscription_end is null or in past)
-        const isExpired = (subscriptionStatus === 'active' || subscriptionStatus === 'trialing') 
-          ? false 
-          : (isExpiredByDate && !isInGracePeriod && subscriptionStatus !== 'active' && subscriptionStatus !== 'trialing');
-        
-        const mappedData: SubscriptionData = {
-          subscribed: subscribed || isInGracePeriod,
-          subscription_tier: directData.subscription_tier as 'basic' | 'pro',
-          subscription_end: directData.subscription_end,
-          subscription_status: subscriptionStatus,
-          grace_period_ends_at: directData.grace_period_ends_at,
-          isInGracePeriod,
-          isExpired,
-        };
-        
-        // Debug log to help diagnose
-        console.log('[useAuth] Mapped subscription data:', {
-          subscribed: mappedData.subscribed,
-          subscription_status: mappedData.subscription_status,
-          subscription_end: mappedData.subscription_end,
-          isExpired: mappedData.isExpired,
-          isInGracePeriod: mappedData.isInGracePeriod,
-          isExpiredByDate,
-          subscriptionStatus
-        });
-        
-        setSubscriptionData(mappedData);
-        // Store with TTL (15 minutes) for security
-        const dataWithTTL = {
-          data: mappedData,
-          expiry: now.getTime() + (15 * 60 * 1000)
-        };
-        sessionStorage.setItem('subscription_data', JSON.stringify(dataWithTTL));
-        sessionStorage.setItem(cacheKey, now.getTime().toString());
-        return;
+      // Check if subscription is expired based on date
+      const isExpiredByDate = subscriptionEnd ? subscriptionEnd < now : false;
+      const isInGracePeriod = gracePeriodEnds ? gracePeriodEnds > now : false;
+
+      // Use database subscribed value if available, otherwise calculate from status
+      let subscribed = subData.subscribed ?? false;
+
+      // If subscription_status is 'active' or 'trialing', ensure subscribed is true
+      if (subData.subscription_status === 'active' || subData.subscription_status === 'trialing') {
+        subscribed = true;
       }
+
+      // If subscription_status is 'canceled' or 'expired', ensure subscribed is false (unless in grace period)
+      if (subData.subscription_status === 'canceled' || subData.subscription_status === 'expired') {
+        subscribed = isInGracePeriod; // Only subscribed if in grace period
+      }
+
+      // If subscription_end is in the future and status is active, ensure subscribed is true
+      if (subscriptionEnd && subscriptionEnd > now && (subData.subscription_status === 'active' || subData.subscription_status === 'trialing')) {
+        subscribed = true;
+      }
+
+      // Determine subscription status
+      let subscriptionStatus: 'active' | 'past_due' | 'canceled' | 'trialing' | 'expired' = subData.subscription_status as any || 'active';
+
+      // If status is active or trialing, never mark as expired regardless of date
+      if (subscriptionStatus === 'active' || subscriptionStatus === 'trialing') {
+        subscribed = true;
+        // Don't override status if it's already active/trialing
+      } else {
+        // Only mark as expired if date is past AND not in grace period AND status allows it
+        if (isExpiredByDate && !isInGracePeriod && subscriptionStatus !== 'active' && subscriptionStatus !== 'trialing') {
+          subscriptionStatus = 'expired';
+        }
+      }
+
+      // Ensure isExpired is false if status is active or trialing (even if subscription_end is null or in past)
+      const isExpired = (subscriptionStatus === 'active' || subscriptionStatus === 'trialing')
+        ? false
+        : (isExpiredByDate && !isInGracePeriod && subscriptionStatus !== 'active' && subscriptionStatus !== 'trialing');
+
+      const mappedData: SubscriptionData = {
+        subscribed: subscribed || isInGracePeriod,
+        subscription_tier: subData.subscription_tier as 'basic' | 'pro',
+        subscription_end: subData.subscription_end,
+        subscription_status: subscriptionStatus,
+        grace_period_ends_at: subData.grace_period_ends_at,
+        isInGracePeriod,
+        isExpired,
+      };
+
+      // Debug log to help diagnose
+      console.log('[useAuth] Mapped subscription data:', {
+        subscribed: mappedData.subscribed,
+        subscription_status: mappedData.subscription_status,
+        subscription_end: mappedData.subscription_end,
+        isExpired: mappedData.isExpired,
+        isInGracePeriod: mappedData.isInGracePeriod,
+        isExpiredByDate,
+        subscriptionStatus
+      });
+
+      setSubscriptionData(mappedData);
+      // Store with TTL (5 minutes) for performance optimization
+      const dataWithTTL = {
+        data: mappedData,
+        expiry: now.getTime() + (5 * 60 * 1000)
+      };
+      sessionStorage.setItem('subscription_data', JSON.stringify(dataWithTTL));
+      sessionStorage.setItem(cacheKey, now.getTime().toString());
+      return;
     } catch (error) {
       // Silent fallback
     }
@@ -222,11 +234,11 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
       };
       
       setSubscriptionData(mappedData);
-      
-      // Cache the subscription data with TTL (15 minutes) for security
+
+      // Cache the subscription data with TTL (5 minutes) for performance optimization
       const dataWithTTL = {
         data: mappedData,
-        expiry: now + (15 * 60 * 1000)
+        expiry: now + (5 * 60 * 1000)
       };
       sessionStorage.setItem('subscription_data', JSON.stringify(dataWithTTL));
       sessionStorage.setItem(cacheKey, now.toString());
