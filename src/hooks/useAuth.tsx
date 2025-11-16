@@ -91,48 +91,48 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     }
 
     // First try direct database query for speed (no edge function)
-    // Use single JOIN query for optimal performance
+    // Use two separate queries for reliability
     try {
-      // Single query with LEFT JOIN - gets both profile and subscription data in one round trip
-      // Using LEFT JOIN (not !inner) so query succeeds even if no subscription exists
-      const { data: directData, error: directError } = await supabase
+      setSubscriptionLoading(true);
+
+      // Query 1: Get user's organization_id from profile
+      const { data: profile, error: profileError } = await supabase
         .from('profiles')
-        .select(`
-          organization_id,
-          subscribers(
-            subscribed,
-            subscription_tier,
-            subscription_end,
-            subscription_status,
-            grace_period_ends_at
-          )
-        `)
+        .select('organization_id')
         .eq('id', userToUse.id)
         .eq('is_active', true)
         .maybeSingle();
 
-      if (directError) {
-        console.error('[useAuth] Database query error:', directError);
-        // Fall through to edge function on error
-        throw directError;
+      if (profileError) {
+        console.error('[useAuth] Profile query error:', profileError);
+        throw profileError;
       }
 
-      if (!directData?.organization_id) {
-        // User has no organization - fallback to edge function
+      if (!profile?.organization_id) {
         console.log('[useAuth] No organization found, using edge function');
         throw new Error('No organization');
       }
 
-      if (!directData.subscribers) {
-        // No subscription record exists yet - fallback to edge function to create it
+      console.log('[useAuth] Organization found:', profile.organization_id);
+
+      // Query 2: Get subscription by organization_id
+      const { data: subData, error: subError } = await supabase
+        .from('subscribers')
+        .select('subscribed, subscription_tier, subscription_end, subscription_status, grace_period_ends_at')
+        .eq('organization_id', profile.organization_id)
+        .maybeSingle();
+
+      if (subError) {
+        console.error('[useAuth] Subscriber query error:', subError);
+        throw subError;
+      }
+
+      if (!subData) {
         console.log('[useAuth] No subscriber record found, using edge function to fetch from Stripe');
         throw new Error('No subscriber record');
       }
 
-      // Extract subscription data from the joined result
-      const subData = Array.isArray(directData.subscribers)
-        ? directData.subscribers[0]
-        : directData.subscribers;
+      console.log('[useAuth] Subscriber data found:', subData);
 
       // Process subscription data
       const now = new Date();
@@ -209,14 +209,19 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
       };
       sessionStorage.setItem('subscription_data', JSON.stringify(dataWithTTL));
       sessionStorage.setItem(cacheKey, now.getTime().toString());
+      setSubscriptionLoading(false);
       return;
     } catch (error) {
       // Expected fallback - use edge function instead
       console.log('[useAuth] Using edge function fallback:', error instanceof Error ? error.message : 'unknown');
+      // Keep loading state true as we're about to call edge function
     }
 
     try {
-      setSubscriptionLoading(true);
+      // Already set to true in try block above, but ensure it's set
+      if (!subscriptionLoading) {
+        setSubscriptionLoading(true);
+      }
       console.log('[useAuth] Calling check-subscription edge function');
 
       const { data, error } = await supabase.functions.invoke('check-subscription', {

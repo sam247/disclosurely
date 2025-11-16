@@ -21,15 +21,26 @@ const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
 
   // Track when subscription data has been explicitly loaded (not just default)
   useEffect(() => {
+    // Reset loaded flag when loading starts
+    if (loading || subscriptionLoading) {
+      subscriptionDataLoadedRef.current = false;
+      return;
+    }
+
     // Mark as loaded only when loading is complete and we have actual data
-    if (!loading && !subscriptionLoading && user) {
+    if (user) {
       // Check if subscriptionData has been explicitly loaded (has subscription_status or other indicators)
-      const hasExplicitData = subscriptionData.subscription_status !== undefined || 
-                              subscriptionData.subscription_tier !== undefined ||
-                              subscriptionData.subscription_end !== undefined;
-      
+      // Must have either tier OR status to be considered real data
+      const hasExplicitData = (subscriptionData.subscription_status !== undefined && subscriptionData.subscription_status !== null) ||
+                              (subscriptionData.subscription_tier !== undefined && subscriptionData.subscription_tier !== null) ||
+                              (subscriptionData.subscription_end !== undefined && subscriptionData.subscription_end !== null);
+
       if (hasExplicitData) {
+        console.log('[ProtectedRoute] Subscription data loaded:', subscriptionData);
         subscriptionDataLoadedRef.current = true;
+      } else {
+        console.log('[ProtectedRoute] Waiting for subscription data...');
+        subscriptionDataLoadedRef.current = false;
       }
     }
   }, [loading, subscriptionLoading, user, subscriptionData]);
@@ -136,13 +147,22 @@ const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
   // Check subscription access - only block if subscriptionData is loaded and explicitly shows no access
   // Don't block if subscriptionData is still loading or is default/undefined
   // NEVER block users with active/trialing status or pro/basic tier
-  const shouldBlockAccess = subscriptionData && 
-                            !subscriptionLoading && 
+  // MUST have explicit subscription data loaded before blocking anyone
+  const shouldBlockAccess = subscriptionDataLoadedRef.current &&
+                            !subscriptionLoading &&
                             subscriptionData.subscription_status !== 'active' &&
                             subscriptionData.subscription_status !== 'trialing' &&
                             subscriptionData.subscription_tier !== 'pro' &&
                             subscriptionData.subscription_tier !== 'basic' &&
                             !canAccess(subscriptionData);
+
+  console.log('[ProtectedRoute] Block check:', {
+    shouldBlockAccess,
+    dataLoaded: subscriptionDataLoadedRef.current,
+    subscriptionLoading,
+    tier: subscriptionData?.subscription_tier,
+    status: subscriptionData?.subscription_status
+  });
   
   if (shouldBlockAccess) {
     const statusForModal = getSubscriptionStatusForModal(subscriptionData);
