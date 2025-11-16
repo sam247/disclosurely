@@ -128,10 +128,10 @@ const SubscriptionManagement = () => {
           <CardTitle className="flex items-center space-x-2">
             <CreditCard className="h-5 w-5" />
             <span>Current Subscription</span>
-            <Button 
-              variant="outline" 
-              size="sm" 
-              onClick={() => refreshSubscription()}
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => refreshSubscription(null, true)}
               className="ml-auto"
             >
               Refresh Status
