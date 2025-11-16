@@ -85,7 +85,7 @@ const AuditTrail = () => {
       }
       
       // Convert the database results to our interface format
-      const typedData: AuditEvent[] = (data || []).map(item => ({
+      const typedData: AuditEvent[] = ((data as any) || []).map((item: any) => ({
         id: item.id,
         event_type: item.event_type,
         actor_id: item.actor_id || undefined,
