@@ -93,12 +93,13 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     // First try direct database query for speed (no edge function)
     // Use single JOIN query for optimal performance
     try {
-      // Single query with JOIN - gets both profile and subscription data in one round trip
+      // Single query with LEFT JOIN - gets both profile and subscription data in one round trip
+      // Using LEFT JOIN (not !inner) so query succeeds even if no subscription exists
       const { data: directData, error: directError } = await supabase
         .from('profiles')
         .select(`
           organization_id,
-          subscribers!inner(
+          subscribers(
             subscribed,
             subscription_tier,
             subscription_end,
@@ -110,12 +111,22 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
         .eq('is_active', true)
         .maybeSingle();
 
-      if (directError || !directData?.organization_id || !directData.subscribers) {
-        // User has no organization or subscription - set default subscription data
-        const defaultData = { subscribed: false };
-        setSubscriptionData(defaultData);
-        sessionStorage.removeItem('subscription_data');
-        return;
+      if (directError) {
+        console.error('[useAuth] Database query error:', directError);
+        // Fall through to edge function on error
+        throw directError;
+      }
+
+      if (!directData?.organization_id) {
+        // User has no organization - fallback to edge function
+        console.log('[useAuth] No organization found, using edge function');
+        throw new Error('No organization');
+      }
+
+      if (!directData.subscribers) {
+        // No subscription record exists yet - fallback to edge function to create it
+        console.log('[useAuth] No subscriber record found, using edge function to fetch from Stripe');
+        throw new Error('No subscriber record');
       }
 
       // Extract subscription data from the joined result
@@ -200,12 +211,14 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
       sessionStorage.setItem(cacheKey, now.getTime().toString());
       return;
     } catch (error) {
-      // Silent fallback
+      // Expected fallback - use edge function instead
+      console.log('[useAuth] Using edge function fallback:', error instanceof Error ? error.message : 'unknown');
     }
-    
+
     try {
       setSubscriptionLoading(true);
-      
+      console.log('[useAuth] Calling check-subscription edge function');
+
       const { data, error } = await supabase.functions.invoke('check-subscription', {
         headers: {
           Authorization: `Bearer ${sessionToUse.access_token}`,
@@ -213,8 +226,15 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
       });
 
       if (error) {
+        console.error('[useAuth] Edge function error:', error);
+        // Don't return empty - set a reasonable default
+        const defaultData = { subscribed: false };
+        setSubscriptionData(defaultData);
+        sessionStorage.removeItem('subscription_data');
         return;
       }
+
+      console.log('[useAuth] Edge function response:', data);
       
       const nowDate = new Date();
       const subscriptionEnd = data?.subscription_end ? new Date(data.subscription_end) : null;
