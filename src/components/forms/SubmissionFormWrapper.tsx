@@ -21,6 +21,7 @@ interface LinkData {
   usage_limit: number | null;
   expires_at: string | null;
   is_active: boolean;
+  link_token: string;
   default_language?: string;
   available_languages?: string[] | null;
 }
@@ -127,6 +128,7 @@ const SubmissionFormWrapper = () => {
         usage_limit: linkInfo.usage_limit,
         expires_at: linkInfo.expires_at,
         is_active: linkInfo.is_active,
+        link_token: linkToken!,
         default_language: linkInfo.default_language,
         available_languages: availableLanguages as string[] | null
       });

@@ -232,15 +232,15 @@ const LinkGenerator = () => {
 
         const { data: newLink, error: createError } = await supabase
           .from('organization_links')
-          .insert({
+          .insert([{
             organization_id: profile.organization_id,
             name: org?.name || 'Default Submission Link',
             description: 'Default secure submission link',
             is_active: true,
             default_language: 'en',
-            available_languages: ['en'],
+            available_languages: ['en'] as any,
             created_by: user.id
-          })
+          } as any])
           .select()
           .single();
 
@@ -765,7 +765,7 @@ const LinkGenerator = () => {
             </p>
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 p-4 border rounded-lg bg-muted/50">
               {ALL_LANGUAGES.map((lang) => {
-                const availableLanguages = primaryLink.available_languages || ALL_LANGUAGES.map(l => l.code);
+                const availableLanguages = (primaryLink.available_languages as string[]) || ALL_LANGUAGES.map(l => l.code);
                 const isChecked = availableLanguages.includes(lang.code);
                 
                 return (
@@ -774,7 +774,7 @@ const LinkGenerator = () => {
                       id={`lang-${lang.code}`}
                       checked={isChecked}
                       onCheckedChange={(checked) => {
-                        const current = primaryLink.available_languages || ALL_LANGUAGES.map(l => l.code);
+                        const current = (primaryLink.available_languages as string[]) || ALL_LANGUAGES.map(l => l.code);
                         const updated = checked
                           ? [...current, lang.code]
                           : current.filter((code: string) => code !== lang.code);
@@ -814,7 +814,7 @@ const LinkGenerator = () => {
             </div>
             <p className="text-xs text-muted-foreground">
               {(() => {
-                const availableLanguages = primaryLink.available_languages || ALL_LANGUAGES.map(l => l.code);
+                const availableLanguages = (primaryLink.available_languages as string[]) || ALL_LANGUAGES.map(l => l.code);
                 return `${availableLanguages.length} of ${ALL_LANGUAGES.length} languages selected`;
               })()}
             </p>

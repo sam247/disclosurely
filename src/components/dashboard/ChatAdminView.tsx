@@ -111,7 +111,7 @@ const ChatAdminView = () => {
         .order('created_at', { ascending: true });
 
       if (error) throw error;
-      setMessages(data || []);
+      setMessages((data || []) as ChatMessage[]);
     } catch (error: any) {
       console.error('Error fetching messages:', error);
       toast({

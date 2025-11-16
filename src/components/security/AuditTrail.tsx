@@ -48,10 +48,9 @@ const AuditTrail = () => {
     try {
       // Use filtered view for non-owner users to hide sensitive data for anonymous cases (PRIVACY FIX H3)
       const isOwner = user?.email === 'sampettiford@googlemail.com';
-      const tableName = isOwner ? 'audit_logs' : 'audit_logs_filtered';
       
       let query = supabase
-        .from(tableName)
+        .from(isOwner ? 'audit_logs' as any : 'audit_logs_filtered')
         .select('*')
         .order('created_at', { ascending: false })
         .limit(100);
