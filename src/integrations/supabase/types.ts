@@ -2933,6 +2933,7 @@ export type Database = {
           last_payment_failed_at: string | null
           organization_id: string | null
           stripe_customer_id: string | null
+          stripe_data_cached_at: string | null
           subscribed: boolean
           subscription_end: string | null
           subscription_status: string | null
@@ -2948,6 +2949,7 @@ export type Database = {
           last_payment_failed_at?: string | null
           organization_id?: string | null
           stripe_customer_id?: string | null
+          stripe_data_cached_at?: string | null
           subscribed?: boolean
           subscription_end?: string | null
           subscription_status?: string | null
@@ -2963,6 +2965,7 @@ export type Database = {
           last_payment_failed_at?: string | null
           organization_id?: string | null
           stripe_customer_id?: string | null
+          stripe_data_cached_at?: string | null
           subscribed?: boolean
           subscription_end?: string | null
           subscription_status?: string | null
