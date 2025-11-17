@@ -2,6 +2,7 @@ import { ReactElement } from 'react';
 import { render, RenderOptions } from '@testing-library/react';
 import { BrowserRouter } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { HelmetProvider } from 'react-helmet-async';
 import { vi } from 'vitest';
 
 // Create a custom render function that includes providers
@@ -26,9 +27,11 @@ export const AllTheProviders = ({ children }: AllTheProvidersProps) => {
   const queryClient = createTestQueryClient();
 
   return (
-    <QueryClientProvider client={queryClient}>
-      <BrowserRouter>{children}</BrowserRouter>
-    </QueryClientProvider>
+    <HelmetProvider>
+      <QueryClientProvider client={queryClient}>
+        <BrowserRouter>{children}</BrowserRouter>
+      </QueryClientProvider>
+    </HelmetProvider>
   );
 };
 
