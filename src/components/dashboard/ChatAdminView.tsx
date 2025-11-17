@@ -13,7 +13,8 @@ import {
   Eye,
   Archive,
   RefreshCw,
-  Send
+  Send,
+  Trash2
 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
@@ -30,6 +31,8 @@ interface ChatConversation {
   created_at: string;
   updated_at: string;
   message_count?: number;
+  human_requested?: boolean;
+  human_requested_at?: string;
 }
 
 interface ChatMessage {
@@ -65,7 +68,9 @@ const ChatAdminView = () => {
         .order('updated_at', { ascending: false })
         .limit(500);
 
-      if (statusFilter !== 'all') {
+      if (statusFilter === 'human_requested') {
+        query = query.eq('human_requested', true);
+      } else if (statusFilter !== 'all') {
         query = query.eq('status', statusFilter);
       }
 
@@ -228,6 +233,51 @@ const ChatAdminView = () => {
     }
   };
 
+  const handleDeleteConversation = async (conversationId: string) => {
+    if (!confirm('Are you sure you want to permanently delete this conversation? This action cannot be undone.')) {
+      return;
+    }
+
+    try {
+      // Delete messages first (CASCADE should handle this, but being explicit)
+      const { error: messagesError } = await supabase
+        .from('chat_messages')
+        .delete()
+        .eq('conversation_id', conversationId);
+
+      if (messagesError) throw messagesError;
+
+      // Delete conversation
+      const { error: convError } = await supabase
+        .from('chat_conversations')
+        .delete()
+        .eq('id', conversationId);
+
+      if (convError) throw convError;
+
+      toast({
+        title: "Success",
+        description: "Conversation deleted permanently",
+      });
+
+      // Refresh conversations list
+      await fetchConversations();
+      
+      // Clear selected conversation if it was deleted
+      if (selectedConversation?.id === conversationId) {
+        setSelectedConversation(null);
+        setMessages([]);
+      }
+    } catch (error: any) {
+      console.error('Delete error:', error);
+      toast({
+        title: "Error",
+        description: error.message || "Failed to delete conversation. Please check RLS policies.",
+        variant: "destructive",
+      });
+    }
+  };
+
   const filteredConversations = conversations.filter(conv => {
     if (searchQuery) {
       const query = searchQuery.toLowerCase();
@@ -309,6 +359,13 @@ const ChatAdminView = () => {
                 >
                   Archived
                 </Button>
+                <Button
+                  variant={statusFilter === 'human_requested' ? 'default' : 'outline'}
+                  size="sm"
+                  onClick={() => setStatusFilter('human_requested')}
+                >
+                  Human Requested
+                </Button>
               </div>
             </div>
           </CardContent>
@@ -372,13 +429,14 @@ const ChatAdminView = () => {
                             </div>
                             <Badge
                               variant={
+                                conv.human_requested ? 'destructive' :
                                 conv.status === 'active' ? 'default' :
                                 conv.status === 'closed' ? 'secondary' :
                                 'outline'
                               }
                               className="text-xs flex-shrink-0"
                             >
-                              {conv.status}
+                              {conv.human_requested ? 'Human Requested' : conv.status}
                             </Badge>
                           </div>
                         </div>
@@ -411,16 +469,28 @@ const ChatAdminView = () => {
                     </CardDescription>
                   </div>
                   {selectedConversation && (
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={async () => {
-                        await handleArchiveConversation(selectedConversation.id);
-                      }}
-                    >
-                      <Archive className="h-4 w-4 mr-2" />
-                      Archive
-                    </Button>
+                    <div className="flex gap-2">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={async () => {
+                          await handleArchiveConversation(selectedConversation.id);
+                        }}
+                      >
+                        <Archive className="h-4 w-4 mr-2" />
+                        Archive
+                      </Button>
+                      <Button
+                        variant="destructive"
+                        size="sm"
+                        onClick={async () => {
+                          await handleDeleteConversation(selectedConversation.id);
+                        }}
+                      >
+                        <Trash2 className="h-4 w-4 mr-2" />
+                        Delete
+                      </Button>
+                    </div>
                   )}
                 </div>
               </CardHeader>
