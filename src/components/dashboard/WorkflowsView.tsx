@@ -448,9 +448,9 @@ const WorkflowsView = () => {
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="text-xl sm:text-2xl font-bold tracking-tight">Workflows</h2>
+        <h2 className="text-xl sm:text-2xl font-bold tracking-tight">{t('workflows.title')}</h2>
         <p className="text-muted-foreground mt-2">
-          Automate case assignment and SLA management
+          {t('workflows.description')}
         </p>
       </div>
 
@@ -458,18 +458,18 @@ const WorkflowsView = () => {
           <TabsList className="grid w-full grid-cols-3 h-auto">
             <TabsTrigger value="rules" className="text-xs sm:text-sm py-2 sm:py-2.5">
               <Settings className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
-              <span className="hidden sm:inline">Assignment Rules</span>
-              <span className="sm:hidden">Rules</span>
+              <span className="hidden sm:inline">{t('workflows.assignmentRules')}</span>
+              <span className="sm:hidden">{t('workflows.rules')}</span>
             </TabsTrigger>
             <TabsTrigger value="sla" className="text-xs sm:text-sm py-2 sm:py-2.5">
               <Clock className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
-              <span className="hidden sm:inline">SLA Policies</span>
-              <span className="sm:hidden">SLA</span>
+              <span className="hidden sm:inline">{t('workflows.slaPolicies')}</span>
+              <span className="sm:hidden">{t('workflows.sla')}</span>
             </TabsTrigger>
             <TabsTrigger value="history" className="text-xs sm:text-sm py-2 sm:py-2.5">
               <History className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
-              <span className="hidden sm:inline">Workflow History</span>
-              <span className="sm:hidden">History</span>
+              <span className="hidden sm:inline">{t('workflows.workflowHistory')}</span>
+              <span className="sm:hidden">{t('workflows.history')}</span>
             </TabsTrigger>
           </TabsList>
 
@@ -479,14 +479,14 @@ const WorkflowsView = () => {
               <CardHeader>
                 <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
                   <div>
-                    <CardTitle className="text-lg md:text-xl">Assignment Rules</CardTitle>
+                    <CardTitle className="text-lg md:text-xl">{t('workflows.assignmentRules')}</CardTitle>
                     <CardDescription className="text-xs md:text-sm">
-                      Configure automatic case assignment based on category, urgency, and keywords
+                      {t('workflows.assignmentRulesDescription')}
                     </CardDescription>
                   </div>
                   <Button onClick={handleCreateRule} size="sm" className="w-full sm:w-auto">
                     <Plus className="h-4 w-4 mr-2" />
-                    Create Rule
+                    {t('workflows.createRule')}
                   </Button>
                 </div>
               </CardHeader>
@@ -494,8 +494,8 @@ const WorkflowsView = () => {
                 {rules.length === 0 ? (
                   <div className="text-center py-8 md:py-12 text-muted-foreground">
                     <Settings className="h-10 w-10 md:h-12 md:w-12 mx-auto mb-4 opacity-50" />
-                    <p className="text-sm md:text-base">No assignment rules configured yet.</p>
-                    <p className="text-xs md:text-sm mt-2">Create your first rule to automate case assignment.</p>
+                    <p className="text-sm md:text-base">{t('workflows.noRules')}</p>
+                    <p className="text-xs md:text-sm mt-2">{t('workflows.createFirstRule')}</p>
                   </div>
                 ) : (
                   <>
@@ -504,12 +504,12 @@ const WorkflowsView = () => {
                       <Table>
                         <TableHeader>
                           <TableRow>
-                            <TableHead>Name</TableHead>
-                            <TableHead>Priority</TableHead>
-                            <TableHead>Conditions</TableHead>
-                            <TableHead>Assign To</TableHead>
-                            <TableHead>Status</TableHead>
-                            <TableHead>Actions</TableHead>
+                            <TableHead>{t('workflows.name')}</TableHead>
+                            <TableHead>{t('workflows.priority')}</TableHead>
+                            <TableHead>{t('workflows.conditions')}</TableHead>
+                            <TableHead>{t('workflows.assignTo')}</TableHead>
+                            <TableHead>{t('workflows.status')}</TableHead>
+                            <TableHead>{t('workflows.actions')}</TableHead>
                           </TableRow>
                         </TableHeader>
                         <TableBody>
@@ -596,7 +596,7 @@ const WorkflowsView = () => {
                               </div>
                               <div className="space-y-2">
                                 <div>
-                                  <p className="text-xs font-medium text-muted-foreground mb-1">Conditions</p>
+                                  <p className="text-xs font-medium text-muted-foreground mb-1">{t('workflows.conditions')}</p>
                                   <div className="flex flex-wrap gap-1">
                                     {rule.conditions.category && rule.conditions.category !== 'any' && (
                                       <Badge variant="outline" className="text-xs">Category: {rule.conditions.category}</Badge>
@@ -610,7 +610,7 @@ const WorkflowsView = () => {
                                   </div>
                                 </div>
                                 <div>
-                                  <p className="text-xs font-medium text-muted-foreground mb-1">Assign To</p>
+                                  <p className="text-xs font-medium text-muted-foreground mb-1">{t('workflows.assignTo')}</p>
                                   <p className="text-xs">
                                     {rule.assign_to_user_id ? (
                                       teamMembers.find(m => m.id === rule.assign_to_user_id)?.email || 'User'
@@ -626,7 +626,7 @@ const WorkflowsView = () => {
                                   onClick={() => handleEditRule(rule)}
                                 >
                                   <Edit className="h-3 w-3 mr-1" />
-                                  Edit
+                                  {t('workflows.edit')}
                                 </Button>
                                 <Button
                                   variant="outline"
@@ -635,7 +635,7 @@ const WorkflowsView = () => {
                                   onClick={() => handleDeleteRule(rule.id)}
                                 >
                                   <Trash2 className="h-3 w-3 mr-1" />
-                                  Delete
+                                  {t('workflows.delete')}
                                 </Button>
                               </div>
                             </div>
@@ -655,14 +655,14 @@ const WorkflowsView = () => {
               <CardHeader>
                 <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
                   <div>
-                    <CardTitle className="text-lg md:text-xl">SLA Policies</CardTitle>
+                    <CardTitle className="text-lg md:text-xl">{t('workflows.slaPolicies')}</CardTitle>
                     <CardDescription className="text-xs md:text-sm">
-                      Set response time targets for different priority levels
+                      {t('workflows.slaPoliciesDescription')}
                     </CardDescription>
                   </div>
                   <Button onClick={handleCreatePolicy} size="sm" className="w-full sm:w-auto">
                     <Plus className="h-4 w-4 mr-2" />
-                    Create Policy
+                    {t('workflows.createPolicy')}
                   </Button>
                 </div>
               </CardHeader>
@@ -670,8 +670,8 @@ const WorkflowsView = () => {
                 {policies.length === 0 ? (
                   <div className="text-center py-8 md:py-12 text-muted-foreground">
                     <Clock className="h-10 w-10 md:h-12 md:w-12 mx-auto mb-4 opacity-50" />
-                    <p className="text-sm md:text-base">No SLA policies configured yet.</p>
-                    <p className="text-xs md:text-sm mt-2">Create your first policy to track response times.</p>
+                    <p className="text-sm md:text-base">{t('workflows.noPolicies')}</p>
+                    <p className="text-xs md:text-sm mt-2">{t('workflows.createFirstPolicy')}</p>
                   </div>
                 ) : (
                   <>
@@ -680,13 +680,13 @@ const WorkflowsView = () => {
                       <Table>
                         <TableHeader>
                           <TableRow>
-                            <TableHead>Name</TableHead>
-                            <TableHead>Critical</TableHead>
-                            <TableHead>High</TableHead>
-                            <TableHead>Medium</TableHead>
-                            <TableHead>Low</TableHead>
-                            <TableHead>Default</TableHead>
-                            <TableHead>Actions</TableHead>
+                            <TableHead>{t('workflows.name')}</TableHead>
+                            <TableHead>{t('workflows.critical')}</TableHead>
+                            <TableHead>{t('workflows.high')}</TableHead>
+                            <TableHead>{t('workflows.medium')}</TableHead>
+                            <TableHead>{t('workflows.low')}</TableHead>
+                            <TableHead>{t('workflows.default')}</TableHead>
+                            <TableHead>{t('workflows.actions')}</TableHead>
                           </TableRow>
                         </TableHeader>
                         <TableBody>
@@ -741,19 +741,19 @@ const WorkflowsView = () => {
                               </div>
                               <div className="grid grid-cols-2 gap-2 text-xs">
                                 <div>
-                                  <p className="text-muted-foreground">Critical</p>
+                                  <p className="text-muted-foreground">{t('workflows.critical')}</p>
                                   <p className="font-medium">{policy.critical_response_time}h</p>
                                 </div>
                                 <div>
-                                  <p className="text-muted-foreground">High</p>
+                                  <p className="text-muted-foreground">{t('workflows.high')}</p>
                                   <p className="font-medium">{policy.high_response_time}h</p>
                                 </div>
                                 <div>
-                                  <p className="text-muted-foreground">Medium</p>
+                                  <p className="text-muted-foreground">{t('workflows.medium')}</p>
                                   <p className="font-medium">{policy.medium_response_time}h</p>
                                 </div>
                                 <div>
-                                  <p className="text-muted-foreground">Low</p>
+                                  <p className="text-muted-foreground">{t('workflows.low')}</p>
                                   <p className="font-medium">{policy.low_response_time}h</p>
                                 </div>
                               </div>
@@ -765,7 +765,7 @@ const WorkflowsView = () => {
                                   onClick={() => handleEditPolicy(policy)}
                                 >
                                   <Edit className="h-3 w-3 mr-1" />
-                                  Edit
+                                  {t('workflows.edit')}
                                 </Button>
                                 <Button
                                   variant="outline"
@@ -774,7 +774,7 @@ const WorkflowsView = () => {
                                   onClick={() => handleDeletePolicy(policy.id)}
                                 >
                                   <Trash2 className="h-3 w-3 mr-1" />
-                                  Delete
+                                  {t('workflows.delete')}
                                 </Button>
                               </div>
                             </div>
@@ -792,17 +792,17 @@ const WorkflowsView = () => {
           <TabsContent value="history" className="mt-4 md:mt-6">
             <Card>
               <CardHeader>
-                <CardTitle className="text-lg md:text-xl">Workflow History</CardTitle>
+                <CardTitle className="text-lg md:text-xl">{t('workflows.workflowHistory')}</CardTitle>
                 <CardDescription className="text-xs md:text-sm">
-                  View audit log of all workflow automation events
+                  {t('workflows.workflowHistoryDescription')}
                 </CardDescription>
               </CardHeader>
               <CardContent>
                 {workflowLogs.length === 0 ? (
                   <div className="text-center py-8 md:py-12 text-muted-foreground">
                     <History className="h-10 w-10 md:h-12 md:w-12 mx-auto mb-4 opacity-50" />
-                    <p className="text-sm md:text-base">No workflow history yet.</p>
-                    <p className="text-xs md:text-sm mt-2">Workflow events will appear here once automation is active.</p>
+                    <p className="text-sm md:text-base">{t('workflows.noHistory')}</p>
+                    <p className="text-xs md:text-sm mt-2">{t('workflows.historyWillAppear')}</p>
                   </div>
                 ) : (
                   <>
@@ -811,10 +811,10 @@ const WorkflowsView = () => {
                       <Table>
                         <TableHeader>
                           <TableRow>
-                            <TableHead>Action</TableHead>
-                            <TableHead>Report ID</TableHead>
-                            <TableHead>Details</TableHead>
-                            <TableHead>Date</TableHead>
+                            <TableHead>{t('workflows.action')}</TableHead>
+                            <TableHead>{t('workflows.reportId')}</TableHead>
+                            <TableHead>{t('workflows.details')}</TableHead>
+                            <TableHead>{t('workflows.date')}</TableHead>
                           </TableRow>
                         </TableHeader>
                         <TableBody>
@@ -850,11 +850,11 @@ const WorkflowsView = () => {
                                 </span>
                               </div>
                               <div>
-                                <p className="text-xs font-medium text-muted-foreground mb-1">Report ID</p>
+                                <p className="text-xs font-medium text-muted-foreground mb-1">{t('workflows.reportId')}</p>
                                 <p className="font-mono text-xs">{log.report_id.substring(0, 8)}...</p>
                               </div>
                               <div>
-                                <p className="text-xs font-medium text-muted-foreground mb-1">Details</p>
+                                <p className="text-xs font-medium text-muted-foreground mb-1">{t('workflows.details')}</p>
                                 <pre className="text-xs bg-muted p-2 rounded overflow-auto max-h-32">
                                   {JSON.stringify(log.details, null, 2)}
                                 </pre>
@@ -901,7 +901,7 @@ const WorkflowsView = () => {
                   onChange={(e) => setRulePriority(parseInt(e.target.value) || 0)}
                   placeholder="0"
                 />
-                <p className="text-xs text-muted-foreground">Higher priority rules are evaluated first</p>
+                <p className="text-xs text-muted-foreground">{t('workflows.priorityHelp')}</p>
               </div>
               <div className="space-y-2">
                 <Label htmlFor="rule-enabled">Enabled</Label>
@@ -961,7 +961,7 @@ const WorkflowsView = () => {
                 onChange={(e) => setRuleKeywords(e.target.value)}
                 placeholder="e.g., fraud, embezzlement, theft"
               />
-              <p className="text-xs text-muted-foreground">Rule matches if any keyword is found in report content</p>
+              <p className="text-xs text-muted-foreground">{t('workflows.keywordsHelp')}</p>
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="space-y-2">

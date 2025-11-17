@@ -55,7 +55,7 @@ const DashboardSidebar = ({
     locked: !isOrgAdmin,
     ownerOnly: false
   }, {
-    title: 'Workflows',
+    title: t('sidebar.workflows'),
     icon: Workflow,
     path: '/dashboard/workflows',
     locked: !isOrgAdmin,
@@ -68,7 +68,7 @@ const DashboardSidebar = ({
     locked: !isOrgAdmin,
     ownerOnly: false
   }, {
-    title: 'Secure Link',
+    title: t('sidebar.secureLink'),
     icon: LinkIcon,
     path: '/dashboard/secure-link',
     locked: false,
@@ -80,19 +80,19 @@ const DashboardSidebar = ({
     locked: !isOrgAdmin,
     ownerOnly: false
   }, {
-    title: 'Integrations',
+    title: t('sidebar.integrations'),
     icon: Zap,
     path: '/dashboard/integrations',
     locked: !isOrgAdmin,
     ownerOnly: false
   }, {
-    title: 'Settings',
+    title: t('sidebar.settings'),
     icon: Settings,
     path: '/dashboard/settings',
     locked: !isOrgAdmin,
     ownerOnly: false
   }, {
-    title: 'Admin',
+    title: t('sidebar.adminSection'),
     icon: Shield,
     path: '/dashboard/admin',
     locked: false,
@@ -102,17 +102,17 @@ const DashboardSidebar = ({
 
   const adminSubMenuItems = [
     {
-      title: 'Feature Flags',
+      title: t('sidebar.featureFlags'),
       icon: Flag,
       path: '/dashboard/admin/features'
     },
     {
-      title: 'Chat Support',
+      title: t('sidebar.chatSupport'),
       icon: MessageSquare,
       path: '/dashboard/admin/chat'
     },
     {
-      title: 'System Health',
+      title: t('sidebar.systemHealth'),
       icon: Activity,
       path: '/dashboard/admin/health'
     }

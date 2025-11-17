@@ -1,4 +1,19 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
+
+// Mock the entire supabase client module
+vi.mock('@/integrations/supabase/client', () => ({
+  supabase: {
+    from: vi.fn(),
+    auth: {
+      getSession: vi.fn(),
+    },
+    functions: {
+      invoke: vi.fn(),
+    },
+    rpc: vi.fn(),
+  },
+}));
+
 import { supabase } from '@/integrations/supabase/client';
 
 describe('Security Features', () => {
@@ -13,16 +28,14 @@ describe('Security Features', () => {
         { id: '1', organization_id: 'org-1', title: 'Report 1' },
       ];
 
-      const mockFrom = vi.fn().mockReturnValue({
+      vi.mocked(supabase.from).mockReturnValue({
         select: vi.fn().mockReturnValue({
           eq: vi.fn().mockResolvedValue({
             data: mockReports,
             error: null,
           }),
         }),
-      });
-
-      vi.mocked(supabase.from).mockImplementation(mockFrom as any);
+      } as any);
 
       const { data } = await supabase
         .from('reports')
@@ -38,7 +51,7 @@ describe('Security Features', () => {
         { user_id: 'user-1', role: 'case_handler', organization_id: 'org-1' },
       ];
 
-      const mockFrom = vi.fn().mockReturnValue({
+      vi.mocked(supabase.from).mockReturnValue({
         select: vi.fn().mockReturnValue({
           eq: vi.fn().mockReturnValue({
             eq: vi.fn().mockResolvedValue({
@@ -48,8 +61,6 @@ describe('Security Features', () => {
           }),
         }),
       });
-
-      vi.mocked(supabase.from).mockImplementation(mockFrom as any);
 
       const { data } = await supabase
         .from('user_roles')
@@ -66,7 +77,7 @@ describe('Security Features', () => {
         { id: '1', title: 'Active Report', deleted_at: null },
       ];
 
-      const mockFrom = vi.fn().mockReturnValue({
+      vi.mocked(supabase.from).mockReturnValue({
         select: vi.fn().mockReturnValue({
           is: vi.fn().mockResolvedValue({
             data: mockReports,
@@ -74,8 +85,6 @@ describe('Security Features', () => {
           }),
         }),
       });
-
-      vi.mocked(supabase.from).mockImplementation(mockFrom as any);
 
       const { data } = await supabase
         .from('reports')
@@ -95,12 +104,10 @@ describe('Security Features', () => {
         key_hash: 'abc123hash',
       };
 
-      const mockInvoke = vi.fn().mockResolvedValue({
+      vi.mocked(supabase.functions.invoke).mockResolvedValue({
         data: mockEncryptedReport,
         error: null,
       });
-
-      vi.mocked(supabase.functions.invoke).mockImplementation(mockInvoke);
 
       const { data } = await supabase.functions.invoke('encrypt-report-data', {
         body: { reportData: { description: 'Test' }, organizationId: 'org-1' },
@@ -118,12 +125,10 @@ describe('Security Features', () => {
         sender_type: 'case_handler',
       };
 
-      const mockInvoke = vi.fn().mockResolvedValue({
+      vi.mocked(supabase.functions.invoke).mockResolvedValue({
         data: { message: mockEncryptedMessage },
         error: null,
       });
-
-      vi.mocked(supabase.functions.invoke).mockImplementation(mockInvoke);
 
       const { data } = await supabase.functions.invoke('anonymous-report-messaging', {
         body: {
@@ -145,14 +150,12 @@ describe('Security Features', () => {
         blocked: true,
       };
 
-      const mockFrom = vi.fn().mockReturnValue({
+      vi.mocked(supabase.from).mockReturnValue({
         insert: vi.fn().mockResolvedValue({
           data: mockAuditLog,
           error: null,
         }),
       });
-
-      vi.mocked(supabase.from).mockImplementation(mockFrom as any);
 
       const { data } = await supabase.from('encryption_salt_audit').insert({
         event_type: 'encryption_salt_change_attempt',
@@ -166,7 +169,7 @@ describe('Security Features', () => {
 
   describe('Authentication & Session Security', () => {
     it('should validate JWT token expiration', async () => {
-      const mockGetSession = vi.fn().mockResolvedValue({
+      vi.mocked(supabase.auth.getSession).mockResolvedValue({
         data: {
           session: {
             access_token: 'valid_token',
@@ -176,8 +179,6 @@ describe('Security Features', () => {
         error: null,
       });
 
-      vi.mocked(supabase.auth.getSession).mockImplementation(mockGetSession);
-
       const { data } = await supabase.auth.getSession();
 
       expect(data.session?.access_token).toBeDefined();
@@ -185,12 +186,10 @@ describe('Security Features', () => {
     });
 
     it('should enforce account lockout after failed attempts', async () => {
-      const mockRpc = vi.fn().mockResolvedValue({
+      vi.mocked(supabase.rpc).mockResolvedValue({
         data: true, // Account is locked
         error: null,
       });
-
-      vi.mocked(supabase.rpc).mockImplementation(mockRpc);
 
       const { data: isLocked } = await supabase.rpc('is_account_locked', {
         p_email: 'test@example.com',
@@ -198,7 +197,7 @@ describe('Security Features', () => {
       });
 
       expect(isLocked).toBe(true);
-      expect(mockRpc).toHaveBeenCalledWith('is_account_locked', {
+      expect(supabase.rpc).toHaveBeenCalledWith('is_account_locked', {
         p_email: 'test@example.com',
         p_organization_id: null,
       });
@@ -210,12 +209,10 @@ describe('Security Features', () => {
         { id: 'session-2', user_id: 'user-1', is_active: true },
       ];
 
-      const mockInvoke = vi.fn().mockResolvedValue({
+      vi.mocked(supabase.functions.invoke).mockResolvedValue({
         data: { sessions: mockActiveSessions },
         error: null,
       });
-
-      vi.mocked(supabase.functions.invoke).mockImplementation(mockInvoke);
 
       const { data } = await supabase.functions.invoke('track-session', {
         body: { action: 'check_active_sessions', userId: 'user-1' },
@@ -236,14 +233,12 @@ describe('Security Features', () => {
         target_id: 'report-123',
       };
 
-      const mockFrom = vi.fn().mockReturnValue({
+      vi.mocked(supabase.from).mockReturnValue({
         insert: vi.fn().mockResolvedValue({
           data: [mockAuditEntry],
           error: null,
         }),
       });
-
-      vi.mocked(supabase.from).mockImplementation(mockFrom as any);
 
       const { data } = await supabase.from('audit_logs').insert(mockAuditEntry);
 
@@ -257,7 +252,7 @@ describe('Security Features', () => {
         { id: '2', event_type: 'action2', previous_hash: 'hash1', hash: 'hash2' },
       ];
 
-      const mockFrom = vi.fn().mockReturnValue({
+      vi.mocked(supabase.from).mockReturnValue({
         select: vi.fn().mockReturnValue({
           order: vi.fn().mockResolvedValue({
             data: mockAuditLogs,
@@ -265,8 +260,6 @@ describe('Security Features', () => {
           }),
         }),
       });
-
-      vi.mocked(supabase.from).mockImplementation(mockFrom as any);
 
       const { data } = await supabase.from('audit_logs').select('*').order('created_at');
 
@@ -278,7 +271,7 @@ describe('Security Features', () => {
     it('should prevent SQL injection in database queries', async () => {
       const maliciousInput = "'; DROP TABLE reports; --";
 
-      const mockFrom = vi.fn().mockReturnValue({
+      vi.mocked(supabase.from).mockReturnValue({
         select: vi.fn().mockReturnValue({
           eq: vi.fn().mockResolvedValue({
             data: [],
@@ -286,8 +279,6 @@ describe('Security Features', () => {
           }),
         }),
       });
-
-      vi.mocked(supabase.from).mockImplementation(mockFrom as any);
 
       // Parameterized query should safely handle malicious input
       const { data } = await supabase.from('reports').select('*').eq('title', maliciousInput);
@@ -310,7 +301,7 @@ describe('Security Features', () => {
 
   describe('File Upload Security', () => {
     it('should strip metadata from uploaded files', async () => {
-      const mockInvoke = vi.fn().mockResolvedValue({
+      vi.mocked(supabase.functions.invoke).mockResolvedValue({
         data: {
           success: true,
           original_metadata: { gps: 'removed', camera: 'removed' },
@@ -318,8 +309,6 @@ describe('Security Features', () => {
         },
         error: null,
       });
-
-      vi.mocked(supabase.functions.invoke).mockImplementation(mockInvoke);
 
       const { data } = await supabase.functions.invoke('strip-document-metadata', {
         body: { fileId: 'file-123' },
@@ -345,15 +334,13 @@ describe('Security Features', () => {
 
   describe('PII Detection & Redaction', () => {
     it('should detect and redact PII before AI processing', async () => {
-      const mockInvoke = vi.fn().mockResolvedValue({
+      vi.mocked(supabase.functions.invoke).mockResolvedValue({
         data: {
           redacted_text: 'My email is [REDACTED] and phone is [REDACTED]',
           pii_found: ['email', 'phone'],
         },
         error: null,
       });
-
-      vi.mocked(supabase.functions.invoke).mockImplementation(mockInvoke);
 
       const { data } = await supabase.functions.invoke('analyze-case-with-ai', {
         body: {
@@ -373,18 +360,18 @@ describe('Security Features', () => {
   describe('Rate Limiting', () => {
     it('should enforce rate limits on API endpoints', async () => {
       const requests = Array(100).fill(null);
-      const mockInvoke = vi.fn();
 
-      // First 50 should succeed
-      mockInvoke.mockResolvedValueOnce({ data: { success: true }, error: null });
+      // First should succeed
+      vi.mocked(supabase.functions.invoke).mockResolvedValueOnce({
+        data: { success: true },
+        error: null
+      } as any);
 
       // After rate limit, should fail
-      mockInvoke.mockResolvedValueOnce({
+      vi.mocked(supabase.functions.invoke).mockResolvedValueOnce({
         data: null,
         error: { message: 'Rate limit exceeded' },
-      });
-
-      vi.mocked(supabase.functions.invoke).mockImplementation(mockInvoke);
+      } as any);
 
       // Simulate rapid requests
       const results = await Promise.all(
@@ -396,7 +383,7 @@ describe('Security Features', () => {
       );
 
       // At least one should be rate limited (in real scenario)
-      expect(mockInvoke).toHaveBeenCalled();
+      expect(supabase.functions.invoke).toHaveBeenCalled();
     });
   });
 });
