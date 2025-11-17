@@ -36,10 +36,8 @@ const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
                               (subscriptionData.subscription_end !== undefined && subscriptionData.subscription_end !== null);
 
       if (hasExplicitData) {
-        console.log('[ProtectedRoute] Subscription data loaded:', subscriptionData);
         subscriptionDataLoadedRef.current = true;
       } else {
-        console.log('[ProtectedRoute] Waiting for subscription data...');
         subscriptionDataLoadedRef.current = false;
       }
     }
@@ -67,7 +65,6 @@ const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
 
     // NEVER show modal for pro or basic tier users, regardless of status
     if (subscriptionData.subscription_tier === 'pro' || subscriptionData.subscription_tier === 'basic') {
-      console.log('[ProtectedRoute] Pro/Basic user - hiding modal');
       setShowSubscriptionModal(false);
       hasCheckedRef.current = true;
       return;
@@ -75,7 +72,6 @@ const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
 
     // NEVER show modal if subscription is active or trialing
     if (subscriptionData.subscription_status === 'active' || subscriptionData.subscription_status === 'trialing') {
-      console.log('[ProtectedRoute] Active/Trialing subscription - hiding modal');
       setShowSubscriptionModal(false);
       hasCheckedRef.current = true;
       return;
@@ -90,14 +86,6 @@ const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
       const hasAccess = canAccess(subscriptionData);
       const statusForModal = getSubscriptionStatusForModal(subscriptionData);
 
-      console.log('[ProtectedRoute] Modal check:', {
-        hasAccess,
-        statusForModal,
-        tier: subscriptionData.subscription_tier,
-        status: subscriptionData.subscription_status,
-        subscribed: subscriptionData.subscribed
-      });
-
       // Only show modal if:
       // 1. User doesn't have access
       // 2. There's a specific status that requires showing the modal
@@ -107,11 +95,9 @@ const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
                         subscriptionData.subscription_status !== undefined;
 
       if (shouldShow && (statusChanged || !hasCheckedRef.current)) {
-        console.log('[ProtectedRoute] Showing subscription modal');
         setShowSubscriptionModal(true);
         hasCheckedRef.current = true;
       } else {
-        console.log('[ProtectedRoute] Hiding subscription modal');
         setShowSubscriptionModal(false);
         if (!hasCheckedRef.current) {
           hasCheckedRef.current = true;
@@ -129,12 +115,15 @@ const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
     };
   }, [loading, subscriptionLoading, user, subscriptionData]);
 
-  if (loading || subscriptionLoading) {
+  // Unified loading state - show consistent spinner for all loading states
+  const isLoading = loading || subscriptionLoading || (user && !subscriptionDataLoadedRef.current);
+
+  if (isLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+      <div className="fixed inset-0 bg-gray-50 flex items-center justify-center z-50">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-          <p className="text-sm text-gray-500">Loading...</p>
+          <p className="text-sm text-gray-500">Loading your dashboard...</p>
         </div>
       </div>
     );
@@ -155,14 +144,6 @@ const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
                             subscriptionData.subscription_tier !== 'pro' &&
                             subscriptionData.subscription_tier !== 'basic' &&
                             !canAccess(subscriptionData);
-
-  console.log('[ProtectedRoute] Block check:', {
-    shouldBlockAccess,
-    dataLoaded: subscriptionDataLoadedRef.current,
-    subscriptionLoading,
-    tier: subscriptionData?.subscription_tier,
-    status: subscriptionData?.subscription_status
-  });
   
   if (shouldBlockAccess) {
     const statusForModal = getSubscriptionStatusForModal(subscriptionData);
