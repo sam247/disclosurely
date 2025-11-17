@@ -3,6 +3,7 @@ import react from "@vitejs/plugin-react-swc";
 import path from "path";
 import { componentTagger } from "lovable-tagger";
 import { sentryVitePlugin } from "@sentry/vite-plugin";
+import { visualizer } from "rollup-plugin-visualizer";
 
 // https://vitejs.dev/config/
 export default defineConfig(({ mode }) => ({
@@ -29,6 +30,12 @@ export default defineConfig(({ mode }) => ({
         },
       },
     })] : []),
+    ...(process.env.ANALYZE ? [visualizer({
+      filename: './dist/stats.html',
+      open: true,
+      gzipSize: true,
+      brotliSize: true,
+    })] : []),
   ],
   resolve: {
     alias: {
@@ -41,9 +48,67 @@ export default defineConfig(({ mode }) => ({
     // Optimize chunk splitting
     rollupOptions: {
       output: {
-        manualChunks: {
-          'vendor': ['react', 'react-dom', 'react-router-dom'],
-          'i18n': ['react-i18next', 'i18next'],
+        manualChunks(id) {
+          // Core React libraries
+          if (id.includes('node_modules/react') || id.includes('node_modules/react-dom')) {
+            return 'vendor-react';
+          }
+          // Router
+          if (id.includes('node_modules/react-router-dom')) {
+            return 'vendor-router';
+          }
+          // i18n
+          if (id.includes('node_modules/react-i18next') || id.includes('node_modules/i18next')) {
+            return 'vendor-i18n';
+          }
+          // Supabase
+          if (id.includes('node_modules/@supabase')) {
+            return 'vendor-supabase';
+          }
+          // UI libraries (shadcn, radix)
+          if (id.includes('node_modules/@radix-ui') || id.includes('node_modules/class-variance-authority')) {
+            return 'vendor-ui';
+          }
+          // Charts and visualization
+          if (id.includes('node_modules/recharts') || id.includes('node_modules/html2canvas')) {
+            return 'vendor-charts';
+          }
+          // Rich text editor (TipTap)
+          if (id.includes('node_modules/@tiptap') || id.includes('node_modules/prosemirror')) {
+            return 'vendor-editor';
+          }
+          // Form libraries
+          if (id.includes('node_modules/react-hook-form') || id.includes('node_modules/@hookform') || id.includes('node_modules/zod')) {
+            return 'vendor-forms';
+          }
+          // PDF generation
+          if (id.includes('node_modules/jspdf')) {
+            return 'vendor-pdf';
+          }
+          // Monitoring and error tracking
+          if (id.includes('node_modules/@sentry')) {
+            return 'vendor-sentry';
+          }
+          // Query/state management
+          if (id.includes('node_modules/@tanstack')) {
+            return 'vendor-query';
+          }
+          // CMS
+          if (id.includes('node_modules/contentful')) {
+            return 'vendor-cms';
+          }
+          // Icons
+          if (id.includes('node_modules/lucide-react')) {
+            return 'vendor-icons';
+          }
+          // Crypto libraries
+          if (id.includes('node_modules/crypto-js')) {
+            return 'vendor-crypto';
+          }
+          // Other large vendors
+          if (id.includes('node_modules/')) {
+            return 'vendor-misc';
+          }
         },
         // Ensure consistent chunk file names
         chunkFileNames: 'assets/[name]-[hash].js',

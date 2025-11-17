@@ -19,7 +19,7 @@ const AuthLayout = ({
       <div className="sm:mx-auto sm:w-full sm:max-w-md">
         <div className="text-center">
           <div className="flex items-center justify-center mb-6">
-            <img src="/lovable-uploads/c46ace0e-df58-4119-b5e3-8dcfa075ea2f.png" alt="Disclosurely" className="h-6 sm:h-12 w-auto" />
+            <img src="/lovable-uploads/c46ace0e-df58-4119-b5e3-8dcfa075ea2f.png" alt="Disclosurely" className="h-6 sm:h-12 w-auto" loading="eager" fetchPriority="high" />
           </div>
           <p className="mt-2 text-sm text-gray-600">Secure Whistleblowing Platform</p>
         </div>
