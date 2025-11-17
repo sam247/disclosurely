@@ -602,18 +602,313 @@ docker stop supabase_db_cxmuzperkittvibslnff supabase_edge_runtime_cxmuzperkittv
 
 ---
 
-## 🧪 Testing
+## 🧪 Testing Infrastructure
+
+### Overview
+Disclosurely uses a comprehensive multi-layer testing strategy combining **Vitest** for unit/integration tests and **Playwright** for end-to-end testing.
+
+**Test Coverage**: 49+ passing tests across critical functionality
+**Frameworks**: Vitest + React Testing Library + Playwright
+**Documentation**: See `/TESTING.md` for detailed testing guide
+
+### Testing Stack
+
+**Unit & Integration Testing**:
+- **Vitest**: Fast unit test runner
+- **React Testing Library**: Component testing
+- **@testing-library/user-event**: User interaction simulation
+- **jsdom**: Browser environment simulation
+
+**E2E Testing**:
+- **Playwright**: Cross-browser E2E testing
+- Supports Chromium, Firefox, WebKit, Mobile viewports
+- Visual regression testing capabilities
+
+### Test Commands
+
+```bash
+# Unit & Integration Tests (Vitest)
+npm test                    # Run tests in watch mode
+npm run test:run            # Run tests once
+npm run test:ui             # Run with interactive UI
+npm run test:coverage       # Run with coverage report
+
+# E2E Tests (Playwright)
+npm run test:e2e            # Run E2E tests
+npm run test:e2e:ui         # Run with Playwright UI
+npm run test:e2e:headed     # Run in headed mode (visible browser)
+npm run test:e2e:debug      # Run in debug mode
+
+# All Tests
+npm run test:all            # Run both unit and E2E tests
+
+# Setup
+npm run playwright:install  # Install Playwright browsers
+```
+
+### Test Suite Structure
+
+**Location**: Tests are co-located with source files (`*.test.ts`, `*.test.tsx`)
+
+#### Unit & Integration Tests (Vitest)
+
+**1. Encryption & Security** (`src/utils/encryption.test.ts`) - ✅ 22 tests
+- Client-side AES-256-GCM encryption/decryption
+- Key generation and SHA-256 hashing
+- Server-side encryption edge functions
+- Unicode and JSON data handling
+- Error handling and validation
+
+**2. Authentication** (`src/components/auth/LoginForm.test.tsx`) - ✅ 12 tests
+- Email/OTP authentication flow
+- Google OAuth integration
+- Account lockout detection
+- Error states and loading indicators
+- Form validation
+
+**3. Session Management** (`src/hooks/useSessionTimeout.test.tsx`) - 8 tests
+- Idle timeout detection (15 min)
+- Absolute timeout enforcement (8 hours)
+- Activity tracking across multiple event types
+- Warning modal display
+- Session extension functionality
+
+**4. Custom Domains** (`src/hooks/useCustomDomains.test.tsx`) - 6 tests
+- Domain addition with DNS instructions
+- CNAME verification
+- DNS propagation checking
+- Domain deletion
+- Error handling
+
+**5. Secure Messaging** (`src/components/anonymous/AnonymousMessaging.test.tsx`) - 7 tests
+- Message encryption and display
+- Optimistic updates
+- Error rollback
+- Empty message validation
+- Custom branding application
+
+**6. Team Management** (`src/components/UserManagement.test.tsx`) - 8 tests
+- Team member listing
+- Invitation workflows
+- Duplicate prevention
+- Expiration handling
+- Team limit enforcement
+
+**7. Security Features** (`src/test/security.test.ts`) - 17 tests
+- Row Level Security (RLS) enforcement
+- Organization isolation
+- Data encryption verification
+- Audit logging
+- PII detection and redaction
+- Input sanitization (SQL injection, XSS)
+- File upload security
+- Rate limiting
+
+#### E2E Tests (Playwright)
+
+**1. Authentication Flows** (`e2e/auth.spec.ts`)
+- Login page display and validation
+- OTP verification flow
+- Session timeout warnings
+- Navigation between auth pages
+
+**2. Anonymous Reporting** (`e2e/anonymous-reporting.spec.ts`)
+- Form display and validation
+- Draft saving and resuming
+- File upload security
+- Tracking ID generation
+- Secure messaging interface
+
+**3. Dashboard Features** (`e2e/dashboard.spec.ts`)
+- Team management
+  - Member listing
+  - Invitation sending
+  - Invitation cancellation
+  - Team limit enforcement
+- Custom domains
+  - Domain addition
+  - DNS verification
+  - Propagation status
+  - Domain deletion
+- Secure link generation
+  - Link creation
+  - Clipboard functionality
+  - Custom domain integration
+- Case management
+  - Report filtering
+  - Case assignment
+  - Status updates
+- Compliance policies
+  - Policy creation
+  - Team assignment
+- Security settings
+  - Active session display
+  - Session revocation
+
+### Test Utilities & Helpers
+
+**Location**: `/src/test/`
+- `setup.ts` - Global test configuration
+- `utils.tsx` - React Testing Library helpers
+- `mocks/supabase.ts` - Supabase client mocks
+
+**Key Helpers**:
+```typescript
+// Render with providers
+renderWithProviders(<Component />);
+
+// Mock authenticated user
+mockAuthenticatedUser;
+mockAuthenticatedSession;
+
+// Mock data
+mockOrganization;
+mockReport;
+mockPolicy;
+```
+
+### Critical Test Scenarios
+
+**Pre-Launch Must-Test Workflows**:
+1. ✅ Anonymous report submission → Access code generation
+2. ✅ Two-way messaging → Encryption/decryption
+3. ✅ Authentication → OTP and OAuth flows
+4. ✅ Session management → Timeout warnings
+5. ✅ Custom domains → DNS verification and propagation
+6. ✅ Team invitations → Email sending and acceptance
+7. ✅ Security features → RLS, encryption, audit logging
+8. ⬜ Policy assignment → Bulk actions (needs E2E test)
+9. ⬜ AI case analysis → PII redaction (needs integration test)
+10. ⬜ File uploads → Metadata stripping (needs integration test)
+
+### Testing Best Practices
+
+**1. Test User Behavior, Not Implementation**
+```typescript
+// ✅ Good
+it('should show success message after login', async () => {
+  await userEvent.type(screen.getByLabelText(/email/i), 'test@example.com');
+  await userEvent.click(screen.getByRole('button', { name: /sign in/i }));
+  expect(screen.getByText(/check your email/i)).toBeInTheDocument();
+});
+
+// ❌ Avoid
+it('should set loading state', () => {
+  expect(component.state.loading).toBe(true);
+});
+```
+
+**2. Use Semantic Queries (Accessibility-First)**
+Priority order:
+1. `getByRole` - Most accessible
+2. `getByLabelText` - Good for forms
+3. `getByText` - Good for content
+4. `getByTestId` - Last resort
+
+**3. Always Mock External Dependencies**
+- Supabase client
+- API calls
+- Browser APIs (localStorage, sessionStorage)
+- Router navigation
+
+**4. Clean Up After Tests**
+```typescript
+beforeEach(() => {
+  vi.clearAllMocks();
+});
+```
+
+**5. Test All States**
+- Loading states
+- Success states
+- Error states
+- Edge cases (empty data, null values)
 
 ### Manual Testing
-- Anonymous submission flow: `/test/anonymous-submission`
-- Test reports: Use test organization in Supabase
 
-### Key Test Scenarios
-1. Anonymous report submission → Access code generation
-2. Two-way messaging → Encryption/decryption
-3. Policy assignment → Bulk actions
-4. Role-based access → RLS policies
-5. Custom domain → DNS verification
+**Test Accounts** (in Supabase):
+- Anonymous submission: `/test/anonymous-submission`
+- Use test organization for report testing
+
+**Critical Manual Tests** (Pre-Launch):
+1. Complete anonymous report submission flow
+2. Dashboard login and navigation (all roles)
+3. Case assignment and status updates
+4. Policy creation and acknowledgment
+5. Team invitation acceptance
+6. Custom domain configuration end-to-end
+7. Secure messaging (both directions)
+8. File upload with metadata stripping
+9. AI case analysis with PII
+10. Export functionality (reports, policies)
+
+### CI/CD Integration
+
+**GitHub Actions Example**:
+```yaml
+name: Tests
+on: [push, pull_request]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+      - run: npm ci
+      - run: npm run test:run
+      - run: npx playwright install
+      - run: npm run test:e2e
+```
+
+### Coverage Goals
+
+**Current Coverage**: ~60% of critical paths
+**Target Coverage**: >80% before production launch
+
+**Priority Areas for Additional Tests**:
+1. Compliance policy bulk actions
+2. AI analysis workflows
+3. File upload and processing
+4. Subscription limit enforcement
+5. Advanced search and filtering
+6. Analytics and reporting
+7. Audit log verification
+
+### Troubleshooting
+
+**Tests timing out?**
+```typescript
+// In vitest.config.ts
+export default defineConfig({
+  test: {
+    testTimeout: 10000, // 10 seconds
+  },
+});
+```
+
+**Mock not working?**
+Ensure mocks are defined before imports:
+```typescript
+vi.mock('@/integrations/supabase/client', () => ({
+  // mock implementation
+}));
+
+import MyComponent from './MyComponent';
+```
+
+**Component test failing?**
+Always use `renderWithProviders` to ensure necessary providers (Router, QueryClient) are available.
+
+### Resources
+
+- [Vitest Documentation](https://vitest.dev/)
+- [React Testing Library](https://testing-library.com/docs/react-testing-library/intro/)
+- [Playwright Documentation](https://playwright.dev/)
+- [Testing Best Practices](https://kentcdodds.com/blog/common-mistakes-with-react-testing-library)
+- **Internal**: `/TESTING.md` - Comprehensive testing guide
 
 ---
 
