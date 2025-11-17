@@ -36,10 +36,8 @@ const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
                               (subscriptionData.subscription_end !== undefined && subscriptionData.subscription_end !== null);
 
       if (hasExplicitData) {
-        console.log('[ProtectedRoute] ✅ Data loaded, unlocking UI');
         subscriptionDataLoadedRef.current = true;
       } else {
-        console.log('[ProtectedRoute] ⏳ Waiting for subscription data...');
         subscriptionDataLoadedRef.current = false;
       }
     }
@@ -125,9 +123,8 @@ const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
   const isLoading = loading || subscriptionLoading || (user && !hasSubscriptionData);
 
   if (isLoading) {
-    console.log('[ProtectedRoute] Loading...', { loading, subscriptionLoading, user: !!user, hasSubscriptionData });
     return (
-      <div className="fixed inset-0 bg-gray-50 flex items-center justify-center z-50">
+      <div className="fixed inset-0 bg-gray-50 flex items-center justify-center z-50 animate-in fade-in duration-150">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
           <p className="text-sm text-gray-500">Loading your dashboard...</p>
@@ -135,8 +132,6 @@ const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
       </div>
     );
   }
-
-  console.log('[ProtectedRoute] ✅ Rendering dashboard');
 
   if (!user) {
     return <Navigate to="/login" replace />;
