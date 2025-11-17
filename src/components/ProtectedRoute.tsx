@@ -28,7 +28,7 @@ const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
     }
 
     // Mark as loaded only when loading is complete and we have actual data
-    if (user) {
+    if (user && !loading && !subscriptionLoading) {
       // Check if subscriptionData has been explicitly loaded (has subscription_status or other indicators)
       // Must have either tier OR status to be considered real data
       const hasExplicitData = (subscriptionData.subscription_status !== undefined && subscriptionData.subscription_status !== null) ||
@@ -36,8 +36,10 @@ const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
                               (subscriptionData.subscription_end !== undefined && subscriptionData.subscription_end !== null);
 
       if (hasExplicitData) {
+        console.log('[ProtectedRoute] ✅ Data loaded, unlocking UI');
         subscriptionDataLoadedRef.current = true;
       } else {
+        console.log('[ProtectedRoute] ⏳ Waiting for subscription data...');
         subscriptionDataLoadedRef.current = false;
       }
     }
@@ -116,9 +118,14 @@ const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
   }, [loading, subscriptionLoading, user, subscriptionData]);
 
   // Unified loading state - show consistent spinner for all loading states
-  const isLoading = loading || subscriptionLoading || (user && !subscriptionDataLoadedRef.current);
+  // Use direct state checks instead of ref to avoid timing issues
+  const hasSubscriptionData = (subscriptionData.subscription_status !== undefined && subscriptionData.subscription_status !== null) ||
+                               (subscriptionData.subscription_tier !== undefined && subscriptionData.subscription_tier !== null);
+
+  const isLoading = loading || subscriptionLoading || (user && !hasSubscriptionData);
 
   if (isLoading) {
+    console.log('[ProtectedRoute] Loading...', { loading, subscriptionLoading, user: !!user, hasSubscriptionData });
     return (
       <div className="fixed inset-0 bg-gray-50 flex items-center justify-center z-50">
         <div className="text-center">
@@ -128,6 +135,8 @@ const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
       </div>
     );
   }
+
+  console.log('[ProtectedRoute] ✅ Rendering dashboard');
 
   if (!user) {
     return <Navigate to="/login" replace />;
