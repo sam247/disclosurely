@@ -96,6 +96,12 @@ describe('useCustomDomains', () => {
         created_at: '2024-01-03',
       };
 
+      // Mock initial fetchDomains on hook mount
+      mockInvoke.mockResolvedValueOnce({
+        data: { domains: [] },
+        error: null,
+      });
+
       // Mock add domain response
       mockInvoke.mockResolvedValueOnce({
         data: {
@@ -105,7 +111,7 @@ describe('useCustomDomains', () => {
         error: null,
       });
 
-      // Mock refresh domains response
+      // Mock refresh domains response after add
       mockInvoke.mockResolvedValueOnce({
         data: { domains: [mockNewDomain] },
         error: null,
