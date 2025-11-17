@@ -86,92 +86,95 @@ const MultipleSessionModal: React.FC<MultipleSessionModalProps> = ({
 
   return (
     <AlertDialog open={open}>
-      <AlertDialogContent className="w-[calc(100vw-2rem)] sm:max-w-lg max-h-[90vh] overflow-hidden flex flex-col bg-background p-0">
-        <div className="overflow-y-auto flex-1">
-          <div className="p-6 pb-4">
-            <AlertDialogHeader className="pb-4">
-              <div className="flex items-center gap-3 mb-1">
-                <div className="h-10 w-10 rounded-full bg-amber-100 dark:bg-amber-900/20 flex items-center justify-center flex-shrink-0">
-                  <Shield className="h-5 w-5 text-amber-600 dark:text-amber-500" />
-                </div>
-                <AlertDialogTitle className="text-lg sm:text-xl">Multiple Sessions Detected</AlertDialogTitle>
+      <AlertDialogContent className="max-w-[calc(100vw-3rem)] sm:max-w-[480px] max-h-[90vh] p-0 gap-0 flex flex-col">
+        {/* Scrollable content area - GUARANTEED to leave space for footer */}
+        <div className="overflow-y-auto flex-1 min-h-0">
+          <AlertDialogHeader className="p-4 sm:p-6 pb-3 sm:pb-4 space-y-2 sm:space-y-3">
+            <div className="flex items-start gap-2 sm:gap-3">
+              <div className="h-9 w-9 sm:h-10 sm:w-10 rounded-full bg-amber-100 dark:bg-amber-900/20 flex items-center justify-center flex-shrink-0">
+                <Shield className="h-4 w-4 sm:h-5 sm:w-5 text-amber-600 dark:text-amber-500" />
               </div>
-              <AlertDialogDescription className="text-sm sm:text-base">
-                Only one active session is allowed. Choose which device to continue on.
-              </AlertDialogDescription>
-            </AlertDialogHeader>
+              <div className="flex-1 min-w-0">
+                <AlertDialogTitle className="text-sm sm:text-base leading-tight">
+                  Multiple Sessions Detected
+                </AlertDialogTitle>
+                <AlertDialogDescription className="text-xs mt-1 sm:mt-1.5">
+                  Only one active session is allowed. Choose which device to continue on.
+                </AlertDialogDescription>
+              </div>
+            </div>
+          </AlertDialogHeader>
 
-            {otherSession && (
-              <div className="space-y-4">
-                {/* Device Info Card */}
-                <div className="p-4 bg-muted/50 rounded-lg border space-y-3">
-                  <div className="flex items-start gap-3">
-                    <div className="h-9 w-9 rounded-md bg-background border flex items-center justify-center flex-shrink-0 text-muted-foreground mt-0.5">
-                      {getDeviceIcon(otherSession.device_type)}
+          {otherSession && (
+            <div className="px-4 sm:px-6 pb-3 sm:pb-4 space-y-3 sm:space-y-4">
+              {/* Device Info Card */}
+              <div className="p-3 bg-muted/50 rounded-lg border">
+                <div className="flex items-start gap-2 sm:gap-3">
+                  <div className="h-8 w-8 sm:h-9 sm:w-9 rounded-md bg-background border flex items-center justify-center flex-shrink-0 text-muted-foreground">
+                    {getDeviceIcon(otherSession.device_type)}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="font-medium text-xs sm:text-sm">{formatDevice()}</p>
+                    <div className="flex items-center gap-1.5 mt-0.5 sm:mt-1 text-xs text-muted-foreground">
+                      <MapPin className="h-3 w-3 flex-shrink-0" />
+                      <span className="truncate">{formatLocation()}</span>
                     </div>
-                    <div className="flex-1 min-w-0">
-                      <p className="font-medium text-sm sm:text-base">{formatDevice()}</p>
-                      <div className="flex items-center gap-1.5 mt-1 text-xs sm:text-sm text-muted-foreground">
-                        <MapPin className="h-3 w-3 flex-shrink-0" />
-                        <span className="truncate">{formatLocation()}</span>
-                      </div>
-                      <p className="text-xs sm:text-sm text-muted-foreground mt-1.5">
-                        Last active: <span className="font-medium text-foreground">{formatTime(otherSession.last_activity_at)}</span>
-                      </p>
-                    </div>
+                    <p className="text-xs text-muted-foreground mt-0.5 sm:mt-1">
+                      Active: {formatTime(otherSession.last_activity_at)}
+                    </p>
                   </div>
                 </div>
-
-                {/* Map showing location */}
-                {otherSession.location_lat && otherSession.location_lng && (
-                  <div className="rounded-lg border overflow-hidden bg-muted/30">
-                    <iframe
-                      width="100%"
-                      height="200"
-                      frameBorder="0"
-                      style={{ border: 0 }}
-                      referrerPolicy="no-referrer-when-downgrade"
-                      src={`https://www.google.com/maps/embed/v1/place?key=${import.meta.env.VITE_GOOGLE_MAPS_API_KEY || 'AIzaSyBFw0Qbyq9zTFTd-tUY6dZWTgaQzuU17R8'}&q=${otherSession.location_lat},${otherSession.location_lng}&zoom=10`}
-                      allowFullScreen
-                      loading="lazy"
-                      className="w-full"
-                    ></iframe>
-                    <div className="px-3 py-2 bg-background/95 border-t text-xs text-muted-foreground flex items-center gap-1.5">
-                      <MapPin className="h-3 w-3" />
-                      <span>Approximate location of other session</span>
-                    </div>
-                  </div>
-                )}
               </div>
-            )}
-          </div>
+
+              {/* Map showing location */}
+              {otherSession.location_lat && otherSession.location_lng && (
+                <div className="rounded-lg border overflow-hidden bg-muted/30">
+                  <iframe
+                    width="100%"
+                    height="160"
+                    frameBorder="0"
+                    style={{ border: 0, display: 'block' }}
+                    referrerPolicy="no-referrer-when-downgrade"
+                    src={`https://www.google.com/maps/embed/v1/place?key=${import.meta.env.VITE_GOOGLE_MAPS_API_KEY || 'AIzaSyBFw0Qbyq9zTFTd-tUY6dZWTgaQzuU17R8'}&q=${otherSession.location_lat},${otherSession.location_lng}&zoom=10`}
+                    allowFullScreen
+                    loading="lazy"
+                    title="Session location"
+                  />
+                  <div className="px-2 sm:px-3 py-1.5 sm:py-2 bg-background border-t text-xs text-muted-foreground flex items-center gap-1.5">
+                    <MapPin className="h-3 w-3 flex-shrink-0" />
+                    <span className="truncate">Approximate location</span>
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
         </div>
 
-        {/* Fixed footer with buttons */}
-        <AlertDialogFooter className="flex-col gap-2 sm:flex-row sm:justify-end p-6 pt-4 border-t bg-background/95 backdrop-blur-sm">
+        {/* Fixed footer - ALWAYS visible, never scrolls */}
+        <div className="flex-shrink-0 p-3 sm:p-4 border-t bg-background/95 space-y-2">
           <Button
             variant="default"
             onClick={onDismiss}
-            className="w-full sm:w-auto order-1"
+            className="w-full h-9 text-xs sm:text-sm"
           >
             Continue on this device
           </Button>
           <Button
             variant="outline"
             onClick={onContinueOtherDevice}
-            className="w-full sm:w-auto order-2"
+            className="w-full h-9 text-xs sm:text-sm"
           >
             Continue on other device
           </Button>
           <Button
             variant="ghost"
             onClick={onLogoutEverywhere}
-            className="w-full sm:w-auto order-3 text-destructive hover:text-destructive hover:bg-destructive/10"
+            className="w-full h-9 text-xs sm:text-sm text-destructive hover:text-destructive hover:bg-destructive/10"
           >
-            <LogOut className="h-4 w-4 mr-2" />
+            <LogOut className="h-3 w-3 sm:h-4 sm:w-4 mr-1.5 sm:mr-2" />
             Log out everywhere
           </Button>
-        </AlertDialogFooter>
+        </div>
       </AlertDialogContent>
     </AlertDialog>
   );
