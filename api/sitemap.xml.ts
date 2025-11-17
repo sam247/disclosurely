@@ -17,7 +17,10 @@ type VercelResponse = {
 
 // Contentful configuration
 const CONTENTFUL_SPACE_ID = process.env.VITE_CONTENTFUL_SPACE_ID || 'rm7hib748uv7';
-const CONTENTFUL_DELIVERY_TOKEN = process.env.VITE_CONTENTFUL_DELIVERY_TOKEN || 'e3JfeWQKBvfCQoqi22f6F_XzWgbZPXR9JWTyuSTGcFw';
+const CONTENTFUL_DELIVERY_TOKEN = process.env.VITE_CONTENTFUL_DELIVERY_TOKEN;
+if (!CONTENTFUL_DELIVERY_TOKEN) {
+  throw new Error('VITE_CONTENTFUL_DELIVERY_TOKEN environment variable is required');
+}
 
 const client = createClient({
   space: CONTENTFUL_SPACE_ID,

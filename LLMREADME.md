@@ -221,6 +221,35 @@ Defined in `user_roles` table with `app_role` enum:
   - Token-based access
   - Custom domain support
 
+### 8. Referral Program
+- **Location**: `/dashboard/settings` → Referral tab
+- **Key Files**:
+  - `src/components/ReferralProgram.tsx`
+  - `supabase/functions/_shared/partnero.ts`
+  - `supabase/functions/get-referral-link/index.ts`
+  - `supabase/functions/stripe-webhook/index.ts` (transaction tracking)
+- **Features**:
+  - Generate unique referral links
+  - Track referrals via Partnero API
+  - Automatic transaction tracking on subscription
+  - Referral code passed through checkout flow
+
+### 9. AI Chat Support
+- **Location**: Available on all pages (floating widget, bottom-right)
+- **Key Files**:
+  - `src/components/ChatWidget.tsx` - Frontend chat widget
+  - `src/components/dashboard/ChatAdminView.tsx` - Admin panel
+  - `supabase/functions/chat-support/index.ts` - Edge function
+  - `supabase/functions/delete-chat-conversation/index.ts` - Delete handler
+- **Features**:
+  - AI-powered support using DeepSeek API
+  - "Speak to Human" button with email notifications (3-4 min wait time)
+  - Admin panel for managing conversations
+  - Delete conversations permanently
+  - Human request tracking and filtering
+  - Conversation history and message management
+  - Larger chat bubbles for better readability
+
 ---
 
 ## 🌐 Routing Architecture
@@ -416,6 +445,12 @@ docker stop supabase_db_cxmuzperkittvibslnff supabase_edge_runtime_cxmuzperkittv
    - Edge Functions check salt on startup
    - Audit table: `encryption_salt_audit` tracks changes
    - See `ENCRYPTION_SALT_BACKUP.md` and `DISASTER_RECOVERY.md` for details
+7. **⚠️ CRITICAL: NO HARDCODED SECRETS**:
+   - **NEVER** hardcode API keys, tokens, or secrets in code
+   - Always use environment variables
+   - If env var is missing, fail fast with clear error (don't use fallback values)
+   - See `SECURITY_MITIGATION_PLAN.md` for details
+   - Use `scripts/check-secrets.sh` before deploying (if created)
 
 ### Performance
 1. **N+1 Queries**: Previously fixed (batch operations for notifications)
@@ -507,6 +542,33 @@ docker stop supabase_db_cxmuzperkittvibslnff supabase_edge_runtime_cxmuzperkittv
 **Issue**: Reports can't be decrypted
 **Solution**: Verify organization encryption keys exist and are correct
 
+### 6. Chat Delete Not Working
+**Issue**: Delete button shows alerts but doesn't delete conversations
+**Solution**: Ensure `delete-chat-conversation` edge function is deployed. The function uses service role to bypass RLS.
+
+### 7. Hardcoded Secrets Error
+**Issue**: Build fails or security scan finds hardcoded secrets
+**Solution**: 
+- Remove all hardcoded fallback values from environment variables
+- Use fail-fast error handling instead
+- Verify all secrets are in Vercel environment variables
+- See `SECURITY_MITIGATION_PLAN.md` for complete fix
+
+### 8. Subscription Access Blocked
+**Issue**: Users with active subscriptions can't access dashboard
+**Solution**: Check `useAuth.tsx` and `subscriptionUtils.ts` - ensure `active`/`trialing` statuses always grant access regardless of `subscription_end` date.
+
+### 9. Human Request Not Sending Email
+**Issue**: "Speak to Human" button doesn't trigger email notification
+**Solution**: 
+- Verify `RESEND_API_KEY` is set in Supabase edge function secrets
+- Check `chat-support` edge function logs
+- Ensure email recipient (`sampettiford@googlemail.com`) is correct in function
+
+### 10. Sitemap Generation Fails
+**Issue**: Sitemap API returns error about missing Contentful token
+**Solution**: Ensure `VITE_CONTENTFUL_DELIVERY_TOKEN` is set in Vercel environment variables. The function now fails fast if the token is missing (no hardcoded fallback).
+
 ---
 
 ## 🔄 Current State & Recent Changes
@@ -518,6 +580,13 @@ docker stop supabase_db_cxmuzperkittvibslnff supabase_edge_runtime_cxmuzperkittv
 - ✅ Security fixes (encryption, RLS, error sanitization)
 - ✅ Added bulk policy actions
 - ✅ Progress bars for policy acknowledgments
+- ✅ **Referral Program Integration** (Partnero) - Users can refer others and earn rewards
+- ✅ **AI Chat Support** - 24/7 AI-powered chat widget with "Speak to Human" feature
+- ✅ **Chat Admin Panel** - Admin interface for managing chat conversations with delete functionality
+- ✅ **PII Scanner** - Server-side PII detection and redaction for anonymous reports
+- ✅ **Privacy Enhancements** - Filename hashing, audit log filtering, PII sanitization in logs
+- ✅ **Subscription Access Fixes** - Improved subscription status checking and access control
+- ✅ **Removed Hardcoded Secrets** - Fixed critical security vulnerability (see SECURITY_MITIGATION_PLAN.md)
 
 ### In Progress / Planned
 - ⏳ Acknowledgment certificates (Quick Win #3)
@@ -528,7 +597,7 @@ docker stop supabase_db_cxmuzperkittvibslnff supabase_edge_runtime_cxmuzperkittv
 ### Known Technical Debt
 - Contentful integration in `DynamicHelmet.tsx` disabled (needs refactor)
 - MFA integration incomplete
-- Some hardcoded fallbacks in error handling
+- ~~Some hardcoded fallbacks in error handling~~ ✅ FIXED - Removed hardcoded secrets
 - Feature flags system exists but underutilized
 
 ---
@@ -635,6 +704,6 @@ git push origin branch         # Push to remote
 
 ---
 
-**Last Updated**: 2025-01-02  
+**Last Updated**: 2025-11-17  
 **Maintained By**: AI Agents (for development continuity)  
 **Purpose**: Onboarding new AI agents and maintaining context across chat resets

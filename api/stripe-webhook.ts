@@ -20,8 +20,7 @@ const GA4_MP_ENDPOINT =
   'https://server-side-tagging-nsepetvtjq-uc.a.run.app/mp/collect';
 const GA4_MEASUREMENT_ID =
   process.env.GA4_MEASUREMENT_ID || 'G-8QLEGKTKCW';
-const GA4_API_SECRET =
-  process.env.GA4_API_SECRET || '8PERvggaTUublSyLXCDB8A';
+const GA4_API_SECRET = process.env.GA4_API_SECRET;
 
 // Utility: read raw body for Stripe validation
 async function buffer(readable: any) {
@@ -120,21 +119,26 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         ],
       };
 
-      const url = `${GA4_MP_ENDPOINT}?measurement_id=${encodeURIComponent(
-        GA4_MEASUREMENT_ID
-      )}&api_secret=${encodeURIComponent(GA4_API_SECRET)}`;
+      // Only send GA4 event if API secret is configured
+      if (GA4_API_SECRET) {
+        const url = `${GA4_MP_ENDPOINT}?measurement_id=${encodeURIComponent(
+          GA4_MEASUREMENT_ID
+        )}&api_secret=${encodeURIComponent(GA4_API_SECRET)}`;
 
-      const resp = await fetch(url, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(mpPayload),
-      });
+        const resp = await fetch(url, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(mpPayload),
+        });
 
-      if (!resp.ok) {
-        const t = await resp.text().catch(() => '');
-        console.error('❌ GA4 MP (via sGTM) failed:', resp.status, t);
+        if (!resp.ok) {
+          const t = await resp.text().catch(() => '');
+          console.error('❌ GA4 MP (via sGTM) failed:', resp.status, t);
+        } else {
+          console.log('✅ GA4 MP (via sGTM) purchase sent.');
+        }
       } else {
-        console.log('✅ GA4 MP (via sGTM) purchase sent.');
+        console.warn('⚠️ GA4_API_SECRET environment variable is missing. GA4 tracking will be disabled.');
       }
     }
 
