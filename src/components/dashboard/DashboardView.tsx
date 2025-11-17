@@ -1414,8 +1414,8 @@ Additional Details: ${decryptedContent.additionalDetails || 'None provided'}
                           <TableHead>{t('title')}</TableHead>
                           <TableHead>{t('status')}</TableHead>
                           <TableHead>{t('category')}</TableHead>
-                          <TableHead>Priority</TableHead>
-                          <TableHead>AI Triage</TableHead>
+                          <TableHead>{t('priority')}</TableHead>
+                          <TableHead>{t('ai.triage')}</TableHead>
                           <TableHead>{t('assignedTo')}</TableHead>
                           <TableHead>{t('date')}</TableHead>
                           <TableHead className="text-right">{t('actions')}</TableHead>
@@ -1504,7 +1504,7 @@ Additional Details: ${decryptedContent.additionalDetails || 'None provided'}
                                         <div className="flex items-center justify-between">
                                           <div className="flex items-center gap-2">
                                             <Bot className="w-4 h-4 text-primary" />
-                                            <h4 className="font-semibold text-sm">AI Case Triage</h4>
+                                            <h4 className="font-semibold text-sm">{t('ai.caseTriage')}</h4>
                                           </div>
                                           <Badge variant={
                                             getUrgencyLevel(report.ai_risk_level) === 'HIGH' ? 'destructive' :
@@ -1524,7 +1524,7 @@ Additional Details: ${decryptedContent.additionalDetails || 'None provided'}
                                         {/* Severity Score */}
                                         <div className="space-y-2">
                                           <div className="flex justify-between items-center">
-                                            <span className="text-sm font-medium">Severity</span>
+                                            <span className="text-sm font-medium">{t('ai.severity')}</span>
                                             <span className="text-sm font-bold">{getSeverityScore(report.ai_risk_score)}/10</span>
                                           </div>
                                           <div className="w-full bg-gray-200 rounded-full h-2">
@@ -1546,8 +1546,8 @@ Additional Details: ${decryptedContent.additionalDetails || 'None provided'}
                                         {/* AI Confidence */}
                                         <div className="flex justify-between items-center pt-2 border-t">
                                           <div>
-                                            <div className="text-sm font-medium">AI Confidence</div>
-                                            <div className="text-xs text-muted-foreground">How certain the AI is</div>
+                                            <div className="text-sm font-medium">{t('ai.confidence')}</div>
+                                            <div className="text-xs text-muted-foreground">{t('ai.confidenceDescription')}</div>
                                           </div>
                                           <div className="text-right">
                                             <div className="text-lg font-bold">{getConfidencePercentage(report.ai_likelihood_score)}%</div>
@@ -1846,7 +1846,7 @@ Additional Details: ${decryptedContent.additionalDetails || 'None provided'}
                                          'bg-green-100 text-green-800';
                                 })()
                               }`}>
-                                <span>AI Triage: {getUrgencyLevel(report.ai_risk_level)}</span>
+                                <span>{t('ai.triage')}: {getUrgencyLevel(report.ai_risk_level)}</span>
                               </div>
                             )}
                           </div>
@@ -2218,7 +2218,7 @@ Additional Details: ${decryptedContent.additionalDetails || 'None provided'}
                                          'bg-green-100 text-green-800';
                                 })()
                               }`}>
-                                <span>AI Triage: {getUrgencyLevel(report.ai_risk_level)}</span>
+                                <span>{t('ai.triage')}: {getUrgencyLevel(report.ai_risk_level)}</span>
                               </div>
                             )}
                           </div>
