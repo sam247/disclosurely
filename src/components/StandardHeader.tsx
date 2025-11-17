@@ -23,8 +23,8 @@ export const StandardHeader = ({ currentLanguage }: StandardHeaderProps) => {
                 src="/lovable-uploads/c46ace0e-df58-4119-b5e3-8dcfa075ea2f.png"
                 alt="Disclosurely"
                 className="h-5 sm:h-6 md:h-8 w-auto"
-                loading="lazy"
-                decoding="async"
+                loading="eager"
+                fetchPriority="high"
               />
             </Link>
           </div>

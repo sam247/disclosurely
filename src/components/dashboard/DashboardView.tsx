@@ -31,7 +31,6 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSepara
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { createBrandedPDF, addPDFSection, addPDFField, downloadPDF, exportToCSV, formatExportDate, getStatusColor, addPDFTable } from '@/utils/export-utils';
-import { decryptReport } from '@/utils/encryption';
 import { detectAllPatterns, PatternDetectionResult } from '@/utils/patternDetection';
 
 // Risk Level Selector Component
@@ -267,6 +266,7 @@ const DashboardView = () => {
       for (const report of reports) {
         try {
           if (report.encrypted_content && report.encryption_key_hash) {
+            const { decryptReport } = await import('@/utils/encryption');
             const decrypted = await decryptReport(report.encrypted_content, report.encryption_key_hash);
             decryptedContents.set(report.id, decrypted);
           }
@@ -411,6 +411,7 @@ const DashboardView = () => {
       if ((reportsData || archivedData) && profile?.organization_id) {
         const categories: Record<string, { main: string; sub: string }> = {};
         const allReports = [...(reportsData || []), ...(archivedData || [])];
+        const { decryptReport } = await import('@/utils/encryption');
         for (const report of allReports) {
           try {
             if (report.encrypted_content) {

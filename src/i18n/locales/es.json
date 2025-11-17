@@ -846,5 +846,39 @@
       "standard": "Gestor de casos estándar",
       "any": "Cualquier gestor disponible"
     }
+  },
+  "tour": {
+    "welcome": "¡Bienvenido a Disclosurely! Hagamos un recorrido rápido para ayudarte a comenzar con la plataforma.",
+    "dashboardHome": "Este es tu panel principal donde puedes ver todos los informes y gestionar tus casos.",
+    "secureLink": "Comparte este enlace seguro con tu equipo para permitir envíos de informes anónimos.",
+    "aiHelper": "Usa IA para analizar casos, detectar patrones y obtener recomendaciones inteligentes.",
+    "analytics": "Ver análisis detallados e información sobre tus informes y rendimiento del equipo.",
+    "workflows": "Automatiza la asignación y seguimiento de casos con flujos de trabajo personalizados.",
+    "team": "Gestiona los miembros de tu equipo, asigna roles y controla los permisos de acceso.",
+    "settings": "Personaliza la configuración de tu organización, marca e integraciones.",
+    "checklist": "Rastrea tu progreso de incorporación con esta práctica lista de verificación.",
+    "languageSelector": "¡Cambia el idioma del panel aquí - soportamos 12 idiomas!",
+    "complete": "¡Todo listo! Explora la plataforma y comunícate si necesitas ayuda.",
+    "back": "Atrás",
+    "close": "Cerrar",
+    "finish": "Finalizar Recorrido",
+    "next": "Siguiente",
+    "skip": "Omitir Recorrido"
+  },
+  "checklist": {
+    "title": "Primeros Pasos",
+    "complete": "¡Configuración Completa!",
+    "allDone": "¡Has completado todos los pasos de incorporación!",
+    "progress": "{{completed}} de {{total}} completados",
+    "completeProfile": "Completa Tu Perfil",
+    "completeProfileDesc": "Agrega tu nombre e información de contacto",
+    "createCase": "Explorar Panel",
+    "createCaseDesc": "Ver y gestionar tu primer caso",
+    "inviteTeam": "Invitar Miembros del Equipo",
+    "inviteTeamDesc": "Agrega colegas para colaborar en casos",
+    "setupBranding": "Personalizar Marca",
+    "setupBrandingDesc": "Agrega tu logo y colores de marca",
+    "takeTour": "Hacer el Recorrido",
+    "takeTourDesc": "Aprende sobre todas las características clave"
   }
 }

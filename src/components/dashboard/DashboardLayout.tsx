@@ -14,6 +14,7 @@ import { supabase } from '@/integrations/supabase/client';
 import NotificationSystem from '@/components/NotificationSystem';
 import { useTranslation } from 'react-i18next';
 import { AnnouncementBar } from '@/components/AnnouncementBar';
+import { OnboardingTour } from './OnboardingTour';
 
 interface DashboardLayoutProps {
   children: ReactNode;
@@ -31,6 +32,7 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
   const [hasOrganization, setHasOrganization] = useState<boolean | null>(null);
   const mainContentRef = useRef<HTMLElement>(null);
   const headerRef = useRef<HTMLElement>(null);
+  const [runTour, setRunTour] = useState(false);
 
   // Check if user has completed organization onboarding
   useEffect(() => {
@@ -120,6 +122,25 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
     setShowUpgradeModal(true);
   };
 
+  const handleStartTour = () => {
+    setRunTour(true);
+  };
+
+  const handleFinishTour = () => {
+    setRunTour(false);
+    // Save tour completion to localStorage
+    if (user) {
+      const checklistState = localStorage.getItem(`onboarding_checklist_${user.id}`);
+      const state = checklistState ? JSON.parse(checklistState) : {};
+      state.takeTour = true;
+      localStorage.setItem(`onboarding_checklist_${user.id}`, JSON.stringify(state));
+    }
+  };
+
+  const handleSkipTour = () => {
+    setRunTour(false);
+  };
+
   // Show loading while checking organization
   if (hasOrganization === null) {
     return (
@@ -137,9 +158,10 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
   return (
     <SidebarProvider>
       <div className="min-h-screen flex w-full">
-        <DashboardSidebar 
-          onLockedFeatureClick={handleLockedFeatureClick} 
+        <DashboardSidebar
+          onLockedFeatureClick={handleLockedFeatureClick}
           subscriptionData={subscriptionData}
+          onStartTour={handleStartTour}
         />
         
         <div className="flex-1 flex flex-col min-w-0">
@@ -237,6 +259,13 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
           )}
         </DialogContent>
       </Dialog>
+
+      {/* Onboarding Tour */}
+      <OnboardingTour
+        run={runTour}
+        onFinish={handleFinishTour}
+        onSkip={handleSkipTour}
+      />
     </SidebarProvider>
   );
 };

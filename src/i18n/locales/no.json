@@ -636,5 +636,39 @@
       "standard": "Standard saksbehandler",
       "any": "Enhver tilgjengelig behandler"
     }
+  },
+  "tour": {
+    "welcome": "Velkommen til Disclosurely! La oss ta en rask omvisning for å hjelpe deg i gang med plattformen.",
+    "dashboardHome": "Dette er hovedinstrumentpanelet ditt hvor du kan se alle rapporter og administrere sakene dine.",
+    "secureLink": "Del denne sikre lenken med teamet ditt for å tillate anonyme rapportinnsendelser.",
+    "aiHelper": "Bruk AI til å analysere saker, oppdage mønstre og få intelligente anbefalinger.",
+    "analytics": "Se detaljerte analyser og innsikter om rapportene dine og teamets ytelse.",
+    "workflows": "Automatiser sakstildeling og sporing med tilpassede arbeidsflyter.",
+    "team": "Administrer teammedlemmene dine, tildel roller og kontroller tilgangstillatelser.",
+    "settings": "Tilpass organisasjonsinnstillingene, merkevarebygging og integrasjoner.",
+    "checklist": "Spor onboarding-fremdriften din med denne praktiske sjekklisten.",
+    "languageSelector": "Endre instrumentpanelets språk her - vi støtter 12 språk!",
+    "complete": "Du er klar! Utforsk plattformen og ta kontakt hvis du trenger hjelp.",
+    "back": "Tilbake",
+    "close": "Lukk",
+    "finish": "Fullfør Omvisning",
+    "next": "Neste",
+    "skip": "Hopp over Omvisning"
+  },
+  "checklist": {
+    "title": "Komme i Gang",
+    "complete": "Oppsett Fullført!",
+    "allDone": "Du har fullført alle onboarding-trinnene!",
+    "progress": "{{completed}} av {{total}} fullført",
+    "completeProfile": "Fullfør Profilen Din",
+    "completeProfileDesc": "Legg til navnet ditt og kontaktinformasjon",
+    "createCase": "Utforsk Instrumentpanel",
+    "createCaseDesc": "Se og administrer din første sak",
+    "inviteTeam": "Inviter Teammedlemmer",
+    "inviteTeamDesc": "Legg til kolleger for å samarbeide om saker",
+    "setupBranding": "Tilpass Merkevarebygging",
+    "setupBrandingDesc": "Legg til logoen og merkevarefarger",
+    "takeTour": "Ta Omvisningen",
+    "takeTourDesc": "Lær om alle nøkkelfunksjonene"
   }
 }

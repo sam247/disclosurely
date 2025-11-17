@@ -12,6 +12,7 @@ import { cn } from '@/lib/utils';
 import { useTranslation } from 'react-i18next';
 import disclosurelyFullLogo from '@/assets/logos/disclosurely-full-logo.png';
 import LanguageSelector from '@/components/LanguageSelector';
+import { OnboardingChecklist } from './OnboardingChecklist';
 
 interface DashboardSidebarProps {
   onLockedFeatureClick: (feature: string) => void;
@@ -19,11 +20,13 @@ interface DashboardSidebarProps {
     subscribed: boolean;
     subscription_tier?: 'basic' | 'pro';
   };
+  onStartTour: () => void;
 }
 
 const DashboardSidebar = ({
   onLockedFeatureClick,
-  subscriptionData
+  subscriptionData,
+  onStartTour
 }: DashboardSidebarProps) => {
   const navigate = useNavigate();
   const location = useLocation();
@@ -41,26 +44,30 @@ const DashboardSidebar = ({
     icon: Home,
     path: '/dashboard',
     locked: false,
-    ownerOnly: false
+    ownerOnly: false,
+    dataTour: 'dashboard-home'
   }, {
     title: t('aiCaseHelper'),
     icon: Bot,
     path: '/dashboard/ai-helper',
     locked: !limits.hasAIHelper || !isOrgAdmin,
-    ownerOnly: false
+    ownerOnly: false,
+    dataTour: 'ai-helper'
   }, {
     title: t('analytics'),
     icon: BarChart3,
     path: '/dashboard/analytics',
     locked: !isOrgAdmin,
-    ownerOnly: false
+    ownerOnly: false,
+    dataTour: 'analytics'
   }, {
     title: t('sidebar.workflows'),
     icon: Workflow,
     path: '/dashboard/workflows',
     locked: !isOrgAdmin,
     badge: 'NEW',
-    ownerOnly: false
+    ownerOnly: false,
+    dataTour: 'workflows'
   }, {
     title: t('audit'),
     icon: ScrollText,
@@ -72,13 +79,15 @@ const DashboardSidebar = ({
     icon: LinkIcon,
     path: '/dashboard/secure-link',
     locked: false,
-    ownerOnly: false
+    ownerOnly: false,
+    dataTour: 'secure-link'
   }, {
     title: t('team'),
     icon: Users,
     path: '/dashboard/team',
     locked: !isOrgAdmin,
-    ownerOnly: false
+    ownerOnly: false,
+    dataTour: 'team'
   }, {
     title: t('sidebar.integrations'),
     icon: Zap,
@@ -90,7 +99,8 @@ const DashboardSidebar = ({
     icon: Settings,
     path: '/dashboard/settings',
     locked: !isOrgAdmin,
-    ownerOnly: false
+    ownerOnly: false,
+    dataTour: 'settings'
   }, {
     title: t('sidebar.adminSection'),
     icon: Shield,
@@ -139,7 +149,7 @@ const DashboardSidebar = ({
     <Sidebar className="border-r">
       <SidebarHeader className="p-4">
         <button onClick={() => navigate('/dashboard')} className="flex items-center w-full hover:opacity-80 transition-opacity gap-3">
-          <img src={disclosurelyFullLogo} alt="Disclosurely" className="h-7 w-auto" />
+          <img src={disclosurelyFullLogo} alt="Disclosurely" className="h-7 w-auto" loading="eager" fetchPriority="high" />
         </button>
       </SidebarHeader>
 
@@ -231,13 +241,14 @@ const DashboardSidebar = ({
                 // Regular menu items
                 return (
                   <SidebarMenuItem key={item.path}>
-                    <SidebarMenuButton 
-                      onClick={() => handleNavigation(item)} 
+                    <SidebarMenuButton
+                      onClick={() => handleNavigation(item)}
                       className={cn(
-                        "w-full justify-start transition-colors px-4", 
-                        isActive && "bg-primary/10 text-primary font-medium", 
+                        "w-full justify-start transition-colors px-4",
+                        isActive && "bg-primary/10 text-primary font-medium",
                         item.locked && "opacity-60 hover:opacity-80"
                       )}
+                      data-tour={'dataTour' in item ? item.dataTour : undefined}
                     >
                       <div className="flex items-center gap-3 w-full">
                         <Icon className="flex-shrink-0 text-primary h-5 w-5" />
@@ -259,8 +270,11 @@ const DashboardSidebar = ({
       </SidebarContent>
 
       <SidebarFooter className="p-2 space-y-2">
+        {/* Onboarding Checklist */}
+        <OnboardingChecklist onStartTour={onStartTour} />
+
         {/* Language Selector above the separator line */}
-        <LanguageSelector collapsed={false} />
+        <LanguageSelector collapsed={false} data-tour="language-selector" />
         
         {/* Separator line */}
         <Separator />

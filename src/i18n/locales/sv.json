@@ -636,5 +636,39 @@
       "standard": "Standard ärendehanterare",
       "any": "Vilken tillgänglig hanterare som helst"
     }
+  },
+  "tour": {
+    "welcome": "Välkommen till Disclosurely! Låt oss ta en snabb rundtur för att hjälpa dig komma igång med plattformen.",
+    "dashboardHome": "Detta är din huvudinstrumentpanel där du kan se alla rapporter och hantera dina ärenden.",
+    "secureLink": "Dela denna säkra länk med ditt team för att möjliggöra anonyma rapportinlämningar.",
+    "aiHelper": "Använd AI för att analysera ärenden, upptäcka mönster och få intelligenta rekommendationer.",
+    "analytics": "Visa detaljerad analys och insikter om dina rapporter och teamprestanda.",
+    "workflows": "Automatisera ärendetilldelning och spårning med anpassade arbetsflöden.",
+    "team": "Hantera dina teammedlemmar, tilldela roller och kontrollera åtkomstbehörigheter.",
+    "settings": "Anpassa dina organisationsinställningar, varumärke och integrationer.",
+    "checklist": "Spåra dina onboardingframsteg med denna praktiska checklista.",
+    "languageSelector": "Ändra instrumentpanelens språk här - vi stöder 12 språk!",
+    "complete": "Du är redo! Utforska plattformen och hör av dig om du behöver hjälp.",
+    "back": "Tillbaka",
+    "close": "Stäng",
+    "finish": "Avsluta Rundturen",
+    "next": "Nästa",
+    "skip": "Hoppa över Rundturen"
+  },
+  "checklist": {
+    "title": "Komma Igång",
+    "complete": "Inställning Klar!",
+    "allDone": "Du har slutfört alla onboardingsteg!",
+    "progress": "{{completed}} av {{total}} slutförda",
+    "completeProfile": "Slutför Din Profil",
+    "completeProfileDesc": "Lägg till ditt namn och kontaktinformation",
+    "createCase": "Utforska Instrumentpanelen",
+    "createCaseDesc": "Visa och hantera ditt första ärende",
+    "inviteTeam": "Bjud in Teammedlemmar",
+    "inviteTeamDesc": "Lägg till kollegor för att samarbeta om ärenden",
+    "setupBranding": "Anpassa Varumärke",
+    "setupBrandingDesc": "Lägg till din logotyp och varumärkesfärger",
+    "takeTour": "Ta Rundturen",
+    "takeTourDesc": "Lär dig om alla nyckelfunktioner"
   }
 }

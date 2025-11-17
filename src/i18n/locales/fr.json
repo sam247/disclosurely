@@ -736,5 +736,39 @@
       "standard": "Gestionnaire de cas standard",
       "any": "Tout gestionnaire disponible"
     }
+  },
+  "tour": {
+    "welcome": "Bienvenue sur Disclosurely ! Faisons un tour rapide pour vous aider à démarrer avec la plateforme.",
+    "dashboardHome": "Ceci est votre tableau de bord principal où vous pouvez voir tous les rapports et gérer vos cas.",
+    "secureLink": "Partagez ce lien sécurisé avec votre équipe pour permettre les soumissions de rapports anonymes.",
+    "aiHelper": "Utilisez l'IA pour analyser les cas, détecter les modèles et obtenir des recommandations intelligentes.",
+    "analytics": "Consultez des analyses détaillées et des informations sur vos rapports et les performances de votre équipe.",
+    "workflows": "Automatisez l'attribution et le suivi des cas avec des flux de travail personnalisés.",
+    "team": "Gérez les membres de votre équipe, attribuez des rôles et contrôlez les autorisations d'accès.",
+    "settings": "Personnalisez les paramètres de votre organisation, la marque et les intégrations.",
+    "checklist": "Suivez votre progression d'intégration avec cette liste de contrôle pratique.",
+    "languageSelector": "Changez la langue du tableau de bord ici - nous prenons en charge 12 langues !",
+    "complete": "Vous êtes prêt ! Explorez la plateforme et contactez-nous si vous avez besoin d'aide.",
+    "back": "Retour",
+    "close": "Fermer",
+    "finish": "Terminer la Visite",
+    "next": "Suivant",
+    "skip": "Ignorer la Visite"
+  },
+  "checklist": {
+    "title": "Premiers Pas",
+    "complete": "Configuration Terminée !",
+    "allDone": "Vous avez terminé toutes les étapes d'intégration !",
+    "progress": "{{completed}} sur {{total}} terminés",
+    "completeProfile": "Complétez Votre Profil",
+    "completeProfileDesc": "Ajoutez votre nom et vos coordonnées",
+    "createCase": "Explorer le Tableau de Bord",
+    "createCaseDesc": "Voir et gérer votre premier cas",
+    "inviteTeam": "Inviter des Membres de l'Équipe",
+    "inviteTeamDesc": "Ajoutez des collègues pour collaborer sur les cas",
+    "setupBranding": "Personnaliser la Marque",
+    "setupBrandingDesc": "Ajoutez votre logo et vos couleurs de marque",
+    "takeTour": "Faire la Visite",
+    "takeTourDesc": "Découvrez toutes les fonctionnalités clés"
   }
 }

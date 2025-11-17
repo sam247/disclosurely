@@ -514,5 +514,39 @@
       "standard": "Standard-Fallbearbeiter",
       "any": "Beliebiger verfügbarer Bearbeiter"
     }
+  },
+  "tour": {
+    "welcome": "Willkommen bei Disclosurely! Lassen Sie uns eine kurze Tour machen, um Ihnen den Einstieg in die Plattform zu erleichtern.",
+    "dashboardHome": "Dies ist Ihr Haupt-Dashboard, wo Sie alle Berichte sehen und Ihre Fälle verwalten können.",
+    "secureLink": "Teilen Sie diesen sicheren Link mit Ihrem Team, um anonyme Berichtsübermittlungen zu ermöglichen.",
+    "aiHelper": "Verwenden Sie KI, um Fälle zu analysieren, Muster zu erkennen und intelligente Empfehlungen zu erhalten.",
+    "analytics": "Sehen Sie sich detaillierte Analysen und Einblicke zu Ihren Berichten und der Teamleistung an.",
+    "workflows": "Automatisieren Sie die Fallzuweisung und -verfolgung mit benutzerdefinierten Workflows.",
+    "team": "Verwalten Sie Ihre Teammitglieder, weisen Sie Rollen zu und kontrollieren Sie Zugriffsberechtigungen.",
+    "settings": "Passen Sie Ihre Organisationseinstellungen, Ihr Branding und Ihre Integrationen an.",
+    "checklist": "Verfolgen Sie Ihren Onboarding-Fortschritt mit dieser praktischen Checkliste.",
+    "languageSelector": "Ändern Sie hier die Dashboard-Sprache - wir unterstützen 12 Sprachen!",
+    "complete": "Sie sind startklar! Erkunden Sie die Plattform und melden Sie sich, wenn Sie Hilfe benötigen.",
+    "back": "Zurück",
+    "close": "Schließen",
+    "finish": "Tour Beenden",
+    "next": "Weiter",
+    "skip": "Tour Überspringen"
+  },
+  "checklist": {
+    "title": "Erste Schritte",
+    "complete": "Einrichtung Abgeschlossen!",
+    "allDone": "Sie haben alle Onboarding-Schritte abgeschlossen!",
+    "progress": "{{completed}} von {{total}} abgeschlossen",
+    "completeProfile": "Vervollständigen Sie Ihr Profil",
+    "completeProfileDesc": "Fügen Sie Ihren Namen und Kontaktinformationen hinzu",
+    "createCase": "Dashboard Erkunden",
+    "createCaseDesc": "Ihren ersten Fall anzeigen und verwalten",
+    "inviteTeam": "Teammitglieder Einladen",
+    "inviteTeamDesc": "Fügen Sie Kollegen hinzu, um an Fällen zusammenzuarbeiten",
+    "setupBranding": "Branding Anpassen",
+    "setupBrandingDesc": "Fügen Sie Ihr Logo und Ihre Markenfarben hinzu",
+    "takeTour": "Tour Machen",
+    "takeTourDesc": "Erfahren Sie mehr über alle wichtigen Funktionen"
   }
 }

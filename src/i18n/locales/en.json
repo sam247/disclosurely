@@ -1140,5 +1140,39 @@
     "typeReply": "Type your reply...",
     "enterFirstName": "Enter your first name",
     "enterLastName": "Enter your last name"
+  },
+  "tour": {
+    "welcome": "Welcome to Disclosurely! Let's take a quick tour to help you get started with the platform.",
+    "dashboardHome": "This is your dashboard home where you can view all reports and manage your cases.",
+    "secureLink": "Share this secure link with your team to allow anonymous report submissions.",
+    "aiHelper": "Use AI to analyze cases, detect patterns, and get intelligent recommendations.",
+    "analytics": "View detailed analytics and insights about your reports and team performance.",
+    "workflows": "Automate case assignment and tracking with custom workflows.",
+    "team": "Manage your team members, assign roles, and control access permissions.",
+    "settings": "Customize your organization settings, branding, and integrations.",
+    "checklist": "Track your onboarding progress with this handy checklist.",
+    "languageSelector": "Change the dashboard language here - we support 12 languages!",
+    "complete": "You're all set! Explore the platform and reach out if you need any help.",
+    "back": "Back",
+    "close": "Close",
+    "finish": "Finish Tour",
+    "next": "Next",
+    "skip": "Skip Tour"
+  },
+  "checklist": {
+    "title": "Getting Started",
+    "complete": "Setup Complete!",
+    "allDone": "You've completed all the onboarding steps!",
+    "progress": "{{completed}} of {{total}} completed",
+    "completeProfile": "Complete Your Profile",
+    "completeProfileDesc": "Add your name and contact information",
+    "createCase": "Explore Dashboard",
+    "createCaseDesc": "View and manage your first case",
+    "inviteTeam": "Invite Team Members",
+    "inviteTeamDesc": "Add colleagues to collaborate on cases",
+    "setupBranding": "Customize Branding",
+    "setupBrandingDesc": "Add your logo and brand colors",
+    "takeTour": "Take the Tour",
+    "takeTourDesc": "Learn about all the key features"
   }
 }

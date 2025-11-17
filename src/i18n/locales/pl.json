@@ -504,5 +504,39 @@
       "standard": "Standardowy obsługujący sprawy",
       "any": "Dowolny dostępny obsługujący"
     }
+  },
+  "tour": {
+    "welcome": "Witamy w Disclosurely! Zróbmy szybką wycieczkę, aby pomóc Ci rozpocząć pracę z platformą.",
+    "dashboardHome": "To jest Twój główny panel, w którym możesz przeglądać wszystkie raporty i zarządzać swoimi sprawami.",
+    "secureLink": "Udostępnij ten bezpieczny link swojemu zespołowi, aby umożliwić anonimowe zgłaszanie raportów.",
+    "aiHelper": "Użyj AI do analizy spraw, wykrywania wzorców i uzyskiwania inteligentnych rekomendacji.",
+    "analytics": "Wyświetl szczegółowe analizy i spostrzeżenia dotyczące Twoich raportów i wydajności zespołu.",
+    "workflows": "Automatyzuj przypisywanie i śledzenie spraw za pomocą niestandardowych przepływów pracy.",
+    "team": "Zarządzaj członkami zespołu, przypisuj role i kontroluj uprawnienia dostępu.",
+    "settings": "Dostosuj ustawienia organizacji, branding i integracje.",
+    "checklist": "Śledź postępy wdrożenia za pomocą tej praktycznej listy kontrolnej.",
+    "languageSelector": "Zmień język panelu tutaj - obsługujemy 12 języków!",
+    "complete": "Jesteś gotowy! Eksploruj platformę i skontaktuj się, jeśli potrzebujesz pomocy.",
+    "back": "Wstecz",
+    "close": "Zamknij",
+    "finish": "Zakończ Wycieczkę",
+    "next": "Dalej",
+    "skip": "Pomiń Wycieczkę"
+  },
+  "checklist": {
+    "title": "Pierwsze Kroki",
+    "complete": "Konfiguracja Zakończona!",
+    "allDone": "Ukończyłeś wszystkie kroki wdrożenia!",
+    "progress": "{{completed}} z {{total}} ukończono",
+    "completeProfile": "Uzupełnij Swój Profil",
+    "completeProfileDesc": "Dodaj swoje imię i dane kontaktowe",
+    "createCase": "Poznaj Panel",
+    "createCaseDesc": "Zobacz i zarządzaj swoją pierwszą sprawą",
+    "inviteTeam": "Zaproś Członków Zespołu",
+    "inviteTeamDesc": "Dodaj kolegów do współpracy nad sprawami",
+    "setupBranding": "Dostosuj Branding",
+    "setupBrandingDesc": "Dodaj swoje logo i kolory marki",
+    "takeTour": "Odbądź Wycieczkę",
+    "takeTourDesc": "Poznaj wszystkie kluczowe funkcje"
   }
 }

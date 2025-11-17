@@ -636,5 +636,39 @@
       "standard": "Standard sagsbehandler",
       "any": "Enhver tilgængelig behandler"
     }
+  },
+  "tour": {
+    "welcome": "Velkommen til Disclosurely! Lad os tage en hurtig rundvisning for at hjælpe dig i gang med platformen.",
+    "dashboardHome": "Dette er dit hoveddashboard, hvor du kan se alle rapporter og administrere dine sager.",
+    "secureLink": "Del dette sikre link med dit team for at tillade anonyme rapportindsendelser.",
+    "aiHelper": "Brug AI til at analysere sager, opdage mønstre og få intelligente anbefalinger.",
+    "analytics": "Se detaljerede analyser og indsigter om dine rapporter og teamets præstation.",
+    "workflows": "Automatiser sagstildeling og sporing med tilpassede arbejdsgange.",
+    "team": "Administrer dine teammedlemmer, tildel roller og kontroller adgangstilladelser.",
+    "settings": "Tilpas dine organisationsindstillinger, branding og integrationer.",
+    "checklist": "Spor din onboarding-fremgang med denne praktiske tjekliste.",
+    "languageSelector": "Skift dashboardsprog her - vi understøtter 12 sprog!",
+    "complete": "Du er klar! Udforsk platformen og kontakt os, hvis du har brug for hjælp.",
+    "back": "Tilbage",
+    "close": "Luk",
+    "finish": "Afslut Rundvisning",
+    "next": "Næste",
+    "skip": "Spring Rundvisning Over"
+  },
+  "checklist": {
+    "title": "Kom i Gang",
+    "complete": "Opsætning Fuldført!",
+    "allDone": "Du har fuldført alle onboarding-trin!",
+    "progress": "{{completed}} af {{total}} fuldført",
+    "completeProfile": "Udfyld Din Profil",
+    "completeProfileDesc": "Tilføj dit navn og kontaktoplysninger",
+    "createCase": "Udforsk Dashboard",
+    "createCaseDesc": "Se og administrer din første sag",
+    "inviteTeam": "Inviter Teammedlemmer",
+    "inviteTeamDesc": "Tilføj kolleger for at samarbejde om sager",
+    "setupBranding": "Tilpas Branding",
+    "setupBrandingDesc": "Tilføj dit logo og brandfarver",
+    "takeTour": "Tag Rundvisningen",
+    "takeTourDesc": "Lær om alle nøglefunktioner"
   }
 }
