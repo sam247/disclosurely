@@ -638,5 +638,39 @@
       "standard": "Gestor de casos padrão",
       "any": "Qualquer gestor disponível"
     }
+  },
+  "tour": {
+    "welcome": "Bem-vindo ao Disclosurely! Vamos fazer um tour rápido para ajudá-lo a começar com a plataforma.",
+    "dashboardHome": "Este é o seu painel principal onde você pode ver todos os relatórios e gerenciar seus casos.",
+    "secureLink": "Compartilhe este link seguro com sua equipe para permitir envios de relatórios anônimos.",
+    "aiHelper": "Use IA para analisar casos, detectar padrões e obter recomendações inteligentes.",
+    "analytics": "Visualize análises detalhadas e insights sobre seus relatórios e desempenho da equipe.",
+    "workflows": "Automatize a atribuição e o rastreamento de casos com fluxos de trabalho personalizados.",
+    "team": "Gerencie os membros da sua equipe, atribua funções e controle permissões de acesso.",
+    "settings": "Personalize as configurações da sua organização, marca e integrações.",
+    "checklist": "Acompanhe seu progresso de integração com esta lista de verificação prática.",
+    "languageSelector": "Altere o idioma do painel aqui - suportamos 12 idiomas!",
+    "complete": "Você está pronto! Explore a plataforma e entre em contato se precisar de ajuda.",
+    "back": "Voltar",
+    "close": "Fechar",
+    "finish": "Finalizar Tour",
+    "next": "Próximo",
+    "skip": "Pular Tour"
+  },
+  "checklist": {
+    "title": "Primeiros Passos",
+    "complete": "Configuração Concluída!",
+    "allDone": "Você completou todas as etapas de integração!",
+    "progress": "{{completed}} de {{total}} concluídos",
+    "completeProfile": "Complete Seu Perfil",
+    "completeProfileDesc": "Adicione seu nome e informações de contato",
+    "createCase": "Explorar Painel",
+    "createCaseDesc": "Visualizar e gerenciar seu primeiro caso",
+    "inviteTeam": "Convidar Membros da Equipe",
+    "inviteTeamDesc": "Adicione colegas para colaborar em casos",
+    "setupBranding": "Personalizar Marca",
+    "setupBrandingDesc": "Adicione seu logo e cores da marca",
+    "takeTour": "Fazer o Tour",
+    "takeTourDesc": "Conheça todos os recursos principais"
   }
 }

@@ -636,5 +636,39 @@
       "standard": "Standaard casebehandelaar",
       "any": "Elke beschikbare behandelaar"
     }
+  },
+  "tour": {
+    "welcome": "Welkom bij Disclosurely! Laten we een snelle rondleiding maken om u op weg te helpen met het platform.",
+    "dashboardHome": "Dit is uw hoofddashboard waar u alle rapporten kunt bekijken en uw cases kunt beheren.",
+    "secureLink": "Deel deze veilige link met uw team om anonieme rapportinzendingen mogelijk te maken.",
+    "aiHelper": "Gebruik AI om cases te analyseren, patronen te detecteren en intelligente aanbevelingen te krijgen.",
+    "analytics": "Bekijk gedetailleerde analyses en inzichten over uw rapporten en teamprestaties.",
+    "workflows": "Automatiseer casetoewijzing en -tracking met aangepaste workflows.",
+    "team": "Beheer uw teamleden, wijs rollen toe en controleer toegangsrechten.",
+    "settings": "Pas uw organisatie-instellingen, branding en integraties aan.",
+    "checklist": "Volg uw onboarding-voortgang met deze handige checklist.",
+    "languageSelector": "Wijzig hier de dashboardtaal - we ondersteunen 12 talen!",
+    "complete": "U bent klaar! Verken het platform en neem contact op als u hulp nodig heeft.",
+    "back": "Terug",
+    "close": "Sluiten",
+    "finish": "Tour Voltooien",
+    "next": "Volgende",
+    "skip": "Tour Overslaan"
+  },
+  "checklist": {
+    "title": "Aan de Slag",
+    "complete": "Installatie Voltooid!",
+    "allDone": "U heeft alle onboarding-stappen voltooid!",
+    "progress": "{{completed}} van {{total}} voltooid",
+    "completeProfile": "Voltooi Uw Profiel",
+    "completeProfileDesc": "Voeg uw naam en contactgegevens toe",
+    "createCase": "Dashboard Verkennen",
+    "createCaseDesc": "Uw eerste case bekijken en beheren",
+    "inviteTeam": "Teamleden Uitnodigen",
+    "inviteTeamDesc": "Voeg collega's toe om samen te werken aan cases",
+    "setupBranding": "Branding Aanpassen",
+    "setupBrandingDesc": "Voeg uw logo en merkkleurenuren toe",
+    "takeTour": "Tour Volgen",
+    "takeTourDesc": "Leer over alle belangrijke functies"
   }
 }

@@ -636,5 +636,39 @@
       "standard": "Gestore di casi standard",
       "any": "Qualsiasi gestore disponibile"
     }
+  },
+  "tour": {
+    "welcome": "Benvenuto su Disclosurely! Facciamo un tour rapido per aiutarti a iniziare con la piattaforma.",
+    "dashboardHome": "Questa è la tua dashboard principale dove puoi visualizzare tutti i rapporti e gestire i tuoi casi.",
+    "secureLink": "Condividi questo link sicuro con il tuo team per consentire invii di rapporti anonimi.",
+    "aiHelper": "Usa l'IA per analizzare i casi, rilevare modelli e ottenere raccomandazioni intelligenti.",
+    "analytics": "Visualizza analisi dettagliate e approfondimenti sui tuoi rapporti e sulle prestazioni del team.",
+    "workflows": "Automatizza l'assegnazione e il monitoraggio dei casi con flussi di lavoro personalizzati.",
+    "team": "Gestisci i membri del tuo team, assegna ruoli e controlla i permessi di accesso.",
+    "settings": "Personalizza le impostazioni della tua organizzazione, il branding e le integrazioni.",
+    "checklist": "Traccia i tuoi progressi di onboarding con questa comoda checklist.",
+    "languageSelector": "Cambia la lingua della dashboard qui - supportiamo 12 lingue!",
+    "complete": "Sei pronto! Esplora la piattaforma e contattaci se hai bisogno di aiuto.",
+    "back": "Indietro",
+    "close": "Chiudi",
+    "finish": "Termina Tour",
+    "next": "Avanti",
+    "skip": "Salta Tour"
+  },
+  "checklist": {
+    "title": "Per Iniziare",
+    "complete": "Configurazione Completata!",
+    "allDone": "Hai completato tutti i passaggi di onboarding!",
+    "progress": "{{completed}} di {{total}} completati",
+    "completeProfile": "Completa il Tuo Profilo",
+    "completeProfileDesc": "Aggiungi il tuo nome e le informazioni di contatto",
+    "createCase": "Esplora Dashboard",
+    "createCaseDesc": "Visualizza e gestisci il tuo primo caso",
+    "inviteTeam": "Invita Membri del Team",
+    "inviteTeamDesc": "Aggiungi colleghi per collaborare sui casi",
+    "setupBranding": "Personalizza Branding",
+    "setupBrandingDesc": "Aggiungi il tuo logo e i colori del marchio",
+    "takeTour": "Fai il Tour",
+    "takeTourDesc": "Scopri tutte le funzionalità chiave"
   }
 }
