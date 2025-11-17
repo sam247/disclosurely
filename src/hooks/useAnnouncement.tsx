@@ -2,12 +2,13 @@ import { useState, useEffect } from 'react';
 import { createClient } from 'contentful';
 
 const CONTENTFUL_SPACE_ID = import.meta.env.VITE_CONTENTFUL_SPACE_ID || 'rm7hib748uv7';
-const CONTENTFUL_DELIVERY_TOKEN = import.meta.env.VITE_CONTENTFUL_DELIVERY_TOKEN || 'e3JfeWQKBvfCQoqi22f6F_XzWgbZPXR9JWTyuSTGcFw';
+const CONTENTFUL_DELIVERY_TOKEN = import.meta.env.VITE_CONTENTFUL_DELIVERY_TOKEN;
 
-const client = createClient({
+// Only create client if token is available
+const client = CONTENTFUL_DELIVERY_TOKEN ? createClient({
   space: CONTENTFUL_SPACE_ID,
   accessToken: CONTENTFUL_DELIVERY_TOKEN,
-});
+}) : null;
 
 export interface Announcement {
   id: string;
@@ -25,15 +26,17 @@ export const useAnnouncement = () => {
 
   useEffect(() => {
     const fetchAnnouncement = async () => {
+      if (!client) {
+        console.warn('Contentful client not initialized - VITE_CONTENTFUL_DELIVERY_TOKEN missing');
+        setLoading(false);
+        return;
+      }
+
       try {
         setLoading(true);
         setError(null);
 
         // Fetch published announcements (content type: 'announcement')
-        
-        
-        
-        
         const response = await client.getEntries({
           content_type: 'announcement',
           'fields.status': 'published',

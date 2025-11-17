@@ -50,12 +50,13 @@ interface DynamicHelmetProps {
 // Contentful configuration
 // NOTE: Uses Contentful Delivery API (read-only) for SEO data - independent of MCP status
 const CONTENTFUL_SPACE_ID = import.meta.env.VITE_CONTENTFUL_SPACE_ID || 'rm7hib748uv7';
-const CONTENTFUL_DELIVERY_TOKEN = import.meta.env.VITE_CONTENTFUL_DELIVERY_TOKEN || 'e3JfeWQKBvfCQoqi22f6F_XzWgbZPXR9JWTyuSTGcFw';
+const CONTENTFUL_DELIVERY_TOKEN = import.meta.env.VITE_CONTENTFUL_DELIVERY_TOKEN;
 
-const contentfulClient = createClient({
+// Only create client if token is available
+const contentfulClient = CONTENTFUL_DELIVERY_TOKEN ? createClient({
   space: CONTENTFUL_SPACE_ID,
   accessToken: CONTENTFUL_DELIVERY_TOKEN,
-});
+}) : null;
 
 const DynamicHelmet: React.FC<DynamicHelmetProps> = ({
   pageIdentifier,
@@ -74,15 +75,17 @@ const DynamicHelmet: React.FC<DynamicHelmetProps> = ({
 
   useEffect(() => {
     const fetchSEOData = async () => {
+      if (!contentfulClient) {
+        console.warn('Contentful client not initialized - VITE_CONTENTFUL_DELIVERY_TOKEN missing. Using fallback SEO data.');
+        setLoading(false);
+        return;
+      }
+
       try {
-        
-        
         // Fetch SEO data from Contentful
         // Try both with and without leading slash
         const pagePathWithSlash = pageIdentifier.startsWith('/') ? pageIdentifier : `/${pageIdentifier}`;
         const pagePathWithoutSlash = pageIdentifier.startsWith('/') ? pageIdentifier.slice(1) : pageIdentifier;
-        
-        
         
         const response = await contentfulClient.getEntries({
           content_type: 'seoPage',

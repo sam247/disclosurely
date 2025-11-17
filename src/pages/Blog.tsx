@@ -19,12 +19,13 @@ import { documentToHtmlString } from '@contentful/rich-text-html-renderer';
 // This is separate from Contentful MCP which is used for content management.
 // The blog will continue to work regardless of MCP status.
 const CONTENTFUL_SPACE_ID = import.meta.env.VITE_CONTENTFUL_SPACE_ID || 'rm7hib748uv7';
-const CONTENTFUL_DELIVERY_TOKEN = import.meta.env.VITE_CONTENTFUL_DELIVERY_TOKEN || 'e3JfeWQKBvfCQoqi22f6F_XzWgbZPXR9JWTyuSTGcFw';
+const CONTENTFUL_DELIVERY_TOKEN = import.meta.env.VITE_CONTENTFUL_DELIVERY_TOKEN;
 
-const client = createClient({
+// Only create client if token is available
+const client = CONTENTFUL_DELIVERY_TOKEN ? createClient({
   space: CONTENTFUL_SPACE_ID,
   accessToken: CONTENTFUL_DELIVERY_TOKEN,
-});
+}) : null;
 
 interface ContentfulBlogPostFields {
   title: string;
@@ -129,6 +130,12 @@ const Blog = () => {
   }, [slug, selectedCategorySlug]);
 
   const fetchCategories = async () => {
+    if (!client) {
+      console.warn('Contentful client not initialized - VITE_CONTENTFUL_DELIVERY_TOKEN missing');
+      setCategories([]);
+      return;
+    }
+
     try {
       const response = await client.getEntries<ContentfulCategory>({
         content_type: '1Dn01YZmIbymrxi194Q2xV', // Category content type ID
@@ -142,17 +149,19 @@ const Blog = () => {
   };
 
   const fetchPosts = async () => {
+    if (!client) {
+      console.warn('Contentful client not initialized - VITE_CONTENTFUL_DELIVERY_TOKEN missing');
+      setPosts([]);
+      return;
+    }
+
     try {
-      
-      
       const query: any = {
         content_type: '9oYANGj5uBRT6UHsl5LxO', // Blog Post content type ID
         order: '-fields.publishDate',
         include: 2, // Include linked author and categories
       };
 
-      
-      
       const response = await client.getEntries<ContentfulBlogPost>(query);
       
       
@@ -207,6 +216,12 @@ const Blog = () => {
   };
 
   const fetchSinglePost = async (postSlug: string) => {
+    if (!client) {
+      console.warn('Contentful client not initialized - VITE_CONTENTFUL_DELIVERY_TOKEN missing');
+      setCurrentPost(null);
+      return;
+    }
+
     try {
       const response = await client.getEntries<ContentfulBlogPost>({
         content_type: '9oYANGj5uBRT6UHsl5LxO', // Blog Post content type ID
@@ -745,10 +760,13 @@ const RelatedArticles = ({ currentPost }: { currentPost: BlogPostDisplay }) => {
 
   useEffect(() => {
     const fetchRelatedPosts = async () => {
+      if (!client) {
+        console.warn('Contentful client not initialized - VITE_CONTENTFUL_DELIVERY_TOKEN missing');
+        setLoading(false);
+        return;
+      }
+
       try {
-        
-        
-        
         // Simplified query - just get recent posts, excluding current post
         const response = await client.getEntries({
           content_type: '9oYANGj5uBRT6UHsl5LxO',
