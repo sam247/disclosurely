@@ -239,21 +239,19 @@ const ChatAdminView = () => {
     }
 
     try {
-      // Delete messages first (CASCADE should handle this, but being explicit)
-      const { error: messagesError } = await supabase
-        .from('chat_messages')
-        .delete()
-        .eq('conversation_id', conversationId);
+      // Use edge function with service role to bypass RLS
+      const { data, error } = await supabase.functions.invoke('delete-chat-conversation', {
+        body: { conversationId },
+        headers: {
+          Authorization: `Bearer ${(await supabase.auth.getSession()).data.session?.access_token}`,
+        },
+      });
 
-      if (messagesError) throw messagesError;
+      if (error) throw error;
 
-      // Delete conversation
-      const { error: convError } = await supabase
-        .from('chat_conversations')
-        .delete()
-        .eq('id', conversationId);
-
-      if (convError) throw convError;
+      if (data?.error) {
+        throw new Error(data.error);
+      }
 
       toast({
         title: "Success",
@@ -272,7 +270,7 @@ const ChatAdminView = () => {
       console.error('Delete error:', error);
       toast({
         title: "Error",
-        description: error.message || "Failed to delete conversation. Please check RLS policies.",
+        description: error.message || "Failed to delete conversation. Please try again.",
         variant: "destructive",
       });
     }
