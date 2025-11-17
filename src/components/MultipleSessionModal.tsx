@@ -86,19 +86,19 @@ const MultipleSessionModal: React.FC<MultipleSessionModalProps> = ({
 
   return (
     <AlertDialog open={open}>
-      <AlertDialogContent className="max-w-[95vw] sm:max-w-[500px] max-h-[95vh] p-0 gap-0 overflow-hidden">
-        {/* Scrollable content area */}
-        <div className="overflow-y-auto max-h-[calc(95vh-120px)]">
-          <AlertDialogHeader className="p-6 pb-4 space-y-3">
-            <div className="flex items-start gap-3">
-              <div className="h-10 w-10 rounded-full bg-amber-100 dark:bg-amber-900/20 flex items-center justify-center flex-shrink-0">
-                <Shield className="h-5 w-5 text-amber-600 dark:text-amber-500" />
+      <AlertDialogContent className="max-w-[calc(100vw-3rem)] sm:max-w-[480px] max-h-[90vh] p-0 gap-0 flex flex-col">
+        {/* Scrollable content area - GUARANTEED to leave space for footer */}
+        <div className="overflow-y-auto flex-1 min-h-0">
+          <AlertDialogHeader className="p-4 sm:p-6 pb-3 sm:pb-4 space-y-2 sm:space-y-3">
+            <div className="flex items-start gap-2 sm:gap-3">
+              <div className="h-9 w-9 sm:h-10 sm:w-10 rounded-full bg-amber-100 dark:bg-amber-900/20 flex items-center justify-center flex-shrink-0">
+                <Shield className="h-4 w-4 sm:h-5 sm:w-5 text-amber-600 dark:text-amber-500" />
               </div>
               <div className="flex-1 min-w-0">
-                <AlertDialogTitle className="text-base sm:text-lg leading-tight">
+                <AlertDialogTitle className="text-sm sm:text-base leading-tight">
                   Multiple Sessions Detected
                 </AlertDialogTitle>
-                <AlertDialogDescription className="text-xs sm:text-sm mt-1.5">
+                <AlertDialogDescription className="text-xs mt-1 sm:mt-1.5">
                   Only one active session is allowed. Choose which device to continue on.
                 </AlertDialogDescription>
               </div>
@@ -106,21 +106,21 @@ const MultipleSessionModal: React.FC<MultipleSessionModalProps> = ({
           </AlertDialogHeader>
 
           {otherSession && (
-            <div className="px-6 pb-4 space-y-4">
+            <div className="px-4 sm:px-6 pb-3 sm:pb-4 space-y-3 sm:space-y-4">
               {/* Device Info Card */}
-              <div className="p-3 sm:p-4 bg-muted/50 rounded-lg border">
-                <div className="flex items-start gap-3">
-                  <div className="h-9 w-9 rounded-md bg-background border flex items-center justify-center flex-shrink-0 text-muted-foreground">
+              <div className="p-3 bg-muted/50 rounded-lg border">
+                <div className="flex items-start gap-2 sm:gap-3">
+                  <div className="h-8 w-8 sm:h-9 sm:w-9 rounded-md bg-background border flex items-center justify-center flex-shrink-0 text-muted-foreground">
                     {getDeviceIcon(otherSession.device_type)}
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className="font-medium text-sm">{formatDevice()}</p>
-                    <div className="flex items-center gap-1.5 mt-1 text-xs text-muted-foreground">
+                    <p className="font-medium text-xs sm:text-sm">{formatDevice()}</p>
+                    <div className="flex items-center gap-1.5 mt-0.5 sm:mt-1 text-xs text-muted-foreground">
                       <MapPin className="h-3 w-3 flex-shrink-0" />
                       <span className="truncate">{formatLocation()}</span>
                     </div>
-                    <p className="text-xs text-muted-foreground mt-1">
-                      Last active: {formatTime(otherSession.last_activity_at)}
+                    <p className="text-xs text-muted-foreground mt-0.5 sm:mt-1">
+                      Active: {formatTime(otherSession.last_activity_at)}
                     </p>
                   </div>
                 </div>
@@ -131,7 +131,7 @@ const MultipleSessionModal: React.FC<MultipleSessionModalProps> = ({
                 <div className="rounded-lg border overflow-hidden bg-muted/30">
                   <iframe
                     width="100%"
-                    height="180"
+                    height="160"
                     frameBorder="0"
                     style={{ border: 0, display: 'block' }}
                     referrerPolicy="no-referrer-when-downgrade"
@@ -140,9 +140,9 @@ const MultipleSessionModal: React.FC<MultipleSessionModalProps> = ({
                     loading="lazy"
                     title="Session location"
                   />
-                  <div className="px-3 py-2 bg-background border-t text-xs text-muted-foreground flex items-center gap-1.5">
+                  <div className="px-2 sm:px-3 py-1.5 sm:py-2 bg-background border-t text-xs text-muted-foreground flex items-center gap-1.5">
                     <MapPin className="h-3 w-3 flex-shrink-0" />
-                    <span>Approximate location of other session</span>
+                    <span className="truncate">Approximate location</span>
                   </div>
                 </div>
               )}
@@ -150,28 +150,28 @@ const MultipleSessionModal: React.FC<MultipleSessionModalProps> = ({
           )}
         </div>
 
-        {/* Fixed footer - always visible */}
-        <div className="p-4 sm:p-6 pt-4 border-t bg-muted/30 space-y-2">
+        {/* Fixed footer - ALWAYS visible, never scrolls */}
+        <div className="flex-shrink-0 p-3 sm:p-4 border-t bg-background/95 space-y-2">
           <Button
             variant="default"
             onClick={onDismiss}
-            className="w-full h-10 text-sm"
+            className="w-full h-9 text-xs sm:text-sm"
           >
             Continue on this device
           </Button>
           <Button
             variant="outline"
             onClick={onContinueOtherDevice}
-            className="w-full h-10 text-sm"
+            className="w-full h-9 text-xs sm:text-sm"
           >
             Continue on other device
           </Button>
           <Button
             variant="ghost"
             onClick={onLogoutEverywhere}
-            className="w-full h-10 text-sm text-destructive hover:text-destructive hover:bg-destructive/10"
+            className="w-full h-9 text-xs sm:text-sm text-destructive hover:text-destructive hover:bg-destructive/10"
           >
-            <LogOut className="h-4 w-4 mr-2" />
+            <LogOut className="h-3 w-3 sm:h-4 sm:w-4 mr-1.5 sm:mr-2" />
             Log out everywhere
           </Button>
         </div>
