@@ -89,12 +89,13 @@ describe('DashboardView', () => {
     renderWithProviders(<DashboardView />);
 
     // Dashboard should load - check for any dashboard content
+    // Use more specific queries to avoid multiple matches
     await waitFor(() => {
-      const hasContent = screen.queryByText(/reports/i) || 
-                        screen.queryByText(/dashboard/i) ||
-                        screen.queryByRole('table') ||
-                        screen.queryByRole('button', { name: /filter/i });
-      expect(hasContent).toBeTruthy();
+      const hasTable = screen.queryByRole('table');
+      const hasFilterButton = screen.queryByRole('button', { name: /filter/i });
+      const hasReportsHeading = screen.queryByRole('heading', { name: /reports/i });
+      const hasDashboardContent = hasTable || hasFilterButton || hasReportsHeading;
+      expect(hasDashboardContent).toBeTruthy();
     }, { timeout: 5000 });
   });
 
