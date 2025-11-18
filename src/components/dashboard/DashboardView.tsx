@@ -683,7 +683,6 @@ const DashboardView = () => {
       if (!profile?.organization_id) throw new Error('User organization not found');
 
       // Decrypt the report content
-      const { decryptReport } = await import('@/utils/encryption');
       const decryptedContent = await decryptReport(report.encrypted_content, profile.organization_id);
       
       // Format content for AI analysis
@@ -781,7 +780,6 @@ Additional Details: ${decryptedContent.additionalDetails || 'None provided'}
       if (!profile?.organization_id) throw new Error('User organization not found');
 
       // Decrypt the report content
-      const { decryptReport } = await import('@/utils/encryption');
       const decryptedContent = await decryptReport(report.encrypted_content, profile.organization_id);
 
       // Create PDF with organization name

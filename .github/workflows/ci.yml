@@ -50,6 +50,8 @@ jobs:
 
       - name: Run tests with coverage
         run: npm run test:run -- --coverage
+        continue-on-error: false
+        timeout-minutes: 10
 
       - name: Upload coverage reports
         uses: codecov/codecov-action@v4
@@ -84,6 +86,8 @@ jobs:
         run: npm run test:e2e
         env:
           CI: true
+          PLAYWRIGHT_BASE_URL: http://localhost:8080
+        timeout-minutes: 20
 
       - name: Upload E2E test results
         uses: actions/upload-artifact@v4

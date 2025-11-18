@@ -47,7 +47,7 @@ const WhistleblowerMessagingPage = lazy(() => import('./pages/WhistleblowerMessa
 const ReportDetails = lazyWithRetry(() => import('./pages/ReportDetails'));
 
 // Lazy load dashboard and authenticated components with retry logic for critical components
-const AuthenticatedApp = lazy(() => import('./components/AuthenticatedApp'));
+import AuthenticatedApp from './components/AuthenticatedApp';
 const DashboardLayout = lazyWithRetry(() => import('./components/dashboard/DashboardLayout'));
 const DashboardView = lazyWithRetry(() => import('./components/dashboard/DashboardView'));
 const AIHelperView = lazyWithRetry(() => import('./components/dashboard/AIHelperView'));

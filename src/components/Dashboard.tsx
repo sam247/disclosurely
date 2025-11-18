@@ -27,6 +27,7 @@ import SubscriptionPromptModal from '@/components/SubscriptionPromptModal';
 import TrialPromptModal from '@/components/TrialPromptModal';
 import type { Report as DatabaseReport } from '@/types/database';
 import { auditLogger } from '@/utils/auditLogger';
+import { decryptReportCategory } from '@/utils/encryption';
 
 interface Report {
   id: string;
@@ -117,9 +118,6 @@ const Dashboard = () => {
         if (!profile?.organization_id) return 'Unknown';
         orgId = profile.organization_id;
       }
-      
-      // Import the secure category-only decryption utility
-      const { decryptReportCategory } = await import('@/utils/encryption');
       
       // Extract only the category field
       const category = decryptReportCategory(report.encrypted_content, orgId);
