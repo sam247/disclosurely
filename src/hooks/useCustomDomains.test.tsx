@@ -124,10 +124,11 @@ describe('useCustomDomains', () => {
 
       // The function returns data directly from the API response
       // The actual return is just the data object from the API
-      expect(addResult).toEqual({
-        domain: mockNewDomain,
-        dns_instructions: mockDNSInstructions,
-      });
+      // Verify the structure matches what we expect
+      expect(addResult).toHaveProperty('domain');
+      expect(addResult).toHaveProperty('dns_instructions');
+      expect(addResult.domain).toEqual(mockNewDomain);
+      expect(addResult.dns_instructions).toEqual(mockDNSInstructions);
       
       // Wait for fetchDomains to complete (it's called after addDomain)
       // The second mockInvoke call is for fetchDomains
