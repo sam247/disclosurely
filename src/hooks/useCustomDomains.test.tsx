@@ -137,14 +137,7 @@ describe('useCustomDomains', () => {
         expect(invokeCalls).toBeGreaterThanOrEqual(2); // addDomain + fetchDomains
       }, { timeout: 3000 });
       
-      // Verify the function was called correctly
-      expect(mockInvoke).toHaveBeenCalledWith('custom-domains', {
-        body: {
-          action: 'add',
-          domain_name: 'report.company.com',
-        },
-      });
-
+      // Verify the function was called correctly for addDomain
       expect(mockInvoke).toHaveBeenCalledWith('custom-domains', {
         body: {
           action: 'add',

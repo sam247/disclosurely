@@ -63,7 +63,7 @@ describe('SignupForm', () => {
     vi.clearAllMocks();
   });
 
-  it('should render signup form with all fields', () => {
+  it('should render signup form with all fields', async () => {
     renderWithProviders(<SignupForm />);
 
     // Wait for form to render
