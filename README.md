@@ -2,6 +2,8 @@
 
 **Secure, GDPR-compliant whistleblowing SaaS platform**
 
+> **Status**: Restored to working state (commit 34b19bd) - Deployment trigger
+
 🌐 **Website**: https://disclosurely.com  
 📚 **Documentation**: https://docs.disclosurely.com  
 📧 **Support**: support@disclosurely.com
