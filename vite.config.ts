@@ -53,15 +53,10 @@ export default defineConfig(({ mode }) => ({
         // This helps libraries like react-joyride access React when dynamically imported
         format: 'es',
         manualChunks(id) {
-          // CRITICAL: Check react-joyride FIRST before React checks
-          // This ensures it gets its own chunk and can properly import React
-          // Build: Force rebuild to clear Vercel cache - 2025-11-18
-          if (id.includes('react-joyride')) {
-            return 'vendor-tour';
-          }
-          // Core React libraries
-          if (id.includes('node_modules/react') || 
-              id.includes('node_modules/react-dom')) {
+          // Core React libraries + react-joyride (bundled together to ensure hook access)
+          if (id.includes('node_modules/react') ||
+              id.includes('node_modules/react-dom') ||
+              id.includes('react-joyride')) {
             return 'vendor-react';
           }
           // Router
