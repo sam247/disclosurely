@@ -55,6 +55,7 @@ export default defineConfig(({ mode }) => ({
         manualChunks(id) {
           // CRITICAL: Check react-joyride FIRST before React checks
           // This ensures it gets its own chunk and can properly import React
+          // Build: Force rebuild to clear Vercel cache - 2025-11-18
           if (id.includes('react-joyride')) {
             return 'vendor-tour';
           }
