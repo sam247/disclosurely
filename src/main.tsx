@@ -1,3 +1,4 @@
+import * as React from 'react'
 import { createRoot } from 'react-dom/client'
 import App from './App.tsx'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
@@ -7,6 +8,12 @@ import './index.css'
 import i18n from './i18n/config'
 import ErrorBoundary from './components/forms/ErrorBoundary'
 import * as Sentry from "@sentry/react"
+
+// Make React available globally for dynamically imported modules (like react-joyride)
+// This ensures that when react-joyride is dynamically imported, it can access React
+if (typeof window !== 'undefined') {
+  (window as any).React = React;
+}
 
 // Initialize Sentry BEFORE React
 if (import.meta.env.VITE_SENTRY_DSN) {

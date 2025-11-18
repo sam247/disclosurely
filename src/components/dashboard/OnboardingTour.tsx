@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import Joyride, { CallBackProps, STATUS, Step } from 'react-joyride';
 import { useTranslation } from 'react-i18next';
 import { useUserRoles } from '@/hooks/useUserRoles';
@@ -92,6 +92,11 @@ export const OnboardingTour = ({ run, onFinish, onSkip }: OnboardingTourProps) =
       setStepIndex(index + (action === 'next' ? 1 : -1));
     }
   };
+
+  // Don't render if tour is not running
+  if (!run) {
+    return null;
+  }
 
   return (
     <Joyride

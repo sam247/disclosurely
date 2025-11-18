@@ -41,6 +41,7 @@ export default defineConfig(({ mode }) => ({
     alias: {
       "@": path.resolve(__dirname, "./src"),
     },
+    dedupe: ['react', 'react-dom'], // Ensure React is deduplicated across chunks
   },
   build: {
     // Generate source maps for Sentry
@@ -48,13 +49,18 @@ export default defineConfig(({ mode }) => ({
     // Optimize chunk splitting
     rollupOptions: {
       output: {
+        // Ensure React is available to dynamically imported modules
+        // This helps libraries like react-joyride access React when dynamically imported
+        format: 'es',
         manualChunks(id) {
-          // Onboarding tour - MUST be before React check to prevent vendor-misc inclusion
-          if (id.includes('node_modules/react-joyride')) {
+          // CRITICAL: Check react-joyride FIRST before React checks
+          // This ensures it gets its own chunk and can properly import React
+          if (id.includes('react-joyride')) {
             return 'vendor-tour';
           }
           // Core React libraries
-          if (id.includes('node_modules/react') || id.includes('node_modules/react-dom')) {
+          if (id.includes('node_modules/react') || 
+              id.includes('node_modules/react-dom')) {
             return 'vendor-react';
           }
           // Router
