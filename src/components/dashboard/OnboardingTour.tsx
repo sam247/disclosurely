@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import Joyride, { CallBackProps, STATUS, Step } from 'react-joyride';
+import type { CallBackProps, STATUS, Step } from 'react-joyride';
 import { useTranslation } from 'react-i18next';
 import { useUserRoles } from '@/hooks/useUserRoles';
 
@@ -13,6 +13,18 @@ export const OnboardingTour = ({ run, onFinish, onSkip }: OnboardingTourProps) =
   const { t } = useTranslation();
   const { isOrgAdmin } = useUserRoles();
   const [stepIndex, setStepIndex] = useState(0);
+  const [JoyrideComponent, setJoyrideComponent] = useState<any>(null);
+
+  // Dynamically import react-joyride only when tour is running
+  useEffect(() => {
+    if (run && !JoyrideComponent) {
+      import('react-joyride').then((module) => {
+        setJoyrideComponent(() => module.default);
+      }).catch((error) => {
+        console.error('Failed to load react-joyride:', error);
+      });
+    }
+  }, [run, JoyrideComponent]);
 
   // Define tour steps based on user role
   const steps: Step[] = [
@@ -92,6 +104,13 @@ export const OnboardingTour = ({ run, onFinish, onSkip }: OnboardingTourProps) =
       setStepIndex(index + (action === 'next' ? 1 : -1));
     }
   };
+
+  // Don't render until Joyride is loaded
+  if (!JoyrideComponent || !run) {
+    return null;
+  }
+
+  const Joyride = JoyrideComponent;
 
   return (
     <Joyride

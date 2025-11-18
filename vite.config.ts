@@ -49,11 +49,10 @@ export default defineConfig(({ mode }) => ({
     rollupOptions: {
       output: {
         manualChunks(id) {
-          // Core React libraries and React-dependent libraries
-          // IMPORTANT: react-joyride must be in same chunk as React to avoid scope issues
+          // Core React libraries
+          // Note: react-joyride is now dynamically imported, so it doesn't need to be in vendor-react
           if (id.includes('node_modules/react') || 
-              id.includes('node_modules/react-dom') ||
-              id.includes('node_modules/react-joyride')) {
+              id.includes('node_modules/react-dom')) {
             return 'vendor-react';
           }
           // Router
