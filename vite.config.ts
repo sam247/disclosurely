@@ -41,6 +41,7 @@ export default defineConfig(({ mode }) => ({
     alias: {
       "@": path.resolve(__dirname, "./src"),
     },
+    dedupe: ['react', 'react-dom'], // Ensure React is deduplicated across chunks
   },
   build: {
     // Generate source maps for Sentry
@@ -48,9 +49,16 @@ export default defineConfig(({ mode }) => ({
     // Optimize chunk splitting
     rollupOptions: {
       output: {
+        // Ensure React is available to dynamically imported modules
+        // This helps libraries like react-joyride access React when dynamically imported
+        format: 'es',
         manualChunks(id) {
+          // IMPORTANT: Check for react-joyride FIRST before other React checks
+          // This ensures it's bundled with React when dynamically imported
+          if (id.includes('node_modules/react-joyride')) {
+            return 'vendor-react';
+          }
           // Core React libraries
-          // Note: react-joyride is now dynamically imported, so it doesn't need to be in vendor-react
           if (id.includes('node_modules/react') || 
               id.includes('node_modules/react-dom')) {
             return 'vendor-react';
@@ -106,12 +114,6 @@ export default defineConfig(({ mode }) => ({
           // Crypto libraries
           if (id.includes('node_modules/crypto-js')) {
             return 'vendor-crypto';
-          }
-          // React-dependent libraries that might be dynamically imported
-          // Ensure they can access React when loaded
-          if (id.includes('node_modules/react-joyride')) {
-            // Bundle react-joyride with React to ensure React is available
-            return 'vendor-react';
           }
           // Other large vendors
           if (id.includes('node_modules/')) {

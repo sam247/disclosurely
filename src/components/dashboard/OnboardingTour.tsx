@@ -32,19 +32,10 @@ export const OnboardingTour = ({ run, onFinish, onSkip }: OnboardingTourProps) =
   // Dynamically import react-joyride only when tour is running
   useEffect(() => {
     if (run && !JoyrideComponent) {
-      // Ensure React is available before importing
-      if (typeof window !== 'undefined' && (window as any).React) {
-        import('react-joyride').then((module) => {
-          setJoyrideComponent(() => module.default);
-          setJoyrideConstants({
-            STATUS: module.STATUS || { FINISHED: 'finished', SKIPPED: 'skipped' },
-          });
-        }).catch((error) => {
-          console.error('Failed to load react-joyride:', error);
-        });
-      } else {
-        // Wait a bit for React to be available
-        const timer = setTimeout(() => {
+      // Ensure React is available globally before importing react-joyride
+      // React should be available via window.React (set in main.tsx)
+      const ensureReactAndImport = () => {
+        if (typeof window !== 'undefined' && (window as any).React) {
           import('react-joyride').then((module) => {
             setJoyrideComponent(() => module.default);
             setJoyrideConstants({
@@ -53,9 +44,14 @@ export const OnboardingTour = ({ run, onFinish, onSkip }: OnboardingTourProps) =
           }).catch((error) => {
             console.error('Failed to load react-joyride:', error);
           });
-        }, 100);
-        return () => clearTimeout(timer);
-      }
+        } else {
+          // Wait for React to be available (should be very quick)
+          const timer = setTimeout(ensureReactAndImport, 50);
+          return () => clearTimeout(timer);
+        }
+      };
+      
+      ensureReactAndImport();
     }
   }, [run, JoyrideComponent]);
 
