@@ -306,20 +306,26 @@ describe('useCustomDomains', () => {
     });
   });
 
-  describe('DNS propagation', () => {
-    it.skip('should check DNS propagation status', async () => {
-      // checkPropagation function doesn't exist in the hook
+  describe('DNS verification', () => {
+    it('should verify domain DNS status', async () => {
+      const mockDomain = {
+        id: 'domain-1',
+        domain_name: 'report.company.com',
+        verification_status: 'pending',
+      };
+
       mockInvoke
         .mockResolvedValueOnce({
-          data: { domains: [] },
+          data: { domains: [mockDomain] },
           error: null,
         })
         .mockResolvedValueOnce({
           data: {
-            propagated: true,
-            dns_records: [
-              { type: 'CNAME', name: 'report.company.com', value: 'cname.disclosurely.com' },
-            ],
+            verified: true,
+            domain: {
+              ...mockDomain,
+              verification_status: 'verified',
+            },
           },
           error: null,
         });
@@ -330,24 +336,40 @@ describe('useCustomDomains', () => {
         expect(result.current.loading).toBe(false);
       });
 
-      // checkPropagation doesn't exist in the hook - skip this test
-      // The verifyDomain function handles DNS checking
-      test.skip('checkPropagation function not implemented in hook', () => {});
+      // Verify the hook has verifyDomain function
+      expect(result.current.verifyDomain).toBeDefined();
+      expect(typeof result.current.verifyDomain).toBe('function');
+
+      // Test verifyDomain
+      let verifyResult;
+      await act(async () => {
+        verifyResult = await result.current.verifyDomain('domain-1');
+      });
+
+      expect(verifyResult).toBeDefined();
+      expect(mockInvoke).toHaveBeenCalledWith('custom-domains', {
+        body: {
+          action: 'verify',
+          domainId: 'domain-1',
+        },
+      });
     });
 
-    it.skip('should detect incomplete DNS propagation', async () => {
-      // checkPropagation function doesn't exist in the hook
+    it('should handle DNS verification errors', async () => {
+      const mockDomain = {
+        id: 'domain-1',
+        domain_name: 'report.company.com',
+        verification_status: 'pending',
+      };
+
       mockInvoke
         .mockResolvedValueOnce({
-          data: { domains: [] },
+          data: { domains: [mockDomain] },
           error: null,
         })
         .mockResolvedValueOnce({
-          data: {
-            propagated: false,
-            message: 'DNS records not yet propagated',
-          },
-          error: null,
+          data: null,
+          error: { message: 'DNS verification failed' },
         });
 
       const { result } = renderHook(() => useCustomDomains());
@@ -356,9 +378,12 @@ describe('useCustomDomains', () => {
         expect(result.current.loading).toBe(false);
       });
 
-      // checkPropagation doesn't exist in the hook - skip this test
-      // The verifyDomain function handles DNS checking
-      test.skip('checkPropagation function not implemented in hook', () => {});
+      // Test that verifyDomain handles errors
+      await expect(async () => {
+        await act(async () => {
+          await result.current.verifyDomain('domain-1');
+        });
+      }).rejects.toBeDefined();
     });
   });
 });
