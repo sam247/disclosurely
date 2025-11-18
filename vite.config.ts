@@ -49,6 +49,10 @@ export default defineConfig(({ mode }) => ({
     rollupOptions: {
       output: {
         manualChunks(id) {
+          // Onboarding tour - MUST be before React check to prevent vendor-misc inclusion
+          if (id.includes('node_modules/react-joyride')) {
+            return 'vendor-tour';
+          }
           // Core React libraries
           if (id.includes('node_modules/react') || id.includes('node_modules/react-dom')) {
             return 'vendor-react';
@@ -105,8 +109,8 @@ export default defineConfig(({ mode }) => ({
           if (id.includes('node_modules/crypto-js')) {
             return 'vendor-crypto';
           }
-          // Other large vendors
-          if (id.includes('node_modules/')) {
+          // Other large vendors (explicitly exclude react-joyride which has its own chunk)
+          if (id.includes('node_modules/') && !id.includes('node_modules/react-joyride')) {
             return 'vendor-misc';
           }
         },
