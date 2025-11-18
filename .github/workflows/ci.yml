@@ -52,6 +52,14 @@ jobs:
         run: npm run test:run -- --coverage
         continue-on-error: false
         timeout-minutes: 10
+        env:
+          CI: true
+          VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL || 'https://test.supabase.co' }}
+          VITE_SUPABASE_PUBLISHABLE_KEY: ${{ secrets.VITE_SUPABASE_PUBLISHABLE_KEY || 'test-anon-key' }}
+          VITE_SUPABASE_PROJECT_ID: ${{ secrets.VITE_SUPABASE_PROJECT_ID || 'test-project-id' }}
+          VITE_CONTENTFUL_SPACE_ID: ${{ secrets.VITE_CONTENTFUL_SPACE_ID || 'test-space-id' }}
+          VITE_CONTENTFUL_DELIVERY_TOKEN: ${{ secrets.VITE_CONTENTFUL_DELIVERY_TOKEN || 'test-delivery-token' }}
+          VITE_GOOGLE_MAPS_API_KEY: ${{ secrets.VITE_GOOGLE_MAPS_API_KEY || 'test-maps-key' }}
 
       - name: Upload coverage reports
         uses: codecov/codecov-action@v4
@@ -87,6 +95,12 @@ jobs:
         env:
           CI: true
           PLAYWRIGHT_BASE_URL: http://localhost:8080
+          VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL || 'https://test.supabase.co' }}
+          VITE_SUPABASE_PUBLISHABLE_KEY: ${{ secrets.VITE_SUPABASE_PUBLISHABLE_KEY || 'test-anon-key' }}
+          VITE_SUPABASE_PROJECT_ID: ${{ secrets.VITE_SUPABASE_PROJECT_ID || 'test-project-id' }}
+          VITE_CONTENTFUL_SPACE_ID: ${{ secrets.VITE_CONTENTFUL_SPACE_ID || 'test-space-id' }}
+          VITE_CONTENTFUL_DELIVERY_TOKEN: ${{ secrets.VITE_CONTENTFUL_DELIVERY_TOKEN || 'test-delivery-token' }}
+          VITE_GOOGLE_MAPS_API_KEY: ${{ secrets.VITE_GOOGLE_MAPS_API_KEY || 'test-maps-key' }}
         timeout-minutes: 20
 
       - name: Upload E2E test results

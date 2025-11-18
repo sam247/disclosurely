@@ -2,8 +2,9 @@ import { test, expect } from '@playwright/test';
 
 test.describe('Dashboard - Team Management', () => {
   test.beforeEach(async ({ page }) => {
-    // Would need to login first
-    test.skip(); // All dashboard tests require authentication
+    // Skip all tests in this suite - they require authentication
+    // This is intentional as we don't have auth setup in CI yet
+    test.skip();
   });
 
   test('should display team members list', async ({ page }) => {
@@ -66,7 +67,8 @@ test.describe('Dashboard - Team Management', () => {
 
 test.describe('Dashboard - Custom Domains', () => {
   test.beforeEach(async ({ page }) => {
-    test.skip(); // Requires authentication
+    // Skip all tests in this suite - they require authentication
+    test.skip();
   });
 
   test('should add custom domain', async ({ page }) => {
@@ -124,7 +126,8 @@ test.describe('Dashboard - Custom Domains', () => {
 
 test.describe('Dashboard - Secure Link Generation', () => {
   test.beforeEach(async ({ page }) => {
-    test.skip(); // Requires authentication
+    // Skip all tests in this suite - they require authentication
+    test.skip();
   });
 
   test('should generate secure reporting link', async ({ page }) => {
@@ -167,7 +170,8 @@ test.describe('Dashboard - Secure Link Generation', () => {
 
 test.describe('Dashboard - Case Management', () => {
   test.beforeEach(async ({ page }) => {
-    test.skip(); // Requires authentication
+    // Skip all tests in this suite - they require authentication
+    test.skip();
   });
 
   test('should display reports list', async ({ page }) => {
@@ -210,7 +214,8 @@ test.describe('Dashboard - Case Management', () => {
 
 test.describe('Dashboard - Compliance Policies', () => {
   test.beforeEach(async ({ page }) => {
-    test.skip(); // Requires authentication
+    // Skip all tests in this suite - they require authentication
+    test.skip();
   });
 
   test('should create new compliance policy', async ({ page }) => {
@@ -250,7 +255,8 @@ test.describe('Dashboard - Compliance Policies', () => {
 
 test.describe('Dashboard - Security Settings', () => {
   test.beforeEach(async ({ page }) => {
-    test.skip(); // Requires authentication
+    // Skip all tests in this suite - they require authentication
+    test.skip();
   });
 
   test('should display active sessions', async ({ page }) => {

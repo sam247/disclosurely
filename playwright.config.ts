@@ -75,6 +75,14 @@ export default defineConfig({
     timeout: 120000,
     stdout: 'pipe',
     stderr: 'pipe',
+    env: {
+      VITE_SUPABASE_URL: process.env.VITE_SUPABASE_URL || 'https://test.supabase.co',
+      VITE_SUPABASE_PUBLISHABLE_KEY: process.env.VITE_SUPABASE_PUBLISHABLE_KEY || 'test-anon-key',
+      VITE_SUPABASE_PROJECT_ID: process.env.VITE_SUPABASE_PROJECT_ID || 'test-project-id',
+      VITE_CONTENTFUL_SPACE_ID: process.env.VITE_CONTENTFUL_SPACE_ID || 'test-space-id',
+      VITE_CONTENTFUL_DELIVERY_TOKEN: process.env.VITE_CONTENTFUL_DELIVERY_TOKEN || 'test-delivery-token',
+      VITE_GOOGLE_MAPS_API_KEY: process.env.VITE_GOOGLE_MAPS_API_KEY || 'test-maps-key',
+    },
   },
   
   /* Global test timeout */
