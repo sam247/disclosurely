@@ -18,8 +18,8 @@ try {
     console.log('Nothing to commit or commit failed');
   }
   
-  console.log('\nPushing to origin main...');
-  const pushOutput = execSync('git push origin main', { cwd: repoPath, encoding: 'utf8', stdio: 'pipe' });
+  console.log('\nForce pushing to origin main (reset requires force push)...');
+  const pushOutput = execSync('git push origin main --force', { cwd: repoPath, encoding: 'utf8', stdio: 'pipe' });
   console.log(pushOutput);
   
   console.log('\nPush complete!');
