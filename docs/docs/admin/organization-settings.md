@@ -91,16 +91,24 @@ Manage your organization's core settings, branding, and configuration in one cen
 
 ### Secure Reporting Link
 
-Your unique, secure reporting URL:
+Your organization has two types of reporting URLs:
+
+**Default Subdomain URL**:
 ```
-https://disclosurely.com/secure/tool/submit/[your-token]
+https://[your-org-name].disclosurely.com/report
 ```
 
-**Managing Your Link**:
-- Cannot be changed (security reasons)
-- Can be disabled temporarily
-- Copy to share with employees
-- QR code available for printing
+**Custom Branded Domain** (Optional):
+```
+https://reports.yourcompany.com
+```
+
+**Managing Your Links**:
+- Default subdomain is automatically generated from your organization name
+- Set up custom branded domains in [Custom Domains](/admin/custom-domains) settings
+- Create and manage multiple reporting links in the Link Generator
+- QR codes available for printing and distribution
+- See [Link Generator & Management](/admin/link-generator) for detailed link configuration
 
 ### Report Form Settings
 
