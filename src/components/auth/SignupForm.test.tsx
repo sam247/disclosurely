@@ -75,7 +75,7 @@ describe('SignupForm', () => {
     expect(screen.getAllByLabelText(/password/i).length).toBeGreaterThanOrEqual(1);
     expect(screen.getByLabelText(/first name/i)).toBeInTheDocument();
     expect(screen.getByLabelText(/last name/i)).toBeInTheDocument();
-    expect(screen.getByLabelText(/organization name/i)).toBeInTheDocument();
+    expect(screen.getByLabelText(/business name/i)).toBeInTheDocument();
   });
 
   it('should validate password match', async () => {
@@ -97,7 +97,7 @@ describe('SignupForm', () => {
     await user.type(confirmPasswordInput, 'different123');
     await user.type(screen.getByLabelText(/first name/i), 'John');
     await user.type(screen.getByLabelText(/last name/i), 'Doe');
-    await user.type(screen.getByLabelText(/organization name/i), 'Test Org');
+    await user.type(screen.getByLabelText(/business name/i), 'Test Org');
     
     // Now submit with mismatched passwords
     await user.clear(confirmPasswordInput);
@@ -130,10 +130,10 @@ describe('SignupForm', () => {
     await user.type(passwordInputs[1] || screen.getByLabelText(/confirm.*password/i), 'password123');
     await user.type(screen.getByLabelText(/first name/i), 'John');
     await user.type(screen.getByLabelText(/last name/i), 'Doe');
-    await user.type(screen.getByLabelText(/organization name/i), 'Test Org');
+    await user.type(screen.getByLabelText(/business name/i), 'Test Org');
     
-    // Now clear organization name to test custom validation
-    const orgInput = screen.getByLabelText(/organization name/i);
+    // Now clear business name to test custom validation
+    const orgInput = screen.getByLabelText(/business name/i);
     await user.clear(orgInput);
     
     // Submit form - HTML5 validation might prevent this, but if it doesn't, custom validation should trigger
@@ -176,7 +176,7 @@ describe('SignupForm', () => {
     await user.type(passwordInputs[1] || screen.getByLabelText(/confirm.*password/i), 'password123');
     await user.type(screen.getByLabelText(/first name/i), 'John');
     await user.type(screen.getByLabelText(/last name/i), 'Doe');
-    await user.type(screen.getByLabelText(/organization name/i), 'Test Org');
+    await user.type(screen.getByLabelText(/business name/i), 'Test Org');
 
     const submitButton = screen.getByRole('button', { name: /create account/i });
     await user.click(submitButton);
@@ -215,7 +215,7 @@ describe('SignupForm', () => {
     await user.type(passwordInputs[1] || screen.getByLabelText(/confirm.*password/i), 'password123');
     await user.type(screen.getByLabelText(/first name/i), 'John');
     await user.type(screen.getByLabelText(/last name/i), 'Doe');
-    await user.type(screen.getByLabelText(/organization name/i), 'Test Org');
+    await user.type(screen.getByLabelText(/business name/i), 'Test Org');
 
     const submitButton = screen.getByRole('button', { name: /create account/i });
     await user.click(submitButton);
@@ -262,7 +262,7 @@ describe('SignupForm', () => {
     await user.type(passwordInputs[1] || screen.getByLabelText(/confirm.*password/i), 'password123');
     await user.type(screen.getByLabelText(/first name/i), 'John');
     await user.type(screen.getByLabelText(/last name/i), 'Doe');
-    await user.type(screen.getByLabelText(/organization name/i), 'My Company');
+    await user.type(screen.getByLabelText(/business name/i), 'My Company');
 
     const submitButton = screen.getByRole('button', { name: /create account/i });
     await user.click(submitButton);

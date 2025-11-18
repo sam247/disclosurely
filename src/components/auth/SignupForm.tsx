@@ -296,9 +296,8 @@ const SignupForm = () => {
         </div>
 
         <div className="pt-4 border-t">
-          <p className="text-sm font-medium text-gray-900 mb-4">Organization Details</p>
           <div>
-            <Label htmlFor="organizationName">Organization Name</Label>
+            <Label htmlFor="organizationName">Business Name</Label>
             <div className="mt-1">
               <Input
                 id="organizationName"
@@ -307,10 +306,10 @@ const SignupForm = () => {
                 required
                 value={organizationName}
                 onChange={(e) => setOrganizationName(e.target.value)}
-                placeholder="Your company name"
+                placeholder="Your business name"
               />
               <p className="mt-1 text-xs text-gray-500">
-                Your submission link will be automatically generated from your organization name
+                Your submission link will be automatically generated from your business name
               </p>
             </div>
           </div>
