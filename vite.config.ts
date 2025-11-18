@@ -54,9 +54,10 @@ export default defineConfig(({ mode }) => ({
         format: 'es',
         manualChunks(id) {
           // Core React libraries + react-joyride (bundled together to ensure hook access)
+          // Check for joyride with regex to catch any path format
           if (id.includes('node_modules/react') ||
               id.includes('node_modules/react-dom') ||
-              id.includes('react-joyride')) {
+              /joyride/i.test(id)) {
             return 'vendor-react';
           }
           // Router
@@ -111,8 +112,8 @@ export default defineConfig(({ mode }) => ({
           if (id.includes('node_modules/crypto-js')) {
             return 'vendor-crypto';
           }
-          // Other large vendors (explicitly exclude react-joyride which has its own chunk)
-          if (id.includes('node_modules/') && !id.includes('node_modules/react-joyride')) {
+          // Other large vendors (explicitly exclude react-joyride)
+          if (id.includes('node_modules/') && !/joyride/i.test(id)) {
             return 'vendor-misc';
           }
         },
