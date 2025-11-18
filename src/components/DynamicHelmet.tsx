@@ -58,6 +58,10 @@ const contentfulClient = CONTENTFUL_DELIVERY_TOKEN ? createClient({
   accessToken: CONTENTFUL_DELIVERY_TOKEN,
 }) : null;
 
+// Module-level cache to prevent infinite loops (persists across component remounts)
+const fetchCache = new Map<string, { data: any; timestamp: number }>();
+const CACHE_TTL = 60000; // 1 minute cache
+
 const DynamicHelmet: React.FC<DynamicHelmetProps> = ({
   pageIdentifier,
   fallbackTitle,
@@ -154,10 +158,6 @@ const DynamicHelmet: React.FC<DynamicHelmetProps> = ({
   // Calculate canonical and hreflang immediately (synchronously, before any async operations)
   const finalCanonicalUrl = normalizeCanonicalUrl(buildCanonicalUrl());
   const hrefLangUrls = getHrefLangUrls();
-
-  // Add request caching to prevent infinite loops
-  const fetchCache = new Map<string, { data: any; timestamp: number }>();
-  const CACHE_TTL = 60000; // 1 minute cache
 
   useEffect(() => {
     const fetchSEOData = async () => {
