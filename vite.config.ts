@@ -49,8 +49,11 @@ export default defineConfig(({ mode }) => ({
     rollupOptions: {
       output: {
         manualChunks(id) {
-          // Core React libraries
-          if (id.includes('node_modules/react') || id.includes('node_modules/react-dom')) {
+          // Core React libraries and React-dependent libraries
+          // IMPORTANT: react-joyride must be in same chunk as React to avoid scope issues
+          if (id.includes('node_modules/react') || 
+              id.includes('node_modules/react-dom') ||
+              id.includes('node_modules/react-joyride')) {
             return 'vendor-react';
           }
           // Router
