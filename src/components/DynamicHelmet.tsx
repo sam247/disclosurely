@@ -77,6 +77,33 @@ const DynamicHelmet: React.FC<DynamicHelmetProps> = ({
   const [schemaData, setSchemaData] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
+  // Normalize URL to always use non-www version and remove trailing slashes
+  // Must be defined before use to avoid temporal dead zone errors
+  const normalizeCanonicalUrl = (url: string) => {
+    try {
+      const urlObj = new URL(url);
+      // Remove www. prefix
+      if (urlObj.hostname.startsWith('www.')) {
+        urlObj.hostname = urlObj.hostname.substring(4);
+      }
+      // Remove trailing slash from pathname (except for root which should be empty)
+      let pathname = urlObj.pathname;
+      if (pathname === '/') {
+        pathname = '';
+      } else if (pathname.endsWith('/')) {
+        pathname = pathname.slice(0, -1);
+      }
+      urlObj.pathname = pathname;
+      // Remove query params and hash for canonical URLs
+      urlObj.search = '';
+      urlObj.hash = '';
+      return urlObj.toString();
+    } catch (error) {
+      console.error('Error normalizing canonical URL:', error);
+      return url;
+    }
+  };
+
   // CRITICAL: Build canonical and hreflang URLs independently - NEVER affected by Contentful
   // These must be calculated synchronously and never depend on async Contentful data
   const buildCanonicalUrl = () => {
@@ -328,32 +355,6 @@ const DynamicHelmet: React.FC<DynamicHelmetProps> = ({
   if (finalImage && !finalImage.startsWith('http')) {
     finalImage = finalImage.startsWith('//') ? `https:${finalImage}` : `https://disclosurely.com${finalImage}`;
   }
-
-  // Normalize URL to always use non-www version and remove trailing slashes
-  const normalizeCanonicalUrl = (url: string) => {
-    try {
-      const urlObj = new URL(url);
-      // Remove www. prefix
-      if (urlObj.hostname.startsWith('www.')) {
-        urlObj.hostname = urlObj.hostname.substring(4);
-      }
-      // Remove trailing slash from pathname (except for root which should be empty)
-      let pathname = urlObj.pathname;
-      if (pathname === '/') {
-        pathname = '';
-      } else if (pathname.endsWith('/')) {
-        pathname = pathname.slice(0, -1);
-      }
-      urlObj.pathname = pathname;
-      // Remove query params and hash for canonical URLs
-      urlObj.search = '';
-      urlObj.hash = '';
-      return urlObj.toString();
-    } catch (error) {
-      console.error('Error normalizing canonical URL:', error);
-      return url;
-    }
-  };
 
   const finalRobots = seoData?.robots_directive || 'index,follow';
 
