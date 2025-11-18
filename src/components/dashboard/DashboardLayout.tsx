@@ -14,10 +14,7 @@ import { supabase } from '@/integrations/supabase/client';
 import NotificationSystem from '@/components/NotificationSystem';
 import { useTranslation } from 'react-i18next';
 import { AnnouncementBar } from '@/components/AnnouncementBar';
-import { lazy, Suspense } from 'react';
-
-// Lazy load OnboardingTour to avoid loading react-joyride until needed
-const OnboardingTour = lazy(() => import('./OnboardingTour').then(module => ({ default: module.OnboardingTour })));
+import { OnboardingTour } from './OnboardingTour';
 
 interface DashboardLayoutProps {
   children: ReactNode;
@@ -263,16 +260,12 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
         </DialogContent>
       </Dialog>
 
-      {/* Onboarding Tour - Lazy loaded to avoid initial bundle size */}
-      {runTour && (
-        <Suspense fallback={null}>
-          <OnboardingTour
-            run={runTour}
-            onFinish={handleFinishTour}
-            onSkip={handleSkipTour}
-          />
-        </Suspense>
-      )}
+      {/* Onboarding Tour */}
+      <OnboardingTour
+        run={runTour}
+        onFinish={handleFinishTour}
+        onSkip={handleSkipTour}
+      />
     </SidebarProvider>
   );
 };

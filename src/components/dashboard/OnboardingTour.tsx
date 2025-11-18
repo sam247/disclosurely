@@ -1,20 +1,7 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
+import Joyride, { CallBackProps, STATUS, Step } from 'react-joyride';
 import { useTranslation } from 'react-i18next';
 import { useUserRoles } from '@/hooks/useUserRoles';
-
-// Define types locally to avoid importing from react-joyride
-type Step = {
-  target: string;
-  content: string;
-  placement?: string;
-  disableBeacon?: boolean;
-};
-
-type CallBackProps = {
-  status: string;
-  action: string;
-  index: number;
-};
 
 interface OnboardingTourProps {
   run: boolean;
@@ -26,34 +13,6 @@ export const OnboardingTour = ({ run, onFinish, onSkip }: OnboardingTourProps) =
   const { t } = useTranslation();
   const { isOrgAdmin } = useUserRoles();
   const [stepIndex, setStepIndex] = useState(0);
-  const [JoyrideComponent, setJoyrideComponent] = useState<any>(null);
-  const [JoyrideConstants, setJoyrideConstants] = useState<any>(null);
-
-  // Dynamically import react-joyride only when tour is running
-  useEffect(() => {
-    if (run && !JoyrideComponent) {
-      // Ensure React is available globally before importing react-joyride
-      // React should be available via window.React (set in main.tsx)
-      const ensureReactAndImport = () => {
-        if (typeof window !== 'undefined' && (window as any).React) {
-          import('react-joyride').then((module) => {
-            setJoyrideComponent(() => module.default);
-            setJoyrideConstants({
-              STATUS: module.STATUS || { FINISHED: 'finished', SKIPPED: 'skipped' },
-            });
-          }).catch((error) => {
-            console.error('Failed to load react-joyride:', error);
-          });
-        } else {
-          // Wait for React to be available (should be very quick)
-          const timer = setTimeout(ensureReactAndImport, 50);
-          return () => clearTimeout(timer);
-        }
-      };
-      
-      ensureReactAndImport();
-    }
-  }, [run, JoyrideComponent]);
 
   // Define tour steps based on user role
   const steps: Step[] = [
@@ -120,13 +79,10 @@ export const OnboardingTour = ({ run, onFinish, onSkip }: OnboardingTourProps) =
 
   const handleJoyrideCallback = (data: CallBackProps) => {
     const { status, action, index } = data;
-    const finishedStatuses: string[] = JoyrideConstants 
-      ? [JoyrideConstants.STATUS.FINISHED, JoyrideConstants.STATUS.SKIPPED]
-      : ['finished', 'skipped'];
-    const skippedStatus = JoyrideConstants?.STATUS?.SKIPPED || 'skipped';
+    const finishedStatuses: string[] = [STATUS.FINISHED, STATUS.SKIPPED];
 
     if (finishedStatuses.includes(status)) {
-      if (status === skippedStatus) {
+      if (status === STATUS.SKIPPED) {
         onSkip();
       } else {
         onFinish();
@@ -137,12 +93,10 @@ export const OnboardingTour = ({ run, onFinish, onSkip }: OnboardingTourProps) =
     }
   };
 
-  // Don't render until Joyride is loaded and constants are available
-  if (!JoyrideComponent || !JoyrideConstants || !run) {
+  // Don't render if tour is not running
+  if (!run) {
     return null;
   }
-
-  const Joyride = JoyrideComponent;
 
   return (
     <Joyride

@@ -53,14 +53,11 @@ export default defineConfig(({ mode }) => ({
         // This helps libraries like react-joyride access React when dynamically imported
         format: 'es',
         manualChunks(id) {
-          // IMPORTANT: Check for react-joyride FIRST before other React checks
-          // This ensures it's bundled with React when dynamically imported
-          if (id.includes('node_modules/react-joyride')) {
-            return 'vendor-react';
-          }
-          // Core React libraries
+          // Core React libraries and React-dependent libraries
+          // Bundle react-joyride with React to ensure React is available
           if (id.includes('node_modules/react') || 
-              id.includes('node_modules/react-dom')) {
+              id.includes('node_modules/react-dom') ||
+              id.includes('node_modules/react-joyride')) {
             return 'vendor-react';
           }
           // Router
