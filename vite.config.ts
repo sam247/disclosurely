@@ -107,6 +107,12 @@ export default defineConfig(({ mode }) => ({
           if (id.includes('node_modules/crypto-js')) {
             return 'vendor-crypto';
           }
+          // React-dependent libraries that might be dynamically imported
+          // Ensure they can access React when loaded
+          if (id.includes('node_modules/react-joyride')) {
+            // Bundle react-joyride with React to ensure React is available
+            return 'vendor-react';
+          }
           // Other large vendors
           if (id.includes('node_modules/')) {
             return 'vendor-misc';

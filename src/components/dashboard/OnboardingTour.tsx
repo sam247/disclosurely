@@ -1,7 +1,20 @@
 import { useEffect, useState } from 'react';
-import type { CallBackProps, STATUS, Step } from 'react-joyride';
 import { useTranslation } from 'react-i18next';
 import { useUserRoles } from '@/hooks/useUserRoles';
+
+// Define types locally to avoid importing from react-joyride
+type Step = {
+  target: string;
+  content: string;
+  placement?: string;
+  disableBeacon?: boolean;
+};
+
+type CallBackProps = {
+  status: string;
+  action: string;
+  index: number;
+};
 
 interface OnboardingTourProps {
   run: boolean;
@@ -14,15 +27,35 @@ export const OnboardingTour = ({ run, onFinish, onSkip }: OnboardingTourProps) =
   const { isOrgAdmin } = useUserRoles();
   const [stepIndex, setStepIndex] = useState(0);
   const [JoyrideComponent, setJoyrideComponent] = useState<any>(null);
+  const [JoyrideConstants, setJoyrideConstants] = useState<any>(null);
 
   // Dynamically import react-joyride only when tour is running
   useEffect(() => {
     if (run && !JoyrideComponent) {
-      import('react-joyride').then((module) => {
-        setJoyrideComponent(() => module.default);
-      }).catch((error) => {
-        console.error('Failed to load react-joyride:', error);
-      });
+      // Ensure React is available before importing
+      if (typeof window !== 'undefined' && (window as any).React) {
+        import('react-joyride').then((module) => {
+          setJoyrideComponent(() => module.default);
+          setJoyrideConstants({
+            STATUS: module.STATUS || { FINISHED: 'finished', SKIPPED: 'skipped' },
+          });
+        }).catch((error) => {
+          console.error('Failed to load react-joyride:', error);
+        });
+      } else {
+        // Wait a bit for React to be available
+        const timer = setTimeout(() => {
+          import('react-joyride').then((module) => {
+            setJoyrideComponent(() => module.default);
+            setJoyrideConstants({
+              STATUS: module.STATUS || { FINISHED: 'finished', SKIPPED: 'skipped' },
+            });
+          }).catch((error) => {
+            console.error('Failed to load react-joyride:', error);
+          });
+        }, 100);
+        return () => clearTimeout(timer);
+      }
     }
   }, [run, JoyrideComponent]);
 
@@ -91,10 +124,13 @@ export const OnboardingTour = ({ run, onFinish, onSkip }: OnboardingTourProps) =
 
   const handleJoyrideCallback = (data: CallBackProps) => {
     const { status, action, index } = data;
-    const finishedStatuses: string[] = [STATUS.FINISHED, STATUS.SKIPPED];
+    const finishedStatuses: string[] = JoyrideConstants 
+      ? [JoyrideConstants.STATUS.FINISHED, JoyrideConstants.STATUS.SKIPPED]
+      : ['finished', 'skipped'];
+    const skippedStatus = JoyrideConstants?.STATUS?.SKIPPED || 'skipped';
 
     if (finishedStatuses.includes(status)) {
-      if (status === STATUS.SKIPPED) {
+      if (status === skippedStatus) {
         onSkip();
       } else {
         onFinish();
@@ -105,8 +141,8 @@ export const OnboardingTour = ({ run, onFinish, onSkip }: OnboardingTourProps) =
     }
   };
 
-  // Don't render until Joyride is loaded
-  if (!JoyrideComponent || !run) {
+  // Don't render until Joyride is loaded and constants are available
+  if (!JoyrideComponent || !JoyrideConstants || !run) {
     return null;
   }
 
