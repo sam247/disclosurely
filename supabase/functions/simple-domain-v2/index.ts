@@ -433,6 +433,69 @@ serve(async (req) => {
       );
     }
 
+    // CHECK ACCESSIBILITY
+    if (action === 'check-accessibility') {
+      const authHeader = req.headers.get('Authorization');
+      if (!authHeader) {
+        return new Response(
+          JSON.stringify({ success: false, message: 'Unauthorized' }),
+          { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      }
+
+      const authClient = createClient(supabaseUrl, Deno.env.get('SUPABASE_ANON_KEY') ?? '', {
+        global: { headers: { Authorization: authHeader } },
+      });
+      const { data: { user } } = await authClient.auth.getUser();
+      if (!user) {
+        return new Response(
+          JSON.stringify({ success: false, message: 'Unauthorized' }),
+          { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      }
+
+      const { data: profile } = await authClient.from('profiles').select('organization_id').eq('id', user.id).single();
+      if (!profile?.organization_id) {
+        return new Response(
+          JSON.stringify({ success: false, accessible: false, organizationId: null }),
+          { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      }
+
+      // Check if domain exists and is active for this organization
+      const { data: customDomain } = await db
+        .from('custom_domains')
+        .select('id, organization_id, status, is_active')
+        .eq('domain_name', domain)
+        .eq('organization_id', profile.organization_id)
+        .eq('is_active', true)
+        .eq('status', 'active')
+        .single();
+
+      if (!customDomain) {
+        return new Response(
+          JSON.stringify({ 
+            success: true, 
+            accessible: false, 
+            organizationId: profile.organization_id,
+            message: 'Domain not found or inactive in system'
+          }),
+          { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      }
+
+      // Domain is active and verified, so it's accessible
+      return new Response(
+        JSON.stringify({ 
+          success: true, 
+          accessible: true,
+          organizationId: customDomain.organization_id,
+          message: 'Domain is accessible'
+        }),
+        { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
     return new Response(
       JSON.stringify({ success: false, message: 'Invalid action' }),
       { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
