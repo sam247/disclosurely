@@ -59,35 +59,36 @@ const createQueryBuilder = () => {
     error: null,
   });
   
-  const builder: any = {
-    select: vi.fn().mockReturnValue(builder),
-    insert: vi.fn().mockReturnValue(builder),
-    update: vi.fn().mockReturnValue(builder),
-    delete: vi.fn().mockReturnValue(builder),
-    upsert: vi.fn().mockReturnValue(builder),
-    eq: vi.fn().mockReturnValue(builder),
-    neq: vi.fn().mockReturnValue(builder),
-    gt: vi.fn().mockReturnValue(builder),
-    gte: vi.fn().mockReturnValue(builder),
-    lt: vi.fn().mockReturnValue(builder),
-    lte: vi.fn().mockReturnValue(builder),
-    like: vi.fn().mockReturnValue(builder),
-    ilike: vi.fn().mockReturnValue(builder),
-    is: vi.fn().mockReturnValue(builder),
-    in: vi.fn().mockReturnValue(builder),
-    contains: vi.fn().mockReturnValue(builder),
-    order: vi.fn().mockReturnValue(builder),
-    limit: vi.fn().mockReturnValue(builder),
-    range: vi.fn().mockReturnValue(builder),
-    single: vi.fn().mockResolvedValue({
-      data: null,
-      error: null,
-    }),
-    maybeSingle: vi.fn().mockResolvedValue({
-      data: null,
-      error: null,
-    }),
-  };
+  const builder: any = {};
+  
+  // Define methods that return builder
+  builder.select = vi.fn().mockReturnValue(builder);
+  builder.insert = vi.fn().mockReturnValue(builder);
+  builder.update = vi.fn().mockReturnValue(builder);
+  builder.delete = vi.fn().mockReturnValue(builder);
+  builder.upsert = vi.fn().mockReturnValue(builder);
+  builder.eq = vi.fn().mockReturnValue(builder);
+  builder.neq = vi.fn().mockReturnValue(builder);
+  builder.gt = vi.fn().mockReturnValue(builder);
+  builder.gte = vi.fn().mockReturnValue(builder);
+  builder.lt = vi.fn().mockReturnValue(builder);
+  builder.lte = vi.fn().mockReturnValue(builder);
+  builder.like = vi.fn().mockReturnValue(builder);
+  builder.ilike = vi.fn().mockReturnValue(builder);
+  builder.is = vi.fn().mockReturnValue(builder);
+  builder.in = vi.fn().mockReturnValue(builder);
+  builder.contains = vi.fn().mockReturnValue(builder);
+  builder.order = vi.fn().mockReturnValue(builder);
+  builder.limit = vi.fn().mockReturnValue(builder);
+  builder.range = vi.fn().mockReturnValue(builder);
+  builder.single = vi.fn().mockResolvedValue({
+    data: null,
+    error: null,
+  });
+  builder.maybeSingle = vi.fn().mockResolvedValue({
+    data: null,
+    error: null,
+  });
   
   // Make the builder thenable (Promise-like) for queries without .single()/.maybeSingle()
   builder.then = defaultResult.then.bind(defaultResult);

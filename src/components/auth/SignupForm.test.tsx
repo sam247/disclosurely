@@ -143,8 +143,9 @@ describe('SignupForm', () => {
     await waitFor(() => {
       // Check if toast was called (organization required error) or if form validation prevented submission
       const toastCalls = mockToast.mock.calls;
+      const inputElement = orgInput as HTMLInputElement;
       const hasError = toastCalls.length > 0 || 
-                      orgInput.validity.valid === false;
+                      (inputElement.validity && inputElement.validity.valid === false);
       expect(hasError).toBe(true);
     }, { timeout: 3000 });
   });
