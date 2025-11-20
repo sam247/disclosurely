@@ -6,16 +6,6 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY as string, {
   apiVersion: '2023-10-16',
 });
 
-// ---- GA4 / sGTM MP config ----
-// We send Measurement Protocol events to the *server container* endpoint.
-// Example provided by you:
-const GA4_MP_ENDPOINT =
-  process.env.GA4_MP_ENDPOINT ||
-  'https://server-side-tagging-nsepetvtjq-uc.a.run.app/mp/collect';
-const GA4_MEASUREMENT_ID =
-  process.env.GA4_MEASUREMENT_ID || 'G-8QLEGKTKCW';
-const GA4_API_SECRET = process.env.GA4_API_SECRET;
-
 // Utility: read raw body for Stripe validation
 async function buffer(readable: any) {
   const chunks: Buffer[] = [];
@@ -95,45 +85,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
             null);
       }
 
-      // Build GA4 MP payload for sGTM
-      // We send email & rdt_cid as custom params; your Reddit CAPI tag maps them.
-      const mpPayload = {
-        client_id: '555.1', // static client_id for server events; replace if you generate one
-        events: [
-          {
-            name: 'purchase',
-            params: {
-              currency,
-              value,
-              transaction_id: transactionId,
-              email,     // <-- used by sGTM Reddit tag
-              rdt_cid: rdtCid // <-- used by sGTM Reddit tag
-            },
-          },
-        ],
-      };
-
-      // Only send GA4 event if API secret is configured
-      if (GA4_API_SECRET) {
-        const url = `${GA4_MP_ENDPOINT}?measurement_id=${encodeURIComponent(
-          GA4_MEASUREMENT_ID
-        )}&api_secret=${encodeURIComponent(GA4_API_SECRET)}`;
-
-        const resp = await fetch(url, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(mpPayload),
-        });
-
-        if (!resp.ok) {
-          const t = await resp.text().catch(() => '');
-          console.error('❌ GA4 MP (via sGTM) failed:', resp.status, t);
-        } else {
-          console.log('✅ GA4 MP (via sGTM) purchase sent.');
-        }
-      } else {
-        console.warn('⚠️ GA4_API_SECRET environment variable is missing. GA4 tracking will be disabled.');
-      }
+      // Server-side tracking has been removed
+      // Transaction data is available in the variables above if needed for other purposes
     }
 
     return res.status(200).json({ received: true });
