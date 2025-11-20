@@ -121,33 +121,38 @@ const SimpleGDPRSettings = () => {
             Your privacy rights are automatically protected. All requests are processed immediately without manual review.
           </CardDescription>
         </CardHeader>
+        <CardContent>
+          <p className="text-sm text-muted-foreground">
+            All GDPR requests are processed automatically. Use the options below to export your data or delete your account.
+          </p>
+        </CardContent>
+      </Card>
+
+      {/* Data Export Section */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2 text-lg sm:text-xl">
+            <Download className="h-5 w-5 text-green-600" />
+            Download Your Data
+          </CardTitle>
+          <CardDescription className="text-sm sm:text-base">
+            Get a copy of all your personal data. The export will be generated automatically and sent to your email.
+          </CardDescription>
+        </CardHeader>
         <CardContent className="space-y-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="text-center p-3 sm:p-4 bg-green-50 rounded-lg space-y-3">
-              <Download className="h-6 sm:h-8 w-6 sm:w-8 text-green-600 mx-auto" />
-              <h4 className="font-medium text-green-800 text-sm sm:text-base">Data Export</h4>
-              <p className="text-xs sm:text-sm text-green-600 mb-2">Instant download available</p>
-              <Button
-                onClick={handleDataExport}
-                loading={loading}
-                loadingText="Processing..."
-                disabled={!user?.email}
-                size="sm"
-                className="bg-green-600 hover:bg-green-700 text-white"
-              >
-                <Download className="w-4 h-4 mr-2" />
-                Download My Data
-              </Button>
-              <div className="flex items-start gap-2 text-xs text-green-700 mt-2">
-                <Mail className="w-3 h-3 mt-0.5 flex-shrink-0" />
-                <p>You'll receive an email with your data export within a few minutes. The download link will be valid for 7 days.</p>
-              </div>
-            </div>
-            <div className="text-center p-3 sm:p-4 bg-red-50 rounded-lg">
-              <UserX className="h-6 sm:h-8 w-6 sm:w-8 text-red-600 mx-auto mb-2" />
-              <h4 className="font-medium text-red-800 text-sm sm:text-base">Account Deletion</h4>
-              <p className="text-xs sm:text-sm text-red-600">Complete within 24 hours</p>
-            </div>
+          <Button 
+            onClick={handleDataExport} 
+            loading={loading}
+            loadingText="Processing..."
+            disabled={!user?.email} 
+            className="w-full sm:w-auto bg-green-600 hover:bg-green-700"
+          >
+            <Download className="w-4 h-4 mr-2" />
+            Download My Data
+          </Button>
+          <div className="flex items-start gap-2 text-xs sm:text-sm text-gray-600">
+            <Mail className="w-4 h-4 mt-0.5 flex-shrink-0" />
+            <p>You'll receive an email with your data export within a few minutes. The download link will be valid for 7 days.</p>
           </div>
         </CardContent>
       </Card>

@@ -163,7 +163,7 @@ async function fetchBlogPosts(): Promise<UrlEntry[]> {
     const response = await client.getEntries({
       content_type: '9oYANGj5uBRT6UHsl5LxO', // Blog Post content type ID
       'fields.status': 'published',
-      order: '-fields.publishDate',
+      order: ['-fields.publishDate'] as any, // Contentful expects array for order
       limit: 1000, // Get all blog posts
     });
 

@@ -237,9 +237,11 @@ const CustomDomainSettings = () => {
         }));
         
         if (validRecords.length === 0) {
+          console.error('No valid records after filtering. Raw result:', result);
           throw new Error('No valid DNS records returned from server');
         }
         
+        console.log('Setting valid records:', validRecords);
         setRecords(validRecords);
         
         // AI Logging

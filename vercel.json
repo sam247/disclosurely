@@ -72,5 +72,8 @@
       "source": "/((?!assets/|api/|_next/|favicon\\.ico|robots\\.txt|sitemap.*\\.xml|.*\\.[a-z]{2,4}$).*)",
       "destination": "/index.html"
     }
+  ],
+  "ignore": [
+    "docs/**"
   ]
 }
