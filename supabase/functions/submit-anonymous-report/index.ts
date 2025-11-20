@@ -313,13 +313,26 @@ serve(async (req) => {
     console.log('🔍 Verifying link token...')
     const { data: linkData, error: linkError } = await supabase
       .from('organization_links')
-      .select('organization_id, organization:organizations(*)')
+      .select('organization_id')
       .eq('link_token', linkToken)
       .eq('is_active', true)
       .single()
     
-    if (linkError || !linkData) {
-      console.log('❌ Invalid link token')
+    if (linkError) {
+      console.error('❌ Link token query error:', linkError)
+      await logToSystem(supabase, 'error', 'submission', 'Link token verification failed', { 
+        linkError: linkError.message,
+        linkErrorCode: linkError.code,
+        linkErrorDetails: linkError.details
+      }, linkError);
+      return new Response(
+        JSON.stringify({ error: 'Invalid link token' }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      )
+    }
+    
+    if (!linkData || !linkData.organization_id) {
+      console.log('❌ Invalid link token - no data returned')
       return new Response(
         JSON.stringify({ error: 'Invalid link token' }),
         { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
@@ -418,12 +431,23 @@ serve(async (req) => {
     // Create the report
     console.log('📝 Creating report in database...')
     
-    // Ensure priority is an integer (convert if string)
-    const priorityValue = typeof reportData.priority === 'string' 
-      ? parseInt(reportData.priority, 10) 
-      : reportData.priority;
+    // Ensure priority is an integer (convert if string, validate range)
+    let priorityValue: number;
+    if (typeof reportData.priority === 'string') {
+      priorityValue = parseInt(reportData.priority, 10);
+    } else if (typeof reportData.priority === 'number') {
+      priorityValue = Math.round(reportData.priority);
+    } else {
+      priorityValue = 3; // Default to medium priority
+    }
     
-    console.log('Priority value:', priorityValue, 'Type:', typeof priorityValue);
+    // Validate priority is in valid range (1-5)
+    if (isNaN(priorityValue) || priorityValue < 1 || priorityValue > 5) {
+      console.warn('⚠️ Invalid priority value:', reportData.priority, 'defaulting to 3');
+      priorityValue = 3;
+    }
+    
+    console.log('Priority value:', priorityValue, 'Type:', typeof priorityValue, 'Original:', reportData.priority);
     
     // Store PII detection metadata in report metadata field
     const reportMetadata: any = {
