@@ -461,44 +461,62 @@ serve(async (req) => {
       // Note: We don't store the actual PII text or positions for privacy
     }
 
+    const reportInsertData = {
+      tracking_id: reportData.tracking_id,
+      title: reportData.title,
+      encrypted_content: encryptedData,
+      encryption_key_hash: keyHash,
+      report_type: reportData.report_type,
+      submitted_by_email: reportData.submitted_by_email,
+      status: reportData.status,
+      priority: priorityValue,
+      manual_risk_level: priorityValue, // Map priority to risk level
+      tags: reportData.tags,
+      organization_id: linkData.organization_id,
+      metadata: reportMetadata, // Store PII scan results
+      // Contextual fields (not encrypted - stored as plain columns)
+      incident_date: reportData.incident_date || null,
+      location: reportData.location || null,
+      witnesses: reportData.witnesses || null,
+      previous_reports: reportData.previous_reports || false,
+      additional_notes: reportData.additional_notes || null
+    };
+    
+    console.log('📝 Inserting report with data:', {
+      tracking_id: reportInsertData.tracking_id,
+      title: reportInsertData.title,
+      priority: reportInsertData.priority,
+      organization_id: reportInsertData.organization_id,
+      status: reportInsertData.status
+    });
+    
     const { data: report, error: reportError } = await supabase
       .from('reports')
-      .insert({
-        tracking_id: reportData.tracking_id,
-        title: reportData.title,
-        encrypted_content: encryptedData,
-        encryption_key_hash: keyHash,
-        report_type: reportData.report_type,
-        submitted_by_email: reportData.submitted_by_email,
-        status: reportData.status,
-        priority: priorityValue,
-        manual_risk_level: priorityValue, // Map priority to risk level
-        tags: reportData.tags,
-        organization_id: linkData.organization_id,
-        metadata: reportMetadata, // Store PII scan results
-        // Contextual fields (not encrypted - stored as plain columns)
-        incident_date: reportData.incident_date || null,
-        location: reportData.location || null,
-        witnesses: reportData.witnesses || null,
-        previous_reports: reportData.previous_reports || false,
-        additional_notes: reportData.additional_notes || null
-      })
+      .insert(reportInsertData)
       .select()
       .single()
     
     if (reportError) {
       console.error('❌ Failed to create report:', reportError)
+      console.error('❌ Report error details:', JSON.stringify(reportError, null, 2))
       await logToSystem(supabase, 'error', 'submission', 'Failed to create report', { 
         reportError: reportError.message,
+        reportErrorCode: reportError.code,
+        reportErrorDetails: reportError.details,
+        reportErrorHint: reportError.hint,
         reportData: {
           tracking_id: reportData.tracking_id,
           title: reportData.title,
           priority: priorityValue,
-          priorityType: typeof priorityValue
+          priorityType: typeof priorityValue,
+          organization_id: linkData.organization_id
         }
       }, reportError);
       return new Response(
-        JSON.stringify({ error: 'Failed to create report. Please try again or contact support.' }),
+        JSON.stringify({ 
+          error: 'Failed to create report. Please try again or contact support.',
+          details: process.env.NODE_ENV === 'development' ? reportError.message : undefined
+        }),
         { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       )
     }
