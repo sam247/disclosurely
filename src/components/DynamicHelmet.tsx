@@ -456,7 +456,7 @@ const DynamicHelmet: React.FC<DynamicHelmetProps> = ({
               <meta name="msvalidate.01" content={globalSeoData.bing_site_verification} />
             )}
 
-            {/* Google Analytics */}
+            {/* Google Analytics - Client-side only (server-side tagging disabled) */}
             {globalSeoData?.google_analytics_id && (
               <>
                 <script async src={`https://www.googletagmanager.com/gtag/js?id=${globalSeoData.google_analytics_id}`} />
@@ -465,14 +465,18 @@ const DynamicHelmet: React.FC<DynamicHelmetProps> = ({
                     window.dataLayer = window.dataLayer || [];
                     function gtag(){dataLayer.push(arguments);}
                     gtag('js', new Date());
-                    gtag('config', '${globalSeoData.google_analytics_id}');
+                    gtag('config', '${globalSeoData.google_analytics_id}', {
+                      'transport_type': 'beacon',
+                      'send_page_view': true
+                    });
                   `}
                 </script>
               </>
             )}
 
-      {/* Google Tag Manager */}
-      {globalSeoData?.google_tag_manager_id && (
+      {/* Google Tag Manager - Disabled: Server-side tagging cancelled */}
+      {/* GTM is commented out because it may be configured for server-side tagging which has been cancelled */}
+      {/* {globalSeoData?.google_tag_manager_id && (
         <>
           <script>
             {`
@@ -488,7 +492,7 @@ const DynamicHelmet: React.FC<DynamicHelmetProps> = ({
               height="0" width="0" style={{display:'none',visibility:'hidden'}} />
           </noscript>
         </>
-      )}
+      )} */}
 
       {/* Facebook Pixel */}
       {globalSeoData?.facebook_pixel_id && (

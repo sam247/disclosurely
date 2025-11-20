@@ -140,13 +140,13 @@ export const createMockSupabaseClient = () => {
     },
     storage: {
       from: vi.fn().mockReturnValue({
-        upload: vi.fn().mockResolvedValue({
-          data: null,
-          error: null,
-        }),
-        download: vi.fn().mockResolvedValue({
-          data: null,
-          error: null,
+      upload: vi.fn().mockResolvedValue({
+        data: null,
+        error: null,
+      }),
+      download: vi.fn().mockResolvedValue({
+        data: null,
+        error: null,
         }),
         remove: vi.fn().mockResolvedValue({
           data: null,

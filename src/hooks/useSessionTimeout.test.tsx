@@ -56,7 +56,7 @@ describe('useSessionTimeout', () => {
     const { result } = renderHook(() => useSessionTimeout());
 
     const initialAbsoluteTime = result.current.getAbsoluteTimeRemaining();
-    
+
     // The absolute time is based on Date.now() which doesn't advance with fake timers
     // So we can only verify the function returns a valid value
     expect(initialAbsoluteTime).toBeGreaterThanOrEqual(0);
@@ -105,7 +105,7 @@ describe('useSessionTimeout', () => {
 
     // Check if warning component exists (it's a memoized component, always truthy)
     // The actual warning display is controlled by the `open` prop
-    expect(result.current.IdleWarningComponent).toBeTruthy();
+      expect(result.current.IdleWarningComponent).toBeTruthy();
 
     // Get time before activity
     const timeBeforeActivity = result.current.getIdleTimeRemaining();

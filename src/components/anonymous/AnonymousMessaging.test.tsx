@@ -31,42 +31,52 @@ vi.mock('react-router-dom', async () => {
   };
 });
 
-// Mock Supabase
+// Mock Supabase - Use chainable query builder
 const mockInvoke = vi.fn();
-const mockFrom = vi.fn();
-const mockSelect = vi.fn();
-const mockEq = vi.fn();
-const mockMaybeSingle = vi.fn();
+
+const createChainableQueryBuilder = (finalResult: any = { data: null, error: null }) => {
+  const builder: any = {
+    select: vi.fn().mockReturnThis(),
+    insert: vi.fn().mockReturnThis(),
+    update: vi.fn().mockReturnThis(),
+    delete: vi.fn().mockReturnThis(),
+    eq: vi.fn().mockReturnThis(),
+    neq: vi.fn().mockReturnThis(),
+    is: vi.fn().mockReturnThis(),
+    gt: vi.fn().mockReturnThis(),
+    gte: vi.fn().mockReturnThis(),
+    lt: vi.fn().mockReturnThis(),
+    lte: vi.fn().mockReturnThis(),
+    like: vi.fn().mockReturnThis(),
+    ilike: vi.fn().mockReturnThis(),
+    in: vi.fn().mockReturnThis(),
+    contains: vi.fn().mockReturnThis(),
+    order: vi.fn().mockReturnThis(),
+    limit: vi.fn().mockReturnThis(),
+    range: vi.fn().mockReturnThis(),
+    single: vi.fn().mockResolvedValue(finalResult),
+    maybeSingle: vi.fn().mockResolvedValue(finalResult),
+  };
+  
+  // Make it thenable (Promise-like)
+  builder.then = (onResolve: any) => Promise.resolve(finalResult).then(onResolve);
+  builder.catch = (onReject: any) => Promise.resolve(finalResult).catch(onReject);
+  builder.finally = (onFinally: any) => Promise.resolve(finalResult).finally(onFinally);
+  
+  return builder;
+};
 
 vi.mock('@/integrations/supabase/client', () => ({
   supabase: {
     functions: {
       invoke: (...args: any[]) => mockInvoke(...args),
     },
-    from: (...args: any[]) => {
-      mockFrom(...args);
-      return {
-        select: (...args: any[]) => {
-          mockSelect(...args);
-          return {
-            eq: (...args: any[]) => {
-              mockEq(...args);
-              return {
-                eq: (...args: any[]) => {
-                  mockEq(...args);
-                  return {
-                    order: () => ({
-                      limit: () => ({
-                        maybeSingle: mockMaybeSingle,
-                      }),
-                    }),
-                  };
-                },
-              };
-            },
-          };
-        },
-      };
+    from: vi.fn(() => createChainableQueryBuilder()),
+    auth: {
+      getSession: vi.fn().mockResolvedValue({
+        data: { session: null },
+        error: null,
+      }),
     },
   },
 }));
@@ -231,7 +241,7 @@ describe('AnonymousMessaging', () => {
     await waitFor(() => {
       // The message input should still contain the text (rollback restores it)
       // But the message should not appear in the messages list
-      expect(messageInput).toHaveValue('This should fail');
+    expect(messageInput).toHaveValue('This should fail');
     }, { timeout: 3000 });
 
     // Verify the message was not added to the messages list

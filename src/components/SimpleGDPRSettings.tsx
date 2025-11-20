@@ -110,24 +110,6 @@ const SimpleGDPRSettings = () => {
 
   return (
     <div className="space-y-4 sm:space-y-6">
-      {/* Automated Processing Info */}
-      <Card className="border-blue-200">
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2 text-lg sm:text-xl">
-            <CheckCircle className="h-5 w-5 text-blue-600" />
-            Automated Privacy Protection
-          </CardTitle>
-          <CardDescription className="text-sm sm:text-base">
-            Your privacy rights are automatically protected. All requests are processed immediately without manual review.
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <p className="text-sm text-muted-foreground">
-            All GDPR requests are processed automatically. Use the options below to export your data or delete your account.
-          </p>
-        </CardContent>
-      </Card>
-
       {/* Data Export Section */}
       <Card>
         <CardHeader>

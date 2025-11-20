@@ -97,6 +97,13 @@ describe('useCustomDomains', () => {
       };
 
       // Mock add domain response
+      // First call: initial fetchDomains (from useEffect)
+      mockInvoke.mockResolvedValueOnce({
+        data: { domains: [] },
+        error: null,
+      });
+      
+      // Second call: addDomain
       mockInvoke.mockResolvedValueOnce({
         data: {
           domain: mockNewDomain,
@@ -105,7 +112,7 @@ describe('useCustomDomains', () => {
         error: null,
       });
 
-      // Mock refresh domains response
+      // Third call: fetchDomains (called after addDomain)
       mockInvoke.mockResolvedValueOnce({
         data: { domains: [mockNewDomain] },
         error: null,
@@ -233,18 +240,26 @@ describe('useCustomDomains', () => {
     });
 
     it('should handle verification failure', async () => {
-      mockInvoke
-        .mockResolvedValueOnce({
-          data: { domains: [] },
-          error: null,
-        })
-        .mockResolvedValueOnce({
-          data: {
-            verified: false,
-            message: 'DNS records not found',
-          },
-          error: null,
-        });
+      // First call: initial fetchDomains (from useEffect)
+      mockInvoke.mockResolvedValueOnce({
+        data: { domains: [] },
+        error: null,
+      });
+      
+      // Second call: verifyDomain
+      mockInvoke.mockResolvedValueOnce({
+        data: {
+          verified: false,
+          message: 'DNS records not found',
+        },
+        error: null,
+      });
+      
+      // Third call: fetchDomains (called after verifyDomain)
+      mockInvoke.mockResolvedValueOnce({
+        data: { domains: [] },
+        error: null,
+      });
 
       const { result } = renderHook(() => useCustomDomains());
 
@@ -314,21 +329,29 @@ describe('useCustomDomains', () => {
         verification_status: 'pending',
       };
 
-      mockInvoke
-        .mockResolvedValueOnce({
-          data: { domains: [mockDomain] },
-          error: null,
-        })
-        .mockResolvedValueOnce({
-          data: {
-            verified: true,
-            domain: {
-              ...mockDomain,
-              verification_status: 'verified',
-            },
+      // First call: initial fetchDomains (from useEffect)
+      mockInvoke.mockResolvedValueOnce({
+        data: { domains: [mockDomain] },
+        error: null,
+      });
+      
+      // Second call: verifyDomain
+      mockInvoke.mockResolvedValueOnce({
+        data: {
+          verified: true,
+          domain: {
+            ...mockDomain,
+            verification_status: 'verified',
           },
-          error: null,
-        });
+        },
+        error: null,
+      });
+      
+      // Third call: fetchDomains (called after verifyDomain)
+      mockInvoke.mockResolvedValueOnce({
+        data: { domains: [{ ...mockDomain, verification_status: 'verified' }] },
+        error: null,
+      });
 
       const { result } = renderHook(() => useCustomDomains());
 
@@ -380,9 +403,9 @@ describe('useCustomDomains', () => {
 
       // Test that verifyDomain handles errors
       await expect(async () => {
-        await act(async () => {
+      await act(async () => {
           await result.current.verifyDomain('domain-1');
-        });
+      });
       }).rejects.toBeDefined();
     });
   });

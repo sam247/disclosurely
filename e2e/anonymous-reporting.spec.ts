@@ -3,7 +3,7 @@ import { test, expect } from '@playwright/test';
 test.describe('Anonymous Report Submission', () => {
   test('should display anonymous reporting form', async ({ page }) => {
     await page.goto('/report');
-    
+
     // Wait for page to load
     await page.waitForLoadState('networkidle');
 

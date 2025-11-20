@@ -44,72 +44,50 @@ vi.mock('@/hooks/useSubscriptionLimits', () => ({
   }),
 }));
 
-// Mock Supabase
-const mockFrom = vi.fn();
-const mockSelect = vi.fn();
-const mockEq = vi.fn();
-const mockInsert = vi.fn();
-const mockUpdate = vi.fn();
-const mockDelete = vi.fn();
-const mockOrder = vi.fn();
-const mockIs = vi.fn();
-const mockGt = vi.fn();
+// Mock Supabase - Create chainable query builder
+const createChainableQueryBuilder = (finalResult: any = { data: [], error: null }) => {
+  const builder: any = {
+    select: vi.fn().mockReturnThis(),
+    insert: vi.fn().mockReturnThis(),
+    update: vi.fn().mockReturnThis(),
+    delete: vi.fn().mockReturnThis(),
+    eq: vi.fn().mockReturnThis(),
+    neq: vi.fn().mockReturnThis(),
+    is: vi.fn().mockReturnThis(),
+    gt: vi.fn().mockReturnThis(),
+    gte: vi.fn().mockReturnThis(),
+    lt: vi.fn().mockReturnThis(),
+    lte: vi.fn().mockReturnThis(),
+    like: vi.fn().mockReturnThis(),
+    ilike: vi.fn().mockReturnThis(),
+    in: vi.fn().mockReturnThis(),
+    contains: vi.fn().mockReturnThis(),
+    order: vi.fn().mockReturnThis(),
+    limit: vi.fn().mockReturnThis(),
+    range: vi.fn().mockReturnThis(),
+    single: vi.fn().mockResolvedValue(finalResult),
+    maybeSingle: vi.fn().mockResolvedValue(finalResult),
+  };
+  
+  // Make it thenable (Promise-like)
+  builder.then = (onResolve: any) => Promise.resolve(finalResult).then(onResolve);
+  builder.catch = (onReject: any) => Promise.resolve(finalResult).catch(onReject);
+  builder.finally = (onFinally: any) => Promise.resolve(finalResult).finally(onFinally);
+  
+  return builder;
+};
 
 vi.mock('@/integrations/supabase/client', () => ({
   supabase: {
-    from: (...args: any[]) => {
-      mockFrom(...args);
-      return {
-        select: (...args: any[]) => {
-          mockSelect(...args);
-          return {
-            eq: (...args: any[]) => {
-              mockEq(...args);
-              return {
-                eq: (...args: any[]) => {
-                  mockEq(...args);
-                  return {
-                    order: (...args: any[]) => {
-                      mockOrder(...args);
-                      return Promise.resolve({ data: [], error: null });
-                    },
-                    is: (...args: any[]) => {
-                      mockIs(...args);
-                      return {
-                        gt: (...args: any[]) => {
-                          mockGt(...args);
-                          return {
-                            order: (...args: any[]) => {
-                              mockOrder(...args);
-                              return Promise.resolve({ data: [], error: null });
-                            },
-                          };
-                        },
-                      };
-                    },
-                  };
-                },
-              };
-            },
-          };
-        },
-        insert: (...args: any[]) => {
-          mockInsert(...args);
-          return Promise.resolve({ data: null, error: null });
-        },
-        update: (...args: any[]) => {
-          mockUpdate(...args);
-          return {
-            eq: () => Promise.resolve({ data: null, error: null }),
-          };
-        },
-        delete: () => ({
-          eq: () => Promise.resolve({ data: null, error: null }),
-        }),
-      };
-    },
+    from: vi.fn(() => createChainableQueryBuilder()),
     functions: {
-      invoke: vi.fn(),
+      invoke: vi.fn().mockResolvedValue({ data: null, error: null }),
+    },
+    auth: {
+      getSession: vi.fn().mockResolvedValue({
+        data: { session: null },
+        error: null,
+      }),
     },
   },
 }));
@@ -145,6 +123,19 @@ describe('UserManagement', () => {
       { user_id: 'user-1', role: 'case_handler' },
       { user_id: 'user-2', role: 'reviewer' },
     ];
+
+    // Setup mocks for this test - need to import and setup before render
+    const { supabase } = await import('@/integrations/supabase/client');
+    const mockFrom = supabase.from as any;
+    
+    // Reset and setup mocks in order of calls
+    mockFrom.mockReset();
+    // Mock profiles query (team members) - first call
+    mockFrom.mockReturnValueOnce(createChainableQueryBuilder({ data: mockTeamMembers, error: null }));
+    // Mock user_roles query - second call
+    mockFrom.mockReturnValueOnce(createChainableQueryBuilder({ data: mockUserRoles, error: null }));
+    // Mock invitations query - third call (with is().gt().order() chain)
+    mockFrom.mockReturnValueOnce(createChainableQueryBuilder({ data: [], error: null }));
 
     mockFrom.mockImplementation((table: string) => ({
       select: () => ({
@@ -210,7 +201,7 @@ describe('UserManagement', () => {
     
     if (roleSelect && roleSelect.getAttribute('aria-disabled') !== 'true') {
       try {
-        await user.click(roleSelect);
+    await user.click(roleSelect);
         const caseHandlerOption = screen.queryByText(/case handler/i);
         if (caseHandlerOption) {
           await user.click(caseHandlerOption);
@@ -225,10 +216,10 @@ describe('UserManagement', () => {
                       screen.queryByRole('button', { name: /send/i });
     
     if (sendButton && !sendButton.hasAttribute('disabled')) {
-      await user.click(sendButton);
-      
+    await user.click(sendButton);
+
       // Wait for any async operation
-      await waitFor(() => {
+    await waitFor(() => {
         // Check if toast was called (indicates some action happened)
         const toastCalls = mockToast.mock.calls;
         const wasCalled = mockInvokeFn.mock.calls.length > 0 || 
@@ -255,24 +246,18 @@ describe('UserManagement', () => {
       },
     ];
 
-    mockFrom.mockImplementation((table: string) => ({
-      select: () => ({
-        eq: () => ({
-          eq: () => ({
-            order: () => Promise.resolve({ data: table === 'profiles' ? [] : [], error: null }),
-            is: () => ({
-              gt: () => ({
-                order: () =>
-                  Promise.resolve({
-                    data: table === 'user_invitations' ? mockExistingInvitations : [],
-                    error: null,
-                  }),
-              }),
-            }),
-          }),
-        }),
-      }),
-    }));
+    // Setup mocks for this test
+    const { supabase } = await import('@/integrations/supabase/client');
+    const mockFrom = supabase.from as any;
+    
+    // Reset and setup mocks in order of calls
+    mockFrom.mockReset();
+    // Mock profiles query (empty - no existing member)
+    mockFrom.mockReturnValueOnce(createChainableQueryBuilder({ data: [], error: null }));
+    // Mock user_roles query (empty)
+    mockFrom.mockReturnValueOnce(createChainableQueryBuilder({ data: [], error: null }));
+    // Mock invitations query (with existing invitation)
+    mockFrom.mockReturnValueOnce(createChainableQueryBuilder({ data: mockExistingInvitations, error: null }));
 
     renderWithProviders(<UserManagement />);
 
@@ -287,7 +272,7 @@ describe('UserManagement', () => {
     // Try to invite same email
     const inviteButton = screen.queryByRole('button', { name: /invite/i });
     if (inviteButton) {
-      await user.click(inviteButton);
+    await user.click(inviteButton);
     }
 
     const emailInput = screen.getByLabelText(/email/i);
@@ -295,9 +280,9 @@ describe('UserManagement', () => {
 
     const sendButton = screen.queryByRole('button', { name: /send.*invitation/i });
     if (sendButton) {
-      await user.click(sendButton);
-      
-      await waitFor(() => {
+    await user.click(sendButton);
+
+    await waitFor(() => {
         // Check if toast was called (duplicate error)
         const toastCalls = mockToast.mock.calls;
         const hasError = toastCalls.length > 0 || 
@@ -360,9 +345,9 @@ describe('UserManagement', () => {
     const cancelButton = screen.queryByRole('button', { name: /cancel/i });
     
     if (cancelButton) {
-      await user.click(cancelButton);
-      
-      await waitFor(() => {
+    await user.click(cancelButton);
+
+    await waitFor(() => {
         expect(mockToast).toHaveBeenCalled();
       }, { timeout: 3000 });
     } else {
