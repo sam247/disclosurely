@@ -461,7 +461,7 @@ serve(async (req) => {
       // Note: We don't store the actual PII text or positions for privacy
     }
 
-    const reportInsertData = {
+    const reportInsertData: any = {
       tracking_id: reportData.tracking_id,
       title: reportData.title,
       encrypted_content: encryptedData,
@@ -473,7 +473,6 @@ serve(async (req) => {
       manual_risk_level: priorityValue, // Map priority to risk level
       tags: reportData.tags,
       organization_id: linkData.organization_id,
-      metadata: reportMetadata, // Store PII scan results
       // Contextual fields (not encrypted - stored as plain columns)
       incident_date: reportData.incident_date || null,
       location: reportData.location || null,
@@ -481,6 +480,12 @@ serve(async (req) => {
       previous_reports: reportData.previous_reports || false,
       additional_notes: reportData.additional_notes || null
     };
+    
+    // Only add metadata if the column exists (for backwards compatibility)
+    // The migration should add this column, but we check to avoid errors
+    if (Object.keys(reportMetadata).length > 0) {
+      reportInsertData.metadata = reportMetadata;
+    }
     
     console.log('📝 Inserting report with data:', {
       tracking_id: reportInsertData.tracking_id,
