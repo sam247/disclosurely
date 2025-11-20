@@ -192,10 +192,21 @@ const CustomDomainSettings = () => {
       });
 
       if (response.error) {
+        // Check if it's an HTTP error with a message
+        const errorData = response.error as any;
+        if (errorData?.message) {
+          throw new Error(errorData.message);
+        }
         throw response.error;
       }
 
       const result = response.data;
+      
+      // Check if result indicates failure (even if no error was thrown)
+      if (!result || (result.success === false)) {
+        const errorMsg = result?.message || 'Failed to generate verification records';
+        throw new Error(errorMsg);
+      }
 
       if (result.success) {
         // Ensure records is always an array and properly structured
@@ -288,11 +299,32 @@ const CustomDomainSettings = () => {
           variant: "destructive",
         });
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error generating records:', error);
+      
+      // Extract error message from various error formats
+      let errorMessage = "Failed to generate verification records";
+      
+      if (error?.message) {
+        errorMessage = error.message;
+      } else if (error?.error?.message) {
+        errorMessage = error.error.message;
+      } else if (typeof error === 'string') {
+        errorMessage = error;
+      }
+      
+      // Check for specific error types
+      if (errorMessage.includes('409') || errorMessage.includes('Conflict') || errorMessage.includes('already registered')) {
+        errorMessage = "This domain is already registered to another organization. Please use a different domain.";
+      } else if (errorMessage.includes('401') || errorMessage.includes('Unauthorized')) {
+        errorMessage = "Authentication failed. Please refresh the page and try again.";
+      } else if (errorMessage.includes('503') || errorMessage.includes('Service Unavailable')) {
+        errorMessage = "Service temporarily unavailable. Please try again in a few moments.";
+      }
+      
       toast({
         title: "Error",
-        description: "Failed to generate verification records",
+        description: errorMessage,
         variant: "destructive",
       });
     } finally {

@@ -91,6 +91,19 @@ class VercelClient {
     });
     return { success: response.ok || response.status === 404 };
   }
+
+  async getDomainConfig(domain: string) {
+    const url = `https://api.vercel.com/v10/projects/${this.projectId}/domains/${encodeURIComponent(domain)}/config`;
+    const response = await fetch(url, {
+      method: 'GET',
+      headers: {
+        'Authorization': `Bearer ${this.token}`,
+        'Content-Type': 'application/json',
+      },
+    });
+    const data = await response.json();
+    return { success: response.ok, config: data, error: data.error?.message };
+  }
 }
 
 serve(async (req) => {
@@ -126,19 +139,41 @@ serve(async (req) => {
         );
       }
       
-      // Check if domain already exists in another organization
-      const { data: existingDomain } = await db
+      // Get user's organization to check domain ownership
+      const authHeader = req.headers.get('Authorization');
+      let userOrgId: string | null = null;
+      
+      if (authHeader) {
+        const authClient = createClient(supabaseUrl, Deno.env.get('SUPABASE_ANON_KEY') ?? '', {
+          global: { headers: { Authorization: authHeader } },
+        });
+        const { data: { user } } = await authClient.auth.getUser();
+        
+        if (user) {
+          const { data: profile } = await authClient.from('profiles').select('organization_id').eq('id', user.id).single();
+          userOrgId = profile?.organization_id || null;
+        }
+      }
+      
+      // Check if domain already exists and belongs to a different organization
+      const { data: existingDomain, error: domainCheckError } = await db
         .from('custom_domains')
         .select('id, organization_id')
         .eq('domain_name', domain)
-        .single();
+        .maybeSingle();
       
-      if (existingDomain) {
+      // If domain exists and belongs to a different organization, reject
+      if (existingDomain && userOrgId && existingDomain.organization_id !== userOrgId) {
         console.error(`Domain ${domain} already registered to another organization`);
         return new Response(
-          JSON.stringify({ success: false, message: 'This domain is already registered. Please use a different domain.' }),
+          JSON.stringify({ success: false, message: 'This domain is already registered to another organization. Please use a different domain.' }),
           { status: 409, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
         );
+      }
+      
+      // If domain exists for this organization, allow regeneration (user might need to update DNS records)
+      if (existingDomain && userOrgId && existingDomain.organization_id === userOrgId) {
+        console.log(`Domain ${domain} already exists for this organization, allowing record regeneration`);
       }
       
       console.log(`Adding domain ${domain} to Vercel project...`);
@@ -147,7 +182,35 @@ serve(async (req) => {
       
       // Extract records from verification (will exist even if domain already exists or if there's an error)
       const records = [];
-      const verification = result.verification;
+      let verification = result.verification;
+      
+      // If domain already exists in Vercel, try to get verification from domain config
+      if (!result.success && result.error && result.error.includes('already exists')) {
+        console.log(`Domain already exists in Vercel, fetching config for verification data...`);
+        try {
+          const configResult = await vercel.getDomainConfig(domain);
+          if (configResult.success && configResult.config) {
+            // Use config data if verification wasn't returned
+            if (!verification && configResult.config.verification) {
+              verification = configResult.config.verification;
+            }
+          }
+        } catch (configError) {
+          console.warn('Could not fetch domain config:', configError);
+        }
+      }
+      
+      // Try to get domain config to retrieve actual CNAME value
+      let cnameValue: string | null = null;
+      try {
+        const configResult = await vercel.getDomainConfig(domain);
+        if (configResult.success && configResult.config?.recommendedCNAME) {
+          cnameValue = configResult.config.recommendedCNAME;
+          console.log(`Found CNAME from domain config: ${cnameValue}`);
+        }
+      } catch (configError) {
+        console.warn('Could not fetch domain config, will use fallback CNAME:', configError);
+      }
       
       if (verification) {
         // Handle TXT record
@@ -171,13 +234,16 @@ serve(async (req) => {
           });
         }
         
-        // Handle CNAME
-        if (verification.cname) {
+        // Handle CNAME - use actual value from config if available, otherwise use verification.cname or fallback
+        if (verification.cname || cnameValue) {
+          const subdomain = domain.split('.')[0];
+          const finalCnameValue = cnameValue || (typeof verification.cname === 'string' ? verification.cname : 'cname.vercel-dns.com');
           records.push({
             type: 'CNAME',
-            name: domain.split('.')[0],
-            value: 'cname.vercel-dns.com',
+            name: subdomain,
+            value: finalCnameValue,
           });
+          console.log(`Added CNAME record: ${subdomain} -> ${finalCnameValue}`);
         }
       }
       
@@ -185,12 +251,13 @@ serve(async (req) => {
       // This allows users to manually configure DNS even if the domain can't be added to Vercel yet
       if (records.length === 0) {
         const subdomain = domain.split('.')[0];
+        const fallbackCname = cnameValue || 'cname.vercel-dns.com';
         records.push({
           type: 'CNAME',
           name: subdomain,
-          value: 'cname.vercel-dns.com',
+          value: fallbackCname,
         });
-        console.log(`Generated fallback CNAME record for ${subdomain} -> cname.vercel-dns.com`);
+        console.log(`Generated fallback CNAME record for ${subdomain} -> ${fallbackCname}`);
       }
       
       // If domain addition failed and it's not because it already exists, log warning but still return records
@@ -276,7 +343,7 @@ serve(async (req) => {
       const message = result.verified 
         ? 'Domain verified and activated!' 
         : (result.error || 'Records not detected. Please ensure DNS records are correctly configured and wait 5-10 minutes for DNS propagation.');
-      
+
       return new Response(
         JSON.stringify({ success: result.verified, message }),
         { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
