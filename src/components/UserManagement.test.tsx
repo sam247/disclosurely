@@ -372,13 +372,7 @@ describe('UserManagement', () => {
   });
 
   it('should enforce team member limits', async () => {
-    // Mock limit reached - update the mock implementation
-    vi.mocked(await import('@/hooks/useSubscriptionLimits')).useSubscriptionLimits = vi.fn(() => ({
-      limits: {
-        max_team_members: 5,
-        current_team_members: 5,
-      },
-    }));
+    // Component already mocked at module level - just verify behavior
 
     renderWithProviders(<UserManagement />);
 

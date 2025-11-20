@@ -102,7 +102,7 @@ const Dashboard = () => {
   const [processingReportId, setProcessingReportId] = useState<string | null>(null);
 
   // Secure category extraction with rate limiting
-  const decryptReportCategory = async (report: Report): Promise<string> => {
+  const decryptReportCategoryAsync = async (report: Report): Promise<string> => {
     try {
       if (!user) return 'Unknown';
       
@@ -143,7 +143,7 @@ const Dashboard = () => {
         
         await Promise.all(batch.map(async (report) => {
           if (!reportCategories[report.id]) {
-            categories[report.id] = await decryptReportCategory(report);
+            categories[report.id] = await decryptReportCategoryAsync(report);
           }
         }));
         
@@ -212,7 +212,7 @@ const Dashboard = () => {
       
       for (const report of archivedReports) {
         if (!reportCategories[report.id]) {
-          categories[report.id] = await decryptReportCategory(report);
+          categories[report.id] = await decryptReportCategoryAsync(report);
         }
       }
       
