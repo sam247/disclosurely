@@ -173,8 +173,8 @@ const Landing = () => {
           <p className="text-lg sm:text-xl text-gray-700 mb-8 max-w-3xl mx-auto px-4">{t("landing.hero.subtitle")}</p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center items-center px-4">
             <a href="https://app.disclosurely.com/auth/signup" className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-3 rounded-lg text-lg font-semibold w-full sm:w-auto text-center">
-              {t("landing.hero.startFreeTrial")}
-            </Link>
+                {t("landing.hero.startFreeTrial")}
+              </a>
             <Link to={`${langPrefix}/pricing`} className="border border-gray-300 hover:border-gray-400 text-gray-700 px-8 py-3 rounded-lg text-lg font-semibold w-full sm:w-auto text-center">
               {t("landing.hero.viewPricing")}
             </Link>
