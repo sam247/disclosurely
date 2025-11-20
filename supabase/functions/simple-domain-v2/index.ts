@@ -126,19 +126,42 @@ serve(async (req) => {
         );
       }
       
-      // Check if domain already exists in another organization
+      // Get user's organization ID first
+      const authHeader = req.headers.get('Authorization');
+      let userOrgId = null;
+
+      if (authHeader) {
+        const authClient = createClient(supabaseUrl, Deno.env.get('SUPABASE_ANON_KEY') ?? '', {
+          global: { headers: { Authorization: authHeader } },
+        });
+        const { data: { user } } = await authClient.auth.getUser();
+
+        if (user) {
+          const { data: profile } = await authClient.from('profiles').select('organization_id').eq('id', user.id).single();
+          userOrgId = profile?.organization_id;
+        }
+      }
+
+      // Check if domain already exists
       const { data: existingDomain } = await db
         .from('custom_domains')
-        .select('id, organization_id')
+        .select('id, organization_id, status')
         .eq('domain_name', domain)
-        .single();
-      
+        .maybeSingle();
+
       if (existingDomain) {
-        console.error(`Domain ${domain} already registered to another organization`);
-        return new Response(
-          JSON.stringify({ success: false, message: 'This domain is already registered. Please use a different domain.' }),
-          { status: 409, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-        );
+        // If domain belongs to the SAME organization, allow regenerating records
+        if (existingDomain.organization_id === userOrgId) {
+          console.log(`Domain ${domain} already exists for this organization - regenerating records`);
+          // Continue to generate records (don't return error)
+        } else {
+          // Domain belongs to a DIFFERENT organization - reject
+          console.error(`Domain ${domain} already registered to another organization`);
+          return new Response(
+            JSON.stringify({ success: false, message: 'This domain is already registered to another organization. Please use a different domain.' }),
+            { status: 409, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+          );
+        }
       }
       
       console.log(`Adding domain ${domain} to Vercel project...`);
