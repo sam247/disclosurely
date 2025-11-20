@@ -155,26 +155,27 @@ serve(async (req) => {
         }
       }
       
-      // Check if domain already exists and belongs to a different organization
-      const { data: existingDomain, error: domainCheckError } = await db
+      // Check if domain already exists (for logging purposes only)
+      // We allow record generation regardless - users may need to regenerate DNS records
+      const { data: existingDomain } = await db
         .from('custom_domains')
         .select('id, organization_id')
         .eq('domain_name', domain)
         .maybeSingle();
       
-      // If domain exists and belongs to a different organization, reject
-      if (existingDomain && userOrgId && existingDomain.organization_id !== userOrgId) {
-        console.error(`Domain ${domain} already registered to another organization`);
-        return new Response(
-          JSON.stringify({ success: false, message: 'This domain is already registered to another organization. Please use a different domain.' }),
-          { status: 409, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-        );
+      if (existingDomain) {
+        if (userOrgId && existingDomain.organization_id === userOrgId) {
+          console.log(`Domain ${domain} already exists for this organization, allowing record regeneration`);
+        } else if (userOrgId && existingDomain.organization_id !== userOrgId) {
+          console.warn(`Domain ${domain} exists for different organization (${existingDomain.organization_id}), but allowing record generation for DNS setup`);
+        } else {
+          console.log(`Domain ${domain} exists in database, allowing record generation`);
+        }
       }
       
-      // If domain exists for this organization, allow regeneration (user might need to update DNS records)
-      if (existingDomain && userOrgId && existingDomain.organization_id === userOrgId) {
-        console.log(`Domain ${domain} already exists for this organization, allowing record regeneration`);
-      }
+      // Note: We don't block record generation based on organization ownership
+      // because users may need to regenerate DNS records even if domain exists
+      // Organization ownership is enforced during verification/deletion instead
       
       console.log(`Adding domain ${domain} to Vercel project...`);
       const result = await vercel.addDomain(domain);
