@@ -278,6 +278,6 @@ describe('LoginForm', () => {
 
     const signUpLink = screen.getByRole('link', { name: /auth.signin.signUpLink/i });
     expect(signUpLink).toBeInTheDocument();
-    expect(signUpLink).toHaveAttribute('href', '/auth/signup');
+    expect(signUpLink).toHaveAttribute('href', 'https://app.disclosurely.com/auth/signup');
   });
 });

@@ -99,7 +99,8 @@ const createQueryBuilder = () => {
 
 // Mock Supabase client
 export const createMockSupabaseClient = () => {
-  const queryBuilder = createQueryBuilder();
+  // Create a new query builder for each .from() call to avoid state conflicts
+  const fromMock = vi.fn(() => createQueryBuilder());
   
   return {
     auth: {
@@ -126,7 +127,7 @@ export const createMockSupabaseClient = () => {
         data: { subscription: { unsubscribe: vi.fn() } },
       }),
     },
-    from: vi.fn().mockReturnValue(queryBuilder),
+    from: fromMock,
     rpc: vi.fn().mockResolvedValue({
       data: null,
       error: null,

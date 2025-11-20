@@ -151,6 +151,7 @@ const CaseInsightsView = () => {
                 disabled={!inputQuery.trim() || isLoading}
                 size="lg"
                 className="h-12 px-6"
+                aria-label="Search"
               >
                 {isLoading ? (
                   <Loader2 className="h-5 w-5 animate-spin" />
@@ -283,6 +284,7 @@ const CaseInsightsView = () => {
                 onClick={() => handleQuery(inputQuery)}
                 disabled={!inputQuery.trim() || isLoading}
                 size="default"
+                aria-label="Send"
               >
                 {isLoading ? (
                   <Loader2 className="h-4 w-4 animate-spin" />
