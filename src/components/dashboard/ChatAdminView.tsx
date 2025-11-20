@@ -31,8 +31,6 @@ interface ChatConversation {
   created_at: string;
   updated_at: string;
   message_count?: number;
-  human_requested?: boolean;
-  human_requested_at?: string;
 }
 
 interface ChatMessage {
@@ -68,9 +66,7 @@ const ChatAdminView = () => {
         .order('updated_at', { ascending: false })
         .limit(500);
 
-      if (statusFilter === 'human_requested') {
-        query = query.eq('human_requested', true);
-      } else if (statusFilter !== 'all') {
+      if (statusFilter !== 'all') {
         query = query.eq('status', statusFilter);
       }
 
@@ -357,13 +353,6 @@ const ChatAdminView = () => {
                 >
                   Archived
                 </Button>
-                <Button
-                  variant={statusFilter === 'human_requested' ? 'default' : 'outline'}
-                  size="sm"
-                  onClick={() => setStatusFilter('human_requested')}
-                >
-                  Human Requested
-                </Button>
               </div>
             </div>
           </CardContent>
@@ -427,14 +416,13 @@ const ChatAdminView = () => {
                             </div>
                             <Badge
                               variant={
-                                conv.human_requested ? 'destructive' :
                                 conv.status === 'active' ? 'default' :
                                 conv.status === 'closed' ? 'secondary' :
                                 'outline'
                               }
                               className="text-xs flex-shrink-0"
                             >
-                              {conv.human_requested ? 'Human Requested' : conv.status}
+                              {conv.status}
                             </Badge>
                           </div>
                         </div>

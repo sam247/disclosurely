@@ -52,8 +52,55 @@ export const renderWithProviders = (
   return render(ui, { wrapper: AllTheProviders, ...renderOptions });
 };
 
+// Create a chainable query builder mock
+const createQueryBuilder = () => {
+  const defaultResult = Promise.resolve({
+    data: null,
+    error: null,
+  });
+  
+  const builder: any = {
+    select: vi.fn().mockReturnValue(builder),
+    insert: vi.fn().mockReturnValue(builder),
+    update: vi.fn().mockReturnValue(builder),
+    delete: vi.fn().mockReturnValue(builder),
+    upsert: vi.fn().mockReturnValue(builder),
+    eq: vi.fn().mockReturnValue(builder),
+    neq: vi.fn().mockReturnValue(builder),
+    gt: vi.fn().mockReturnValue(builder),
+    gte: vi.fn().mockReturnValue(builder),
+    lt: vi.fn().mockReturnValue(builder),
+    lte: vi.fn().mockReturnValue(builder),
+    like: vi.fn().mockReturnValue(builder),
+    ilike: vi.fn().mockReturnValue(builder),
+    is: vi.fn().mockReturnValue(builder),
+    in: vi.fn().mockReturnValue(builder),
+    contains: vi.fn().mockReturnValue(builder),
+    order: vi.fn().mockReturnValue(builder),
+    limit: vi.fn().mockReturnValue(builder),
+    range: vi.fn().mockReturnValue(builder),
+    single: vi.fn().mockResolvedValue({
+      data: null,
+      error: null,
+    }),
+    maybeSingle: vi.fn().mockResolvedValue({
+      data: null,
+      error: null,
+    }),
+  };
+  
+  // Make the builder thenable (Promise-like) for queries without .single()/.maybeSingle()
+  builder.then = defaultResult.then.bind(defaultResult);
+  builder.catch = defaultResult.catch.bind(defaultResult);
+  builder.finally = defaultResult.finally.bind(defaultResult);
+  
+  return builder;
+};
+
 // Mock Supabase client
 export const createMockSupabaseClient = () => {
+  const queryBuilder = createQueryBuilder();
+  
   return {
     auth: {
       getSession: vi.fn().mockResolvedValue({
@@ -79,13 +126,8 @@ export const createMockSupabaseClient = () => {
         data: { subscription: { unsubscribe: vi.fn() } },
       }),
     },
-    from: vi.fn().mockReturnThis(),
-    select: vi.fn().mockReturnThis(),
-    insert: vi.fn().mockReturnThis(),
-    update: vi.fn().mockReturnThis(),
-    delete: vi.fn().mockReturnThis(),
-    eq: vi.fn().mockReturnThis(),
-    single: vi.fn().mockResolvedValue({
+    from: vi.fn().mockReturnValue(queryBuilder),
+    rpc: vi.fn().mockResolvedValue({
       data: null,
       error: null,
     }),
@@ -96,14 +138,23 @@ export const createMockSupabaseClient = () => {
       }),
     },
     storage: {
-      from: vi.fn().mockReturnThis(),
-      upload: vi.fn().mockResolvedValue({
-        data: null,
-        error: null,
-      }),
-      download: vi.fn().mockResolvedValue({
-        data: null,
-        error: null,
+      from: vi.fn().mockReturnValue({
+        upload: vi.fn().mockResolvedValue({
+          data: null,
+          error: null,
+        }),
+        download: vi.fn().mockResolvedValue({
+          data: null,
+          error: null,
+        }),
+        remove: vi.fn().mockResolvedValue({
+          data: null,
+          error: null,
+        }),
+        list: vi.fn().mockResolvedValue({
+          data: null,
+          error: null,
+        }),
       }),
     },
   };

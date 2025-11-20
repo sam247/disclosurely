@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Home, Bot, Users, Palette, Lock, BarChart3, ScrollText, Link as LinkIcon, MessageSquare, Info, FileText, Zap, Settings, Shield, Workflow, Flag, Activity, ChevronRight } from 'lucide-react';
+import { Home, Bot, Users, Palette, Lock, BarChart3, ScrollText, Link as LinkIcon, MessageSquare, Info, FileText, Zap, Settings, Shield, Workflow, Flag, Activity, ChevronRight, Search } from 'lucide-react';
 import { Separator } from '@/components/ui/separator';
 import { Badge } from '@/components/ui/badge';
 import { useLocation, useNavigate } from 'react-router-dom';
@@ -47,6 +47,12 @@ const DashboardSidebar = ({
     icon: Bot,
     path: '/dashboard/ai-helper',
     locked: !limits.hasAIHelper || !isOrgAdmin,
+    ownerOnly: false
+  }, {
+    title: 'Case Insights',
+    icon: Search,
+    path: '/dashboard/case-insights',
+    locked: false, // Always visible, route will handle permission check
     ownerOnly: false
   }, {
     title: t('analytics'),
@@ -152,6 +158,9 @@ const DashboardSidebar = ({
                 if (item.ownerOnly && !isOwner) {
                   return null;
                 }
+                
+                // Always show Case Insights if user has AI Helper access (same feature set)
+                // Don't hide it even if locked - let the click handler show upgrade modal
                 
                 const isActive = location.pathname === item.path || (item.hasSubMenu && location.pathname.startsWith(item.path));
                 const Icon = item.icon;

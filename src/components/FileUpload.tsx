@@ -115,12 +115,21 @@ const FileUpload: React.FC<FileUploadProps> = ({
               const timeout = file.type.startsWith('video/') ? 300000 : 120000; // 5 min for videos, 2 min for others
               const timeoutId = setTimeout(() => controller.abort(), timeout);
 
+              // Get auth token from Supabase client session, fallback to anon key from env
+              const { data: { session } } = await supabase.auth.getSession();
+              const authToken = session?.access_token || import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
+              const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+
+              if (!supabaseUrl || !authToken) {
+                throw new Error('Supabase configuration missing');
+              }
+
               const response = await fetch(
-                `https://cxmuzperkittvibslnff.supabase.co/functions/v1/strip-all-metadata`,
+                `${supabaseUrl}/functions/v1/strip-all-metadata`,
                 {
                   method: 'POST',
                   headers: {
-                    'Authorization': `Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImN4bXV6cGVya2l0dHZpYnNsbmZmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTAyNTk1MDEsImV4cCI6MjA2NTgzNTUwMX0.NxqrBnzSR-dxfWw4mn7nIHB-QTt900MtAh96fCCm1Lg`
+                    'Authorization': `Bearer ${authToken}`
                   },
                   body: formData,
                   signal: controller.signal
@@ -166,7 +175,7 @@ const FileUpload: React.FC<FileUploadProps> = ({
             }
           } catch (error) {
             // NEVER return original file if stripping fails
-            console.error(`Failed to strip metadata from ${file.name}:`, error);
+            console.error('Failed to strip metadata from file:', file.name, error);
             toast.error(
               `❌ Could not process ${file.name}`,
               { description: error instanceof Error ? error.message : 'Metadata stripping failed. File not uploaded.' }

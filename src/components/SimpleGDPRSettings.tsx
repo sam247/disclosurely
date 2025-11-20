@@ -13,7 +13,7 @@ import { Shield, Download, UserX, CheckCircle, Clock, Mail, Trash2, AlertTriangl
 import { Separator } from '@/components/ui/separator';
 
 const SimpleGDPRSettings = () => {
-  const { user } = useAuth();
+  const { user, subscriptionData } = useAuth();
   const { toast } = useToast();
   const [exportEmail, setExportEmail] = useState(user?.email || '');
   const [loading, setLoading] = useState(false);
@@ -79,10 +79,16 @@ const SimpleGDPRSettings = () => {
       }, 2000);
       
     } catch (error: any) {
+      const errorMessage = error.message || "Failed to initiate account deletion.";
+      const isSubscriptionError = errorMessage.includes('active subscription');
+      
       toast({
-        title: "Error",
-        description: error.message || "Failed to initiate account deletion.",
+        title: isSubscriptionError ? "Subscription Active" : "Error",
+        description: isSubscriptionError 
+          ? "Please cancel your subscription first before deleting your account. You can cancel from the Billing section."
+          : errorMessage,
         variant: "destructive",
+        duration: isSubscriptionError ? 10000 : 5000,
       });
     } finally {
       setLoading(false);
@@ -177,6 +183,16 @@ const SimpleGDPRSettings = () => {
                 <p className="text-sm text-muted-foreground mt-1">
                   Permanently delete your account and ALL associated data. This is irreversible.
                 </p>
+                {subscriptionData && (subscriptionData.subscribed || subscriptionData.subscription_status === 'active' || subscriptionData.subscription_status === 'trialing') && (
+                  <div className="mt-3 p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
+                    <p className="text-sm font-medium text-yellow-900">
+                      ⚠️ Active Subscription Required
+                    </p>
+                    <p className="text-xs text-yellow-800 mt-1">
+                      You must cancel your subscription first before deleting your account. Please cancel from the Billing section.
+                    </p>
+                  </div>
+                )}
                 <ul className="list-disc list-inside mt-2 text-xs sm:text-sm text-muted-foreground space-y-1">
                   <li>Your account will be deleted (cannot log in)</li>
                   <li>All reports, messages, and files will be deleted</li>
@@ -238,7 +254,7 @@ const SimpleGDPRSettings = () => {
                   <AlertDialogCancel className="w-full sm:w-auto">Cancel</AlertDialogCancel>
                   <Button
                     onClick={handleAccountDeletion}
-                    disabled={!deleteAccountConfirm || loading}
+                    disabled={!deleteAccountConfirm || loading || (subscriptionData && (subscriptionData.subscribed || subscriptionData.subscription_status === 'active' || subscriptionData.subscription_status === 'trialing'))}
                     className="bg-red-600 hover:bg-red-700 w-full sm:w-auto"
                   >
                     {loading ? 'Processing...' : 'Yes, Delete Everything'}

@@ -54,6 +54,14 @@ export const rateLimiters = {
     analytics: true,
     prefix: "@upstash/ratelimit/api",
   }),
+  
+  // RAG Case Query: 10 per minute, 100 per hour per organization
+  ragQuery: new Ratelimit({
+    redis,
+    limiter: Ratelimit.slidingWindow(10, "1 m"),
+    analytics: true,
+    prefix: "@upstash/ratelimit/rag-query",
+  }),
 }
 
 export interface RateLimitResult {

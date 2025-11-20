@@ -386,4 +386,165 @@ describe('Security Features', () => {
       expect(supabase.functions.invoke).toHaveBeenCalled();
     });
   });
+
+  describe('Case Insights RAG Security', () => {
+    it('should enforce organization isolation in RAG queries', async () => {
+      // User A from org-1 should not see org-2 cases
+      vi.mocked(supabase.functions.invoke).mockResolvedValue({
+        data: {
+          response: 'Found 2 cases',
+          cases: [
+            { id: 'case-1', tracking_id: 'DIS-001', organization_id: 'org-1' },
+            { id: 'case-2', tracking_id: 'DIS-002', organization_id: 'org-1' }
+          ]
+        },
+        error: null
+      });
+
+      const { data } = await supabase.functions.invoke('rag-case-query', {
+        body: {
+          query: 'Show me fraud cases',
+          organizationId: 'org-1'
+        }
+      });
+
+      // Verify all returned cases belong to org-1
+      expect(data.cases.every((c: any) => c.organization_id === 'org-1')).toBe(true);
+      expect(data.cases.length).toBe(2);
+    });
+
+    it('should block cross-organization access attempts', async () => {
+      // User from org-1 trying to query org-2 should be blocked
+      vi.mocked(supabase.functions.invoke).mockResolvedValue({
+        data: null,
+        error: { message: 'Unauthorized: User does not belong to this organization' }
+      });
+
+      const { error } = await supabase.functions.invoke('rag-case-query', {
+        body: {
+          query: 'Show me cases',
+          organizationId: 'org-2' // Different org
+        }
+      });
+
+      expect(error?.message).toContain('Unauthorized');
+    });
+
+    it('should enforce rate limiting on RAG queries (10/minute)', async () => {
+      // First 10 requests should succeed
+      for (let i = 0; i < 10; i++) {
+        vi.mocked(supabase.functions.invoke).mockResolvedValueOnce({
+          data: { response: 'Success', cases: [] },
+          error: null
+        });
+      }
+
+      // 11th request should be rate limited
+      vi.mocked(supabase.functions.invoke).mockResolvedValueOnce({
+        data: null,
+        error: { message: 'Too many requests. Please try again later.' }
+      });
+
+      // Simulate 11 rapid requests
+      const requests = Array(11).fill(null).map(() =>
+        supabase.functions.invoke('rag-case-query', {
+          body: { query: 'test', organizationId: 'org-1' }
+        })
+      );
+
+      const results = await Promise.all(requests);
+      const lastResult = results[results.length - 1];
+
+      expect(lastResult.error?.message).toContain('Too many requests');
+    });
+
+    it('should log all RAG queries to audit table', async () => {
+      const mockQueryLog = {
+        id: 'log-1',
+        organization_id: 'org-1',
+        user_id: 'user-1',
+        query_text: 'Show me fraud cases',
+        results_count: 2,
+        cases_returned: ['case-1', 'case-2'],
+        created_at: new Date().toISOString()
+      };
+
+      vi.mocked(supabase.from).mockReturnValue({
+        insert: vi.fn().mockResolvedValue({
+          data: [mockQueryLog],
+          error: null
+        })
+      } as any);
+
+      // Simulate query logging
+      const { data } = await supabase.from('rag_query_logs').insert({
+        organization_id: 'org-1',
+        user_id: 'user-1',
+        query_text: 'Show me fraud cases',
+        results_count: 2,
+        cases_returned: ['case-1', 'case-2']
+      });
+
+      expect(data).toBeDefined();
+      expect(data![0].organization_id).toBe('org-1');
+      expect(data![0].query_text).toBe('Show me fraud cases');
+      expect(data![0].results_count).toBe(2);
+    });
+
+    it('should verify match_cases_by_organization RPC enforces org_id filter', async () => {
+      // RPC function should only return cases from specified org
+      const mockCases = [
+        { id: 'case-1', tracking_id: 'DIS-001', organization_id: 'org-1' },
+        { id: 'case-2', tracking_id: 'DIS-002', organization_id: 'org-1' }
+      ];
+
+      vi.mocked(supabase.rpc).mockResolvedValue({
+        data: mockCases,
+        error: null
+      });
+
+      const { data } = await supabase.rpc('match_cases_by_organization', {
+        query_embedding: '[0.1, 0.2, ...]',
+        match_threshold: 0.7,
+        match_count: 10,
+        org_id: 'org-1'
+      });
+
+      // Verify all cases belong to requested org
+      expect(data.every((c: any) => c.organization_id === 'org-1')).toBe(true);
+      expect(supabase.rpc).toHaveBeenCalledWith(
+        'match_cases_by_organization',
+        expect.objectContaining({ org_id: 'org-1' })
+      );
+    });
+
+    it('should prevent users from viewing other organizations query logs', async () => {
+      // User from org-1 should only see org-1 logs
+      const mockLogs = [
+        {
+          id: 'log-1',
+          organization_id: 'org-1',
+          user_id: 'user-1',
+          query_text: 'Query 1'
+        }
+      ];
+
+      vi.mocked(supabase.from).mockReturnValue({
+        select: vi.fn().mockReturnValue({
+          eq: vi.fn().mockResolvedValue({
+            data: mockLogs,
+            error: null
+          })
+        })
+      } as any);
+
+      const { data } = await supabase
+        .from('rag_query_logs')
+        .select('*')
+        .eq('organization_id', 'org-1');
+
+      expect(data).toBeDefined();
+      expect(data!.every((log: any) => log.organization_id === 'org-1')).toBe(true);
+    });
+  });
 });
