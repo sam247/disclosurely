@@ -36,8 +36,15 @@ test.describe('Authentication Flows', () => {
   });
 
   test('should navigate to signup page from login', async ({ page }) => {
-    await page.click('text=/sign up/i');
-    await expect(page).toHaveURL(/.*signup/);
+    const signUpLink = page.locator('a', { hasText: /sign up/i }).first();
+    await expect(signUpLink).toHaveAttribute('href', /.*signup/);
+    // Click and verify navigation (may be external link)
+    await signUpLink.click();
+    // Wait a bit for navigation
+    await page.waitForTimeout(1000);
+    // Check if URL contains signup (works for both relative and absolute URLs)
+    const url = page.url();
+    expect(url).toMatch(/.*signup/);
   });
 
   test('should handle session timeout', async ({ page, context }) => {

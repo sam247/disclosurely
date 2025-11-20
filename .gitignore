@@ -27,3 +27,8 @@ dist-ssr
 .cursor/rules/kluster-code-verify.mdc
 .kluster
 .vercel
+
+# Test artifacts
+playwright-report/
+test-results/
+coverage/
