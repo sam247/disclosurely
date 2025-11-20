@@ -136,11 +136,11 @@ const LoginForm = () => {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4">
       <Button
         onClick={handleGoogleLogin}
         variant="outline"
-        className="w-full"
+        className="w-full h-9 text-sm"
         loading={googleLoading}
         loadingText={t('auth.signin.signingInWithGoogle')}
       >
@@ -165,7 +165,7 @@ const LoginForm = () => {
         {t('auth.signin.continueWithGoogle')}
       </Button>
 
-      <div className="relative">
+      <div className="relative my-3">
         <div className="absolute inset-0 flex items-center">
           <span className="w-full border-t" />
         </div>
@@ -174,9 +174,9 @@ const LoginForm = () => {
         </div>
       </div>
 
-      <form onSubmit={handleLogin} className="space-y-4">
+      <form onSubmit={handleLogin} className="space-y-3">
         <div>
-          <Label htmlFor="email">{t('auth.signin.emailLabel')}</Label>
+          <Label htmlFor="email" className="text-sm">{t('auth.signin.emailLabel')}</Label>
           <div className="mt-1">
             <Input
               id="email"
@@ -187,14 +187,15 @@ const LoginForm = () => {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               placeholder={t('auth.signin.emailPlaceholder')}
+              className="h-9 text-sm"
             />
           </div>
         </div>
 
-        <div>
+        <div className="pt-1">
           <Button
             type="submit"
-            className="w-full"
+            className="w-full h-9 text-sm"
             loading={loading}
             loadingText={t('auth.signin.sendingCode')}
           >
@@ -202,12 +203,12 @@ const LoginForm = () => {
           </Button>
         </div>
 
-        <div className="text-center">
-          <p className="text-sm text-gray-600">
+        <div className="text-center pt-2">
+          <p className="text-xs sm:text-sm text-gray-600">
             {t('auth.signin.noAccount')}{' '}
-            <Link to={`${langPrefix}/auth/signup`} className="font-medium text-blue-600 hover:text-blue-500">
+            <a href="https://app.disclosurely.com/auth/signup" className="font-medium text-blue-600 hover:text-blue-500">
               {t('auth.signin.signUpLink')}
-            </Link>
+            </a>
           </p>
         </div>
       </form>

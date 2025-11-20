@@ -120,9 +120,9 @@ const Landing = () => {
               <Link to={`${langPrefix}/pricing`} className="text-gray-700 hover:text-gray-900">
                 {t("nav.pricing")}
               </Link>
-              <Link to={`${langPrefix}/auth/signup`} className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors">
+              <a href="https://app.disclosurely.com/auth/signup" className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors">
                 {t("nav.getStarted")}
-              </Link>
+              </a>
             </div>
             <div className="md:hidden flex items-center gap-1.5">
               <PublicLanguageSelector />
@@ -172,7 +172,7 @@ const Landing = () => {
           </h1>
           <p className="text-lg sm:text-xl text-gray-700 mb-8 max-w-3xl mx-auto px-4">{t("landing.hero.subtitle")}</p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center items-center px-4">
-            <Link to={`${langPrefix}/auth/signup`} className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-3 rounded-lg text-lg font-semibold w-full sm:w-auto text-center">
+            <a href="https://app.disclosurely.com/auth/signup" className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-3 rounded-lg text-lg font-semibold w-full sm:w-auto text-center">
               {t("landing.hero.startFreeTrial")}
             </Link>
             <Link to={`${langPrefix}/pricing`} className="border border-gray-300 hover:border-gray-400 text-gray-700 px-8 py-3 rounded-lg text-lg font-semibold w-full sm:w-auto text-center">

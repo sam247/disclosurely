@@ -16,17 +16,17 @@ const AuthLayout = ({
         <Home className="h-5 w-5 sm:h-6 sm:w-6" />
       </button>
 
-      <div className="sm:mx-auto sm:w-full sm:max-w-md">
+      <div className="sm:mx-auto sm:w-full sm:max-w-lg">
         <div className="text-center">
-          <div className="flex items-center justify-center mb-6">
-            <img src="/lovable-uploads/c46ace0e-df58-4119-b5e3-8dcfa075ea2f.png" alt="Disclosurely" className="h-6 sm:h-12 w-auto" />
+          <div className="flex items-center justify-center mb-4">
+            <img src="/lovable-uploads/c46ace0e-df58-4119-b5e3-8dcfa075ea2f.png" alt="Disclosurely" className="h-5 sm:h-7 w-auto" />
           </div>
-          <p className="mt-2 text-sm text-gray-600">Secure Whistleblowing Platform</p>
+          <p className="mt-1 text-xs sm:text-sm text-gray-600">Secure Whistleblowing Platform</p>
         </div>
       </div>
 
-      <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
-        <div className="bg-white py-8 px-4 shadow-lg sm:rounded-lg sm:px-10 border border-gray-100">
+      <div className="mt-6 sm:mx-auto sm:w-full sm:max-w-lg">
+        <div className="bg-white py-6 px-4 shadow-lg sm:rounded-lg sm:px-8 border border-gray-100">
           {children}
         </div>
       </div>
