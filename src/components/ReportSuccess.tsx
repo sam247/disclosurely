@@ -1,6 +1,6 @@
 
 import { useState, useEffect, useMemo } from 'react';
-import { useSearchParams, useNavigate } from 'react-router-dom';
+import { useSearchParams, useNavigate, useLocation } from 'react-router-dom';
 import { useOrganizationData } from '@/contexts/OrganizationContext';
 import { useCustomDomain } from '@/hooks/useCustomDomain';
 import { Card, CardContent } from '@/components/ui/card';
@@ -13,7 +13,10 @@ import { supabase } from '@/integrations/supabase/client';
 const ReportSuccess = () => {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
-  const trackingId = searchParams.get('trackingId');
+  const location = useLocation();
+  
+  // Get trackingId from location state (preferred) or URL params (fallback)
+  const trackingId = (location.state as any)?.trackingId || searchParams.get('trackingId');
   const linkTokenFromUrl = searchParams.get('linkToken');
   const { toast } = useToast();
   const { organizationData, loading, error, fetchOrganizationByTrackingId } = useOrganizationData();

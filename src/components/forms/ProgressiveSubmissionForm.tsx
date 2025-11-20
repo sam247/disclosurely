@@ -198,8 +198,8 @@ const ProgressiveSubmissionForm = ({
           await deleteDraft(draftCode);
         }
 
-        // Navigate to success page
-        navigate('/success', {
+        // Navigate to success page with trackingId in URL for better compatibility
+        navigate(`/success?trackingId=${encodeURIComponent(trackingId)}${linkToken ? `&linkToken=${encodeURIComponent(linkToken)}` : ''}`, {
           state: {
             trackingId,
             organizationName: linkData.organization_name,
