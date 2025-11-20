@@ -49,12 +49,16 @@ const ReportSuccess = () => {
 
   useEffect(() => {
     if (trackingId) {
-      fetchOrganizationByTrackingId(trackingId);
+      fetchOrganizationByTrackingId(trackingId).catch((err) => {
+        console.error('Error fetching organization:', err);
+        // Don't throw - let the component render with error state
+      });
       // Only fetch linkToken from the report if not provided in URL
       if (!linkTokenFromUrl) {
         fetchLinkTokenFromReport(trackingId);
       }
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [trackingId, linkTokenFromUrl]);
 
   const fetchLinkTokenFromReport = async (trackingId: string) => {
@@ -116,7 +120,28 @@ const ReportSuccess = () => {
     }
   };
 
-  if (loading || domainLoading) {
+  // Priority: domainBranding > organizationData (from tracking ID) > defaults
+  // This ensures custom domain branding takes precedence
+  // IMPORTANT: All hooks must be called before any conditional returns
+  const finalBranding = useMemo(() => domainBranding || organizationData, [domainBranding, organizationData]);
+  const logoUrl = finalBranding?.custom_logo_url || finalBranding?.logo_url;
+  const brandColor = finalBranding?.brand_color || '#2563eb';
+  const organizationName = finalBranding?.name || 'Organization';
+
+  // Don't block rendering if we don't have a trackingId - show success message anyway
+  if (!trackingId) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <AlertTriangle className="h-12 w-12 text-yellow-600 mx-auto mb-4" />
+          <p className="text-gray-600">No tracking ID provided</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Show loading only if we're actively fetching and don't have any data yet
+  if ((loading || domainLoading) && !finalBranding) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
@@ -126,13 +151,6 @@ const ReportSuccess = () => {
       </div>
     );
   }
-
-  // Priority: domainBranding > organizationData (from tracking ID) > defaults
-  // This ensures custom domain branding takes precedence
-  const finalBranding = useMemo(() => domainBranding || organizationData, [domainBranding, organizationData]);
-  const logoUrl = finalBranding?.custom_logo_url || finalBranding?.logo_url;
-  const brandColor = finalBranding?.brand_color || '#2563eb';
-  const organizationName = finalBranding?.name || 'Organization';
 
   return (
     <BrandedFormLayout
