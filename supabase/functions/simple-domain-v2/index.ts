@@ -126,19 +126,41 @@ serve(async (req) => {
         );
       }
       
-      // Check if domain already exists in another organization
+      // Get user's organization to check ownership
+      const authHeader = req.headers.get('Authorization');
+      let userOrgId = null;
+      
+      if (authHeader) {
+        const authClient = createClient(supabaseUrl, Deno.env.get('SUPABASE_ANON_KEY') ?? '', {
+          global: { headers: { Authorization: authHeader } },
+        });
+        const { data: { user } } = await authClient.auth.getUser();
+        
+        if (user) {
+          const { data: profile } = await authClient.from('profiles').select('organization_id').eq('id', user.id).single();
+          userOrgId = profile?.organization_id;
+        }
+      }
+      
+      // Check if domain already exists
       const { data: existingDomain } = await db
         .from('custom_domains')
-        .select('id, organization_id')
+        .select('id, organization_id, status')
         .eq('domain_name', domain)
         .single();
       
-      if (existingDomain) {
+      // If domain exists and belongs to a DIFFERENT organization, block it
+      if (existingDomain && existingDomain.organization_id !== userOrgId) {
         console.error(`Domain ${domain} already registered to another organization`);
         return new Response(
-          JSON.stringify({ success: false, message: 'This domain is already registered. Please use a different domain.' }),
+          JSON.stringify({ success: false, message: 'This domain is already registered to another organization.' }),
           { status: 409, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
         );
+      }
+      
+      // If domain exists and belongs to SAME organization, allow regenerating records
+      if (existingDomain && existingDomain.organization_id === userOrgId) {
+        console.log(`Domain ${domain} already exists for this organization (status: ${existingDomain.status}), regenerating records...`);
       }
       
       console.log(`Adding domain ${domain} to Vercel project...`);
