@@ -92,3 +92,9 @@ verify_jwt = false
 
 [functions.resend-email-webhook]
 verify_jwt = false
+
+[functions.generate-case-embeddings]
+verify_jwt = false
+
+[functions.rag-case-query]
+verify_jwt = true

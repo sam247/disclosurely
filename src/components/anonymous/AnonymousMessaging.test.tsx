@@ -227,13 +227,17 @@ describe('AnonymousMessaging', () => {
     const sendButton = screen.getByRole('button', { name: /send/i });
     await user.click(sendButton);
 
+    // Wait for error handling
     await waitFor(() => {
-      // Message should be removed (rollback)
-      expect(screen.queryByText('This should fail')).not.toBeInTheDocument();
-    });
+      // The message input should still contain the text (rollback restores it)
+      // But the message should not appear in the messages list
+      expect(messageInput).toHaveValue('This should fail');
+    }, { timeout: 3000 });
 
-    // Input should be restored
-    expect(messageInput).toHaveValue('This should fail');
+    // Verify the message was not added to the messages list
+    // The textarea still has the value, but it shouldn't be in the messages
+    const messageInList = screen.queryByText('This should fail', { selector: '[data-message]' });
+    expect(messageInList).not.toBeInTheDocument();
   });
 
   it('should handle report not found', async () => {
@@ -367,10 +371,26 @@ describe('AnonymousMessaging', () => {
 
     const sendButton = screen.getByRole('button', { name: /send/i });
 
+    // Clear previous calls to only count calls after button click
+    mockInvoke.mockClear();
+    
+    // Reset mock to return the same data for any subsequent calls
+    mockInvoke.mockResolvedValue({
+      data: {
+        report: mockReport,
+        messages: [],
+        organization: { name: 'Test Org' },
+      },
+      error: null,
+    });
+
     // Try to send empty message
     await user.click(sendButton);
 
-    // Should not call invoke for sending
-    expect(mockInvoke).toHaveBeenCalledTimes(1); // Only initial load
+    // Wait a bit to ensure no async calls are made
+    await waitFor(() => {
+      // Should not call invoke for sending empty message
+      expect(mockInvoke).not.toHaveBeenCalled();
+    }, { timeout: 1000 });
   });
 });

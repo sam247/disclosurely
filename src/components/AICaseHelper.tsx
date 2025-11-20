@@ -14,6 +14,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { useOrganization } from '@/hooks/useOrganization';
 import { auditLogger } from '@/utils/auditLogger';
 import { PIIPreviewModal } from '@/components/PIIPreviewModal';
+import { decryptReport } from '@/utils/encryption';
 
 interface NewCase {
   id: string;
@@ -359,8 +360,6 @@ const AICaseHelper: React.FC<AICaseHelperProps> = ({ reportId, reportContent }) 
       let decryptedContent = reportContent || '[Case content not available]';
       if (caseData.encrypted_content && caseData.organization_id) {
         try {
-          // Import decrypt function dynamically
-          const { decryptReport } = await import('@/utils/encryption');
           const decrypted = await decryptReport(caseData.encrypted_content, caseData.organization_id);
           decryptedContent = `
 Case Details:
@@ -582,7 +581,6 @@ Case Details:
       let decryptedContent = '';
       if (caseData.encrypted_content && caseData.organization_id) {
         try {
-          const { decryptReport } = await import('@/utils/encryption');
           const decrypted = await decryptReport(caseData.encrypted_content, caseData.organization_id);
           decryptedContent = `Category: ${decrypted.category || 'Not specified'}
 

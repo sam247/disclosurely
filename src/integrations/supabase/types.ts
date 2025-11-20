@@ -611,6 +611,8 @@ export type Database = {
       chat_conversations: {
         Row: {
           created_at: string | null
+          human_requested: boolean | null
+          human_requested_at: string | null
           id: string
           status: string | null
           updated_at: string | null
@@ -620,6 +622,8 @@ export type Database = {
         }
         Insert: {
           created_at?: string | null
+          human_requested?: boolean | null
+          human_requested_at?: string | null
           id?: string
           status?: string | null
           updated_at?: string | null
@@ -629,6 +633,8 @@ export type Database = {
         }
         Update: {
           created_at?: string | null
+          human_requested?: boolean | null
+          human_requested_at?: string | null
           id?: string
           status?: string | null
           updated_at?: string | null
@@ -2327,6 +2333,54 @@ export type Database = {
           },
         ]
       }
+      rag_query_logs: {
+        Row: {
+          cases_returned: string[] | null
+          created_at: string
+          id: string
+          metadata: Json | null
+          organization_id: string
+          query_text: string
+          results_count: number | null
+          user_id: string
+        }
+        Insert: {
+          cases_returned?: string[] | null
+          created_at?: string
+          id?: string
+          metadata?: Json | null
+          organization_id: string
+          query_text: string
+          results_count?: number | null
+          user_id: string
+        }
+        Update: {
+          cases_returned?: string[] | null
+          created_at?: string
+          id?: string
+          metadata?: Json | null
+          organization_id?: string
+          query_text?: string
+          results_count?: number | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "rag_query_logs_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "rag_query_logs_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       report_attachments: {
         Row: {
           content_type: string
@@ -2539,6 +2593,7 @@ export type Database = {
           deleted_at: string | null
           deleted_by: string | null
           due_date: string | null
+          embedding: string | null
           encrypted_content: string
           encryption_key_hash: string
           first_read_at: string | null
@@ -2580,6 +2635,7 @@ export type Database = {
           deleted_at?: string | null
           deleted_by?: string | null
           due_date?: string | null
+          embedding?: string | null
           encrypted_content: string
           encryption_key_hash: string
           first_read_at?: string | null
@@ -2621,6 +2677,7 @@ export type Database = {
           deleted_at?: string | null
           deleted_by?: string | null
           due_date?: string | null
+          embedding?: string | null
           encrypted_content?: string
           encryption_key_hash?: string
           first_read_at?: string | null
@@ -3789,6 +3846,24 @@ export type Database = {
       mark_reminder_sent: {
         Args: { assignment_id: string }
         Returns: undefined
+      }
+      match_cases_by_organization: {
+        Args: {
+          match_count: number
+          match_threshold: number
+          org_id: string
+          query_embedding: string
+        }
+        Returns: {
+          created_at: string
+          description: string
+          id: string
+          priority: number
+          similarity: number
+          status: string
+          title: string
+          tracking_id: string
+        }[]
       }
       process_notifications_manually: { Args: never; Returns: Json }
       record_login_attempt: {

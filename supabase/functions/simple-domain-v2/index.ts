@@ -125,8 +125,8 @@ serve(async (req) => {
           { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
         );
       }
-      
-      // Get user's organization ID first
+
+      // Get user's organization to check ownership
       const authHeader = req.headers.get('Authorization');
       let userOrgId = null;
 
@@ -147,38 +147,27 @@ serve(async (req) => {
         .from('custom_domains')
         .select('id, organization_id, status')
         .eq('domain_name', domain)
-        .maybeSingle();
+        .single();
 
-      if (existingDomain) {
-        // If domain belongs to the SAME organization, allow regenerating records
-        if (existingDomain.organization_id === userOrgId) {
-          console.log(`Domain ${domain} already exists for this organization - regenerating records`);
-          // Continue to generate records (don't return error)
-        } else {
-          // Domain belongs to a DIFFERENT organization - reject
-          console.error(`Domain ${domain} already registered to another organization`);
-          return new Response(
-            JSON.stringify({ success: false, message: 'This domain is already registered to another organization. Please use a different domain.' }),
-            { status: 409, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-          );
-        }
+      // If domain exists and belongs to a DIFFERENT organization, block it
+      if (existingDomain && existingDomain.organization_id !== userOrgId) {
+        console.error(`Domain ${domain} already registered to another organization`);
+        return new Response(
+          JSON.stringify({ success: false, message: 'This domain is already registered to another organization.' }),
+          { status: 409, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      }
+      
+      // If domain exists and belongs to SAME organization, allow regenerating records
+      if (existingDomain && existingDomain.organization_id === userOrgId) {
+        console.log(`Domain ${domain} already exists for this organization (status: ${existingDomain.status}), regenerating records...`);
       }
       
       console.log(`Adding domain ${domain} to Vercel project...`);
       const result = await vercel.addDomain(domain);
       console.log(`Vercel result:`, JSON.stringify(result, null, 2));
       
-      // If domain already exists, that's OK - we just need the verification records
-      if (!result.success && result.error && !result.error.includes('already exists')) {
-        const errorMsg = result.error || 'Failed to add domain to Vercel';
-        console.error(`Domain addition failed: ${errorMsg}`);
-        return new Response(
-          JSON.stringify({ success: false, message: errorMsg }),
-          { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-        );
-      }
-
-      // Extract records from verification (will exist even if domain already exists)
+      // Extract records from verification (will exist even if domain already exists or if there's an error)
       const records = [];
       const verification = result.verification;
       
@@ -214,12 +203,23 @@ serve(async (req) => {
         }
       }
       
+      // Always generate at least a CNAME record, even if Vercel API fails or returns no verification
+      // This allows users to manually configure DNS even if the domain can't be added to Vercel yet
       if (records.length === 0) {
+        const subdomain = domain.split('.')[0];
         records.push({
           type: 'CNAME',
-          name: domain.split('.')[0],
+          name: subdomain,
           value: 'cname.vercel-dns.com',
         });
+        console.log(`Generated fallback CNAME record for ${subdomain} -> cname.vercel-dns.com`);
+      }
+      
+      // If domain addition failed and it's not because it already exists, log warning but still return records
+      if (!result.success && result.error && !result.error.includes('already exists')) {
+        const errorMsg = result.error || 'Failed to add domain to Vercel';
+        console.warn(`Domain addition failed: ${errorMsg}, but returning records for manual configuration`);
+        // Don't return error - still provide records so user can configure DNS manually
       }
 
       return new Response(
@@ -294,8 +294,13 @@ serve(async (req) => {
         }
       }
 
+      // Provide more specific error message when verification fails
+      const message = result.verified 
+        ? 'Domain verified and activated!' 
+        : (result.error || 'Records not detected. Please ensure DNS records are correctly configured and wait 5-10 minutes for DNS propagation.');
+      
       return new Response(
-        JSON.stringify({ success: result.verified, message: result.verified ? 'Domain verified and activated!' : 'Verification pending' }),
+        JSON.stringify({ success: result.verified, message }),
         { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }

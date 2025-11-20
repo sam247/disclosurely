@@ -58,6 +58,10 @@ const contentfulClient = CONTENTFUL_DELIVERY_TOKEN ? createClient({
   accessToken: CONTENTFUL_DELIVERY_TOKEN,
 }) : null;
 
+// Module-level cache to prevent infinite loops (persists across component remounts)
+const fetchCache = new Map<string, { data: any; timestamp: number }>();
+const CACHE_TTL = 60000; // 1 minute cache
+
 const DynamicHelmet: React.FC<DynamicHelmetProps> = ({
   pageIdentifier,
   fallbackTitle,
@@ -73,10 +77,130 @@ const DynamicHelmet: React.FC<DynamicHelmetProps> = ({
   const [schemaData, setSchemaData] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
+  // Normalize URL to always use non-www version and remove trailing slashes
+  // Must be defined before use to avoid temporal dead zone errors
+  const normalizeCanonicalUrl = (url: string) => {
+    try {
+      const urlObj = new URL(url);
+      // Remove www. prefix
+      if (urlObj.hostname.startsWith('www.')) {
+        urlObj.hostname = urlObj.hostname.substring(4);
+      }
+      // Remove trailing slash from pathname (except for root which should be empty)
+      let pathname = urlObj.pathname;
+      if (pathname === '/') {
+        pathname = '';
+      } else if (pathname.endsWith('/')) {
+        pathname = pathname.slice(0, -1);
+      }
+      urlObj.pathname = pathname;
+      // Remove query params and hash for canonical URLs
+      urlObj.search = '';
+      urlObj.hash = '';
+      return urlObj.toString();
+    } catch (error) {
+      console.error('Error normalizing canonical URL:', error);
+      return url;
+    }
+  };
+
+  // CRITICAL: Build canonical and hreflang URLs independently - NEVER affected by Contentful
+  // These must be calculated synchronously and never depend on async Contentful data
+  const buildCanonicalUrl = () => {
+    // If canonicalUrl is explicitly provided, use it (highest priority)
+    if (canonicalUrl) {
+      return canonicalUrl;
+    }
+
+    // Build URL from pageIdentifier (works on both server and client)
+    const baseUrl = 'https://disclosurely.com';
+
+    // Detect current language from URL path
+    const currentPath = typeof window !== 'undefined' ? window.location.pathname : '';
+    const langMatch = currentPath.match(/^\/([a-z]{2})(\/|$)/);
+    const currentLang = langMatch ? langMatch[1] : null;
+    const supportedLangs = ['es', 'fr', 'de', 'pl', 'sv', 'no', 'pt', 'it', 'nl', 'da', 'el'];
+    const hasLangPrefix = currentLang && supportedLangs.includes(currentLang);
+
+    // Normalize pageIdentifier to always start with /
+    let path = pageIdentifier;
+    if (!path.startsWith('/')) {
+      path = `/${path}`;
+    }
+
+    // Remove trailing slash except for root
+    if (path !== '/' && path.endsWith('/')) {
+      path = path.slice(0, -1);
+    }
+
+    // Prepend language prefix if current URL has one (for multilingual SEO)
+    if (hasLangPrefix) {
+      path = `/${currentLang}${path}`;
+    }
+
+    // Handle root path specially
+    if (path === '/' || path === '') {
+      return hasLangPrefix ? `${baseUrl}/${currentLang}` : baseUrl;
+    }
+
+    return `${baseUrl}${path}`;
+  };
+
+  // Generate dynamic hreflang URLs based on current page path - NEVER from Contentful
+  const getHrefLangUrls = () => {
+    if (typeof window === 'undefined') return {};
+
+    const currentPath = window.location.pathname;
+    const languages = ['en', 'es', 'fr', 'de', 'pl', 'sv', 'no', 'pt', 'it', 'nl', 'da', 'el'];
+
+    // Extract the page path without language prefix
+    let basePath = currentPath;
+    for (const lang of languages) {
+      if (currentPath.startsWith(`/${lang}/`)) {
+        basePath = currentPath.substring(lang.length + 1); // Remove /lang prefix
+        break;
+      } else if (currentPath === `/${lang}`) {
+        basePath = '/';
+        break;
+      }
+    }
+
+    // Generate URLs for all language versions
+    const hrefLangUrls: Record<string, string> = {};
+
+    // x-default and en both point to English version (without /en prefix)
+    hrefLangUrls['x-default'] = `https://disclosurely.com${basePath}`;
+    hrefLangUrls['en'] = `https://disclosurely.com${basePath}`;
+
+    // Other languages with their prefix
+    languages.forEach(lang => {
+      if (lang !== 'en') {
+        hrefLangUrls[lang] = `https://disclosurely.com/${lang}${basePath}`;
+      }
+    });
+
+    return hrefLangUrls;
+  };
+
+  // Calculate canonical and hreflang immediately (synchronously, before any async operations)
+  const finalCanonicalUrl = normalizeCanonicalUrl(buildCanonicalUrl());
+  const hrefLangUrls = getHrefLangUrls();
+
   useEffect(() => {
     const fetchSEOData = async () => {
       if (!contentfulClient) {
         console.warn('Contentful client not initialized - VITE_CONTENTFUL_DELIVERY_TOKEN missing. Using fallback SEO data.');
+        setLoading(false);
+        return;
+      }
+
+      // Check cache first
+      const cacheKey = `seo-${pageIdentifier}-${i18n.language}`;
+      const cached = fetchCache.get(cacheKey);
+      if (cached && Date.now() - cached.timestamp < CACHE_TTL) {
+        setSeoData(cached.data.seoData);
+        setGlobalSeoData(cached.data.globalSeoData);
+        setSchemaData(cached.data.schemaData);
         setLoading(false);
         return;
       }
@@ -94,13 +218,11 @@ const DynamicHelmet: React.FC<DynamicHelmetProps> = ({
           limit: 1,
         });
 
-        
+        let fetchedSeoData: SEOData | null = null;
 
         if (response.items.length > 0) {
           const item = response.items[0];
           const fields = item.fields as any;
-          
-          
           
           // Ensure OG image URL is absolute (add https: if missing)
           let ogImageUrl = fields.ogImage?.fields?.file?.url;
@@ -108,20 +230,20 @@ const DynamicHelmet: React.FC<DynamicHelmetProps> = ({
             ogImageUrl = `https:${ogImageUrl}`;
           }
           
-          setSeoData({
+          // IMPORTANT: Do NOT include canonical_url from Contentful - it's managed independently
+          fetchedSeoData = {
             meta_title: fields.pageTitle,
             meta_description: fields.metaDescription,
             og_title: fields.ogTitle,
             og_description: fields.ogDescription,
             og_image_url: ogImageUrl,
-            canonical_url: fields.canonicalUrl,
+            // canonical_url: fields.canonicalUrl, // REMOVED - canonical is managed independently
             robots_directive: fields.robotsMeta,
-          });
-        } else {
-          
+          };
         }
 
         // Fetch global site settings
+        let fetchedGlobalSeoData: GlobalSEOData | null = null;
         const siteSettingsResponse = await contentfulClient.getEntries({
           content_type: 'siteSettings',
           'fields.isActive': true,
@@ -132,15 +254,13 @@ const DynamicHelmet: React.FC<DynamicHelmetProps> = ({
           const siteItem = siteSettingsResponse.items[0];
           const siteFields = siteItem.fields as any;
           
-          
-          
           // Ensure default OG image URL is absolute (add https: if missing)
           let defaultOgImageUrl = siteFields.defaultOgImage?.fields?.file?.url;
           if (defaultOgImageUrl && !defaultOgImageUrl.startsWith('http')) {
             defaultOgImageUrl = `https:${defaultOgImageUrl}`;
           }
           
-          setGlobalSeoData({
+          fetchedGlobalSeoData = {
             site_name: siteFields.siteName,
             default_meta_title: siteFields.siteName,
             default_meta_description: 'Secure whistleblowing platform',
@@ -151,10 +271,11 @@ const DynamicHelmet: React.FC<DynamicHelmetProps> = ({
             facebook_pixel_id: siteFields.facebookPixelId,
             google_site_verification: siteFields.googleSiteVerification,
             bing_site_verification: siteFields.bingSiteVerification,
-          });
+          };
         }
 
         // Fetch schema structured data for this page
+        let fetchedSchemaData: any[] = [];
         const schemaResponse = await contentfulClient.getEntries({
           content_type: 'schemaStructuredData',
           'fields.isActive': true,
@@ -163,14 +284,26 @@ const DynamicHelmet: React.FC<DynamicHelmetProps> = ({
         });
 
         if (schemaResponse.items.length > 0) {
-          const schemaItems = schemaResponse.items.map((item: any) => ({
+          fetchedSchemaData = schemaResponse.items.map((item: any) => ({
             type: item.fields.schemaType,
             data: item.fields.schemaData,
           }));
-          
-          
-          setSchemaData(schemaItems);
         }
+
+        // Update state and cache
+        setSeoData(fetchedSeoData);
+        setGlobalSeoData(fetchedGlobalSeoData);
+        setSchemaData(fetchedSchemaData);
+        
+        // Cache the results
+        fetchCache.set(cacheKey, {
+          data: {
+            seoData: fetchedSeoData,
+            globalSeoData: fetchedGlobalSeoData,
+            schemaData: fetchedSchemaData,
+          },
+          timestamp: Date.now(),
+        });
       } catch (error) {
         console.error('❌ DynamicHelmet: Error fetching SEO data from Contentful:', error);
       } finally {
@@ -223,116 +356,6 @@ const DynamicHelmet: React.FC<DynamicHelmetProps> = ({
     finalImage = finalImage.startsWith('//') ? `https:${finalImage}` : `https://disclosurely.com${finalImage}`;
   }
 
-  // Normalize URL to always use non-www version and remove trailing slashes
-  const normalizeCanonicalUrl = (url: string) => {
-    try {
-      const urlObj = new URL(url);
-      // Remove www. prefix
-      if (urlObj.hostname.startsWith('www.')) {
-        urlObj.hostname = urlObj.hostname.substring(4);
-      }
-      // Remove trailing slash from pathname (except for root which should be empty)
-      let pathname = urlObj.pathname;
-      if (pathname === '/') {
-        pathname = '';
-      } else if (pathname.endsWith('/')) {
-        pathname = pathname.slice(0, -1);
-      }
-      urlObj.pathname = pathname;
-      // Remove query params and hash for canonical URLs
-      urlObj.search = '';
-      urlObj.hash = '';
-      return urlObj.toString();
-    } catch (error) {
-      console.error('Error normalizing canonical URL:', error);
-      return url;
-    }
-  };
-
-  // Build canonical URL using pageIdentifier (works both server-side and client-side)
-  const buildCanonicalUrl = () => {
-    // If canonicalUrl is explicitly provided, use it
-    if (canonicalUrl) {
-      return canonicalUrl;
-    }
-
-    // Build URL from pageIdentifier (works on both server and client)
-    const baseUrl = 'https://disclosurely.com';
-
-    // Detect current language from URL path
-    const currentPath = typeof window !== 'undefined' ? window.location.pathname : '';
-    const langMatch = currentPath.match(/^\/([a-z]{2})(\/|$)/);
-    const currentLang = langMatch ? langMatch[1] : null;
-    const supportedLangs = ['es', 'fr', 'de', 'pl', 'sv', 'no', 'pt', 'it', 'nl', 'da', 'el'];
-    const hasLangPrefix = currentLang && supportedLangs.includes(currentLang);
-
-    // Normalize pageIdentifier to always start with /
-    let path = pageIdentifier;
-    if (!path.startsWith('/')) {
-      path = `/${path}`;
-    }
-
-    // Remove trailing slash except for root
-    if (path !== '/' && path.endsWith('/')) {
-      path = path.slice(0, -1);
-    }
-
-    // Prepend language prefix if current URL has one (for multilingual SEO)
-    if (hasLangPrefix) {
-      path = `/${currentLang}${path}`;
-    }
-
-    // Handle root path specially
-    if (path === '/' || path === '') {
-      return hasLangPrefix ? `${baseUrl}/${currentLang}` : baseUrl;
-    }
-
-    return `${baseUrl}${path}`;
-  };
-
-  const currentPageUrl = buildCanonicalUrl();
-
-  // Normalize the canonical URL (remove www, query params, etc.)
-  const finalCanonicalUrl = normalizeCanonicalUrl(currentPageUrl);
-
-  // Generate dynamic hreflang URLs based on current page path
-  const getHrefLangUrls = () => {
-    if (typeof window === 'undefined') return {};
-
-    const currentPath = window.location.pathname;
-    const languages = ['en', 'es', 'fr', 'de', 'pl', 'sv', 'no', 'pt', 'it', 'nl', 'da', 'el'];
-
-    // Extract the page path without language prefix
-    let basePath = currentPath;
-    for (const lang of languages) {
-      if (currentPath.startsWith(`/${lang}/`)) {
-        basePath = currentPath.substring(lang.length + 1); // Remove /lang prefix
-        break;
-      } else if (currentPath === `/${lang}`) {
-        basePath = '/';
-        break;
-      }
-    }
-
-    // Generate URLs for all language versions
-    const hrefLangUrls: Record<string, string> = {};
-
-    // x-default and en both point to English version (without /en prefix)
-    hrefLangUrls['x-default'] = `https://disclosurely.com${basePath}`;
-    hrefLangUrls['en'] = `https://disclosurely.com${basePath}`;
-
-    // Other languages with their prefix
-    languages.forEach(lang => {
-      if (lang !== 'en') {
-        hrefLangUrls[lang] = `https://disclosurely.com/${lang}${basePath}`;
-      }
-    });
-
-    return hrefLangUrls;
-  };
-
-  const hrefLangUrls = getHrefLangUrls();
-
   const finalRobots = seoData?.robots_directive || 'index,follow';
 
   const finalKeywords = seoData?.meta_keywords || [];
@@ -384,9 +407,11 @@ const DynamicHelmet: React.FC<DynamicHelmetProps> = ({
         <meta name="keywords" content={finalKeywords.join(', ')} />
       )}
       <meta name="robots" content={finalRobots} />
+      
+      {/* CRITICAL: Canonical URL is ALWAYS set independently - never from Contentful */}
       <link rel="canonical" href={finalCanonicalUrl} />
 
-      {/* Dynamic Hreflang Tags for All Language Versions */}
+      {/* CRITICAL: Hreflang tags are ALWAYS set independently - never from Contentful */}
       {typeof window !== 'undefined' && Object.keys(hrefLangUrls).length > 0 && (
         <>
           {Object.entries(hrefLangUrls).map(([lang, url]) => (

@@ -1,7 +1,6 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { Building2, CreditCard, Globe, Shield } from 'lucide-react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import OrganizationSettingsBranding from '@/components/OrganizationSettings';
 import SubscriptionManagement from '@/components/SubscriptionManagement';
 import CustomDomainSettings from '@/components/CustomDomainSettings';
@@ -24,74 +23,66 @@ const OrganizationSettings = () => {
 
       {/* Scrollable Content */}
       <div className="flex-1 overflow-y-auto">
-        <div className="space-y-6">
+        <div className="space-y-8 pt-6">
           {isOrgAdmin && (
             <>
               {/* Organization Settings */}
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center space-x-2">
+              <div className="space-y-4">
+                <div>
+                  <h2 className="text-lg font-semibold flex items-center gap-2">
                     <Building2 className="h-5 w-5 text-blue-600" />
-                    <span>Organization</span>
-                  </CardTitle>
-                  <CardDescription>
+                    Organization
+                  </h2>
+                  <p className="text-sm text-muted-foreground mt-1">
                     Manage your organization's branding and settings
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <OrganizationSettingsBranding />
-                </CardContent>
-              </Card>
+                  </p>
+                </div>
+                <OrganizationSettingsBranding />
+              </div>
 
               {/* Subscription */}
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center space-x-2">
+              <div className="space-y-4">
+                <div>
+                  <h2 className="text-lg font-semibold flex items-center gap-2">
                     <CreditCard className="h-5 w-5 text-blue-600" />
-                    <span>Subscription</span>
-                  </CardTitle>
-                  <CardDescription>
+                    Subscription
+                  </h2>
+                  <p className="text-sm text-muted-foreground mt-1">
                     Manage your subscription and billing information
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <SubscriptionManagement />
-                </CardContent>
-              </Card>
+                  </p>
+                </div>
+                <SubscriptionManagement />
+              </div>
 
               {/* Custom Domains */}
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center space-x-2">
+              <div className="space-y-4">
+                <div>
+                  <h2 className="text-lg font-semibold flex items-center gap-2">
                     <Globe className="h-5 w-5 text-blue-600" />
-                    <span>Custom Domains</span>
-                  </CardTitle>
-                  <CardDescription>
+                    Custom Domains
+                  </h2>
+                  <p className="text-sm text-muted-foreground mt-1">
                     Configure custom domains for your secure reporting links
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <CustomDomainSettings />
-                </CardContent>
-              </Card>
+                  </p>
+                </div>
+                <CustomDomainSettings />
+              </div>
             </>
           )}
 
           {/* Privacy & Data - Always visible */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center space-x-2">
+          <div className="space-y-4">
+            <div>
+              <h2 className="text-lg font-semibold flex items-center gap-2">
                 <Shield className="h-5 w-5 text-blue-600" />
-                <span>Privacy & Data</span>
-              </CardTitle>
-              <CardDescription>
+                Privacy & Data
+              </h2>
+              <p className="text-sm text-muted-foreground mt-1">
                 Manage your privacy settings and data handling preferences
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <SimpleGDPRSettings />
-            </CardContent>
-          </Card>
+              </p>
+            </div>
+            <SimpleGDPRSettings />
+          </div>
         </div>
       </div>
     </div>

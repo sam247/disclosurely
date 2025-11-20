@@ -47,10 +47,11 @@ const WhistleblowerMessagingPage = lazy(() => import('./pages/WhistleblowerMessa
 const ReportDetails = lazyWithRetry(() => import('./pages/ReportDetails'));
 
 // Lazy load dashboard and authenticated components with retry logic for critical components
-const AuthenticatedApp = lazy(() => import('./components/AuthenticatedApp'));
+import AuthenticatedApp from './components/AuthenticatedApp';
 const DashboardLayout = lazyWithRetry(() => import('./components/dashboard/DashboardLayout'));
 const DashboardView = lazyWithRetry(() => import('./components/dashboard/DashboardView'));
 const AIHelperView = lazyWithRetry(() => import('./components/dashboard/AIHelperView'));
+const CaseInsightsView = lazyWithRetry(() => import('./pages/CaseInsightsView'));
 const SettingsView = lazyWithRetry(() => import('./components/dashboard/SettingsView'));
 const OrganizationSettings = lazyWithRetry(() => import('./components/dashboard/OrganizationSettings'));
 const OrganizationOnboarding = lazy(() => import('./components/OrganizationOnboarding'));
@@ -256,6 +257,16 @@ const AppContent = () => {
             <ProtectedRoute>
               <DashboardLayout>
                 <AIHelperView />
+              </DashboardLayout>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/dashboard/case-insights"
+          element={
+            <ProtectedRoute>
+              <DashboardLayout>
+                <CaseInsightsView />
               </DashboardLayout>
             </ProtectedRoute>
           }

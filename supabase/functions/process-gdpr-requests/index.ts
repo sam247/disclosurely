@@ -64,6 +64,36 @@ serve(async (req) => {
         );
       }
 
+      // Check subscription status before allowing account deletion
+      if (body.type === 'delete_account') {
+        // Get user's profile to find organization
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('organization_id')
+          .eq('id', user.id)
+          .single();
+
+        if (profile?.organization_id) {
+          // Check if organization has an active subscription
+          const { data: subscriber } = await supabase
+            .from('subscribers')
+            .select('subscribed, subscription_status')
+            .eq('organization_id', profile.organization_id)
+            .maybeSingle();
+
+          // Block deletion if subscription is active or trialing
+          if (subscriber && (subscriber.subscribed === true || subscriber.subscription_status === 'active' || subscriber.subscription_status === 'trialing')) {
+            return new Response(
+              JSON.stringify({ 
+                error: 'Cannot delete account with active subscription',
+                message: 'Please cancel your subscription first before deleting your account.'
+              }),
+              { status: 400, headers: { 'Content-Type': 'application/json', ...corsHeaders } }
+            );
+          }
+        }
+      }
+
       // Enqueue the appropriate request
       if (body.type === 'delete_data') {
         console.log('[GDPR-PROCESSOR] Enqueuing data deletion (anonymize) for', body.email);
@@ -88,12 +118,69 @@ serve(async (req) => {
       }
     }
     
-    // Legacy support for unauthenticated requests (for backward compatibility)
+    // Handle export requests (requires authentication)
     else if (body?.type === 'export' && body.email) {
       console.log('[GDPR-PROCESSOR] Enqueuing export request for', body.email);
-      await supabase
-        .from('data_export_requests')
-        .insert({ email_address: body.email, status: 'pending', request_type: 'full_export' });
+      
+      // Require authentication for export requests
+      const authHeader = req.headers.get('Authorization');
+      if (!authHeader) {
+        return new Response(
+          JSON.stringify({ error: 'Authentication required for data export requests' }),
+          { status: 401, headers: { 'Content-Type': 'application/json', ...corsHeaders } }
+        );
+      }
+      
+      try {
+        const { data: { user: authUser }, error: authError } = await supabase.auth.getUser(
+          authHeader.replace('Bearer ', '')
+        );
+        
+        if (authError || !authUser || authUser.email !== body.email) {
+          return new Response(
+            JSON.stringify({ error: 'Invalid authentication or email mismatch' }),
+            { status: 403, headers: { 'Content-Type': 'application/json', ...corsHeaders } }
+          );
+        }
+        
+        // Get user's organization (required)
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('organization_id')
+          .eq('id', authUser.id)
+          .single();
+        
+        if (!profile?.organization_id) {
+          return new Response(
+            JSON.stringify({ error: 'User profile not found or missing organization' }),
+            { status: 400, headers: { 'Content-Type': 'application/json', ...corsHeaders } }
+          );
+        }
+        
+        const { error: insertError } = await supabase
+          .from('data_export_requests')
+          .insert({ 
+            email_address: body.email, 
+            status: 'pending', 
+            request_type: 'full_export',
+            organization_id: profile.organization_id,
+            requested_by: authUser.id
+          });
+        
+        if (insertError) {
+          console.error('[GDPR-PROCESSOR] Error inserting export request:', insertError);
+          return new Response(
+            JSON.stringify({ error: 'Failed to create export request' }),
+            { status: 500, headers: { 'Content-Type': 'application/json', ...corsHeaders } }
+          );
+        }
+      } catch (err) {
+        console.error('[GDPR-PROCESSOR] Error processing export request:', err);
+        return new Response(
+          JSON.stringify({ error: 'Failed to process export request' }),
+          { status: 500, headers: { 'Content-Type': 'application/json', ...corsHeaders } }
+        );
+      }
     }
 
     // Process pending export and erasure requests
@@ -521,13 +608,20 @@ async function performDataErasure(supabase: any, request: GDPRRequest) {
           })
           .eq('target_id', userId);
 
-        // 17. Delete user roles
+        // 17. Delete RAG query logs (Case Insights queries)
+        await supabase.from('rag_query_logs').delete().eq('user_id', userId);
+        // Also delete by organization (in case user was org admin)
+        if (orgId) {
+          await supabase.from('rag_query_logs').delete().eq('organization_id', orgId);
+        }
+
+        // 18. Delete user roles
         await supabase.from('user_roles').delete().eq('user_id', userId);
 
-        // 18. Delete from profiles table
+        // 19. Delete from profiles table
         await supabase.from('profiles').delete().eq('id', userId);
 
-        // 19. Delete from auth.users using admin API
+        // 20. Delete from auth.users using admin API
         console.log('[GDPR-PROCESSOR] Deleting from auth.users...');
         try {
           const { error: authDeleteError } = await supabase.auth.admin.deleteUser(userId);

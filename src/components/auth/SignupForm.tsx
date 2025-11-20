@@ -177,11 +177,11 @@ const SignupForm = () => {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4">
       <Button
         onClick={handleGoogleSignup}
         variant="outline"
-        className="w-full"
+        className="w-full h-9 text-sm"
         loading={googleLoading}
         loadingText="Signing up with Google..."
       >
@@ -206,7 +206,7 @@ const SignupForm = () => {
         Continue with Google
       </Button>
 
-      <div className="relative">
+      <div className="relative my-3">
         <div className="absolute inset-0 flex items-center">
           <span className="w-full border-t" />
         </div>
@@ -215,10 +215,10 @@ const SignupForm = () => {
         </div>
       </div>
 
-      <form onSubmit={handleSignup} className="space-y-4">
-        <div className="grid grid-cols-2 gap-4">
+      <form onSubmit={handleSignup} className="space-y-3">
+        <div className="grid grid-cols-2 gap-3">
           <div>
-            <Label htmlFor="firstName">First name</Label>
+            <Label htmlFor="firstName" className="text-sm">First name</Label>
             <div className="mt-1">
               <Input
                 id="firstName"
@@ -228,11 +228,12 @@ const SignupForm = () => {
                 value={firstName}
                 onChange={(e) => setFirstName(e.target.value)}
                 placeholder="First name"
+                className="h-9 text-sm"
               />
             </div>
           </div>
           <div>
-            <Label htmlFor="lastName">Last name</Label>
+            <Label htmlFor="lastName" className="text-sm">Last name</Label>
             <div className="mt-1">
               <Input
                 id="lastName"
@@ -242,13 +243,14 @@ const SignupForm = () => {
                 value={lastName}
                 onChange={(e) => setLastName(e.target.value)}
                 placeholder="Last name"
+                className="h-9 text-sm"
               />
             </div>
           </div>
         </div>
 
         <div>
-          <Label htmlFor="email">Email address</Label>
+          <Label htmlFor="email" className="text-sm">Email address</Label>
           <div className="mt-1">
             <Input
               id="email"
@@ -259,46 +261,49 @@ const SignupForm = () => {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               placeholder="Enter your email"
+              className="h-9 text-sm"
             />
           </div>
         </div>
 
-        <div>
-          <Label htmlFor="password">Password</Label>
-          <div className="mt-1">
-            <Input
-              id="password"
-              name="password"
-              type="password"
-              autoComplete="new-password"
-              required
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              placeholder="Enter your password"
-            />
-          </div>
-        </div>
-
-        <div>
-          <Label htmlFor="confirmPassword">Confirm password</Label>
-          <div className="mt-1">
-            <Input
-              id="confirmPassword"
-              name="confirmPassword"
-              type="password"
-              autoComplete="new-password"
-              required
-              value={confirmPassword}
-              onChange={(e) => setConfirmPassword(e.target.value)}
-              placeholder="Confirm your password"
-            />
-          </div>
-        </div>
-
-        <div className="pt-4 border-t">
-          <p className="text-sm font-medium text-gray-900 mb-4">Organization Details</p>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <div>
-            <Label htmlFor="organizationName">Organization Name</Label>
+            <Label htmlFor="password" className="text-sm">Password</Label>
+            <div className="mt-1">
+              <Input
+                id="password"
+                name="password"
+                type="password"
+                autoComplete="new-password"
+                required
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder="Enter your password"
+                className="h-9 text-sm"
+              />
+            </div>
+          </div>
+          <div>
+            <Label htmlFor="confirmPassword" className="text-sm">Confirm password</Label>
+            <div className="mt-1">
+              <Input
+                id="confirmPassword"
+                name="confirmPassword"
+                type="password"
+                autoComplete="new-password"
+                required
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+                placeholder="Confirm your password"
+                className="h-9 text-sm"
+              />
+            </div>
+          </div>
+        </div>
+
+        <div className="pt-2 border-t">
+          <div>
+            <Label htmlFor="organizationName" className="text-sm">Business Name</Label>
             <div className="mt-1">
               <Input
                 id="organizationName"
@@ -307,19 +312,20 @@ const SignupForm = () => {
                 required
                 value={organizationName}
                 onChange={(e) => setOrganizationName(e.target.value)}
-                placeholder="Your company name"
+                placeholder="Your business name"
+                className="h-9 text-sm"
               />
               <p className="mt-1 text-xs text-gray-500">
-                Your submission link will be automatically generated from your organization name
+                Your submission link will be automatically generated from your business name
               </p>
             </div>
           </div>
         </div>
 
-        <div>
+        <div className="pt-1">
           <Button
             type="submit"
-            className="w-full"
+            className="w-full h-9 text-sm"
             loading={loading}
             loadingText="Creating account..."
           >
@@ -327,10 +333,10 @@ const SignupForm = () => {
           </Button>
         </div>
 
-        <div className="text-center">
-          <p className="text-sm text-gray-600">
+        <div className="text-center pt-2">
+          <p className="text-xs sm:text-sm text-gray-600">
             Already have an account?{' '}
-            <a href="https://app.disclosurely.com/auth/login" className="font-medium text-blue-600 hover:text-blue-500">
+            <a href="https://app.disclosurely.com/login" className="font-medium text-blue-600 hover:text-blue-500">
               Sign in
             </a>
           </p>

@@ -1,5 +1,5 @@
 import { useEffect, useState, useRef } from 'react';
-import { MessageCircle, X, Send, Loader2, User } from 'lucide-react';
+import { MessageCircle, X, Send, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { supabase } from '@/integrations/supabase/client';
@@ -55,7 +55,7 @@ const ChatWidget = ({
   const [inputMessage, setInputMessage] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [conversationId, setConversationId] = useState<string | null>(null);
-  const [humanRequested, setHumanRequested] = useState(false);
+  const [hasLoadedHistory, setHasLoadedHistory] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const { user } = useAuth();
   const { toast } = useToast();
@@ -67,12 +67,21 @@ const ChatWidget = ({
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
 
-  // Load conversation history if conversationId exists
+  // Load conversation history only when opening chat with existing conversationId
+  // Don't reload if we just created a new conversation
   useEffect(() => {
-    if (conversationId && isOpen) {
+    if (conversationId && isOpen && !hasLoadedHistory) {
       loadConversationHistory();
+      setHasLoadedHistory(true);
     }
   }, [conversationId, isOpen]);
+
+  // Reset history flag when chat closes
+  useEffect(() => {
+    if (!isOpen) {
+      setHasLoadedHistory(false);
+    }
+  }, [isOpen]);
 
   const loadConversationHistory = async () => {
     if (!conversationId) return;
@@ -131,8 +140,19 @@ const ChatWidget = ({
 
       if (data) {
         // Update conversation ID if this is a new conversation
+        // Mark history as loaded to prevent reloading and clearing messages
         if (data.conversationId && !conversationId) {
           setConversationId(data.conversationId);
+          setHasLoadedHistory(true); // Prevent reloading history that would clear our messages
+        }
+
+        // Replace temp user message with permanent one if messageId is provided
+        if (data.userMessageId) {
+          setMessages(prev => prev.map(msg => 
+            msg.id === tempUserMessage.id 
+              ? { ...msg, id: data.userMessageId }
+              : msg
+          ));
         }
 
         // Add AI response
@@ -166,58 +186,6 @@ const ChatWidget = ({
     }
   };
 
-  const requestHuman = async () => {
-    if (!conversationId) {
-      toast({
-        title: "Error",
-        description: "Please start a conversation first",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    try {
-      setIsLoading(true);
-      
-      // Call edge function to mark conversation as needing human
-      const { data, error } = await supabase.functions.invoke('chat-support', {
-        body: {
-          action: 'request_human',
-          conversationId: conversationId,
-          userId: user?.id || null,
-          userEmail: user?.email || null,
-          userName: user?.user_metadata?.full_name || null,
-        }
-      });
-
-      if (error) throw error;
-
-      setHumanRequested(true);
-      
-      // Show confirmation message
-      const confirmationMessage: ChatMessage = {
-        id: `human-request-${Date.now()}`,
-        role: 'assistant',
-        content: 'A human agent will be with you shortly. Expected wait time: 3-4 minutes. Please keep this chat open.',
-        timestamp: new Date()
-      };
-      setMessages(prev => [...prev, confirmationMessage]);
-
-      toast({
-        title: "Request Sent",
-        description: "A human agent will join the conversation shortly",
-      });
-    } catch (error: any) {
-      console.error('Error requesting human:', error);
-      toast({
-        title: "Error",
-        description: error.message || "Failed to request human agent. Please try again.",
-        variant: "destructive",
-      });
-    } finally {
-      setIsLoading(false);
-    }
-  };
 
   if (!enabled) return null;
 
@@ -330,13 +298,6 @@ const ChatWidget = ({
 
           {/* Chat Input */}
           <div className="p-4 border-t">
-            {humanRequested && (
-              <div className="mb-3 p-3 bg-blue-50 border border-blue-200 rounded-lg">
-                <p className="text-sm text-blue-900 font-medium">
-                  Human agent requested • Expected wait: 3-4 minutes
-                </p>
-              </div>
-            )}
             <div className="flex gap-2">
               <textarea
                 value={inputMessage}
@@ -345,24 +306,12 @@ const ChatWidget = ({
                 placeholder="Type your message..."
                 className="flex-1 px-3 py-2 border rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-primary resize-none min-h-[40px] max-h-[120px]"
                 rows={1}
-                disabled={isLoading || humanRequested}
+                disabled={isLoading}
               />
-              {!humanRequested && (
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={requestHuman}
-                  disabled={!conversationId || isLoading}
-                  className="shrink-0"
-                  title="Speak to a human agent"
-                >
-                  <User className="h-4 w-4" />
-                </Button>
-              )}
               <Button
                 size="sm"
                 onClick={sendMessage}
-                disabled={!inputMessage.trim() || isLoading || humanRequested}
+                disabled={!inputMessage.trim() || isLoading}
                 className="shrink-0"
               >
                 {isLoading ? (

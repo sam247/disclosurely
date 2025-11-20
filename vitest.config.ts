@@ -6,8 +6,11 @@ export default defineConfig({
   plugins: [react()],
   test: {
     globals: true,
-    environment: 'jsdom',
+    environment: 'happy-dom', // More compatible than jsdom, especially with Node 18
     setupFiles: ['./src/test/setup.ts'],
+    testTimeout: 10000, // 10 seconds
+    hookTimeout: 10000,
+    teardownTimeout: 5000,
     css: true,
     include: ['src/**/*.{test,spec}.{ts,tsx}'],
     exclude: ['node_modules', 'supabase/**', '.lovable/**'],

@@ -33,12 +33,12 @@ export const StandardHeader = ({ currentLanguage }: StandardHeaderProps) => {
             <Link to={`${langPrefix}/pricing`} className="text-gray-600 hover:text-gray-900">
               {t("nav.pricing")}
             </Link>
-            <Link
-              to={`${langPrefix}/auth/signup`}
+            <a
+              href="https://app.disclosurely.com/auth/signup"
               className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors"
             >
               {t("nav.getStarted")}
-            </Link>
+            </a>
           </div>
           <div className="md:hidden flex items-center gap-1.5">
             <PublicLanguageSelector />

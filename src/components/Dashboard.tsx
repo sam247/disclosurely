@@ -27,6 +27,7 @@ import SubscriptionPromptModal from '@/components/SubscriptionPromptModal';
 import TrialPromptModal from '@/components/TrialPromptModal';
 import type { Report as DatabaseReport } from '@/types/database';
 import { auditLogger } from '@/utils/auditLogger';
+import { decryptReportCategory } from '@/utils/encryption';
 
 interface Report {
   id: string;
@@ -101,7 +102,7 @@ const Dashboard = () => {
   const [processingReportId, setProcessingReportId] = useState<string | null>(null);
 
   // Secure category extraction with rate limiting
-  const decryptReportCategory = async (report: Report): Promise<string> => {
+  const decryptReportCategoryAsync = async (report: Report): Promise<string> => {
     try {
       if (!user) return 'Unknown';
       
@@ -117,9 +118,6 @@ const Dashboard = () => {
         if (!profile?.organization_id) return 'Unknown';
         orgId = profile.organization_id;
       }
-      
-      // Import the secure category-only decryption utility
-      const { decryptReportCategory } = await import('@/utils/encryption');
       
       // Extract only the category field
       const category = decryptReportCategory(report.encrypted_content, orgId);
@@ -145,7 +143,7 @@ const Dashboard = () => {
         
         await Promise.all(batch.map(async (report) => {
           if (!reportCategories[report.id]) {
-            categories[report.id] = await decryptReportCategory(report);
+            categories[report.id] = await decryptReportCategoryAsync(report);
           }
         }));
         
@@ -214,7 +212,7 @@ const Dashboard = () => {
       
       for (const report of archivedReports) {
         if (!reportCategories[report.id]) {
-          categories[report.id] = await decryptReportCategory(report);
+          categories[report.id] = await decryptReportCategoryAsync(report);
         }
       }
       

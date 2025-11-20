@@ -13,23 +13,35 @@ import { Shield, Download, UserX, CheckCircle, Clock, Mail, Trash2, AlertTriangl
 import { Separator } from '@/components/ui/separator';
 
 const SimpleGDPRSettings = () => {
-  const { user } = useAuth();
+  const { user, subscriptionData } = useAuth();
   const { toast } = useToast();
-  const [exportEmail, setExportEmail] = useState(user?.email || '');
   const [loading, setLoading] = useState(false);
   const [deleteAccountConfirm, setDeleteAccountConfirm] = useState(false);
 
   const handleDataExport = async () => {
-    if (!exportEmail) return;
+    if (!user?.email) {
+      toast({
+        title: "Authentication Required",
+        description: "Please log in to request a data export.",
+        variant: "destructive",
+      });
+      return;
+    }
     
     setLoading(true);
     try {
-      // Trigger automated data export
+      // Get session token for authentication
+      const { data: { session } } = await supabase.auth.getSession();
+      
+      // Trigger automated data export with authentication
       const { data, error } = await supabase.functions.invoke('process-gdpr-requests', {
         body: { 
           type: 'export',
-          email: exportEmail 
-        }
+          email: user.email 
+        },
+        headers: session?.access_token ? {
+          Authorization: `Bearer ${session.access_token}`
+        } : undefined
       });
 
       if (error) throw error;
@@ -79,10 +91,16 @@ const SimpleGDPRSettings = () => {
       }, 2000);
       
     } catch (error: any) {
+      const errorMessage = error.message || "Failed to initiate account deletion.";
+      const isSubscriptionError = errorMessage.includes('active subscription');
+      
       toast({
-        title: "Error",
-        description: error.message || "Failed to initiate account deletion.",
+        title: isSubscriptionError ? "Subscription Active" : "Error",
+        description: isSubscriptionError 
+          ? "Please cancel your subscription first before deleting your account. You can cancel from the Billing section."
+          : errorMessage,
         variant: "destructive",
+        duration: isSubscriptionError ? 10000 : 5000,
       });
     } finally {
       setLoading(false);
@@ -103,48 +121,31 @@ const SimpleGDPRSettings = () => {
             Your privacy rights are automatically protected. All requests are processed immediately without manual review.
           </CardDescription>
         </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="text-center p-3 sm:p-4 bg-green-50 rounded-lg">
-              <Download className="h-6 sm:h-8 w-6 sm:w-8 text-green-600 mx-auto mb-2" />
-              <h4 className="font-medium text-green-800 text-sm sm:text-base">Data Export</h4>
-              <p className="text-xs sm:text-sm text-green-600">Instant download available</p>
-            </div>
-            <div className="text-center p-3 sm:p-4 bg-red-50 rounded-lg">
-              <UserX className="h-6 sm:h-8 w-6 sm:w-8 text-red-600 mx-auto mb-2" />
-              <h4 className="font-medium text-red-800 text-sm sm:text-base">Account Deletion</h4>
-              <p className="text-xs sm:text-sm text-red-600">Complete within 24 hours</p>
-            </div>
-          </div>
+        <CardContent>
+          <p className="text-sm text-muted-foreground">
+            All GDPR requests are processed automatically. Use the options below to export your data or delete your account.
+          </p>
         </CardContent>
       </Card>
 
       {/* Data Export Section */}
       <Card>
         <CardHeader>
-          <CardTitle className="text-lg sm:text-xl">Download Your Data</CardTitle>
+          <CardTitle className="flex items-center gap-2 text-lg sm:text-xl">
+            <Download className="h-5 w-5 text-green-600" />
+            Download Your Data
+          </CardTitle>
           <CardDescription className="text-sm sm:text-base">
             Get a copy of all your personal data. The export will be generated automatically and sent to your email.
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
-          <div>
-            <Label htmlFor="export-email" className="text-sm sm:text-base">Email Address</Label>
-            <Input
-              id="export-email"
-              type="email"
-              value={exportEmail}
-              onChange={(e) => setExportEmail(e.target.value)}
-              placeholder="your-email@example.com"
-              className="mt-1"
-            />
-          </div>
           <Button 
             onClick={handleDataExport} 
             loading={loading}
             loadingText="Processing..."
-            disabled={!exportEmail} 
-            className="w-full sm:w-auto"
+            disabled={!user?.email} 
+            className="w-full sm:w-auto bg-green-600 hover:bg-green-700"
           >
             <Download className="w-4 h-4 mr-2" />
             Download My Data
@@ -177,6 +178,16 @@ const SimpleGDPRSettings = () => {
                 <p className="text-sm text-muted-foreground mt-1">
                   Permanently delete your account and ALL associated data. This is irreversible.
                 </p>
+                {subscriptionData && (subscriptionData.subscribed || subscriptionData.subscription_status === 'active' || subscriptionData.subscription_status === 'trialing') && (
+                  <div className="mt-3 p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
+                    <p className="text-sm font-medium text-yellow-900">
+                      ⚠️ Active Subscription Required
+                    </p>
+                    <p className="text-xs text-yellow-800 mt-1">
+                      You must cancel your subscription first before deleting your account. Please cancel from the Billing section.
+                    </p>
+                  </div>
+                )}
                 <ul className="list-disc list-inside mt-2 text-xs sm:text-sm text-muted-foreground space-y-1">
                   <li>Your account will be deleted (cannot log in)</li>
                   <li>All reports, messages, and files will be deleted</li>
@@ -238,7 +249,7 @@ const SimpleGDPRSettings = () => {
                   <AlertDialogCancel className="w-full sm:w-auto">Cancel</AlertDialogCancel>
                   <Button
                     onClick={handleAccountDeletion}
-                    disabled={!deleteAccountConfirm || loading}
+                    disabled={!deleteAccountConfirm || loading || (subscriptionData && (subscriptionData.subscribed || subscriptionData.subscription_status === 'active' || subscriptionData.subscription_status === 'trialing'))}
                     className="bg-red-600 hover:bg-red-700 w-full sm:w-auto"
                   >
                     {loading ? 'Processing...' : 'Yes, Delete Everything'}
