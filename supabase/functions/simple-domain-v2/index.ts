@@ -143,15 +143,17 @@ serve(async (req) => {
       }
 
       // Check if domain already exists
-      const { data: existingDomain } = await db
+      const { data: existingDomain, error: domainCheckError } = await db
         .from('custom_domains')
         .select('id, organization_id, status')
         .eq('domain_name', domain)
-        .single();
+        .maybeSingle();
+
+      console.log(`Domain check: domain=${domain}, userOrgId=${userOrgId}, existingDomain=${JSON.stringify(existingDomain)}`);
 
       // If domain exists and belongs to a DIFFERENT organization, block it
       if (existingDomain && existingDomain.organization_id !== userOrgId) {
-        console.error(`Domain ${domain} already registered to another organization`);
+        console.error(`Domain ${domain} already registered to another organization (user: ${userOrgId}, domain owner: ${existingDomain.organization_id})`);
         return new Response(
           JSON.stringify({ success: false, message: 'This domain is already registered to another organization.' }),
           { status: 409, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
