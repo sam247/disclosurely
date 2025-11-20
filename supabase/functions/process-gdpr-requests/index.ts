@@ -118,12 +118,69 @@ serve(async (req) => {
       }
     }
     
-    // Legacy support for unauthenticated requests (for backward compatibility)
+    // Handle export requests (requires authentication)
     else if (body?.type === 'export' && body.email) {
       console.log('[GDPR-PROCESSOR] Enqueuing export request for', body.email);
-      await supabase
-        .from('data_export_requests')
-        .insert({ email_address: body.email, status: 'pending', request_type: 'full_export' });
+      
+      // Require authentication for export requests
+      const authHeader = req.headers.get('Authorization');
+      if (!authHeader) {
+        return new Response(
+          JSON.stringify({ error: 'Authentication required for data export requests' }),
+          { status: 401, headers: { 'Content-Type': 'application/json', ...corsHeaders } }
+        );
+      }
+      
+      try {
+        const { data: { user: authUser }, error: authError } = await supabase.auth.getUser(
+          authHeader.replace('Bearer ', '')
+        );
+        
+        if (authError || !authUser || authUser.email !== body.email) {
+          return new Response(
+            JSON.stringify({ error: 'Invalid authentication or email mismatch' }),
+            { status: 403, headers: { 'Content-Type': 'application/json', ...corsHeaders } }
+          );
+        }
+        
+        // Get user's organization (required)
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('organization_id')
+          .eq('id', authUser.id)
+          .single();
+        
+        if (!profile?.organization_id) {
+          return new Response(
+            JSON.stringify({ error: 'User profile not found or missing organization' }),
+            { status: 400, headers: { 'Content-Type': 'application/json', ...corsHeaders } }
+          );
+        }
+        
+        const { error: insertError } = await supabase
+          .from('data_export_requests')
+          .insert({ 
+            email_address: body.email, 
+            status: 'pending', 
+            request_type: 'full_export',
+            organization_id: profile.organization_id,
+            requested_by: authUser.id
+          });
+        
+        if (insertError) {
+          console.error('[GDPR-PROCESSOR] Error inserting export request:', insertError);
+          return new Response(
+            JSON.stringify({ error: 'Failed to create export request' }),
+            { status: 500, headers: { 'Content-Type': 'application/json', ...corsHeaders } }
+          );
+        }
+      } catch (err) {
+        console.error('[GDPR-PROCESSOR] Error processing export request:', err);
+        return new Response(
+          JSON.stringify({ error: 'Failed to process export request' }),
+          { status: 500, headers: { 'Content-Type': 'application/json', ...corsHeaders } }
+        );
+      }
     }
 
     // Process pending export and erasure requests

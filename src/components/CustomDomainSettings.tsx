@@ -421,11 +421,20 @@ const CustomDomainSettings = () => {
           variant: "destructive",
         });
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error verifying domain:', error);
+      const errorMessage = error?.message || 'Failed to verify domain';
+      setVerificationResult({
+        success: false,
+        message: errorMessage.includes('not detected') || errorMessage.includes('DNS') 
+          ? 'Records not detected. Please ensure DNS records are correctly configured and wait 5-10 minutes for DNS propagation.'
+          : errorMessage,
+      });
       toast({
-        title: "Error",
-        description: "Failed to verify domain",
+        title: "Verification Failed",
+        description: errorMessage.includes('not detected') || errorMessage.includes('DNS')
+          ? 'Records not detected. Please ensure DNS records are correctly configured and wait 5-10 minutes for DNS propagation.'
+          : errorMessage,
         variant: "destructive",
       });
     } finally {

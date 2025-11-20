@@ -145,17 +145,7 @@ serve(async (req) => {
       const result = await vercel.addDomain(domain);
       console.log(`Vercel result:`, JSON.stringify(result, null, 2));
       
-      // If domain already exists, that's OK - we just need the verification records
-      if (!result.success && result.error && !result.error.includes('already exists')) {
-        const errorMsg = result.error || 'Failed to add domain to Vercel';
-        console.error(`Domain addition failed: ${errorMsg}`);
-        return new Response(
-          JSON.stringify({ success: false, message: errorMsg }),
-          { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-        );
-      }
-
-      // Extract records from verification (will exist even if domain already exists)
+      // Extract records from verification (will exist even if domain already exists or if there's an error)
       const records = [];
       const verification = result.verification;
       
@@ -191,12 +181,23 @@ serve(async (req) => {
         }
       }
       
+      // Always generate at least a CNAME record, even if Vercel API fails or returns no verification
+      // This allows users to manually configure DNS even if the domain can't be added to Vercel yet
       if (records.length === 0) {
+        const subdomain = domain.split('.')[0];
         records.push({
           type: 'CNAME',
-          name: domain.split('.')[0],
+          name: subdomain,
           value: 'cname.vercel-dns.com',
         });
+        console.log(`Generated fallback CNAME record for ${subdomain} -> cname.vercel-dns.com`);
+      }
+      
+      // If domain addition failed and it's not because it already exists, log warning but still return records
+      if (!result.success && result.error && !result.error.includes('already exists')) {
+        const errorMsg = result.error || 'Failed to add domain to Vercel';
+        console.warn(`Domain addition failed: ${errorMsg}, but returning records for manual configuration`);
+        // Don't return error - still provide records so user can configure DNS manually
       }
 
       return new Response(
@@ -271,8 +272,13 @@ serve(async (req) => {
         }
       }
 
+      // Provide more specific error message when verification fails
+      const message = result.verified 
+        ? 'Domain verified and activated!' 
+        : (result.error || 'Records not detected. Please ensure DNS records are correctly configured and wait 5-10 minutes for DNS propagation.');
+      
       return new Response(
-        JSON.stringify({ success: result.verified, message: result.verified ? 'Domain verified and activated!' : 'Verification pending' }),
+        JSON.stringify({ success: result.verified, message }),
         { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }

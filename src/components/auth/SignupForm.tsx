@@ -266,37 +266,38 @@ const SignupForm = () => {
           </div>
         </div>
 
-        <div>
-          <Label htmlFor="password" className="text-sm">Password</Label>
-          <div className="mt-1">
-            <Input
-              id="password"
-              name="password"
-              type="password"
-              autoComplete="new-password"
-              required
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              placeholder="Enter your password"
-              className="h-9 text-sm"
-            />
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div>
+            <Label htmlFor="password" className="text-sm">Password</Label>
+            <div className="mt-1">
+              <Input
+                id="password"
+                name="password"
+                type="password"
+                autoComplete="new-password"
+                required
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder="Enter your password"
+                className="h-9 text-sm"
+              />
+            </div>
           </div>
-        </div>
-
-        <div>
-          <Label htmlFor="confirmPassword" className="text-sm">Confirm password</Label>
-          <div className="mt-1">
-            <Input
-              id="confirmPassword"
-              name="confirmPassword"
-              type="password"
-              autoComplete="new-password"
-              required
-              value={confirmPassword}
-              onChange={(e) => setConfirmPassword(e.target.value)}
-              placeholder="Confirm your password"
-              className="h-9 text-sm"
-            />
+          <div>
+            <Label htmlFor="confirmPassword" className="text-sm">Confirm password</Label>
+            <div className="mt-1">
+              <Input
+                id="confirmPassword"
+                name="confirmPassword"
+                type="password"
+                autoComplete="new-password"
+                required
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+                placeholder="Confirm your password"
+                className="h-9 text-sm"
+              />
+            </div>
           </div>
         </div>
 

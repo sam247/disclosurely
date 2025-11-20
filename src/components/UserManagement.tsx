@@ -618,7 +618,7 @@ const UserManagement = () => {
                   <span>Invite User</span>
                 </Button>
               </DialogTrigger>
-              <DialogContent>
+              <DialogContent className="max-w-md">
                 <DialogHeader>
                   <DialogTitle>Invite Team Member</DialogTitle>
                   <DialogDescription>
