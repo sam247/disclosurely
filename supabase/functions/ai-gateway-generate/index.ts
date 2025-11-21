@@ -79,7 +79,18 @@ serve(async (req) => {
 
   try {
     // ============================================================================
-    // 1. FEATURE FLAG CHECK (Kill switch)
+    // 1. AUTHENTICATION (Manual JWT verification since verify_jwt = false)
+    // ============================================================================
+    const authHeader = req.headers.get('Authorization');
+    if (!authHeader) {
+      return new Response('Unauthorized', {
+        status: 401,
+        headers: corsHeaders
+      });
+    }
+
+    // ============================================================================
+    // 2. FEATURE FLAG CHECK (Kill switch)
     // ============================================================================
     const supabase = createClient(
       Deno.env.get('SUPABASE_URL') ?? '',
@@ -88,6 +99,16 @@ serve(async (req) => {
 
     const organizationId = req.headers.get('X-Organization-Id');
     console.log(`[AI Gateway] Received request for org: ${organizationId}`);
+    
+    if (!organizationId) {
+      return new Response(
+        JSON.stringify({ error: 'X-Organization-Id header required' }),
+        { 
+          status: 400,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+        }
+      );
+    }
     
     // Check if AI Gateway feature is enabled for this organization
     const { data: featureEnabled, error: featureError } = await supabase
@@ -113,27 +134,6 @@ serve(async (req) => {
         JSON.stringify({ error: 'AI Gateway not enabled for this organization' }),
         { 
           status: 403,
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-        }
-      );
-    }
-
-    // ============================================================================
-    // 2. AUTHENTICATION & AUTHORIZATION
-    // ============================================================================
-    const authHeader = req.headers.get('Authorization');
-    if (!authHeader) {
-      return new Response('Unauthorized', { 
-        status: 401,
-        headers: corsHeaders 
-      });
-    }
-
-    if (!organizationId) {
-      return new Response(
-        JSON.stringify({ error: 'X-Organization-Id header required' }),
-        { 
-          status: 400,
           headers: { ...corsHeaders, 'Content-Type': 'application/json' }
         }
       );
