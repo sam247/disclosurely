@@ -571,9 +571,15 @@ When listing cases, always include the tracking ID (DIS-XXXX format) so users ca
         responseContent = await handleFollowUp(query);
       } else if (selectedCaseId) {
         // Initial case analysis - show PII preview first
-        console.log('📊 Case analysis - showing PII preview');
+        console.log('📊 Case analysis - showing PII preview', { selectedCaseId, hasAnalyzedCase });
         setIsLoading(false);
         setPendingAnalysisQuery(query.trim());
+        
+        // Ensure case data is loaded before showing preview
+        if (!selectedCaseData) {
+          await loadCaseData(selectedCaseId);
+        }
+        
         await loadPreviewContent();
         return; // Exit early, analysis will run after PII preview confirmation
       } else {
