@@ -1164,8 +1164,8 @@ Additional Details: ${decrypted.additionalDetails || 'None provided'}`;
                 <div ref={messagesEndRef} />
               </div>
 
-              {/* Input Area */}
-              <div className="border-t p-4">
+              {/* Input Area - Fixed at bottom */}
+              <div className="border-t p-4 flex-shrink-0">
                 <div className="flex gap-2">
                   <Input
                     value={inputQuery}
