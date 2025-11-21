@@ -917,15 +917,10 @@ Additional Details: ${decrypted.additionalDetails || 'None provided'}`;
                     <Select 
                       value={selectedCaseId} 
                       onValueChange={(value) => {
-                        const selectedCase = cases.find(c => c.id === value);
-                        if (selectedCase) {
-                          setSelectedCaseId(value);
-                          setHasAnalyzedCase(false);
-                          setIsEmptyState(false);
-                          setSelectedCaseData(null); // Reset case data - will load when send is clicked
-                          // Populate search box with case analysis prompt
-                          setInputQuery("Analyze this case");
-                        }
+                        setSelectedCaseId(value);
+                        setHasAnalyzedCase(false);
+                        loadCaseData(value);
+                        setInputQuery("Analyze this case");
                       }}
                     >
                       <SelectTrigger className="w-full">
@@ -1012,14 +1007,10 @@ Additional Details: ${decrypted.additionalDetails || 'None provided'}`;
               <div className="flex items-center gap-4 flex-wrap">
                 <div className="flex-1 min-w-[200px]">
                   <Select value={selectedCaseId} onValueChange={(value) => {
-                    const selectedCase = cases.find(c => c.id === value);
-                    if (selectedCase) {
-                      setSelectedCaseId(value);
-                      setHasAnalyzedCase(false);
-                      setSelectedCaseData(null); // Reset case data - will load when send is clicked
-                      // Populate search box with case analysis prompt
-                      setInputQuery("Analyze this case");
-                    }
+                    setSelectedCaseId(value);
+                    setHasAnalyzedCase(false);
+                    loadCaseData(value);
+                    setInputQuery("Analyze this case");
                   }}>
                     <SelectTrigger>
                       <SelectValue placeholder="Select a case to analyze..." />
