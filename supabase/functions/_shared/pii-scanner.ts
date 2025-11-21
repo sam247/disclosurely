@@ -66,8 +66,7 @@ const PII_PATTERNS = {
     pattern: /\b[A-Z][a-z]{2,}\s+[A-Z][a-z]{2,}(?:\s+[A-Z][a-z]{2,})?\b/g,
     severity: 'medium' as const,
     description: 'Possible full name detected',
-    // Improved validation: exclude common business phrases and require context
-    validator: (match: string, text: string, matchIndex: number) => {
+  },
       // Check against static false positives
       for (const fpPattern of STATIC_FALSE_POSITIVES) {
         if (fpPattern.test(match)) return false;
@@ -228,11 +227,37 @@ export function scanForPII(text: string): PIIScanResult {
           }
         }
         
-        // Use validator if available
-        if (!isFalsePositive && PII_PATTERNS[type as keyof typeof PII_PATTERNS]?.validator) {
-          const validator = (PII_PATTERNS[type as keyof typeof PII_PATTERNS] as any).validator;
-          if (typeof validator === 'function' && !validator(matchText, text, match.index)) {
+        // Additional context-aware validation for standalone names
+        if (!isFalsePositive && type === 'standaloneName') {
+          const beforeContext = text.substring(Math.max(0, match.index - 30), match.index).toLowerCase();
+          const afterContext = text.substring(match.index + matchText.length, Math.min(text.length, match.index + matchText.length + 30)).toLowerCase();
+          const contextText = beforeContext + ' ' + afterContext;
+          
+          // Exclude if it's clearly a business term
+          const businessIndicators = [
+            'report', 'expense', 'fraud', 'misconduct', 'violation', 'policy',
+            'hiring', 'recruitment', 'process', 'procedure', 'system', 'department'
+          ];
+          
+          const matchLower = matchText.toLowerCase();
+          if (businessIndicators.some(indicator => matchLower.includes(indicator) || contextText.includes(indicator))) {
             isFalsePositive = true;
+          }
+          
+          // Names are more likely after personal pronouns or titles
+          if (!isFalsePositive) {
+            const nameIndicators = ['my', 'i am', 'mr.', 'mrs.', 'ms.', 'dr.', 'professor', 'manager', 'supervisor'];
+            const isLikelyName = nameIndicators.some(indicator => beforeContext.includes(indicator));
+            
+            // If no clear name context, be more conservative
+            if (!isLikelyName) {
+              const words = matchText.split(/\s+/);
+              const commonFirstNames = ['john', 'jane', 'michael', 'sarah', 'david', 'emily', 'james', 'mary', 'robert', 'lisa'];
+              if (words.length === 2 && !commonFirstNames.includes(words[0].toLowerCase())) {
+                // Not a common first name and no context - likely false positive
+                isFalsePositive = true;
+              }
+            }
           }
         }
         
