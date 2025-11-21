@@ -322,9 +322,9 @@ const AuditLogView = () => {
   }
 
   return (
-    <div className="space-y-2 h-screen flex flex-col overflow-hidden">
+    <div className="space-y-2 h-[100dvh] sm:h-screen flex flex-col overflow-hidden">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 flex-shrink-0">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 flex-shrink-0 px-2 sm:px-0">
         <div>
           <h1 className="text-xl sm:text-2xl font-bold">Audit Trail</h1>
           <p className="text-xs sm:text-sm text-muted-foreground mt-0.5">
@@ -374,7 +374,7 @@ const AuditLogView = () => {
       </div>
 
       {/* Filters - Collapsible Horizontal Layout */}
-      <div className="border rounded-lg bg-white flex-shrink-0">
+      <div className="border rounded-lg bg-white flex-shrink-0 mx-2 sm:mx-0">
         <div 
           className="flex items-center justify-between p-2 cursor-pointer hover:bg-gray-50"
           onClick={() => setFiltersExpanded(!filtersExpanded)}
@@ -536,7 +536,7 @@ const AuditLogView = () => {
       </div>
 
       {/* Excel-Style Table */}
-      <div className="border rounded-lg bg-white flex-1 flex flex-col overflow-hidden min-h-0">
+      <div className="border rounded-lg bg-white flex-1 flex flex-col overflow-hidden min-h-0 mx-2 sm:mx-0 mb-2 sm:mb-0">
         {/* Table Header */}
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between p-2 sm:p-3 border-b bg-gray-50 gap-2 sm:gap-0 flex-shrink-0">
           <div className="flex items-center space-x-2 sm:space-x-4">
@@ -598,7 +598,7 @@ const AuditLogView = () => {
             {/* Desktop Table View */}
             <div className="hidden md:block flex-1 overflow-hidden min-h-0 flex flex-col">
               {/* Scrollable table body */}
-              <div className="flex-1 overflow-y-auto overflow-x-auto min-h-0" style={{ maxHeight: 'calc(100vh - 380px)' }}>
+              <div className="flex-1 overflow-y-auto overflow-x-auto min-h-0" style={{ maxHeight: 'calc(100dvh - 380px)' }}>
                 <table className="w-full">
               {/* Fixed Header */}
               <thead className="bg-gray-50 sticky top-0 z-10">
@@ -825,7 +825,7 @@ const AuditLogView = () => {
             </div>
 
             {/* Mobile Card View */}
-            <div className="md:hidden space-y-2 p-2 overflow-y-auto flex-1 min-h-0" style={{ maxHeight: 'calc(100vh - 500px)' }}>
+            <div className="md:hidden space-y-2 p-2 overflow-y-auto flex-1 min-h-0" style={{ maxHeight: 'calc(100dvh - 420px)' }}>
               {logs.map((log) => (
                 <div
                   key={log.id}
