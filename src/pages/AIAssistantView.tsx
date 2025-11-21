@@ -514,6 +514,44 @@ Remember: Compliance teams need confidence and clarity under pressure. Be the ad
       throw new Error('No case selected');
     }
 
+    // Load case data if not already loaded
+    if (!selectedCaseData) {
+      await loadCaseData(selectedCaseId);
+    }
+
+    // Decrypt case content for context
+    let caseContext = '';
+    if (selectedCaseData?.encrypted_content && selectedCaseData?.organization_id) {
+      try {
+        const decrypted = await decryptReport(selectedCaseData.encrypted_content, selectedCaseData.organization_id);
+        caseContext = `
+Case: ${selectedCaseData.tracking_id} - ${selectedCaseData.title}
+Category: ${decrypted.category || 'Not specified'}
+Description: ${decrypted.description || 'Not provided'}
+Location: ${decrypted.location || 'Not specified'}
+Date: ${decrypted.dateOfIncident || 'Not specified'}
+Status: ${selectedCaseData.status}
+Priority: ${selectedCaseData.priority}/5
+        `.trim();
+      } catch (decryptError: any) {
+        console.error('Error decrypting case for follow-up:', decryptError);
+        caseContext = `Case: ${selectedCaseData.tracking_id} - ${selectedCaseData.title} (Status: ${selectedCaseData.status}, Priority: ${selectedCaseData.priority}/5)`;
+      }
+    } else if (selectedCaseData) {
+      caseContext = `Case: ${selectedCaseData.tracking_id} - ${selectedCaseData.title} (Status: ${selectedCaseData.status}, Priority: ${selectedCaseData.priority}/5)`;
+    }
+
+    // Get all cases for cross-case queries
+    let allCasesContext = '';
+    if (Array.isArray(allCases) && allCases.length > 0) {
+      const harassmentCases = allCases.filter(c => 
+        c.report_type?.toLowerCase().includes('harassment') || 
+        c.title?.toLowerCase().includes('harassment') ||
+        c.tags?.some((tag: string) => tag.toLowerCase().includes('harassment'))
+      );
+      allCasesContext = `\n\nYou have access to ${allCases.length} total cases. ${harassmentCases.length} of them are harassment-related.`;
+    }
+
     // Build conversation history (last 4 messages)
     const recentMessages: Array<{ role: string; content: string }> = [];
     if (Array.isArray(messages) && messages.length > 0) {
@@ -535,9 +573,11 @@ Remember: Compliance teams need confidence and clarity under pressure. Be the ad
         messages: [
           {
             role: 'system',
-            content: `You are a compliance consultant having a conversational chat about case "${selectedCaseData?.title || 'a compliance case'}". 
+            content: `You are a compliance consultant having a conversational chat about cases. You have access to case data and can answer questions about specific cases or patterns across cases.
 
-Provide SHORT, conversational responses (2-3 paragraphs max). NO headings, NO bullet points - just natural conversation. Be direct and helpful, like chatting with a colleague.`
+${caseContext}${allCasesContext}
+
+Provide SHORT, conversational responses (2-3 paragraphs max). NO headings, NO bullet points, NO markdown formatting - just natural conversation. Be direct and helpful, like chatting with a colleague. Answer questions using the case data you have access to.`
           },
           ...recentMessages
         ],
@@ -1179,10 +1219,10 @@ Additional Details: ${decrypted.additionalDetails || 'None provided'}`;
                             <Button
                               onClick={async () => {
                                 setShowPIIChoice(false);
-                                setPreservePII(false); // Don't preserve = redact PII
+                                setPreservePII(true); // Preserve = don't redact PII (show personal details)
                                 const query = inputQuery || "Analyze this case";
-                                // preserve_pii: false means redact PII (backend checks !preserve_pii)
-                                await handleQueryWithPIIPreference(query, false);
+                                // preserve_pii: true means don't redact PII (backend checks !preserve_pii)
+                                await handleQueryWithPIIPreference(query, true);
                               }}
                               className="flex-1 bg-green-600 hover:bg-green-700"
                               size="sm"
@@ -1193,10 +1233,10 @@ Additional Details: ${decrypted.additionalDetails || 'None provided'}`;
                             <Button
                               onClick={async () => {
                                 setShowPIIChoice(false);
-                                setPreservePII(true); // Preserve = don't redact PII
+                                setPreservePII(false); // Don't preserve = redact PII (show [EMPLOYEE_ID_1])
                                 const query = inputQuery || "Analyze this case";
-                                // preserve_pii: true means don't redact PII (backend checks !preserve_pii)
-                                await handleQueryWithPIIPreference(query, true);
+                                // preserve_pii: false means redact PII (backend checks !preserve_pii)
+                                await handleQueryWithPIIPreference(query, false);
                               }}
                               variant="outline"
                               className="flex-1"
@@ -1437,18 +1477,9 @@ Additional Details: ${decrypted.additionalDetails || 'None provided'}`;
                             : 'bg-muted text-foreground border'
                         )}
                       >
-                        {message.role === 'assistant' && (message.content.includes('###') || message.content.includes('**') || message.content.includes('🚨') || message.content.includes('*')) ? (
-                          <div 
-                            className="prose prose-sm max-w-none dark:prose-invert"
-                            dangerouslySetInnerHTML={{ 
-                              __html: sanitizeHtml(formatMarkdownToHtml(message.content)) 
-                            }}
-                          />
-                        ) : (
-                          <p className="whitespace-pre-wrap leading-relaxed text-sm">
-                            {message.content}
-                          </p>
-                        )}
+                        <p className="whitespace-pre-wrap leading-relaxed text-sm">
+                          {message.content}
+                        </p>
                         
                         {/* PII Protection Info - Inline Display */}
                         {message.role === 'assistant' && message.piiMetadata?.redacted && (
@@ -1529,10 +1560,10 @@ Additional Details: ${decrypted.additionalDetails || 'None provided'}`;
                             <Button
                               onClick={async () => {
                                 setShowPIIChoice(false);
-                                setPreservePII(false); // Don't preserve = redact PII
+                                setPreservePII(true); // Preserve = don't redact PII (show personal details)
                                 const query = inputQuery || "Analyze this case";
-                                // preserve_pii: false means redact PII (backend checks !preserve_pii)
-                                await handleQueryWithPIIPreference(query, false);
+                                // preserve_pii: true means don't redact PII (backend checks !preserve_pii)
+                                await handleQueryWithPIIPreference(query, true);
                               }}
                               className="flex-1 bg-green-600 hover:bg-green-700"
                               size="sm"
@@ -1543,10 +1574,10 @@ Additional Details: ${decrypted.additionalDetails || 'None provided'}`;
                             <Button
                               onClick={async () => {
                                 setShowPIIChoice(false);
-                                setPreservePII(true); // Preserve = don't redact PII
+                                setPreservePII(false); // Don't preserve = redact PII (show [EMPLOYEE_ID_1])
                                 const query = inputQuery || "Analyze this case";
-                                // preserve_pii: true means don't redact PII (backend checks !preserve_pii)
-                                await handleQueryWithPIIPreference(query, true);
+                                // preserve_pii: false means redact PII (backend checks !preserve_pii)
+                                await handleQueryWithPIIPreference(query, false);
                               }}
                               variant="outline"
                               className="flex-1"
