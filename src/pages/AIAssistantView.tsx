@@ -12,7 +12,11 @@ import {
   Upload, 
   FileText,
   Eye,
-  Save
+  Save,
+  Shield,
+  ChevronDown,
+  ChevronUp,
+  AlertCircle
 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
@@ -40,6 +44,11 @@ interface ChatMessage {
     created_at: string;
   }>;
   timestamp: Date;
+  piiMetadata?: {
+    redacted: boolean;
+    stats?: Record<string, number>;
+    redactionMap?: Record<string, string>;
+  };
 }
 
 interface NewCase {
@@ -59,6 +68,147 @@ interface CompanyDocument {
   file_size: number;
   created_at: string;
 }
+
+// Inline PII Info Component
+const PIIInfoInline = ({ piiMetadata, originalContent }: { piiMetadata: { redacted: boolean; stats?: Record<string, number>; redactionMap?: Record<string, string> }; originalContent: string }) => {
+  const [isExpanded, setIsExpanded] = useState(false);
+  const { organization } = useOrganization();
+  const { toast } = useToast();
+  const [reportingFalsePositive, setReportingFalsePositive] = useState<string | null>(null);
+
+  const totalPII = piiMetadata.stats ? Object.values(piiMetadata.stats).reduce((sum, count) => sum + count, 0) : 0;
+  const redactionMap = piiMetadata.redactionMap || {};
+
+  const handleReportFalsePositive = async (original: string, type: string) => {
+    if (!organization?.id) {
+      toast({
+        title: 'Error',
+        description: 'Unable to report false positive. Organization not found.',
+        variant: 'destructive'
+      });
+      return;
+    }
+
+    setReportingFalsePositive(original);
+    
+    try {
+      // Get context around the detection
+      const start = Math.max(0, originalContent.indexOf(original) - 50);
+      const end = Math.min(originalContent.length, originalContent.indexOf(original) + original.length + 50);
+      const context = originalContent.substring(start, end);
+
+      const { error } = await supabase
+        .from('pii_false_positives')
+        .insert({
+          organization_id: organization.id,
+          detected_text: original,
+          detection_type: type,
+          context: context,
+          reported_by: (await supabase.auth.getUser()).data.user?.id || null
+        });
+
+      if (error) throw error;
+
+      toast({
+        title: 'False Positive Reported',
+        description: `"${original}" has been reported. Thank you for helping improve our detection system!`,
+      });
+
+      setReportingFalsePositive(null);
+    } catch (error: any) {
+      console.error('Error reporting false positive:', error);
+      toast({
+        title: 'Error',
+        description: 'Failed to report false positive. Please try again.',
+        variant: 'destructive'
+      });
+      setReportingFalsePositive(null);
+    }
+  };
+
+  if (!piiMetadata.redacted || totalPII === 0) return null;
+
+  return (
+    <div className="mt-3 pt-3 border-t border-muted">
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          <Shield className="h-4 w-4 text-green-600" />
+          <Badge variant="secondary" className="bg-green-50 text-green-800 border-green-200">
+            {totalPII} item{totalPII !== 1 ? 's' : ''} protected
+          </Badge>
+          {piiMetadata.stats && Object.entries(piiMetadata.stats).map(([type, count]) => (
+            <span key={type} className="text-xs text-muted-foreground">
+              {count} {type.toLowerCase()}
+            </span>
+          ))}
+        </div>
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={() => setIsExpanded(!isExpanded)}
+          className="h-7 text-xs"
+        >
+          {isExpanded ? (
+            <>
+              <ChevronUp className="h-3 w-3 mr-1" />
+              Hide details
+            </>
+          ) : (
+            <>
+              <ChevronDown className="h-3 w-3 mr-1" />
+              View details
+            </>
+          )}
+        </Button>
+      </div>
+      
+      {isExpanded && redactionMap && Object.keys(redactionMap).length > 0 && (
+        <div className="mt-3 space-y-2">
+          <p className="text-xs text-muted-foreground mb-2">
+            The following information was automatically redacted for privacy:
+          </p>
+          <div className="space-y-2 max-h-48 overflow-y-auto">
+            {Object.entries(redactionMap).map(([original, placeholder]) => {
+              // Extract type from placeholder (e.g., [EMAIL_1] -> EMAIL)
+              const typeMatch = placeholder.match(/\[(\w+)_\d+\]/);
+              const type = typeMatch ? typeMatch[1] : 'UNKNOWN';
+              
+              return (
+                <div key={placeholder} className="flex items-center justify-between gap-2 p-2 bg-muted/50 rounded text-xs">
+                  <div className="flex items-center gap-2 flex-1 min-w-0">
+                    <span className="px-2 py-0.5 bg-green-100 text-green-800 rounded font-mono text-[10px]">
+                      {placeholder}
+                    </span>
+                    <span className="text-muted-foreground truncate" title={original}>
+                      {original}
+                    </span>
+                  </div>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => handleReportFalsePositive(original, type)}
+                    disabled={reportingFalsePositive === original}
+                    className="h-6 px-2 text-[10px] flex-shrink-0"
+                    title="Report as false positive"
+                  >
+                    {reportingFalsePositive === original ? (
+                      'Reporting...'
+                    ) : (
+                      <>
+                        <AlertCircle className="h-3 w-3 mr-1" />
+                        Not PII
+                      </>
+                    )}
+                  </Button>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
 
 const AIAssistantView = () => {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
@@ -336,17 +486,25 @@ Remember: Compliance teams need confidence and clarity under pressure. Be the ad
       data.content || 
       'No analysis generated';
 
+    // Capture PII metadata from response
+    const piiMetadata = data.metadata ? {
+      redacted: data.metadata.pii_redacted || false,
+      stats: data.metadata.pii_stats,
+      redactionMap: data.metadata.redaction_map
+    } : undefined;
+
     // Store for saving
     setCurrentAnalysisData({
       caseData: selectedCaseData,
       customPrompt: query.trim(),
       companyDocuments,
-      analysis: responseContent
+      analysis: responseContent,
+      piiMetadata
     });
 
     // Mark case as analyzed after successful analysis
     setHasAnalyzedCase(true);
-    return responseContent;
+    return { content: responseContent, piiMetadata };
   };
 
   // Handle follow-up questions (conversational chat about analyzed case)
@@ -570,23 +728,34 @@ When listing cases, always include the tracking ID (DIS-XXXX format) so users ca
         setIsLoading(false);
         responseContent = await handleFollowUp(query);
       } else if (selectedCaseId) {
-        // Initial case analysis - show PII preview first
-        console.log('📊 Case analysis - showing PII preview', { selectedCaseId, hasAnalyzedCase, hasSelectedCaseData: !!selectedCaseData });
-        setPendingAnalysisQuery(query.trim());
+        // Initial case analysis - run directly (PII info shown inline in results)
+        console.log('📊 Case analysis - running directly', { selectedCaseId, hasAnalyzedCase, hasSelectedCaseData: !!selectedCaseData });
         
-        // Always load case data first to ensure we have it
-        console.log('📦 Loading case data...');
-        await loadCaseData(selectedCaseId);
+        // Ensure case data is loaded
+        if (!selectedCaseData) {
+          console.log('📦 Loading case data...');
+          await loadCaseData(selectedCaseId);
+        }
         
-        // Small delay to ensure state is updated
-        await new Promise(resolve => setTimeout(resolve, 100));
+        // Run analysis directly - PII metadata will be captured and shown inline
+        const analysisResult = await handleCaseAnalysis(query.trim(), false);
+        responseContent = typeof analysisResult === 'string' ? analysisResult : analysisResult.content;
         
-        // Now load and show preview
-        console.log('🔍 Loading preview content...');
-        await loadPreviewContent();
-        console.log('✅ Preview content loaded, modal should open');
+        // Store PII metadata for display in message
+        const piiMetadata = typeof analysisResult === 'object' ? analysisResult.piiMetadata : undefined;
+        
+        const aiMessage: ChatMessage = {
+          id: `ai-${Date.now()}`,
+          role: 'assistant',
+          content: responseContent,
+          timestamp: new Date(),
+          piiMetadata
+        };
+        
+        setMessages(prev => [...prev, aiMessage]);
+        setHasAnalyzedCase(true);
         setIsLoading(false);
-        return; // Exit early, analysis will run after PII preview confirmation
+        return; // Exit early, message already added
       } else {
         // Cross-case search
         console.log('🔍 Cross-case search');
@@ -601,7 +770,8 @@ When listing cases, always include the tracking ID (DIS-XXXX format) so users ca
         role: 'assistant',
         content: responseContent,
         cases: relevantCases.length > 0 ? relevantCases : undefined,
-        timestamp: new Date()
+        timestamp: new Date(),
+        piiMetadata: undefined // Cross-case search doesn't use PII redaction
       };
 
       setMessages(prev => [...prev, aiMessage]);
@@ -1119,6 +1289,15 @@ Additional Details: ${decrypted.additionalDetails || 'None provided'}`;
                             {message.content}
                           </p>
                         )}
+                        
+                        {/* PII Protection Info - Inline Display */}
+                        {message.role === 'assistant' && message.piiMetadata?.redacted && (
+                          <PIIInfoInline 
+                            piiMetadata={message.piiMetadata}
+                            originalContent={message.content}
+                          />
+                        )}
+                        
                         <p className={cn(
                           'text-xs mt-2',
                           message.role === 'user' ? 'text-primary-foreground/70' : 'text-muted-foreground'
@@ -1192,11 +1371,8 @@ Additional Details: ${decrypted.additionalDetails || 'None provided'}`;
                   />
                   <Button
                     onClick={() => {
-                      if (selectedCaseId && !hasAnalyzedCase) {
-                        loadPreviewContent();
-                      } else {
-                        handleQuery(inputQuery);
-                      }
+                      // Direct analysis - PII info shown inline in results
+                      handleQuery(inputQuery);
                     }}
                     disabled={!inputQuery.trim() || isLoading}
                     size="default"
@@ -1228,17 +1404,20 @@ Additional Details: ${decrypted.additionalDetails || 'None provided'}`;
           }}
           onProceedWithoutRedaction={async () => {
             setShowPIIPreview(false);
-            // Run analysis without PII redaction
+            // Run analysis without PII redaction (legacy modal handler - kept for backwards compatibility)
             if (selectedCaseId && selectedCaseData && pendingAnalysisQuery) {
               setPreservePII(true);
               setIsLoading(true);
               try {
-                const responseContent = await handleCaseAnalysis(pendingAnalysisQuery, true);
+                const analysisResult = await handleCaseAnalysis(pendingAnalysisQuery, true);
+                const responseContent = typeof analysisResult === 'string' ? analysisResult : analysisResult.content;
+                const piiMetadata = typeof analysisResult === 'object' ? analysisResult.piiMetadata : undefined;
                 const aiMessage: ChatMessage = {
                   id: `ai-${Date.now()}`,
                   role: 'assistant',
                   content: responseContent,
-                  timestamp: new Date()
+                  timestamp: new Date(),
+                  piiMetadata
                 };
                 setMessages(prev => [...prev, aiMessage]);
                 setHasAnalyzedCase(true);
