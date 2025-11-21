@@ -608,7 +608,8 @@ serve(async (req) => {
               tracking_id: reportData.tracking_id,
               status: reportData.status,
               report_type: reportData.report_type,
-              created_at: report.created_at
+              created_at: report.created_at,
+              priority: priorityValue // Pass whistleblower's priority rating
             },
             reportContent: reportData.description // Use plain text description before encryption
           })

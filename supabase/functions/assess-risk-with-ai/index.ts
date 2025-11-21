@@ -21,6 +21,13 @@ serve(async (req) => {
       throw new Error('Deepseek API key not configured');
     }
 
+    const whistleblowerPriority = reportData.priority || 3; // Default to 3 if not provided
+    const priorityLabel = whistleblowerPriority === 1 ? 'Low (1/5)' :
+                         whistleblowerPriority === 2 ? 'Low-Medium (2/5)' :
+                         whistleblowerPriority === 3 ? 'Medium (3/5)' :
+                         whistleblowerPriority === 4 ? 'High (4/5)' :
+                         'Critical (5/5)';
+
     const prompt = `You are an expert risk assessment analyst. Analyze the following whistleblower report and provide a comprehensive risk assessment using the standard risk matrix methodology.
 
 REPORT DETAILS:
@@ -29,6 +36,7 @@ REPORT DETAILS:
 - Status: ${reportData.status}
 - Type: ${reportData.report_type}
 - Created: ${reportData.created_at}
+- Whistleblower's Priority Rating: ${priorityLabel} (${whistleblowerPriority}/5)
 
 REPORT CONTENT:
 ${reportContent || 'Report content not available'}
@@ -54,6 +62,19 @@ Please analyze this report using the following risk assessment framework:
 
 4. CALCULATE RISK SCORE: Multiply Likelihood × Impact (1-25 scale)
 
+IMPORTANT - INTELLIGENT PRIORITY ADJUSTMENT:
+The whistleblower has rated this report as ${priorityLabel}. Consider this rating in your assessment:
+
+- If your independent analysis suggests a HIGHER risk than the whistleblower's rating, explain why (e.g., systemic issues, legal implications, pattern indicators, regulatory exposure)
+- If your analysis suggests a LOWER risk, explain why (e.g., isolated incident, limited scope, mitigatable factors)
+- If your analysis aligns with the whistleblower's rating, confirm and provide supporting reasoning
+- Consider that whistleblowers may understate severity due to fear, or overstate due to personal impact - your analysis should balance their perspective with objective risk factors
+
+The AI triage should provide an independent, objective assessment that considers:
+- The whistleblower's perspective (their priority rating)
+- Objective risk factors (legal, financial, reputational, operational, compliance)
+- What this means for the company (not just the individual's concern)
+
 Please provide your analysis in the following JSON format:
 {
   "hazards_identified": ["list of identified hazards/threats"],
@@ -64,6 +85,7 @@ Please provide your analysis in the following JSON format:
   "risk_score": [1-25],
   "risk_level": "Low/Medium/High/Critical",
   "priority_recommendation": "Immediate/High/Medium/Low",
+  "whistleblower_priority_alignment": "explanation of how your assessment compares to the whistleblower's ${priorityLabel} rating and why",
   "immediate_actions": ["list of immediate actions required"],
   "risk_factors": ["key factors contributing to risk level"]
 }

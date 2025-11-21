@@ -29,6 +29,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from '@/components/ui/sheet';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { createBrandedPDF, addPDFSection, addPDFField, downloadPDF, exportToCSV, formatExportDate, getStatusColor, addPDFTable } from '@/utils/export-utils';
 import { decryptReport } from '@/utils/encryption';
@@ -248,6 +249,7 @@ const DashboardView = () => {
   const [exportingReportId, setExportingReportId] = useState<string | null>(null);
   const [resolvingReportId, setResolvingReportId] = useState<string | null>(null);
   const [updatingStatusReportId, setUpdatingStatusReportId] = useState<string | null>(null);
+  const [aiTriageReportId, setAiTriageReportId] = useState<string | null>(null);
 
   useEffect(() => {
     if (user && !rolesLoading) {
@@ -1497,83 +1499,7 @@ Additional Details: ${decryptedContent.additionalDetails || 'None provided'}
                                       </button>
                                     </PopoverTrigger>
                                     <PopoverContent className="w-80">
-                                      <div className="space-y-3">
-                                        {/* Header */}
-                                        <div className="flex items-center justify-between">
-                                          <div className="flex items-center gap-2">
-                                            <Bot className="w-4 h-4 text-primary" />
-                                            <h4 className="font-semibold text-sm">{t('ai.caseTriage')}</h4>
-                                          </div>
-                                          <Badge variant={
-                                            getUrgencyLevel(report.ai_risk_level) === 'HIGH' ? 'destructive' :
-                                            getUrgencyLevel(report.ai_risk_level) === 'MEDIUM' ? 'default' :
-                                            'secondary'
-                                          }>
-                                            {getUrgencyLevel(report.ai_risk_level)}
-                                          </Badge>
-                                        </div>
-
-                                        <p className="text-sm text-muted-foreground">
-                                          This case {getUrgencyLevel(report.ai_risk_level) === 'HIGH' ? 'needs urgent attention' :
-                                                     getUrgencyLevel(report.ai_risk_level) === 'MEDIUM' ? 'requires prompt review' :
-                                                     'can be handled in standard timeline'}
-                                        </p>
-
-                                        {/* Severity Score */}
-                                        <div className="space-y-2">
-                                          <div className="flex justify-between items-center">
-                                            <span className="text-sm font-medium">{t('ai.severity')}</span>
-                                            <span className="text-sm font-bold">{getSeverityScore(report.ai_risk_score)}/10</span>
-                                          </div>
-                                          <div className="w-full bg-gray-200 rounded-full h-2">
-                                            <div
-                                              className={`h-2 rounded-full ${
-                                                getSeverityScore(report.ai_risk_score) >= 8 ? 'bg-red-600' :
-                                                getSeverityScore(report.ai_risk_score) >= 6 ? 'bg-orange-500' :
-                                                getSeverityScore(report.ai_risk_score) >= 4 ? 'bg-yellow-500' :
-                                                'bg-green-500'
-                                              }`}
-                                              style={{width: `${(getSeverityScore(report.ai_risk_score)/10)*100}%`}}
-                                            />
-                                          </div>
-                                          <p className="text-xs text-muted-foreground">
-                                            {getSeverityDescription(getSeverityScore(report.ai_risk_score))}
-                                          </p>
-                                        </div>
-
-                                        {/* AI Confidence */}
-                                        <div className="flex justify-between items-center pt-2 border-t">
-                                          <div>
-                                            <div className="text-sm font-medium">{t('ai.confidence')}</div>
-                                            <div className="text-xs text-muted-foreground">{t('ai.confidenceDescription')}</div>
-                                          </div>
-                                          <div className="text-right">
-                                            <div className="text-lg font-bold">{getConfidencePercentage(report.ai_likelihood_score)}%</div>
-                                          </div>
-                                        </div>
-
-                                        {/* Suggested Action */}
-                                        <div className="pt-3 border-t bg-blue-50 -mx-4 px-4 py-3 rounded-b-lg">
-                                          <div className="text-xs font-semibold text-blue-900 mb-2">Suggested Action:</div>
-                                          <div className="space-y-1">
-                                            <div className="flex items-center gap-2 text-sm text-blue-800">
-                                              <Clock className="w-4 h-4 flex-shrink-0" />
-                                              <span>{getTimelineText(getUrgencyLevel(report.ai_risk_level))}</span>
-                                            </div>
-                                            <div className="flex items-center gap-2 text-sm text-blue-800">
-                                              <User className="w-4 h-4 flex-shrink-0" />
-                                              <span>{getHandlerRecommendation(getUrgencyLevel(report.ai_risk_level))}</span>
-                                            </div>
-                                          </div>
-                                        </div>
-
-                                        {/* Timestamp */}
-                                        {report.ai_assessed_at && (
-                                          <div className="text-xs text-muted-foreground pt-2 border-t">
-                                            Triaged: {new Date(report.ai_assessed_at).toLocaleDateString()} at {new Date(report.ai_assessed_at).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}
-                                          </div>
-                                        )}
-                                      </div>
+                                      {renderAITriageDetails(report)}
                                     </PopoverContent>
                                   </Popover>
                                 </div>
@@ -2361,6 +2287,24 @@ Additional Details: ${decryptedContent.additionalDetails || 'None provided'}
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {/* AI Triage Mobile Modal */}
+      <Sheet open={!!aiTriageReportId} onOpenChange={(open) => !open && setAiTriageReportId(null)}>
+        <SheetContent side="bottom" className="h-[80vh] overflow-y-auto">
+          <SheetHeader>
+            <SheetTitle>{t('ai.caseTriage')}</SheetTitle>
+            <SheetDescription>
+              {aiTriageReportId && reports.find(r => r.id === aiTriageReportId)?.tracking_id}
+            </SheetDescription>
+          </SheetHeader>
+          <div className="mt-4">
+            {aiTriageReportId && (() => {
+              const report = reports.find(r => r.id === aiTriageReportId);
+              return report ? renderAITriageDetails(report) : null;
+            })()}
+          </div>
+        </SheetContent>
+      </Sheet>
 
       {/* Report Details Dialog */}
       <Dialog open={isReportDialogOpen} onOpenChange={setIsReportDialogOpen}>
