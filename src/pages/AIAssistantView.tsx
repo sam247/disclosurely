@@ -1219,10 +1219,10 @@ Additional Details: ${decrypted.additionalDetails || 'None provided'}`;
                             <Button
                               onClick={async () => {
                                 setShowPIIChoice(false);
-                                setPreservePII(true); // Preserve = don't redact PII (show personal details)
+                                setPreservePII(false); // Don't preserve = redact PII (show [EMPLOYEE_ID_1])
                                 const query = inputQuery || "Analyze this case";
-                                // preserve_pii: true means don't redact PII (backend checks !preserve_pii)
-                                await handleQueryWithPIIPreference(query, true);
+                                // preserve_pii: false means redact PII (backend checks !preserve_pii)
+                                await handleQueryWithPIIPreference(query, false);
                               }}
                               className="flex-1 bg-green-600 hover:bg-green-700"
                               size="sm"
@@ -1233,10 +1233,10 @@ Additional Details: ${decrypted.additionalDetails || 'None provided'}`;
                             <Button
                               onClick={async () => {
                                 setShowPIIChoice(false);
-                                setPreservePII(false); // Don't preserve = redact PII (show [EMPLOYEE_ID_1])
+                                setPreservePII(true); // Preserve = don't redact PII (show personal details)
                                 const query = inputQuery || "Analyze this case";
-                                // preserve_pii: false means redact PII (backend checks !preserve_pii)
-                                await handleQueryWithPIIPreference(query, false);
+                                // preserve_pii: true means don't redact PII (backend checks !preserve_pii)
+                                await handleQueryWithPIIPreference(query, true);
                               }}
                               variant="outline"
                               className="flex-1"
@@ -1560,10 +1560,10 @@ Additional Details: ${decrypted.additionalDetails || 'None provided'}`;
                             <Button
                               onClick={async () => {
                                 setShowPIIChoice(false);
-                                setPreservePII(true); // Preserve = don't redact PII (show personal details)
+                                setPreservePII(false); // Don't preserve = redact PII (show [EMPLOYEE_ID_1])
                                 const query = inputQuery || "Analyze this case";
-                                // preserve_pii: true means don't redact PII (backend checks !preserve_pii)
-                                await handleQueryWithPIIPreference(query, true);
+                                // preserve_pii: false means redact PII (backend checks !preserve_pii)
+                                await handleQueryWithPIIPreference(query, false);
                               }}
                               className="flex-1 bg-green-600 hover:bg-green-700"
                               size="sm"
@@ -1574,10 +1574,10 @@ Additional Details: ${decrypted.additionalDetails || 'None provided'}`;
                             <Button
                               onClick={async () => {
                                 setShowPIIChoice(false);
-                                setPreservePII(false); // Don't preserve = redact PII (show [EMPLOYEE_ID_1])
+                                setPreservePII(true); // Preserve = don't redact PII (show personal details)
                                 const query = inputQuery || "Analyze this case";
-                                // preserve_pii: false means redact PII (backend checks !preserve_pii)
-                                await handleQueryWithPIIPreference(query, false);
+                                // preserve_pii: true means don't redact PII (backend checks !preserve_pii)
+                                await handleQueryWithPIIPreference(query, true);
                               }}
                               variant="outline"
                               className="flex-1"
