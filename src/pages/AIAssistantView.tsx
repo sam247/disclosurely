@@ -1189,17 +1189,10 @@ Additional Details: ${decrypted.additionalDetails || 'None provided'}`;
                     disabled={isLoading}
                   />
                   <Button
-                    onClick={async () => {
+                    onClick={() => {
                       if (selectedCaseId && !hasAnalyzedCase) {
-                        // First time analyzing this case - show PII preview first
-                        setPendingAnalysisQuery(inputQuery.trim());
-                        // Ensure case data is loaded
-                        if (!selectedCaseData) {
-                          await loadCaseData(selectedCaseId);
-                        }
-                        await loadPreviewContent();
+                        loadPreviewContent();
                       } else {
-                        // Follow-up question or cross-case search - go straight to query
                         handleQuery(inputQuery);
                       }
                     }}
