@@ -11,6 +11,7 @@ interface PIIPreviewModalProps {
   originalText: string;
   caseTitle: string;
   onConfirm: () => void;
+  onProceedWithoutRedaction?: () => void;
   onCancel: () => void;
 }
 
@@ -18,6 +19,7 @@ export const PIIPreviewModal: React.FC<PIIPreviewModalProps> = ({
   originalText,
   caseTitle,
   onConfirm,
+  onProceedWithoutRedaction,
   onCancel
 }) => {
   const { toast } = useToast();
@@ -25,8 +27,19 @@ export const PIIPreviewModal: React.FC<PIIPreviewModalProps> = ({
   const [reportingFalsePositive, setReportingFalsePositive] = useState<string | null>(null);
   
   // Detect PII client-side
-  const redactionResult = detectPII(originalText);
-  const highlightedParts = highlightPIIForDisplay(originalText, redactionResult.detections);
+  const redactionResult = detectPII(originalText || '');
+  const highlightedParts = (() => {
+    try {
+      const result = highlightPIIForDisplay(
+        originalText || '', 
+        Array.isArray(redactionResult?.detections) ? redactionResult.detections : []
+      );
+      return Array.isArray(result) ? result : [{ text: originalText || '', isPII: false }];
+    } catch (error) {
+      console.error('Error highlighting PII:', error);
+      return [{ text: originalText || '', isPII: false }];
+    }
+  })();
 
   const handleReportFalsePositive = async (detection: any) => {
     if (!organization?.id) {
@@ -84,7 +97,7 @@ export const PIIPreviewModal: React.FC<PIIPreviewModalProps> = ({
             Privacy Preview: {caseTitle}
           </DialogTitle>
           <DialogDescription className="text-base">
-            {redactionResult.piiCount > 0 
+            {(redactionResult?.piiCount || 0) > 0 
               ? `${redactionResult.piiCount} piece${redactionResult.piiCount > 1 ? 's' : ''} of personal information will be automatically redacted before AI analysis.`
               : 'No personal information detected. Your case will be analyzed as-is.'}
           </DialogDescription>
@@ -103,7 +116,7 @@ export const PIIPreviewModal: React.FC<PIIPreviewModalProps> = ({
                 </h3>
               </div>
               <div className="p-4 bg-white text-sm leading-relaxed whitespace-pre-wrap font-mono">
-                {highlightedParts.map((part, idx) => (
+                {Array.isArray(highlightedParts) && highlightedParts.map((part, idx) => (
                   part.isPII ? (
                     <span
                       key={idx}
@@ -128,13 +141,13 @@ export const PIIPreviewModal: React.FC<PIIPreviewModalProps> = ({
                 </h3>
               </div>
               <div className="p-4 bg-white text-sm leading-relaxed whitespace-pre-wrap font-mono">
-                {redactionResult.redactedText}
+                {redactionResult?.redactedText || originalText || ''}
               </div>
             </div>
           </div>
 
           {/* PII breakdown */}
-          {redactionResult.piiCount > 0 && (
+          {(redactionResult?.piiCount || 0) > 0 && (
             <div className="border rounded-lg overflow-hidden">
               <div className="bg-blue-50 border-b p-3">
                 <h3 className="font-semibold flex items-center gap-2 text-sm">
@@ -144,7 +157,7 @@ export const PIIPreviewModal: React.FC<PIIPreviewModalProps> = ({
               </div>
               <div className="p-4 bg-white">
                 <div className="grid grid-cols-2 gap-3">
-                  {redactionResult.detections.map((detection, idx) => (
+                  {Array.isArray(redactionResult.detections) && redactionResult.detections.map((detection, idx) => (
                     <div 
                       key={idx} 
                       className="flex items-center gap-3 bg-gray-50 p-3 rounded-lg border"
@@ -203,11 +216,20 @@ export const PIIPreviewModal: React.FC<PIIPreviewModalProps> = ({
           </div>
         </div>
 
-        <DialogFooter className="border-t pt-4">
-          <Button variant="outline" onClick={onCancel}>
+        <DialogFooter className="border-t pt-4 flex-col sm:flex-row gap-2">
+          <Button variant="outline" onClick={onCancel} className="w-full sm:w-auto">
             Go Back
           </Button>
-          <Button onClick={onConfirm} className="bg-green-600 hover:bg-green-700">
+          {onProceedWithoutRedaction && (
+            <Button 
+              variant="outline" 
+              onClick={onProceedWithoutRedaction}
+              className="w-full sm:w-auto border-amber-300 text-amber-700 hover:bg-amber-50"
+            >
+              Proceed Without Redaction
+            </Button>
+          )}
+          <Button onClick={onConfirm} className="bg-green-600 hover:bg-green-700 w-full sm:w-auto">
             Looks Good - Proceed with Analysis
           </Button>
         </DialogFooter>

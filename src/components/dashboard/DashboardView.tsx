@@ -341,20 +341,44 @@ const DashboardView = () => {
   // Pattern Detection: Run when reports change
   useEffect(() => {
     const runPatternDetection = async () => {
-      if (reports.length < 3 || patternsDismissed) return; // Need minimum data for patterns
-
+      if (reports.length < 3 || patternsDismissed || !effectiveOrganizationId) return; // Need minimum data for patterns
 
       // Decrypt report contents for name detection
       const decryptedContents = new Map<string, string>();
 
       for (const report of reports) {
         try {
-          if (report.encrypted_content && report.encryption_key_hash) {
-            const decrypted = await decryptReport(report.encrypted_content, report.encryption_key_hash);
-            decryptedContents.set(report.id, decrypted);
+          if (report.encrypted_content && effectiveOrganizationId) {
+            // Use organization_id from report if available, otherwise use effectiveOrganizationId
+            const orgId = (report as any).organization_id || effectiveOrganizationId;
+            const decrypted = await decryptReport(report.encrypted_content, orgId);
+            
+            // Convert decrypted object to string format for pattern detection
+            // Pattern detection searches for names in the text, so combine all text fields
+            let decryptedString = '';
+            if (typeof decrypted === 'string') {
+              decryptedString = decrypted;
+            } else if (decrypted && typeof decrypted === 'object') {
+              // Combine all text fields from decrypted report
+              const fields = [
+                decrypted.category,
+                decrypted.description,
+                decrypted.location,
+                decrypted.witnesses,
+                decrypted.evidence,
+                decrypted.additionalDetails
+              ].filter(Boolean);
+              decryptedString = fields.join(' ');
+            }
+            
+            if (decryptedString) {
+              decryptedContents.set(report.id, decryptedString);
+            }
           }
         } catch (error) {
-          log.error(LogContext.ENCRYPTION, 'Failed to decrypt report for pattern detection', error as Error, { reportId: report.id });
+          // Silently skip reports that can't be decrypted (might be from different org or corrupted)
+          // This is expected for some reports, so we don't log it as an error
+          console.debug('Skipping report for pattern detection (decryption failed):', report.id);
         }
       }
 
@@ -1569,9 +1593,8 @@ Additional Details: ${decryptedContent.additionalDetails || 'None provided'}
                                     <PopoverTrigger asChild>
                                       <button
                                         className={`inline-flex items-center gap-1 px-2 py-1 rounded-md text-xs font-semibold cursor-pointer transition-all hover:ring-2 hover:ring-offset-1 ${
-                                          report.ai_risk_level === 'Critical' ? 'bg-red-600 text-white hover:ring-red-400' :
-                                          report.ai_risk_level === 'High' ? 'bg-orange-500 text-white hover:ring-orange-400' :
-                                          report.ai_risk_level === 'Medium' ? 'bg-yellow-500 text-white hover:ring-yellow-400' :
+                                          getUrgencyLevel(report.ai_risk_level) === 'HIGH' ? 'bg-red-600 text-white hover:ring-red-400' :
+                                          getUrgencyLevel(report.ai_risk_level) === 'MEDIUM' ? 'bg-yellow-500 text-white hover:ring-yellow-400' :
                                           'bg-green-500 text-white hover:ring-green-400'
                                         }`}
                                       >

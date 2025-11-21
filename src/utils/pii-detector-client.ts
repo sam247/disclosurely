@@ -250,6 +250,16 @@ function getPIIPatterns(): PIIPattern[] {
  * Detect PII in text and return redaction result
  */
 export function detectPII(text: string): RedactionResult {
+  // Safety check: ensure text is a string
+  if (!text || typeof text !== 'string') {
+    return {
+      redactedText: '',
+      detections: [],
+      piiCount: 0,
+      stats: {}
+    };
+  }
+
   const detections: PIIDetection[] = [];
   const stats: Record<string, number> = {};
   const patterns = getPIIPatterns();
@@ -353,17 +363,30 @@ export function highlightPIIForDisplay(
   text: string, 
   detections: PIIDetection[]
 ): Array<{ text: string; isPII: boolean; type?: string; placeholder?: string }> {
-  if (detections.length === 0) {
-    return [{ text, isPII: false }];
+  // Safety check: ensure text is a string
+  if (!text || typeof text !== 'string') {
+    return [{ text: '', isPII: false }];
+  }
+
+  // Safety check: ensure detections is an array
+  if (!Array.isArray(detections) || detections.length === 0) {
+    return [{ text: text, isPII: false }];
   }
 
   const parts: Array<{ text: string; isPII: boolean; type?: string; placeholder?: string }> = [];
   let lastIndex = 0;
 
-  // Sort by start position
-  const sortedDetections = [...detections].sort((a, b) => a.start - b.start);
+  // Sort by start position and filter out invalid detections
+  const sortedDetections = [...detections]
+    .filter(d => d && typeof d.start === 'number' && typeof d.end === 'number' && d.original)
+    .sort((a, b) => a.start - b.start);
 
   sortedDetections.forEach(detection => {
+    // Validate detection
+    if (!detection || typeof detection.start !== 'number' || typeof detection.end !== 'number') {
+      return;
+    }
+
     // Text before PII
     if (detection.start > lastIndex) {
       parts.push({
@@ -374,7 +397,7 @@ export function highlightPIIForDisplay(
 
     // PII text
     parts.push({
-      text: detection.original,
+      text: detection.original || '',
       isPII: true,
       type: detection.type,
       placeholder: detection.placeholder
@@ -389,6 +412,11 @@ export function highlightPIIForDisplay(
       text: text.substring(lastIndex),
       isPII: false
     });
+  }
+
+  // Ensure we always return at least one part
+  if (parts.length === 0) {
+    return [{ text: text, isPII: false }];
   }
 
   return parts;

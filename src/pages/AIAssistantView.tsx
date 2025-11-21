@@ -79,6 +79,8 @@ const AIAssistantView = () => {
   const [currentAnalysisData, setCurrentAnalysisData] = useState<any>(null);
   const [isSaving, setIsSaving] = useState(false);
   const [hasAnalyzedCase, setHasAnalyzedCase] = useState(false); // Track if case has been analyzed
+  const [pendingAnalysisQuery, setPendingAnalysisQuery] = useState<string>(''); // Store query while PII preview is open
+  const [preservePII, setPreservePII] = useState(false); // Track if user wants to skip PII redaction
   
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -99,11 +101,11 @@ const AIAssistantView = () => {
 
   // Load cases and documents on mount
   useEffect(() => {
-    if (user) {
+    if (user && organization?.id) {
       loadCases();
       loadDocuments();
     }
-  }, [user]);
+  }, [user, organization?.id]);
 
   // Scroll to bottom when messages change
   useEffect(() => {
@@ -181,7 +183,7 @@ const AIAssistantView = () => {
   };
 
   // Handle case analysis (when case is selected)
-  const handleCaseAnalysis = async (query: string) => {
+  const handleCaseAnalysis = async (query: string, skipPIIRedaction: boolean = false) => {
     if (!selectedCaseId || !selectedCaseData || !organization?.id) {
       throw new Error('Case not selected');
     }
@@ -269,6 +271,7 @@ ${decryptedContent}${documentContext}`;
     // Call ai-gateway-generate DIRECTLY from frontend
     const { data, error } = await supabase.functions.invoke('ai-gateway-generate', {
       body: {
+        preserve_pii: skipPIIRedaction, // Skip PII redaction if user chose to proceed without it
         messages: [
           {
             role: 'system',
@@ -341,6 +344,7 @@ Remember: Compliance teams need confidence and clarity under pressure. Be the ad
       analysis: responseContent
     });
 
+    // Mark case as analyzed after successful analysis
     setHasAnalyzedCase(true);
     return responseContent;
   };
@@ -557,20 +561,36 @@ When listing cases, always include the tracking ID (DIS-XXXX format) so users ca
 
       // Simple routing logic:
       // 1. If case is selected AND has been analyzed -> follow-up chat
-      // 2. If case is selected AND not analyzed -> case analysis
+      // 2. If case is selected AND not analyzed -> show PII preview first, then analyze
       // 3. If no case selected -> cross-case search
 
       if (selectedCaseId && hasAnalyzedCase) {
         // Follow-up conversation
         console.log('💬 Follow-up conversation');
+        setIsLoading(false);
         responseContent = await handleFollowUp(query);
       } else if (selectedCaseId) {
-        // Initial case analysis
-        console.log('📊 Case analysis');
-        responseContent = await handleCaseAnalysis(query);
+        // Initial case analysis - show PII preview first
+        console.log('📊 Case analysis - showing PII preview', { selectedCaseId, hasAnalyzedCase, hasSelectedCaseData: !!selectedCaseData });
+        setPendingAnalysisQuery(query.trim());
+        
+        // Always load case data first to ensure we have it
+        console.log('📦 Loading case data...');
+        await loadCaseData(selectedCaseId);
+        
+        // Small delay to ensure state is updated
+        await new Promise(resolve => setTimeout(resolve, 100));
+        
+        // Now load and show preview
+        console.log('🔍 Loading preview content...');
+        await loadPreviewContent();
+        console.log('✅ Preview content loaded, modal should open');
+        setIsLoading(false);
+        return; // Exit early, analysis will run after PII preview confirmation
       } else {
         // Cross-case search
         console.log('🔍 Cross-case search');
+        setIsLoading(false);
         const result = await handleCrossCaseSearch(query);
         responseContent = result.content;
         relevantCases = result.cases;
@@ -630,18 +650,14 @@ When listing cases, always include the tracking ID (DIS-XXXX format) so users ca
   };
 
   const handleCaseCardClick = (caseId: string) => {
-    setSelectedCaseId(caseId);
-    setHasAnalyzedCase(false); // Reset analysis state
-    loadCaseData(caseId);
-    
-    const caseData = cases.find(c => c.id === caseId);
-    if (caseData) {
-      setMessages(prev => [...prev, {
-        id: `system-${Date.now()}`,
-        role: 'assistant',
-        content: `Switched to analyzing case ${caseData.tracking_id}. Ask me to analyze this case or ask questions about it.`,
-        timestamp: new Date()
-      }]);
+    const selectedCase = cases.find(c => c.id === caseId);
+    if (selectedCase) {
+      setSelectedCaseId(caseId);
+      setHasAnalyzedCase(false);
+      setIsEmptyState(false);
+      loadCaseData(caseId);
+      // Populate search box with case analysis prompt
+      setInputQuery(`Analyze case ${selectedCase.tracking_id}`);
     }
   };
 
@@ -698,8 +714,20 @@ When listing cases, always include the tracking ID (DIS-XXXX format) so users ca
   };
 
   const loadPreviewContent = async () => {
-    if (!selectedCaseId) return;
+    if (!selectedCaseId) {
+      console.error('❌ loadPreviewContent: No selectedCaseId');
+      return;
+    }
 
+    // Set pending query from current input
+    setPendingAnalysisQuery(inputQuery.trim());
+
+    // Ensure case data is loaded
+    if (!selectedCaseData) {
+      await loadCaseData(selectedCaseId);
+    }
+
+    console.log('🔍 loadPreviewContent: Starting', { selectedCaseId });
     setIsLoadingPreview(true);
     try {
       const { data: caseData, error: caseError } = await supabase
@@ -708,7 +736,17 @@ When listing cases, always include the tracking ID (DIS-XXXX format) so users ca
         .eq('id', selectedCaseId)
         .single();
 
-      if (caseError) throw caseError;
+      if (caseError) {
+        console.error('❌ loadPreviewContent: Database error', caseError);
+        throw caseError;
+      }
+
+      if (!caseData) {
+        console.error('❌ loadPreviewContent: No case data returned');
+        throw new Error('Case not found');
+      }
+
+      console.log('✅ loadPreviewContent: Case data loaded', { caseId: caseData.id, title: caseData.title });
 
       let decryptedContent = '';
       if (caseData.encrypted_content && caseData.organization_id) {
@@ -728,12 +766,14 @@ Evidence: ${decrypted.evidence || 'No evidence provided'}
 
 Additional Details: ${decrypted.additionalDetails || 'None provided'}`;
         } catch (decryptError) {
-          console.error('Error decrypting case content:', decryptError);
+          console.error('⚠️ loadPreviewContent: Error decrypting case content:', decryptError);
           decryptedContent = '[Case content is encrypted and could not be decrypted]';
         }
+      } else {
+        decryptedContent = '[No case content available]';
       }
 
-      let fullContent = `Case: ${caseData.title}\n\n${decryptedContent}`;
+      let fullContent = `Case: ${caseData.title || 'Untitled'}\n\n${decryptedContent}`;
       
       if (Array.isArray(selectedDocs) && selectedDocs.length > 0 && Array.isArray(documents)) {
         const docNames = selectedDocs.map(docId => {
@@ -745,15 +785,20 @@ Additional Details: ${decrypted.additionalDetails || 'None provided'}`;
         }
       }
 
+      console.log('✅ loadPreviewContent: Setting preview content and opening modal');
       setPreviewContent(fullContent);
       setShowPIIPreview(true);
-    } catch (error) {
-      console.error('Error loading preview:', error);
+      console.log('✅ loadPreviewContent: Modal should now be open');
+    } catch (error: any) {
+      console.error('❌ loadPreviewContent: Error', error);
       toast({
         title: "Preview Failed",
-        description: "Failed to load case content for preview.",
+        description: error.message || "Failed to load case content for preview.",
         variant: "destructive"
       });
+      // Still try to show preview with minimal content
+      setPreviewContent(`Case: ${selectedCaseData?.title || 'Unknown'}\n\n[Error loading case content]`);
+      setShowPIIPreview(true);
     } finally {
       setIsLoadingPreview(false);
     }
@@ -846,7 +891,13 @@ Additional Details: ${decrypted.additionalDetails || 'None provided'}`;
                     disabled={isLoading}
                   />
                   <Button
-                    onClick={() => handleQuery(inputQuery)}
+                    onClick={() => {
+                      if (selectedCaseId && !hasAnalyzedCase) {
+                        loadPreviewContent();
+                      } else {
+                        handleQuery(inputQuery);
+                      }
+                    }}
                     disabled={!inputQuery.trim() || isLoading}
                     size="lg"
                     className="h-12 px-6"
@@ -859,43 +910,32 @@ Additional Details: ${decrypted.additionalDetails || 'None provided'}`;
                   </Button>
                 </div>
 
-                <div className="space-y-3">
-                  <p className="text-sm text-muted-foreground text-center">Or try one of these:</p>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                    <Button
-                      variant="outline"
-                      onClick={() => handleQuery("Show me all harassment cases")}
-                      disabled={isLoading}
-                      className="h-auto py-3 px-4 text-left justify-start whitespace-normal"
+                {/* Show case dropdown if available */}
+                {Array.isArray(cases) && cases.length > 0 && (
+                  <div className="mt-8 w-full max-w-2xl">
+                    <p className="text-sm text-muted-foreground mb-2 text-center">Select a case to analyze:</p>
+                    <Select 
+                      value={selectedCaseId} 
+                      onValueChange={(value) => {
+                        setSelectedCaseId(value);
+                        setHasAnalyzedCase(false);
+                        loadCaseData(value);
+                        setInputQuery("Analyze this case");
+                      }}
                     >
-                      Show me all harassment cases
-                    </Button>
-                    <Button
-                      variant="outline"
-                      onClick={() => handleQuery("What's my average resolution time?")}
-                      disabled={isLoading}
-                      className="h-auto py-3 px-4 text-left justify-start whitespace-normal"
-                    >
-                      What's my average resolution time?
-                    </Button>
-                    <Button
-                      variant="outline"
-                      onClick={() => handleQuery("High priority unresolved cases")}
-                      disabled={isLoading}
-                      className="h-auto py-3 px-4 text-left justify-start whitespace-normal"
-                    >
-                      High priority unresolved cases
-                    </Button>
-                    <Button
-                      variant="outline"
-                      onClick={() => handleQuery("Cases created in the last 30 days")}
-                      disabled={isLoading}
-                      className="h-auto py-3 px-4 text-left justify-start whitespace-normal"
-                    >
-                      Cases created in the last 30 days
-                    </Button>
+                      <SelectTrigger className="w-full">
+                        <SelectValue placeholder="Select a case to analyze..." />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {cases.map((caseItem) => (
+                          <SelectItem key={caseItem.id} value={caseItem.id}>
+                            {caseItem.tracking_id} - {caseItem.title}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
                   </div>
-                </div>
+                )}
               </div>
             </div>
           </div>
@@ -1043,10 +1083,10 @@ Additional Details: ${decrypted.additionalDetails || 'None provided'}`;
             </CardContent>
           </Card>
 
-          <Card className="h-[calc(100vh-300px)] flex flex-col">
-            <CardContent className="flex-1 flex flex-col p-0">
-              {/* Messages Area */}
-              <div className="flex-1 overflow-y-auto p-6 space-y-6">
+          <Card className="flex flex-col" style={{ height: 'calc(100vh - 380px)', minHeight: '500px' }}>
+            <CardContent className="flex-1 flex flex-col p-0 overflow-hidden">
+              {/* Messages Area - Fixed height with scroll */}
+              <div className="flex-1 overflow-y-auto p-6 space-y-6 min-h-0">
                 {Array.isArray(messages) && messages.map((message) => (
                   <div
                     key={message.id}
@@ -1130,8 +1170,8 @@ Additional Details: ${decrypted.additionalDetails || 'None provided'}`;
                 <div ref={messagesEndRef} />
               </div>
 
-              {/* Input Area */}
-              <div className="border-t p-4">
+              {/* Input Area - Fixed at bottom */}
+              <div className="border-t p-4 flex-shrink-0">
                 <div className="flex gap-2">
                   <Input
                     value={inputQuery}
@@ -1183,7 +1223,43 @@ Additional Details: ${decrypted.additionalDetails || 'None provided'}`;
             setShowPIIPreview(false);
             handleQuery(inputQuery);
           }}
-          onCancel={() => setShowPIIPreview(false)}
+          onProceedWithoutRedaction={async () => {
+            setShowPIIPreview(false);
+            // Run analysis without PII redaction
+            if (selectedCaseId && selectedCaseData && pendingAnalysisQuery) {
+              setPreservePII(true);
+              setIsLoading(true);
+              try {
+                const responseContent = await handleCaseAnalysis(pendingAnalysisQuery, true);
+                const aiMessage: ChatMessage = {
+                  id: `ai-${Date.now()}`,
+                  role: 'assistant',
+                  content: responseContent,
+                  timestamp: new Date()
+                };
+                setMessages(prev => [...prev, aiMessage]);
+                setHasAnalyzedCase(true);
+                setPendingAnalysisQuery('');
+              } catch (error: any) {
+                console.error('Error in analysis:', error);
+                toast({
+                  title: "Analysis Failed",
+                  description: error.message || "Failed to analyze case.",
+                  variant: "destructive"
+                });
+              } finally {
+                setIsLoading(false);
+              }
+            }
+          }}
+          onCancel={() => {
+            setShowPIIPreview(false);
+            setPendingAnalysisQuery('');
+            // Reset case selection if user cancels
+            setSelectedCaseId('');
+            setSelectedCaseData(null);
+            setIsEmptyState(true);
+          }}
         />
       )}
     </div>

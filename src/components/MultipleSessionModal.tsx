@@ -134,10 +134,7 @@ const MultipleSessionModal: React.FC<MultipleSessionModalProps> = ({
                     height="160"
                     frameBorder="0"
                     style={{ border: 0, display: 'block' }}
-                    referrerPolicy="no-referrer-when-downgrade"
-                    src={`https://www.google.com/maps/embed/v1/place?key=${import.meta.env.VITE_GOOGLE_MAPS_API_KEY || 'AIzaSyBFw0Qbyq9zTFTd-tUY6dZWTgaQzuU17R8'}&q=${otherSession.location_lat},${otherSession.location_lng}&zoom=10`}
-                    allowFullScreen
-                    loading="lazy"
+                    src={`https://www.openstreetmap.org/export/embed.html?bbox=${otherSession.location_lng - 0.1},${otherSession.location_lat - 0.1},${otherSession.location_lng + 0.1},${otherSession.location_lat + 0.1}&layer=mapnik&marker=${otherSession.location_lat},${otherSession.location_lng}`}
                     title="Session location"
                   />
                   <div className="px-2 sm:px-3 py-1.5 sm:py-2 bg-background border-t text-xs text-muted-foreground flex items-center gap-1.5">
