@@ -346,6 +346,7 @@ Remember: Compliance teams need confidence and clarity under pressure. Be the ad
       analysis: responseContent
     });
 
+    // Mark case as analyzed after successful analysis
     setHasAnalyzedCase(true);
     return responseContent;
   };
