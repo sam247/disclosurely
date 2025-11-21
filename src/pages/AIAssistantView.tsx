@@ -893,7 +893,6 @@ Additional Details: ${decrypted.additionalDetails || 'None provided'}`;
           </div>
 
           {/* Case Selection - Always available */}
-      {(
         <Card className="mb-4">
           <CardContent className="p-4">
             <div className="flex items-center gap-4 flex-wrap">
@@ -971,7 +970,6 @@ Additional Details: ${decrypted.additionalDetails || 'None provided'}`;
             )}
           </CardContent>
         </Card>
-      )}
 
       <Card className="h-[calc(100vh-300px)] flex flex-col">
         <CardContent className="flex-1 flex flex-col p-0">
