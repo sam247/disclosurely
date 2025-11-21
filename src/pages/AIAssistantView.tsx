@@ -577,10 +577,14 @@ When listing cases, always include the tracking ID (DIS-XXXX format) so users ca
         
         // Ensure case data is loaded before showing preview
         if (!selectedCaseData) {
+          console.log('📦 Loading case data first...');
           await loadCaseData(selectedCaseId);
         }
         
+        // Wait a moment for state to update, then load preview
+        console.log('🔍 Loading preview content...');
         await loadPreviewContent();
+        console.log('✅ Preview content loaded, modal should open');
         return; // Exit early, analysis will run after PII preview confirmation
       } else {
         // Cross-case search
@@ -709,8 +713,12 @@ When listing cases, always include the tracking ID (DIS-XXXX format) so users ca
   };
 
   const loadPreviewContent = async () => {
-    if (!selectedCaseId) return;
+    if (!selectedCaseId) {
+      console.error('❌ loadPreviewContent: No selectedCaseId');
+      return;
+    }
 
+    console.log('🔍 loadPreviewContent: Starting', { selectedCaseId });
     setIsLoadingPreview(true);
     try {
       const { data: caseData, error: caseError } = await supabase
@@ -719,7 +727,17 @@ When listing cases, always include the tracking ID (DIS-XXXX format) so users ca
         .eq('id', selectedCaseId)
         .single();
 
-      if (caseError) throw caseError;
+      if (caseError) {
+        console.error('❌ loadPreviewContent: Database error', caseError);
+        throw caseError;
+      }
+
+      if (!caseData) {
+        console.error('❌ loadPreviewContent: No case data returned');
+        throw new Error('Case not found');
+      }
+
+      console.log('✅ loadPreviewContent: Case data loaded', { caseId: caseData.id, title: caseData.title });
 
       let decryptedContent = '';
       if (caseData.encrypted_content && caseData.organization_id) {
@@ -739,12 +757,14 @@ Evidence: ${decrypted.evidence || 'No evidence provided'}
 
 Additional Details: ${decrypted.additionalDetails || 'None provided'}`;
         } catch (decryptError) {
-          console.error('Error decrypting case content:', decryptError);
+          console.error('⚠️ loadPreviewContent: Error decrypting case content:', decryptError);
           decryptedContent = '[Case content is encrypted and could not be decrypted]';
         }
+      } else {
+        decryptedContent = '[No case content available]';
       }
 
-      let fullContent = `Case: ${caseData.title}\n\n${decryptedContent}`;
+      let fullContent = `Case: ${caseData.title || 'Untitled'}\n\n${decryptedContent}`;
       
       if (Array.isArray(selectedDocs) && selectedDocs.length > 0 && Array.isArray(documents)) {
         const docNames = selectedDocs.map(docId => {
@@ -756,15 +776,20 @@ Additional Details: ${decrypted.additionalDetails || 'None provided'}`;
         }
       }
 
+      console.log('✅ loadPreviewContent: Setting preview content and opening modal');
       setPreviewContent(fullContent);
       setShowPIIPreview(true);
-    } catch (error) {
-      console.error('Error loading preview:', error);
+      console.log('✅ loadPreviewContent: Modal should now be open');
+    } catch (error: any) {
+      console.error('❌ loadPreviewContent: Error', error);
       toast({
         title: "Preview Failed",
-        description: "Failed to load case content for preview.",
+        description: error.message || "Failed to load case content for preview.",
         variant: "destructive"
       });
+      // Still try to show preview with minimal content
+      setPreviewContent(`Case: ${selectedCaseData?.title || 'Unknown'}\n\n[Error loading case content]`);
+      setShowPIIPreview(true);
     } finally {
       setIsLoadingPreview(false);
     }

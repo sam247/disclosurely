@@ -28,10 +28,18 @@ export const PIIPreviewModal: React.FC<PIIPreviewModalProps> = ({
   
   // Detect PII client-side
   const redactionResult = detectPII(originalText || '');
-  const highlightedParts = highlightPIIForDisplay(
-    originalText || '', 
-    Array.isArray(redactionResult?.detections) ? redactionResult.detections : []
-  );
+  const highlightedParts = (() => {
+    try {
+      const result = highlightPIIForDisplay(
+        originalText || '', 
+        Array.isArray(redactionResult?.detections) ? redactionResult.detections : []
+      );
+      return Array.isArray(result) ? result : [{ text: originalText || '', isPII: false }];
+    } catch (error) {
+      console.error('Error highlighting PII:', error);
+      return [{ text: originalText || '', isPII: false }];
+    }
+  })();
 
   const handleReportFalsePositive = async (detection: any) => {
     if (!organization?.id) {
