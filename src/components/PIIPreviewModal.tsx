@@ -11,6 +11,7 @@ interface PIIPreviewModalProps {
   originalText: string;
   caseTitle: string;
   onConfirm: () => void;
+  onProceedWithoutRedaction?: () => void;
   onCancel: () => void;
 }
 
@@ -18,6 +19,7 @@ export const PIIPreviewModal: React.FC<PIIPreviewModalProps> = ({
   originalText,
   caseTitle,
   onConfirm,
+  onProceedWithoutRedaction,
   onCancel
 }) => {
   const { toast } = useToast();
@@ -206,11 +208,20 @@ export const PIIPreviewModal: React.FC<PIIPreviewModalProps> = ({
           </div>
         </div>
 
-        <DialogFooter className="border-t pt-4">
-          <Button variant="outline" onClick={onCancel}>
+        <DialogFooter className="border-t pt-4 flex-col sm:flex-row gap-2">
+          <Button variant="outline" onClick={onCancel} className="w-full sm:w-auto">
             Go Back
           </Button>
-          <Button onClick={onConfirm} className="bg-green-600 hover:bg-green-700">
+          {onProceedWithoutRedaction && (
+            <Button 
+              variant="outline" 
+              onClick={onProceedWithoutRedaction}
+              className="w-full sm:w-auto border-amber-300 text-amber-700 hover:bg-amber-50"
+            >
+              Proceed Without Redaction
+            </Button>
+          )}
+          <Button onClick={onConfirm} className="bg-green-600 hover:bg-green-700 w-full sm:w-auto">
             Looks Good - Proceed with Analysis
           </Button>
         </DialogFooter>

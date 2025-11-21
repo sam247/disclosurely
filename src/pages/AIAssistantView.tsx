@@ -79,6 +79,8 @@ const AIAssistantView = () => {
   const [currentAnalysisData, setCurrentAnalysisData] = useState<any>(null);
   const [isSaving, setIsSaving] = useState(false);
   const [hasAnalyzedCase, setHasAnalyzedCase] = useState(false); // Track if case has been analyzed
+  const [pendingAnalysisQuery, setPendingAnalysisQuery] = useState<string>(''); // Store query while PII preview is open
+  const [preservePII, setPreservePII] = useState(false); // Track if user wants to skip PII redaction
   
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -137,7 +139,7 @@ const AIAssistantView = () => {
     }
   };
 
-  const loadCaseData = async (caseId: string, showPIIPreview: boolean = false) => {
+  const loadCaseData = async (caseId: string) => {
     try {
       const { data, error } = await supabase
         .from('reports')
@@ -150,11 +152,6 @@ const AIAssistantView = () => {
       
       setSelectedCaseData(data);
       setHasAnalyzedCase(false); // Reset when case changes
-      
-      // If showPIIPreview is true, automatically open PII preview
-      if (showPIIPreview) {
-        await loadPreviewContent();
-      }
     } catch (error: any) {
       console.error('Error loading case data:', error);
       toast({
@@ -563,20 +560,25 @@ When listing cases, always include the tracking ID (DIS-XXXX format) so users ca
 
       // Simple routing logic:
       // 1. If case is selected AND has been analyzed -> follow-up chat
-      // 2. If case is selected AND not analyzed -> case analysis
+      // 2. If case is selected AND not analyzed -> show PII preview first, then analyze
       // 3. If no case selected -> cross-case search
 
       if (selectedCaseId && hasAnalyzedCase) {
         // Follow-up conversation
         console.log('💬 Follow-up conversation');
+        setIsLoading(false);
         responseContent = await handleFollowUp(query);
       } else if (selectedCaseId) {
-        // Initial case analysis
-        console.log('📊 Case analysis');
-        responseContent = await handleCaseAnalysis(query);
+        // Initial case analysis - show PII preview first
+        console.log('📊 Case analysis - showing PII preview');
+        setIsLoading(false);
+        setPendingAnalysisQuery(query.trim());
+        await loadPreviewContent();
+        return; // Exit early, analysis will run after PII preview confirmation
       } else {
         // Cross-case search
         console.log('🔍 Cross-case search');
+        setIsLoading(false);
         const result = await handleCrossCaseSearch(query);
         responseContent = result.content;
         relevantCases = result.cases;
@@ -636,10 +638,15 @@ When listing cases, always include the tracking ID (DIS-XXXX format) so users ca
   };
 
   const handleCaseCardClick = (caseId: string) => {
-    setSelectedCaseId(caseId);
-    setHasAnalyzedCase(false); // Reset analysis state
-    setIsEmptyState(false);
-    loadCaseData(caseId, true); // Show PII preview when case is selected
+    const selectedCase = cases.find(c => c.id === caseId);
+    if (selectedCase) {
+      setSelectedCaseId(caseId);
+      setHasAnalyzedCase(false);
+      setIsEmptyState(false);
+      loadCaseData(caseId);
+      // Populate search box with case analysis prompt
+      setInputQuery(`Analyze case ${selectedCase.tracking_id}`);
+    }
   };
 
   const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -863,10 +870,15 @@ Additional Details: ${decrypted.additionalDetails || 'None provided'}`;
                     <Select 
                       value={selectedCaseId} 
                       onValueChange={(value) => {
-                        setSelectedCaseId(value);
-                        setHasAnalyzedCase(false);
-                        setIsEmptyState(false);
-                        loadCaseData(value, true); // Show PII preview when case is selected
+                        const selectedCase = cases.find(c => c.id === value);
+                        if (selectedCase) {
+                          setSelectedCaseId(value);
+                          setHasAnalyzedCase(false);
+                          setIsEmptyState(false);
+                          loadCaseData(value);
+                          // Populate search box with case analysis prompt
+                          setInputQuery(`Analyze case ${selectedCase.tracking_id}`);
+                        }
                       }}
                     >
                       <SelectTrigger className="w-full">
@@ -953,9 +965,14 @@ Additional Details: ${decrypted.additionalDetails || 'None provided'}`;
               <div className="flex items-center gap-4 flex-wrap">
                 <div className="flex-1 min-w-[200px]">
                   <Select value={selectedCaseId} onValueChange={(value) => {
-                    setSelectedCaseId(value);
-                    setHasAnalyzedCase(false);
-                    loadCaseData(value, true); // Show PII preview when case is selected
+                    const selectedCase = cases.find(c => c.id === value);
+                    if (selectedCase) {
+                      setSelectedCaseId(value);
+                      setHasAnalyzedCase(false);
+                      loadCaseData(value);
+                      // Populate search box with case analysis prompt
+                      setInputQuery(`Analyze case ${selectedCase.tracking_id}`);
+                    }
                   }}>
                     <SelectTrigger>
                       <SelectValue placeholder="Select a case to analyze..." />
@@ -1160,13 +1177,65 @@ Additional Details: ${decrypted.additionalDetails || 'None provided'}`;
           caseTitle={selectedCaseData.title}
           onConfirm={async () => {
             setShowPIIPreview(false);
-            // After confirming PII preview, automatically run analysis
-            if (selectedCaseId && selectedCaseData) {
-              await handleQuery('Analyze this case');
+            // After confirming PII preview, automatically run analysis with redaction
+            if (selectedCaseId && selectedCaseData && pendingAnalysisQuery) {
+              setPreservePII(false);
+              setIsLoading(true);
+              try {
+                const responseContent = await handleCaseAnalysis(pendingAnalysisQuery, false);
+                const aiMessage: ChatMessage = {
+                  id: `ai-${Date.now()}`,
+                  role: 'assistant',
+                  content: responseContent,
+                  timestamp: new Date()
+                };
+                setMessages(prev => [...prev, aiMessage]);
+                setHasAnalyzedCase(true);
+                setPendingAnalysisQuery('');
+              } catch (error: any) {
+                console.error('Error in analysis:', error);
+                toast({
+                  title: "Analysis Failed",
+                  description: error.message || "Failed to analyze case.",
+                  variant: "destructive"
+                });
+              } finally {
+                setIsLoading(false);
+              }
+            }
+          }}
+          onProceedWithoutRedaction={async () => {
+            setShowPIIPreview(false);
+            // Run analysis without PII redaction
+            if (selectedCaseId && selectedCaseData && pendingAnalysisQuery) {
+              setPreservePII(true);
+              setIsLoading(true);
+              try {
+                const responseContent = await handleCaseAnalysis(pendingAnalysisQuery, true);
+                const aiMessage: ChatMessage = {
+                  id: `ai-${Date.now()}`,
+                  role: 'assistant',
+                  content: responseContent,
+                  timestamp: new Date()
+                };
+                setMessages(prev => [...prev, aiMessage]);
+                setHasAnalyzedCase(true);
+                setPendingAnalysisQuery('');
+              } catch (error: any) {
+                console.error('Error in analysis:', error);
+                toast({
+                  title: "Analysis Failed",
+                  description: error.message || "Failed to analyze case.",
+                  variant: "destructive"
+                });
+              } finally {
+                setIsLoading(false);
+              }
             }
           }}
           onCancel={() => {
             setShowPIIPreview(false);
+            setPendingAnalysisQuery('');
             // Reset case selection if user cancels
             setSelectedCaseId('');
             setSelectedCaseData(null);
