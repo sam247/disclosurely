@@ -1,8 +1,11 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
-import { Shield, Eye, EyeOff, Info, Lock } from 'lucide-react';
+import { Shield, Eye, EyeOff, Info, Lock, AlertCircle } from 'lucide-react';
 import { detectPII, highlightPIIForDisplay, formatPIIType } from '@/utils/pii-detector-client';
+import { supabase } from '@/integrations/supabase/client';
+import { useToast } from '@/hooks/use-toast';
+import { useOrganization } from '@/hooks/useOrganization';
 
 interface PIIPreviewModalProps {
   originalText: string;
@@ -17,9 +20,60 @@ export const PIIPreviewModal: React.FC<PIIPreviewModalProps> = ({
   onConfirm,
   onCancel
 }) => {
+  const { toast } = useToast();
+  const { organization } = useOrganization();
+  const [reportingFalsePositive, setReportingFalsePositive] = useState<string | null>(null);
+  
   // Detect PII client-side
   const redactionResult = detectPII(originalText);
   const highlightedParts = highlightPIIForDisplay(originalText, redactionResult.detections);
+
+  const handleReportFalsePositive = async (detection: any) => {
+    if (!organization?.id) {
+      toast({
+        title: 'Error',
+        description: 'Unable to report false positive. Organization not found.',
+        variant: 'destructive'
+      });
+      return;
+    }
+
+    setReportingFalsePositive(detection.original);
+    
+    try {
+      // Get context around the detection
+      const start = Math.max(0, originalText.indexOf(detection.original) - 50);
+      const end = Math.min(originalText.length, originalText.indexOf(detection.original) + detection.original.length + 50);
+      const context = originalText.substring(start, end);
+
+      const { error } = await supabase
+        .from('pii_false_positives')
+        .insert({
+          organization_id: organization.id,
+          detected_text: detection.original,
+          detection_type: detection.type,
+          context: context,
+          reported_by: (await supabase.auth.getUser()).data.user?.id || null
+        });
+
+      if (error) throw error;
+
+      toast({
+        title: 'False Positive Reported',
+        description: `"${detection.original}" has been reported. Thank you for helping improve our detection system!`,
+      });
+
+      setReportingFalsePositive(null);
+    } catch (error: any) {
+      console.error('Error reporting false positive:', error);
+      toast({
+        title: 'Error',
+        description: 'Failed to report false positive. Please try again.',
+        variant: 'destructive'
+      });
+      setReportingFalsePositive(null);
+    }
+  };
 
   return (
     <Dialog open onOpenChange={onCancel}>
@@ -100,16 +154,29 @@ export const PIIPreviewModal: React.FC<PIIPreviewModalProps> = ({
                           {detection.placeholder}
                         </span>
                       </div>
-                      <div className="flex items-center gap-2 text-sm min-w-0">
+                      <div className="flex items-center gap-2 text-sm min-w-0 flex-1">
                         <span className="text-gray-400">→</span>
                         <span className="font-mono text-red-600 truncate" title={detection.original}>
                           {detection.original}
                         </span>
                       </div>
-                      <div className="flex-shrink-0 ml-auto">
+                      <div className="flex items-center gap-2 flex-shrink-0">
                         <span className="text-xs text-gray-500">
                           {formatPIIType(detection.type)}
                         </span>
+                        {detection.type === 'standaloneName' && (
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className="h-6 px-2 text-xs"
+                            onClick={() => handleReportFalsePositive(detection)}
+                            disabled={reportingFalsePositive === detection.original}
+                            title="Report as false positive (not a real name)"
+                          >
+                            <AlertCircle className="h-3 w-3 mr-1" />
+                            {reportingFalsePositive === detection.original ? 'Reporting...' : 'Not a name'}
+                          </Button>
+                        )}
                       </div>
                     </div>
                   ))}

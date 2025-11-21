@@ -105,13 +105,47 @@ function detectNames(text: string): Array<{ match: string; start: number; end: n
       'United Kingdom', 'New York', 'San Francisco', 'Los Angeles',
       'Data Protection', 'Human Resources', 'Chief Executive',
       'United States', 'European Union', 'Dear Sir', 'Dear Madam',
-      'Client Services', 'Team Lead', 'Senior Account', 'Account Manager'
+      'Client Services', 'Team Lead', 'Senior Account', 'Account Manager',
+      'Hiring Friends', 'Fraudulent Expenses', 'Expense Report',
+      'Financial Misconduct', 'Workplace Behaviour', 'Code of Conduct',
+      'Policy Violation', 'Internal Audit', 'Compliance Issue'
     ];
 
     if (!excludedWords.includes(fullName)) {
       // Additional validation: Not after "at" or "in" (likely place names)
-      const beforeContext = text.substring(Math.max(0, match.index - 10), match.index);
-      if (!/\b(at|in|near|from|to)\s*$/i.test(beforeContext)) {
+      const beforeContext = text.substring(Math.max(0, match.index - 30), match.index).toLowerCase();
+      const afterContext = text.substring(match.index + fullName.length, Math.min(text.length, match.index + fullName.length + 30)).toLowerCase();
+      const contextText = beforeContext + ' ' + afterContext;
+      
+      // Exclude if it's clearly a business term
+      const businessIndicators = [
+        'report', 'expense', 'fraud', 'misconduct', 'violation', 'policy',
+        'hiring', 'recruitment', 'process', 'procedure', 'system', 'department'
+      ];
+      
+      const matchLower = fullName.toLowerCase();
+      if (businessIndicators.some(indicator => matchLower.includes(indicator) || contextText.includes(indicator))) {
+        return; // Skip this match
+      }
+      
+      // Names are more likely after personal pronouns or titles
+      const nameIndicators = ['my', 'i am', 'mr.', 'mrs.', 'ms.', 'dr.', 'professor', 'manager', 'supervisor'];
+      const isLikelyName = nameIndicators.some(indicator => beforeContext.includes(indicator));
+      
+      // If no clear name context, be more conservative
+      if (!isLikelyName && !/\b(at|in|near|from|to)\s*$/i.test(beforeContext)) {
+        // Check if first word is a common first name
+        const words = fullName.split(/\s+/);
+        const commonFirstNames = ['john', 'jane', 'michael', 'sarah', 'david', 'emily', 'james', 'mary', 'robert', 'lisa'];
+        if (words.length === 2 && commonFirstNames.includes(words[0].toLowerCase())) {
+          names.push({
+            match: fullName,
+            start: match.index,
+            end: match.index + fullName.length
+          });
+        }
+        // Otherwise skip if no clear context
+      } else if (!/\b(at|in|near|from|to)\s*$/i.test(beforeContext)) {
         names.push({
           match: fullName,
           start: match.index,
