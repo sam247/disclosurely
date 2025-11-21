@@ -25,8 +25,11 @@ export const PIIPreviewModal: React.FC<PIIPreviewModalProps> = ({
   const [reportingFalsePositive, setReportingFalsePositive] = useState<string | null>(null);
   
   // Detect PII client-side
-  const redactionResult = detectPII(originalText);
-  const highlightedParts = highlightPIIForDisplay(originalText, redactionResult.detections);
+  const redactionResult = detectPII(originalText || '');
+  const highlightedParts = highlightPIIForDisplay(
+    originalText || '', 
+    Array.isArray(redactionResult?.detections) ? redactionResult.detections : []
+  );
 
   const handleReportFalsePositive = async (detection: any) => {
     if (!organization?.id) {
@@ -84,7 +87,7 @@ export const PIIPreviewModal: React.FC<PIIPreviewModalProps> = ({
             Privacy Preview: {caseTitle}
           </DialogTitle>
           <DialogDescription className="text-base">
-            {redactionResult.piiCount > 0 
+            {(redactionResult?.piiCount || 0) > 0 
               ? `${redactionResult.piiCount} piece${redactionResult.piiCount > 1 ? 's' : ''} of personal information will be automatically redacted before AI analysis.`
               : 'No personal information detected. Your case will be analyzed as-is.'}
           </DialogDescription>
@@ -128,13 +131,13 @@ export const PIIPreviewModal: React.FC<PIIPreviewModalProps> = ({
                 </h3>
               </div>
               <div className="p-4 bg-white text-sm leading-relaxed whitespace-pre-wrap font-mono">
-                {redactionResult.redactedText}
+                {redactionResult?.redactedText || originalText || ''}
               </div>
             </div>
           </div>
 
           {/* PII breakdown */}
-          {redactionResult.piiCount > 0 && (
+          {(redactionResult?.piiCount || 0) > 0 && (
             <div className="border rounded-lg overflow-hidden">
               <div className="bg-blue-50 border-b p-3">
                 <h3 className="font-semibold flex items-center gap-2 text-sm">

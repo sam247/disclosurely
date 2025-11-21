@@ -250,6 +250,16 @@ function getPIIPatterns(): PIIPattern[] {
  * Detect PII in text and return redaction result
  */
 export function detectPII(text: string): RedactionResult {
+  // Safety check: ensure text is a string
+  if (!text || typeof text !== 'string') {
+    return {
+      redactedText: '',
+      detections: [],
+      piiCount: 0,
+      stats: {}
+    };
+  }
+
   const detections: PIIDetection[] = [];
   const stats: Record<string, number> = {};
   const patterns = getPIIPatterns();
@@ -353,8 +363,9 @@ export function highlightPIIForDisplay(
   text: string, 
   detections: PIIDetection[]
 ): Array<{ text: string; isPII: boolean; type?: string; placeholder?: string }> {
-  if (detections.length === 0) {
-    return [{ text, isPII: false }];
+  // Safety check: ensure detections is an array
+  if (!Array.isArray(detections) || detections.length === 0) {
+    return [{ text: text || '', isPII: false }];
   }
 
   const parts: Array<{ text: string; isPII: boolean; type?: string; placeholder?: string }> = [];
