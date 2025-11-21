@@ -5,7 +5,7 @@
 
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts';
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
-import { redactPII } from './_shared/pii-detector.ts';
+import { redactPII } from '../_shared/pii-detector.ts';
 
 // Restrict CORS for authenticated endpoints  
 const getAllowedOrigin = (req: Request): string => {
@@ -57,12 +57,13 @@ interface GenerateRequest {
 }
 
 serve(async (req) => {
-  const corsHeaders = getCorsHeaders(req);
-  
-  // Handle CORS preflight
+  // Handle CORS preflight FIRST - before any other code
   if (req.method === 'OPTIONS') {
+    const corsHeaders = getCorsHeaders(req);
     return new Response('ok', { status: 200, headers: corsHeaders });
   }
+  
+  const corsHeaders = getCorsHeaders(req);
 
   try {
     // ============================================================================
