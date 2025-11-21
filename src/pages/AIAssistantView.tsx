@@ -422,7 +422,7 @@ ${decryptedContent}${documentContext}`;
     // Call ai-gateway-generate DIRECTLY from frontend
     const { data, error } = await supabase.functions.invoke('ai-gateway-generate', {
       body: {
-        preserve_pii: skipPIIRedaction, // Skip PII redaction if user chose to proceed without it
+        preserve_pii: skipPIIRedaction, // true = preserve PII (don't redact), false = redact PII
         messages: [
           {
             role: 'system',
@@ -1181,7 +1181,7 @@ Additional Details: ${decrypted.additionalDetails || 'None provided'}`;
                                 setShowPIIChoice(false);
                                 setPreservePII(false); // Don't preserve = redact PII
                                 const query = inputQuery || "Analyze this case";
-                                // Pass false to skipPIIRedaction = don't skip redaction = redact PII
+                                // preserve_pii: false means redact PII (backend checks !preserve_pii)
                                 await handleQueryWithPIIPreference(query, false);
                               }}
                               className="flex-1 bg-green-600 hover:bg-green-700"
@@ -1195,7 +1195,7 @@ Additional Details: ${decrypted.additionalDetails || 'None provided'}`;
                                 setShowPIIChoice(false);
                                 setPreservePII(true); // Preserve = don't redact PII
                                 const query = inputQuery || "Analyze this case";
-                                // Pass true to skipPIIRedaction = skip redaction = don't redact PII
+                                // preserve_pii: true means don't redact PII (backend checks !preserve_pii)
                                 await handleQueryWithPIIPreference(query, true);
                               }}
                               variant="outline"
@@ -1531,7 +1531,7 @@ Additional Details: ${decrypted.additionalDetails || 'None provided'}`;
                                 setShowPIIChoice(false);
                                 setPreservePII(false); // Don't preserve = redact PII
                                 const query = inputQuery || "Analyze this case";
-                                // Pass false to skipPIIRedaction = don't skip redaction = redact PII
+                                // preserve_pii: false means redact PII (backend checks !preserve_pii)
                                 await handleQueryWithPIIPreference(query, false);
                               }}
                               className="flex-1 bg-green-600 hover:bg-green-700"
@@ -1545,7 +1545,7 @@ Additional Details: ${decrypted.additionalDetails || 'None provided'}`;
                                 setShowPIIChoice(false);
                                 setPreservePII(true); // Preserve = don't redact PII
                                 const query = inputQuery || "Analyze this case";
-                                // Pass true to skipPIIRedaction = skip redaction = don't redact PII
+                                // preserve_pii: true means don't redact PII (backend checks !preserve_pii)
                                 await handleQueryWithPIIPreference(query, true);
                               }}
                               variant="outline"
