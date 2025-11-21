@@ -246,7 +246,7 @@ serve(async (req) => {
     // ============================================================================
     const model = body.model || policy.routing?.default_model || 'deepseek-chat';
     const temperature = body.temperature ?? policy.routing?.purpose_routing?.[body.context?.purpose || 'default']?.temperature ?? 0.7;
-    const maxTokens = body.max_tokens || policy.routing?.purpose_routing?.[body.context?.purpose || 'default']?.max_tokens || 2000;
+    // maxTokens already declared on line 177 - reuse it here
 
     const startTime = Date.now();
     const requestId = crypto.randomUUID();

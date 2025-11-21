@@ -99,11 +99,11 @@ const AIAssistantView = () => {
 
   // Load cases and documents on mount
   useEffect(() => {
-    if (user) {
+    if (user && organization?.id) {
       loadCases();
       loadDocuments();
     }
-  }, [user]);
+  }, [user, organization?.id]);
 
   // Scroll to bottom when messages change
   useEffect(() => {
