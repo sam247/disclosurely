@@ -67,59 +67,6 @@ const PII_PATTERNS = {
     severity: 'medium' as const,
     description: 'Possible full name detected',
   },
-      // Check against static false positives
-      for (const fpPattern of STATIC_FALSE_POSITIVES) {
-        if (fpPattern.test(match)) return false;
-      }
-      
-      // Check against business phrases
-      for (const bpPattern of BUSINESS_PHRASES) {
-        if (bpPattern.test(match)) return false;
-      }
-      
-      // Check context - names are less likely after certain words
-      const beforeContext = text.substring(Math.max(0, matchIndex - 30), matchIndex).toLowerCase();
-      const afterContext = text.substring(matchIndex + match.length, Math.min(text.length, matchIndex + match.length + 30)).toLowerCase();
-      
-      // Exclude if it's clearly a business term
-      const businessIndicators = [
-        'report', 'expense', 'fraud', 'misconduct', 'violation', 'policy',
-        'hiring', 'recruitment', 'process', 'procedure', 'system', 'department'
-      ];
-      
-      const contextText = (beforeContext + ' ' + afterContext).toLowerCase();
-      if (businessIndicators.some(indicator => contextText.includes(indicator))) {
-        // Check if the match itself contains business terms
-        const matchLower = match.toLowerCase();
-        if (businessIndicators.some(indicator => matchLower.includes(indicator))) {
-          return false;
-        }
-      }
-      
-      // Names are more likely after personal pronouns or titles
-      const nameIndicators = ['my', 'i am', 'mr.', 'mrs.', 'ms.', 'dr.', 'professor', 'manager', 'supervisor'];
-      if (nameIndicators.some(indicator => beforeContext.includes(indicator))) {
-        return true; // More likely to be a name
-      }
-      
-      // If it's just two capitalized words without context, be more conservative
-      // Only flag if it looks like a typical name pattern (first name + last name)
-      const words = match.split(/\s+/);
-      if (words.length === 2) {
-        // Common first names (very basic check)
-        const commonFirstNames = ['john', 'jane', 'michael', 'sarah', 'david', 'emily', 'james', 'mary', 'robert', 'lisa'];
-        const firstWord = words[0].toLowerCase();
-        // If first word is a common name, more likely to be a real name
-        if (commonFirstNames.includes(firstWord)) {
-          return true;
-        }
-        // Otherwise, require more context
-        return nameIndicators.some(indicator => beforeContext.includes(indicator));
-      }
-      
-      return true; // Default to flagging (conservative approach)
-    },
-  },
   specificDate: {
     pattern: /\b(?:on|since|from|started|joined|hired)\s+(?:(?:January|February|March|April|May|June|July|August|September|October|November|December)\s+\d{1,2}|\d{1,2}\s+(?:January|February|March|April|May|June|July|August|September|October|November|December)),?\s+\d{4}\b/gi,
     severity: 'low' as const,
