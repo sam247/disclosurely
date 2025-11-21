@@ -538,15 +538,29 @@ Priority: ${selectedCaseData.priority}/5
       caseContext = `Case: ${selectedCaseData.tracking_id} - ${selectedCaseData.title} (Status: ${selectedCaseData.status}, Priority: ${selectedCaseData.priority}/5)`;
     }
 
-    // Get all cases for cross-case queries
+    // Get all cases for cross-case queries - load if not already loaded
     let allCasesContext = '';
-    if (Array.isArray(allCases) && allCases.length > 0) {
-      const harassmentCases = allCases.filter(c => 
-        c.report_type?.toLowerCase().includes('harassment') || 
-        c.title?.toLowerCase().includes('harassment') ||
-        c.tags?.some((tag: string) => tag.toLowerCase().includes('harassment'))
-      );
-      allCasesContext = `\n\nYou have access to ${allCases.length} total cases. ${harassmentCases.length} of them are harassment-related.`;
+    if (!Array.isArray(cases) || cases.length === 0) {
+      await loadCases();
+    }
+    
+    if (Array.isArray(cases) && cases.length > 0) {
+      // Fetch full case data including report_type and tags for filtering
+      const { data: fullCasesData } = await supabase
+        .from('reports')
+        .select('id, tracking_id, title, status, priority, report_type, tags')
+        .eq('organization_id', organization.id)
+        .neq('status', 'archived')
+        .limit(100);
+      
+      if (Array.isArray(fullCasesData) && fullCasesData.length > 0) {
+        const harassmentCases = fullCasesData.filter(c => 
+          c.report_type?.toLowerCase().includes('harassment') || 
+          c.title?.toLowerCase().includes('harassment') ||
+          (Array.isArray(c.tags) && c.tags.some((tag: string) => tag.toLowerCase().includes('harassment')))
+        );
+        allCasesContext = `\n\nYou have access to ${fullCasesData.length} total cases. ${harassmentCases.length} of them are harassment-related.`;
+      }
     }
 
     // Build conversation history (last 4 messages)
