@@ -691,6 +691,116 @@ When listing cases, always include the tracking ID (DIS-XXXX format) so users ca
   };
 
   // Main query handler - routes to appropriate function
+  // Helper to handle query with explicit PII preference (avoids state timing issues)
+  const handleQueryWithPIIPreference = async (query: string, skipPIIRedaction: boolean) => {
+    if (!query.trim()) return;
+
+    const userMessage: ChatMessage = {
+      id: `user-${Date.now()}`,
+      role: 'user',
+      content: query.trim(),
+      timestamp: new Date()
+    };
+
+    setMessages(prev => [...prev, userMessage]);
+    setInputQuery('');
+    setIsLoading(true);
+
+    try {
+      let responseContent: string;
+      let relevantCases: Array<{ id: string; tracking_id: string; title: string; status: string; priority: number; created_at: string }> = [];
+
+      if (selectedCaseId && hasAnalyzedCase) {
+        // Follow-up conversation
+        console.log('💬 Follow-up conversation');
+        setIsLoading(false);
+        responseContent = await handleFollowUp(query);
+      } else if (selectedCaseId) {
+        // Initial case analysis - run with explicit PII preference
+        console.log('📊 Case analysis - running', { selectedCaseId, hasAnalyzedCase, skipPIIRedaction, hasSelectedCaseData: !!selectedCaseData });
+        
+        // Ensure case data is loaded
+        if (!selectedCaseData) {
+          console.log('📦 Loading case data...');
+          await loadCaseData(selectedCaseId);
+        }
+        
+        // Run analysis with explicit PII preference
+        const analysisResult = await handleCaseAnalysis(query.trim(), skipPIIRedaction);
+        responseContent = typeof analysisResult === 'string' ? analysisResult : analysisResult.content;
+        
+        // Store PII metadata for display in message
+        const piiMetadata = typeof analysisResult === 'object' ? analysisResult.piiMetadata : undefined;
+        
+        const aiMessage: ChatMessage = {
+          id: `ai-${Date.now()}`,
+          role: 'assistant',
+          content: responseContent,
+          timestamp: new Date(),
+          piiMetadata
+        };
+        
+        setMessages(prev => [...prev, aiMessage]);
+        setHasAnalyzedCase(true);
+        setShowPIIChoice(false);
+        setIsLoading(false);
+        return; // Exit early, message already added
+      } else {
+        // Cross-case search
+        console.log('🔍 Cross-case search');
+        setIsLoading(false);
+        const result = await handleCrossCaseSearch(query);
+        responseContent = result.content;
+        relevantCases = result.cases;
+      }
+
+      const aiMessage: ChatMessage = {
+        id: `ai-${Date.now()}`,
+        role: 'assistant',
+        content: responseContent,
+        cases: relevantCases.length > 0 ? relevantCases : undefined,
+        timestamp: new Date(),
+        piiMetadata: undefined
+      };
+
+      setMessages(prev => [...prev, aiMessage]);
+
+      // Log event
+      if (organization?.id) {
+        await auditLogger.logEvent({
+          event_type: 'ai_query',
+          user_id: user?.id || 'anonymous',
+          organization_id: organization.id,
+          metadata: {
+            query: query.trim(),
+            response_length: responseContent.length,
+            case_id: selectedCaseId || null,
+            cases_found: relevantCases.length
+          }
+        });
+      }
+    } catch (error: any) {
+      console.error('Query error:', error);
+      
+      const errorMessage: ChatMessage = {
+        id: `error-${Date.now()}`,
+        role: 'assistant',
+        content: `❌ **Error**: ${error.message || "Failed to process your query. Please try again."}\n\nIf this problem persists, please:\n- Check your internet connection\n- Verify the case ID is correct\n- Ensure you have permission to access this case\n- Try refreshing the page`,
+        timestamp: new Date()
+      };
+      
+      setMessages(prev => [...prev, errorMessage]);
+      
+      toast({
+        title: "Query Failed",
+        description: error.message || "Failed to process your query.",
+        variant: "destructive"
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   const handleQuery = async (query: string) => {
     if (!query.trim() || isLoading || !organization?.id) {
       if (!organization?.id) {
@@ -1069,9 +1179,10 @@ Additional Details: ${decrypted.additionalDetails || 'None provided'}`;
                             <Button
                               onClick={async () => {
                                 setShowPIIChoice(false);
-                                setPreservePII(false); // Use PII redaction
+                                setPreservePII(false); // Don't preserve = redact PII
                                 const query = inputQuery || "Analyze this case";
-                                await handleQuery(query);
+                                // Pass false to skipPIIRedaction = don't skip redaction = redact PII
+                                await handleQueryWithPIIPreference(query, false);
                               }}
                               className="flex-1 bg-green-600 hover:bg-green-700"
                               size="sm"
@@ -1082,9 +1193,10 @@ Additional Details: ${decrypted.additionalDetails || 'None provided'}`;
                             <Button
                               onClick={async () => {
                                 setShowPIIChoice(false);
-                                setPreservePII(true); // Skip PII redaction
+                                setPreservePII(true); // Preserve = don't redact PII
                                 const query = inputQuery || "Analyze this case";
-                                await handleQuery(query);
+                                // Pass true to skipPIIRedaction = skip redaction = don't redact PII
+                                await handleQueryWithPIIPreference(query, true);
                               }}
                               variant="outline"
                               className="flex-1"
@@ -1325,7 +1437,7 @@ Additional Details: ${decrypted.additionalDetails || 'None provided'}`;
                             : 'bg-muted text-foreground border'
                         )}
                       >
-                        {message.role === 'assistant' && selectedCaseId && (message.content.includes('🚨') || message.content.includes('**What\'s the situation?**')) ? (
+                        {message.role === 'assistant' && (message.content.includes('###') || message.content.includes('**') || message.content.includes('🚨') || message.content.includes('*')) ? (
                           <div 
                             className="prose prose-sm max-w-none dark:prose-invert"
                             dangerouslySetInnerHTML={{ 
@@ -1417,9 +1529,10 @@ Additional Details: ${decrypted.additionalDetails || 'None provided'}`;
                             <Button
                               onClick={async () => {
                                 setShowPIIChoice(false);
-                                setPreservePII(false); // Use PII redaction
+                                setPreservePII(false); // Don't preserve = redact PII
                                 const query = inputQuery || "Analyze this case";
-                                await handleQuery(query);
+                                // Pass false to skipPIIRedaction = don't skip redaction = redact PII
+                                await handleQueryWithPIIPreference(query, false);
                               }}
                               className="flex-1 bg-green-600 hover:bg-green-700"
                               size="sm"
@@ -1430,9 +1543,10 @@ Additional Details: ${decrypted.additionalDetails || 'None provided'}`;
                             <Button
                               onClick={async () => {
                                 setShowPIIChoice(false);
-                                setPreservePII(true); // Skip PII redaction
+                                setPreservePII(true); // Preserve = don't redact PII
                                 const query = inputQuery || "Analyze this case";
-                                await handleQuery(query);
+                                // Pass true to skipPIIRedaction = skip redaction = don't redact PII
+                                await handleQueryWithPIIPreference(query, true);
                               }}
                               variant="outline"
                               className="flex-1"
