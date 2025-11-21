@@ -97,7 +97,7 @@ const AIAssistantView = () => {
   // Check for caseId in URL params (from case card clicks)
   useEffect(() => {
     const caseId = searchParams.get('caseId');
-    if (caseId) {
+    if (caseId && caseId !== selectedCaseId) {
       setSelectedCaseId(caseId);
       setCurrentMode('deep-dive');
       loadCaseData(caseId);
@@ -151,15 +151,26 @@ const AIAssistantView = () => {
         .eq('id', caseId)
         .single();
 
-      if (error) throw error;
+      if (error) {
+        console.error('Error loading case data:', error);
+        throw error;
+      }
+      
+      if (!data) {
+        throw new Error('Case not found');
+      }
+      
       setSelectedCaseData(data);
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error loading case data:', error);
       toast({
         title: "Error",
-        description: "Failed to load case data.",
+        description: error.message || "Failed to load case data.",
         variant: "destructive"
       });
+      // Reset selection on error
+      setSelectedCaseId('');
+      setCurrentMode(null);
     }
   };
 
@@ -183,7 +194,25 @@ const AIAssistantView = () => {
   };
 
   const handleQuery = async (query: string) => {
-    if (!query.trim() || isLoading || !organization?.id) return;
+    if (!query.trim() || isLoading) {
+      if (!organization?.id) {
+        toast({
+          title: "Organization Required",
+          description: "Please wait for organization to load.",
+          variant: "destructive"
+        });
+      }
+      return;
+    }
+
+    if (!organization?.id) {
+      toast({
+        title: "Organization Required",
+        description: "Organization not loaded. Please try again.",
+        variant: "destructive"
+      });
+      return;
+    }
 
     const userMessage: ChatMessage = {
       id: `user-${Date.now()}`,
@@ -230,25 +259,37 @@ const AIAssistantView = () => {
 
       if (mode === 'rag') {
         // RAG search mode
-        const { data, error } = await supabase.functions.invoke('rag-case-query', {
-          body: {
-            query: query.trim(),
-            organizationId: organization.id
+        try {
+          const { data, error } = await supabase.functions.invoke('rag-case-query', {
+            body: {
+              query: query.trim(),
+              organizationId: organization.id
+            }
+          });
+
+          if (error) {
+            console.error('RAG query error:', error);
+            throw new Error(error.message || 'Failed to search cases');
           }
-        });
 
-        if (error) throw error;
+          if (!data) {
+            throw new Error('No response from AI service');
+          }
 
-        const aiMessage: ChatMessage = {
-          id: `ai-${Date.now()}`,
-          role: 'assistant',
-          content: data.response || 'No response generated',
-          cases: data.cases || [],
-          mode: 'rag',
-          timestamp: new Date()
-        };
+          const aiMessage: ChatMessage = {
+            id: `ai-${Date.now()}`,
+            role: 'assistant',
+            content: data.response || 'No response generated',
+            cases: Array.isArray(data.cases) ? data.cases : [],
+            mode: 'rag',
+            timestamp: new Date()
+          };
 
-        setMessages(prev => [...prev, aiMessage]);
+          setMessages(prev => [...prev, aiMessage]);
+        } catch (ragError: any) {
+          console.error('RAG search failed:', ragError);
+          throw ragError;
+        }
       } else {
         // Deep-dive analysis mode
         if (!selectedCaseId) {
@@ -262,15 +303,28 @@ const AIAssistantView = () => {
         }
 
         // Get case data if not already loaded
-        if (!selectedCaseData) {
-          await loadCaseData(selectedCaseId);
+        let caseDataToUse = selectedCaseData;
+        if (!caseDataToUse) {
+          // Load case data synchronously
+          const { data, error } = await supabase
+            .from('reports')
+            .select('*')
+            .eq('id', selectedCaseId)
+            .single();
+
+          if (error || !data) {
+            throw new Error('Failed to load case data. Please try again.');
+          }
+          
+          caseDataToUse = data;
+          setSelectedCaseData(data);
         }
 
         // Decrypt case content
         let decryptedContent = '';
-        if (selectedCaseData?.encrypted_content && selectedCaseData?.organization_id) {
+        if (caseDataToUse?.encrypted_content && caseDataToUse?.organization_id) {
           try {
-            const decrypted = await decryptReport(selectedCaseData.encrypted_content, selectedCaseData.organization_id);
+            const decrypted = await decryptReport(caseDataToUse.encrypted_content, caseDataToUse.organization_id);
             decryptedContent = `
 Case Details:
 - Category: ${decrypted.category || 'Not specified'}
@@ -288,37 +342,47 @@ Case Details:
         }
 
         // Process selected documents
-        const companyDocuments = [];
-        for (const docId of selectedDocs) {
-          const doc = documents.find(d => d.id === docId);
-          if (doc && doc.content_type === 'application/pdf') {
-            try {
-              const { data: extractData, error: extractError } = await supabase.functions.invoke('extract-pdf-text', {
-                body: { filePath: doc.file_path }
-              });
-
-              if (!extractError && extractData?.text) {
-                companyDocuments.push({
-                  name: doc.name,
-                  content: extractData.text
+        const companyDocuments: Array<{ name: string; content: string }> = [];
+        if (Array.isArray(selectedDocs) && selectedDocs.length > 0) {
+          for (const docId of selectedDocs) {
+            const doc = documents.find(d => d.id === docId);
+            if (doc && doc.content_type === 'application/pdf') {
+              try {
+                const { data: extractData, error: extractError } = await supabase.functions.invoke('extract-pdf-text', {
+                  body: { filePath: doc.file_path }
                 });
+
+                if (!extractError && extractData?.text) {
+                  companyDocuments.push({
+                    name: doc.name,
+                    content: extractData.text
+                  });
+                }
+              } catch (error) {
+                console.error(`Error extracting PDF ${doc.name}:`, error);
               }
-            } catch (error) {
-              console.error(`Error extracting PDF ${doc.name}:`, error);
+            } else if (doc) {
+              // Non-PDF documents
+              companyDocuments.push({
+                name: doc.name,
+                content: `[Document: ${doc.name} - ${doc.content_type}]`
+              });
             }
           }
         }
 
         // Check if this is a follow-up question or initial analysis
-        const isFollowUp = messages.length > 0 && currentMode === 'deep-dive';
+        const isFollowUp = Array.isArray(messages) && messages.length > 0 && currentMode === 'deep-dive';
         
-        let analysisResponse;
+        let analysisResponse: string;
         if (isFollowUp) {
           // Follow-up chat message
-          const recentMessages = messages.slice(-4).map(msg => ({
-            role: msg.role === 'user' ? 'user' : 'assistant',
-            content: msg.content
-          }));
+          const recentMessages = Array.isArray(messages) 
+            ? messages.slice(-4).map(msg => ({
+                role: msg.role === 'user' ? 'user' : 'assistant',
+                content: msg.content
+              }))
+            : [];
           recentMessages.push({ role: 'user', content: query.trim() });
 
           const { data, error } = await supabase.functions.invoke('ai-gateway-generate', {
@@ -342,20 +406,29 @@ Case Details:
             }
           });
 
-          if (error) throw error;
+          if (error) {
+            console.error('AI Gateway error:', error);
+            throw new Error(error.message || 'Failed to generate response');
+          }
+          
+          if (!data) {
+            throw new Error('No response from AI service');
+          }
+          
           analysisResponse = data.response || data.content || 'No response generated';
         } else {
           // Initial analysis
           const { data, error } = await supabase.functions.invoke('analyze-case-with-ai', {
             body: {
               caseData: {
-                id: selectedCaseData.id,
-                title: selectedCaseData.title,
-                status: selectedCaseData.status,
-                created_at: selectedCaseData.created_at,
-                priority: selectedCaseData.priority,
-                tracking_id: selectedCaseData.tracking_id,
-                report_type: selectedCaseData.report_type
+                id: caseDataToUse.id,
+                title: caseDataToUse.title,
+                status: caseDataToUse.status,
+                created_at: caseDataToUse.created_at,
+                priority: caseDataToUse.priority,
+                tracking_id: caseDataToUse.tracking_id,
+                report_type: caseDataToUse.report_type,
+                organization_id: caseDataToUse.organization_id
               },
               caseContent: decryptedContent,
               companyDocuments,
@@ -363,12 +436,20 @@ Case Details:
             }
           });
 
-          if (error) throw error;
+          if (error) {
+            console.error('Case analysis error:', error);
+            throw new Error(error.message || 'Failed to analyze case');
+          }
+          
+          if (!data) {
+            throw new Error('No response from AI analysis service');
+          }
+          
           analysisResponse = data.analysis || 'No analysis generated';
 
           // Store for saving
           setCurrentAnalysisData({
-            caseData: selectedCaseData,
+            caseData: caseDataToUse,
             customPrompt: query.trim(),
             companyDocuments,
             analysis: analysisResponse
@@ -399,7 +480,7 @@ Case Details:
             targetType: 'case',
             targetId: selectedCaseId,
             targetName: selectedCaseData?.title,
-            summary: `AI ${isFollowUp ? 'chat' : 'analysis'} on case: ${selectedCaseData?.title}`,
+            summary: `AI ${isFollowUp ? 'chat' : 'analysis'} on case: ${caseDataToUse?.title || 'Unknown'}`,
             metadata: {
               is_follow_up: isFollowUp,
               documents_analyzed: companyDocuments.length
@@ -618,7 +699,9 @@ Additional Details: ${decrypted.additionalDetails || 'None provided'}`;
   // Empty State UI
   if (isEmptyState) {
     return (
-      <div className="container mx-auto px-4 py-8 max-w-4xl">
+      <div className="flex flex-col h-[calc(100vh-4rem)] overflow-hidden">
+        <div className="flex-1 overflow-y-auto p-6">
+          <div className="max-w-4xl mx-auto">
         <div className="flex flex-col items-center justify-center min-h-[60vh] space-y-8">
           <div className="text-center space-y-4">
             <div className="flex items-center justify-center mb-4">
@@ -673,13 +756,16 @@ Additional Details: ${decrypted.additionalDetails || 'None provided'}`;
             </div>
           </div>
         </div>
+        </div>
       </div>
     );
   }
 
   // Chat Interface UI
   return (
-    <div className="container mx-auto px-4 py-6 max-w-6xl">
+    <div className="flex flex-col h-[calc(100vh-4rem)] overflow-hidden">
+      <div className="flex-1 overflow-y-auto p-6">
+        <div className="max-w-6xl mx-auto">
       <div className="flex items-center justify-between mb-6 flex-wrap gap-4">
         <div>
           <div className="flex items-center gap-2">
@@ -748,11 +834,17 @@ Additional Details: ${decrypted.additionalDetails || 'None provided'}`;
                     <SelectValue placeholder="Select a case to analyze..." />
                   </SelectTrigger>
                   <SelectContent>
-                    {cases.map((caseItem) => (
-                      <SelectItem key={caseItem.id} value={caseItem.id}>
-                        {caseItem.tracking_id} - {caseItem.title}
+                    {Array.isArray(cases) && cases.length > 0 ? (
+                      cases.map((caseItem) => (
+                        <SelectItem key={caseItem.id} value={caseItem.id}>
+                          {caseItem.tracking_id} - {caseItem.title}
+                        </SelectItem>
+                      ))
+                    ) : (
+                      <SelectItem value="no-cases" disabled>
+                        No cases available
                       </SelectItem>
-                    ))}
+                    )}
                   </SelectContent>
                 </Select>
               </div>
@@ -781,7 +873,7 @@ Additional Details: ${decrypted.additionalDetails || 'None provided'}`;
                 )}
               </div>
             </div>
-            {documents.length > 0 && (
+            {Array.isArray(documents) && documents.length > 0 && (
               <div className="mt-3 pt-3 border-t">
                 <p className="text-xs text-muted-foreground mb-2">Available documents:</p>
                 <div className="flex flex-wrap gap-2">
@@ -851,7 +943,7 @@ Additional Details: ${decrypted.additionalDetails || 'None provided'}`;
                   </div>
 
                   {/* Case Cards for RAG responses */}
-                  {message.role === 'assistant' && message.cases && message.cases.length > 0 && (
+                  {message.role === 'assistant' && message.cases && Array.isArray(message.cases) && message.cases.length > 0 && (
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 mt-3">
                       {message.cases.map((caseData) => (
                         <div
@@ -925,6 +1017,8 @@ Additional Details: ${decrypted.additionalDetails || 'None provided'}`;
           </div>
         </CardContent>
       </Card>
+        </div>
+      </div>
 
       {/* PII Preview Modal */}
       {showPIIPreview && selectedCaseData && (
