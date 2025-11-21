@@ -411,10 +411,10 @@ Case Details:
         let analysisResponse: string;
         if (isFollowUp) {
           // Follow-up chat message
-          const recentMessages = Array.isArray(messages) 
+          const recentMessages: Array<{ role: string; content: string }> = Array.isArray(messages) && messages.length > 0
             ? messages.slice(-4).map(msg => ({
                 role: msg.role === 'user' ? 'user' : 'assistant',
-                content: msg.content
+                content: msg.content || ''
               }))
             : [];
           recentMessages.push({ role: 'user', content: query.trim() });
@@ -620,10 +620,10 @@ Remember: Compliance teams need confidence and clarity under pressure. Be the ad
         ).join('\n');
 
         // Build conversation history
-        const recentMessages = Array.isArray(messages) 
+        const recentMessages: Array<{ role: string; content: string }> = Array.isArray(messages) && messages.length > 0
           ? messages.slice(-4).map(msg => ({
               role: msg.role === 'user' ? 'user' : 'assistant',
-              content: msg.content
+              content: msg.content || ''
             }))
           : [];
         recentMessages.push({ role: 'user', content: query.trim() });
