@@ -197,6 +197,8 @@ const AIAssistantView = () => {
   };
 
   const handleQuery = async (query: string) => {
+    console.log('📝 handleQuery called:', { query: query.trim(), isLoading, hasOrg: !!organization?.id });
+    
     if (!query.trim() || isLoading) {
       if (!organization?.id) {
         toast({
@@ -232,6 +234,7 @@ const AIAssistantView = () => {
       // Detect intent and extract case ID
       const intent = detectIntent(query, { selectedCaseId });
       const caseIdFromQuery = extractCaseId(query);
+      console.log('🎯 Intent detection:', { intent, caseIdFromQuery, selectedCaseId });
       
       // If case ID found in query, select that case
       if (caseIdFromQuery) {
@@ -286,14 +289,25 @@ const AIAssistantView = () => {
         }
       }
 
-      // Unified approach: If we have a selected case and query is about analyzing it, do analysis
-      // Otherwise, do RAG search (which can also analyze if needed)
+      // Unified approach: Route queries based on intent
+      // - Deep-dive: Analyze a specific case (requires selectedCaseId)
+      // - RAG: Search across all cases using semantic search
+      // - Ambiguous: Default to RAG for cross-case queries, case analysis if case selected
       const shouldAnalyzeCase = selectedCaseId && (
         intent === 'deep-dive' || 
         caseIdFromQuery || 
         query.toLowerCase().includes('analyze') ||
         query.toLowerCase().includes('tell me about')
       );
+
+      // Determine if this should be a RAG query (search across cases)
+      // Use RAG if:
+      // 1. Intent is explicitly 'rag'
+      // 2. Intent is ambiguous and no case is selected (default to search)
+      // 3. No case selected and not analyzing (default to search)
+      const shouldUseRAG = intent === 'rag' || 
+        (intent === 'ambiguous' && !selectedCaseId) ||
+        (!shouldAnalyzeCase && !selectedCaseId && intent !== 'deep-dive');
 
       if (shouldAnalyzeCase) {
         // Deep-dive analysis mode
@@ -445,7 +459,11 @@ Case Details:
             throw new Error('No response from AI service');
           }
           
-          analysisResponse = data.response || data.content || 'No response generated';
+          // Handle different response formats from ai-gateway-generate
+          analysisResponse = data.choices?.[0]?.message?.content || 
+            data.response || 
+            data.content || 
+            'No response generated';
         } else {
           // Initial analysis
           console.log('Starting case analysis for:', caseDataToUse.tracking_id);
@@ -536,6 +554,122 @@ Case Details:
             }
           });
         }
+      } else if (shouldUseRAG) {
+        // RAG search mode - search across all cases using semantic search
+        console.log('🔍 Starting RAG query:', query.trim());
+        console.log('Intent detected:', intent);
+        
+        const { data, error } = await supabase.functions.invoke('rag-case-query', {
+          body: {
+            query: query.trim(),
+            organizationId: organization.id
+          }
+        });
+
+        if (error) {
+          console.error('RAG query error:', error);
+          throw new Error(error.message || 'Failed to search cases');
+        }
+
+        if (!data) {
+          throw new Error('No response from RAG service');
+        }
+
+        console.log('✅ RAG query completed:', {
+          hasResponse: !!data.response,
+          casesFound: data.cases?.length || 0
+        });
+
+        const aiMessage: ChatMessage = {
+          id: `ai-${Date.now()}`,
+          role: 'assistant',
+          content: data.response || 'No response generated',
+          cases: data.cases || [],
+          timestamp: new Date()
+        };
+
+        setMessages(prev => [...prev, aiMessage]);
+
+        // Log RAG query event
+        if (user && organization?.id) {
+          await auditLogger.log({
+            eventType: 'case.rag_query',
+            category: 'case_management',
+            action: 'search',
+            severity: 'low',
+            actorType: 'user',
+            actorId: user.id,
+            actorEmail: user.email,
+            organizationId: organization.id,
+            targetType: 'query',
+            targetId: null,
+            targetName: query.trim(),
+            summary: `RAG search query: ${query.trim()}`,
+            metadata: {
+              intent,
+              cases_found: data.cases?.length || 0,
+              cases_returned: data.cases?.map((c: any) => c.id) || []
+            }
+          });
+        }
+      } else {
+        // Ambiguous intent with selected case - default to conversational follow-up
+        console.log('💬 Conversational follow-up mode');
+        
+        const recentMessages = Array.isArray(messages) 
+          ? messages.slice(-4).map(msg => ({
+              role: msg.role === 'user' ? 'user' : 'assistant',
+              content: msg.content
+            }))
+          : [];
+        recentMessages.push({ role: 'user', content: query.trim() });
+
+        const { data, error } = await supabase.functions.invoke('ai-gateway-generate', {
+          body: {
+            messages: [
+              {
+                role: 'system',
+                content: selectedCaseId 
+                  ? `You are a compliance consultant. The user is asking about their cases. ${selectedCaseData ? `They are currently viewing case "${selectedCaseData.title}". ` : ''}Provide helpful, conversational responses. If they're asking about searching cases, suggest they try queries like "show me all harassment cases" or "find cases about workplace safety".`
+                  : `You are a compliance consultant helping with case management. Provide helpful, conversational responses. If the user wants to search cases, suggest queries like "show me all harassment cases" or "find cases about workplace safety". If they want to analyze a specific case, suggest selecting a case first or mentioning a case ID.`
+              },
+              ...recentMessages
+            ],
+            temperature: 0.7,
+            max_tokens: 500,
+            context: {
+              purpose: 'general_chat',
+              report_id: selectedCaseId || undefined
+            }
+          },
+          headers: {
+            'X-Organization-Id': organization.id
+          }
+        });
+
+        if (error) {
+          console.error('AI Gateway error:', error);
+          throw new Error(error.message || 'Failed to generate response');
+        }
+        
+        if (!data) {
+          throw new Error('No response from AI service');
+        }
+        
+        // Handle different response formats from ai-gateway-generate
+        const responseContent = data.choices?.[0]?.message?.content || 
+          data.response || 
+          data.content || 
+          'No response generated';
+
+        const aiMessage: ChatMessage = {
+          id: `ai-${Date.now()}`,
+          role: 'assistant',
+          content: responseContent,
+          timestamp: new Date()
+        };
+
+        setMessages(prev => [...prev, aiMessage]);
       }
     } catch (error: any) {
       console.error('Error processing query:', error);
