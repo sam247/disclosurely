@@ -112,10 +112,10 @@ const AIAssistantView = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
 
-  // Update empty state
+  // Update empty state - keep empty state visible when case is selected but not analyzed yet
   useEffect(() => {
-    setIsEmptyState(messages.length === 0 && !selectedCaseId);
-  }, [messages, selectedCaseId]);
+    setIsEmptyState(messages.length === 0 && (!selectedCaseId || !hasAnalyzedCase));
+  }, [messages, selectedCaseId, hasAnalyzedCase]);
 
   const loadCases = async () => {
     if (!user || !organization?.id) return;
@@ -886,7 +886,7 @@ Additional Details: ${decrypted.additionalDetails || 'None provided'}`;
                     value={inputQuery}
                     onChange={(e) => setInputQuery(e.target.value)}
                     onKeyPress={handleKeyPress}
-                    placeholder="Ask a question or analyze a case..."
+                    placeholder={selectedCaseId ? "Analyze this case" : "Ask a question or analyze a case..."}
                     className="h-12 text-base"
                     disabled={isLoading}
                   />
