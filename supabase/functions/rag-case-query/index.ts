@@ -164,20 +164,41 @@ serve(async (req) => {
       console.log('⚠️ No vector matches found, trying keyword fallback search...');
       
       // Extract keywords from query (simple approach)
+      // Also handle common variations and plurals
+      const stopWords = ['show', 'me', 'all', 'cases', 'from', 'this', 'that', 'the', 'with', 'about', 'quarter', 'year', 'month', 'week', 'days'];
       const keywords = query.toLowerCase()
         .split(/\s+/)
-        .filter(word => word.length > 3 && !['show', 'me', 'all', 'cases', 'from', 'this', 'that', 'the', 'with', 'about'].includes(word));
+        .filter(word => word.length > 2 && !stopWords.includes(word))
+        .map(word => {
+          // Handle common variations
+          if (word.includes('harass')) return 'harass';
+          if (word.includes('discriminat')) return 'discriminat';
+          if (word.includes('fraud')) return 'fraud';
+          if (word.includes('safety')) return 'safety';
+          return word;
+        });
+      
+      console.log('🔍 Extracted keywords for fallback search:', keywords);
       
       if (keywords.length > 0) {
         // Try keyword search in title, report_type, and tags
         // Build OR conditions for each keyword across multiple fields
         const keywordConditions: string[] = [];
         keywords.forEach(kw => {
+          // Search in title (case-insensitive)
           keywordConditions.push(`title.ilike.%${kw}%`);
+          // Search in report_type
           keywordConditions.push(`report_type.ilike.%${kw}%`);
           // Tags is a JSONB array, so we search differently
           keywordConditions.push(`tags::text.ilike.%${kw}%`);
+          // Also try partial matches (for typos like "Harrassment" vs "Harassment")
+          if (kw.length > 4) {
+            keywordConditions.push(`title.ilike.%${kw.substring(0, kw.length - 1)}%`);
+            keywordConditions.push(`title.ilike.%${kw.substring(0, kw.length - 2)}%`);
+          }
         });
+        
+        console.log('🔍 Keyword search conditions:', keywordConditions.slice(0, 5), '...');
         
         const { data: keywordMatches, error: keywordError } = await supabase
           .from('reports')
@@ -185,6 +206,12 @@ serve(async (req) => {
           .eq('organization_id', targetOrganizationId)
           .or(keywordConditions.join(','))
           .limit(10);
+        
+        if (keywordError) {
+          console.error('❌ Keyword search error:', keywordError);
+        } else {
+          console.log(`🔍 Keyword search found ${keywordMatches?.length || 0} cases`);
+        }
         
         if (!keywordError && keywordMatches && keywordMatches.length > 0) {
           console.log(`✅ Found ${keywordMatches.length} cases via keyword search`);
@@ -199,6 +226,29 @@ serve(async (req) => {
             created_at: c.created_at,
             similarity: 0.5 // Lower similarity score for keyword matches
           }));
+        } else {
+          // If still no matches, try a broader search - just get recent cases
+          console.log('⚠️ Still no matches, trying broader search for recent cases...');
+          const { data: recentCases, error: recentError } = await supabase
+            .from('reports')
+            .select('id, tracking_id, title, status, priority, created_at, report_type, tags')
+            .eq('organization_id', targetOrganizationId)
+            .order('created_at', { ascending: false })
+            .limit(10);
+          
+          if (!recentError && recentCases && recentCases.length > 0) {
+            console.log(`✅ Found ${recentCases.length} recent cases as fallback`);
+            matchedCasesToUse = recentCases.map(c => ({
+              id: c.id,
+              tracking_id: c.tracking_id,
+              title: c.title,
+              description: '',
+              status: c.status,
+              priority: c.priority,
+              created_at: c.created_at,
+              similarity: 0.3 // Even lower for recent cases fallback
+            }));
+          }
         }
       }
     }
