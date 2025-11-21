@@ -52,6 +52,7 @@ const DashboardLayout = lazyWithRetry(() => import('./components/dashboard/Dashb
 const DashboardView = lazyWithRetry(() => import('./components/dashboard/DashboardView'));
 const AIHelperView = lazyWithRetry(() => import('./components/dashboard/AIHelperView'));
 const CaseInsightsView = lazyWithRetry(() => import('./pages/CaseInsightsView'));
+const AIAssistantView = lazyWithRetry(() => import('./pages/AIAssistantView'));
 const SettingsView = lazyWithRetry(() => import('./components/dashboard/SettingsView'));
 const OrganizationSettings = lazyWithRetry(() => import('./components/dashboard/OrganizationSettings'));
 const OrganizationOnboarding = lazy(() => import('./components/OrganizationOnboarding'));
@@ -267,6 +268,16 @@ const AppContent = () => {
             <ProtectedRoute>
               <DashboardLayout>
                 <CaseInsightsView />
+              </DashboardLayout>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/dashboard/ai-assistant"
+          element={
+            <ProtectedRoute>
+              <DashboardLayout>
+                <AIAssistantView />
               </DashboardLayout>
             </ProtectedRoute>
           }

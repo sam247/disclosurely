@@ -44,7 +44,7 @@ export const CaseCard = ({ caseId, trackingId, title, status, priority, created_
   const navigate = useNavigate();
 
   const handleViewDetails = () => {
-    navigate(`/dashboard/ai-helper?caseId=${caseId}`);
+    navigate(`/dashboard/ai-assistant?caseId=${caseId}`);
   };
 
   return (

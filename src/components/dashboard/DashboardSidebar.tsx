@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Home, Bot, Users, Palette, Lock, BarChart3, ScrollText, Link as LinkIcon, MessageSquare, Info, FileText, Zap, Settings, Shield, Workflow, Flag, Activity, ChevronRight, Search } from 'lucide-react';
+import { Home, Bot, Users, Palette, Lock, BarChart3, ScrollText, Link as LinkIcon, MessageSquare, Info, FileText, Zap, Settings, Shield, Workflow, Flag, Activity, ChevronRight, Search, Sparkles } from 'lucide-react';
 import { Separator } from '@/components/ui/separator';
 import { Badge } from '@/components/ui/badge';
 import { useLocation, useNavigate } from 'react-router-dom';
@@ -43,16 +43,10 @@ const DashboardSidebar = ({
     locked: false,
     ownerOnly: false
   }, {
-    title: t('aiCaseHelper'),
-    icon: Bot,
-    path: '/dashboard/ai-helper',
+    title: 'AI Assistant',
+    icon: Sparkles,
+    path: '/dashboard/ai-assistant',
     locked: !limits.hasAIHelper || !isOrgAdmin,
-    ownerOnly: false
-  }, {
-    title: 'Case Insights',
-    icon: Search,
-    path: '/dashboard/case-insights',
-    locked: false, // Always visible, route will handle permission check
     ownerOnly: false
   }, {
     title: t('analytics'),
@@ -159,7 +153,7 @@ const DashboardSidebar = ({
                   return null;
                 }
                 
-                // Always show Case Insights if user has AI Helper access (same feature set)
+                // AI Assistant combines both RAG search and deep-dive analysis
                 // Don't hide it even if locked - let the click handler show upgrade modal
                 
                 const isActive = location.pathname === item.path || (item.hasSubMenu && location.pathname.startsWith(item.path));

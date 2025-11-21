@@ -204,7 +204,7 @@ describe('CaseInsightsView', () => {
     const viewDetailsButton = screen.getAllByText('View Details')[0];
     await userEvent.click(viewDetailsButton);
 
-    expect(mockNavigate).toHaveBeenCalledWith('/dashboard/ai-helper?caseId=case-1');
+    expect(mockNavigate).toHaveBeenCalledWith('/dashboard/ai-assistant?caseId=case-1');
   });
 
   it('should clear chat and return to empty state', async () => {
