@@ -722,6 +722,11 @@ When listing cases, always include the tracking ID (DIS-XXXX format) so users ca
     // Set pending query from current input
     setPendingAnalysisQuery(inputQuery.trim());
 
+    // Ensure case data is loaded
+    if (!selectedCaseData) {
+      await loadCaseData(selectedCaseId);
+    }
+
     console.log('🔍 loadPreviewContent: Starting', { selectedCaseId });
     setIsLoadingPreview(true);
     try {
