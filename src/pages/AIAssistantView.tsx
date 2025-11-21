@@ -240,6 +240,39 @@ const AIAssistantView = () => {
           setSelectedCaseId(matchingCase.id);
           setCurrentMode('deep-dive');
           await loadCaseData(matchingCase.id);
+        } else {
+          // Case not found in loaded cases, try to load it directly
+          console.log('Case not found in loaded cases, attempting direct load:', caseIdFromQuery);
+          try {
+            const { data: caseData, error: caseError } = await supabase
+              .from('reports')
+              .select('id, tracking_id, title')
+              .or(`tracking_id.ilike.%${caseIdFromQuery}%,id.eq.${caseIdFromQuery}`)
+              .limit(1)
+              .maybeSingle();
+            
+            if (caseError) {
+              throw caseError;
+            }
+            
+            if (caseData) {
+              setSelectedCaseId(caseData.id);
+              setCurrentMode('deep-dive');
+              await loadCaseData(caseData.id);
+            } else {
+              throw new Error(`Case ${caseIdFromQuery} not found`);
+            }
+          } catch (caseLoadError: any) {
+            console.error('Error loading case:', caseLoadError);
+            toast({
+              title: "Case Not Found",
+              description: `Could not find case ${caseIdFromQuery}. Please check the case ID and try again.`,
+              variant: "destructive"
+            });
+            setIsLoading(false);
+            setMessages(prev => prev.filter(msg => msg.id !== userMessage.id));
+            return;
+          }
         }
       }
 
@@ -445,7 +478,16 @@ Case Details:
             throw new Error('No response from AI analysis service');
           }
           
-          analysisResponse = data.analysis || 'No analysis generated';
+          // Handle both 'analysis' and 'fallbackAnalysis' response formats
+          analysisResponse = data.analysis || data.fallbackAnalysis || 'No analysis generated';
+          
+          if (data.error && !data.fallbackAnalysis) {
+            console.warn('AI analysis returned error:', data.error);
+            // Still use the error message if no fallback is provided
+            if (!analysisResponse || analysisResponse === 'No analysis generated') {
+              throw new Error(data.error || 'AI analysis failed');
+            }
+          }
 
           // Store for saving
           setCurrentAnalysisData({
@@ -490,14 +532,23 @@ Case Details:
       }
     } catch (error: any) {
       console.error('Error processing query:', error);
+      
+      // Add error message to chat so user sees what went wrong
+      const errorMessage: ChatMessage = {
+        id: `error-${Date.now()}`,
+        role: 'assistant',
+        content: `❌ **Error**: ${error.message || "Failed to process your query. Please try again."}\n\nIf this problem persists, please check:\n- Your internet connection\n- That the case ID is correct\n- That you have permission to access this case`,
+        mode: currentMode || undefined,
+        timestamp: new Date()
+      };
+      
+      setMessages(prev => [...prev, errorMessage]);
+      
       toast({
         title: "Query Failed",
         description: error.message || "Failed to process query. Please try again.",
         variant: "destructive",
       });
-
-      // Remove user message on error
-      setMessages(prev => prev.filter(msg => msg.id !== userMessage.id));
     } finally {
       setIsLoading(false);
     }
@@ -972,10 +1023,15 @@ Additional Details: ${decrypted.additionalDetails || 'None provided'}`;
               <div className="flex justify-start">
                 <div className="bg-muted rounded-lg px-4 py-3 border">
                   <div className="flex items-center gap-2">
-                    <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
-                    <span className="text-sm text-muted-foreground">
-                      {currentMode === 'rag' ? 'Searching your cases...' : 'Analyzing case...'}
-                    </span>
+                    <Loader2 className="h-4 w-4 animate-spin text-primary" />
+                    <div className="flex flex-col">
+                      <span className="text-sm font-medium text-foreground">
+                        {currentMode === 'rag' ? 'Searching your cases...' : 'Analyzing case...'}
+                      </span>
+                      <span className="text-xs text-muted-foreground mt-1">
+                        {currentMode === 'deep-dive' ? 'This may take a few moments' : 'Please wait'}
+                      </span>
+                    </div>
                   </div>
                 </div>
               </div>
