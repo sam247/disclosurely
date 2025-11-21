@@ -137,7 +137,7 @@ const AIAssistantView = () => {
     }
   };
 
-  const loadCaseData = async (caseId: string) => {
+  const loadCaseData = async (caseId: string, showPIIPreview: boolean = false) => {
     try {
       const { data, error } = await supabase
         .from('reports')
@@ -150,6 +150,11 @@ const AIAssistantView = () => {
       
       setSelectedCaseData(data);
       setHasAnalyzedCase(false); // Reset when case changes
+      
+      // If showPIIPreview is true, automatically open PII preview
+      if (showPIIPreview) {
+        await loadPreviewContent();
+      }
     } catch (error: any) {
       console.error('Error loading case data:', error);
       toast({
@@ -632,17 +637,8 @@ When listing cases, always include the tracking ID (DIS-XXXX format) so users ca
   const handleCaseCardClick = (caseId: string) => {
     setSelectedCaseId(caseId);
     setHasAnalyzedCase(false); // Reset analysis state
-    loadCaseData(caseId);
-    
-    const caseData = cases.find(c => c.id === caseId);
-    if (caseData) {
-      setMessages(prev => [...prev, {
-        id: `system-${Date.now()}`,
-        role: 'assistant',
-        content: `Switched to analyzing case ${caseData.tracking_id}. Ask me to analyze this case or ask questions about it.`,
-        timestamp: new Date()
-      }]);
-    }
+    setIsEmptyState(false);
+    loadCaseData(caseId, true); // Show PII preview when case is selected
   };
 
   const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -859,55 +855,17 @@ Additional Details: ${decrypted.additionalDetails || 'None provided'}`;
                   </Button>
                 </div>
 
-                <div className="space-y-3">
-                  <p className="text-sm text-muted-foreground text-center">Or try one of these:</p>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                    <Button
-                      variant="outline"
-                      onClick={() => handleQuery("Show me all harassment cases")}
-                      disabled={isLoading}
-                      className="h-auto py-3 px-4 text-left justify-start whitespace-normal"
-                    >
-                      Show me all harassment cases
-                    </Button>
-                    <Button
-                      variant="outline"
-                      onClick={() => handleQuery("What's my average resolution time?")}
-                      disabled={isLoading}
-                      className="h-auto py-3 px-4 text-left justify-start whitespace-normal"
-                    >
-                      What's my average resolution time?
-                    </Button>
-                    <Button
-                      variant="outline"
-                      onClick={() => handleQuery("High priority unresolved cases")}
-                      disabled={isLoading}
-                      className="h-auto py-3 px-4 text-left justify-start whitespace-normal"
-                    >
-                      High priority unresolved cases
-                    </Button>
-                    <Button
-                      variant="outline"
-                      onClick={() => handleQuery("Cases created in the last 30 days")}
-                      disabled={isLoading}
-                      className="h-auto py-3 px-4 text-left justify-start whitespace-normal"
-                    >
-                      Cases created in the last 30 days
-                    </Button>
-                  </div>
-                </div>
-
                 {/* Show case dropdown if available */}
                 {Array.isArray(cases) && cases.length > 0 && (
-                  <div className="mt-6 w-full max-w-2xl">
-                    <p className="text-sm text-muted-foreground mb-2 text-center">Or select a case to analyze:</p>
+                  <div className="mt-8 w-full max-w-2xl">
+                    <p className="text-sm text-muted-foreground mb-2 text-center">Select a case to analyze:</p>
                     <Select 
                       value={selectedCaseId} 
                       onValueChange={(value) => {
                         setSelectedCaseId(value);
                         setHasAnalyzedCase(false);
-                        loadCaseData(value);
                         setIsEmptyState(false);
+                        loadCaseData(value, true); // Show PII preview when case is selected
                       }}
                     >
                       <SelectTrigger className="w-full">
@@ -996,7 +954,7 @@ Additional Details: ${decrypted.additionalDetails || 'None provided'}`;
                   <Select value={selectedCaseId} onValueChange={(value) => {
                     setSelectedCaseId(value);
                     setHasAnalyzedCase(false);
-                    loadCaseData(value);
+                    loadCaseData(value, true); // Show PII preview when case is selected
                   }}>
                     <SelectTrigger>
                       <SelectValue placeholder="Select a case to analyze..." />
@@ -1199,10 +1157,20 @@ Additional Details: ${decrypted.additionalDetails || 'None provided'}`;
         <PIIPreviewModal
           originalText={previewContent}
           caseTitle={selectedCaseData.title}
-          onConfirm={() => {
+          onConfirm={async () => {
             setShowPIIPreview(false);
+            // After confirming PII preview, automatically run analysis
+            if (selectedCaseId && selectedCaseData) {
+              await handleQuery('Analyze this case');
+            }
           }}
-          onCancel={() => setShowPIIPreview(false)}
+          onCancel={() => {
+            setShowPIIPreview(false);
+            // Reset case selection if user cancels
+            setSelectedCaseId('');
+            setSelectedCaseData(null);
+            setIsEmptyState(true);
+          }}
         />
       )}
     </div>
