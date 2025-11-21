@@ -44,7 +44,6 @@ interface ChatMessage {
     created_at: string;
     similarity?: number;
   }>;
-  mode?: 'rag' | 'deep-dive';
   timestamp: Date;
 }
 
@@ -71,7 +70,6 @@ const AIAssistantView = () => {
   const [inputQuery, setInputQuery] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [isEmptyState, setIsEmptyState] = useState(true);
-  const [currentMode, setCurrentMode] = useState<'rag' | 'deep-dive' | null>(null);
   const [selectedCaseId, setSelectedCaseId] = useState<string>('');
   const [selectedCaseData, setSelectedCaseData] = useState<any>(null);
   const [cases, setCases] = useState<NewCase[]>([]);
@@ -99,7 +97,6 @@ const AIAssistantView = () => {
     const caseId = searchParams.get('caseId');
     if (caseId && caseId !== selectedCaseId) {
       setSelectedCaseId(caseId);
-      setCurrentMode('deep-dive');
       loadCaseData(caseId);
     }
   }, [searchParams]);
@@ -177,7 +174,6 @@ const AIAssistantView = () => {
       });
       // Reset selection on error
       setSelectedCaseId('');
-      setCurrentMode(null);
     }
   };
 
@@ -233,11 +229,11 @@ const AIAssistantView = () => {
     setIsLoading(true);
 
     try {
-      // Detect intent
+      // Detect intent and extract case ID
       const intent = detectIntent(query, { selectedCaseId });
       const caseIdFromQuery = extractCaseId(query);
       
-      // If case ID found in query, switch to deep-dive mode
+      // If case ID found in query, select that case
       if (caseIdFromQuery) {
         const matchingCase = cases.find(c => 
           c.tracking_id.toLowerCase() === caseIdFromQuery.toLowerCase() ||
@@ -245,13 +241,11 @@ const AIAssistantView = () => {
         );
         if (matchingCase) {
           setSelectedCaseId(matchingCase.id);
-          setCurrentMode('deep-dive');
           await loadCaseData(matchingCase.id);
         } else {
           // Case not found in loaded cases, try to load it directly
           console.log('Case not found in loaded cases, attempting direct load:', caseIdFromQuery);
           try {
-            // Only search by tracking_id, not by ID (to avoid UUID parsing errors)
             const { data: caseData, error: caseError } = await supabase
               .from('reports')
               .select('id, tracking_id, title')
@@ -265,7 +259,6 @@ const AIAssistantView = () => {
             
             if (caseData) {
               setSelectedCaseId(caseData.id);
-              setCurrentMode('deep-dive');
               await loadCaseData(caseData.id);
             } else {
               throw new Error(`Case ${caseIdFromQuery} not found`);
@@ -273,12 +266,10 @@ const AIAssistantView = () => {
           } catch (caseLoadError: any) {
             console.error('Error loading case:', caseLoadError);
             
-            // Add error message to chat instead of just showing toast
             const errorMessage: ChatMessage = {
               id: `error-${Date.now()}`,
               role: 'assistant',
               content: `❌ **Case Not Found**\n\nI couldn't find a case with ID "${caseIdFromQuery}". Please check:\n\n• The case ID is spelled correctly (format: DIS-XXXXXXX)\n• The case exists in your organization\n• You have permission to access this case\n\nWould you like to search for cases instead, or try a different case ID?`,
-              mode: 'deep-dive',
               timestamp: new Date()
             };
             
@@ -295,72 +286,16 @@ const AIAssistantView = () => {
         }
       }
 
-      // Determine mode
-      let mode: 'rag' | 'deep-dive' = currentMode || (intent === 'deep-dive' ? 'deep-dive' : 'rag');
-      
-      // If we have a selected case and intent is ambiguous, default to deep-dive
-      if (intent === 'ambiguous' && selectedCaseId) {
-        mode = 'deep-dive';
-      } else if (intent === 'deep-dive' || caseIdFromQuery) {
-        mode = 'deep-dive';
-      } else {
-        mode = 'rag';
-      }
+      // Unified approach: If we have a selected case and query is about analyzing it, do analysis
+      // Otherwise, do RAG search (which can also analyze if needed)
+      const shouldAnalyzeCase = selectedCaseId && (
+        intent === 'deep-dive' || 
+        caseIdFromQuery || 
+        query.toLowerCase().includes('analyze') ||
+        query.toLowerCase().includes('tell me about')
+      );
 
-      setCurrentMode(mode);
-
-      if (mode === 'rag') {
-        // RAG search mode
-        try {
-          const { data, error } = await supabase.functions.invoke('rag-case-query', {
-            body: {
-              query: query.trim(),
-              organizationId: organization.id
-            }
-          });
-
-          if (error) {
-            console.error('RAG query error:', error);
-            throw new Error(error.message || 'Failed to search cases');
-          }
-
-          if (!data) {
-            throw new Error('No response from AI service');
-          }
-
-          // Handle empty results
-          const casesFound = Array.isArray(data.cases) ? data.cases : [];
-          let responseContent = data.response || 'No response generated';
-          
-          if (casesFound.length === 0) {
-            // Customize message for empty results
-            const queryLower = query.toLowerCase();
-            if (queryLower.includes('harassment')) {
-              responseContent = "I couldn't find any harassment cases in your system yet. This could mean:\n\n• No harassment reports have been submitted\n• All harassment cases have been archived\n• The search didn't match any existing cases\n\nWould you like me to search for a different type of case, or help you with something else?";
-            } else if (queryLower.includes('fraud') || queryLower.includes('financial')) {
-              responseContent = "I couldn't find any financial misconduct or fraud cases in your system yet. Would you like me to search for a different category of cases?";
-            } else if (queryLower.includes('safety')) {
-              responseContent = "I couldn't find any workplace safety cases in your system yet. Would you like me to search for a different type of case?";
-            } else {
-              responseContent = `I couldn't find any cases matching "${query.trim()}". This could mean:\n\n• No cases match your search criteria\n• All matching cases have been archived\n• The search terms didn't match any existing cases\n\nWould you like to try a different search, or ask me something else?`;
-            }
-          }
-
-          const aiMessage: ChatMessage = {
-            id: `ai-${Date.now()}`,
-            role: 'assistant',
-            content: responseContent,
-            cases: casesFound,
-            mode: 'rag',
-            timestamp: new Date()
-          };
-
-          setMessages(prev => [...prev, aiMessage]);
-        } catch (ragError: any) {
-          console.error('RAG search failed:', ragError);
-          throw ragError;
-        }
-      } else {
+      if (shouldAnalyzeCase) {
         // Deep-dive analysis mode
         if (!selectedCaseId) {
           toast({
@@ -467,8 +402,7 @@ Case Details:
         }
 
         // Check if this is a follow-up question or initial analysis
-        // Consider it a follow-up if we have previous messages in deep-dive mode OR if we have any previous messages
-        const isFollowUp = Array.isArray(messages) && messages.length > 1 && (currentMode === 'deep-dive' || selectedCaseId);
+        const isFollowUp = Array.isArray(messages) && messages.length > 1 && selectedCaseId;
         
         let analysisResponse: string;
         if (isFollowUp) {
@@ -576,7 +510,6 @@ Case Details:
           id: `ai-${Date.now()}`,
           role: 'assistant',
           content: analysisResponse,
-          mode: 'deep-dive',
           timestamp: new Date()
         };
 
@@ -596,7 +529,7 @@ Case Details:
             targetType: 'case',
             targetId: selectedCaseId,
             targetName: selectedCaseData?.title,
-            summary: `AI ${isFollowUp ? 'chat' : 'analysis'} on case: ${caseDataToUse?.title || 'Unknown'}`,
+            summary: `AI ${isFollowUp ? 'chat' : 'analysis'} on case: ${caseDataToUse?.title || selectedCaseData?.title || 'Unknown'}`,
             metadata: {
               is_follow_up: isFollowUp,
               documents_analyzed: companyDocuments.length
@@ -631,7 +564,6 @@ Case Details:
         id: `error-${Date.now()}`,
         role: 'assistant',
         content: errorContent,
-        mode: currentMode || undefined,
         timestamp: new Date()
       };
       
@@ -649,7 +581,6 @@ Case Details:
 
   const handleCaseCardClick = (caseId: string) => {
     setSelectedCaseId(caseId);
-    setCurrentMode('deep-dive');
     loadCaseData(caseId);
     
     // Add system message to chat
@@ -659,7 +590,6 @@ Case Details:
         id: `system-${Date.now()}`,
         role: 'assistant',
         content: `Switched to analyzing case ${caseData.tracking_id}. Ask me anything about this case.`,
-        mode: 'deep-dive',
         timestamp: new Date()
       }]);
     }
@@ -823,7 +753,6 @@ Additional Details: ${decrypted.additionalDetails || 'None provided'}`;
     setMessages([]);
     setSelectedCaseId('');
     setSelectedCaseData(null);
-    setCurrentMode(null);
     setCurrentAnalysisData(null);
     setIsEmptyState(true);
     navigate('/dashboard/ai-assistant');
@@ -915,22 +844,20 @@ Additional Details: ${decrypted.additionalDetails || 'None provided'}`;
         <div>
           <div className="flex items-center gap-2">
             <h1 className="text-3xl font-bold text-foreground">AI Assistant</h1>
-            {currentMode && (
-              <Badge variant={currentMode === 'rag' ? 'secondary' : 'default'}>
-                {currentMode === 'rag' ? 'Search Mode' : 'Analysis Mode'}
+            {selectedCaseData && (
+              <Badge variant="default">
+                Analyzing: {selectedCaseData.tracking_id}
               </Badge>
             )}
           </div>
           <p className="text-sm text-muted-foreground mt-1">
-            {currentMode === 'rag' 
-              ? 'Searching across all cases' 
-              : selectedCaseData 
-                ? `Analyzing: ${selectedCaseData.tracking_id}`
-                : 'Query and analyze your cases'}
+            {selectedCaseData 
+              ? `Analyzing: ${selectedCaseData.tracking_id} - ${selectedCaseData.title}`
+              : 'Search across all cases or analyze a specific case'}
           </p>
         </div>
         <div className="flex items-center gap-2">
-          {currentMode === 'deep-dive' && selectedCaseId && (
+          {selectedCaseId && (
             <>
               <Button
                 variant="outline"
@@ -965,8 +892,8 @@ Additional Details: ${decrypted.additionalDetails || 'None provided'}`;
         </div>
           </div>
 
-          {/* Case Selection (for deep-dive mode) */}
-      {currentMode === 'deep-dive' && (
+          {/* Case Selection - Always available */}
+      {(
         <Card className="mb-4">
           <CardContent className="p-4">
             <div className="flex items-center gap-4 flex-wrap">
@@ -1067,7 +994,7 @@ Additional Details: ${decrypted.additionalDetails || 'None provided'}`;
                         : 'bg-muted text-foreground border'
                     )}
                   >
-                    {message.role === 'assistant' && message.mode === 'deep-dive' ? (
+                    {message.role === 'assistant' && selectedCaseId && (message.content.includes('🚨') || message.content.includes('**What\'s the situation?**')) ? (
                       <div 
                         className="prose prose-sm max-w-none dark:prose-invert"
                         dangerouslySetInnerHTML={{ 
@@ -1119,10 +1046,10 @@ Additional Details: ${decrypted.additionalDetails || 'None provided'}`;
                     <Loader2 className="h-4 w-4 animate-spin text-primary" />
                     <div className="flex flex-col">
                       <span className="text-sm font-medium text-foreground">
-                        {currentMode === 'rag' ? 'Searching your cases...' : 'Analyzing case...'}
+                        {selectedCaseId ? 'Analyzing case...' : 'Searching your cases...'}
                       </span>
                       <span className="text-xs text-muted-foreground mt-1">
-                        {currentMode === 'deep-dive' ? 'This may take a few moments' : 'Please wait'}
+                        {selectedCaseId ? 'This may take a few moments' : 'Please wait'}
                       </span>
                     </div>
                   </div>
@@ -1141,9 +1068,9 @@ Additional Details: ${decrypted.additionalDetails || 'None provided'}`;
                 onChange={(e) => setInputQuery(e.target.value)}
                 onKeyPress={handleKeyPress}
                 placeholder={
-                  currentMode === 'deep-dive' 
-                    ? "Ask a follow-up question about this case..."
-                    : "Ask a question about your cases..."
+                  selectedCaseId 
+                    ? "Ask a follow-up question about this case or search for other cases..."
+                    : "Ask a question about your cases or analyze a specific case..."
                 }
                 className="flex-1"
                 disabled={isLoading}
