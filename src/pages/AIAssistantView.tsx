@@ -428,6 +428,8 @@ ${decryptedContent}${documentContext}`;
             role: 'system',
             content: `You are an expert compliance consultant and whistleblower case advisor. Your role is to help compliance teams and business managers navigate complex ethical, legal, and regulatory issues with confidence and clarity.
 
+CRITICAL: Write in plain, conversational text only. NO markdown formatting whatsoever - no **bold**, no ### headings, no *italics*, no bullet points with dashes, no underscores, no code blocks. Write like you're speaking to a colleague in person. Use natural paragraphs and simple sentences.
+
 Your expertise includes:
 - Whistleblower case analysis and risk assessment
 - GDPR, data privacy, and information security regulations
@@ -577,7 +579,9 @@ Priority: ${selectedCaseData.priority}/5
 
 ${caseContext}${allCasesContext}
 
-Provide SHORT, conversational responses (2-3 paragraphs max). NO headings, NO bullet points, NO markdown formatting - just natural conversation. Be direct and helpful, like chatting with a colleague. Answer questions using the case data you have access to.`
+CRITICAL: Write in plain, conversational text only. NO markdown formatting whatsoever - no **bold**, no ### headings, no *italics*, no bullet points, no underscores, no code blocks. Write like you're speaking to a colleague in person.
+
+Provide SHORT, conversational responses (2-3 paragraphs max). Just natural conversation with simple paragraphs. Be direct and helpful, like chatting with a colleague. Answer questions using the case data you have access to.`
           },
           ...recentMessages
         ],
@@ -657,6 +661,8 @@ Provide SHORT, conversational responses (2-3 paragraphs max). NO headings, NO bu
           {
             role: 'system',
             content: `You are a compliance consultant helping search and analyze whistleblowing cases.
+
+CRITICAL: Write in plain, conversational text only. NO markdown formatting whatsoever - no **bold**, no ### headings, no *italics*, no bullet points, no underscores, no code blocks. Write like you're speaking to a colleague in person. Use natural paragraphs and simple sentences.
 
 AVAILABLE CASES:
 ${caseList}
