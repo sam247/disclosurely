@@ -231,6 +231,7 @@ const AIAssistantView = () => {
   const [hasAnalyzedCase, setHasAnalyzedCase] = useState(false); // Track if case has been analyzed
   const [pendingAnalysisQuery, setPendingAnalysisQuery] = useState<string>(''); // Store query while PII preview is open
   const [preservePII, setPreservePII] = useState(false); // Track if user wants to skip PII redaction
+  const [showPIIChoice, setShowPIIChoice] = useState(false); // Show inline PII choice when case selected
   
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -728,8 +729,8 @@ When listing cases, always include the tracking ID (DIS-XXXX format) so users ca
         setIsLoading(false);
         responseContent = await handleFollowUp(query);
       } else if (selectedCaseId) {
-        // Initial case analysis - run directly (PII info shown inline in results)
-        console.log('📊 Case analysis - running directly', { selectedCaseId, hasAnalyzedCase, hasSelectedCaseData: !!selectedCaseData });
+        // Initial case analysis - run with user's PII preference
+        console.log('📊 Case analysis - running', { selectedCaseId, hasAnalyzedCase, preservePII, hasSelectedCaseData: !!selectedCaseData });
         
         // Ensure case data is loaded
         if (!selectedCaseData) {
@@ -737,8 +738,8 @@ When listing cases, always include the tracking ID (DIS-XXXX format) so users ca
           await loadCaseData(selectedCaseId);
         }
         
-        // Run analysis directly - PII metadata will be captured and shown inline
-        const analysisResult = await handleCaseAnalysis(query.trim(), false);
+        // Run analysis with user's PII preference
+        const analysisResult = await handleCaseAnalysis(query.trim(), preservePII);
         responseContent = typeof analysisResult === 'string' ? analysisResult : analysisResult.content;
         
         // Store PII metadata for display in message
@@ -754,6 +755,7 @@ When listing cases, always include the tracking ID (DIS-XXXX format) so users ca
         
         setMessages(prev => [...prev, aiMessage]);
         setHasAnalyzedCase(true);
+        setShowPIIChoice(false); // Hide choice after analysis
         setIsLoading(false);
         return; // Exit early, message already added
       } else {
@@ -1022,6 +1024,7 @@ Additional Details: ${decrypted.additionalDetails || 'None provided'}`;
     setSelectedCaseData(null);
     setCurrentAnalysisData(null);
     setHasAnalyzedCase(false);
+    setShowPIIChoice(false);
     setIsEmptyState(true);
     navigate('/dashboard/ai-assistant');
   };
@@ -1051,6 +1054,51 @@ Additional Details: ${decrypted.additionalDetails || 'None provided'}`;
               </div>
 
               <div className="w-full max-w-2xl space-y-4">
+                {/* PII Protection Choice - Inline */}
+                {showPIIChoice && selectedCaseId && !hasAnalyzedCase && (
+                  <Card className="border-blue-200 bg-blue-50/50">
+                    <CardContent className="p-4">
+                      <div className="flex items-start gap-3">
+                        <Shield className="h-5 w-5 text-blue-600 mt-0.5 flex-shrink-0" />
+                        <div className="flex-1">
+                          <h3 className="font-semibold text-sm mb-1">Privacy Protection</h3>
+                          <p className="text-xs text-muted-foreground mb-3">
+                            Choose how to handle personal information in this analysis:
+                          </p>
+                          <div className="flex gap-2">
+                            <Button
+                              onClick={async () => {
+                                setShowPIIChoice(false);
+                                setPreservePII(false); // Use PII redaction
+                                const query = inputQuery || "Analyze this case";
+                                await handleQuery(query);
+                              }}
+                              className="flex-1 bg-green-600 hover:bg-green-700"
+                              size="sm"
+                            >
+                              <Shield className="h-4 w-4 mr-2" />
+                              Analyze with PII Protection
+                            </Button>
+                            <Button
+                              onClick={async () => {
+                                setShowPIIChoice(false);
+                                setPreservePII(true); // Skip PII redaction
+                                const query = inputQuery || "Analyze this case";
+                                await handleQuery(query);
+                              }}
+                              variant="outline"
+                              className="flex-1"
+                              size="sm"
+                            >
+                              Analyze Without Redaction
+                            </Button>
+                          </div>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                )}
+
                 <div className="flex gap-2">
                   <Input
                     value={inputQuery}
@@ -1058,12 +1106,16 @@ Additional Details: ${decrypted.additionalDetails || 'None provided'}`;
                     onKeyPress={handleKeyPress}
                     placeholder={selectedCaseId ? "Analyze this case" : "Ask a question or analyze a case..."}
                     className="h-12 text-base"
-                    disabled={isLoading}
+                    disabled={isLoading || (showPIIChoice && selectedCaseId && !hasAnalyzedCase)}
                   />
                   <Button
                     onClick={() => {
-                      // Direct analysis - PII info shown inline in results
-                      handleQuery(inputQuery || (selectedCaseId ? "Analyze this case" : ""));
+                      // If PII choice not shown yet, show it. Otherwise run analysis
+                      if (selectedCaseId && !hasAnalyzedCase && !showPIIChoice) {
+                        setShowPIIChoice(true);
+                      } else {
+                        handleQuery(inputQuery || (selectedCaseId ? "Analyze this case" : ""));
+                      }
                     }}
                     disabled={(!inputQuery.trim() && !selectedCaseId) || isLoading}
                     size="lg"
@@ -1086,6 +1138,7 @@ Additional Details: ${decrypted.additionalDetails || 'None provided'}`;
                       onValueChange={(value) => {
                         setSelectedCaseId(value);
                         setHasAnalyzedCase(false);
+                        setShowPIIChoice(true); // Show PII choice when case is selected
                         loadCaseData(value);
                         setInputQuery("Analyze this case");
                       }}
@@ -1176,6 +1229,7 @@ Additional Details: ${decrypted.additionalDetails || 'None provided'}`;
                   <Select value={selectedCaseId} onValueChange={(value) => {
                     setSelectedCaseId(value);
                     setHasAnalyzedCase(false);
+                    setShowPIIChoice(true); // Show PII choice when case is selected
                     loadCaseData(value);
                     setInputQuery("Analyze this case");
                   }}>
@@ -1347,7 +1401,52 @@ Additional Details: ${decrypted.additionalDetails || 'None provided'}`;
               </div>
 
               {/* Input Area - Fixed at bottom */}
-              <div className="border-t p-4 flex-shrink-0">
+              <div className="border-t p-4 flex-shrink-0 space-y-3">
+                {/* PII Protection Choice - Inline */}
+                {showPIIChoice && selectedCaseId && !hasAnalyzedCase && (
+                  <Card className="border-blue-200 bg-blue-50/50">
+                    <CardContent className="p-3">
+                      <div className="flex items-start gap-3">
+                        <Shield className="h-5 w-5 text-blue-600 mt-0.5 flex-shrink-0" />
+                        <div className="flex-1">
+                          <h3 className="font-semibold text-sm mb-1">Privacy Protection</h3>
+                          <p className="text-xs text-muted-foreground mb-3">
+                            Choose how to handle personal information in this analysis:
+                          </p>
+                          <div className="flex gap-2">
+                            <Button
+                              onClick={async () => {
+                                setShowPIIChoice(false);
+                                setPreservePII(false); // Use PII redaction
+                                const query = inputQuery || "Analyze this case";
+                                await handleQuery(query);
+                              }}
+                              className="flex-1 bg-green-600 hover:bg-green-700"
+                              size="sm"
+                            >
+                              <Shield className="h-4 w-4 mr-2" />
+                              Analyze with PII Protection
+                            </Button>
+                            <Button
+                              onClick={async () => {
+                                setShowPIIChoice(false);
+                                setPreservePII(true); // Skip PII redaction
+                                const query = inputQuery || "Analyze this case";
+                                await handleQuery(query);
+                              }}
+                              variant="outline"
+                              className="flex-1"
+                              size="sm"
+                            >
+                              Analyze Without Redaction
+                            </Button>
+                          </div>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                )}
+                
                 <div className="flex gap-2">
                   <Input
                     value={inputQuery}
@@ -1361,12 +1460,16 @@ Additional Details: ${decrypted.additionalDetails || 'None provided'}`;
                         : "Ask a question about your cases or analyze a specific case..."
                     }
                     className="flex-1"
-                    disabled={isLoading}
+                    disabled={isLoading || (showPIIChoice && selectedCaseId && !hasAnalyzedCase)}
                   />
                   <Button
                     onClick={() => {
-                      // Direct analysis - PII info shown inline in results
-                      handleQuery(inputQuery);
+                      // If PII choice not shown yet, show it. Otherwise run analysis
+                      if (selectedCaseId && !hasAnalyzedCase && !showPIIChoice) {
+                        setShowPIIChoice(true);
+                      } else {
+                        handleQuery(inputQuery);
+                      }
                     }}
                     disabled={!inputQuery.trim() || isLoading}
                     size="default"
