@@ -883,7 +883,13 @@ Additional Details: ${decrypted.additionalDetails || 'None provided'}`;
                     disabled={isLoading}
                   />
                   <Button
-                    onClick={() => handleQuery(inputQuery)}
+                    onClick={() => {
+                      if (selectedCaseId && !hasAnalyzedCase) {
+                        loadPreviewContent();
+                      } else {
+                        handleQuery(inputQuery);
+                      }
+                    }}
                     disabled={!inputQuery.trim() || isLoading}
                     size="lg"
                     className="h-12 px-6"
@@ -1221,34 +1227,9 @@ Additional Details: ${decrypted.additionalDetails || 'None provided'}`;
         <PIIPreviewModal
           originalText={previewContent}
           caseTitle={selectedCaseData.title}
-          onConfirm={async () => {
+          onConfirm={() => {
             setShowPIIPreview(false);
-            // After confirming PII preview, automatically run analysis with redaction
-            if (selectedCaseId && selectedCaseData && pendingAnalysisQuery) {
-              setPreservePII(false);
-              setIsLoading(true);
-              try {
-                const responseContent = await handleCaseAnalysis(pendingAnalysisQuery, false);
-                const aiMessage: ChatMessage = {
-                  id: `ai-${Date.now()}`,
-                  role: 'assistant',
-                  content: responseContent,
-                  timestamp: new Date()
-                };
-                setMessages(prev => [...prev, aiMessage]);
-                setHasAnalyzedCase(true);
-                setPendingAnalysisQuery('');
-              } catch (error: any) {
-                console.error('Error in analysis:', error);
-                toast({
-                  title: "Analysis Failed",
-                  description: error.message || "Failed to analyze case.",
-                  variant: "destructive"
-                });
-              } finally {
-                setIsLoading(false);
-              }
-            }
+            handleQuery(inputQuery);
           }}
           onProceedWithoutRedaction={async () => {
             setShowPIIPreview(false);
