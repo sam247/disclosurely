@@ -183,7 +183,7 @@ const AIAssistantView = () => {
   };
 
   // Handle case analysis (when case is selected)
-  const handleCaseAnalysis = async (query: string) => {
+  const handleCaseAnalysis = async (query: string, skipPIIRedaction: boolean = false) => {
     if (!selectedCaseId || !selectedCaseData || !organization?.id) {
       throw new Error('Case not selected');
     }
