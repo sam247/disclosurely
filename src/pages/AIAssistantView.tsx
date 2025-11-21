@@ -891,14 +891,17 @@ Additional Details: ${decrypted.additionalDetails || 'None provided'}`;
                     disabled={isLoading}
                   />
                   <Button
-                    onClick={() => {
+                    onClick={async () => {
                       if (selectedCaseId && !hasAnalyzedCase) {
-                        loadPreviewContent();
+                        // First time analyzing this case - show PII preview
+                        console.log('🎯 Empty state: Opening PII preview for case', selectedCaseId);
+                        await loadPreviewContent();
                       } else {
+                        // Follow-up question or cross-case search
                         handleQuery(inputQuery);
                       }
                     }}
-                    disabled={!inputQuery.trim() || isLoading}
+                    disabled={(!inputQuery.trim() && !selectedCaseId) || isLoading}
                     size="lg"
                     className="h-12 px-6"
                   >
