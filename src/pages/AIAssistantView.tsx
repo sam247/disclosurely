@@ -392,6 +392,7 @@ const AIAssistantView = () => {
 
         // Decrypt case content
         let decryptedContent = '';
+        let decryptionFailed = false;
         if (caseDataToUse?.encrypted_content && caseDataToUse?.organization_id) {
           try {
             const decrypted = await decryptReport(caseDataToUse.encrypted_content, caseDataToUse.organization_id);
@@ -405,10 +406,34 @@ Case Details:
 - Evidence: ${decrypted.evidence || 'No evidence provided'}
 - Additional Details: ${decrypted.additionalDetails || 'None provided'}
             `.trim();
-          } catch (decryptError) {
+          } catch (decryptError: any) {
             console.error('Error decrypting case content:', decryptError);
-            decryptedContent = '[Case content is encrypted and could not be decrypted]';
+            decryptionFailed = true;
+            // Still provide basic case info for analysis
+            decryptedContent = `
+Case Details:
+- Title: ${caseDataToUse.title || 'Not specified'}
+- Tracking ID: ${caseDataToUse.tracking_id || 'Not specified'}
+- Status: ${caseDataToUse.status || 'Not specified'}
+- Priority: ${caseDataToUse.priority || 'Not specified'}
+- Report Type: ${caseDataToUse.report_type || 'Not specified'}
+- Created: ${caseDataToUse.created_at || 'Not specified'}
+
+Note: Full case content could not be decrypted. Analysis will be based on available metadata.
+Error: ${decryptError?.message || 'Decryption failed'}
+            `.trim();
           }
+        } else {
+          // No encrypted content, use basic info
+          decryptedContent = `
+Case Details:
+- Title: ${caseDataToUse.title || 'Not specified'}
+- Tracking ID: ${caseDataToUse.tracking_id || 'Not specified'}
+- Status: ${caseDataToUse.status || 'Not specified'}
+- Priority: ${caseDataToUse.priority || 'Not specified'}
+- Report Type: ${caseDataToUse.report_type || 'Not specified'}
+- Created: ${caseDataToUse.created_at || 'Not specified'}
+          `.trim();
         }
 
         // Process selected documents
@@ -489,6 +514,10 @@ Case Details:
           analysisResponse = data.response || data.content || 'No response generated';
         } else {
           // Initial analysis
+          console.log('Starting case analysis for:', caseDataToUse.tracking_id);
+          console.log('Decryption failed:', decryptionFailed);
+          console.log('Content length:', decryptedContent.length);
+          
           const { data, error } = await supabase.functions.invoke('analyze-case-with-ai', {
             body: {
               caseData: {
@@ -506,6 +535,8 @@ Case Details:
               customPrompt: query.trim()
             }
           });
+
+          console.log('Analysis response:', { data: !!data, error: !!error, hasAnalysis: !!(data?.analysis || data?.fallbackAnalysis) });
 
           if (error) {
             console.error('Case analysis error:', error);
@@ -525,6 +556,11 @@ Case Details:
             if (!analysisResponse || analysisResponse === 'No analysis generated') {
               throw new Error(data.error || 'AI analysis failed');
             }
+          }
+          
+          // Add note if decryption failed
+          if (decryptionFailed && analysisResponse) {
+            analysisResponse = `⚠️ **Note**: Full case content could not be decrypted, so this analysis is based on available metadata.\n\n${analysisResponse}`;
           }
 
           // Store for saving
@@ -570,12 +606,31 @@ Case Details:
       }
     } catch (error: any) {
       console.error('Error processing query:', error);
+      console.error('Error details:', {
+        message: error.message,
+        stack: error.stack,
+        name: error.name,
+        code: error.code
+      });
       
       // Add error message to chat so user sees what went wrong
+      let errorContent = `❌ **Error**: ${error.message || "Failed to process your query. Please try again."}\n\n`;
+      
+      // Add specific guidance based on error type
+      if (error.message?.includes('decrypt') || error.message?.includes('403')) {
+        errorContent += `**Decryption Issue**: The case content could not be decrypted. This might be due to:\n- Permission issues\n- Encryption key mismatch\n- Case belongs to a different organization\n\n`;
+      } else if (error.message?.includes('404') || error.message?.includes('not found')) {
+        errorContent += `**Not Found**: The requested resource could not be found.\n\n`;
+      } else if (error.message?.includes('401') || error.message?.includes('unauthorized')) {
+        errorContent += `**Authorization Issue**: You may not have permission to access this resource.\n\n`;
+      }
+      
+      errorContent += `If this problem persists, please:\n- Check your internet connection\n- Verify the case ID is correct\n- Ensure you have permission to access this case\n- Try refreshing the page`;
+      
       const errorMessage: ChatMessage = {
         id: `error-${Date.now()}`,
         role: 'assistant',
-        content: `❌ **Error**: ${error.message || "Failed to process your query. Please try again."}\n\nIf this problem persists, please check:\n- Your internet connection\n- That the case ID is correct\n- That you have permission to access this case`,
+        content: errorContent,
         mode: currentMode || undefined,
         timestamp: new Date()
       };
