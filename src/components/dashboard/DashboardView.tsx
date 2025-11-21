@@ -1593,9 +1593,8 @@ Additional Details: ${decryptedContent.additionalDetails || 'None provided'}
                                     <PopoverTrigger asChild>
                                       <button
                                         className={`inline-flex items-center gap-1 px-2 py-1 rounded-md text-xs font-semibold cursor-pointer transition-all hover:ring-2 hover:ring-offset-1 ${
-                                          report.ai_risk_level === 'Critical' ? 'bg-red-600 text-white hover:ring-red-400' :
-                                          report.ai_risk_level === 'High' ? 'bg-orange-500 text-white hover:ring-orange-400' :
-                                          report.ai_risk_level === 'Medium' ? 'bg-yellow-500 text-white hover:ring-yellow-400' :
+                                          getUrgencyLevel(report.ai_risk_level) === 'HIGH' ? 'bg-red-600 text-white hover:ring-red-400' :
+                                          getUrgencyLevel(report.ai_risk_level) === 'MEDIUM' ? 'bg-yellow-500 text-white hover:ring-yellow-400' :
                                           'bg-green-500 text-white hover:ring-green-400'
                                         }`}
                                       >
