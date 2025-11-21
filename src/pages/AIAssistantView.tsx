@@ -896,6 +896,41 @@ Additional Details: ${decrypted.additionalDetails || 'None provided'}`;
                     </Button>
                   </div>
                 </div>
+
+                {/* Show cases if available */}
+                {Array.isArray(cases) && cases.length > 0 && (
+                  <div className="mt-8 w-full max-w-4xl">
+                    <p className="text-sm font-medium text-foreground mb-3">Or select a case to analyze:</p>
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 max-h-[400px] overflow-y-auto">
+                      {cases.slice(0, 12).map((caseItem) => (
+                        <div
+                          key={caseItem.id}
+                          onClick={() => {
+                            setSelectedCaseId(caseItem.id);
+                            setHasAnalyzedCase(false);
+                            loadCaseData(caseItem.id);
+                            setIsEmptyState(false);
+                          }}
+                          className="cursor-pointer"
+                        >
+                          <CaseCard
+                            caseId={caseItem.id}
+                            trackingId={caseItem.tracking_id}
+                            title={caseItem.title}
+                            status={caseItem.status}
+                            priority={caseItem.priority}
+                            created_at={caseItem.created_at}
+                          />
+                        </div>
+                      ))}
+                    </div>
+                    {cases.length > 12 && (
+                      <p className="text-xs text-muted-foreground mt-2 text-center">
+                        Showing 12 of {cases.length} cases. Search to find more.
+                      </p>
+                    )}
+                  </div>
+                )}
               </div>
             </div>
           </div>
@@ -1042,10 +1077,10 @@ Additional Details: ${decrypted.additionalDetails || 'None provided'}`;
             </CardContent>
           </Card>
 
-          <Card className="h-[calc(100vh-300px)] flex flex-col">
-            <CardContent className="flex-1 flex flex-col p-0">
-              {/* Messages Area */}
-              <div className="flex-1 overflow-y-auto p-6 space-y-6">
+          <Card className="flex flex-col" style={{ height: 'calc(100vh - 380px)', minHeight: '500px' }}>
+            <CardContent className="flex-1 flex flex-col p-0 overflow-hidden">
+              {/* Messages Area - Fixed height with scroll */}
+              <div className="flex-1 overflow-y-auto p-6 space-y-6 min-h-0">
                 {Array.isArray(messages) && messages.map((message) => (
                   <div
                     key={message.id}

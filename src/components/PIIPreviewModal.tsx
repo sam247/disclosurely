@@ -103,7 +103,7 @@ export const PIIPreviewModal: React.FC<PIIPreviewModalProps> = ({
                 </h3>
               </div>
               <div className="p-4 bg-white text-sm leading-relaxed whitespace-pre-wrap font-mono">
-                {highlightedParts.map((part, idx) => (
+                {Array.isArray(highlightedParts) && highlightedParts.map((part, idx) => (
                   part.isPII ? (
                     <span
                       key={idx}
@@ -144,7 +144,7 @@ export const PIIPreviewModal: React.FC<PIIPreviewModalProps> = ({
               </div>
               <div className="p-4 bg-white">
                 <div className="grid grid-cols-2 gap-3">
-                  {redactionResult.detections.map((detection, idx) => (
+                  {Array.isArray(redactionResult.detections) && redactionResult.detections.map((detection, idx) => (
                     <div 
                       key={idx} 
                       className="flex items-center gap-3 bg-gray-50 p-3 rounded-lg border"
