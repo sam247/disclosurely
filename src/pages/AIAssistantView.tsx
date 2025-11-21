@@ -910,7 +910,7 @@ Additional Details: ${decrypted.additionalDetails || 'None provided'}`;
                           setIsEmptyState(false);
                           setSelectedCaseData(null); // Reset case data - will load when send is clicked
                           // Populate search box with case analysis prompt
-                          setInputQuery(`Analyze case ${selectedCase.tracking_id}`);
+                          setInputQuery("Analyze this case");
                         }
                       }}
                     >
