@@ -1061,15 +1061,9 @@ Additional Details: ${decrypted.additionalDetails || 'None provided'}`;
                     disabled={isLoading}
                   />
                   <Button
-                    onClick={async () => {
-                      if (selectedCaseId && !hasAnalyzedCase) {
-                        // First time analyzing this case - show PII preview
-                        console.log('🎯 Empty state: Opening PII preview for case', selectedCaseId);
-                        await loadPreviewContent();
-                      } else {
-                        // Follow-up question or cross-case search
-                        handleQuery(inputQuery);
-                      }
+                    onClick={() => {
+                      // Direct analysis - PII info shown inline in results
+                      handleQuery(inputQuery || (selectedCaseId ? "Analyze this case" : ""));
                     }}
                     disabled={(!inputQuery.trim() && !selectedCaseId) || isLoading}
                     size="lg"
