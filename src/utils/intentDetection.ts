@@ -43,7 +43,8 @@ const DEEP_DIVE_INDICATORS = [
 ];
 
 // Case ID pattern (e.g., "DIS-ABC123" or "case DIS-ABC123")
-const CASE_ID_PATTERN = /(?:case\s+)?(?:DIS-)?[A-Z0-9]{6,}/i;
+// Must start with DIS- followed by alphanumeric, or be explicitly prefixed with "case"
+const CASE_ID_PATTERN = /(?:case\s+)?DIS-[A-Z0-9]{6,}/i;
 
 /**
  * Detect query intent using pattern matching

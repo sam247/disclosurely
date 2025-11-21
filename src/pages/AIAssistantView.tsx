@@ -117,10 +117,17 @@ const AIAssistantView = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
 
-  // Update empty state
+  // Update empty state - only show empty state if no messages and no selected case
   useEffect(() => {
     setIsEmptyState(messages.length === 0 && !selectedCaseId);
   }, [messages, selectedCaseId]);
+  
+  // Keep chat interface visible once user starts chatting
+  useEffect(() => {
+    if (messages.length > 0) {
+      setIsEmptyState(false);
+    }
+  }, [messages.length]);
 
   const loadCases = async () => {
     if (!user) return;
@@ -244,10 +251,11 @@ const AIAssistantView = () => {
           // Case not found in loaded cases, try to load it directly
           console.log('Case not found in loaded cases, attempting direct load:', caseIdFromQuery);
           try {
+            // Only search by tracking_id, not by ID (to avoid UUID parsing errors)
             const { data: caseData, error: caseError } = await supabase
               .from('reports')
               .select('id, tracking_id, title')
-              .or(`tracking_id.ilike.%${caseIdFromQuery}%,id.eq.${caseIdFromQuery}`)
+              .ilike('tracking_id', `%${caseIdFromQuery}%`)
               .limit(1)
               .maybeSingle();
             
@@ -264,13 +272,24 @@ const AIAssistantView = () => {
             }
           } catch (caseLoadError: any) {
             console.error('Error loading case:', caseLoadError);
+            
+            // Add error message to chat instead of just showing toast
+            const errorMessage: ChatMessage = {
+              id: `error-${Date.now()}`,
+              role: 'assistant',
+              content: `❌ **Case Not Found**\n\nI couldn't find a case with ID "${caseIdFromQuery}". Please check:\n\n• The case ID is spelled correctly (format: DIS-XXXXXXX)\n• The case exists in your organization\n• You have permission to access this case\n\nWould you like to search for cases instead, or try a different case ID?`,
+              mode: 'deep-dive',
+              timestamp: new Date()
+            };
+            
+            setMessages(prev => [...prev, errorMessage]);
+            
             toast({
               title: "Case Not Found",
               description: `Could not find case ${caseIdFromQuery}. Please check the case ID and try again.`,
               variant: "destructive"
             });
             setIsLoading(false);
-            setMessages(prev => prev.filter(msg => msg.id !== userMessage.id));
             return;
           }
         }
@@ -309,11 +328,29 @@ const AIAssistantView = () => {
             throw new Error('No response from AI service');
           }
 
+          // Handle empty results
+          const casesFound = Array.isArray(data.cases) ? data.cases : [];
+          let responseContent = data.response || 'No response generated';
+          
+          if (casesFound.length === 0) {
+            // Customize message for empty results
+            const queryLower = query.toLowerCase();
+            if (queryLower.includes('harassment')) {
+              responseContent = "I couldn't find any harassment cases in your system yet. This could mean:\n\n• No harassment reports have been submitted\n• All harassment cases have been archived\n• The search didn't match any existing cases\n\nWould you like me to search for a different type of case, or help you with something else?";
+            } else if (queryLower.includes('fraud') || queryLower.includes('financial')) {
+              responseContent = "I couldn't find any financial misconduct or fraud cases in your system yet. Would you like me to search for a different category of cases?";
+            } else if (queryLower.includes('safety')) {
+              responseContent = "I couldn't find any workplace safety cases in your system yet. Would you like me to search for a different type of case?";
+            } else {
+              responseContent = `I couldn't find any cases matching "${query.trim()}". This could mean:\n\n• No cases match your search criteria\n• All matching cases have been archived\n• The search terms didn't match any existing cases\n\nWould you like to try a different search, or ask me something else?`;
+            }
+          }
+
           const aiMessage: ChatMessage = {
             id: `ai-${Date.now()}`,
             role: 'assistant',
-            content: data.response || 'No response generated',
-            cases: Array.isArray(data.cases) ? data.cases : [],
+            content: responseContent,
+            cases: casesFound,
             mode: 'rag',
             timestamp: new Date()
           };
@@ -405,7 +442,8 @@ Case Details:
         }
 
         // Check if this is a follow-up question or initial analysis
-        const isFollowUp = Array.isArray(messages) && messages.length > 0 && currentMode === 'deep-dive';
+        // Consider it a follow-up if we have previous messages in deep-dive mode OR if we have any previous messages
+        const isFollowUp = Array.isArray(messages) && messages.length > 1 && (currentMode === 'deep-dive' || selectedCaseId);
         
         let analysisResponse: string;
         if (isFollowUp) {
