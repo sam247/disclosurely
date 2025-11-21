@@ -455,54 +455,106 @@ Case Details:
             data.content || 
             'No response generated';
         } else {
-          // Initial analysis
+          // Initial analysis - call ai-gateway-generate directly (no edge-to-edge calls)
           console.log('Starting case analysis for:', caseDataToUse.tracking_id);
           console.log('Decryption failed:', decryptionFailed);
           console.log('Content length:', decryptedContent.length);
           
-          const { data, error } = await supabase.functions.invoke('analyze-case-with-ai', {
+          // Build document context
+          let documentContext = '';
+          if (companyDocuments && companyDocuments.length > 0) {
+            documentContext = '\n\n**Company Documents:**\n' + companyDocuments.map(doc => 
+              `\n**${doc.name}:**\n${doc.content.substring(0, 2000)}`
+            ).join('\n\n---\n\n');
+          }
+
+          // Build analysis prompt
+          const analysisPrompt = query.trim() && !query.toLowerCase().includes('analyze') 
+            ? query.trim()
+            : `Analyze this case and provide:
+- Executive summary of the situation
+- Risk assessment (severity and urgency)
+- Immediate actions needed (next 24-48 hours)
+- Investigation steps and timeline
+- Legal/compliance considerations
+- Strategic recommendations
+
+${decryptedContent}${documentContext}`;
+
+          const { data, error } = await supabase.functions.invoke('ai-gateway-generate', {
             body: {
-              caseData: {
-                id: caseDataToUse.id,
-                title: caseDataToUse.title,
-                status: caseDataToUse.status,
-                created_at: caseDataToUse.created_at,
-                priority: caseDataToUse.priority,
-                tracking_id: caseDataToUse.tracking_id,
-                report_type: caseDataToUse.report_type,
-                organization_id: caseDataToUse.organization_id
-              },
-              caseContent: decryptedContent,
-              companyDocuments,
-              customPrompt: query.trim()
+              messages: [
+                {
+                  role: 'system',
+                  content: `You are an expert compliance consultant and whistleblower case advisor. Your role is to help compliance teams and business managers navigate complex ethical, legal, and regulatory issues with confidence and clarity.
+
+Your expertise includes:
+- Whistleblower case analysis and risk assessment
+- GDPR, data privacy, and information security regulations
+- Employment law, discrimination, and workplace misconduct
+- Corporate governance and ethical business practices
+- Investigation procedures and evidence preservation
+- Stakeholder communication and reputational risk management
+
+Communication style:
+- Professional yet approachable - like a trusted advisor
+- Use clear, jargon-free language that business managers understand
+- Provide specific, actionable guidance with realistic timelines
+- Balance legal precision with practical business context
+- Acknowledge complexity while offering clear next steps
+
+Response format:
+- Start with a brief executive summary of the situation
+- Assess risk level and explain your reasoning
+- Provide immediate actions (next 24-48 hours)
+- Outline investigation steps and timelines
+- Highlight legal/compliance considerations
+- End with 1-2 strategic questions to guide decision-making
+
+Always consider uploaded company documents (policies, procedures, codes of conduct) when providing guidance. Reference specific policies when relevant.
+
+Remember: Compliance teams need confidence and clarity under pressure. Be the advisor they can trust.`
+                },
+                {
+                  role: 'user',
+                  content: analysisPrompt
+                }
+              ],
+              temperature: 0.3,
+              max_tokens: 2000,
+              context: {
+                purpose: 'case_analysis',
+                report_id: caseDataToUse.id
+              }
+            },
+            headers: {
+              'X-Organization-Id': organization.id
             }
           });
 
-          console.log('Analysis response:', { data: !!data, error: !!error, hasAnalysis: !!(data?.analysis || data?.fallbackAnalysis) });
-
           if (error) {
-            console.error('Case analysis error:', error);
+            console.error('AI Gateway error:', error);
             throw new Error(error.message || 'Failed to analyze case');
           }
           
           if (!data) {
-            throw new Error('No response from AI analysis service');
+            throw new Error('No response from AI service');
           }
           
-          // Handle both 'analysis' and 'fallbackAnalysis' response formats
-          analysisResponse = data.analysis || data.fallbackAnalysis || 'No analysis generated';
-          
-          if (data.error && !data.fallbackAnalysis) {
-            console.warn('AI analysis returned error:', data.error);
-            // Still use the error message if no fallback is provided
-            if (!analysisResponse || analysisResponse === 'No analysis generated') {
-              throw new Error(data.error || 'AI analysis failed');
-            }
-          }
+          // Handle different response formats from ai-gateway-generate
+          analysisResponse = data.choices?.[0]?.message?.content || 
+            data.response || 
+            data.content || 
+            'No analysis generated';
           
           // Add note if decryption failed
           if (decryptionFailed && analysisResponse) {
             analysisResponse = `⚠️ **Note**: Full case content could not be decrypted, so this analysis is based on available metadata.\n\n${analysisResponse}`;
+          }
+
+          // Add PII redaction note if applicable
+          if (data.metadata?.pii_redacted) {
+            analysisResponse += '\n\n_🔒 Note: Sensitive information was automatically redacted for privacy during AI analysis._';
           }
 
           // Store for saving
