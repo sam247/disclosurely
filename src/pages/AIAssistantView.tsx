@@ -970,6 +970,7 @@ Additional Details: ${decrypted.additionalDetails || 'None provided'}`;
                     setSelectedCaseId(value);
                     setHasAnalyzedCase(false);
                     loadCaseData(value);
+                    setInputQuery("Analyze this case");
                   }}>
                     <SelectTrigger>
                       <SelectValue placeholder="Select a case to analyze..." />
@@ -1147,7 +1148,13 @@ Additional Details: ${decrypted.additionalDetails || 'None provided'}`;
                     disabled={isLoading}
                   />
                   <Button
-                    onClick={() => handleQuery(inputQuery)}
+                    onClick={() => {
+                      if (selectedCaseId && !hasAnalyzedCase) {
+                        loadPreviewContent();
+                      } else {
+                        handleQuery(inputQuery);
+                      }
+                    }}
                     disabled={!inputQuery.trim() || isLoading}
                     size="default"
                   >
@@ -1174,6 +1181,7 @@ Additional Details: ${decrypted.additionalDetails || 'None provided'}`;
           caseTitle={selectedCaseData.title}
           onConfirm={() => {
             setShowPIIPreview(false);
+            handleQuery(inputQuery);
           }}
           onCancel={() => setShowPIIPreview(false)}
         />
