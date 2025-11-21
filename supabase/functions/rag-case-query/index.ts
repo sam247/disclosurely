@@ -145,7 +145,7 @@ serve(async (req) => {
       'match_cases_by_organization',
       {
         query_embedding: queryEmbedding,
-        match_threshold: 0.7,
+        match_threshold: 0.5, // Lowered from 0.7 to catch more relevant cases
         match_count: 10,
         org_id: targetOrganizationId
       }
@@ -156,7 +156,52 @@ serve(async (req) => {
       throw searchError;
     }
 
-    console.log(`✅ Found ${matchedCases?.length || 0} matching cases`);
+    console.log(`✅ Found ${matchedCases?.length || 0} matching cases via vector search`);
+
+    // If vector search found no cases, try keyword fallback search
+    let matchedCasesToUse = matchedCases || [];
+    if (matchedCasesToUse.length === 0) {
+      console.log('⚠️ No vector matches found, trying keyword fallback search...');
+      
+      // Extract keywords from query (simple approach)
+      const keywords = query.toLowerCase()
+        .split(/\s+/)
+        .filter(word => word.length > 3 && !['show', 'me', 'all', 'cases', 'from', 'this', 'that', 'the', 'with', 'about'].includes(word));
+      
+      if (keywords.length > 0) {
+        // Try keyword search in title, report_type, and tags
+        // Build OR conditions for each keyword across multiple fields
+        const keywordConditions: string[] = [];
+        keywords.forEach(kw => {
+          keywordConditions.push(`title.ilike.%${kw}%`);
+          keywordConditions.push(`report_type.ilike.%${kw}%`);
+          // Tags is a JSONB array, so we search differently
+          keywordConditions.push(`tags::text.ilike.%${kw}%`);
+        });
+        
+        const { data: keywordMatches, error: keywordError } = await supabase
+          .from('reports')
+          .select('id, tracking_id, title, status, priority, created_at, report_type, tags')
+          .eq('organization_id', targetOrganizationId)
+          .or(keywordConditions.join(','))
+          .limit(10);
+        
+        if (!keywordError && keywordMatches && keywordMatches.length > 0) {
+          console.log(`✅ Found ${keywordMatches.length} cases via keyword search`);
+          // Convert to same format as vector search results
+          matchedCasesToUse = keywordMatches.map(c => ({
+            id: c.id,
+            tracking_id: c.tracking_id,
+            title: c.title,
+            description: '',
+            status: c.status,
+            priority: c.priority,
+            created_at: c.created_at,
+            similarity: 0.5 // Lower similarity score for keyword matches
+          }));
+        }
+      }
+    }
 
     // Decrypt case content for context
     const ENCRYPTION_SALT = Deno.env.get('ENCRYPTION_SALT');
@@ -165,9 +210,9 @@ serve(async (req) => {
     }
 
     const casesWithContent = [];
-    if (matchedCases && matchedCases.length > 0) {
+    if (matchedCasesToUse && matchedCasesToUse.length > 0) {
       // Fetch full case data including encrypted content
-      const caseIds = matchedCases.map(c => c.id);
+      const caseIds = matchedCasesToUse.map(c => c.id);
       const { data: fullCases, error: fetchError } = await supabase
         .from('reports')
         .select('id, tracking_id, title, encrypted_content, encryption_key_hash, status, priority, created_at, report_type')
@@ -209,7 +254,7 @@ serve(async (req) => {
             const decryptedString = new TextDecoder().decode(decryptedBuffer);
             const decryptedData = JSON.parse(decryptedString);
 
-            const matchedCase = matchedCases.find(c => c.id === caseData.id);
+            const matchedCase = matchedCasesToUse.find(c => c.id === caseData.id);
             casesWithContent.push({
               id: caseData.id,
               tracking_id: caseData.tracking_id,
@@ -225,7 +270,7 @@ serve(async (req) => {
           } catch (decryptError) {
             console.warn('⚠️ Failed to decrypt case:', caseData.id, decryptError);
             // Include case without description if decryption fails
-            const matchedCase = matchedCases.find(c => c.id === caseData.id);
+            const matchedCase = matchedCasesToUse.find(c => c.id === caseData.id);
             casesWithContent.push({
               id: caseData.id,
               tracking_id: caseData.tracking_id,
@@ -256,10 +301,19 @@ serve(async (req) => {
 
 🔒 SECURITY: You can ONLY access Organization ${targetOrganizationId}'s data. Never reference other organizations.
 
-${casesWithContent.length > 0 ? `RETRIEVED CASES:\n${caseContext}` : 'No cases found matching the query.'}
+${casesWithContent.length > 0 ? `RETRIEVED CASES:\n${caseContext}` : `No cases found matching the query "${query}".
+
+IMPORTANT: If the user is searching for specific case types (e.g., "harassment", "fraud", "safety"), consider:
+- Cases might be categorized differently (check report_type, tags, or category fields)
+- The search might need broader terms
+- Cases might exist but with different wording
+- Suggest checking all cases or trying alternative search terms`}
 
 Provide clear insights, reference case numbers (DIS-XXXX format), identify patterns.
-If no cases found, say so and suggest refining the query.
+If no cases found, acknowledge this and suggest:
+1. Trying broader search terms
+2. Checking if cases exist under different categories
+3. Verifying the time period or filters
 Keep responses concise and actionable.`;
 
     // Call DeepSeek API for response generation
