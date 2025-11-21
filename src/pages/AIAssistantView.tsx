@@ -1004,7 +1004,7 @@ Additional Details: ${decrypted.additionalDetails || 'None provided'}`;
                       setHasAnalyzedCase(false);
                       setSelectedCaseData(null); // Reset case data - will load when send is clicked
                       // Populate search box with case analysis prompt
-                      setInputQuery(`Analyze case ${selectedCase.tracking_id}`);
+                      setInputQuery("Analyze this case");
                     }
                   }}>
                     <SelectTrigger>
@@ -1183,7 +1183,20 @@ Additional Details: ${decrypted.additionalDetails || 'None provided'}`;
                     disabled={isLoading}
                   />
                   <Button
-                    onClick={() => handleQuery(inputQuery)}
+                    onClick={async () => {
+                      if (selectedCaseId && !hasAnalyzedCase) {
+                        // First time analyzing this case - show PII preview first
+                        setPendingAnalysisQuery(inputQuery.trim());
+                        // Ensure case data is loaded
+                        if (!selectedCaseData) {
+                          await loadCaseData(selectedCaseId);
+                        }
+                        await loadPreviewContent();
+                      } else {
+                        // Follow-up question or cross-case search - go straight to query
+                        handleQuery(inputQuery);
+                      }
+                    }}
                     disabled={!inputQuery.trim() || isLoading}
                     size="default"
                   >
