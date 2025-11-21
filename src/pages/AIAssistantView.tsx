@@ -756,6 +756,7 @@ Additional Details: ${decrypted.additionalDetails || 'None provided'}`;
             </div>
           </div>
         </div>
+          </div>
         </div>
       </div>
     );
@@ -766,7 +767,7 @@ Additional Details: ${decrypted.additionalDetails || 'None provided'}`;
     <div className="flex flex-col h-[calc(100vh-4rem)] overflow-hidden">
       <div className="flex-1 overflow-y-auto p-6">
         <div className="max-w-6xl mx-auto">
-      <div className="flex items-center justify-between mb-6 flex-wrap gap-4">
+          <div className="flex items-center justify-between mb-6 flex-wrap gap-4">
         <div>
           <div className="flex items-center gap-2">
             <h1 className="text-3xl font-bold text-foreground">AI Assistant</h1>
@@ -818,9 +819,9 @@ Additional Details: ${decrypted.additionalDetails || 'None provided'}`;
             Clear Chat
           </Button>
         </div>
-      </div>
+          </div>
 
-      {/* Case Selection (for deep-dive mode) */}
+          {/* Case Selection (for deep-dive mode) */}
       {currentMode === 'deep-dive' && (
         <Card className="mb-4">
           <CardContent className="p-4">
