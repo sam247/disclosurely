@@ -271,6 +271,7 @@ ${decryptedContent}${documentContext}`;
     // Call ai-gateway-generate DIRECTLY from frontend
     const { data, error } = await supabase.functions.invoke('ai-gateway-generate', {
       body: {
+        preserve_pii: skipPIIRedaction, // Skip PII redaction if user chose to proceed without it
         messages: [
           {
             role: 'system',
