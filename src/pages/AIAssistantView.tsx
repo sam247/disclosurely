@@ -571,20 +571,21 @@ When listing cases, always include the tracking ID (DIS-XXXX format) so users ca
         responseContent = await handleFollowUp(query);
       } else if (selectedCaseId) {
         // Initial case analysis - show PII preview first
-        console.log('📊 Case analysis - showing PII preview', { selectedCaseId, hasAnalyzedCase });
-        setIsLoading(false);
+        console.log('📊 Case analysis - showing PII preview', { selectedCaseId, hasAnalyzedCase, hasSelectedCaseData: !!selectedCaseData });
         setPendingAnalysisQuery(query.trim());
         
-        // Ensure case data is loaded before showing preview
-        if (!selectedCaseData) {
-          console.log('📦 Loading case data first...');
-          await loadCaseData(selectedCaseId);
-        }
+        // Always load case data first to ensure we have it
+        console.log('📦 Loading case data...');
+        await loadCaseData(selectedCaseId);
         
-        // Wait a moment for state to update, then load preview
+        // Small delay to ensure state is updated
+        await new Promise(resolve => setTimeout(resolve, 100));
+        
+        // Now load and show preview
         console.log('🔍 Loading preview content...');
         await loadPreviewContent();
         console.log('✅ Preview content loaded, modal should open');
+        setIsLoading(false);
         return; // Exit early, analysis will run after PII preview confirmation
       } else {
         // Cross-case search
@@ -907,7 +908,7 @@ Additional Details: ${decrypted.additionalDetails || 'None provided'}`;
                           setSelectedCaseId(value);
                           setHasAnalyzedCase(false);
                           setIsEmptyState(false);
-                          loadCaseData(value);
+                          setSelectedCaseData(null); // Reset case data - will load when send is clicked
                           // Populate search box with case analysis prompt
                           setInputQuery(`Analyze case ${selectedCase.tracking_id}`);
                         }
@@ -1001,7 +1002,7 @@ Additional Details: ${decrypted.additionalDetails || 'None provided'}`;
                     if (selectedCase) {
                       setSelectedCaseId(value);
                       setHasAnalyzedCase(false);
-                      loadCaseData(value);
+                      setSelectedCaseData(null); // Reset case data - will load when send is clicked
                       // Populate search box with case analysis prompt
                       setInputQuery(`Analyze case ${selectedCase.tracking_id}`);
                     }
