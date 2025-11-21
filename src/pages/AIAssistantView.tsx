@@ -1511,28 +1511,6 @@ Additional Details: ${decrypted.additionalDetails || 'None provided'}`;
                           {message.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                         </p>
                       </div>
-
-                      {/* Case Cards */}
-                      {message.role === 'assistant' && Array.isArray(message.cases) && message.cases.length > 0 && (
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 mt-3">
-                          {message.cases.map((caseData) => (
-                            <div
-                              key={caseData.id}
-                              onClick={() => handleCaseCardClick(caseData.id)}
-                              className="cursor-pointer"
-                            >
-                              <CaseCard
-                                caseId={caseData.id}
-                                trackingId={caseData.tracking_id}
-                                title={caseData.title}
-                                status={caseData.status}
-                                priority={caseData.priority}
-                                created_at={caseData.created_at}
-                              />
-                            </div>
-                          ))}
-                        </div>
-                      )}
                     </div>
                   </div>
                 ))}
