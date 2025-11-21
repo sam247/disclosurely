@@ -289,25 +289,15 @@ const AIAssistantView = () => {
         }
       }
 
-      // Unified approach: Route queries based on intent
-      // - Deep-dive: Analyze a specific case (requires selectedCaseId)
-      // - RAG: Search across all cases using semantic search
-      // - Ambiguous: Default to RAG for cross-case queries, case analysis if case selected
+      // Simplified approach: 
+      // - If case selected + analyze intent → analyze that case
+      // - Otherwise → search across cases using simple DB query + AI intelligence
       const shouldAnalyzeCase = selectedCaseId && (
         intent === 'deep-dive' || 
         caseIdFromQuery || 
         query.toLowerCase().includes('analyze') ||
         query.toLowerCase().includes('tell me about')
       );
-
-      // Determine if this should be a RAG query (search across cases)
-      // Use RAG if:
-      // 1. Intent is explicitly 'rag'
-      // 2. Intent is ambiguous and no case is selected (default to search)
-      // 3. No case selected and not analyzing (default to search)
-      const shouldUseRAG = intent === 'rag' || 
-        (intent === 'ambiguous' && !selectedCaseId) ||
-        (!shouldAnalyzeCase && !selectedCaseId && intent !== 'deep-dive');
 
       if (shouldAnalyzeCase) {
         // Deep-dive analysis mode
@@ -554,46 +544,130 @@ Case Details:
             }
           });
         }
-      } else if (shouldUseRAG) {
-        // RAG search mode - search across all cases using semantic search
-        console.log('🔍 Starting RAG query:', query.trim());
-        console.log('Intent detected:', intent);
+      } else {
+        // Search across cases - simple approach: query DB + let AI find relevant cases
+        console.log('🔍 Searching cases with AI intelligence:', query.trim());
         
-        const { data, error } = await supabase.functions.invoke('rag-case-query', {
+        // Get all cases (or recent cases) for the organization
+        const { data: allCases, error: casesError } = await supabase
+          .from('reports')
+          .select('id, tracking_id, title, status, priority, created_at, report_type, tags')
+          .eq('organization_id', organization.id)
+          .neq('status', 'archived')
+          .order('created_at', { ascending: false })
+          .limit(50); // Get recent 50 cases
+        
+        if (casesError) {
+          console.error('Error fetching cases:', casesError);
+          throw new Error('Failed to fetch cases');
+        }
+
+        // Build case list for AI context
+        const caseList = (allCases || []).map(c => 
+          `- ${c.tracking_id}: ${c.title} (${c.status}, Priority: ${c.priority}/5, Type: ${c.report_type || 'N/A'}, Created: ${new Date(c.created_at).toLocaleDateString()})`
+        ).join('\n');
+
+        // Build conversation history
+        const recentMessages = Array.isArray(messages) 
+          ? messages.slice(-4).map(msg => ({
+              role: msg.role === 'user' ? 'user' : 'assistant',
+              content: msg.content
+            }))
+          : [];
+        recentMessages.push({ role: 'user', content: query.trim() });
+
+        // Call AI Gateway with case list - let AI find relevant cases
+        const { data, error } = await supabase.functions.invoke('ai-gateway-generate', {
           body: {
-            query: query.trim(),
-            organizationId: organization.id
+            messages: [
+              {
+                role: 'system',
+                content: `You are a compliance consultant helping search and analyze whistleblowing cases.
+
+AVAILABLE CASES:
+${caseList || 'No cases found in the system.'}
+
+Your task:
+- Understand the user's query (handle typos, synonyms, and variations - e.g., "harassment" includes "bullying", "discrimination", "hostile work environment")
+- Identify which cases are relevant to their query
+- Provide a helpful response listing relevant cases with their tracking IDs (DIS-XXXX format)
+- If no cases match, suggest alternative search terms or ask for clarification
+- Be conversational and helpful
+
+When listing cases, always include the tracking ID (DIS-XXXX format) so users can reference them.`
+              },
+              ...recentMessages
+            ],
+            temperature: 0.7,
+            max_tokens: 1000,
+            context: {
+              purpose: 'case_search',
+              organization_id: organization.id
+            }
+          },
+          headers: {
+            'X-Organization-Id': organization.id
           }
         });
 
         if (error) {
-          console.error('RAG query error:', error);
+          console.error('AI Gateway error:', error);
           throw new Error(error.message || 'Failed to search cases');
         }
-
+        
         if (!data) {
-          throw new Error('No response from RAG service');
+          throw new Error('No response from AI service');
+        }
+        
+        // Parse AI response
+        const responseContent = data.choices?.[0]?.message?.content || 
+          data.response || 
+          data.content || 
+          'No response generated';
+
+        // Try to extract case IDs from AI response to show case cards
+        const caseIdsInResponse: string[] = [];
+        const trackingIdPattern = /DIS-[A-Z0-9]{6,}/gi;
+        const matches = responseContent.match(trackingIdPattern);
+        if (matches) {
+          const uniqueTrackingIds = [...new Set(matches)];
+          // Find case IDs from tracking IDs
+          for (const trackingId of uniqueTrackingIds) {
+            const foundCase = allCases?.find(c => 
+              c.tracking_id.toLowerCase() === trackingId.toLowerCase()
+            );
+            if (foundCase) {
+              caseIdsInResponse.push(foundCase.id);
+            }
+          }
         }
 
-        console.log('✅ RAG query completed:', {
-          hasResponse: !!data.response,
-          casesFound: data.cases?.length || 0
-        });
+        // Get case data for cards
+        const relevantCases = caseIdsInResponse.length > 0
+          ? allCases?.filter(c => caseIdsInResponse.includes(c.id)).map(c => ({
+              id: c.id,
+              tracking_id: c.tracking_id,
+              title: c.title,
+              status: c.status,
+              priority: c.priority,
+              created_at: c.created_at
+            })) || []
+          : [];
 
         const aiMessage: ChatMessage = {
           id: `ai-${Date.now()}`,
           role: 'assistant',
-          content: data.response || 'No response generated',
-          cases: data.cases || [],
+          content: responseContent,
+          cases: relevantCases,
           timestamp: new Date()
         };
 
         setMessages(prev => [...prev, aiMessage]);
 
-        // Log RAG query event
+        // Log search event
         if (user && organization?.id) {
           await auditLogger.log({
-            eventType: 'case.rag_query',
+            eventType: 'case.ai_search',
             category: 'case_management',
             action: 'search',
             severity: 'low',
@@ -604,72 +678,14 @@ Case Details:
             targetType: 'query',
             targetId: null,
             targetName: query.trim(),
-            summary: `RAG search query: ${query.trim()}`,
+            summary: `AI search query: ${query.trim()}`,
             metadata: {
               intent,
-              cases_found: data.cases?.length || 0,
-              cases_returned: data.cases?.map((c: any) => c.id) || []
+              cases_found: relevantCases.length,
+              cases_returned: relevantCases.map(c => c.id)
             }
           });
         }
-      } else {
-        // Ambiguous intent with selected case - default to conversational follow-up
-        console.log('💬 Conversational follow-up mode');
-        
-        const recentMessages = Array.isArray(messages) 
-          ? messages.slice(-4).map(msg => ({
-              role: msg.role === 'user' ? 'user' : 'assistant',
-              content: msg.content
-            }))
-          : [];
-        recentMessages.push({ role: 'user', content: query.trim() });
-
-        const { data, error } = await supabase.functions.invoke('ai-gateway-generate', {
-          body: {
-            messages: [
-              {
-                role: 'system',
-                content: selectedCaseId 
-                  ? `You are a compliance consultant. The user is asking about their cases. ${selectedCaseData ? `They are currently viewing case "${selectedCaseData.title}". ` : ''}Provide helpful, conversational responses. If they're asking about searching cases, suggest they try queries like "show me all harassment cases" or "find cases about workplace safety".`
-                  : `You are a compliance consultant helping with case management. Provide helpful, conversational responses. If the user wants to search cases, suggest queries like "show me all harassment cases" or "find cases about workplace safety". If they want to analyze a specific case, suggest selecting a case first or mentioning a case ID.`
-              },
-              ...recentMessages
-            ],
-            temperature: 0.7,
-            max_tokens: 500,
-            context: {
-              purpose: 'general_chat',
-              report_id: selectedCaseId || undefined
-            }
-          },
-          headers: {
-            'X-Organization-Id': organization.id
-          }
-        });
-
-        if (error) {
-          console.error('AI Gateway error:', error);
-          throw new Error(error.message || 'Failed to generate response');
-        }
-        
-        if (!data) {
-          throw new Error('No response from AI service');
-        }
-        
-        // Handle different response formats from ai-gateway-generate
-        const responseContent = data.choices?.[0]?.message?.content || 
-          data.response || 
-          data.content || 
-          'No response generated';
-
-        const aiMessage: ChatMessage = {
-          id: `ai-${Date.now()}`,
-          role: 'assistant',
-          content: responseContent,
-          timestamp: new Date()
-        };
-
-        setMessages(prev => [...prev, aiMessage]);
       }
     } catch (error: any) {
       console.error('Error processing query:', error);
