@@ -59,8 +59,20 @@ interface GenerateRequest {
 serve(async (req) => {
   // Handle CORS preflight FIRST - before any other code
   if (req.method === 'OPTIONS') {
-    const corsHeaders = getCorsHeaders(req);
-    return new Response('ok', { status: 200, headers: corsHeaders });
+    try {
+      const corsHeaders = getCorsHeaders(req);
+      return new Response('ok', { status: 200, headers: corsHeaders });
+    } catch (error) {
+      // Fallback CORS headers if getCorsHeaders fails
+      return new Response('ok', { 
+        status: 200, 
+        headers: {
+          'Access-Control-Allow-Origin': '*',
+          'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type, x-organization-id',
+          'Access-Control-Allow-Methods': 'POST, OPTIONS',
+        }
+      });
+    }
   }
   
   const corsHeaders = getCorsHeaders(req);
