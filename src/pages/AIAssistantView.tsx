@@ -376,23 +376,69 @@ Note: Full case content could not be decrypted. Analysis will be based on availa
         const doc = documents.find(d => d.id === docId);
         if (doc && doc.content_type === 'application/pdf') {
           try {
+            toast({
+              title: "Extracting PDF",
+              description: `Processing ${doc.name}...`,
+            });
+            
             const { data: extractData, error: extractError } = await supabase.functions.invoke('extract-pdf-text', {
               body: { filePath: doc.file_path }
             });
 
-            if (!extractError && extractData?.text) {
+            if (extractError) {
+              console.error(`Error extracting PDF ${doc.name}:`, extractError);
+              toast({
+                title: "PDF Extraction Failed",
+                description: `Could not extract text from ${doc.name}. The AI will analyze without this document.`,
+                variant: "destructive"
+              });
+              // Still add document with error message so user knows it was attempted
               companyDocuments.push({
                 name: doc.name,
-                content: extractData.text.substring(0, 5000) // Limit document size
+                content: `[PDF Document: ${doc.name} - Text extraction failed. Please ensure the PDF contains extractable text.]`
+              });
+            } else if (extractData?.text) {
+              // Use full extracted text (edge function already limits to 50k chars)
+              // Only limit if it's still too large for AI context
+              const extractedText = extractData.text;
+              const maxLength = 100000; // Increased from 5000 to 100k chars
+              const finalText = extractedText.length > maxLength 
+                ? extractedText.substring(0, maxLength) + `\n\n[Document truncated - showing first ${maxLength.toLocaleString()} characters of ${extractedText.length.toLocaleString()} total]`
+                : extractedText;
+              
+              companyDocuments.push({
+                name: doc.name,
+                content: finalText
+              });
+              
+              toast({
+                title: "PDF Extracted",
+                description: `Successfully extracted ${extractedText.length.toLocaleString()} characters from ${doc.name}`,
+              });
+            } else {
+              console.warn(`No text extracted from PDF ${doc.name}`);
+              companyDocuments.push({
+                name: doc.name,
+                content: `[PDF Document: ${doc.name} - No text could be extracted. This may be an image-based PDF.]`
               });
             }
-          } catch (error) {
+          } catch (error: any) {
             console.error(`Error extracting PDF ${doc.name}:`, error);
+            toast({
+              title: "PDF Extraction Error",
+              description: `Failed to extract ${doc.name}: ${error.message || 'Unknown error'}`,
+              variant: "destructive"
+            });
+            companyDocuments.push({
+              name: doc.name,
+              content: `[PDF Document: ${doc.name} - Extraction error: ${error.message || 'Unknown error'}]`
+            });
           }
         } else if (doc) {
+          // Non-PDF documents
           companyDocuments.push({
             name: doc.name,
-            content: `[Document: ${doc.name} - ${doc.content_type}]`
+            content: `[Document: ${doc.name} - ${doc.content_type || 'Unknown type'}. PDF extraction is only supported for PDF files.]`
           });
         }
       }
@@ -1005,41 +1051,96 @@ When listing cases, always include the tracking ID (DIS-XXXX format) so users ca
     setIsUploading(true);
     
     try {
+      const uploadedFiles: string[] = [];
+      
       for (const file of Array.from(files)) {
-        const fileExt = file.name.split('.').pop();
-        const fileName = `${user.id}/${Date.now()}-${Math.random().toString(36).substring(2)}.${fileExt}`;
+        // Validate file type
+        const validTypes = ['application/pdf', 'text/plain', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'];
+        const validExtensions = ['.pdf', '.txt', '.doc', '.docx'];
+        const fileExt = '.' + file.name.split('.').pop()?.toLowerCase();
+        
+        if (!validTypes.includes(file.type) && !validExtensions.includes(fileExt)) {
+          toast({
+            title: "Invalid File Type",
+            description: `${file.name} is not a supported format. Please upload PDF, TXT, DOC, or DOCX files.`,
+            variant: "destructive"
+          });
+          continue;
+        }
+
+        // Check file size (max 10MB)
+        const maxSize = 10 * 1024 * 1024; // 10MB
+        if (file.size > maxSize) {
+          toast({
+            title: "File Too Large",
+            description: `${file.name} exceeds the 10MB limit. Please upload a smaller file.`,
+            variant: "destructive"
+          });
+          continue;
+        }
+
+        const fileName = `${user.id}/${Date.now()}-${Math.random().toString(36).substring(2)}.${fileExt.substring(1)}`;
         
         const { error: uploadError } = await supabase.storage
           .from('ai-helper-docs')
           .upload(fileName, file);
 
-        if (uploadError) throw uploadError;
+        if (uploadError) {
+          throw new Error(`Failed to upload ${file.name}: ${uploadError.message}`);
+        }
 
         const { error: dbError } = await supabase
           .from('ai_helper_documents')
           .insert({
             name: file.name,
             file_path: fileName,
-            content_type: file.type,
+            content_type: file.type || 'application/pdf',
             file_size: file.size,
             uploaded_by: user.id,
             organization_id: organization.id
           });
 
-        if (dbError) throw dbError;
+        if (dbError) {
+          throw new Error(`Failed to save ${file.name}: ${dbError.message}`);
+        }
+
+        uploadedFiles.push(file.name);
       }
 
-      toast({
-        title: "Success",
-        description: `${files.length} document(s) uploaded successfully.`
-      });
+      if (uploadedFiles.length > 0) {
+        toast({
+          title: "Upload Successful",
+          description: `${uploadedFiles.length} document(s) uploaded. ${uploadedFiles.length === 1 ? 'Select it below' : 'Select them below'} to include in AI analysis.`
+        });
 
-      loadDocuments();
-    } catch (error) {
+        // Reload documents list
+        await loadDocuments();
+        
+        // Auto-select newly uploaded documents if none are selected
+        if (Array.isArray(selectedDocs) && selectedDocs.length === 0) {
+          // Get the newly uploaded document IDs
+          const { data: newDocs } = await supabase
+            .from('ai_helper_documents')
+            .select('id, name')
+            .eq('organization_id', organization.id)
+            .in('name', uploadedFiles)
+            .order('created_at', { ascending: false })
+            .limit(uploadedFiles.length);
+          
+          if (newDocs && newDocs.length > 0) {
+            setSelectedDocs(newDocs.map(doc => doc.id));
+            toast({
+              title: "Documents Selected",
+              description: "Newly uploaded documents have been automatically selected for analysis.",
+            });
+          }
+        }
+      }
+    } catch (error: any) {
       console.error('Error uploading files:', error);
       toast({
         title: "Upload Failed",
-        description: "Failed to upload documents. Please try again.",
+        description: error.message || "Failed to upload documents. Please try again.",
         variant: "destructive"
       });
     } finally {
