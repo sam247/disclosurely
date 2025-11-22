@@ -423,8 +423,10 @@ Note: Full case content could not be decrypted. Analysis will be based on availa
               body: { filePath: doc.file_path }
             });
 
+            console.log(`[PDF Extract] Response for ${doc.name}:`, { extractData, extractError });
+
             if (extractError) {
-              console.error(`Error extracting PDF ${doc.name}:`, extractError);
+              console.error(`[PDF Extract] Error extracting PDF ${doc.name}:`, extractError);
               toast({
                 title: "PDF Extraction Failed",
                 description: `Could not extract text from ${doc.name}. The AI will analyze without this document.`,
@@ -433,12 +435,15 @@ Note: Full case content could not be decrypted. Analysis will be based on availa
               // Still add document with error message so user knows it was attempted
               companyDocuments.push({
                 name: doc.name,
-                content: `[PDF Document: ${doc.name} - Text extraction failed. Please ensure the PDF contains extractable text.]`
+                content: `[PDF Document: ${doc.name} - Text extraction failed: ${extractError.message || 'Unknown error'}]`
               });
             } else if (extractData?.text) {
               // Use full extracted text (edge function already limits to 50k chars)
               // Only limit if it's still too large for AI context
               const extractedText = extractData.text;
+              console.log(`[PDF Extract] Successfully extracted ${extractedText.length} characters from ${doc.name}`);
+              console.log(`[PDF Extract] Preview (first 200 chars):`, extractedText.substring(0, 200));
+              
               const maxLength = 100000; // Increased from 5000 to 100k chars
               const finalText = extractedText.length > maxLength 
                 ? extractedText.substring(0, maxLength) + `\n\n[Document truncated - showing first ${maxLength.toLocaleString()} characters of ${extractedText.length.toLocaleString()} total]`
@@ -454,10 +459,10 @@ Note: Full case content could not be decrypted. Analysis will be based on availa
                 description: `Successfully extracted ${extractedText.length.toLocaleString()} characters from ${doc.name}`,
               });
             } else {
-              console.warn(`No text extracted from PDF ${doc.name}`);
+              console.warn(`[PDF Extract] No text extracted from PDF ${doc.name}. Response:`, extractData);
               companyDocuments.push({
                 name: doc.name,
-                content: `[PDF Document: ${doc.name} - No text could be extracted. This may be an image-based PDF.]`
+                content: `[PDF Document: ${doc.name} - No text could be extracted. This may be an image-based PDF. Response: ${JSON.stringify(extractData)}]`
               });
             }
           } catch (error: any) {
@@ -485,14 +490,18 @@ Note: Full case content could not be decrypted. Analysis will be based on availa
     // Build document context
     let documentContext = '';
     if (companyDocuments.length > 0) {
-      documentContext = '\n\n**Company Documents:**\n' + companyDocuments.map(doc => 
-        `\n**${doc.name}:**\n${doc.content}`
+      documentContext = '\n\n=== COMPANY DOCUMENTS ===\n\n' + companyDocuments.map(doc => 
+        `DOCUMENT: ${doc.name}\n${doc.content}`
       ).join('\n\n---\n\n');
+      console.log(`[Case Analysis] Including ${companyDocuments.length} documents in analysis`);
+      console.log(`[Case Analysis] Document context length: ${documentContext.length} characters`);
+    } else {
+      console.log(`[Case Analysis] No documents selected or extracted`);
     }
 
     // Build analysis prompt
     const analysisPrompt = query.trim() && !query.toLowerCase().includes('analyze') 
-      ? query.trim()
+      ? query.trim() + (documentContext ? `\n\n${documentContext}` : '')
       : `Analyze this case and provide:
 - Executive summary of the situation
 - Risk assessment (severity and urgency)
@@ -502,6 +511,9 @@ Note: Full case content could not be decrypted. Analysis will be based on availa
 - Strategic recommendations
 
 ${decryptedContent}${documentContext}`;
+    
+    console.log(`[Case Analysis] Final prompt length: ${analysisPrompt.length} characters`);
+    console.log(`[Case Analysis] Prompt preview (first 500 chars):`, analysisPrompt.substring(0, 500));
 
     // Call ai-gateway-generate DIRECTLY from frontend
     const { data, error } = await supabase.functions.invoke('ai-gateway-generate', {
@@ -633,9 +645,13 @@ Remember: Compliance teams need confidence and clarity under pressure. Be the ad
     // Build document context
     let documentContext = '';
     if (companyDocuments.length > 0) {
-      documentContext = '\n\n**Company Documents Available:**\n' + companyDocuments.map(doc => 
-        `\n**${doc.name}:**\n${doc.content}`
+      documentContext = '\n\n=== COMPANY DOCUMENTS AVAILABLE ===\n\n' + companyDocuments.map(doc => 
+        `DOCUMENT: ${doc.name}\n${doc.content}`
       ).join('\n\n---\n\n');
+      console.log(`[Follow-up] Including ${companyDocuments.length} documents in follow-up`);
+      console.log(`[Follow-up] Document context length: ${documentContext.length} characters`);
+    } else {
+      console.log(`[Follow-up] No documents available for follow-up`);
     }
 
     // Decrypt case content for context
