@@ -309,6 +309,11 @@ describe('UserManagement', () => {
       },
     ];
 
+    // Setup mocks for this test
+    const { supabase } = await import('@/integrations/supabase/client');
+    const mockFrom = supabase.from as any;
+    mockFrom.mockReset();
+
     mockFrom.mockImplementation((table: string) => ({
       select: () => ({
         eq: () => ({
@@ -396,6 +401,11 @@ describe('UserManagement', () => {
       { user_id: 'user-1', role: 'org_admin' },
     ];
 
+    // Setup mocks for this test
+    const { supabase } = await import('@/integrations/supabase/client');
+    const mockFrom = supabase.from as any;
+    mockFrom.mockReset();
+
     mockFrom.mockImplementation((table: string) => ({
       select: () => ({
         eq: () => ({
@@ -431,6 +441,11 @@ describe('UserManagement', () => {
       created_at: '2024-01-01T00:00:00Z',
       accepted_at: null,
     };
+
+    // Setup mocks for this test
+    const { supabase } = await import('@/integrations/supabase/client');
+    const mockFrom = supabase.from as any;
+    mockFrom.mockReset();
 
     mockFrom.mockImplementation(() => ({
       select: () => ({
