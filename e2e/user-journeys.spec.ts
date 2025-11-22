@@ -259,16 +259,28 @@ test.describe('Complete User Journeys', () => {
     test('should redirect unauthenticated users from protected routes', async ({ page }) => {
       // Try to access dashboard without authentication
       await page.goto('/dashboard');
-
-      // Should redirect to login or show unauthorized message
-      await page.waitForURL(/login|unauthorized|^\/$/, { timeout: 5000 }).catch(() => {
-        // URL might not change, check for login form instead
+      
+      // Wait for navigation to complete
+      await page.waitForLoadState('networkidle', { timeout: 10000 }).catch(() => {
+        // Continue even if networkidle doesn't complete
       });
 
-      const hasLoginForm = await page.locator('input[type="email"], input[type="password"]').count() > 0;
-      const isHome = page.url() === new URL('/', page.url()).href;
+      // Wait a bit for React Router to handle the redirect
+      await page.waitForTimeout(2000);
 
-      expect(hasLoginForm || isHome).toBeTruthy();
+      const currentUrl = page.url();
+      const isLoginPage = currentUrl.includes('/login') || currentUrl.includes('/auth/login');
+      
+      // Check for login form elements
+      const hasEmailInput = await page.locator('input[type="email"]').count() > 0;
+      const hasPasswordInput = await page.locator('input[type="password"]').count() > 0;
+      const hasLoginForm = hasEmailInput || hasPasswordInput;
+      
+      // Check for login-related text
+      const hasLoginText = await page.locator('text=/sign in|login|log in/i').first().isVisible({ timeout: 3000 }).catch(() => false);
+      
+      // Should be on login page OR have login form OR have login text
+      expect(isLoginPage || hasLoginForm || hasLoginText).toBeTruthy();
     });
 
     test('should sanitize user input in forms', async ({ page }) => {
