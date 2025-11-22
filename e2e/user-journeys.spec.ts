@@ -150,16 +150,9 @@ test.describe('Complete User Journeys', () => {
       const isHome = currentUrl === 'http://localhost:8080/' || currentUrl === 'http://127.0.0.1:8080/';
 
       // Debug: Log what we found if test fails
-      if (!is404 && !isHome) {
-        console.log('404 test debug - URL:', currentUrl);
-        console.log('404 test debug - Page title:', await page.title());
-        const bodyText = await page.locator('body').textContent().catch(() => '');
-        console.log('404 test debug - Body text (first 300 chars):', bodyText?.substring(0, 300));
-        console.log('404 test debug - has404Heading:', has404Heading);
-        console.log('404 test debug - has404Text:', has404Text);
-        console.log('404 test debug - has404Anywhere:', has404Anywhere);
-        console.log('404 test debug - hasHomeLink:', hasHomeLink);
-      }
+      // Note: Using test.info() would be better but requires test context
+      // For now, we'll remove console.log to pass linting
+      // If test fails, the assertion will provide enough context
 
       // Either we see 404 content or we're redirected to home
       // If we're still on the 404 path, that's also acceptable (means 404 page is showing)
