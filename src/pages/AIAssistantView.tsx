@@ -1700,85 +1700,54 @@ Additional Details: ${decrypted.additionalDetails || 'None provided'}`;
                     <Upload className="h-4 w-4 mr-2" />
                     {isUploading ? 'Uploading...' : 'Upload Policy'}
                   </Button>
-                  {Array.isArray(selectedDocs) && selectedDocs.length > 0 && (
-                    <Badge variant="secondary">
-                      {selectedDocs.length} document{selectedDocs.length > 1 ? 's' : ''} selected
-                    </Badge>
-                  )}
                 </div>
               </div>
-              {/* Document Selection Section */}
-              <div className="mt-3 pt-3 border-t">
-                {isLoadingDocs ? (
-                  <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                    <Loader2 className="h-3 w-3 animate-spin" />
-                    Loading documents...
-                  </div>
-                ) : Array.isArray(documents) && documents.length > 0 ? (
-                  <>
-                    <div className="flex items-center justify-between mb-2">
-                      <p className="text-xs font-medium text-foreground">
-                        Available documents ({documents.length}):
-                        {Array.isArray(selectedDocs) && selectedDocs.length > 0 && (
-                          <span className="text-primary ml-1 font-semibold">
-                            {selectedDocs.length} selected for analysis
-                          </span>
-                        )}
-                      </p>
-                    </div>
-                    <div className="flex flex-wrap gap-2">
-                      {documents.map((doc) => {
-                        const isSelected = Array.isArray(selectedDocs) && selectedDocs.includes(doc.id);
-                        const isPDF = doc.content_type === 'application/pdf';
-                        return (
-                          <Button
-                            key={doc.id}
-                            variant={isSelected ? 'default' : 'outline'}
-                            size="sm"
-                            onClick={() => {
-                              setSelectedDocs(prev => {
-                                const prevArray = Array.isArray(prev) ? prev : [];
-                                return prevArray.includes(doc.id) 
-                                  ? prevArray.filter(id => id !== doc.id)
-                                  : [...prevArray, doc.id];
-                              });
-                            }}
-                            className={cn(
-                              isSelected && 'ring-2 ring-primary ring-offset-1',
-                              !isPDF && 'opacity-60'
-                            )}
-                            title={!isPDF ? 'Only PDF files are currently supported for text extraction' : ''}
-                          >
-                            <FileText className="h-3 w-3 mr-1" />
-                            <span className="max-w-[200px] truncate">{doc.name}</span>
-                            {isSelected && <span className="ml-1">✓</span>}
-                            {!isPDF && <span className="ml-1 text-xs">(PDF only)</span>}
-                          </Button>
-                        );
-                      })}
-                    </div>
-                    {Array.isArray(selectedDocs) && selectedDocs.length > 0 && (
-                      <p className="text-xs text-muted-foreground mt-2">
-                        ✓ Selected documents will be included in the AI analysis. Click again to deselect.
-                      </p>
-                    )}
-                    {Array.isArray(selectedDocs) && selectedDocs.length === 0 && (
-                      <p className="text-xs text-muted-foreground mt-2">
-                        💡 Select documents above to include them in your AI analysis. PDF files will have their text extracted automatically.
-                      </p>
-                    )}
-                  </>
-                ) : (
-                  <div className="text-center py-2">
-                    <p className="text-xs text-muted-foreground mb-2">
-                      No documents uploaded yet.
-                    </p>
-                    <p className="text-xs text-muted-foreground">
-                      Click "Upload Policy" above to add company documents (PDF, DOC, DOCX, TXT) for AI analysis.
-                    </p>
-                  </div>
-                )}
-              </div>
+              {/* Document Selection Section - Compact */}
+              {Array.isArray(documents) && documents.length > 0 && (
+                <div className="flex flex-wrap gap-2">
+                  {documents.map((doc) => {
+                    const isSelected = Array.isArray(selectedDocs) && selectedDocs.includes(doc.id);
+                    const isPDF = doc.content_type === 'application/pdf';
+                    return (
+                      <div key={doc.id} className="flex items-center gap-1">
+                        <Button
+                          variant={isSelected ? 'default' : 'outline'}
+                          size="sm"
+                          onClick={() => {
+                            setSelectedDocs(prev => {
+                              const prevArray = Array.isArray(prev) ? prev : [];
+                              return prevArray.includes(doc.id) 
+                                ? prevArray.filter(id => id !== doc.id)
+                                : [...prevArray, doc.id];
+                            });
+                          }}
+                          className={cn(
+                            isSelected && 'ring-2 ring-primary ring-offset-1',
+                            !isPDF && 'opacity-60'
+                          )}
+                          title={!isPDF ? 'Only PDF files are currently supported for text extraction' : ''}
+                        >
+                          <FileText className="h-3 w-3 mr-1" />
+                          <span className="max-w-[200px] truncate">{doc.name}</span>
+                          {isSelected && <span className="ml-1">✓</span>}
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            deleteDocument(doc);
+                          }}
+                          className="h-8 w-8 p-0 text-destructive hover:text-destructive hover:bg-destructive/10"
+                          title="Delete document"
+                        >
+                          <Trash2 className="h-3 w-3" />
+                        </Button>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
             </CardContent>
           </Card>
 
