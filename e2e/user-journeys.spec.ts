@@ -132,10 +132,13 @@ test.describe('Complete User Journeys', () => {
 
     test('should handle 404 pages gracefully', async ({ page }) => {
       await page.goto('/non-existent-page-12345');
+      await page.waitForLoadState('networkidle');
 
-      // Should show 404 or redirect to home
-      const is404 = await page.locator('text=/404|not found/i').isVisible();
-      const isHome = page.url().includes('/') && !page.url().includes('non-existent');
+      // Should show 404 page
+      const is404 = await page.locator('text=/404|not found|page not found/i').isVisible({ timeout: 5000 }).catch(() => false);
+      // Or redirect to home (check URL doesn't contain the non-existent path)
+      const currentUrl = page.url();
+      const isHome = currentUrl === 'http://localhost:8080/' || currentUrl === 'http://127.0.0.1:8080/';
 
       expect(is404 || isHome).toBeTruthy();
     });
