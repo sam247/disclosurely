@@ -155,7 +155,9 @@ describe('UserManagement', () => {
 
     await waitFor(() => {
       // Check if component rendered - look for any team member content or table
-      const hasTable = screen.queryByRole('table');
+      // Use queryAllByRole to handle multiple tables
+      const tables = screen.queryAllByRole('table');
+      const hasTable = tables.length > 0;
       const hasInviteButton = screen.queryByRole('button', { name: /invite/i });
       const hasContent = hasTable || hasInviteButton;
       expect(hasContent).toBeTruthy();
@@ -263,7 +265,9 @@ describe('UserManagement', () => {
 
     await waitFor(() => {
       // Check if component rendered - look for any invitation or table content
-      const hasTable = screen.queryByRole('table');
+      // Use queryAllByRole to handle multiple tables
+      const tables = screen.queryAllByRole('table');
+      const hasTable = tables.length > 0;
       const hasInviteButton = screen.queryByRole('button', { name: /invite/i });
       const hasContent = hasTable || hasInviteButton;
       expect(hasContent).toBeTruthy();
@@ -340,9 +344,12 @@ describe('UserManagement', () => {
 
     await waitFor(() => {
       // Email is rendered in table - check for invitation content
+      // Use queryAllByRole to handle multiple tables
+      const tables = screen.queryAllByRole('table');
+      const hasTable = tables.length > 0;
       const hasInvitation = screen.queryByText(/pending@test\.com/i) || 
                            screen.queryByText(/invitation/i) ||
-                           screen.queryByRole('table');
+                           hasTable;
       expect(hasInvitation).toBeTruthy();
     }, { timeout: 5000 });
 
@@ -357,7 +364,10 @@ describe('UserManagement', () => {
       }, { timeout: 3000 });
     } else {
       // If cancel button not found, just verify component rendered
-      expect(screen.queryByRole('table') || screen.queryByText(/invitation/i)).toBeTruthy();
+      // Use queryAllByRole to handle multiple tables
+      const tables = screen.queryAllByRole('table');
+      const hasTable = tables.length > 0;
+      expect(hasTable || screen.queryByText(/invitation/i)).toBeTruthy();
     }
   });
 
@@ -425,9 +435,12 @@ describe('UserManagement', () => {
     await waitFor(() => {
       // Roles are displayed as formatted text (e.g., "Admin", "Org Admin")
       // or as badges - check for any admin-related content
+      // Use queryAllByRole to handle multiple tables
+      const tables = screen.queryAllByRole('table');
+      const hasTable = tables.length > 0;
       const hasAdmin = screen.queryByText(/admin/i) || 
                       screen.queryByText(/org.*admin/i) ||
-                      screen.queryByRole('table');
+                      hasTable;
       expect(hasAdmin).toBeTruthy();
     }, { timeout: 5000 });
   });
