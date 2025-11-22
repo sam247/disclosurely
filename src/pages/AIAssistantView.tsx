@@ -726,7 +726,7 @@ Priority: ${selectedCaseData.priority}/5
 
 ${caseContext}${documentContext}${allCasesContext}
 
-IMPORTANT: You have access to the company documents listed above. When users ask about policies, procedures, or company guidelines, reference the specific documents and their content. You can see and analyze the full text of uploaded policy documents.
+CRITICAL: The company documents are included in the system context above. They appear in a section marked "=== COMPANY DOCUMENTS AVAILABLE ===". When users ask about policies, procedures, or company guidelines, you MUST reference the actual document content that is provided above. The documents contain the full extracted text - you can see and read everything in them. If a user asks "can you see my policy doc?" or similar, answer YES and reference the specific content from the documents provided above.
 
 CRITICAL: Write in plain, conversational text only. NO markdown formatting whatsoever - no **bold**, no ### headings, no *italics*, no bullet points, no underscores, no code blocks. Write like you're speaking to a colleague in person.
 
