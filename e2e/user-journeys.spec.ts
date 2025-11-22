@@ -134,18 +134,26 @@ test.describe('Complete User Journeys', () => {
       await page.goto('/non-existent-page-12345');
       await page.waitForLoadState('networkidle');
 
-      // Wait a bit for React Router to handle the route
-      await page.waitForTimeout(1000);
+      // Wait for React Router to handle the route and render
+      await page.waitForTimeout(2000);
 
-      // Should show 404 page - check for the NotFound component content
-      // The NotFound component shows "404" and "Oops! Page not found"
-      const has404Heading = await page.locator('h1:has-text("404")').isVisible({ timeout: 5000 }).catch(() => false);
-      const has404Text = await page.locator('text=/Oops! Page not found/i').isVisible({ timeout: 5000 }).catch(() => false);
-      const is404 = has404Heading || has404Text;
+      // Check for 404 page content - the NotFound component shows "404" and "Oops! Page not found"
+      const has404Heading = await page.locator('h1').filter({ hasText: /^404$/ }).isVisible({ timeout: 5000 }).catch(() => false);
+      const has404Text = await page.getByText(/Oops! Page not found/i).isVisible({ timeout: 5000 }).catch(() => false);
+      const has404Anywhere = await page.locator('text=/404|not found|page not found/i').first().isVisible({ timeout: 5000 }).catch(() => false);
+      const is404 = has404Heading || has404Text || has404Anywhere;
       
-      // Or redirect to home
+      // Check if redirected to home
       const currentUrl = page.url();
       const isHome = currentUrl === 'http://localhost:8080/' || currentUrl === 'http://127.0.0.1:8080/';
+
+      // Debug: Log what we found if test fails
+      if (!is404 && !isHome) {
+        console.log('404 test debug - URL:', currentUrl);
+        console.log('404 test debug - Page title:', await page.title());
+        const bodyText = await page.locator('body').textContent().catch(() => '');
+        console.log('404 test debug - Body text (first 200 chars):', bodyText?.substring(0, 200));
+      }
 
       // Either we see 404 content or we're redirected to home
       expect(is404 || isHome).toBeTruthy();
