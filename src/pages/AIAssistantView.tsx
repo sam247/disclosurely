@@ -16,7 +16,8 @@ import {
   Shield,
   ChevronDown,
   ChevronUp,
-  AlertCircle
+  AlertCircle,
+  Trash2
 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
@@ -333,6 +334,43 @@ const AIAssistantView = () => {
     }
   };
 
+  const deleteDocument = async (doc: CompanyDocument) => {
+    try {
+      // Delete from storage
+      const { error: storageError } = await supabase.storage
+        .from('ai-helper-docs')
+        .remove([doc.file_path]);
+
+      if (storageError) throw storageError;
+
+      // Delete from database
+      const { error: dbError } = await supabase
+        .from('ai_helper_documents')
+        .delete()
+        .eq('id', doc.id);
+
+      if (dbError) throw dbError;
+
+      toast({
+        title: "Success",
+        description: "Document deleted successfully."
+      });
+
+      loadDocuments();
+      setSelectedDocs(prev => {
+        const prevArray = Array.isArray(prev) ? prev : [];
+        return prevArray.filter(id => id !== doc.id);
+      });
+    } catch (error: any) {
+      console.error('Error deleting document:', error);
+      toast({
+        title: "Delete Failed",
+        description: error.message || "Failed to delete document. Please try again.",
+        variant: "destructive"
+      });
+    }
+  };
+
   // Handle case analysis (when case is selected)
   const handleCaseAnalysis = async (query: string, skipPIIRedaction: boolean = false) => {
     if (!selectedCaseId || !selectedCaseData || !organization?.id) {
@@ -494,7 +532,7 @@ Communication style:
 Response format (write in plain conversational paragraphs, NO markdown):
 Cover the situation in natural paragraphs. Start with a brief summary, assess the risk level and explain your reasoning, provide immediate actions for the next 24-48 hours, outline investigation steps and timelines, highlight legal and compliance considerations, and end with 1-2 strategic questions to guide decision-making. Write it all as natural conversation, not structured lists or formatted sections.
 
-Always consider uploaded company documents (policies, procedures, codes of conduct) when providing guidance. Reference specific policies when relevant.
+IMPORTANT: You have full access to the company documents provided below. These documents contain the organization's policies, procedures, handbooks, and guidelines. When analyzing the case, actively reference and apply these company documents. Compare the case details against the relevant policies, cite specific policy sections when applicable, and provide guidance that aligns with the organization's documented procedures. The company documents are included in the user's message below - read them carefully and use them in your analysis.
 
 Remember: Compliance teams need confidence and clarity under pressure. Be the advisor they can trust.`
           },
@@ -560,6 +598,44 @@ Remember: Compliance teams need confidence and clarity under pressure. Be the ad
     // Load case data if not already loaded
     if (!selectedCaseData) {
       await loadCaseData(selectedCaseId);
+    }
+
+    // Load and extract selected documents for follow-up context
+    const companyDocuments: Array<{ name: string; content: string }> = [];
+    if (Array.isArray(selectedDocs) && selectedDocs.length > 0 && Array.isArray(documents)) {
+      for (const docId of selectedDocs) {
+        const doc = documents.find(d => d.id === docId);
+        if (doc && doc.content_type === 'application/pdf') {
+          try {
+            const { data: extractData, error: extractError } = await supabase.functions.invoke('extract-pdf-text', {
+              body: { filePath: doc.file_path }
+            });
+
+            if (!extractError && extractData?.text) {
+              const extractedText = extractData.text;
+              const maxLength = 100000;
+              const finalText = extractedText.length > maxLength 
+                ? extractedText.substring(0, maxLength) + `\n\n[Document truncated - showing first ${maxLength.toLocaleString()} characters]`
+                : extractedText;
+              
+              companyDocuments.push({
+                name: doc.name,
+                content: finalText
+              });
+            }
+          } catch (error) {
+            console.error(`Error extracting PDF ${doc.name} for follow-up:`, error);
+          }
+        }
+      }
+    }
+
+    // Build document context
+    let documentContext = '';
+    if (companyDocuments.length > 0) {
+      documentContext = '\n\n**Company Documents Available:**\n' + companyDocuments.map(doc => 
+        `\n**${doc.name}:**\n${doc.content}`
+      ).join('\n\n---\n\n');
     }
 
     // Decrypt case content for context
@@ -630,13 +706,15 @@ Priority: ${selectedCaseData.priority}/5
         messages: [
           {
             role: 'system',
-            content: `You are a compliance consultant having a conversational chat about cases. You have access to case data and can answer questions about specific cases or patterns across cases.
+            content: `You are a compliance consultant having a conversational chat about cases. You have access to case data and company documents. You can answer questions about specific cases, reference company policies, or discuss patterns across cases.
 
-${caseContext}${allCasesContext}
+${caseContext}${documentContext}${allCasesContext}
+
+IMPORTANT: You have access to the company documents listed above. When users ask about policies, procedures, or company guidelines, reference the specific documents and their content. You can see and analyze the full text of uploaded policy documents.
 
 CRITICAL: Write in plain, conversational text only. NO markdown formatting whatsoever - no **bold**, no ### headings, no *italics*, no bullet points, no underscores, no code blocks. Write like you're speaking to a colleague in person.
 
-Provide SHORT, conversational responses (2-3 paragraphs max). Just natural conversation with simple paragraphs. Be direct and helpful, like chatting with a colleague. Answer questions using the case data you have access to.`
+Provide SHORT, conversational responses (2-3 paragraphs max). Just natural conversation with simple paragraphs. Be direct and helpful, like chatting with a colleague. Answer questions using the case data and company documents you have access to.`
           },
           ...recentMessages
         ],
@@ -793,17 +871,19 @@ When listing cases, always include the tracking ID (DIS-XXXX format) so users ca
 
   // Main query handler - routes to appropriate function
   // Helper to handle query with explicit PII preference (avoids state timing issues)
-  const handleQueryWithPIIPreference = async (query: string, skipPIIRedaction: boolean) => {
+  const handleQueryWithPIIPreference = async (query: string, skipPIIRedaction: boolean, skipUserMessage: boolean = false) => {
     if (!query.trim()) return;
 
-    const userMessage: ChatMessage = {
-      id: `user-${Date.now()}`,
-      role: 'user',
-      content: query.trim(),
-      timestamp: new Date()
-    };
-
-    setMessages(prev => [...prev, userMessage]);
+    // Don't add user message if this is auto-started analysis
+    if (!skipUserMessage) {
+      const userMessage: ChatMessage = {
+        id: `user-${Date.now()}`,
+        role: 'user',
+        content: query.trim(),
+        timestamp: new Date()
+      };
+      setMessages(prev => [...prev, userMessage]);
+    }
     setInputQuery('');
     setIsLoading(true);
 
@@ -1320,108 +1400,86 @@ Additional Details: ${decrypted.additionalDetails || 'None provided'}`;
               </div>
 
               <div className="w-full max-w-2xl space-y-4">
-                {/* Document Upload Section - Always visible in empty state */}
-                <Card className="border-2 border-dashed border-primary/20 bg-muted/30">
-                  <CardContent className="p-4">
-                    <div className="flex items-start gap-3 mb-3">
-                      <FileText className="h-5 w-5 text-primary mt-0.5 flex-shrink-0" />
-                      <div className="flex-1">
-                        <h3 className="font-semibold text-sm mb-1">Company Documents</h3>
-                        <p className="text-xs text-muted-foreground mb-3">
-                          Upload policy documents, handbooks, or procedures to provide context for AI analysis. You can upload documents before or after selecting a case.
-                        </p>
-                        <div className="flex items-center gap-2 flex-wrap">
-                          <input
-                            ref={fileInputRef}
-                            type="file"
-                            accept=".pdf,.docx,.txt,.doc"
-                            multiple
-                            onChange={handleFileUpload}
-                            className="hidden"
-                          />
-                          <Button
-                            variant="default"
-                            size="sm"
-                            onClick={() => fileInputRef.current?.click()}
-                            disabled={isUploading}
-                          >
-                            <Upload className="h-4 w-4 mr-2" />
-                            {isUploading ? 'Uploading...' : 'Upload Documents'}
-                          </Button>
-                          {Array.isArray(selectedDocs) && selectedDocs.length > 0 && (
-                            <Badge variant="secondary" className="bg-primary/10 text-primary">
-                              {selectedDocs.length} selected
-                            </Badge>
-                          )}
-                          {Array.isArray(documents) && documents.length > 0 && (
-                            <Badge variant="outline">
-                              {documents.length} available
-                            </Badge>
-                          )}
-                        </div>
-                      </div>
-                    </div>
+                {/* Document Upload Section - Compact one-line */}
+                <div className="flex items-center gap-2 flex-wrap">
+                  <input
+                    ref={fileInputRef}
+                    type="file"
+                    accept=".pdf,.docx,.txt,.doc"
+                    multiple
+                    onChange={handleFileUpload}
+                    className="hidden"
+                  />
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => fileInputRef.current?.click()}
+                    disabled={isUploading}
+                  >
+                    <Upload className="h-4 w-4 mr-2" />
+                    {isUploading ? 'Uploading...' : 'Upload Documents'}
+                  </Button>
+                  {Array.isArray(selectedDocs) && selectedDocs.length > 0 && (
+                    <Badge variant="secondary" className="bg-primary/10 text-primary">
+                      {selectedDocs.length} selected
+                    </Badge>
+                  )}
+                  {Array.isArray(documents) && documents.length > 0 && (
+                    <span className="text-xs text-muted-foreground">
+                      {documents.length} available
+                    </span>
+                  )}
+                  {isLoadingDocs && (
+                    <Loader2 className="h-3 w-3 animate-spin text-muted-foreground" />
+                  )}
+                </div>
 
-                    {/* Document List */}
-                    {isLoadingDocs ? (
-                      <div className="flex items-center gap-2 text-xs text-muted-foreground mt-3 pt-3 border-t">
-                        <Loader2 className="h-3 w-3 animate-spin" />
-                        Loading documents...
-                      </div>
-                    ) : Array.isArray(documents) && documents.length > 0 ? (
-                      <div className="mt-3 pt-3 border-t">
-                        <p className="text-xs font-medium text-foreground mb-2">
-                          Available documents ({documents.length}):
-                          {Array.isArray(selectedDocs) && selectedDocs.length > 0 && (
-                            <span className="text-primary ml-1 font-semibold">
-                              {selectedDocs.length} selected for analysis
-                            </span>
-                          )}
-                        </p>
-                        <div className="flex flex-wrap gap-2">
-                          {documents.map((doc) => {
-                            const isSelected = Array.isArray(selectedDocs) && selectedDocs.includes(doc.id);
-                            const isPDF = doc.content_type === 'application/pdf';
-                            return (
-                              <Button
-                                key={doc.id}
-                                variant={isSelected ? 'default' : 'outline'}
-                                size="sm"
-                                onClick={() => {
-                                  setSelectedDocs(prev => {
-                                    const prevArray = Array.isArray(prev) ? prev : [];
-                                    return prevArray.includes(doc.id) 
-                                      ? prevArray.filter(id => id !== doc.id)
-                                      : [...prevArray, doc.id];
-                                  });
-                                }}
-                                className={cn(
-                                  isSelected && 'ring-2 ring-primary ring-offset-1',
-                                  !isPDF && 'opacity-60'
-                                )}
-                                title={!isPDF ? 'Only PDF files are currently supported for text extraction' : ''}
-                              >
-                                <FileText className="h-3 w-3 mr-1" />
-                                <span className="max-w-[200px] truncate">{doc.name}</span>
-                                {isSelected && <span className="ml-1">✓</span>}
-                                {!isPDF && <span className="ml-1 text-xs">(PDF only)</span>}
-                              </Button>
-                            );
-                          })}
+                {/* Document List - Compact */}
+                {Array.isArray(documents) && documents.length > 0 && (
+                  <div className="flex flex-wrap gap-2">
+                    {documents.map((doc) => {
+                      const isSelected = Array.isArray(selectedDocs) && selectedDocs.includes(doc.id);
+                      const isPDF = doc.content_type === 'application/pdf';
+                      return (
+                        <div key={doc.id} className="flex items-center gap-1">
+                          <Button
+                            variant={isSelected ? 'default' : 'outline'}
+                            size="sm"
+                            onClick={() => {
+                              setSelectedDocs(prev => {
+                                const prevArray = Array.isArray(prev) ? prev : [];
+                                return prevArray.includes(doc.id) 
+                                  ? prevArray.filter(id => id !== doc.id)
+                                  : [...prevArray, doc.id];
+                              });
+                            }}
+                            className={cn(
+                              isSelected && 'ring-2 ring-primary ring-offset-1',
+                              !isPDF && 'opacity-60'
+                            )}
+                            title={!isPDF ? 'Only PDF files are currently supported for text extraction' : ''}
+                          >
+                            <FileText className="h-3 w-3 mr-1" />
+                            <span className="max-w-[200px] truncate">{doc.name}</span>
+                            {isSelected && <span className="ml-1">✓</span>}
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              deleteDocument(doc);
+                            }}
+                            className="h-8 w-8 p-0 text-destructive hover:text-destructive hover:bg-destructive/10"
+                            title="Delete document"
+                          >
+                            <Trash2 className="h-3 w-3" />
+                          </Button>
                         </div>
-                        {Array.isArray(selectedDocs) && selectedDocs.length > 0 && (
-                          <p className="text-xs text-muted-foreground mt-2">
-                            ✓ Selected documents will be included in AI analysis. Click again to deselect.
-                          </p>
-                        )}
-                      </div>
-                    ) : (
-                      <p className="text-xs text-muted-foreground mt-3 pt-3 border-t">
-                        No documents uploaded yet. Click "Upload Documents" above to add company policies, handbooks, or procedures.
-                      </p>
-                    )}
-                  </CardContent>
-                </Card>
+                      );
+                    })}
+                  </div>
+                )}
 
                 {/* PII Protection Choice - Inline */}
                 {showPIIChoice && selectedCaseId && !hasAnalyzedCase && (
@@ -1435,34 +1493,36 @@ Additional Details: ${decrypted.additionalDetails || 'None provided'}`;
                             Choose how to handle personal information in this analysis:
                           </p>
                           <div className="flex gap-2">
-                            <Button
-                              onClick={async () => {
-                                setShowPIIChoice(false);
-                                setPreservePII(false); // Don't preserve = redact PII (show [EMPLOYEE_ID_1])
-                                const query = inputQuery || "Analyze this case";
-                                // preserve_pii: false means redact PII (backend checks !preserve_pii)
-                                await handleQueryWithPIIPreference(query, false);
-                              }}
-                              className="flex-1 bg-green-600 hover:bg-green-700"
-                              size="sm"
-                            >
-                              <Shield className="h-4 w-4 mr-2" />
-                              Analyze with PII Protection
-                            </Button>
-                            <Button
-                              onClick={async () => {
-                                setShowPIIChoice(false);
-                                setPreservePII(true); // Preserve = don't redact PII (show personal details)
-                                const query = inputQuery || "Analyze this case";
-                                // preserve_pii: true means don't redact PII (backend checks !preserve_pii)
-                                await handleQueryWithPIIPreference(query, true);
-                              }}
-                              variant="outline"
-                              className="flex-1"
-                              size="sm"
-                            >
-                              Analyze Without Redaction
-                            </Button>
+                          <Button
+                            onClick={async () => {
+                              setShowPIIChoice(false);
+                              setPreservePII(false); // Don't preserve = redact PII (show [EMPLOYEE_ID_1])
+                              const query = inputQuery || "Analyze this case";
+                              // preserve_pii: false means redact PII (backend checks !preserve_pii)
+                              // Skip user message for auto-started analysis
+                              await handleQueryWithPIIPreference(query, false, true);
+                            }}
+                            className="flex-1 bg-green-600 hover:bg-green-700"
+                            size="sm"
+                          >
+                            <Shield className="h-4 w-4 mr-2" />
+                            Analyze with PII Protection
+                          </Button>
+                          <Button
+                            onClick={async () => {
+                              setShowPIIChoice(false);
+                              setPreservePII(true); // Preserve = don't redact PII (show personal details)
+                              const query = inputQuery || "Analyze this case";
+                              // preserve_pii: true means don't redact PII (backend checks !preserve_pii)
+                              // Skip user message for auto-started analysis
+                              await handleQueryWithPIIPreference(query, true, true);
+                            }}
+                            variant="outline"
+                            className="flex-1"
+                            size="sm"
+                          >
+                            Analyze Without Redaction
+                          </Button>
                           </div>
                         </div>
                       </div>
@@ -1801,34 +1861,36 @@ Additional Details: ${decrypted.additionalDetails || 'None provided'}`;
                             Choose how to handle personal information in this analysis:
                           </p>
                           <div className="flex gap-2">
-                            <Button
-                              onClick={async () => {
-                                setShowPIIChoice(false);
-                                setPreservePII(false); // Don't preserve = redact PII (show [EMPLOYEE_ID_1])
-                                const query = inputQuery || "Analyze this case";
-                                // preserve_pii: false means redact PII (backend checks !preserve_pii)
-                                await handleQueryWithPIIPreference(query, false);
-                              }}
-                              className="flex-1 bg-green-600 hover:bg-green-700"
-                              size="sm"
-                            >
-                              <Shield className="h-4 w-4 mr-2" />
-                              Analyze with PII Protection
-                            </Button>
-                            <Button
-                              onClick={async () => {
-                                setShowPIIChoice(false);
-                                setPreservePII(true); // Preserve = don't redact PII (show personal details)
-                                const query = inputQuery || "Analyze this case";
-                                // preserve_pii: true means don't redact PII (backend checks !preserve_pii)
-                                await handleQueryWithPIIPreference(query, true);
-                              }}
-                              variant="outline"
-                              className="flex-1"
-                              size="sm"
-                            >
-                              Analyze Without Redaction
-                            </Button>
+                          <Button
+                            onClick={async () => {
+                              setShowPIIChoice(false);
+                              setPreservePII(false); // Don't preserve = redact PII (show [EMPLOYEE_ID_1])
+                              const query = inputQuery || "Analyze this case";
+                              // preserve_pii: false means redact PII (backend checks !preserve_pii)
+                              // Skip user message for auto-started analysis
+                              await handleQueryWithPIIPreference(query, false, true);
+                            }}
+                            className="flex-1 bg-green-600 hover:bg-green-700"
+                            size="sm"
+                          >
+                            <Shield className="h-4 w-4 mr-2" />
+                            Analyze with PII Protection
+                          </Button>
+                          <Button
+                            onClick={async () => {
+                              setShowPIIChoice(false);
+                              setPreservePII(true); // Preserve = don't redact PII (show personal details)
+                              const query = inputQuery || "Analyze this case";
+                              // preserve_pii: true means don't redact PII (backend checks !preserve_pii)
+                              // Skip user message for auto-started analysis
+                              await handleQueryWithPIIPreference(query, true, true);
+                            }}
+                            variant="outline"
+                            className="flex-1"
+                            size="sm"
+                          >
+                            Analyze Without Redaction
+                          </Button>
                           </div>
                         </div>
                       </div>
