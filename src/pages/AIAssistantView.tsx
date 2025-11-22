@@ -1320,6 +1320,109 @@ Additional Details: ${decrypted.additionalDetails || 'None provided'}`;
               </div>
 
               <div className="w-full max-w-2xl space-y-4">
+                {/* Document Upload Section - Always visible in empty state */}
+                <Card className="border-2 border-dashed border-primary/20 bg-muted/30">
+                  <CardContent className="p-4">
+                    <div className="flex items-start gap-3 mb-3">
+                      <FileText className="h-5 w-5 text-primary mt-0.5 flex-shrink-0" />
+                      <div className="flex-1">
+                        <h3 className="font-semibold text-sm mb-1">Company Documents</h3>
+                        <p className="text-xs text-muted-foreground mb-3">
+                          Upload policy documents, handbooks, or procedures to provide context for AI analysis. You can upload documents before or after selecting a case.
+                        </p>
+                        <div className="flex items-center gap-2 flex-wrap">
+                          <input
+                            ref={fileInputRef}
+                            type="file"
+                            accept=".pdf,.docx,.txt,.doc"
+                            multiple
+                            onChange={handleFileUpload}
+                            className="hidden"
+                          />
+                          <Button
+                            variant="default"
+                            size="sm"
+                            onClick={() => fileInputRef.current?.click()}
+                            disabled={isUploading}
+                          >
+                            <Upload className="h-4 w-4 mr-2" />
+                            {isUploading ? 'Uploading...' : 'Upload Documents'}
+                          </Button>
+                          {Array.isArray(selectedDocs) && selectedDocs.length > 0 && (
+                            <Badge variant="secondary" className="bg-primary/10 text-primary">
+                              {selectedDocs.length} selected
+                            </Badge>
+                          )}
+                          {Array.isArray(documents) && documents.length > 0 && (
+                            <Badge variant="outline">
+                              {documents.length} available
+                            </Badge>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Document List */}
+                    {isLoadingDocs ? (
+                      <div className="flex items-center gap-2 text-xs text-muted-foreground mt-3 pt-3 border-t">
+                        <Loader2 className="h-3 w-3 animate-spin" />
+                        Loading documents...
+                      </div>
+                    ) : Array.isArray(documents) && documents.length > 0 ? (
+                      <div className="mt-3 pt-3 border-t">
+                        <p className="text-xs font-medium text-foreground mb-2">
+                          Available documents ({documents.length}):
+                          {Array.isArray(selectedDocs) && selectedDocs.length > 0 && (
+                            <span className="text-primary ml-1 font-semibold">
+                              {selectedDocs.length} selected for analysis
+                            </span>
+                          )}
+                        </p>
+                        <div className="flex flex-wrap gap-2">
+                          {documents.map((doc) => {
+                            const isSelected = Array.isArray(selectedDocs) && selectedDocs.includes(doc.id);
+                            const isPDF = doc.content_type === 'application/pdf';
+                            return (
+                              <Button
+                                key={doc.id}
+                                variant={isSelected ? 'default' : 'outline'}
+                                size="sm"
+                                onClick={() => {
+                                  setSelectedDocs(prev => {
+                                    const prevArray = Array.isArray(prev) ? prev : [];
+                                    return prevArray.includes(doc.id) 
+                                      ? prevArray.filter(id => id !== doc.id)
+                                      : [...prevArray, doc.id];
+                                  });
+                                }}
+                                className={cn(
+                                  isSelected && 'ring-2 ring-primary ring-offset-1',
+                                  !isPDF && 'opacity-60'
+                                )}
+                                title={!isPDF ? 'Only PDF files are currently supported for text extraction' : ''}
+                              >
+                                <FileText className="h-3 w-3 mr-1" />
+                                <span className="max-w-[200px] truncate">{doc.name}</span>
+                                {isSelected && <span className="ml-1">✓</span>}
+                                {!isPDF && <span className="ml-1 text-xs">(PDF only)</span>}
+                              </Button>
+                            );
+                          })}
+                        </div>
+                        {Array.isArray(selectedDocs) && selectedDocs.length > 0 && (
+                          <p className="text-xs text-muted-foreground mt-2">
+                            ✓ Selected documents will be included in AI analysis. Click again to deselect.
+                          </p>
+                        )}
+                      </div>
+                    ) : (
+                      <p className="text-xs text-muted-foreground mt-3 pt-3 border-t">
+                        No documents uploaded yet. Click "Upload Documents" above to add company policies, handbooks, or procedures.
+                      </p>
+                    )}
+                  </CardContent>
+                </Card>
+
                 {/* PII Protection Choice - Inline */}
                 {showPIIChoice && selectedCaseId && !hasAnalyzedCase && (
                   <Card className="border-blue-200 bg-blue-50/50">
