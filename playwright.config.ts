@@ -70,7 +70,7 @@ export default defineConfig({
   /* Run your local dev server before starting the tests */
   webServer: {
     command: 'npm run dev',
-    url: 'http://localhost:8080',
+    url: 'http://127.0.0.1:8080', // Use 127.0.0.1 for consistency
     reuseExistingServer: !process.env.CI,
     timeout: process.env.CI ? 180000 : 120000, // 3 minutes in CI, 2 minutes locally
     stdout: 'pipe',

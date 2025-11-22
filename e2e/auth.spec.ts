@@ -2,12 +2,10 @@ import { test, expect } from '@playwright/test';
 
 test.describe('Authentication Flows', () => {
   test.beforeEach(async ({ page }) => {
-    try {
-      await page.goto('/auth/login', { waitUntil: 'networkidle', timeout: 10000 });
-    } catch (error) {
-      // If navigation fails, skip the test
-      test.skip();
-    }
+    // Navigate to login page with more lenient options
+    await page.goto('/auth/login', { waitUntil: 'domcontentloaded', timeout: 15000 });
+    // Wait a bit for any async loading
+    await page.waitForTimeout(1000);
   });
 
   test('should display login page with all elements', async ({ page }) => {
