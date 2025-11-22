@@ -7,9 +7,12 @@ import { sentryVitePlugin } from "@sentry/vite-plugin";
 // https://vitejs.dev/config/
 export default defineConfig(({ mode }) => ({
   server: {
-    host: "::",
+    host: process.env.CI ? "127.0.0.1" : "::", // Use localhost in CI for better compatibility
     port: 8080,
-    historyApiFallback: true // Enable client-side routing support
+    strictPort: true, // Fail if port is already in use
+    historyApiFallback: true, // Enable client-side routing support
+    // In CI, reduce HMR overhead
+    hmr: process.env.CI ? false : undefined,
   },
   plugins: [
     react(),

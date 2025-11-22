@@ -72,9 +72,14 @@ export default defineConfig({
     command: 'npm run dev',
     url: 'http://localhost:8080',
     reuseExistingServer: !process.env.CI,
-    timeout: 120000,
+    timeout: process.env.CI ? 180000 : 120000, // 3 minutes in CI, 2 minutes locally
     stdout: 'pipe',
     stderr: 'pipe',
+    // In CI, wait for the server to be ready with more retries
+    ...(process.env.CI && {
+      // Use a more reliable health check
+      reuseExistingServer: false,
+    }),
     env: {
       VITE_SUPABASE_URL: process.env.VITE_SUPABASE_URL || 'https://test.supabase.co',
       VITE_SUPABASE_PUBLISHABLE_KEY: process.env.VITE_SUPABASE_PUBLISHABLE_KEY || 'test-anon-key',
@@ -82,6 +87,8 @@ export default defineConfig({
       VITE_CONTENTFUL_SPACE_ID: process.env.VITE_CONTENTFUL_SPACE_ID || 'test-space-id',
       VITE_CONTENTFUL_DELIVERY_TOKEN: process.env.VITE_CONTENTFUL_DELIVERY_TOKEN || 'test-delivery-token',
       VITE_GOOGLE_MAPS_API_KEY: process.env.VITE_GOOGLE_MAPS_API_KEY || 'test-maps-key',
+      // Ensure CI mode is set for Vite
+      CI: process.env.CI || 'false',
     },
   },
   
