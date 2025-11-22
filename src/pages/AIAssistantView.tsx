@@ -1729,48 +1729,53 @@ Additional Details: ${decrypted.additionalDetails || 'None provided'}`;
               </div>
               {/* Document Selection Section - Compact */}
               {Array.isArray(documents) && documents.length > 0 && (
-                <div className="flex flex-wrap gap-2">
-                  {documents.map((doc) => {
-                    const isSelected = Array.isArray(selectedDocs) && selectedDocs.includes(doc.id);
-                    const isPDF = doc.content_type === 'application/pdf';
-                    return (
-                      <div key={doc.id} className="flex items-center gap-1">
-                        <Button
-                          variant={isSelected ? 'default' : 'outline'}
-                          size="sm"
-                          onClick={() => {
-                            setSelectedDocs(prev => {
-                              const prevArray = Array.isArray(prev) ? prev : [];
-                              return prevArray.includes(doc.id) 
-                                ? prevArray.filter(id => id !== doc.id)
-                                : [...prevArray, doc.id];
-                            });
-                          }}
-                          className={cn(
-                            isSelected && 'ring-2 ring-primary ring-offset-1',
-                            !isPDF && 'opacity-60'
-                          )}
-                          title={!isPDF ? 'Only PDF files are currently supported for text extraction' : ''}
-                        >
-                          <FileText className="h-3 w-3 mr-1" />
-                          <span className="max-w-[200px] truncate">{doc.name}</span>
-                          {isSelected && <span className="ml-1">✓</span>}
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            deleteDocument(doc);
-                          }}
-                          className="h-8 w-8 p-0 text-destructive hover:text-destructive hover:bg-destructive/10"
-                          title="Delete document"
-                        >
-                          <Trash2 className="h-3 w-3" />
-                        </Button>
-                      </div>
-                    );
-                  })}
+                <div className="space-y-2">
+                  <p className="text-xs text-muted-foreground">
+                    💡 <strong>Important:</strong> Click on documents below to <strong>select</strong> them for AI analysis. Selected documents (with ✓) will be included in the analysis.
+                  </p>
+                  <div className="flex flex-wrap gap-2">
+                    {documents.map((doc) => {
+                      const isSelected = Array.isArray(selectedDocs) && selectedDocs.includes(doc.id);
+                      const isPDF = doc.content_type === 'application/pdf';
+                      return (
+                        <div key={doc.id} className="flex items-center gap-1">
+                          <Button
+                            variant={isSelected ? 'default' : 'outline'}
+                            size="sm"
+                            onClick={() => {
+                              setSelectedDocs(prev => {
+                                const prevArray = Array.isArray(prev) ? prev : [];
+                                return prevArray.includes(doc.id) 
+                                  ? prevArray.filter(id => id !== doc.id)
+                                  : [...prevArray, doc.id];
+                              });
+                            }}
+                            className={cn(
+                              isSelected && 'ring-2 ring-primary ring-offset-1',
+                              !isPDF && 'opacity-60'
+                            )}
+                            title={!isPDF ? 'Only PDF files are currently supported for text extraction' : isSelected ? 'Click to deselect' : 'Click to select for AI analysis'}
+                          >
+                            <FileText className="h-3 w-3 mr-1" />
+                            <span className="max-w-[200px] truncate">{doc.name}</span>
+                            {isSelected && <span className="ml-1">✓</span>}
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              deleteDocument(doc);
+                            }}
+                            className="h-8 w-8 p-0 text-destructive hover:text-destructive hover:bg-destructive/10"
+                            title="Delete document"
+                          >
+                            <Trash2 className="h-3 w-3" />
+                          </Button>
+                        </div>
+                      );
+                    })}
+                  </div>
                 </div>
               )}
             </CardContent>
