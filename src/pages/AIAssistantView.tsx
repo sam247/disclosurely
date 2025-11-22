@@ -542,7 +542,9 @@ Communication style:
 - Acknowledge complexity while offering clear next steps
 
 Response format (write in plain conversational paragraphs, NO markdown):
-Cover the situation in natural paragraphs. Start with a brief summary, assess the risk level and explain your reasoning, provide immediate actions for the next 24-48 hours, outline investigation steps and timelines, highlight legal and compliance considerations, and end with 1-2 strategic questions to guide decision-making. Write it all as natural conversation, not structured lists or formatted sections.
+Cover the situation in natural paragraphs. Start with a brief summary, assess the risk level and explain your reasoning, provide immediate actions for the next 24-48 hours, outline investigation steps and timelines, highlight legal and compliance considerations, and end with 1-2 strategic questions to guide the case handler's decision-making process. These questions should be for the compliance team/case handler to consider internally, NOT questions to ask the whistleblower. Write it all as natural conversation, not structured lists or formatted sections.
+
+IMPORTANT: You are advising compliance professionals and case handlers, NOT communicating with whistleblowers. Your questions should guide internal decision-making (e.g., "How can we strengthen the process?" or "What additional evidence should we gather?"), not ask about the whistleblower's needs or feelings.
 
 CRITICAL: The user's message below contains COMPANY DOCUMENTS that have been extracted and included. These documents are part of the user's message content - they appear after the case details. When the user asks about policies, procedures, or company guidelines, you MUST reference the actual document content that is provided in their message. The documents are clearly marked with "=== COMPANY DOCUMENTS ===" or "DOCUMENT: [name]". Read the entire user message carefully - the documents are there, and you can see and reference their full text content.
 
@@ -1417,36 +1419,43 @@ Additional Details: ${decrypted.additionalDetails || 'None provided'}`;
 
               <div className="w-full max-w-2xl space-y-4">
                 {/* Document Upload Section - Compact one-line */}
-                <div className="flex items-center gap-2 flex-wrap">
-                  <input
-                    ref={fileInputRef}
-                    type="file"
-                    accept=".pdf,.docx,.txt,.doc"
-                    multiple
-                    onChange={handleFileUpload}
-                    className="hidden"
-                  />
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => fileInputRef.current?.click()}
-                    disabled={isUploading}
-                  >
-                    <Upload className="h-4 w-4 mr-2" />
-                    {isUploading ? 'Uploading...' : 'Upload Documents'}
-                  </Button>
-                  {Array.isArray(selectedDocs) && selectedDocs.length > 0 && (
-                    <Badge variant="secondary" className="bg-primary/10 text-primary">
-                      {selectedDocs.length} selected
-                    </Badge>
-                  )}
+                <div className="space-y-2">
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <input
+                      ref={fileInputRef}
+                      type="file"
+                      accept=".pdf,.docx,.txt,.doc"
+                      multiple
+                      onChange={handleFileUpload}
+                      className="hidden"
+                    />
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => fileInputRef.current?.click()}
+                      disabled={isUploading}
+                    >
+                      <Upload className="h-4 w-4 mr-2" />
+                      {isUploading ? 'Uploading...' : 'Upload Documents'}
+                    </Button>
+                    {Array.isArray(selectedDocs) && selectedDocs.length > 0 && (
+                      <Badge variant="secondary" className="bg-primary/10 text-primary">
+                        {selectedDocs.length} selected
+                      </Badge>
+                    )}
+                    {Array.isArray(documents) && documents.length > 0 && (
+                      <span className="text-xs text-muted-foreground">
+                        {documents.length} available
+                      </span>
+                    )}
+                    {isLoadingDocs && (
+                      <Loader2 className="h-3 w-3 animate-spin text-muted-foreground" />
+                    )}
+                  </div>
                   {Array.isArray(documents) && documents.length > 0 && (
-                    <span className="text-xs text-muted-foreground">
-                      {documents.length} available
-                    </span>
-                  )}
-                  {isLoadingDocs && (
-                    <Loader2 className="h-3 w-3 animate-spin text-muted-foreground" />
+                    <p className="text-xs text-muted-foreground">
+                      💡 <strong>Important:</strong> Click on documents below to <strong>select</strong> them for AI analysis. Selected documents (with ✓) will be included in the analysis.
+                    </p>
                   )}
                 </div>
 
@@ -1473,7 +1482,7 @@ Additional Details: ${decrypted.additionalDetails || 'None provided'}`;
                               isSelected && 'ring-2 ring-primary ring-offset-1',
                               !isPDF && 'opacity-60'
                             )}
-                            title={!isPDF ? 'Only PDF files are currently supported for text extraction' : ''}
+                            title={!isPDF ? 'Only PDF files are currently supported for text extraction' : isSelected ? 'Click to deselect' : 'Click to select for AI analysis'}
                           >
                             <FileText className="h-3 w-3 mr-1" />
                             <span className="max-w-[200px] truncate">{doc.name}</span>
