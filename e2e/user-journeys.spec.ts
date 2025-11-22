@@ -73,11 +73,8 @@ test.describe('Complete User Journeys', () => {
     });
   });
 
-  test.describe('Authenticated User Journey', () => {
-    test.beforeEach(async ({ page }) => {
-      // Skip these tests as they require authentication
-      test.skip();
-    });
+  test.describe.skip('Authenticated User Journey', () => {
+    // Skip these tests as they require authentication
 
     test('should complete case handler workflow', async ({ page }) => {
       // This test would cover:
