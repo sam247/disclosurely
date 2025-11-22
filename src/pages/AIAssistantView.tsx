@@ -1544,31 +1544,78 @@ Additional Details: ${decrypted.additionalDetails || 'None provided'}`;
                   )}
                 </div>
               </div>
-              {Array.isArray(documents) && documents.length > 0 && (
-                <div className="mt-3 pt-3 border-t">
-                  <p className="text-xs text-muted-foreground mb-2">Available documents:</p>
-                  <div className="flex flex-wrap gap-2">
-                    {documents.map((doc) => (
-                      <Button
-                        key={doc.id}
-                        variant={Array.isArray(selectedDocs) && selectedDocs.includes(doc.id) ? 'default' : 'outline'}
-                        size="sm"
-                        onClick={() => {
-                          setSelectedDocs(prev => {
-                            const prevArray = Array.isArray(prev) ? prev : [];
-                            return prevArray.includes(doc.id) 
-                              ? prevArray.filter(id => id !== doc.id)
-                              : [...prevArray, doc.id];
-                          });
-                        }}
-                      >
-                        <FileText className="h-3 w-3 mr-1" />
-                        {doc.name}
-                      </Button>
-                    ))}
+              {/* Document Selection Section */}
+              <div className="mt-3 pt-3 border-t">
+                {isLoadingDocs ? (
+                  <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                    <Loader2 className="h-3 w-3 animate-spin" />
+                    Loading documents...
                   </div>
-                </div>
-              )}
+                ) : Array.isArray(documents) && documents.length > 0 ? (
+                  <>
+                    <div className="flex items-center justify-between mb-2">
+                      <p className="text-xs font-medium text-foreground">
+                        Available documents ({documents.length}):
+                        {Array.isArray(selectedDocs) && selectedDocs.length > 0 && (
+                          <span className="text-primary ml-1 font-semibold">
+                            {selectedDocs.length} selected for analysis
+                          </span>
+                        )}
+                      </p>
+                    </div>
+                    <div className="flex flex-wrap gap-2">
+                      {documents.map((doc) => {
+                        const isSelected = Array.isArray(selectedDocs) && selectedDocs.includes(doc.id);
+                        const isPDF = doc.content_type === 'application/pdf';
+                        return (
+                          <Button
+                            key={doc.id}
+                            variant={isSelected ? 'default' : 'outline'}
+                            size="sm"
+                            onClick={() => {
+                              setSelectedDocs(prev => {
+                                const prevArray = Array.isArray(prev) ? prev : [];
+                                return prevArray.includes(doc.id) 
+                                  ? prevArray.filter(id => id !== doc.id)
+                                  : [...prevArray, doc.id];
+                              });
+                            }}
+                            className={cn(
+                              isSelected && 'ring-2 ring-primary ring-offset-1',
+                              !isPDF && 'opacity-60'
+                            )}
+                            title={!isPDF ? 'Only PDF files are currently supported for text extraction' : ''}
+                          >
+                            <FileText className="h-3 w-3 mr-1" />
+                            <span className="max-w-[200px] truncate">{doc.name}</span>
+                            {isSelected && <span className="ml-1">✓</span>}
+                            {!isPDF && <span className="ml-1 text-xs">(PDF only)</span>}
+                          </Button>
+                        );
+                      })}
+                    </div>
+                    {Array.isArray(selectedDocs) && selectedDocs.length > 0 && (
+                      <p className="text-xs text-muted-foreground mt-2">
+                        ✓ Selected documents will be included in the AI analysis. Click again to deselect.
+                      </p>
+                    )}
+                    {Array.isArray(selectedDocs) && selectedDocs.length === 0 && (
+                      <p className="text-xs text-muted-foreground mt-2">
+                        💡 Select documents above to include them in your AI analysis. PDF files will have their text extracted automatically.
+                      </p>
+                    )}
+                  </>
+                ) : (
+                  <div className="text-center py-2">
+                    <p className="text-xs text-muted-foreground mb-2">
+                      No documents uploaded yet.
+                    </p>
+                    <p className="text-xs text-muted-foreground">
+                      Click "Upload Policy" above to add company documents (PDF, DOC, DOCX, TXT) for AI analysis.
+                    </p>
+                  </div>
+                )}
+              </div>
             </CardContent>
           </Card>
 
