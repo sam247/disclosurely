@@ -382,6 +382,8 @@ const ProgressiveReportForm = ({
             ? 'min-h-[180px]' // Review step - min height only, allow scroll
             : currentStep === 0
             ? 'min-h-[198px] sm:min-h-[352px]' // Welcome step - min height to accommodate footer
+            : currentStep === 3
+            ? 'min-h-[400px] sm:min-h-[500px]' // Privacy step - needs more space for content
             : 'min-h-[198px] sm:h-[352px]' // Mobile: min-height (flexible), Desktop: fixed height
         }`}
         key={currentStep}

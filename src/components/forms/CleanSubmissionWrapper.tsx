@@ -312,12 +312,23 @@ const CleanSubmissionWrapper = () => {
 
   // Check if we're on a valid domain (subdomain or custom domain)
   const currentHost = window.location.hostname;
+  const currentPath = window.location.pathname;
   const subdomainMatch = currentHost.match(/^([^.]+)\.disclosurely\.com$/);
   const isOnSubdomain = subdomainMatch !== null && 
     subdomainMatch[1] !== 'app' && 
     subdomainMatch[1] !== 'www' && 
     subdomainMatch[1] !== 'secure';
   const isOnValidDomain = isCustomDomain || isOnSubdomain;
+
+  // Block access to root path on branded subdomains - only allow /report, /submit, /whistleblow
+  const validReportPaths = ['/report', '/submit', '/whistleblow'];
+  const isOnValidPath = validReportPaths.includes(currentPath);
+  
+  if (isOnValidDomain && !isOnValidPath && currentPath === '/') {
+    // Redirect root path to /report on branded domains
+    navigate('/report', { replace: true });
+    return null;
+  }
 
   if (!isOnValidDomain || !organizationId) {
     return (
