@@ -33,6 +33,8 @@ vi.mock('react-router-dom', async () => {
 
 // Mock Supabase - Use chainable query builder
 const mockInvoke = vi.fn();
+const mockMaybeSingle = vi.fn();
+const mockSingle = vi.fn();
 
 const createChainableQueryBuilder = (finalResult: any = { data: null, error: null }) => {
   const builder: any = {
@@ -54,8 +56,8 @@ const createChainableQueryBuilder = (finalResult: any = { data: null, error: nul
     order: vi.fn().mockReturnThis(),
     limit: vi.fn().mockReturnThis(),
     range: vi.fn().mockReturnThis(),
-    single: vi.fn().mockResolvedValue(finalResult),
-    maybeSingle: vi.fn().mockResolvedValue(finalResult),
+    single: mockSingle.mockResolvedValue(finalResult),
+    maybeSingle: mockMaybeSingle.mockResolvedValue(finalResult),
   };
   
   // Make it thenable (Promise-like)
