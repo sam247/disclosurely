@@ -350,11 +350,11 @@ const AIAssistantView = () => {
         .eq('id', doc.id);
 
       if (dbError) throw dbError;
-
-      toast({
+            
+            toast({
         title: "Success",
         description: "Document deleted successfully."
-      });
+            });
 
       loadDocuments();
       setSelectedDocs(prev => {
@@ -363,11 +363,11 @@ const AIAssistantView = () => {
       });
     } catch (error: any) {
       console.error('Error deleting document:', error);
-      toast({
+          toast({
         title: "Delete Failed",
         description: error.message || "Failed to delete document. Please try again.",
-        variant: "destructive"
-      });
+            variant: "destructive"
+          });
     }
   };
 
@@ -375,14 +375,14 @@ const AIAssistantView = () => {
   const handleCaseAnalysis = async (query: string, skipPIIRedaction: boolean = false) => {
     if (!selectedCaseId || !selectedCaseData || !organization?.id) {
       throw new Error('Case not selected');
-    }
+        }
 
-    // Decrypt case content
-    let decryptedContent = '';
+        // Decrypt case content
+        let decryptedContent = '';
     if (selectedCaseData?.encrypted_content && selectedCaseData?.organization_id) {
-      try {
+          try {
         const decrypted = await decryptReport(selectedCaseData.encrypted_content, selectedCaseData.organization_id);
-        decryptedContent = `
+            decryptedContent = `
 Case Details:
 - Category: ${decrypted.category || 'Not specified'}
 - Description: ${decrypted.description || 'Not provided'}
@@ -391,10 +391,10 @@ Case Details:
 - Witnesses: ${decrypted.witnesses || 'None mentioned'}
 - Evidence: ${decrypted.evidence || 'No evidence provided'}
 - Additional Details: ${decrypted.additionalDetails || 'None provided'}
-        `.trim();
-      } catch (decryptError: any) {
-        console.error('Error decrypting case content:', decryptError);
-        decryptedContent = `
+            `.trim();
+          } catch (decryptError: any) {
+            console.error('Error decrypting case content:', decryptError);
+            decryptedContent = `
 Case Details:
 - Title: ${selectedCaseData.title || 'Not specified'}
 - Tracking ID: ${selectedCaseData.tracking_id || 'Not specified'}
@@ -403,25 +403,25 @@ Case Details:
 - Report Type: ${selectedCaseData.report_type || 'Not specified'}
 
 Note: Full case content could not be decrypted. Analysis will be based on available metadata.
-        `.trim();
-      }
-    }
+            `.trim();
+          }
+        }
 
-    // Process selected documents
-    const companyDocuments: Array<{ name: string; content: string }> = [];
+        // Process selected documents
+        const companyDocuments: Array<{ name: string; content: string }> = [];
     if (Array.isArray(selectedDocs) && selectedDocs.length > 0 && Array.isArray(documents)) {
-      for (const docId of selectedDocs) {
-        const doc = documents.find(d => d.id === docId);
-        if (doc && doc.content_type === 'application/pdf') {
-          try {
+          for (const docId of selectedDocs) {
+            const doc = documents.find(d => d.id === docId);
+            if (doc && doc.content_type === 'application/pdf') {
+              try {
             toast({
               title: "Extracting PDF",
               description: `Processing ${doc.name}...`,
             });
             
-            const { data: extractData, error: extractError } = await supabase.functions.invoke('extract-pdf-text', {
-              body: { filePath: doc.file_path }
-            });
+                const { data: extractData, error: extractError } = await supabase.functions.invoke('extract-pdf-text', {
+                  body: { filePath: doc.file_path }
+                });
 
             console.log(`[PDF Extract] Response for ${doc.name}:`, { extractData, extractError });
 
@@ -433,8 +433,8 @@ Note: Full case content could not be decrypted. Analysis will be based on availa
                 variant: "destructive"
               });
               // Still add document with error message so user knows it was attempted
-              companyDocuments.push({
-                name: doc.name,
+                  companyDocuments.push({
+                    name: doc.name,
                 content: `[PDF Document: ${doc.name} - Text extraction failed: ${extractError.message || 'Unknown error'}]`
               });
             } else if (extractData?.text) {
@@ -466,7 +466,7 @@ Note: Full case content could not be decrypted. Analysis will be based on availa
               });
             }
           } catch (error: any) {
-            console.error(`Error extracting PDF ${doc.name}:`, error);
+                console.error(`Error extracting PDF ${doc.name}:`, error);
             toast({
               title: "PDF Extraction Error",
               description: `Failed to extract ${doc.name}: ${error.message || 'Unknown error'}`,
@@ -476,16 +476,16 @@ Note: Full case content could not be decrypted. Analysis will be based on availa
               name: doc.name,
               content: `[PDF Document: ${doc.name} - Extraction error: ${error.message || 'Unknown error'}]`
             });
-          }
-        } else if (doc) {
-          // Non-PDF documents
-          companyDocuments.push({
-            name: doc.name,
+              }
+            } else if (doc) {
+              // Non-PDF documents
+              companyDocuments.push({
+                name: doc.name,
             content: `[Document: ${doc.name} - ${doc.content_type || 'Unknown type'}. PDF extraction is only supported for PDF files.]`
-          });
+              });
+            }
+          }
         }
-      }
-    }
 
     // Build document context
     let documentContext = '';
@@ -710,20 +710,20 @@ Priority: ${selectedCaseData.priority}/5
       for (const msg of lastMessages) {
         if (msg && msg.role && msg.content) {
           recentMessages.push({
-            role: msg.role === 'user' ? 'user' : 'assistant',
-            content: msg.content
+                role: msg.role === 'user' ? 'user' : 'assistant',
+                content: msg.content
           });
         }
       }
     }
-    recentMessages.push({ role: 'user', content: query.trim() });
+          recentMessages.push({ role: 'user', content: query.trim() });
 
     // Call ai-gateway-generate DIRECTLY from frontend
-    const { data, error } = await supabase.functions.invoke('ai-gateway-generate', {
-      body: {
-        messages: [
-          {
-            role: 'system',
+          const { data, error } = await supabase.functions.invoke('ai-gateway-generate', {
+            body: {
+              messages: [
+                {
+                  role: 'system',
             content: `You are a compliance consultant having a conversational chat about cases. You have access to case data and company documents. You can answer questions about specific cases, reference company policies, or discuss patterns across cases.
 
 ${caseContext}${documentContext}${allCasesContext}
@@ -733,30 +733,30 @@ CRITICAL: The company documents are included in the system context above. They a
 CRITICAL: Write in plain, conversational text only. NO markdown formatting whatsoever - no **bold**, no ### headings, no *italics*, no bullet points, no underscores, no code blocks. Write like you're speaking to a colleague in person.
 
 Provide SHORT, conversational responses (2-3 paragraphs max). Just natural conversation with simple paragraphs. Be direct and helpful, like chatting with a colleague. Answer questions using the case data and company documents you have access to.`
-          },
-          ...recentMessages
-        ],
-        temperature: 0.7,
-        max_tokens: 500,
-        context: {
-          purpose: 'chat_follow_up',
-          report_id: selectedCaseId
-        }
-      },
-      headers: {
-        'X-Organization-Id': organization.id
-      }
-    });
+                },
+                ...recentMessages
+              ],
+              temperature: 0.7,
+              max_tokens: 500,
+              context: {
+                purpose: 'chat_follow_up',
+                report_id: selectedCaseId
+              }
+            },
+            headers: {
+              'X-Organization-Id': organization.id
+            }
+          });
 
-    if (error) {
-      console.error('AI Gateway error:', error);
-      throw new Error(error.message || 'Failed to generate response');
-    }
-    
-    if (!data) {
-      throw new Error('No response from AI service');
-    }
-    
+          if (error) {
+            console.error('AI Gateway error:', error);
+            throw new Error(error.message || 'Failed to generate response');
+          }
+          
+          if (!data) {
+            throw new Error('No response from AI service');
+          }
+          
     // Parse response
     return data.choices?.[0]?.message?.content || 
       data.response || 
@@ -807,7 +807,7 @@ Provide SHORT, conversational responses (2-3 paragraphs max). Just natural conve
 
     // Call ai-gateway-generate DIRECTLY from frontend
     const { data, error } = await supabase.functions.invoke('ai-gateway-generate', {
-      body: {
+            body: {
         messages: [
           {
             role: 'system',
@@ -841,15 +841,15 @@ When listing cases, always include the tracking ID (DIS-XXXX format) so users ca
       }
     });
 
-    if (error) {
+          if (error) {
       console.error('AI Gateway error:', error);
       throw new Error(error.message || 'Failed to search cases');
-    }
-    
-    if (!data) {
+          }
+          
+          if (!data) {
       throw new Error('No response from AI service');
-    }
-    
+          }
+          
     // Parse response
     const responseContent = data.choices?.[0]?.message?.content || 
       data.response || 
@@ -930,7 +930,7 @@ When listing cases, always include the tracking ID (DIS-XXXX format) so users ca
         
         // Store PII metadata for display in message
         const piiMetadata = typeof analysisResult === 'object' ? analysisResult.piiMetadata : undefined;
-        
+
         const aiMessage: ChatMessage = {
           id: `ai-${Date.now()}`,
           role: 'assistant',
@@ -985,7 +985,7 @@ When listing cases, always include the tracking ID (DIS-XXXX format) so users ca
         id: `error-${Date.now()}`,
         role: 'assistant',
         content: `❌ **Error**: ${error.message || "Failed to process your query. Please try again."}\n\nIf this problem persists, please:\n- Check your internet connection\n- Verify the case ID is correct\n- Ensure you have permission to access this case\n- Try refreshing the page`,
-        timestamp: new Date()
+          timestamp: new Date()
       };
       
       setMessages(prev => [...prev, errorMessage]);
@@ -1061,7 +1061,7 @@ When listing cases, always include the tracking ID (DIS-XXXX format) so users ca
           timestamp: new Date(),
           piiMetadata
         };
-        
+
         setMessages(prev => [...prev, aiMessage]);
         setHasAnalyzedCase(true);
         setShowPIIChoice(false); // Hide choice after analysis
@@ -1088,25 +1088,25 @@ When listing cases, always include the tracking ID (DIS-XXXX format) so users ca
       setMessages(prev => [...prev, aiMessage]);
 
       // Log event
-      if (user && organization?.id) {
-        await auditLogger.log({
+        if (user && organization?.id) {
+          await auditLogger.log({
           eventType: selectedCaseId ? 'case.ai_analysis' : 'case.ai_search',
-          category: 'case_management',
+            category: 'case_management',
           action: selectedCaseId ? (hasAnalyzedCase ? 'chat' : 'analyze') : 'search',
-          severity: 'low',
-          actorType: 'user',
-          actorId: user.id,
-          actorEmail: user.email,
-          organizationId: organization.id,
+            severity: 'low',
+            actorType: 'user',
+            actorId: user.id,
+            actorEmail: user.email,
+            organizationId: organization.id,
           targetType: selectedCaseId ? 'case' : 'query',
           targetId: selectedCaseId || null,
           targetName: selectedCaseData?.title || query.trim(),
           summary: `AI ${selectedCaseId ? (hasAnalyzedCase ? 'chat' : 'analysis') : 'search'}: ${query.trim()}`,
-          metadata: {
+            metadata: {
             is_follow_up: hasAnalyzedCase,
             cases_found: relevantCases.length
-          }
-        });
+            }
+          });
       }
     } catch (error: any) {
       console.error('Error processing query:', error);
@@ -1133,10 +1133,10 @@ When listing cases, always include the tracking ID (DIS-XXXX format) so users ca
   const handleCaseCardClick = (caseId: string) => {
     const selectedCase = cases.find(c => c.id === caseId);
     if (selectedCase) {
-      setSelectedCaseId(caseId);
+    setSelectedCaseId(caseId);
       setHasAnalyzedCase(false);
       setIsEmptyState(false);
-      loadCaseData(caseId);
+    loadCaseData(caseId);
       // Populate search box with case analysis prompt
       setInputQuery(`Analyze case ${selectedCase.tracking_id}`);
     }
@@ -1200,13 +1200,13 @@ When listing cases, always include the tracking ID (DIS-XXXX format) so users ca
 
         if (dbError) {
           throw new Error(`Failed to save ${file.name}: ${dbError.message}`);
-        }
+      }
 
         uploadedFiles.push(file.name);
       }
 
       if (uploadedFiles.length > 0) {
-        toast({
+      toast({
           title: "Upload Successful",
           description: `${uploadedFiles.length} document(s) uploaded. ${uploadedFiles.length === 1 ? 'Select it below' : 'Select them below'} to include in AI analysis.`
         });
@@ -1317,7 +1317,7 @@ Additional Details: ${decrypted.additionalDetails || 'None provided'}`;
           return doc ? doc.name : 'Unknown';
         }).filter(Boolean).join(', ');
         if (docNames) {
-          fullContent += `\n\nDocuments to be analyzed: ${docNames}`;
+        fullContent += `\n\nDocuments to be analyzed: ${docNames}`;
         }
       }
 
@@ -1406,18 +1406,18 @@ Additional Details: ${decrypted.additionalDetails || 'None provided'}`;
       <div className="flex flex-col h-[calc(100vh-4rem)] overflow-hidden">
         <div className="flex-1 overflow-y-auto p-6">
           <div className="max-w-4xl mx-auto">
-            <div className="flex flex-col items-center justify-center min-h-[60vh] space-y-8">
-              <div className="text-center space-y-4">
-                <div className="flex items-center justify-center mb-4">
-                  <Sparkles className="h-16 w-16 text-primary" />
-                </div>
-                <h1 className="text-4xl font-bold text-foreground">AI Assistant</h1>
-                <p className="text-lg text-muted-foreground max-w-md">
-                  Ask questions about your cases or get detailed analysis. I'll automatically understand what you need.
-                </p>
-              </div>
+        <div className="flex flex-col items-center justify-center min-h-[60vh] space-y-8">
+          <div className="text-center space-y-4">
+            <div className="flex items-center justify-center mb-4">
+              <Sparkles className="h-16 w-16 text-primary" />
+            </div>
+            <h1 className="text-4xl font-bold text-foreground">AI Assistant</h1>
+            <p className="text-lg text-muted-foreground max-w-md">
+              Ask questions about your cases or get detailed analysis. I'll automatically understand what you need.
+            </p>
+          </div>
 
-              <div className="w-full max-w-2xl space-y-4">
+          <div className="w-full max-w-2xl space-y-4">
                 {/* Document Upload Section - Compact one-line */}
                 <div className="space-y-2">
                   <div className="flex items-center gap-2 flex-wrap">
@@ -1555,16 +1555,16 @@ Additional Details: ${decrypted.additionalDetails || 'None provided'}`;
                   </Card>
                 )}
 
-                <div className="flex gap-2">
-                  <Input
-                    value={inputQuery}
-                    onChange={(e) => setInputQuery(e.target.value)}
-                    onKeyPress={handleKeyPress}
+            <div className="flex gap-2">
+              <Input
+                value={inputQuery}
+                onChange={(e) => setInputQuery(e.target.value)}
+                onKeyPress={handleKeyPress}
                     placeholder={selectedCaseId ? "Analyze this case" : "Ask a question or analyze a case..."}
-                    className="h-12 text-base"
+                className="h-12 text-base"
                     disabled={isLoading || (showPIIChoice && selectedCaseId && !hasAnalyzedCase)}
-                  />
-                  <Button
+              />
+              <Button
                     onClick={() => {
                       // If PII choice not shown yet, show it. Otherwise run analysis
                       if (selectedCaseId && !hasAnalyzedCase && !showPIIChoice) {
@@ -1574,16 +1574,16 @@ Additional Details: ${decrypted.additionalDetails || 'None provided'}`;
                       }
                     }}
                     disabled={(!inputQuery.trim() && !selectedCaseId) || isLoading}
-                    size="lg"
-                    className="h-12 px-6"
-                  >
-                    {isLoading ? (
-                      <Loader2 className="h-5 w-5 animate-spin" />
-                    ) : (
-                      <Send className="h-5 w-5" />
-                    )}
-                  </Button>
-                </div>
+                size="lg"
+                className="h-12 px-6"
+              >
+                {isLoading ? (
+                  <Loader2 className="h-5 w-5 animate-spin" />
+                ) : (
+                  <Send className="h-5 w-5" />
+                )}
+              </Button>
+            </div>
 
                 {/* Show case dropdown if available */}
                 {Array.isArray(cases) && cases.length > 0 && (
@@ -1607,13 +1607,13 @@ Additional Details: ${decrypted.additionalDetails || 'None provided'}`;
                           <SelectItem key={caseItem.id} value={caseItem.id}>
                             {caseItem.tracking_id} - {caseItem.title}
                           </SelectItem>
-                        ))}
+                ))}
                       </SelectContent>
                     </Select>
-                  </div>
-                )}
               </div>
-            </div>
+                )}
+          </div>
+        </div>
           </div>
         </div>
       </div>
@@ -1626,140 +1626,140 @@ Additional Details: ${decrypted.additionalDetails || 'None provided'}`;
       <div className="flex-1 overflow-y-auto p-6">
         <div className="max-w-6xl mx-auto">
           <div className="flex items-center justify-between mb-6 flex-wrap gap-4">
-            <div>
-              <div className="flex items-center gap-2">
-                <h1 className="text-3xl font-bold text-foreground">AI Assistant</h1>
-                {selectedCaseData && (
-                  <Badge variant="default">
-                    Analyzing: {selectedCaseData.tracking_id}
-                  </Badge>
-                )}
-              </div>
-              <p className="text-sm text-muted-foreground mt-1">
-                {selectedCaseData 
-                  ? `Analyzing: ${selectedCaseData.tracking_id} - ${selectedCaseData.title}`
-                  : 'Search across all cases or analyze a specific case'}
-              </p>
-            </div>
-            <div className="flex items-center gap-2">
-              {selectedCaseId && (
-                <>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={loadPreviewContent}
-                    disabled={isLoadingPreview}
-                  >
-                    <Eye className="h-4 w-4 mr-2" />
-                    Preview PII
-                  </Button>
-                  {currentAnalysisData && (
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={saveAnalysis}
-                      disabled={isSaving}
-                    >
-                      <Save className="h-4 w-4 mr-2" />
-                      Save Analysis
-                    </Button>
-                  )}
-                </>
-              )}
+        <div>
+          <div className="flex items-center gap-2">
+            <h1 className="text-3xl font-bold text-foreground">AI Assistant</h1>
+            {selectedCaseData && (
+              <Badge variant="default">
+                Analyzing: {selectedCaseData.tracking_id}
+              </Badge>
+            )}
+          </div>
+          <p className="text-sm text-muted-foreground mt-1">
+            {selectedCaseData 
+              ? `Analyzing: ${selectedCaseData.tracking_id} - ${selectedCaseData.title}`
+              : 'Search across all cases or analyze a specific case'}
+          </p>
+        </div>
+        <div className="flex items-center gap-2">
+          {selectedCaseId && (
+            <>
               <Button
                 variant="outline"
-                onClick={handleClearChat}
-                disabled={isLoading}
+                size="sm"
+                onClick={loadPreviewContent}
+                disabled={isLoadingPreview}
               >
-                <X className="h-4 w-4 mr-2" />
-                Clear Chat
+                <Eye className="h-4 w-4 mr-2" />
+                Preview PII
               </Button>
-            </div>
+              {currentAnalysisData && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={saveAnalysis}
+                  disabled={isSaving}
+                >
+                  <Save className="h-4 w-4 mr-2" />
+                  Save Analysis
+                </Button>
+              )}
+            </>
+          )}
+          <Button
+            variant="outline"
+            onClick={handleClearChat}
+            disabled={isLoading}
+          >
+            <X className="h-4 w-4 mr-2" />
+            Clear Chat
+          </Button>
+        </div>
           </div>
 
           {/* Case Selection */}
-          <Card className="mb-4">
-            <CardContent className="p-4">
-              <div className="flex items-center gap-4 flex-wrap">
-                <div className="flex-1 min-w-[200px]">
-                  <Select value={selectedCaseId} onValueChange={(value) => {
-                    setSelectedCaseId(value);
+        <Card className="mb-4">
+          <CardContent className="p-4">
+            <div className="flex items-center gap-4 flex-wrap">
+              <div className="flex-1 min-w-[200px]">
+                <Select value={selectedCaseId} onValueChange={(value) => {
+                  setSelectedCaseId(value);
                     setHasAnalyzedCase(false);
                     setShowPIIChoice(true); // Show PII choice when case is selected
-                    loadCaseData(value);
+                  loadCaseData(value);
                     setInputQuery("Analyze this case");
-                  }}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select a case to analyze..." />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {Array.isArray(cases) && cases.length > 0 ? (
-                        cases.map((caseItem) => (
-                          <SelectItem key={caseItem.id} value={caseItem.id}>
-                            {caseItem.tracking_id} - {caseItem.title}
-                          </SelectItem>
-                        ))
-                      ) : (
-                        <SelectItem value="no-cases" disabled>
-                          No cases available
+                }}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select a case to analyze..." />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {Array.isArray(cases) && cases.length > 0 ? (
+                      cases.map((caseItem) => (
+                        <SelectItem key={caseItem.id} value={caseItem.id}>
+                          {caseItem.tracking_id} - {caseItem.title}
                         </SelectItem>
-                      )}
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div className="flex items-center gap-2">
-                  <input
-                    ref={fileInputRef}
-                    type="file"
-                    accept=".pdf,.docx,.txt"
-                    multiple
-                    onChange={handleFileUpload}
-                    className="hidden"
-                  />
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => fileInputRef.current?.click()}
-                    disabled={isUploading}
-                  >
-                    <Upload className="h-4 w-4 mr-2" />
-                    {isUploading ? 'Uploading...' : 'Upload Policy'}
-                  </Button>
-                </div>
+                      ))
+                    ) : (
+                      <SelectItem value="no-cases" disabled>
+                        No cases available
+                      </SelectItem>
+                    )}
+                  </SelectContent>
+                </Select>
               </div>
+              <div className="flex items-center gap-2">
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept=".pdf,.docx,.txt"
+                  multiple
+                  onChange={handleFileUpload}
+                  className="hidden"
+                />
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => fileInputRef.current?.click()}
+                  disabled={isUploading}
+                >
+                  <Upload className="h-4 w-4 mr-2" />
+                  {isUploading ? 'Uploading...' : 'Upload Policy'}
+                </Button>
+              </div>
+            </div>
               {/* Document Selection Section - Compact */}
-              {Array.isArray(documents) && documents.length > 0 && (
+            {Array.isArray(documents) && documents.length > 0 && (
                 <div className="space-y-2">
                   <p className="text-xs text-muted-foreground">
                     💡 <strong>Important:</strong> Click on documents below to <strong>select</strong> them for AI analysis. Selected documents (with ✓) will be included in the analysis.
                   </p>
-                  <div className="flex flex-wrap gap-2">
+                <div className="flex flex-wrap gap-2">
                     {documents.map((doc) => {
                       const isSelected = Array.isArray(selectedDocs) && selectedDocs.includes(doc.id);
                       const isPDF = doc.content_type === 'application/pdf';
                       return (
                         <div key={doc.id} className="flex items-center gap-1">
-                          <Button
+                    <Button
                             variant={isSelected ? 'default' : 'outline'}
-                            size="sm"
-                            onClick={() => {
+                      size="sm"
+                      onClick={() => {
                               setSelectedDocs(prev => {
                                 const prevArray = Array.isArray(prev) ? prev : [];
                                 return prevArray.includes(doc.id) 
                                   ? prevArray.filter(id => id !== doc.id)
                                   : [...prevArray, doc.id];
                               });
-                            }}
+                      }}
                             className={cn(
                               isSelected && 'ring-2 ring-primary ring-offset-1',
                               !isPDF && 'opacity-60'
                             )}
                             title={!isPDF ? 'Only PDF files are currently supported for text extraction' : isSelected ? 'Click to deselect' : 'Click to select for AI analysis'}
-                          >
-                            <FileText className="h-3 w-3 mr-1" />
+                    >
+                      <FileText className="h-3 w-3 mr-1" />
                             <span className="max-w-[200px] truncate">{doc.name}</span>
                             {isSelected && <span className="ml-1">✓</span>}
-                          </Button>
+                    </Button>
                           <Button
                             variant="ghost"
                             size="sm"
@@ -1775,36 +1775,36 @@ Additional Details: ${decrypted.additionalDetails || 'None provided'}`;
                         </div>
                       );
                     })}
-                  </div>
                 </div>
-              )}
-            </CardContent>
-          </Card>
+              </div>
+            )}
+          </CardContent>
+        </Card>
 
           <Card className="flex flex-col" style={{ height: 'calc(100vh - 380px)', minHeight: '500px' }}>
             <CardContent className="flex-1 flex flex-col p-0 overflow-hidden">
               {/* Messages Area - Fixed height with scroll */}
               <div className="flex-1 overflow-y-auto p-6 space-y-6 min-h-0">
                 {Array.isArray(messages) && messages.map((message) => (
+              <div
+                key={message.id}
+                className={cn(
+                  'flex',
+                  message.role === 'user' ? 'justify-end' : 'justify-start'
+                )}
+              >
+                <div className="max-w-[85%] space-y-3">
                   <div
-                    key={message.id}
                     className={cn(
-                      'flex',
-                      message.role === 'user' ? 'justify-end' : 'justify-start'
+                      'rounded-lg px-5 py-3',
+                      message.role === 'user'
+                        ? 'bg-primary text-primary-foreground'
+                        : 'bg-muted text-foreground border'
                     )}
                   >
-                    <div className="max-w-[85%] space-y-3">
-                      <div
-                        className={cn(
-                          'rounded-lg px-5 py-3',
-                          message.role === 'user'
-                            ? 'bg-primary text-primary-foreground'
-                            : 'bg-muted text-foreground border'
-                        )}
-                      >
-                        <p className="whitespace-pre-wrap leading-relaxed text-sm">
-                          {message.content}
-                        </p>
+                      <p className="whitespace-pre-wrap leading-relaxed text-sm">
+                        {message.content}
+                      </p>
                         
                         {/* PII Protection Info - Inline Display */}
                         {message.role === 'assistant' && message.piiMetadata?.redacted && (
@@ -1812,39 +1812,39 @@ Additional Details: ${decrypted.additionalDetails || 'None provided'}`;
                             piiMetadata={message.piiMetadata}
                             originalContent={message.content}
                           />
-                        )}
+                    )}
                         
-                        <p className={cn(
-                          'text-xs mt-2',
-                          message.role === 'user' ? 'text-primary-foreground/70' : 'text-muted-foreground'
-                        )}>
-                          {message.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                        </p>
-                      </div>
-                    </div>
+                    <p className={cn(
+                      'text-xs mt-2',
+                      message.role === 'user' ? 'text-primary-foreground/70' : 'text-muted-foreground'
+                    )}>
+                      {message.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                    </p>
                   </div>
-                ))}
-
-                {isLoading && (
-                  <div className="flex justify-start">
-                    <div className="bg-muted rounded-lg px-4 py-3 border">
-                      <div className="flex items-center gap-2">
-                        <Loader2 className="h-4 w-4 animate-spin text-primary" />
-                        <div className="flex flex-col">
-                          <span className="text-sm font-medium text-foreground">
-                            {selectedCaseId ? (hasAnalyzedCase ? 'Thinking...' : 'Analyzing case...') : 'Searching your cases...'}
-                          </span>
-                          <span className="text-xs text-muted-foreground mt-1">
-                            {selectedCaseId ? 'This may take a few moments' : 'Please wait'}
-                          </span>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                )}
-
-                <div ref={messagesEndRef} />
+                </div>
               </div>
+            ))}
+
+            {isLoading && (
+              <div className="flex justify-start">
+                <div className="bg-muted rounded-lg px-4 py-3 border">
+                  <div className="flex items-center gap-2">
+                    <Loader2 className="h-4 w-4 animate-spin text-primary" />
+                    <div className="flex flex-col">
+                      <span className="text-sm font-medium text-foreground">
+                            {selectedCaseId ? (hasAnalyzedCase ? 'Thinking...' : 'Analyzing case...') : 'Searching your cases...'}
+                      </span>
+                      <span className="text-xs text-muted-foreground mt-1">
+                        {selectedCaseId ? 'This may take a few moments' : 'Please wait'}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            <div ref={messagesEndRef} />
+          </div>
 
               {/* Input Area - Fixed at bottom */}
               <div className="border-t p-4 flex-shrink-0 space-y-3">
@@ -1897,22 +1897,22 @@ Additional Details: ${decrypted.additionalDetails || 'None provided'}`;
                   </Card>
                 )}
                 
-                <div className="flex gap-2">
-                  <Input
-                    value={inputQuery}
-                    onChange={(e) => setInputQuery(e.target.value)}
-                    onKeyPress={handleKeyPress}
-                    placeholder={
-                      selectedCaseId 
+            <div className="flex gap-2">
+              <Input
+                value={inputQuery}
+                onChange={(e) => setInputQuery(e.target.value)}
+                onKeyPress={handleKeyPress}
+                placeholder={
+                  selectedCaseId 
                         ? (hasAnalyzedCase 
                             ? "Ask a follow-up question about this case..."
                             : "Ask me to analyze this case or ask questions about it...")
-                        : "Ask a question about your cases or analyze a specific case..."
-                    }
-                    className="flex-1"
+                    : "Ask a question about your cases or analyze a specific case..."
+                }
+                className="flex-1"
                     disabled={isLoading || (showPIIChoice && selectedCaseId && !hasAnalyzedCase)}
-                  />
-                  <Button
+              />
+              <Button
                     onClick={() => {
                       // If PII choice not shown yet, show it. Otherwise run analysis
                       if (selectedCaseId && !hasAnalyzedCase && !showPIIChoice) {
@@ -1921,22 +1921,22 @@ Additional Details: ${decrypted.additionalDetails || 'None provided'}`;
                         handleQuery(inputQuery);
                       }
                     }}
-                    disabled={!inputQuery.trim() || isLoading}
-                    size="default"
-                  >
-                    {isLoading ? (
-                      <Loader2 className="h-4 w-4 animate-spin" />
-                    ) : (
-                      <Send className="h-4 w-4" />
-                    )}
-                  </Button>
-                </div>
-                <p className="text-xs text-muted-foreground mt-2 text-center">
-                  Powered by AI • Your queries are logged for audit purposes
-                </p>
-              </div>
-            </CardContent>
-          </Card>
+                disabled={!inputQuery.trim() || isLoading}
+                size="default"
+              >
+                {isLoading ? (
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                ) : (
+                  <Send className="h-4 w-4" />
+                )}
+              </Button>
+            </div>
+            <p className="text-xs text-muted-foreground mt-2 text-center">
+              Powered by AI • Your queries are logged for audit purposes
+            </p>
+          </div>
+        </CardContent>
+      </Card>
         </div>
       </div>
 

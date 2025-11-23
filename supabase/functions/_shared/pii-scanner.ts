@@ -117,9 +117,101 @@ const BUSINESS_PHRASES = [
 ];
 
 /**
- * Scan text for PII patterns
+ * Check if OpenRedact feature flag is enabled for an organization
  */
-export function scanForPII(text: string): PIIScanResult {
+async function isOpenRedactEnabled(organizationId?: string): Promise<boolean> {
+  try {
+    const { createClient } = await import('https://esm.sh/@supabase/supabase-js@2');
+    const supabaseUrl = Deno.env.get('SUPABASE_URL') || '';
+    const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') || '';
+    
+    if (!supabaseUrl || !supabaseKey) {
+      return false;
+    }
+
+    const supabase = createClient(supabaseUrl, supabaseKey);
+    
+    const { data, error } = await supabase.rpc('is_feature_enabled', {
+      p_feature_name: 'use_openredact',
+      p_organization_id: organizationId || null,
+    });
+
+    if (error) {
+      console.error('[PII Scanner] Error checking feature flag:', error);
+      return false;
+    }
+
+    return data === true;
+  } catch (error) {
+    console.error('[PII Scanner] Error checking OpenRedact feature flag:', error);
+    return false;
+  }
+}
+
+/**
+ * Use OpenRedact for PII scanning (when feature flag is enabled)
+ */
+async function scanForPIIWithOpenRedact(
+  text: string,
+  organizationId?: string
+): Promise<PIIScanResult> {
+  try {
+    // Import OpenRedact from published package
+    const { OpenRedact } = await import('npm:@openredaction/openredact');
+    const detector = new OpenRedact({ 
+      preset: 'gdpr', 
+      confidenceThreshold: 0.4,
+      enableContextAnalysis: true,
+    });
+    const result = detector.detect(text);
+    
+    // Map OpenRedact result to PIIScanResult format
+    const detected: PIIDetection[] = [];
+    let highSeverityCount = 0;
+    let mediumSeverityCount = 0;
+    let lowSeverityCount = 0;
+    
+    if (result.detections && result.detections.length > 0) {
+      result.detections.forEach((detection: any) => {
+        const severity = detection.severity || 'medium';
+        const mappedSeverity = severity === 'high' ? 'high' : severity === 'low' ? 'low' : 'medium';
+        
+        detected.push({
+          type: detection.type.toLowerCase().replace(/_/g, '') as PIIDetection['type'],
+          text: detection.value || detection.text || '',
+          position: detection.position || { start: 0, end: 0 },
+          severity: mappedSeverity,
+          description: `${detection.type} detected`,
+        });
+        
+        if (mappedSeverity === 'high') highSeverityCount++;
+        else if (mappedSeverity === 'medium') mediumSeverityCount++;
+        else lowSeverityCount++;
+      });
+    }
+    
+    return {
+      detected,
+      hasPII: detected.length > 0,
+      highSeverityCount,
+      mediumSeverityCount,
+      lowSeverityCount,
+    };
+  } catch (error) {
+    console.error('[PII Scanner] OpenRedact error, falling back to legacy:', error);
+    throw error;
+  }
+}
+
+/**
+ * Scan text for PII patterns
+ * 
+ * Checks feature flag and uses OpenRedact if enabled, otherwise uses legacy implementation
+ */
+export async function scanForPII(
+  text: string,
+  organizationId?: string
+): Promise<PIIScanResult> {
   if (!text || typeof text !== 'string') {
     return {
       detected: [],
@@ -129,6 +221,20 @@ export function scanForPII(text: string): PIIScanResult {
       lowSeverityCount: 0,
     };
   }
+
+  // Check feature flag for OpenRedact
+  const useOpenRedact = await isOpenRedactEnabled(organizationId);
+  
+  if (useOpenRedact) {
+    try {
+      return await scanForPIIWithOpenRedact(text, organizationId);
+    } catch (error) {
+      // Fall through to legacy implementation on error
+      console.warn('[PII Scanner] OpenRedact failed, using legacy implementation');
+    }
+  }
+
+  // Legacy implementation (existing code)
 
   const detected: PIIDetection[] = [];
   const processedMatches = new Set<string>(); // Track processed positions to avoid duplicates
@@ -276,9 +382,9 @@ function isValidCreditCard(cardNumber: string): boolean {
 }
 
 /**
- * Scan report data object for PII
+ * Scan report data object for PII (synchronous version for backward compatibility)
  */
-export function scanReportData(reportData: any): PIIScanResult {
+export function scanReportDataSync(reportData: any): PIIScanResult {
   const allDetections: PIIDetection[] = [];
   let currentOffset = 0;
 
@@ -320,5 +426,51 @@ export function scanReportData(reportData: any): PIIScanResult {
     mediumSeverityCount,
     lowSeverityCount,
   };
+}
+
+/**
+ * Scan report data object for PII
+ * 
+ * Checks feature flag and uses OpenRedact if enabled, otherwise uses legacy implementation
+ */
+export async function scanReportData(
+  reportData: any,
+  organizationId?: string
+): Promise<PIIScanResult> {
+  // Check feature flag for OpenRedact
+  const useOpenRedact = await isOpenRedactEnabled(organizationId);
+  
+  if (useOpenRedact) {
+    try {
+      // Combine all text fields
+      const textFields = [
+        reportData.title,
+        reportData.description,
+        reportData.incident_details,
+        reportData.location,
+        reportData.witnesses,
+        reportData.evidence,
+        reportData.additionalDetails,
+      ].filter(Boolean).join('\n\n');
+
+      if (!textFields) {
+        return {
+          detected: [],
+          hasPII: false,
+          highSeverityCount: 0,
+          mediumSeverityCount: 0,
+          lowSeverityCount: 0,
+        };
+      }
+
+      return await scanForPIIWithOpenRedact(textFields, organizationId);
+    } catch (error) {
+      // Fall through to legacy implementation on error
+      console.warn('[PII Scanner] OpenRedact failed, using legacy implementation');
+    }
+  }
+
+  // Legacy implementation
+  return scanReportDataSync(reportData);
 }
 

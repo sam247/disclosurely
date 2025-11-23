@@ -214,9 +214,12 @@ serve(async (req) => {
     if (policy.pii_protection?.enabled && !body.preserve_pii) {
       console.log('[AI Gateway] PII redaction enabled - using enhanced detector');
       
-      body.messages = body.messages.map(msg => {
-        // Use enhanced PII detector with validation
-        const redactionResult = redactPII(msg.content);
+      // Use async redactPII with organization ID for feature flag check
+      const redactionPromises = body.messages.map(async (msg) => {
+        // Use enhanced PII detector with validation (now async for feature flag support)
+        const redactionResult = await redactPII(msg.content, {
+          organizationId: organizationId || undefined,
+        });
         
         if (redactionResult.piiDetected) {
           piiDetected = true;
@@ -235,6 +238,9 @@ serve(async (req) => {
 
         return { ...msg, content: redactionResult.redactedContent };
       });
+      
+      // Wait for all redactions to complete
+      body.messages = await Promise.all(redactionPromises);
       
       if (piiDetected) {
         console.log(`[AI Gateway] Total PII detected:`, detectionStats);

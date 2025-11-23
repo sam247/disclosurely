@@ -74,7 +74,7 @@ test.describe('Complete User Journeys', () => {
   });
 
   test.describe.skip('Authenticated User Journey', () => {
-    // Skip these tests as they require authentication
+      // Skip these tests as they require authentication
 
     test('should complete case handler workflow', async ({ page }) => {
       // This test would cover:
@@ -259,7 +259,7 @@ test.describe('Complete User Journeys', () => {
     test('should redirect unauthenticated users from protected routes', async ({ page }) => {
       // Try to access dashboard without authentication
       await page.goto('/dashboard');
-      
+
       // Wait for navigation to complete
       await page.waitForLoadState('networkidle', { timeout: 10000 }).catch(() => {
         // Continue even if networkidle doesn't complete

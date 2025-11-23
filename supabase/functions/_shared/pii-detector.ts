@@ -323,18 +323,114 @@ export function getPIIPatterns(): PIIPattern[] {
 }
 
 /**
- * Main redaction function
+ * Check if OpenRedact feature flag is enabled for an organization
  */
-export function redactPII(content: string, options?: {
-  includeNames?: boolean;
-  includeAddresses?: boolean;
-  customPatterns?: PIIPattern[];
-}): RedactionResult {
+async function isOpenRedactEnabled(organizationId?: string): Promise<boolean> {
+  try {
+    // Import Supabase client dynamically to avoid circular dependencies
+    const { createClient } = await import('https://esm.sh/@supabase/supabase-js@2');
+    const supabaseUrl = Deno.env.get('SUPABASE_URL') || '';
+    const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') || '';
+    
+    if (!supabaseUrl || !supabaseKey) {
+      return false;
+    }
+
+    const supabase = createClient(supabaseUrl, supabaseKey);
+    
+    const { data, error } = await supabase.rpc('is_feature_enabled', {
+      p_feature_name: 'use_openredact',
+      p_organization_id: organizationId || null,
+    });
+
+    if (error) {
+      console.error('[PII Detector] Error checking feature flag:', error);
+      return false;
+    }
+
+    return data === true;
+  } catch (error) {
+    console.error('[PII Detector] Error checking OpenRedact feature flag:', error);
+    return false;
+  }
+}
+
+/**
+ * Use OpenRedact for PII redaction (when feature flag is enabled)
+ */
+async function redactPIIWithOpenRedact(
+  content: string,
+  organizationId?: string
+): Promise<RedactionResult> {
+  try {
+    // Import OpenRedact from published package
+    const { OpenRedact } = await import('npm:@openredaction/openredact');
+    const detector = new OpenRedact({ 
+      preset: 'gdpr',
+      enableContextAnalysis: true,
+      confidenceThreshold: 0.6,
+    });
+    const result = detector.detect(content);
+    
+    // Map OpenRedact result to RedactionResult format
+    const redactionMap: Record<string, string> = {};
+    const detectionStats: Record<string, number> = {};
+    
+    if (result.detections && result.detections.length > 0) {
+      result.detections.forEach((detection: any, index: number) => {
+        const placeholder = `[${detection.type}_${index + 1}]`;
+        redactionMap[detection.value || detection.text || ''] = placeholder;
+        detectionStats[detection.type] = (detectionStats[detection.type] || 0) + 1;
+      });
+    }
+    
+    return {
+      redactedContent: result.redacted || content,
+      redactionMap,
+      piiDetected: (result.detections?.length || 0) > 0,
+      detectionStats,
+    };
+  } catch (error) {
+    console.error('[PII Detector] OpenRedact error, falling back to legacy:', error);
+    // Fall through to legacy implementation
+    throw error;
+  }
+}
+
+/**
+ * Main redaction function
+ * 
+ * Checks feature flag and uses OpenRedact if enabled, otherwise uses legacy implementation
+ */
+export async function redactPII(
+  content: string,
+  options?: {
+    includeNames?: boolean;
+    includeAddresses?: boolean;
+    customPatterns?: PIIPattern[];
+    organizationId?: string; // Added for feature flag check
+  }
+): Promise<RedactionResult> {
   const {
     includeNames = true, // ENABLED by default - critical for privacy protection
     includeAddresses = true, // ENABLED by default - addresses are sensitive
-    customPatterns = []
+    customPatterns = [],
+    organizationId
   } = options || {};
+
+  // Check feature flag for OpenRedact
+  const useOpenRedact = await isOpenRedactEnabled(organizationId);
+  
+  if (useOpenRedact) {
+    try {
+      return await redactPIIWithOpenRedact(content, organizationId);
+    } catch (error) {
+      // Fall through to legacy implementation on error
+      console.warn('[PII Detector] OpenRedact failed, using legacy implementation');
+    }
+  }
+
+  // Legacy implementation (existing code)
 
   let redactedContent = content;
   const redactionMap: Record<string, string> = {};
@@ -393,6 +489,77 @@ export function redactPII(content: string, options?: {
     for (const address of addresses) {
       if (redactionMap[address]) continue;
 
+      const placeholder = `[ADDRESS_${++globalIndex}]`;
+      redactionMap[address] = placeholder;
+      detectionStats['ADDRESS'] = (detectionStats['ADDRESS'] || 0) + 1;
+      redactedContent = redactedContent.split(address).join(placeholder);
+    }
+  }
+
+  return {
+    redactedContent,
+    redactionMap,
+    piiDetected: Object.keys(redactionMap).length > 0,
+    detectionStats
+  };
+}
+
+// Export synchronous version for backward compatibility
+// This will use legacy implementation only
+export function redactPIISync(content: string, options?: {
+  includeNames?: boolean;
+  includeAddresses?: boolean;
+  customPatterns?: PIIPattern[];
+}): RedactionResult {
+  const {
+    includeNames = true,
+    includeAddresses = true,
+    customPatterns = []
+  } = options || {};
+
+  let redactedContent = content;
+  const redactionMap: Record<string, string> = {};
+  const detectionStats: Record<string, number> = {};
+  let globalIndex = 0;
+
+  const allPatterns = [...getPIIPatterns(), ...customPatterns]
+    .sort((a, b) => b.priority - a.priority);
+
+  for (const pattern of allPatterns) {
+    const matches = content.match(pattern.regex);
+    if (!matches) continue;
+
+    const uniqueMatches = [...new Set(matches)];
+
+    for (const match of uniqueMatches) {
+      if (redactionMap[match]) continue;
+
+      if (pattern.validator && !pattern.validator(match)) {
+        continue;
+      }
+
+      const placeholder = `[${pattern.type}_${++globalIndex}]`;
+      redactionMap[match] = placeholder;
+      detectionStats[pattern.type] = (detectionStats[pattern.type] || 0) + 1;
+      redactedContent = redactedContent.split(match).join(placeholder);
+    }
+  }
+
+  if (includeNames) {
+    const names = detectNames(content);
+    for (const name of names) {
+      if (redactionMap[name]) continue;
+      const placeholder = `[NAME_${++globalIndex}]`;
+      redactionMap[name] = placeholder;
+      detectionStats['NAME'] = (detectionStats['NAME'] || 0) + 1;
+      redactedContent = redactedContent.split(name).join(placeholder);
+    }
+  }
+
+  if (includeAddresses) {
+    const addresses = detectUKAddresses(content);
+    for (const address of addresses) {
+      if (redactionMap[address]) continue;
       const placeholder = `[ADDRESS_${++globalIndex}]`;
       redactionMap[address] = placeholder;
       detectionStats['ADDRESS'] = (detectionStats['ADDRESS'] || 0) + 1;

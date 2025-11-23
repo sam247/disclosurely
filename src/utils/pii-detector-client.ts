@@ -247,9 +247,104 @@ function getPIIPatterns(): PIIPattern[] {
 }
 
 /**
- * Detect PII in text and return redaction result
+ * Check if OpenRedact feature flag is enabled
  */
-export function detectPII(text: string): RedactionResult {
+async function isOpenRedactEnabled(organizationId?: string): Promise<boolean> {
+  try {
+    const { supabase } = await import('@/integrations/supabase/client');
+    const { data, error } = await (supabase.rpc as any)('is_feature_enabled', {
+      p_feature_name: 'use_openredact',
+      p_organization_id: organizationId || null,
+    });
+
+    if (error) {
+      console.error('[PII Detector Client] Error checking feature flag:', error);
+      return false;
+    }
+
+    return data === true;
+  } catch (error) {
+    console.error('[PII Detector Client] Error checking OpenRedact feature flag:', error);
+    return false;
+  }
+}
+
+/**
+ * Use OpenRedact for PII detection (when feature flag is enabled)
+ */
+async function detectPIIWithOpenRedact(
+  text: string,
+  organizationId?: string
+): Promise<RedactionResult> {
+  try {
+    // Import OpenRedact from published package
+    const { OpenRedact } = await import('@openredaction/openredact');
+    const detector = new OpenRedact({ 
+      preset: 'gdpr',
+      confidenceThreshold: 0.4, // Strict for client-side
+      enableContextAnalysis: true,
+    });
+    const result = detector.detect(text);
+    
+    // Map OpenRedact result to RedactionResult format
+    const detections: PIIDetection[] = [];
+    const stats: Record<string, number> = {};
+    
+    if (result.detections && result.detections.length > 0) {
+      result.detections.forEach((detection: any, index: number) => {
+        const placeholder = `[${detection.type}_${index + 1}]`;
+        detections.push({
+          type: detection.type,
+          original: detection.value || detection.text || '',
+          placeholder,
+          start: detection.position?.start || 0,
+          end: detection.position?.end || 0,
+        });
+        stats[detection.type] = (stats[detection.type] || 0) + 1;
+      });
+    }
+    
+    return {
+      redactedText: result.redacted || text,
+      detections,
+      piiCount: detections.length,
+      stats,
+    };
+  } catch (error) {
+    console.error('[PII Detector Client] OpenRedact error, falling back to legacy:', error);
+    throw error;
+  }
+}
+
+/**
+ * Detect PII in text and return redaction result
+ * 
+ * Checks feature flag and uses OpenRedact if enabled, otherwise uses legacy implementation
+ */
+export async function detectPII(
+  text: string,
+  organizationId?: string
+): Promise<RedactionResult> {
+  // Check feature flag for OpenRedact
+  const useOpenRedact = await isOpenRedactEnabled(organizationId);
+  
+  if (useOpenRedact) {
+    try {
+      return await detectPIIWithOpenRedact(text, organizationId);
+    } catch (error) {
+      // Fall through to legacy implementation on error
+      console.warn('[PII Detector Client] OpenRedact failed, using legacy implementation');
+    }
+  }
+
+  // Legacy implementation (existing code)
+  return detectPIISync(text);
+}
+
+/**
+ * Synchronous version for backward compatibility
+ */
+export function detectPIISync(text: string): RedactionResult {
   // Safety check: ensure text is a string
   if (!text || typeof text !== 'string') {
     return {

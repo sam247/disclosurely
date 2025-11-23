@@ -25,6 +25,7 @@
     "@contentful/rich-text-react-renderer": "^16.1.5",
     "@contentful/rich-text-types": "^17.2.4",
     "@hookform/resolvers": "^3.9.0",
+    "@openredaction/openredact": "^0.1.0",
     "@radix-ui/react-accordion": "^1.2.0",
     "@radix-ui/react-alert-dialog": "^1.1.1",
     "@radix-ui/react-aspect-ratio": "^1.1.0",

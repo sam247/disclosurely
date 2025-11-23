@@ -343,7 +343,7 @@ serve(async (req) => {
     
     // 🔍 SERVER-SIDE PII SCANNING (PRIVACY FIX C2)
     console.log('🔍 Scanning report data for PII...')
-    const piiScanResult = scanReportData(reportData)
+    const piiScanResult = await scanReportData(reportData, linkData.organization_id)
     
     if (piiScanResult.hasPII) {
       console.warn(`⚠️ PII detected in report: ${piiScanResult.detected.length} items (${piiScanResult.highSeverityCount} high, ${piiScanResult.mediumSeverityCount} medium, ${piiScanResult.lowSeverityCount} low)`)

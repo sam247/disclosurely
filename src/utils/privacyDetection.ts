@@ -112,7 +112,7 @@ const PII_PATTERNS = {
 /**
  * Scan text for privacy risks
  */
-export function scanForPrivacyRisks(text: string): PrivacyRisk[] {
+export function scanForPrivacyRisksSync(text: string): PrivacyRisk[] {
   if (!text || text.trim().length === 0) {
     return [];
   }

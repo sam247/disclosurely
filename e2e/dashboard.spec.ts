@@ -1,8 +1,8 @@
 import { test, expect } from '@playwright/test';
 
 test.describe.skip('Dashboard - Team Management', () => {
-  // Skip all tests in this suite - they require authentication
-  // This is intentional as we don't have auth setup in CI yet
+    // Skip all tests in this suite - they require authentication
+    // This is intentional as we don't have auth setup in CI yet
 
   test('should display team members list', async ({ page }) => {
     await page.goto('/dashboard/team');
@@ -63,7 +63,7 @@ test.describe.skip('Dashboard - Team Management', () => {
 });
 
 test.describe.skip('Dashboard - Custom Domains', () => {
-  // Skip all tests in this suite - they require authentication
+    // Skip all tests in this suite - they require authentication
 
   test('should add custom domain', async ({ page }) => {
     await page.goto('/dashboard/branding');
@@ -119,7 +119,7 @@ test.describe.skip('Dashboard - Custom Domains', () => {
 });
 
 test.describe.skip('Dashboard - Secure Link Generation', () => {
-  // Skip all tests in this suite - they require authentication
+    // Skip all tests in this suite - they require authentication
 
   test('should generate secure reporting link', async ({ page }) => {
     await page.goto('/dashboard/secure-link');
@@ -160,7 +160,7 @@ test.describe.skip('Dashboard - Secure Link Generation', () => {
 });
 
 test.describe.skip('Dashboard - Case Management', () => {
-  // Skip all tests in this suite - they require authentication
+    // Skip all tests in this suite - they require authentication
 
   test('should display reports list', async ({ page }) => {
     await page.goto('/dashboard');
@@ -201,7 +201,7 @@ test.describe.skip('Dashboard - Case Management', () => {
 });
 
 test.describe.skip('Dashboard - Compliance Policies', () => {
-  // Skip all tests in this suite - they require authentication
+    // Skip all tests in this suite - they require authentication
 
   test('should create new compliance policy', async ({ page }) => {
     await page.goto('/dashboard/compliance');
@@ -239,7 +239,7 @@ test.describe.skip('Dashboard - Compliance Policies', () => {
 });
 
 test.describe.skip('Dashboard - Security Settings', () => {
-  // Skip all tests in this suite - they require authentication
+    // Skip all tests in this suite - they require authentication
 
   test('should display active sessions', async ({ page }) => {
     await page.goto('/dashboard/settings');

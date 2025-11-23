@@ -73,10 +73,14 @@ const ProgressiveReportForm = ({
 
   // Check for privacy risks whenever title/description changes
   useEffect(() => {
-    const combinedText = `${formData.title}\n\n${formData.description}`;
-    const risks = scanForPrivacyRisks(combinedText);
-    setPrivacyRisks(risks);
-  }, [formData.title, formData.description]);
+    const checkPrivacyRisks = async () => {
+      const combinedText = `${formData.title}\n\n${formData.description}`;
+      const risks = await scanForPrivacyRisks(combinedText, organizationId);
+      setPrivacyRisks(risks);
+    };
+    
+    checkPrivacyRisks();
+  }, [formData.title, formData.description, organizationId]);
 
   // Determine total steps (privacy check is conditional)
   const showPrivacyStep = privacyRisks.length > 0 && currentStep >= 3 && !hasViewedPrivacy;
@@ -264,6 +268,7 @@ const ProgressiveReportForm = ({
             onChange={(description) => updateFormData({ description })}
             isValid={validateStep(2)}
             language={language}
+            organizationId={organizationId}
           />
         );
       case 3:
