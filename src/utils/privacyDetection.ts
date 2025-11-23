@@ -110,7 +110,94 @@ const PII_PATTERNS = {
 };
 
 /**
- * Scan text for privacy risks
+ * Check if OpenRedact feature flag is enabled (client-side helper)
+ */
+async function isOpenRedactEnabled(organizationId?: string): Promise<boolean> {
+  try {
+    const { supabase } = await import('@/integrations/supabase/client');
+    const { data, error } = await (supabase.rpc as any)('is_feature_enabled', {
+      p_feature_name: 'use_openredact',
+      p_organization_id: organizationId || null,
+    });
+
+    if (error) {
+      console.error('[Privacy Detection] Error checking feature flag:', error);
+      return false;
+    }
+
+    return data === true;
+  } catch (error) {
+    console.error('[Privacy Detection] Error checking OpenRedact feature flag:', error);
+    return false;
+  }
+}
+
+/**
+ * Use OpenRedact for privacy risk scanning (when feature flag is enabled)
+ */
+async function scanForPrivacyRisksWithOpenRedact(text: string): Promise<PrivacyRisk[]> {
+  try {
+    // Import OpenRedact from published package
+    const { OpenRedact } = await import('@openredaction/openredact');
+    const detector = new OpenRedact({ 
+      preset: 'gdpr',
+      confidenceThreshold: 0.4, // Strict for anonymous reports
+      enableContextAnalysis: true,
+    });
+    const result = detector.detect(text);
+    
+    // Map OpenRedact result to PrivacyRisk[] format
+    const risks: PrivacyRisk[] = [];
+    
+    if (result.detections && result.detections.length > 0) {
+      result.detections.forEach((detection: any) => {
+        const severity = detection.severity || 'medium';
+        const mappedSeverity = severity === 'high' ? 'high' : severity === 'low' ? 'low' : 'medium';
+        const type = detection.type.toLowerCase().replace(/_/g, '') as PrivacyRisk['type'];
+        
+        risks.push({
+          type,
+          text: detection.value || detection.text || '',
+          redacted: `[${detection.type}_REDACTED]`,
+          position: detection.position || { start: 0, end: 0 },
+          severity: mappedSeverity,
+          description: `${detection.type} detected`,
+        });
+      });
+    }
+    
+    return risks;
+  } catch (error) {
+    console.error('[Privacy Detection] OpenRedact error, falling back to legacy:', error);
+    throw error;
+  }
+}
+
+/**
+ * Scan text for privacy risks (PII)
+ * Returns array of detected risks with details
+ * 
+ * Checks feature flag and uses OpenRedact if enabled, otherwise uses legacy implementation
+ */
+export async function scanForPrivacyRisks(text: string, organizationId?: string): Promise<PrivacyRisk[]> {
+  // Check feature flag for OpenRedact
+  const useOpenRedact = await isOpenRedactEnabled(organizationId);
+  
+  if (useOpenRedact) {
+    try {
+      return await scanForPrivacyRisksWithOpenRedact(text);
+    } catch (error) {
+      // Fall through to legacy implementation on error
+      console.warn('[Privacy Detection] OpenRedact failed, using legacy implementation');
+    }
+  }
+
+  // Legacy implementation (existing code)
+  return scanForPrivacyRisksSync(text);
+}
+
+/**
+ * Scan text for privacy risks (synchronous version for backward compatibility)
  */
 export function scanForPrivacyRisksSync(text: string): PrivacyRisk[] {
   if (!text || text.trim().length === 0) {
