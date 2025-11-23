@@ -364,7 +364,7 @@ async function redactPIIWithOpenRedact(
 ): Promise<RedactionResult> {
   try {
     // Import OpenRedact from published package
-    const { OpenRedact } = await import('npm:@openredaction/openredact');
+    const { OpenRedact } = await import('npm:@openredaction/openredaction');
     const detector = new OpenRedact({ 
       preset: 'gdpr',
       enableContextAnalysis: true,

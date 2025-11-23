@@ -157,7 +157,7 @@ async function scanForPIIWithOpenRedact(
 ): Promise<PIIScanResult> {
   try {
     // Import OpenRedact from published package
-    const { OpenRedact } = await import('npm:@openredaction/openredact');
+    const { OpenRedact } = await import('npm:@openredaction/openredaction');
     const detector = new OpenRedact({ 
       preset: 'gdpr', 
       confidenceThreshold: 0.4,
