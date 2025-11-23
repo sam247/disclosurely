@@ -69,21 +69,12 @@ export function usePIIDetector(
     try {
       let result: PIIDetectionResult['detections'] = [];
 
-      if (useOpenRedact) {
-        // Use OpenRedact for detection
-        const { OpenRedact } = await import('@openredaction/openredact');
-        const detector = new OpenRedact({
-          preset: 'gdpr',
-          confidenceThreshold,
-          enableContextAnalysis,
-        });
-        const openRedactResult = detector.detect(textToScan);
-        result = (openRedactResult.detections || []).map((d: any) => ({
-          type: d.type,
-          text: d.value || d.text || '',
-          position: d.position || { start: 0, end: 0 },
-          severity: (d.severity || 'medium') as 'high' | 'medium' | 'low',
-        }));
+      // OpenRedact uses Node.js fs/path modules and cannot run in the browser
+      // For client-side, always use legacy implementation
+      // OpenRedact is only used in server-side edge functions
+      // The feature flag check is kept for future API endpoint implementation
+      if (false) { // Disabled: OpenRedact is Node.js only
+        // Future: Call API endpoint that uses OpenRedact server-side
       } else {
         // Use legacy detection
         const privacyRisks = await scanForPrivacyRisks(textToScan, organizationId);

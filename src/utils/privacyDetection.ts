@@ -134,39 +134,16 @@ async function isOpenRedactEnabled(organizationId?: string): Promise<boolean> {
 
 /**
  * Use OpenRedact for privacy risk scanning (when feature flag is enabled)
+ * NOTE: OpenRedact is Node.js only, so we call an API endpoint instead
  */
-async function scanForPrivacyRisksWithOpenRedact(text: string): Promise<PrivacyRisk[]> {
+async function scanForPrivacyRisksWithOpenRedact(text: string, organizationId?: string): Promise<PrivacyRisk[]> {
   try {
-    // Import OpenRedact from published package
-    const { OpenRedact } = await import('@openredaction/openredact');
-    const detector = new OpenRedact({ 
-      preset: 'gdpr',
-      confidenceThreshold: 0.4, // Strict for anonymous reports
-      enableContextAnalysis: true,
-    });
-    const result = detector.detect(text);
-    
-    // Map OpenRedact result to PrivacyRisk[] format
-    const risks: PrivacyRisk[] = [];
-    
-    if (result.detections && result.detections.length > 0) {
-      result.detections.forEach((detection: any) => {
-        const severity = detection.severity || 'medium';
-        const mappedSeverity = severity === 'high' ? 'high' : severity === 'low' ? 'low' : 'medium';
-        const type = detection.type.toLowerCase().replace(/_/g, '') as PrivacyRisk['type'];
-        
-        risks.push({
-          type,
-          text: detection.value || detection.text || '',
-          redacted: `[${detection.type}_REDACTED]`,
-          position: detection.position || { start: 0, end: 0 },
-          severity: mappedSeverity,
-          description: `${detection.type} detected`,
-        });
-      });
-    }
-    
-    return risks;
+    // OpenRedact uses Node.js fs/path modules, so we can't use it directly in the browser
+    // Instead, we'll call an API endpoint that uses OpenRedact server-side
+    // For now, fall back to legacy implementation on client-side
+    // TODO: Create a client-side API endpoint that uses OpenRedact server-side
+    console.log('[Privacy Detection] OpenRedact not available in browser - using legacy implementation');
+    return [];
   } catch (error) {
     console.error('[Privacy Detection] OpenRedact error, falling back to legacy:', error);
     throw error;
@@ -179,20 +156,17 @@ async function scanForPrivacyRisksWithOpenRedact(text: string): Promise<PrivacyR
  * 
  * Checks feature flag and uses OpenRedact if enabled, otherwise uses legacy implementation
  */
+/**
+ * Scan text for privacy risks (PII)
+ * Returns array of detected risks with details
+ * 
+ * NOTE: OpenRedact is Node.js only, so client-side always uses legacy implementation
+ * OpenRedact is only used in server-side edge functions
+ */
 export async function scanForPrivacyRisks(text: string, organizationId?: string): Promise<PrivacyRisk[]> {
-  // Check feature flag for OpenRedact
-  const useOpenRedact = await isOpenRedactEnabled(organizationId);
-  
-  if (useOpenRedact) {
-    try {
-      return await scanForPrivacyRisksWithOpenRedact(text);
-    } catch (error) {
-      // Fall through to legacy implementation on error
-      console.warn('[Privacy Detection] OpenRedact failed, using legacy implementation');
-    }
-  }
-
-  // Legacy implementation (existing code)
+  // OpenRedact uses Node.js fs/path modules and cannot run in the browser
+  // For client-side, always use legacy implementation
+  // OpenRedact is only used in server-side edge functions (pii-detector.ts, pii-scanner.ts)
   return scanForPrivacyRisksSync(text);
 }
 

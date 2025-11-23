@@ -53,6 +53,8 @@ export default defineConfig(({ mode }) => ({
         entryFileNames: 'assets/[name]-[hash].js',
         assetFileNames: 'assets/[name]-[hash].[ext]',
       },
+      // Externalize OpenRedact - it's Node.js only and used server-side
+      external: ['@openredaction/openredact'],
     },
     // Increase chunk size warning limit
     chunkSizeWarningLimit: 1000,

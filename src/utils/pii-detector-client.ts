@@ -276,44 +276,11 @@ async function detectPIIWithOpenRedact(
   text: string,
   organizationId?: string
 ): Promise<RedactionResult> {
-  try {
-    // Import OpenRedact from published package
-    const { OpenRedact } = await import('@openredaction/openredact');
-    const detector = new OpenRedact({ 
-      preset: 'gdpr',
-      confidenceThreshold: 0.4, // Strict for client-side
-      enableContextAnalysis: true,
-    });
-    const result = detector.detect(text);
-    
-    // Map OpenRedact result to RedactionResult format
-    const detections: PIIDetection[] = [];
-    const stats: Record<string, number> = {};
-    
-    if (result.detections && result.detections.length > 0) {
-      result.detections.forEach((detection: any, index: number) => {
-        const placeholder = `[${detection.type}_${index + 1}]`;
-        detections.push({
-          type: detection.type,
-          original: detection.value || detection.text || '',
-          placeholder,
-          start: detection.position?.start || 0,
-          end: detection.position?.end || 0,
-        });
-        stats[detection.type] = (stats[detection.type] || 0) + 1;
-      });
-    }
-    
-    return {
-      redactedText: result.redacted || text,
-      detections,
-      piiCount: detections.length,
-      stats,
-    };
-  } catch (error) {
-    console.error('[PII Detector Client] OpenRedact error, falling back to legacy:', error);
-    throw error;
-  }
+  // OpenRedact uses Node.js fs/path modules and cannot run in the browser
+  // For client-side, always use legacy implementation
+  // OpenRedact is only used in server-side edge functions
+  console.log('[PII Detector Client] OpenRedact not available in browser - using legacy implementation');
+  return detectPIISync(text);
 }
 
 /**

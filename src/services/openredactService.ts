@@ -71,25 +71,11 @@ export class OpenRedactService {
     }
 
     try {
-      // Import OpenRedact from published package
-      const { OpenRedact } = await import('@openredaction/openredact');
+      // NOTE: OpenRedact uses Node.js fs/path modules and cannot run in the browser
+      // This service is for server-side use only (edge functions)
+      // For browser/client-side, use API endpoints that call server-side OpenRedact
+      console.warn('[OpenRedact] Service is for server-side use only. Use API endpoints from client-side.');
       
-      // Initialize OpenRedact with Disclosurely-specific configuration
-      this.detector = new OpenRedact({
-        enableContextAnalysis: openRedactConfig.backend.enableContextAnalysis,
-        enableCache: openRedactConfig.backend.enableCache,
-        cacheSize: openRedactConfig.backend.cacheSize,
-        confidenceThreshold: openRedactConfig.backend.confidenceThreshold,
-        customPatterns: openRedactConfig.backend.customPatterns?.map(p => ({
-          type: p.type,
-          regex: p.regex,
-          placeholder: p.placeholder,
-          priority: p.priority,
-          severity: p.severity,
-        })),
-        preset: 'gdpr', // GDPR compliance preset
-      });
-
       // Load learning store
       await this.loadLearningStore();
 
