@@ -48,6 +48,12 @@ verify_jwt = true
 [functions.ai-gateway-generate]
 verify_jwt = false
 
+[functions.check-feature-flag]
+verify_jwt = false
+
+[functions.check-account-locked]
+verify_jwt = false
+
 [functions.extract-pdf-text]
 verify_jwt = true
 

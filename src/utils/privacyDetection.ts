@@ -114,18 +114,8 @@ const PII_PATTERNS = {
  */
 async function isOpenRedactEnabled(organizationId?: string): Promise<boolean> {
   try {
-    const { supabase } = await import('@/integrations/supabase/client');
-    const { data, error } = await (supabase.rpc as any)('is_feature_enabled', {
-      p_feature_name: 'use_openredact',
-      p_organization_id: organizationId || null,
-    });
-
-    if (error) {
-      console.error('[Privacy Detection] Error checking feature flag:', error);
-      return false;
-    }
-
-    return data === true;
+    const { checkFeatureFlag } = await import('@/utils/edgeFunctions');
+    return await checkFeatureFlag('use_openredact', organizationId);
   } catch (error) {
     console.error('[Privacy Detection] Error checking OpenRedact feature flag:', error);
     return false;

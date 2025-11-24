@@ -34,11 +34,9 @@ const AccountLockout = () => {
     if (!user?.email) return;
 
     try {
-      // Check if account is currently locked
-      const { data: isLocked, error: lockError } = await supabase.rpc('is_account_locked', {
-        p_email: user.email,
-        p_organization_id: null
-      });
+      // Check if account is currently locked (via Edge Function to handle CORS)
+      const { checkAccountLocked } = await import('@/utils/edgeFunctions');
+      const isLocked = await checkAccountLocked(user.email, null);
 
       // Get lockout settings
       const { data: settings } = await supabase
@@ -56,7 +54,7 @@ const AccountLockout = () => {
         .gte('attempted_at', new Date(Date.now() - (settings?.lockout_duration_minutes || 15) * 60 * 1000).toISOString());
 
       setLockoutInfo({
-        isLocked: isLocked || false,
+        isLocked: isLocked,
         failedAttempts: count || 0,
         maxAttempts: settings?.max_attempts || 5,
         lockoutDuration: settings?.lockout_duration_minutes || 15

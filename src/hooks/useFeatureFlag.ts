@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
-import { supabase } from '@/integrations/supabase/client';
+import { checkFeatureFlag } from '@/utils/edgeFunctions';
 
 /**
  * Hook to check if a feature is enabled for the current organization
@@ -22,17 +22,7 @@ export const useFeatureFlag = (
   return useQuery({
     queryKey: ['feature-flag', featureName, organizationId],
     queryFn: async () => {
-      const { data, error } = await (supabase.rpc as any)('is_feature_enabled', {
-        p_feature_name: featureName,
-        p_organization_id: organizationId || null
-      });
-
-      if (error) {
-        console.error('Error checking feature flag:', error);
-        return false; // Default to disabled on error
-      }
-
-      return data as boolean;
+      return await checkFeatureFlag(featureName, organizationId);
     },
     staleTime: 60000, // Cache for 1 minute
     refetchOnMount: true,

@@ -1,8 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Shield, Eye, EyeOff, Info, Lock, AlertCircle } from 'lucide-react';
-import { detectPII, highlightPIIForDisplay, formatPIIType } from '@/utils/pii-detector-client';
+import { detectPIISync, highlightPIIForDisplay, formatPIIType } from '@/utils/pii-detector-client';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { useOrganization } from '@/hooks/useOrganization';
@@ -25,21 +25,37 @@ export const PIIPreviewModal: React.FC<PIIPreviewModalProps> = ({
   const { toast } = useToast();
   const { organization } = useOrganization();
   const [reportingFalsePositive, setReportingFalsePositive] = useState<string | null>(null);
-  
-  // Detect PII client-side
-  const redactionResult = detectPII(originalText || '');
-  const highlightedParts = (() => {
+  const [redactionResult, setRedactionResult] = useState<{
+    redactedText: string;
+    detections: Array<{ original: string; placeholder: string; type: string; start: number; end: number }>;
+    piiCount: number;
+    stats: Record<string, number>;
+  } | null>(null);
+  const [highlightedParts, setHighlightedParts] = useState<Array<{ text: string; isPII: boolean; type?: string; placeholder?: string }>>([]);
+
+  // Detect PII client-side (using sync version since OpenRedact can't run in browser)
+  useEffect(() => {
     try {
-      const result = highlightPIIForDisplay(
+      const result = detectPIISync(originalText || '');
+      setRedactionResult(result);
+      
+      // Generate highlighted parts
+      const highlighted = highlightPIIForDisplay(
         originalText || '', 
-        Array.isArray(redactionResult?.detections) ? redactionResult.detections : []
+        Array.isArray(result?.detections) ? result.detections : []
       );
-      return Array.isArray(result) ? result : [{ text: originalText || '', isPII: false }];
+      setHighlightedParts(Array.isArray(highlighted) ? highlighted : [{ text: originalText || '', isPII: false }]);
     } catch (error) {
-      console.error('Error highlighting PII:', error);
-      return [{ text: originalText || '', isPII: false }];
+      console.error('Error detecting PII:', error);
+      setRedactionResult({
+        redactedText: originalText || '',
+        detections: [],
+        piiCount: 0,
+        stats: {}
+      });
+      setHighlightedParts([{ text: originalText || '', isPII: false }]);
     }
-  })();
+  }, [originalText]);
 
   const handleReportFalsePositive = async (detection: any) => {
     if (!organization?.id) {

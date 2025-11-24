@@ -93,7 +93,7 @@ interface PIIPattern {
 function detectNames(text: string): Array<{ match: string; start: number; end: number }> {
   const names: Array<{ match: string; start: number; end: number }> = [];
   
-  // Pattern: Capitalized First Last (e.g., "John Smith", "Mark Rivers", "Jane Doe")
+  // Pattern 1: Capitalized First Last (e.g., "John Smith", "Mark Rivers", "Jane Doe")
   const namePattern = /\b([A-Z][a-z]{2,})\s+([A-Z][a-z]{2,})\b/g;
   let match;
 
@@ -146,6 +146,58 @@ function detectNames(text: string): Array<{ match: string; start: number; end: n
         }
         // Otherwise skip if no clear context
       } else if (!/\b(at|in|near|from|to)\s*$/i.test(beforeContext)) {
+        names.push({
+          match: fullName,
+          start: match.index,
+          end: match.index + fullName.length
+        });
+      }
+    }
+  }
+
+  // Pattern 2: First Name + Initial (e.g., "Mike J", "John D", "Sarah K")
+  const nameInitialPattern = /\b([A-Z][a-z]{2,})\s+([A-Z])\b(?!\s*[a-z])/g;
+  nameInitialPattern.lastIndex = 0; // Reset regex
+  
+  while ((match = nameInitialPattern.exec(text)) !== null) {
+    const fullName = match[0];
+    
+    // Exclude common false positives
+    const excludedWords = [
+      'United Kingdom', 'New York', 'San Francisco', 'Los Angeles',
+      'Data Protection', 'Human Resources', 'Chief Executive',
+      'United States', 'European Union', 'Dear Sir', 'Dear Madam',
+      'Client Services', 'Team Lead', 'Senior Account', 'Account Manager',
+      'Hiring Friends', 'Fraudulent Expenses', 'Expense Report',
+      'Financial Misconduct', 'Workplace Behaviour', 'Code of Conduct',
+      'Policy Violation', 'Internal Audit', 'Compliance Issue'
+    ];
+
+    if (!excludedWords.includes(fullName)) {
+      // Additional validation: Not after "at" or "in" (likely place names)
+      const beforeContext = text.substring(Math.max(0, match.index - 30), match.index).toLowerCase();
+      const afterContext = text.substring(match.index + fullName.length, Math.min(text.length, match.index + fullName.length + 30)).toLowerCase();
+      const contextText = beforeContext + ' ' + afterContext;
+      
+      // Exclude if it's clearly a business term
+      const businessIndicators = [
+        'report', 'expense', 'fraud', 'misconduct', 'violation', 'policy',
+        'hiring', 'recruitment', 'process', 'procedure', 'system', 'department'
+      ];
+      
+      const matchLower = fullName.toLowerCase();
+      if (businessIndicators.some(indicator => matchLower.includes(indicator) || contextText.includes(indicator))) {
+        continue; // Skip this match
+      }
+      
+      // Check if this overlaps with existing matches
+      const overlaps = names.some(
+        n => 
+          (match.index >= n.start && match.index < n.end) ||
+          (match.index + fullName.length > n.start && match.index + fullName.length <= n.end)
+      );
+      
+      if (!overlaps) {
         names.push({
           match: fullName,
           start: match.index,
@@ -251,18 +303,8 @@ function getPIIPatterns(): PIIPattern[] {
  */
 async function isOpenRedactEnabled(organizationId?: string): Promise<boolean> {
   try {
-    const { supabase } = await import('@/integrations/supabase/client');
-    const { data, error } = await (supabase.rpc as any)('is_feature_enabled', {
-      p_feature_name: 'use_openredact',
-      p_organization_id: organizationId || null,
-    });
-
-    if (error) {
-      console.error('[PII Detector Client] Error checking feature flag:', error);
-      return false;
-    }
-
-    return data === true;
+    const { checkFeatureFlag } = await import('@/utils/edgeFunctions');
+    return await checkFeatureFlag('use_openredact', organizationId);
   } catch (error) {
     console.error('[PII Detector Client] Error checking OpenRedact feature flag:', error);
     return false;

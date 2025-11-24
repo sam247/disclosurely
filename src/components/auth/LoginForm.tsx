@@ -8,6 +8,7 @@ import { Label } from '@/components/ui/label';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { useTranslation } from 'react-i18next';
+import { checkAccountLocked } from '@/utils/edgeFunctions';
 import OTPVerification from './OTPVerification';
 
 const LoginForm = () => {
@@ -26,25 +27,17 @@ const LoginForm = () => {
     setLoading(true);
 
     try {
-      // Check if account is locked before attempting login (optional - gracefully handle if RPC doesn't exist)
-      try {
-        const { data: lockoutData, error: lockoutError } = await supabase.rpc('is_account_locked', {
-          p_email: email,
-          p_organization_id: null
+      // Check if account is locked before attempting login (via Edge Function to handle CORS)
+      const isLocked = await checkAccountLocked(email, null);
+      
+      if (isLocked) {
+        toast({
+          title: "Account Temporarily Locked",
+          description: "Too many failed login attempts. Please try again later.",
+          variant: "destructive",
         });
-
-        if (!lockoutError && lockoutData === true) {
-          toast({
-            title: "Account Temporarily Locked",
-            description: "Too many failed login attempts. Please try again later.",
-            variant: "destructive",
-          });
-          setLoading(false);
-          return;
-        }
-      } catch (rpcError) {
-        // RPC function might not exist or be unavailable - continue with login
-        
+        setLoading(false);
+        return;
       }
 
       // Use standard OTP authentication flow
