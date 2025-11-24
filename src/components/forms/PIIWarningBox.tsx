@@ -27,7 +27,7 @@ export const PIIWarningBox = ({ detections, isDetecting = false, className = '' 
   }
 
   return (
-    <Collapsible open={isOpen} onOpenChange={setIsOpen} className={className}>
+    <Collapsible open={isOpen} onOpenChange={setIsOpen} className={`w-full ${className}`}>
       <Alert variant="destructive" className="py-2 border-orange-300 bg-orange-50 dark:bg-orange-950/20">
         <AlertTriangle className="h-4 w-4 text-orange-600" />
         <AlertDescription className="text-sm">

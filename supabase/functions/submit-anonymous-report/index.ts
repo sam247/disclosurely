@@ -425,14 +425,8 @@ serve(async (req) => {
     combined.set(iv)
     combined.set(new Uint8Array(encryptedBuffer), iv.length)
     
-    // Convert to base64
-    const CHUNK = 0x8000
-    let binary = ''
-    for (let i = 0; i < combined.length; i += CHUNK) {
-      const slice = combined.subarray(i, Math.min(i + CHUNK, combined.length))
-      binary += String.fromCharCode.apply(null, Array.from(slice))
-    }
-    const encryptedData = typeof btoa === 'function' ? btoa(binary) : Buffer.from(binary, 'binary').toString('base64')
+    // Convert to base64 - use Deno's built-in base64 encoding
+    const encryptedData = btoa(String.fromCharCode(...combined))
     const keyHash = organizationKey
     
     console.log('✅ Encryption completed server-side')

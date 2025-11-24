@@ -24,7 +24,7 @@ const Step9Additional = ({ witnesses, previousReports, onChange, language, organ
     confidenceThreshold: 0.4,
   });
   return (
-    <div className="space-y-4 py-2">
+    <div className="space-y-4 py-2 flex flex-col">
       <div className="flex items-center gap-2 sm:gap-3">
         <div className="p-1.5 sm:p-2 rounded-lg bg-primary/10 flex-shrink-0">
           <FileText className="w-4 h-4 sm:w-5 sm:h-5 text-primary" />

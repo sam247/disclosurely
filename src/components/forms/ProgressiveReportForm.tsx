@@ -383,7 +383,7 @@ const ProgressiveReportForm = ({
         <Progress value={progressPercent} className="h-2" />
       </div>
 
-      {/* Step content with animation - Flexible on mobile, fixed on desktop */}
+      {/* Step content with animation - Fully responsive, no fixed heights */}
       <div
         className={`transition-all duration-300 ease-in-out ${
           currentStep === 9 || currentStep === 10 
@@ -392,7 +392,7 @@ const ProgressiveReportForm = ({
             ? 'min-h-[198px] sm:min-h-[352px]' // Welcome step - min height to accommodate footer
             : currentStep === 3
             ? 'min-h-[400px] sm:min-h-[500px]' // Privacy step - needs more space for content
-            : 'min-h-[198px] sm:h-[352px]' // Mobile: min-height (flexible), Desktop: fixed height
+            : 'min-h-[198px]' // All other steps - fully responsive, no fixed height
         }`}
         key={currentStep}
       >

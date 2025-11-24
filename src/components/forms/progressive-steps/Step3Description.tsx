@@ -50,7 +50,7 @@ const Step3Description = ({ value, onChange, isValid, language, organizationId }
 
   return (
     <TooltipProvider>
-      <div className="space-y-4 py-2 flex flex-col flex-1 min-h-0">
+      <div className="space-y-4 py-2 flex flex-col">
       <div className="flex items-center gap-2 sm:gap-3">
         <div className="p-1.5 sm:p-2 rounded-lg bg-primary/10 flex-shrink-0">
           <FileText className="w-4 h-4 sm:w-5 sm:h-5 text-primary" />
@@ -65,7 +65,7 @@ const Step3Description = ({ value, onChange, isValid, language, organizationId }
         </div>
       </div>
 
-        <div className="space-y-2 flex flex-col flex-1 min-h-0">
+        <div className="space-y-2 flex flex-col">
           <div className="flex items-center gap-2">
             <Label htmlFor="description" className="text-base">
               {t.step2.label}
@@ -106,15 +106,15 @@ const Step3Description = ({ value, onChange, isValid, language, organizationId }
             value={value}
             onChange={(e) => onChange(e.target.value)}
             placeholder={t.step2.placeholder}
-            className={`min-h-[120px] sm:min-h-[180px] flex-1 text-base resize-none ${
+            className={`min-h-[120px] sm:min-h-[180px] text-base resize-none ${
               hasPII ? 'border-destructive focus-visible:ring-destructive' : ''
             }`}
             maxLength={5000}
           />
           
-          {/* Real-time PII detection feedback */}
+          {/* Real-time PII detection feedback - in normal flow to push buttons down */}
           {value.length > 50 && (
-            <div className="space-y-2">
+            <div className="space-y-2 w-full">
               <PIIWarningBox detections={detections} isDetecting={isDetecting} />
               
               {!isDetecting && !hasPII && value.length > 50 && (
@@ -126,7 +126,7 @@ const Step3Description = ({ value, onChange, isValid, language, organizationId }
             </div>
           )}
           
-          <div className="flex justify-between items-center text-sm mt-2 flex-shrink-0">
+          <div className="flex justify-between items-center text-sm mt-2">
             <div className="text-gray-500">
               {!isValid && value.length > 0 && value.length < 20 && (
                 <span className="text-amber-600">{t.step2.minChars}</span>
