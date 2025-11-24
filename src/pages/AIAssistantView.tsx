@@ -1281,8 +1281,8 @@ When listing cases, always include the tracking ID (DIS-XXXX format) so users ca
       return;
     }
 
-    // Set pending query from current input
-    setPendingAnalysisQuery(inputQuery.trim());
+    // Set pending query from current input, or use default
+    setPendingAnalysisQuery(inputQuery.trim() || "Analyze this case");
 
     // Ensure case data is loaded
     if (!selectedCaseData) {
@@ -1778,18 +1778,10 @@ Additional Details: ${decrypted.additionalDetails || 'None provided'}`;
                       <div className="flex gap-3 w-full max-w-md">
                 <Button
                           onClick={async () => {
-                            if (selectedCaseData) {
-                              const decryptedContent = await decryptReport(selectedCaseData);
-                              setPreviewContent(decryptedContent);
-                              setPendingAnalysisQuery(inputQuery || "Analyze this case");
-                              setShowPIIPreview(true);
-                              setShowPIIChoice(false);
-                            } else {
-                              setShowPIIChoice(false);
-                              setPreservePII(false);
-                              const query = inputQuery || "Analyze this case";
-                              await handleQueryWithPIIPreference(query, false, true);
-                            }
+                            setShowPIIChoice(false);
+                            setPreservePII(false);
+                            const query = inputQuery || "Analyze this case";
+                            await handleQueryWithPIIPreference(query, false, true);
                           }}
                           className="flex-1 bg-green-600 hover:bg-green-700"
                           size="default"
@@ -1812,20 +1804,16 @@ Additional Details: ${decrypted.additionalDetails || 'None provided'}`;
                 </Button>
               </div>
                     <Button
-                        onClick={async () => {
-                          if (selectedCaseData) {
-                            const decryptedContent = await decryptReport(selectedCaseData);
-                            setPreviewContent(decryptedContent);
-                            setShowPIIPreview(true);
-                            setShowPIIChoice(false);
-                          }
+                        onClick={() => {
+                          loadPreviewContent();
                         }}
                         variant="outline"
                         size="default"
                         className="w-full max-w-md"
+                        disabled={isLoadingPreview}
                       >
                         <Eye className="h-4 w-4 mr-2" />
-                        Preview PII Detection
+                        {isLoadingPreview ? 'Loading Preview...' : 'Preview PII Detection'}
                     </Button>
                 </div>
           </CardContent>
