@@ -361,7 +361,21 @@ serve(async (req) => {
     
     // 🔍 SERVER-SIDE PII SCANNING (PRIVACY FIX C2)
     console.log('🔍 Scanning report data for PII...')
-    const piiScanResult = await scanReportData(reportData, linkData.organization_id)
+    let piiScanResult;
+    try {
+      piiScanResult = await scanReportData(reportData, linkData.organization_id)
+      console.log('✅ PII scan completed:', { hasPII: piiScanResult.hasPII, count: piiScanResult.detected.length })
+    } catch (piiError) {
+      console.error('❌ PII scan failed, continuing without PII detection:', piiError)
+      // Continue with empty PII result if scan fails
+      piiScanResult = {
+        detected: [],
+        hasPII: false,
+        highSeverityCount: 0,
+        mediumSeverityCount: 0,
+        lowSeverityCount: 0,
+      }
+    }
     
     if (piiScanResult.hasPII) {
       console.warn(`⚠️ PII detected in report: ${piiScanResult.detected.length} items (${piiScanResult.highSeverityCount} high, ${piiScanResult.mediumSeverityCount} medium, ${piiScanResult.lowSeverityCount} low)`)
