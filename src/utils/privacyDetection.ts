@@ -88,7 +88,59 @@ const PII_PATTERNS = {
     pattern: /\b[A-Z][a-z]{2,}\s+[A-Z][a-z]{2,}(?:\s+[A-Z][a-z]{2,})?\b/g,
     severity: 'medium' as const,
     description: 'Possible full name detected',
-    redact: () => '[NAME REDACTED]'
+    redact: () => '[NAME REDACTED]',
+    // Validator to filter out false positives
+    validator: (match: string) => {
+      const lowerMatch = match.toLowerCase();
+      
+      // Common business/team terms that aren't names
+      const businessTerms = [
+        'customer care', 'customer service', 'customer support', 'customer records',
+        'human resources', 'hr department', 'it department', 'it support',
+        'legal department', 'finance department', 'sales team', 'marketing team',
+        'management team', 'executive team', 'board members', 'staff members',
+        'team member', 'team members', 'team lead', 'team leader',
+        'data breach', 'security breach', 'privacy policy', 'terms service',
+        'improper access', 'unauthorized access', 'data access', 'system access',
+        'account access', 'user access', 'admin access', 'secure access'
+      ];
+      
+      if (businessTerms.some(term => lowerMatch.includes(term))) {
+        return false;
+      }
+      
+      // Common street/address words that aren't names
+      const addressWords = [
+        'street', 'road', 'lane', 'avenue', 'drive', 'court', 'place', 'way',
+        'boulevard', 'circle', 'parkway', 'terrace', 'close', 'grove', 'hill',
+        'north', 'south', 'east', 'west', 'upper', 'lower', 'new', 'old',
+        'high', 'main', 'church', 'mill', 'bridge', 'green', 'park', 'wood'
+      ];
+      
+      const words = lowerMatch.split(/\s+/);
+      if (words.some(word => addressWords.includes(word))) {
+        return false;
+      }
+      
+      // Common action/descriptive phrases
+      const actionPhrases = [
+        'improper', 'unauthorized', 'inappropriate', 'unacceptable',
+        'customer', 'client', 'user', 'member', 'employee', 'staff',
+        'records', 'data', 'information', 'details', 'files', 'documents'
+      ];
+      
+      // If it starts with an action word, likely not a name
+      if (actionPhrases.includes(words[0])) {
+        return false;
+      }
+      
+      // If it ends with a business term, likely not a name
+      if (words.length >= 2 && businessTerms.some(term => lowerMatch.endsWith(term.split(' ').slice(-1)[0]))) {
+        return false;
+      }
+      
+      return true;
+    }
   },
   // Specific dates - supports both US and UK formats
   specificDate: {
@@ -177,6 +229,13 @@ export function scanForPrivacyRisksSync(text: string): PrivacyRisk[] {
     for (const match of matches) {
       if (match.index !== undefined) {
         const matchedText = match[0];
+
+        // Use validator if it exists to filter false positives
+        if ('validator' in config && typeof config.validator === 'function') {
+          if (!config.validator(matchedText)) {
+            continue; // Skip this match - it's a false positive
+          }
+        }
 
         // Skip if this is part of a larger already-detected risk
         const overlaps = risks.some(risk =>

@@ -269,15 +269,16 @@ serve(async (req) => {
   const requestId = `req_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
   console.log('submit-anonymous-report: request start', { url: new URL(req.url).pathname, requestId })
   
+  // Get CORS headers early - use for all responses
+  const corsHeaders = getCorsHeaders(req);
+  
   try {
     console.log('🔍 SUBMIT FUNCTION STARTED')
     
     if (req.method === 'OPTIONS') {
       console.log('OPTIONS request')
-      return new Response('ok', { headers: getCorsHeaders(req) })
+      return new Response('ok', { headers: corsHeaders })
     }
-    
-    const corsHeaders = getCorsHeaders(req);
 
     // 🔒 Rate limiting: 5 submissions per 15 minutes per IP
     const rateLimit = await checkRateLimit(req, rateLimiters.reportSubmission)
@@ -725,12 +726,19 @@ serve(async (req) => {
       console.error('Failed to log error to system:', logError)
     }
     
+    // Ensure CORS headers are always included, even on errors
     return new Response(
       JSON.stringify({ 
         error: 'Submit failed. Please try again or contact support.',
-        details: process.env.NODE_ENV === 'development' ? error?.message : undefined
+        details: Deno.env.get('ENVIRONMENT') === 'development' ? error?.message : undefined
       }),
-      { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      { 
+        status: 500, 
+        headers: { 
+          ...corsHeaders, 
+          'Content-Type': 'application/json' 
+        } 
+      }
     )
   }
 })

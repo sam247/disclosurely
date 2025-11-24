@@ -119,7 +119,7 @@ const CleanSubmissionWrapper = () => {
         .select('id, domain, active_url_type, custom_domain, custom_domain_verified')
         .eq('id', organizationId)
         .eq('is_active', true)
-        .single();
+        .maybeSingle();
 
       if (orgError || !orgData) {
         console.error('Organization not found:', orgError);
