@@ -1719,16 +1719,6 @@ Additional Details: ${decrypted.additionalDetails || 'None provided'}`;
             )}
           </div>
           <div className="flex items-center gap-2">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={loadPreviewContent}
-              disabled={!selectedCaseId || hasAnalyzedCase || isLoadingPreview}
-              title={!selectedCaseId || hasAnalyzedCase ? "Select a case to preview PII detection" : "Preview PII Detection"}
-            >
-              <Eye className="h-4 w-4 mr-2" />
-              Preview PII
-            </Button>
             {currentAnalysisData && (
               <Button
                 variant="outline"
@@ -1754,13 +1744,93 @@ Additional Details: ${decrypted.additionalDetails || 'None provided'}`;
 
         {/* Chat Messages Area */}
         <div className="flex-1 overflow-y-auto p-4 md:p-6">
-          {isEmptyState ? (
+          {isEmptyState && !showPIIChoice ? (
             <div className="flex flex-col items-center justify-center h-full">
               <Sparkles className="h-12 w-12 text-muted-foreground mb-4" />
               <h2 className="text-xl font-semibold mb-2">AI Assistant</h2>
               <p className="text-sm text-muted-foreground text-center max-w-md">
                 Select a case from the sidebar to analyze, or ask a question about your cases.
               </p>
+            </div>
+          ) : showPIIChoice && selectedCaseId && !hasAnalyzedCase ? (
+            <div className="flex flex-col items-center justify-center h-full">
+              <div className="max-w-2xl w-full space-y-6">
+                <div className="text-center space-y-2">
+                  <Sparkles className="h-12 w-12 text-primary mx-auto mb-4" />
+                  <h2 className="text-2xl font-semibold">AI Assistant</h2>
+                  {selectedCaseData && (
+                    <p className="text-sm text-muted-foreground">
+                      Analyzing: {selectedCaseData.tracking_id} - {selectedCaseData.title}
+                    </p>
+                  )}
+                </div>
+                
+                <Card className="border-blue-200 bg-blue-50/50">
+                  <CardContent className="p-6">
+                    <div className="flex flex-col items-center text-center space-y-4">
+                      <div className="flex items-center gap-2">
+                        <Shield className="h-6 w-6 text-blue-600" />
+                        <h3 className="text-lg font-semibold">Privacy Protection</h3>
+                      </div>
+                      <p className="text-sm text-muted-foreground max-w-md">
+                        Choose how to handle personal information in this analysis:
+                      </p>
+                      <div className="flex gap-3 w-full max-w-md">
+                        <Button
+                          onClick={async () => {
+                            if (selectedCaseData) {
+                              const decryptedContent = await decryptReport(selectedCaseData);
+                              setPreviewContent(decryptedContent);
+                              setPendingAnalysisQuery(inputQuery || "Analyze this case");
+                              setShowPIIPreview(true);
+                              setShowPIIChoice(false);
+                            } else {
+                              setShowPIIChoice(false);
+                              setPreservePII(false);
+                              const query = inputQuery || "Analyze this case";
+                              await handleQueryWithPIIPreference(query, false, true);
+                            }
+                          }}
+                          className="flex-1 bg-green-600 hover:bg-green-700"
+                          size="default"
+                        >
+                          <Shield className="h-4 w-4 mr-2" />
+                          Analyze with PII Protection
+                        </Button>
+                        <Button
+                          onClick={async () => {
+                            setShowPIIChoice(false);
+                            setPreservePII(true);
+                            const query = inputQuery || "Analyze this case";
+                            await handleQueryWithPIIPreference(query, true, true);
+                          }}
+                          variant="outline"
+                          className="flex-1"
+                          size="default"
+                        >
+                          Analyze Without Redaction
+                        </Button>
+                      </div>
+                      <Button
+                        onClick={async () => {
+                          if (selectedCaseData) {
+                            const decryptedContent = await decryptReport(selectedCaseData);
+                            setPreviewContent(decryptedContent);
+                            setShowPIIPreview(true);
+                            setShowPIIChoice(false);
+                          }
+                        }}
+                        variant="outline"
+                        size="default"
+                        className="w-full max-w-md"
+                      >
+                        <Eye className="h-4 w-4 mr-2" />
+                        Preview PII Detection
+                      </Button>
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
             </div>
           ) : (
             <div className="max-w-4xl mx-auto space-y-6">
@@ -1829,76 +1899,7 @@ Additional Details: ${decrypted.additionalDetails || 'None provided'}`;
 
         {/* Input Area - Fixed at Bottom */}
         <div className="border-t p-4 md:p-6 flex-shrink-0">
-          <div className="max-w-4xl mx-auto space-y-3">
-            {/* PII Protection Choice */}
-            {showPIIChoice && selectedCaseId && !hasAnalyzedCase && (
-              <Card className="border-blue-200 bg-blue-50/50">
-                <CardContent className="p-3">
-                  <div className="flex items-start gap-3">
-                    <Shield className="h-5 w-5 text-blue-600 mt-0.5 flex-shrink-0" />
-                    <div className="flex-1">
-                      <h3 className="font-semibold text-sm mb-1">Privacy Protection</h3>
-                      <p className="text-xs text-muted-foreground mb-3">
-                        Choose how to handle personal information in this analysis:
-                      </p>
-                      <div className="flex gap-2 mb-2">
-                        <Button
-                          onClick={async () => {
-                            if (selectedCaseData) {
-                              const decryptedContent = await decryptReport(selectedCaseData);
-                              setPreviewContent(decryptedContent);
-                              setPendingAnalysisQuery(inputQuery || "Analyze this case");
-                              setShowPIIPreview(true);
-                              setShowPIIChoice(false);
-                            } else {
-                              setShowPIIChoice(false);
-                              setPreservePII(false);
-                              const query = inputQuery || "Analyze this case";
-                              await handleQueryWithPIIPreference(query, false, true);
-                            }
-                          }}
-                          className="flex-1 bg-green-600 hover:bg-green-700"
-                          size="sm"
-                        >
-                          <Shield className="h-4 w-4 mr-2" />
-                          Analyze with PII Protection
-                        </Button>
-                        <Button
-                          onClick={async () => {
-                            setShowPIIChoice(false);
-                            setPreservePII(true);
-                            const query = inputQuery || "Analyze this case";
-                            await handleQueryWithPIIPreference(query, true, true);
-                          }}
-                          variant="outline"
-                          className="flex-1"
-                          size="sm"
-                        >
-                          Analyze Without Redaction
-                        </Button>
-                      </div>
-                      <Button
-                        onClick={async () => {
-                          if (selectedCaseData) {
-                            const decryptedContent = await decryptReport(selectedCaseData);
-                            setPreviewContent(decryptedContent);
-                            setShowPIIPreview(true);
-                            setShowPIIChoice(false);
-                          }
-                        }}
-                        variant="outline"
-                        size="sm"
-                        className="w-full"
-                      >
-                        <Eye className="h-4 w-4 mr-2" />
-                        Preview PII Detection
-                      </Button>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            )}
-            
+          <div className="max-w-4xl mx-auto">
             <div className="flex gap-2">
               <Input
                 value={inputQuery}
