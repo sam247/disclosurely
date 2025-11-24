@@ -721,35 +721,43 @@ serve(async (req) => {
     }
 
     // Trigger email notifications directly (no bridge)
-    await sendReportNotificationEmails(supabase, report, linkData.organization_id)
+    try {
+      await sendReportNotificationEmails(supabase, report, linkData.organization_id)
+    } catch (emailError) {
+      console.error('⚠️ Email notification error (non-blocking):', emailError)
+    }
 
     // Log audit event
     console.log('📋 Logging audit event...')
-    await logAuditEvent(supabase, {
-      eventType: 'report_created',
-      category: 'security',
-      action: 'create',
-      severity: piiScanResult.hasPII && piiScanResult.highSeverityCount > 0 ? 'high' : 'medium',
-      actorType: 'anonymous',
-      actorId: null,
-      actorEmail: reportData.submitted_by_email,
-      actorIpAddress: null, // Set to null to avoid inet type issues
-      actorUserAgent: req.headers.get('user-agent'),
-      targetType: 'report',
-      targetId: report.id,
-      targetName: reportData.title,
-      summary: `Anonymous report submitted: ${reportData.title}`,
-      description: `Report ${reportData.tracking_id} submitted via secure link${piiScanResult.hasPII ? ` (PII detected: ${piiScanResult.detected.length} items)` : ''}`,
-      metadata: {
-        linkToken: linkToken.substring(0, 8) + '...',
-        organizationId: linkData.organization_id,
-        reportType: reportData.report_type,
-        priority: reportData.priority,
-        pii_detected: piiScanResult.hasPII,
-        pii_count: piiScanResult.detected.length,
-        pii_high_severity: piiScanResult.highSeverityCount,
-      }
-    })
+    try {
+      await logAuditEvent(supabase, {
+        eventType: 'report_created',
+        category: 'security',
+        action: 'create',
+        severity: piiScanResult.hasPII && piiScanResult.highSeverityCount > 0 ? 'high' : 'medium',
+        actorType: 'anonymous',
+        actorId: null,
+        actorEmail: reportData.submitted_by_email,
+        actorIpAddress: null, // Set to null to avoid inet type issues
+        actorUserAgent: req.headers.get('user-agent'),
+        targetType: 'report',
+        targetId: report.id,
+        targetName: reportData.title,
+        summary: `Anonymous report submitted: ${reportData.title}`,
+        description: `Report ${reportData.tracking_id} submitted via secure link${piiScanResult.hasPII ? ` (PII detected: ${piiScanResult.detected.length} items)` : ''}`,
+        metadata: {
+          linkToken: linkToken.substring(0, 8) + '...',
+          organizationId: linkData.organization_id,
+          reportType: reportData.report_type,
+          priority: reportData.priority,
+          pii_detected: piiScanResult.hasPII,
+          pii_count: piiScanResult.detected.length,
+          pii_high_severity: piiScanResult.highSeverityCount,
+        }
+      })
+    } catch (auditError) {
+      console.error('⚠️ Audit logging error (non-blocking):', auditError)
+    }
     
     console.log('🎉 Report submission completed successfully!')
     
