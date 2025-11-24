@@ -1528,7 +1528,7 @@ Additional Details: ${decrypted.additionalDetails || 'None provided'}`;
   };
 
   // Main Layout - ChatGPT Style
-  return (
+    return (
     <div className="flex h-full overflow-hidden -m-4 md:-m-6">
       {/* Left Sidebar */}
       <div className="w-[260px] border-r bg-muted/30 flex flex-col overflow-hidden">
@@ -1540,7 +1540,7 @@ Additional Details: ${decrypted.additionalDetails || 'None provided'}`;
               {isLoadingCases ? (
                 <div className="flex items-center justify-center py-4">
                   <Loader2 className="h-4 w-4 animate-spin" />
-                </div>
+            </div>
               ) : (
                 <div className="space-y-1">
                   {Array.isArray(cases) && cases.length > 0 ? (
@@ -1576,7 +1576,7 @@ Additional Details: ${decrypted.additionalDetails || 'None provided'}`;
                   )}
                 </div>
               )}
-            </div>
+          </div>
 
             <Separator />
 
@@ -1591,8 +1591,8 @@ Additional Details: ${decrypted.additionalDetails || 'None provided'}`;
                   multiple
                   onChange={handleFileUpload}
                   className="hidden"
-                />
-                <Button
+              />
+              <Button
                   variant="ghost"
                   size="sm"
                   className="h-6 w-6 p-0"
@@ -1646,7 +1646,7 @@ Additional Details: ${decrypted.additionalDetails || 'None provided'}`;
                             title="Delete document"
                           >
                             <Trash2 className="h-3 w-3 text-destructive" />
-                          </Button>
+              </Button>
                         </div>
                       );
                     })
@@ -1682,7 +1682,7 @@ Additional Details: ${decrypted.additionalDetails || 'None provided'}`;
                             {new Date(analysis.created_at).toLocaleDateString()}
                           </div>
                         </button>
-                        <Button
+                  <Button
                           variant="ghost"
                           size="sm"
                           className="h-6 w-6 p-0 opacity-0 group-hover:opacity-100 transition-opacity"
@@ -1693,18 +1693,18 @@ Additional Details: ${decrypted.additionalDetails || 'None provided'}`;
                           title="Delete saved analysis"
                         >
                           <Trash2 className="h-3 w-3 text-destructive" />
-                        </Button>
-                      </div>
+                  </Button>
+              </div>
                     ))
                   ) : (
                     <p className="text-xs text-muted-foreground px-2">No saved analyses</p>
                   )}
-                </div>
-              )}
             </div>
+              )}
           </div>
+        </div>
         </ScrollArea>
-      </div>
+          </div>
 
       {/* Main Content Area */}
       <div className="flex-1 flex flex-col overflow-hidden">
@@ -1717,30 +1717,30 @@ Additional Details: ${decrypted.additionalDetails || 'None provided'}`;
                 {selectedCaseData.tracking_id}
               </Badge>
             )}
-          </div>
-          <div className="flex items-center gap-2">
-            {currentAnalysisData && (
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={saveAnalysis}
-                disabled={isSaving}
-              >
-                <Save className="h-4 w-4 mr-2" />
-                Save Analysis
-              </Button>
-            )}
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={handleClearChat}
-              disabled={isLoading}
-            >
-              <X className="h-4 w-4 mr-2" />
-              Clear
-            </Button>
-          </div>
         </div>
+        <div className="flex items-center gap-2">
+              {currentAnalysisData && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={saveAnalysis}
+                  disabled={isSaving}
+                >
+                  <Save className="h-4 w-4 mr-2" />
+                  Save Analysis
+                </Button>
+          )}
+          <Button
+            variant="outline"
+              size="sm"
+            onClick={handleClearChat}
+            disabled={isLoading}
+          >
+            <X className="h-4 w-4 mr-2" />
+              Clear
+          </Button>
+        </div>
+          </div>
 
         {/* Chat Messages Area */}
         <div className="flex-1 overflow-y-auto p-4 md:p-6">
@@ -1762,13 +1762,13 @@ Additional Details: ${decrypted.additionalDetails || 'None provided'}`;
                     <p className="text-sm text-muted-foreground">
                       Analyzing: {selectedCaseData.tracking_id} - {selectedCaseData.title}
                     </p>
-                  )}
-                </div>
+                    )}
+              </div>
                 
                 <Card className="border-blue-200 bg-blue-50/50">
                   <CardContent className="p-6">
                     <div className="flex flex-col items-center text-center space-y-4">
-                      <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2">
                         <Shield className="h-6 w-6 text-blue-600" />
                         <h3 className="text-lg font-semibold">Privacy Protection</h3>
                       </div>
@@ -1776,7 +1776,7 @@ Additional Details: ${decrypted.additionalDetails || 'None provided'}`;
                         Choose how to handle personal information in this analysis:
                       </p>
                       <div className="flex gap-3 w-full max-w-md">
-                        <Button
+                <Button
                           onClick={async () => {
                             if (selectedCaseData) {
                               const decryptedContent = await decryptReport(selectedCaseData);
@@ -1804,14 +1804,14 @@ Additional Details: ${decrypted.additionalDetails || 'None provided'}`;
                             const query = inputQuery || "Analyze this case";
                             await handleQueryWithPIIPreference(query, true, true);
                           }}
-                          variant="outline"
+                  variant="outline"
                           className="flex-1"
                           size="default"
-                        >
+                >
                           Analyze Without Redaction
-                        </Button>
-                      </div>
-                      <Button
+                </Button>
+              </div>
+                    <Button
                         onClick={async () => {
                           if (selectedCaseData) {
                             const decryptedContent = await decryptReport(selectedCaseData);
@@ -1826,31 +1826,31 @@ Additional Details: ${decrypted.additionalDetails || 'None provided'}`;
                       >
                         <Eye className="h-4 w-4 mr-2" />
                         Preview PII Detection
-                      </Button>
-                    </div>
-                  </CardContent>
-                </Card>
+                    </Button>
+                </div>
+          </CardContent>
+        </Card>
               </div>
             </div>
           ) : (
             <div className="max-w-4xl mx-auto space-y-6">
               {Array.isArray(messages) && messages.map((message) => (
-                <div
-                  key={message.id}
-                  className={cn(
-                    'flex',
-                    message.role === 'user' ? 'justify-end' : 'justify-start'
-                  )}
-                >
-                  <div className="max-w-[85%] space-y-3">
-                    <div
-                      className={cn(
-                        'rounded-lg px-5 py-3',
-                        message.role === 'user'
-                          ? 'bg-primary text-primary-foreground'
-                          : 'bg-muted text-foreground border'
-                      )}
-                    >
+              <div
+                key={message.id}
+                className={cn(
+                  'flex',
+                  message.role === 'user' ? 'justify-end' : 'justify-start'
+                )}
+              >
+                <div className="max-w-[85%] space-y-3">
+                  <div
+                    className={cn(
+                      'rounded-lg px-5 py-3',
+                      message.role === 'user'
+                        ? 'bg-primary text-primary-foreground'
+                        : 'bg-muted text-foreground border'
+                    )}
+                  >
                       <p className="whitespace-pre-wrap leading-relaxed text-sm">
                         {message.content}
                       </p>
@@ -1861,41 +1861,41 @@ Additional Details: ${decrypted.additionalDetails || 'None provided'}`;
                           piiMetadata={message.piiMetadata}
                           originalContent={message.content}
                         />
-                      )}
+                    )}
                       
-                      <p className={cn(
-                        'text-xs mt-2',
-                        message.role === 'user' ? 'text-primary-foreground/70' : 'text-muted-foreground'
-                      )}>
-                        {message.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                      </p>
-                    </div>
+                    <p className={cn(
+                      'text-xs mt-2',
+                      message.role === 'user' ? 'text-primary-foreground/70' : 'text-muted-foreground'
+                    )}>
+                      {message.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                    </p>
                   </div>
                 </div>
-              ))}
+              </div>
+            ))}
 
-              {isLoading && (
-                <div className="flex justify-start">
-                  <div className="bg-muted rounded-lg px-4 py-3 border">
-                    <div className="flex items-center gap-2">
-                      <Loader2 className="h-4 w-4 animate-spin text-primary" />
-                      <div className="flex flex-col">
-                        <span className="text-sm font-medium text-foreground">
+            {isLoading && (
+              <div className="flex justify-start">
+                <div className="bg-muted rounded-lg px-4 py-3 border">
+                  <div className="flex items-center gap-2">
+                    <Loader2 className="h-4 w-4 animate-spin text-primary" />
+                    <div className="flex flex-col">
+                      <span className="text-sm font-medium text-foreground">
                           {selectedCaseId ? (hasAnalyzedCase ? 'Thinking...' : 'Analyzing case...') : 'Searching your cases...'}
-                        </span>
-                        <span className="text-xs text-muted-foreground mt-1">
-                          {selectedCaseId ? 'This may take a few moments' : 'Please wait'}
-                        </span>
-                      </div>
+                      </span>
+                      <span className="text-xs text-muted-foreground mt-1">
+                        {selectedCaseId ? 'This may take a few moments' : 'Please wait'}
+                      </span>
                     </div>
                   </div>
                 </div>
-              )}
+              </div>
+            )}
 
-              <div ref={messagesEndRef} />
+            <div ref={messagesEndRef} />
             </div>
           )}
-        </div>
+          </div>
 
         {/* Input Area - Fixed at Bottom */}
         <div className="border-t p-4 md:p-6 flex-shrink-0">

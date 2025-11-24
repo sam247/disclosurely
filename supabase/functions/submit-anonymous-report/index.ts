@@ -89,7 +89,7 @@ const getCorsHeaders = (req: Request) => {
   const origin = req.headers.get('origin') || '*';
   return {
     'Access-Control-Allow-Origin': origin,
-    'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
     'Access-Control-Allow-Methods': 'POST, OPTIONS',
   };
 };
@@ -402,34 +402,70 @@ serve(async (req) => {
     }
     
     // Encrypt using Web Crypto API
-    const iv = crypto.getRandomValues(new Uint8Array(12))
-    const keyBytes = new Uint8Array(organizationKey.match(/.{1,2}/g)!.map(byte => parseInt(byte, 16)))
-    const cryptoKey = await crypto.subtle.importKey(
-      'raw',
-      keyBytes,
-      { name: 'AES-GCM' },
-      false,
-      ['encrypt']
-    )
+    let encryptedData: string;
+    let keyHash: string;
     
-    const dataString = JSON.stringify(contentToEncrypt)
-    const dataBuffer = new TextEncoder().encode(dataString)
-    const encryptedBuffer = await crypto.subtle.encrypt(
-      { name: 'AES-GCM', iv: iv },
-      cryptoKey,
-      dataBuffer
-    )
-    
-    // Combine IV and encrypted data
-    const combined = new Uint8Array(iv.length + encryptedBuffer.byteLength)
-    combined.set(iv)
-    combined.set(new Uint8Array(encryptedBuffer), iv.length)
-    
-    // Convert to base64 - use Deno's built-in base64 encoding
-    const encryptedData = btoa(String.fromCharCode(...combined))
-    const keyHash = organizationKey
-    
-    console.log('✅ Encryption completed server-side')
+    try {
+      console.log('🔐 Starting encryption process...')
+      const iv = crypto.getRandomValues(new Uint8Array(12))
+      const keyBytes = new Uint8Array(organizationKey.match(/.{1,2}/g)!.map(byte => parseInt(byte, 16)))
+      
+      console.log('🔐 Importing crypto key...')
+      const cryptoKey = await crypto.subtle.importKey(
+        'raw',
+        keyBytes,
+        { name: 'AES-GCM' },
+        false,
+        ['encrypt']
+      )
+      
+      const dataString = JSON.stringify(contentToEncrypt)
+      console.log('🔐 Data to encrypt length:', dataString.length)
+      const dataBuffer = new TextEncoder().encode(dataString)
+      
+      console.log('🔐 Encrypting data...')
+      const encryptedBuffer = await crypto.subtle.encrypt(
+        { name: 'AES-GCM', iv: iv },
+        cryptoKey,
+        dataBuffer
+      )
+      
+      console.log('🔐 Encryption successful, buffer size:', encryptedBuffer.byteLength)
+      
+      // Combine IV and encrypted data
+      const combined = new Uint8Array(iv.length + encryptedBuffer.byteLength)
+      combined.set(iv)
+      combined.set(new Uint8Array(encryptedBuffer), iv.length)
+      
+      console.log('🔐 Converting to base64, combined size:', combined.length)
+      // Convert to base64 - handle large arrays by chunking
+      // String.fromCharCode has argument limit, so we chunk it
+      const CHUNK_SIZE = 0x8000; // 32KB chunks
+      let binary = '';
+      for (let i = 0; i < combined.length; i += CHUNK_SIZE) {
+        const chunk = combined.subarray(i, Math.min(i + CHUNK_SIZE, combined.length));
+        binary += String.fromCharCode.apply(null, Array.from(chunk));
+      }
+      encryptedData = btoa(binary)
+      keyHash = organizationKey
+      
+      console.log('✅ Encryption completed server-side, base64 length:', encryptedData.length)
+    } catch (encryptError) {
+      console.error('❌ Encryption error:', encryptError)
+      console.error('❌ Encryption error details:', JSON.stringify(encryptError, null, 2))
+      await logToSystem(supabase, 'error', 'submission', 'Encryption failed', {
+        errorMessage: encryptError?.message || 'Unknown encryption error',
+        errorStack: encryptError?.stack || 'No stack trace',
+        errorType: encryptError?.constructor?.name || 'Unknown'
+      }, encryptError);
+      return new Response(
+        JSON.stringify({ 
+          error: 'Encryption failed. Please try again or contact support.',
+          details: Deno.env.get('ENVIRONMENT') === 'development' ? encryptError?.message : undefined
+        }),
+        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      )
+    }
     
     // Create the report
     console.log('📝 Creating report in database...')
@@ -495,7 +531,10 @@ serve(async (req) => {
       title: reportInsertData.title,
       priority: reportInsertData.priority,
       organization_id: reportInsertData.organization_id,
-      status: reportInsertData.status
+      status: reportInsertData.status,
+      hasEncryptedContent: !!reportInsertData.encrypted_content,
+      encryptedContentLength: reportInsertData.encrypted_content?.length || 0,
+      hasMetadata: !!reportInsertData.metadata
     });
     
     const { data: report, error: reportError } = await supabase
@@ -507,6 +546,16 @@ serve(async (req) => {
     if (reportError) {
       console.error('❌ Failed to create report:', reportError)
       console.error('❌ Report error details:', JSON.stringify(reportError, null, 2))
+      console.error('❌ Report insert data keys:', Object.keys(reportInsertData))
+      console.error('❌ Report insert data sample:', {
+        tracking_id: reportInsertData.tracking_id,
+        title: reportInsertData.title?.substring(0, 50),
+        encrypted_content_length: reportInsertData.encrypted_content?.length,
+        organization_id: reportInsertData.organization_id,
+        priority: reportInsertData.priority,
+        priority_type: typeof reportInsertData.priority
+      })
+      
       await logToSystem(supabase, 'error', 'submission', 'Failed to create report', { 
         reportError: reportError.message,
         reportErrorCode: reportError.code,
@@ -517,13 +566,15 @@ serve(async (req) => {
           title: reportData.title,
           priority: priorityValue,
           priorityType: typeof priorityValue,
-          organization_id: linkData.organization_id
+          organization_id: linkData.organization_id,
+          encryptedContentLength: reportInsertData.encrypted_content?.length,
+          hasMetadata: !!reportInsertData.metadata
         }
       }, reportError);
       return new Response(
         JSON.stringify({ 
           error: 'Failed to create report. Please try again or contact support.',
-          details: process.env.NODE_ENV === 'development' ? reportError.message : undefined
+          details: Deno.env.get('ENVIRONMENT') === 'development' ? reportError.message : undefined
         }),
         { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       )

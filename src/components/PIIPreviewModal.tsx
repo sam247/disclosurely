@@ -32,7 +32,7 @@ export const PIIPreviewModal: React.FC<PIIPreviewModalProps> = ({
     stats: Record<string, number>;
   } | null>(null);
   const [highlightedParts, setHighlightedParts] = useState<Array<{ text: string; isPII: boolean; type?: string; placeholder?: string }>>([]);
-
+  
   // Detect PII client-side (using sync version since OpenRedact can't run in browser)
   useEffect(() => {
     try {
