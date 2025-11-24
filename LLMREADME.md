@@ -121,6 +121,185 @@ Defined in `user_roles` table with `app_role` enum:
 
 ---
 
+## 🏛️ System Architecture
+
+### High-Level Architecture
+
+Disclosurely follows a **serverless, multi-tenant SaaS architecture** with clear separation between frontend, backend, and infrastructure layers.
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│                    CLIENT LAYER (Browser)                    │
+│  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐      │
+│  │   React App  │  │  Progressive │  │   Dashboard  │      │
+│  │   (Vite)     │  │  Form (SPA)  │  │   (SPA)      │      │
+│  └──────┬───────┘  └──────┬───────┘  └──────┬───────┘      │
+│         │                  │                  │              │
+│         └──────────────────┼──────────────────┘              │
+│                            │                                  │
+│                    ┌───────▼────────┐                        │
+│                    │  Supabase JS   │                        │
+│                    │     Client     │                        │
+│                    └───────┬────────┘                        │
+└────────────────────────────┼─────────────────────────────────┘
+                             │
+┌────────────────────────────▼─────────────────────────────────┐
+│              SUPABASE PLATFORM (Backend)                     │
+│  ┌──────────────────────────────────────────────────────┐   │
+│  │              PostgreSQL Database                      │   │
+│  │  • Row Level Security (RLS) for multi-tenancy        │   │
+│  │  • Encrypted report storage                          │   │
+│  │  • Audit logging                                     │   │
+│  │  • Vector embeddings (pgvector)                      │   │
+│  └──────────────────────────────────────────────────────┘   │
+│                                                               │
+│  ┌──────────────────────────────────────────────────────┐   │
+│  │           Edge Functions (Deno Runtime)              │   │
+│  │  • submit-anonymous-report (encryption, validation)  │   │
+│  │  • decrypt-report-data (decryption)                  │   │
+│  │  • analyze-case-with-ai (AI processing)              │   │
+│  │  • ai-gateway-generate (AI API gateway)              │   │
+│  │  • case-workflow-engine (automation)                 │   │
+│  │  • chat-support (AI chat)                            │   │
+│  │  • + 35+ other functions                             │   │
+│  └──────────────────────────────────────────────────────┘   │
+│                                                               │
+│  ┌──────────────────────────────────────────────────────┐   │
+│  │              Supabase Auth                           │   │
+│  │  • Email/OTP authentication                          │   │
+│  │  • Google OAuth                                      │   │
+│  │  • Session management                                │   │
+│  └──────────────────────────────────────────────────────┘   │
+│                                                               │
+│  ┌──────────────────────────────────────────────────────┐   │
+│  │            Supabase Storage                          │   │
+│  │  • Encrypted file attachments                        │   │
+│  │  • Metadata-stripped uploads                         │   │
+│  └──────────────────────────────────────────────────────┘   │
+└───────────────────────────────────────────────────────────────┘
+                             │
+┌────────────────────────────▼─────────────────────────────────┐
+│              EXTERNAL SERVICES                                │
+│  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐      │
+│  │    Stripe    │  │    Resend    │  │   DeepSeek   │      │
+│  │  (Payments)  │  │   (Email)    │  │     (AI)     │      │
+│  └──────────────┘  └──────────────┘  └──────────────┘      │
+│  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐      │
+│  │  Contentful  │  │   Partnero   │  │    Vercel    │      │
+│  │   (Content)  │  │ (Referrals)  │  │  (Hosting)   │      │
+│  └──────────────┘  └──────────────┘  └──────────────┘      │
+└───────────────────────────────────────────────────────────────┘
+```
+
+### Request Flow: Anonymous Report Submission
+
+**1. Client-Side (Browser)**:
+```
+User fills form → ProgressiveReportForm component
+  ↓
+PII Detection (client-side, real-time)
+  ↓
+Form validation
+  ↓
+POST to Edge Function: submit-anonymous-report
+```
+
+**2. Edge Function Processing**:
+```
+submit-anonymous-report Edge Function:
+  ├─ Rate limiting (Upstash Redis)
+  ├─ Link token verification
+  ├─ PII scanning (server-side, OpenRedact or legacy)
+  ├─ Server-side encryption (AES-256-GCM)
+  ├─ Database insert (reports table)
+  ├─ Workflow automation (non-blocking):
+  │   ├─ Auto-assignment (case-workflow-engine)
+  │   └─ SLA calculation (case-workflow-engine)
+  ├─ AI risk assessment (non-blocking):
+  │   └─ assess-risk-with-ai Edge Function
+  ├─ Email notifications (non-blocking):
+  │   └─ sendReportNotificationEmails (Resend API)
+  └─ Audit logging (non-blocking):
+      └─ logAuditEvent
+```
+
+**3. Post-Submission (Async, Non-Blocking)**:
+- AI risk assessment runs asynchronously
+- Email notifications sent via Resend
+- Workflow automation (auto-assignment, SLA)
+- Audit events logged
+
+### Multi-Tenancy Architecture
+
+**Organization Isolation**:
+- **Row Level Security (RLS)**: All queries filtered by `organization_id`
+- **Encryption Keys**: Organization-specific keys derived from `organization_id + ENCRYPTION_SALT`
+- **Custom Domains**: Each organization can have custom reporting domains
+- **Branding**: Per-organization logos, colors, and settings
+
+**Data Isolation Layers**:
+1. **Database Level**: RLS policies enforce organization boundaries
+2. **Application Level**: All queries include `organization_id` filter
+3. **Encryption Level**: Organization-specific encryption keys
+4. **Storage Level**: Organization-scoped storage buckets
+
+### Edge Functions Architecture
+
+**Shared Utilities** (`supabase/functions/_shared/`):
+- `cors.ts` - CORS header utilities
+- `pii-scanner.ts` - PII detection (OpenRedact + legacy)
+- `pii-detector.ts` - PII redaction utilities
+- `rateLimit.ts` - Rate limiting (Upstash Redis)
+- `partnero.ts` - Referral program integration
+
+**Key Edge Functions**:
+- `submit-anonymous-report` - Report submission (encryption, validation, workflow)
+- `decrypt-report-data` - Report decryption for authorized users
+- `analyze-case-with-ai` - AI case analysis
+- `ai-gateway-generate` - AI API gateway with PII redaction
+- `case-workflow-engine` - Auto-assignment and SLA calculation
+- `chat-support` - AI chat widget backend
+- `check-feature-flag` - Feature flag checking (public endpoint)
+- `check-account-locked` - Account lockout checking (public endpoint)
+
+**Error Handling Pattern**:
+- Critical operations (encryption, database insert) block on failure
+- Non-critical operations (email, audit, AI) wrapped in try-catch, non-blocking
+- All errors logged to `system_logs` table
+- CORS headers always included, even on errors
+
+### Encryption Architecture
+
+**Report Encryption Flow**:
+1. **Client-Side** (for drafts): Browser-based encryption using Web Crypto API
+2. **Server-Side** (for submissions): Edge Function encryption using Deno Web Crypto API
+3. **Key Derivation**: `SHA-256(organization_id + ENCRYPTION_SALT)`
+4. **Algorithm**: AES-256-GCM (authenticated encryption)
+5. **Storage**: Encrypted content stored in `reports.encrypted_content` column
+
+**Decryption Flow**:
+1. Authorized user requests report via dashboard
+2. `decrypt-report-data` Edge Function called
+3. Function verifies user permissions (RLS + role check)
+4. Decrypts using organization-specific key
+5. Returns decrypted content to client
+
+### CORS & Custom Domain Architecture
+
+**CORS Strategy**:
+- **Public Endpoints**: Allow all origins (`*`) for custom domain support
+- **Security**: Handled by link tokens, feature flags, or other auth mechanisms
+- **Shared Utility**: `getCorsHeaders()` in `supabase/functions/_shared/cors.ts`
+
+**Custom Domain Flow**:
+1. Organization configures custom domain in dashboard
+2. DNS verification (CNAME record)
+3. Vercel DNS API creates domain mapping
+4. Edge Functions handle requests from custom domains
+5. CORS headers allow all origins to support custom domains
+
+---
+
 ## 🗄️ Database Architecture (Supabase)
 
 ### Key Tables
@@ -569,6 +748,22 @@ docker stop supabase_db_cxmuzperkittvibslnff supabase_edge_runtime_cxmuzperkittv
 **Issue**: Sitemap API returns error about missing Contentful token
 **Solution**: Ensure `VITE_CONTENTFUL_DELIVERY_TOKEN` is set in Vercel environment variables. The function now fails fast if the token is missing (no hardcoded fallback).
 
+### 11. Report Submission Fails with 500 Error
+**Issue**: `submit-anonymous-report` Edge Function returns 500 Internal Server Error
+**Root Cause**: Non-critical operations (email notifications, audit logging) were throwing errors that blocked the response, even though the report was successfully created in the database.
+
+**Solution** (Fixed 2025-11-24):
+- Wrapped `sendReportNotificationEmails()` in try-catch (non-blocking)
+- Wrapped `logAuditEvent()` in try-catch (non-blocking)
+- Wrapped PII scanning in try-catch (continues with empty result if fails)
+- Enhanced error logging with full error details
+- All non-critical operations now fail gracefully without blocking submission
+
+**Key Principle**: Critical operations (encryption, database insert) should block on failure, but non-critical operations (email, audit, AI processing) should be non-blocking to ensure core functionality always succeeds.
+
+**Files Changed**:
+- `supabase/functions/submit-anonymous-report/index.ts` - Added try-catch blocks around non-critical operations
+
 ---
 
 ## 🔄 Current State & Recent Changes
@@ -587,6 +782,7 @@ docker stop supabase_db_cxmuzperkittvibslnff supabase_edge_runtime_cxmuzperkittv
 - ✅ **Privacy Enhancements** - Filename hashing, audit log filtering, PII sanitization in logs
 - ✅ **Subscription Access Fixes** - Improved subscription status checking and access control
 - ✅ **Removed Hardcoded Secrets** - Fixed critical security vulnerability (see SECURITY_MITIGATION_PLAN.md)
+- ✅ **Report Submission Resilience** (2025-11-24) - Made email notifications and audit logging non-blocking to prevent submission failures
 
 ### In Progress / Planned
 - ⏳ Acknowledgment certificates (Quick Win #3)
