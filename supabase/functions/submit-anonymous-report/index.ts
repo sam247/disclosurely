@@ -289,10 +289,19 @@ serve(async (req) => {
 
     console.log('Processing POST request')
     
-    const body = await req.json()
-    console.log('Request body parsed:', Object.keys(body || {}))
+    let body: any;
+    try {
+      body = await req.json()
+      console.log('Request body parsed:', Object.keys(body || {}))
+    } catch (jsonError) {
+      console.error('❌ Failed to parse request body:', jsonError)
+      return new Response(
+        JSON.stringify({ error: 'Invalid request body' }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      )
+    }
     
-    const { reportData, linkToken } = body
+    const { reportData, linkToken } = body || {}
     
     // Initialize Supabase client inside handler (following Supabase AI recommendations)
     console.log('🔗 Initializing Supabase client...')
@@ -744,11 +753,18 @@ serve(async (req) => {
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     )
 
-  } catch (error) {
+  } catch (error: any) {
     console.error('❌ ERROR IN SUBMIT FUNCTION:', error)
     console.error('❌ Error message:', error?.message || 'Unknown error')
     console.error('❌ Error stack:', error?.stack || 'No stack trace')
-    console.error('❌ Error details:', JSON.stringify(error, null, 2))
+    console.error('❌ Error name:', error?.name || 'Unknown')
+    console.error('❌ Error constructor:', error?.constructor?.name || 'Unknown')
+    try {
+      console.error('❌ Full error object:', JSON.stringify(error, Object.getOwnPropertyNames(error), 2))
+    } catch (stringifyError) {
+      console.error('❌ Could not stringify error:', stringifyError)
+      console.error('❌ Error toString:', String(error))
+    }
     
     // Log to system logs for debugging
     try {
@@ -765,7 +781,9 @@ serve(async (req) => {
       await logToSystem(supabase, 'error', 'submission', 'Edge function error', {
         errorMessage: error?.message || 'Unknown error',
         errorStack: error?.stack || 'No stack trace',
-        errorType: error?.constructor?.name || 'Unknown'
+        errorType: error?.constructor?.name || 'Unknown',
+        errorName: error?.name || 'Unknown',
+        errorString: String(error)
       }, error)
     } catch (logError) {
       console.error('Failed to log error to system:', logError)
@@ -775,7 +793,7 @@ serve(async (req) => {
     return new Response(
       JSON.stringify({ 
         error: 'Submit failed. Please try again or contact support.',
-        details: Deno.env.get('ENVIRONMENT') === 'development' ? error?.message : undefined
+        details: Deno.env.get('ENVIRONMENT') === 'development' ? (error?.message || String(error)) : undefined
       }),
       { 
         status: 500, 
