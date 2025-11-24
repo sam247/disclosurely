@@ -1777,43 +1777,105 @@ Additional Details: ${decrypted.additionalDetails || 'None provided'}`;
                       </p>
                       <div className="flex gap-3 w-full max-w-md">
                 <Button
-                          onClick={async () => {
-                            setShowPIIChoice(false);
-                            setPreservePII(false);
-                            const query = inputQuery || "Analyze this case";
-                            await handleQueryWithPIIPreference(query, false, true);
+                          onClick={async (e) => {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            try {
+                              setShowPIIChoice(false);
+                              setPreservePII(false);
+                              const query = inputQuery || "Analyze this case";
+                              await handleQueryWithPIIPreference(query, false, true);
+                            } catch (error: any) {
+                              console.error('Error in Analyze with PII Protection:', error);
+                              toast({
+                                title: "Analysis Failed",
+                                description: error.message || "Failed to start analysis. Please try again.",
+                                variant: "destructive"
+                              });
+                              setShowPIIChoice(true); // Re-show choice on error
+                            }
                           }}
                           className="flex-1 bg-green-600 hover:bg-green-700"
                           size="default"
+                          disabled={isLoading || isLoadingPreview}
                         >
-                          <Shield className="h-4 w-4 mr-2" />
-                          Analyze with PII Protection
+                          {isLoading ? (
+                            <>
+                              <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                              Analyzing...
+                            </>
+                          ) : (
+                            <>
+                              <Shield className="h-4 w-4 mr-2" />
+                              Analyze with PII Protection
+                            </>
+                          )}
                         </Button>
                         <Button
-                          onClick={async () => {
-                            setShowPIIChoice(false);
-                            setPreservePII(true);
-                            const query = inputQuery || "Analyze this case";
-                            await handleQueryWithPIIPreference(query, true, true);
+                          onClick={async (e) => {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            try {
+                              setShowPIIChoice(false);
+                              setPreservePII(true);
+                              const query = inputQuery || "Analyze this case";
+                              await handleQueryWithPIIPreference(query, true, true);
+                            } catch (error: any) {
+                              console.error('Error in Analyze Without Redaction:', error);
+                              toast({
+                                title: "Analysis Failed",
+                                description: error.message || "Failed to start analysis. Please try again.",
+                                variant: "destructive"
+                              });
+                              setShowPIIChoice(true); // Re-show choice on error
+                            }
                           }}
                   variant="outline"
                           className="flex-1"
                           size="default"
+                          disabled={isLoading || isLoadingPreview}
                 >
-                          Analyze Without Redaction
+                          {isLoading ? (
+                            <>
+                              <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                              Analyzing...
+                            </>
+                          ) : (
+                            'Analyze Without Redaction'
+                          )}
                 </Button>
               </div>
                     <Button
-                        onClick={() => {
-                          loadPreviewContent();
+                        onClick={(e) => {
+                          e.preventDefault();
+                          e.stopPropagation();
+                          try {
+                            loadPreviewContent();
+                          } catch (error: any) {
+                            console.error('Error loading preview:', error);
+                            toast({
+                              title: "Preview Failed",
+                              description: error.message || "Failed to load preview. Please try again.",
+                              variant: "destructive"
+                            });
+                          }
                         }}
                         variant="outline"
                         size="default"
                         className="w-full max-w-md"
-                        disabled={isLoadingPreview}
+                        disabled={isLoading || isLoadingPreview}
                       >
-                        <Eye className="h-4 w-4 mr-2" />
-                        {isLoadingPreview ? 'Loading Preview...' : 'Preview PII Detection'}
+                        {isLoadingPreview ? (
+                          <>
+                            <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                            Loading Preview...
+                          </>
+                        ) : (
+                          <>
+                            <Eye className="h-4 w-4 mr-2" />
+                            Preview PII Detection
+                          </>
+                        )}
                     </Button>
                 </div>
           </CardContent>
