@@ -29,6 +29,8 @@ import { PIIPreviewModal } from '@/components/PIIPreviewModal';
 import { decryptReport } from '@/utils/encryption';
 import { auditLogger } from '@/utils/auditLogger';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Separator } from '@/components/ui/separator';
+import { ScrollArea } from '@/components/ui/scroll-area';
 import { formatMarkdownToHtml } from '@/utils/markdownFormatter';
 import { sanitizeHtml } from '@/utils/sanitizer';
 
@@ -233,6 +235,8 @@ const AIAssistantView = () => {
   const [pendingAnalysisQuery, setPendingAnalysisQuery] = useState<string>(''); // Store query while PII preview is open
   const [preservePII, setPreservePII] = useState(false); // Track if user wants to skip PII redaction
   const [showPIIChoice, setShowPIIChoice] = useState(false); // Show inline PII choice when case selected
+  const [savedAnalyses, setSavedAnalyses] = useState<any[]>([]);
+  const [isLoadingSavedAnalyses, setIsLoadingSavedAnalyses] = useState(false);
   
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -251,11 +255,12 @@ const AIAssistantView = () => {
     }
   }, [searchParams]);
 
-  // Load cases and documents on mount
+  // Load cases, documents, and saved analyses on mount
   useEffect(() => {
     if (user && organization?.id) {
       loadCases();
       loadDocuments();
+      loadSavedAnalyses();
     }
   }, [user, organization?.id]);
 
@@ -583,11 +588,32 @@ Remember: Compliance teams need confidence and clarity under pressure. Be the ad
       'No analysis generated';
 
     // Capture PII metadata from response
-    const piiMetadata = data.metadata ? {
-      redacted: data.metadata.pii_redacted || false,
-      stats: data.metadata.pii_stats,
-      redactionMap: data.metadata.redaction_map
-    } : undefined;
+    // Calculate PII stats only from case description (exclude document PII)
+    let piiMetadata = undefined;
+    if (data.metadata && data.metadata.pii_redacted) {
+      // Detect PII in case description only (not documents)
+      const { detectPII } = await import('@/utils/pii-detector-client');
+      const caseOnlyPII = await detectPII(decryptedContent, organization?.id);
+      
+      // Build stats from case-only PII detection
+      const caseStats: Record<string, number> = {};
+      if (caseOnlyPII.detections && Array.isArray(caseOnlyPII.detections)) {
+        caseOnlyPII.detections.forEach((detection: any) => {
+          const type = detection.type || 'unknown';
+          caseStats[type] = (caseStats[type] || 0) + 1;
+        });
+      }
+      
+      // Only show metadata if case has PII (ignore document PII in count)
+      const casePIICount = Object.values(caseStats).reduce((sum, count) => sum + count, 0);
+      if (casePIICount > 0) {
+        piiMetadata = {
+          redacted: true,
+          stats: caseStats, // Use case-only stats, not document stats
+          redactionMap: data.metadata.redaction_map // Keep full redaction map for display
+        };
+      }
+    }
 
     // Store for saving
     setCurrentAnalysisData({
@@ -1340,6 +1366,104 @@ Additional Details: ${decrypted.additionalDetails || 'None provided'}`;
     }
   };
 
+  const loadSavedAnalyses = async () => {
+    if (!organization?.id) return;
+    
+    setIsLoadingSavedAnalyses(true);
+    try {
+      const { data, error } = await supabase
+        .from('ai_case_analyses')
+        .select('*')
+        .eq('organization_id', organization.id)
+        .order('created_at', { ascending: false })
+        .limit(50);
+
+      if (error) throw error;
+      setSavedAnalyses(Array.isArray(data) ? data : []);
+    } catch (error) {
+      console.error('Error loading saved analyses:', error);
+    } finally {
+      setIsLoadingSavedAnalyses(false);
+    }
+  };
+
+  const loadSavedAnalysis = async (analysisId: string) => {
+    try {
+      const analysis = savedAnalyses.find(a => a.id === analysisId);
+      if (!analysis) return;
+
+      // Load the case data
+      const { data: caseData, error: caseError } = await supabase
+        .from('reports')
+        .select('*')
+        .eq('id', analysis.case_id)
+        .single();
+
+      if (caseError) throw caseError;
+
+      // Set the case as selected
+      setSelectedCaseId(analysis.case_id);
+      setSelectedCaseData(caseData);
+      setHasAnalyzedCase(true);
+
+      // Create messages from saved analysis
+      const userMessage: ChatMessage = {
+        id: `user-${Date.now()}`,
+        role: 'user',
+        content: `Analyze this case: ${analysis.tracking_id}`,
+        timestamp: new Date(analysis.created_at)
+      };
+
+      const aiMessage: ChatMessage = {
+        id: `ai-${Date.now()}`,
+        role: 'assistant',
+        content: analysis.analysis_content,
+        timestamp: new Date(analysis.created_at)
+      };
+
+      setMessages([userMessage, aiMessage]);
+      setIsEmptyState(false);
+      setShowPIIChoice(false);
+
+      toast({
+        title: "Analysis Loaded",
+        description: `Loaded saved analysis for ${analysis.tracking_id}`
+      });
+    } catch (error: any) {
+      console.error('Error loading saved analysis:', error);
+      toast({
+        title: "Error",
+        description: error.message || "Failed to load saved analysis.",
+        variant: "destructive"
+      });
+    }
+  };
+
+  const deleteSavedAnalysis = async (analysisId: string) => {
+    try {
+      const { error } = await supabase
+        .from('ai_case_analyses')
+        .delete()
+        .eq('id', analysisId)
+        .eq('created_by', user?.id);
+
+      if (error) throw error;
+
+      setSavedAnalyses(prev => prev.filter(a => a.id !== analysisId));
+      toast({
+        title: "Deleted",
+        description: "Saved analysis deleted successfully."
+      });
+    } catch (error: any) {
+      console.error('Error deleting saved analysis:', error);
+      toast({
+        title: "Delete Failed",
+        description: error.message || "Failed to delete saved analysis.",
+        variant: "destructive"
+      });
+    }
+  };
+
   const saveAnalysis = async () => {
     if (!currentAnalysisData || !organization?.id || !selectedCaseId) {
       toast({
@@ -1365,6 +1489,9 @@ Additional Details: ${decrypted.additionalDetails || 'None provided'}`;
         });
 
       if (error) throw error;
+
+      // Reload saved analyses
+      await loadSavedAnalyses();
 
       toast({
         title: "✅ Analysis Saved",
@@ -1400,503 +1527,378 @@ Additional Details: ${decrypted.additionalDetails || 'None provided'}`;
     }
   };
 
-  // Empty State UI
-  if (isEmptyState) {
-    return (
-      <div className="flex flex-col h-[calc(100vh-4rem)] overflow-hidden">
-        <div className="flex-1 overflow-y-auto p-6">
-          <div className="max-w-4xl mx-auto">
-        <div className="flex flex-col items-center justify-center min-h-[60vh] space-y-8">
-          <div className="text-center space-y-4">
-            <div className="flex items-center justify-center mb-4">
-              <Sparkles className="h-16 w-16 text-primary" />
-            </div>
-            <h1 className="text-4xl font-bold text-foreground">AI Assistant</h1>
-            <p className="text-lg text-muted-foreground max-w-md">
-              Ask questions about your cases or get detailed analysis. I'll automatically understand what you need.
-            </p>
-          </div>
-
-          <div className="w-full max-w-2xl space-y-4">
-                {/* Document Upload Section - Compact one-line */}
-                <div className="space-y-2">
-                  <div className="flex items-center gap-2 flex-wrap">
-                    <input
-                      ref={fileInputRef}
-                      type="file"
-                      accept=".pdf,.docx,.txt,.doc"
-                      multiple
-                      onChange={handleFileUpload}
-                      className="hidden"
-                    />
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => fileInputRef.current?.click()}
-                      disabled={isUploading}
-                    >
-                      <Upload className="h-4 w-4 mr-2" />
-                      {isUploading ? 'Uploading...' : 'Upload Documents'}
-                    </Button>
-                    {Array.isArray(selectedDocs) && selectedDocs.length > 0 && (
-                      <Badge variant="secondary" className="bg-primary/10 text-primary">
-                        {selectedDocs.length} selected
-                      </Badge>
-                    )}
-                    {Array.isArray(documents) && documents.length > 0 && (
-                      <span className="text-xs text-muted-foreground">
-                        {documents.length} available
-                      </span>
-                    )}
-                    {isLoadingDocs && (
-                      <Loader2 className="h-3 w-3 animate-spin text-muted-foreground" />
-                    )}
-                  </div>
-                  {Array.isArray(documents) && documents.length > 0 && (
-                    <p className="text-xs text-muted-foreground">
-                      💡 <strong>Important:</strong> Click on documents below to <strong>select</strong> them for AI analysis. Selected documents (with ✓) will be included in the analysis.
-                    </p>
+  // Main Layout - ChatGPT Style
+  return (
+    <div className="flex h-[calc(100vh-4rem)] overflow-hidden">
+      {/* Left Sidebar */}
+      <div className="w-[260px] border-r bg-muted/30 flex flex-col overflow-hidden">
+        <ScrollArea className="flex-1">
+          <div className="p-4 space-y-6">
+            {/* Case Selection Section */}
+            <div>
+              <h3 className="text-sm font-semibold mb-2 px-2">Cases</h3>
+              {isLoadingCases ? (
+                <div className="flex items-center justify-center py-4">
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                </div>
+              ) : (
+                <div className="space-y-1">
+                  {Array.isArray(cases) && cases.length > 0 ? (
+                    cases.slice(0, 20).map((caseItem) => (
+                      <button
+                        key={caseItem.id}
+                        onClick={() => {
+                          setSelectedCaseId(caseItem.id);
+                          setHasAnalyzedCase(false);
+                          setShowPIIChoice(true);
+                          loadCaseData(caseItem.id);
+                          setInputQuery("Analyze this case");
+                          setIsEmptyState(false);
+                        }}
+                        className={cn(
+                          "w-full text-left px-3 py-2 rounded-md text-sm transition-colors",
+                          selectedCaseId === caseItem.id
+                            ? "bg-primary text-primary-foreground"
+                            : "hover:bg-muted"
+                        )}
+                      >
+                        <div className="font-medium truncate">{caseItem.tracking_id}</div>
+                        <div className={cn(
+                          "text-xs truncate",
+                          selectedCaseId === caseItem.id ? "text-primary-foreground/80" : "text-muted-foreground"
+                        )}>
+                          {caseItem.title}
+                        </div>
+                      </button>
+                    ))
+                  ) : (
+                    <p className="text-xs text-muted-foreground px-2">No cases available</p>
                   )}
                 </div>
-
-                {/* Document List - Compact */}
-                {Array.isArray(documents) && documents.length > 0 && (
-                  <div className="flex flex-wrap gap-2">
-                    {documents.map((doc) => {
-                      const isSelected = Array.isArray(selectedDocs) && selectedDocs.includes(doc.id);
-                      const isPDF = doc.content_type === 'application/pdf';
-                      return (
-                        <div key={doc.id} className="flex items-center gap-1">
-                          <Button
-                            variant={isSelected ? 'default' : 'outline'}
-                            size="sm"
-                            onClick={() => {
-                              setSelectedDocs(prev => {
-                                const prevArray = Array.isArray(prev) ? prev : [];
-                                return prevArray.includes(doc.id) 
-                                  ? prevArray.filter(id => id !== doc.id)
-                                  : [...prevArray, doc.id];
-                              });
-                            }}
-                            className={cn(
-                              isSelected && 'ring-2 ring-primary ring-offset-1',
-                              !isPDF && 'opacity-60'
-                            )}
-                            title={!isPDF ? 'Only PDF files are currently supported for text extraction' : isSelected ? 'Click to deselect' : 'Click to select for AI analysis'}
-                          >
-                            <FileText className="h-3 w-3 mr-1" />
-                            <span className="max-w-[200px] truncate">{doc.name}</span>
-                            {isSelected && <span className="ml-1">✓</span>}
-                          </Button>
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              deleteDocument(doc);
-                            }}
-                            className="h-8 w-8 p-0 text-destructive hover:text-destructive hover:bg-destructive/10"
-                            title="Delete document"
-                          >
-                            <Trash2 className="h-3 w-3" />
-                          </Button>
-                        </div>
-                      );
-                    })}
-                  </div>
-                )}
-
-                {/* PII Protection Choice - Inline */}
-                {showPIIChoice && selectedCaseId && !hasAnalyzedCase && (
-                  <Card className="border-blue-200 bg-blue-50/50">
-                    <CardContent className="p-4">
-                      <div className="flex items-start gap-3">
-                        <Shield className="h-5 w-5 text-blue-600 mt-0.5 flex-shrink-0" />
-                        <div className="flex-1">
-                          <h3 className="font-semibold text-sm mb-1">Privacy Protection</h3>
-                          <p className="text-xs text-muted-foreground mb-3">
-                            Choose how to handle personal information in this analysis:
-                          </p>
-                          <div className="flex gap-2">
-                          <Button
-                            onClick={async () => {
-                              setShowPIIChoice(false);
-                              setPreservePII(false); // Don't preserve = redact PII (show [EMPLOYEE_ID_1])
-                              const query = inputQuery || "Analyze this case";
-                              // preserve_pii: false means redact PII (backend checks !preserve_pii)
-                              // Skip user message for auto-started analysis
-                              await handleQueryWithPIIPreference(query, false, true);
-                            }}
-                            className="flex-1 bg-green-600 hover:bg-green-700"
-                            size="sm"
-                          >
-                            <Shield className="h-4 w-4 mr-2" />
-                            Analyze with PII Protection
-                          </Button>
-                          <Button
-                            onClick={async () => {
-                              setShowPIIChoice(false);
-                              setPreservePII(true); // Preserve = don't redact PII (show personal details)
-                              const query = inputQuery || "Analyze this case";
-                              // preserve_pii: true means don't redact PII (backend checks !preserve_pii)
-                              // Skip user message for auto-started analysis
-                              await handleQueryWithPIIPreference(query, true, true);
-                            }}
-                            variant="outline"
-                            className="flex-1"
-                            size="sm"
-                          >
-                            Analyze Without Redaction
-                          </Button>
-                          </div>
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
-                )}
-
-            <div className="flex gap-2">
-              <Input
-                value={inputQuery}
-                onChange={(e) => setInputQuery(e.target.value)}
-                onKeyPress={handleKeyPress}
-                    placeholder={selectedCaseId ? "Analyze this case" : "Ask a question or analyze a case..."}
-                className="h-12 text-base"
-                    disabled={isLoading || (showPIIChoice && selectedCaseId && !hasAnalyzedCase)}
-              />
-              <Button
-                    onClick={() => {
-                      // If PII choice not shown yet, show it. Otherwise run analysis
-                      if (selectedCaseId && !hasAnalyzedCase && !showPIIChoice) {
-                        setShowPIIChoice(true);
-                      } else {
-                        handleQuery(inputQuery || (selectedCaseId ? "Analyze this case" : ""));
-                      }
-                    }}
-                    disabled={(!inputQuery.trim() && !selectedCaseId) || isLoading}
-                size="lg"
-                className="h-12 px-6"
-              >
-                {isLoading ? (
-                  <Loader2 className="h-5 w-5 animate-spin" />
-                ) : (
-                  <Send className="h-5 w-5" />
-                )}
-              </Button>
+              )}
             </div>
 
-                {/* Show case dropdown if available */}
-                {Array.isArray(cases) && cases.length > 0 && (
-                  <div className="mt-8 w-full max-w-2xl">
-                    <p className="text-sm text-muted-foreground mb-2 text-center">Select a case to analyze:</p>
-                    <Select 
-                      value={selectedCaseId} 
-                      onValueChange={(value) => {
-                        setSelectedCaseId(value);
-                        setHasAnalyzedCase(false);
-                        setShowPIIChoice(true); // Show PII choice when case is selected
-                        loadCaseData(value);
-                        setInputQuery("Analyze this case");
-                      }}
-                    >
-                      <SelectTrigger className="w-full">
-                        <SelectValue placeholder="Select a case to analyze..." />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {cases.map((caseItem) => (
-                          <SelectItem key={caseItem.id} value={caseItem.id}>
-                            {caseItem.tracking_id} - {caseItem.title}
-                          </SelectItem>
-                ))}
-                      </SelectContent>
-                    </Select>
-              </div>
-                )}
-          </div>
-        </div>
-          </div>
-        </div>
-      </div>
-    );
-  }
+            <Separator />
 
-  // Chat Interface UI
-  return (
-    <div className="flex flex-col h-[calc(100vh-4rem)] overflow-hidden">
-      <div className="flex-1 overflow-y-auto p-6">
-        <div className="max-w-6xl mx-auto">
-          <div className="flex items-center justify-between mb-6 flex-wrap gap-4">
-        <div>
-          <div className="flex items-center gap-2">
-            <h1 className="text-3xl font-bold text-foreground">AI Assistant</h1>
-            {selectedCaseData && (
-              <Badge variant="default">
-                Analyzing: {selectedCaseData.tracking_id}
-              </Badge>
-            )}
-          </div>
-          <p className="text-sm text-muted-foreground mt-1">
-            {selectedCaseData 
-              ? `Analyzing: ${selectedCaseData.tracking_id} - ${selectedCaseData.title}`
-              : 'Search across all cases or analyze a specific case'}
-          </p>
-        </div>
-        <div className="flex items-center gap-2">
-          {selectedCaseId && (
-            <>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={loadPreviewContent}
-                disabled={isLoadingPreview}
-              >
-                <Eye className="h-4 w-4 mr-2" />
-                Preview PII
-              </Button>
-              {currentAnalysisData && (
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={saveAnalysis}
-                  disabled={isSaving}
-                >
-                  <Save className="h-4 w-4 mr-2" />
-                  Save Analysis
-                </Button>
-              )}
-            </>
-          )}
-          <Button
-            variant="outline"
-            onClick={handleClearChat}
-            disabled={isLoading}
-          >
-            <X className="h-4 w-4 mr-2" />
-            Clear Chat
-          </Button>
-        </div>
-          </div>
-
-          {/* Case Selection */}
-        <Card className="mb-4">
-          <CardContent className="p-4">
-            <div className="flex items-center gap-4 flex-wrap">
-              <div className="flex-1 min-w-[200px]">
-                <Select value={selectedCaseId} onValueChange={(value) => {
-                  setSelectedCaseId(value);
-                    setHasAnalyzedCase(false);
-                    setShowPIIChoice(true); // Show PII choice when case is selected
-                  loadCaseData(value);
-                    setInputQuery("Analyze this case");
-                }}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select a case to analyze..." />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {Array.isArray(cases) && cases.length > 0 ? (
-                      cases.map((caseItem) => (
-                        <SelectItem key={caseItem.id} value={caseItem.id}>
-                          {caseItem.tracking_id} - {caseItem.title}
-                        </SelectItem>
-                      ))
-                    ) : (
-                      <SelectItem value="no-cases" disabled>
-                        No cases available
-                      </SelectItem>
-                    )}
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="flex items-center gap-2">
+            {/* Document Management Section */}
+            <div>
+              <div className="flex items-center justify-between mb-2 px-2">
+                <h3 className="text-sm font-semibold">Documents</h3>
                 <input
                   ref={fileInputRef}
                   type="file"
-                  accept=".pdf,.docx,.txt"
+                  accept=".pdf,.docx,.txt,.doc"
                   multiple
                   onChange={handleFileUpload}
                   className="hidden"
                 />
                 <Button
-                  variant="outline"
+                  variant="ghost"
                   size="sm"
+                  className="h-6 w-6 p-0"
                   onClick={() => fileInputRef.current?.click()}
                   disabled={isUploading}
+                  title="Upload document"
                 >
-                  <Upload className="h-4 w-4 mr-2" />
-                  {isUploading ? 'Uploading...' : 'Upload Policy'}
+                  <Upload className="h-3 w-3" />
                 </Button>
               </div>
-            </div>
-              {/* Document Selection Section - Compact */}
-            {Array.isArray(documents) && documents.length > 0 && (
-                <div className="space-y-2">
-                  <p className="text-xs text-muted-foreground">
-                    💡 <strong>Important:</strong> Click on documents below to <strong>select</strong> them for AI analysis. Selected documents (with ✓) will be included in the analysis.
-                  </p>
-                <div className="flex flex-wrap gap-2">
-                    {documents.map((doc) => {
+              {isLoadingDocs ? (
+                <div className="flex items-center justify-center py-4">
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                </div>
+              ) : (
+                <div className="space-y-1">
+                  {Array.isArray(documents) && documents.length > 0 ? (
+                    documents.map((doc) => {
                       const isSelected = Array.isArray(selectedDocs) && selectedDocs.includes(doc.id);
-                      const isPDF = doc.content_type === 'application/pdf';
                       return (
-                        <div key={doc.id} className="flex items-center gap-1">
-                    <Button
-                            variant={isSelected ? 'default' : 'outline'}
-                      size="sm"
-                      onClick={() => {
+                        <div key={doc.id} className="flex items-center gap-1 group">
+                          <button
+                            onClick={() => {
                               setSelectedDocs(prev => {
                                 const prevArray = Array.isArray(prev) ? prev : [];
-                                return prevArray.includes(doc.id) 
+                                return prevArray.includes(doc.id)
                                   ? prevArray.filter(id => id !== doc.id)
                                   : [...prevArray, doc.id];
                               });
-                      }}
+                            }}
                             className={cn(
-                              isSelected && 'ring-2 ring-primary ring-offset-1',
-                              !isPDF && 'opacity-60'
+                              "flex-1 text-left px-3 py-2 rounded-md text-xs transition-colors truncate",
+                              isSelected
+                                ? "bg-primary text-primary-foreground"
+                                : "hover:bg-muted"
                             )}
-                            title={!isPDF ? 'Only PDF files are currently supported for text extraction' : isSelected ? 'Click to deselect' : 'Click to select for AI analysis'}
-                    >
-                      <FileText className="h-3 w-3 mr-1" />
-                            <span className="max-w-[200px] truncate">{doc.name}</span>
+                            title={doc.name}
+                          >
+                            <FileText className="h-3 w-3 inline mr-1" />
+                            <span className="truncate">{doc.name}</span>
                             {isSelected && <span className="ml-1">✓</span>}
-                    </Button>
+                          </button>
                           <Button
                             variant="ghost"
                             size="sm"
+                            className="h-6 w-6 p-0 opacity-0 group-hover:opacity-100 transition-opacity"
                             onClick={(e) => {
                               e.stopPropagation();
                               deleteDocument(doc);
                             }}
-                            className="h-8 w-8 p-0 text-destructive hover:text-destructive hover:bg-destructive/10"
                             title="Delete document"
                           >
-                            <Trash2 className="h-3 w-3" />
+                            <Trash2 className="h-3 w-3 text-destructive" />
                           </Button>
                         </div>
                       );
-                    })}
+                    })
+                  ) : (
+                    <p className="text-xs text-muted-foreground px-2">No documents</p>
+                  )}
                 </div>
-              </div>
-            )}
-          </CardContent>
-        </Card>
+              )}
+            </div>
 
-          <Card className="flex flex-col" style={{ height: 'calc(100vh - 380px)', minHeight: '500px' }}>
-            <CardContent className="flex-1 flex flex-col p-0 overflow-hidden">
-              {/* Messages Area - Fixed height with scroll */}
-              <div className="flex-1 overflow-y-auto p-6 space-y-6 min-h-0">
-                {Array.isArray(messages) && messages.map((message) => (
-              <div
-                key={message.id}
-                className={cn(
-                  'flex',
-                  message.role === 'user' ? 'justify-end' : 'justify-start'
-                )}
+            <Separator />
+
+            {/* Saved Analyses Section */}
+            <div>
+              <h3 className="text-sm font-semibold mb-2 px-2">Saved Analyses</h3>
+              {isLoadingSavedAnalyses ? (
+                <div className="flex items-center justify-center py-4">
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                </div>
+              ) : (
+                <div className="space-y-1">
+                  {savedAnalyses.length > 0 ? (
+                    savedAnalyses.map((analysis) => (
+                      <div key={analysis.id} className="flex items-center gap-1 group">
+                        <button
+                          onClick={() => loadSavedAnalysis(analysis.id)}
+                          className="flex-1 text-left px-3 py-2 rounded-md text-xs transition-colors hover:bg-muted truncate"
+                          title={`${analysis.tracking_id} - ${analysis.case_title}`}
+                        >
+                          <div className="font-medium truncate">{analysis.tracking_id}</div>
+                          <div className="text-muted-foreground truncate">{analysis.case_title}</div>
+                          <div className="text-muted-foreground text-[10px]">
+                            {new Date(analysis.created_at).toLocaleDateString()}
+                          </div>
+                        </button>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="h-6 w-6 p-0 opacity-0 group-hover:opacity-100 transition-opacity"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            deleteSavedAnalysis(analysis.id);
+                          }}
+                          title="Delete saved analysis"
+                        >
+                          <Trash2 className="h-3 w-3 text-destructive" />
+                        </Button>
+                      </div>
+                    ))
+                  ) : (
+                    <p className="text-xs text-muted-foreground px-2">No saved analyses</p>
+                  )}
+                </div>
+              )}
+            </div>
+          </div>
+        </ScrollArea>
+      </div>
+
+      {/* Main Content Area */}
+      <div className="flex-1 flex flex-col overflow-hidden">
+        {/* Toolbar */}
+        <div className="h-14 border-b flex items-center justify-between px-4 md:px-6 flex-shrink-0">
+          <div className="flex items-center gap-2">
+            <h1 className="text-lg font-semibold">AI Assistant</h1>
+            {selectedCaseData && (
+              <Badge variant="secondary">
+                {selectedCaseData.tracking_id}
+              </Badge>
+            )}
+          </div>
+          <div className="flex items-center gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={loadPreviewContent}
+              disabled={!selectedCaseId || hasAnalyzedCase || isLoadingPreview}
+              title={!selectedCaseId || hasAnalyzedCase ? "Select a case to preview PII detection" : "Preview PII Detection"}
+            >
+              <Eye className="h-4 w-4 mr-2" />
+              Preview PII
+            </Button>
+            {currentAnalysisData && (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={saveAnalysis}
+                disabled={isSaving}
               >
-                <div className="max-w-[85%] space-y-3">
-                  <div
-                    className={cn(
-                      'rounded-lg px-5 py-3',
-                      message.role === 'user'
-                        ? 'bg-primary text-primary-foreground'
-                        : 'bg-muted text-foreground border'
-                    )}
-                  >
+                <Save className="h-4 w-4 mr-2" />
+                Save Analysis
+              </Button>
+            )}
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleClearChat}
+              disabled={isLoading}
+            >
+              <X className="h-4 w-4 mr-2" />
+              Clear
+            </Button>
+          </div>
+        </div>
+
+        {/* Chat Messages Area */}
+        <div className="flex-1 overflow-y-auto p-4 md:p-6">
+          {isEmptyState ? (
+            <div className="flex flex-col items-center justify-center h-full">
+              <Sparkles className="h-12 w-12 text-muted-foreground mb-4" />
+              <h2 className="text-xl font-semibold mb-2">AI Assistant</h2>
+              <p className="text-sm text-muted-foreground text-center max-w-md">
+                Select a case from the sidebar to analyze, or ask a question about your cases.
+              </p>
+            </div>
+          ) : (
+            <div className="max-w-4xl mx-auto space-y-6">
+              {Array.isArray(messages) && messages.map((message) => (
+                <div
+                  key={message.id}
+                  className={cn(
+                    'flex',
+                    message.role === 'user' ? 'justify-end' : 'justify-start'
+                  )}
+                >
+                  <div className="max-w-[85%] space-y-3">
+                    <div
+                      className={cn(
+                        'rounded-lg px-5 py-3',
+                        message.role === 'user'
+                          ? 'bg-primary text-primary-foreground'
+                          : 'bg-muted text-foreground border'
+                      )}
+                    >
                       <p className="whitespace-pre-wrap leading-relaxed text-sm">
                         {message.content}
                       </p>
-                        
-                        {/* PII Protection Info - Inline Display */}
-                        {message.role === 'assistant' && message.piiMetadata?.redacted && (
-                          <PIIInfoInline 
-                            piiMetadata={message.piiMetadata}
-                            originalContent={message.content}
-                          />
-                    )}
-                        
-                    <p className={cn(
-                      'text-xs mt-2',
-                      message.role === 'user' ? 'text-primary-foreground/70' : 'text-muted-foreground'
-                    )}>
-                      {message.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                    </p>
-                  </div>
-                </div>
-              </div>
-            ))}
-
-            {isLoading && (
-              <div className="flex justify-start">
-                <div className="bg-muted rounded-lg px-4 py-3 border">
-                  <div className="flex items-center gap-2">
-                    <Loader2 className="h-4 w-4 animate-spin text-primary" />
-                    <div className="flex flex-col">
-                      <span className="text-sm font-medium text-foreground">
-                            {selectedCaseId ? (hasAnalyzedCase ? 'Thinking...' : 'Analyzing case...') : 'Searching your cases...'}
-                      </span>
-                      <span className="text-xs text-muted-foreground mt-1">
-                        {selectedCaseId ? 'This may take a few moments' : 'Please wait'}
-                      </span>
+                      
+                      {/* PII Protection Info - Inline Display */}
+                      {message.role === 'assistant' && message.piiMetadata?.redacted && (
+                        <PIIInfoInline 
+                          piiMetadata={message.piiMetadata}
+                          originalContent={message.content}
+                        />
+                      )}
+                      
+                      <p className={cn(
+                        'text-xs mt-2',
+                        message.role === 'user' ? 'text-primary-foreground/70' : 'text-muted-foreground'
+                      )}>
+                        {message.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                      </p>
                     </div>
                   </div>
                 </div>
-              </div>
-            )}
+              ))}
 
-            <div ref={messagesEndRef} />
-          </div>
-
-              {/* Input Area - Fixed at bottom */}
-              <div className="border-t p-4 flex-shrink-0 space-y-3">
-                {/* PII Protection Choice - Inline */}
-                {showPIIChoice && selectedCaseId && !hasAnalyzedCase && (
-                  <Card className="border-blue-200 bg-blue-50/50">
-                    <CardContent className="p-3">
-                      <div className="flex items-start gap-3">
-                        <Shield className="h-5 w-5 text-blue-600 mt-0.5 flex-shrink-0" />
-                        <div className="flex-1">
-                          <h3 className="font-semibold text-sm mb-1">Privacy Protection</h3>
-                          <p className="text-xs text-muted-foreground mb-3">
-                            Choose how to handle personal information in this analysis:
-                          </p>
-                          <div className="flex gap-2">
-                          <Button
-                            onClick={async () => {
-                              setShowPIIChoice(false);
-                              setPreservePII(false); // Don't preserve = redact PII (show [EMPLOYEE_ID_1])
-                              const query = inputQuery || "Analyze this case";
-                              // preserve_pii: false means redact PII (backend checks !preserve_pii)
-                              // Skip user message for auto-started analysis
-                              await handleQueryWithPIIPreference(query, false, true);
-                            }}
-                            className="flex-1 bg-green-600 hover:bg-green-700"
-                            size="sm"
-                          >
-                            <Shield className="h-4 w-4 mr-2" />
-                            Analyze with PII Protection
-                          </Button>
-                          <Button
-                            onClick={async () => {
-                              setShowPIIChoice(false);
-                              setPreservePII(true); // Preserve = don't redact PII (show personal details)
-                              const query = inputQuery || "Analyze this case";
-                              // preserve_pii: true means don't redact PII (backend checks !preserve_pii)
-                              // Skip user message for auto-started analysis
-                              await handleQueryWithPIIPreference(query, true, true);
-                            }}
-                            variant="outline"
-                            className="flex-1"
-                            size="sm"
-                          >
-                            Analyze Without Redaction
-                          </Button>
-                          </div>
-                        </div>
+              {isLoading && (
+                <div className="flex justify-start">
+                  <div className="bg-muted rounded-lg px-4 py-3 border">
+                    <div className="flex items-center gap-2">
+                      <Loader2 className="h-4 w-4 animate-spin text-primary" />
+                      <div className="flex flex-col">
+                        <span className="text-sm font-medium text-foreground">
+                          {selectedCaseId ? (hasAnalyzedCase ? 'Thinking...' : 'Analyzing case...') : 'Searching your cases...'}
+                        </span>
+                        <span className="text-xs text-muted-foreground mt-1">
+                          {selectedCaseId ? 'This may take a few moments' : 'Please wait'}
+                        </span>
                       </div>
-                    </CardContent>
-                  </Card>
-                )}
-                
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              <div ref={messagesEndRef} />
+            </div>
+          )}
+        </div>
+
+        {/* Input Area - Fixed at Bottom */}
+        <div className="border-t p-4 md:p-6 flex-shrink-0">
+          <div className="max-w-4xl mx-auto space-y-3">
+            {/* PII Protection Choice */}
+            {showPIIChoice && selectedCaseId && !hasAnalyzedCase && (
+              <Card className="border-blue-200 bg-blue-50/50">
+                <CardContent className="p-3">
+                  <div className="flex items-start gap-3">
+                    <Shield className="h-5 w-5 text-blue-600 mt-0.5 flex-shrink-0" />
+                    <div className="flex-1">
+                      <h3 className="font-semibold text-sm mb-1">Privacy Protection</h3>
+                      <p className="text-xs text-muted-foreground mb-3">
+                        Choose how to handle personal information in this analysis:
+                      </p>
+                      <div className="flex gap-2 mb-2">
+                        <Button
+                          onClick={async () => {
+                            if (selectedCaseData) {
+                              const decryptedContent = await decryptReport(selectedCaseData);
+                              setPreviewContent(decryptedContent);
+                              setPendingAnalysisQuery(inputQuery || "Analyze this case");
+                              setShowPIIPreview(true);
+                              setShowPIIChoice(false);
+                            } else {
+                              setShowPIIChoice(false);
+                              setPreservePII(false);
+                              const query = inputQuery || "Analyze this case";
+                              await handleQueryWithPIIPreference(query, false, true);
+                            }
+                          }}
+                          className="flex-1 bg-green-600 hover:bg-green-700"
+                          size="sm"
+                        >
+                          <Shield className="h-4 w-4 mr-2" />
+                          Analyze with PII Protection
+                        </Button>
+                        <Button
+                          onClick={async () => {
+                            setShowPIIChoice(false);
+                            setPreservePII(true);
+                            const query = inputQuery || "Analyze this case";
+                            await handleQueryWithPIIPreference(query, true, true);
+                          }}
+                          variant="outline"
+                          className="flex-1"
+                          size="sm"
+                        >
+                          Analyze Without Redaction
+                        </Button>
+                      </div>
+                      <Button
+                        onClick={async () => {
+                          if (selectedCaseData) {
+                            const decryptedContent = await decryptReport(selectedCaseData);
+                            setPreviewContent(decryptedContent);
+                            setShowPIIPreview(true);
+                            setShowPIIChoice(false);
+                          }
+                        }}
+                        variant="outline"
+                        size="sm"
+                        className="w-full"
+                      >
+                        <Eye className="h-4 w-4 mr-2" />
+                        Preview PII Detection
+                      </Button>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+            
             <div className="flex gap-2">
               <Input
                 value={inputQuery}
@@ -1904,23 +1906,22 @@ Additional Details: ${decrypted.additionalDetails || 'None provided'}`;
                 onKeyPress={handleKeyPress}
                 placeholder={
                   selectedCaseId 
-                        ? (hasAnalyzedCase 
-                            ? "Ask a follow-up question about this case..."
-                            : "Ask me to analyze this case or ask questions about it...")
+                    ? (hasAnalyzedCase 
+                        ? "Ask a follow-up question about this case..."
+                        : "Ask me to analyze this case or ask questions about it...")
                     : "Ask a question about your cases or analyze a specific case..."
                 }
                 className="flex-1"
-                    disabled={isLoading || (showPIIChoice && selectedCaseId && !hasAnalyzedCase)}
+                disabled={isLoading || (showPIIChoice && selectedCaseId && !hasAnalyzedCase)}
               />
               <Button
-                    onClick={() => {
-                      // If PII choice not shown yet, show it. Otherwise run analysis
-                      if (selectedCaseId && !hasAnalyzedCase && !showPIIChoice) {
-                        setShowPIIChoice(true);
-                      } else {
-                        handleQuery(inputQuery);
-                      }
-                    }}
+                onClick={() => {
+                  if (selectedCaseId && !hasAnalyzedCase && !showPIIChoice) {
+                    setShowPIIChoice(true);
+                  } else {
+                    handleQuery(inputQuery);
+                  }
+                }}
                 disabled={!inputQuery.trim() || isLoading}
                 size="default"
               >
@@ -1931,12 +1932,10 @@ Additional Details: ${decrypted.additionalDetails || 'None provided'}`;
                 )}
               </Button>
             </div>
-            <p className="text-xs text-muted-foreground mt-2 text-center">
+            <p className="text-xs text-muted-foreground text-center">
               Powered by AI • Your queries are logged for audit purposes
             </p>
           </div>
-        </CardContent>
-      </Card>
         </div>
       </div>
 
@@ -1945,13 +1944,15 @@ Additional Details: ${decrypted.additionalDetails || 'None provided'}`;
         <PIIPreviewModal
           originalText={previewContent}
           caseTitle={selectedCaseData.title}
-          onConfirm={() => {
+          onConfirm={async () => {
             setShowPIIPreview(false);
-            handleQuery(inputQuery);
+            const query = pendingAnalysisQuery || inputQuery || "Analyze this case";
+            setPreservePII(false);
+            await handleQueryWithPIIPreference(query, false, true);
+            setPendingAnalysisQuery('');
           }}
           onProceedWithoutRedaction={async () => {
             setShowPIIPreview(false);
-            // Run analysis without PII redaction (legacy modal handler - kept for backwards compatibility)
             if (selectedCaseId && selectedCaseData && pendingAnalysisQuery) {
               setPreservePII(true);
               setIsLoading(true);
@@ -1984,7 +1985,6 @@ Additional Details: ${decrypted.additionalDetails || 'None provided'}`;
           onCancel={() => {
             setShowPIIPreview(false);
             setPendingAnalysisQuery('');
-            // Reset case selection if user cancels
             setSelectedCaseId('');
             setSelectedCaseData(null);
             setIsEmptyState(true);
