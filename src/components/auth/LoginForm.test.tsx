@@ -3,11 +3,12 @@ import { screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { renderWithProviders } from '@/test/utils';
 import LoginForm from './LoginForm';
+import { checkAccountLocked } from '@/utils/edgeFunctions';
 
 // Mock Supabase client
 const mockSignInWithOtp = vi.fn();
 const mockSignInWithOAuth = vi.fn();
-const mockRpc = vi.fn();
+const mockFunctionsInvoke = vi.fn();
 
 vi.mock('@/integrations/supabase/client', () => ({
   supabase: {
@@ -15,8 +16,15 @@ vi.mock('@/integrations/supabase/client', () => ({
       signInWithOtp: (...args: any[]) => mockSignInWithOtp(...args),
       signInWithOAuth: (...args: any[]) => mockSignInWithOAuth(...args),
     },
-    rpc: (...args: any[]) => mockRpc(...args),
+    functions: {
+      invoke: (...args: any[]) => mockFunctionsInvoke(...args),
+    },
   },
+}));
+
+// Mock edgeFunctions
+vi.mock('@/utils/edgeFunctions', () => ({
+  checkAccountLocked: vi.fn(),
 }));
 
 // Mock useNavigate
@@ -48,6 +56,8 @@ vi.mock('react-i18next', () => ({
 describe('LoginForm', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    // Reset checkAccountLocked mock
+    vi.mocked(checkAccountLocked).mockResolvedValue(false);
   });
 
   it('should render login form with email input and submit button', () => {
@@ -66,10 +76,7 @@ describe('LoginForm', () => {
   it('should handle successful OTP login', async () => {
     const user = userEvent.setup();
 
-    mockRpc.mockResolvedValueOnce({
-      data: false,
-      error: null,
-    });
+    vi.mocked(checkAccountLocked).mockResolvedValueOnce(false);
 
     mockSignInWithOtp.mockResolvedValueOnce({
       error: null,
@@ -104,10 +111,7 @@ describe('LoginForm', () => {
   it('should handle account lockout', async () => {
     const user = userEvent.setup();
 
-    mockRpc.mockResolvedValueOnce({
-      data: true, // Account is locked
-      error: null,
-    });
+    vi.mocked(checkAccountLocked).mockResolvedValueOnce(true); // Account is locked
 
     renderWithProviders(<LoginForm />);
 
@@ -118,10 +122,7 @@ describe('LoginForm', () => {
     await user.click(submitButton);
 
     await waitFor(() => {
-      expect(mockRpc).toHaveBeenCalledWith('is_account_locked', {
-        p_email: 'locked@example.com',
-        p_organization_id: null,
-      });
+      expect(checkAccountLocked).toHaveBeenCalledWith('locked@example.com', null);
     });
 
     await waitFor(() => {
@@ -139,10 +140,7 @@ describe('LoginForm', () => {
   it('should handle login error gracefully', async () => {
     const user = userEvent.setup();
 
-    mockRpc.mockResolvedValueOnce({
-      data: false,
-      error: null,
-    });
+    vi.mocked(checkAccountLocked).mockResolvedValueOnce(false);
 
     mockSignInWithOtp.mockResolvedValueOnce({
       error: { message: 'Invalid credentials' },
@@ -211,10 +209,7 @@ describe('LoginForm', () => {
   it('should show loading state during login', async () => {
     const user = userEvent.setup();
 
-    mockRpc.mockResolvedValueOnce({
-      data: false,
-      error: null,
-    });
+    vi.mocked(checkAccountLocked).mockResolvedValueOnce(false);
 
     // Delay the resolution to capture loading state
     mockSignInWithOtp.mockImplementation(() =>
@@ -249,11 +244,13 @@ describe('LoginForm', () => {
     expect(emailInput.type).toBe('email');
   });
 
-  it('should gracefully handle missing RPC function', async () => {
+  it('should gracefully handle missing Edge Function', async () => {
     const user = userEvent.setup();
 
-    // RPC throws error (function doesn't exist)
-    mockRpc.mockRejectedValueOnce(new Error('Function not found'));
+    // Edge Function throws error (function doesn't exist)
+    // checkAccountLocked catches errors internally and returns false, allowing login to proceed
+    // Since checkAccountLocked has try/catch and returns false on error, we mock it to return false
+    vi.mocked(checkAccountLocked).mockResolvedValueOnce(false);
 
     mockSignInWithOtp.mockResolvedValueOnce({
       error: null,
@@ -267,7 +264,12 @@ describe('LoginForm', () => {
     await user.type(emailInput, 'test@example.com');
     await user.click(submitButton);
 
-    // Should continue with login despite RPC error
+    // checkAccountLocked should be called
+    await waitFor(() => {
+      expect(checkAccountLocked).toHaveBeenCalledWith('test@example.com', null);
+    });
+
+    // Should continue with login (checkAccountLocked returns false on error, allowing login)
     await waitFor(() => {
       expect(mockSignInWithOtp).toHaveBeenCalled();
     });

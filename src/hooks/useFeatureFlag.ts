@@ -1,5 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
 import { checkFeatureFlag } from '@/utils/edgeFunctions';
+import { supabase } from '@/integrations/supabase/client';
 
 /**
  * Hook to check if a feature is enabled for the current organization
