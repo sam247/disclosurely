@@ -2,5 +2,5 @@
 alwaysApply: true
 ---
 - Always read LLMREADME.md for project context
-- Always use available mcp servers for contentful, supabase, vercel, github and semgrep work
-- Push to git after code changes at https://github.com/sam247/disclosurely
+- Always use Supabase MCP, Vercel MCP, GitHub MCP and Resend MCP in the first instance. They are ALL connected. 
+- Always push to git after code changes at https://github.com/sam247/disclosurely

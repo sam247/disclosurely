@@ -259,6 +259,7 @@ const ProgressiveReportForm = ({
             onChange={(title) => updateFormData({ title })}
             isValid={validateStep(1)}
             language={language}
+            organizationId={organizationId}
           />
         );
       case 2:
@@ -321,6 +322,7 @@ const ProgressiveReportForm = ({
             location={formData.location}
             onChange={updateFormData}
             language={language}
+            organizationId={organizationId}
           />
         );
       case 7:
@@ -338,6 +340,7 @@ const ProgressiveReportForm = ({
             previousReports={formData.previousReports}
             onChange={updateFormData}
             language={language}
+            organizationId={organizationId}
           />
         );
       case 9:

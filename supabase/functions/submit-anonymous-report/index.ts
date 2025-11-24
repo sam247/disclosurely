@@ -83,10 +83,16 @@ async function logToSystem(supabase: any, level: string, context: string, messag
   }
 }
 
-const corsHeaders = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
-}
+// CORS headers for public endpoint - allow all origins to support custom domains
+// Security is handled by the link token
+const getCorsHeaders = (req: Request) => {
+  const origin = req.headers.get('origin') || '*';
+  return {
+    'Access-Control-Allow-Origin': origin,
+    'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+    'Access-Control-Allow-Methods': 'POST, OPTIONS',
+  };
+};
 
 // Audit logging function - simplified to avoid type issues
 async function logAuditEvent(supabase: any, event: any) {
@@ -268,8 +274,10 @@ serve(async (req) => {
     
     if (req.method === 'OPTIONS') {
       console.log('OPTIONS request')
-      return new Response('ok', { headers: corsHeaders })
+      return new Response('ok', { headers: getCorsHeaders(req) })
     }
+    
+    const corsHeaders = getCorsHeaders(req);
 
     // 🔒 Rate limiting: 5 submissions per 15 minutes per IP
     const rateLimit = await checkRateLimit(req, rateLimiters.reportSubmission)

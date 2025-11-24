@@ -1529,7 +1529,7 @@ Additional Details: ${decrypted.additionalDetails || 'None provided'}`;
 
   // Main Layout - ChatGPT Style
   return (
-    <div className="flex h-[calc(100vh-4rem)] overflow-hidden">
+    <div className="flex h-full overflow-hidden -m-4 md:-m-6">
       {/* Left Sidebar */}
       <div className="w-[260px] border-r bg-muted/30 flex flex-col overflow-hidden">
         <ScrollArea className="flex-1">

@@ -1,42 +1,17 @@
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts';
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 
-// CORS headers helper
-const getAllowedOrigin = (req: Request): string => {
-  const origin = req.headers.get('origin');
-  
-  if (!origin) {
-    return 'https://disclosurely.com';
-  }
-  
-  // Allow specific production domains
-  const allowedDomains = [
-    'https://disclosurely.com',
-    'https://www.disclosurely.com',
-    'https://app.disclosurely.com',
-    'http://localhost:8080',
-    'http://localhost:5173',
-  ];
-  
-  if (allowedDomains.includes(origin)) {
-    return origin;
-  }
-  
-  // Allow Lovable preview domains (any subdomain)
-  if (origin.includes('.lovable.app') || origin.includes('.lovableproject.com')) {
-    return origin;
-  }
-  
-  // Default fallback
-  return 'https://disclosurely.com';
+// CORS headers for public endpoints - allow all origins to support custom domains
+// Security is handled by the link token or other authentication mechanisms
+const getCorsHeaders = (req: Request) => {
+  const origin = req.headers.get('origin') || '*';
+  return {
+    'Access-Control-Allow-Origin': origin,
+    'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+    'Access-Control-Allow-Credentials': 'true',
+    'Access-Control-Allow-Methods': 'POST, OPTIONS',
+  };
 };
-
-const getCorsHeaders = (req: Request) => ({
-  'Access-Control-Allow-Origin': getAllowedOrigin(req),
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
-  'Access-Control-Allow-Credentials': 'true',
-  'Access-Control-Allow-Methods': 'POST, OPTIONS',
-});
 
 interface AccountLockedRequest {
   email: string;

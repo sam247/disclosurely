@@ -10,7 +10,7 @@ import {
 } from '@/components/ui/tooltip';
 import { progressiveFormTranslations } from '@/i18n/progressiveFormTranslations';
 import { usePIIDetector } from '@/hooks/usePIIDetector';
-import { Alert, AlertDescription } from '@/components/ui/alert';
+import { PIIWarningBox } from '@/components/forms/PIIWarningBox';
 
 interface Step3DescriptionProps {
   value: string;
@@ -115,34 +115,7 @@ const Step3Description = ({ value, onChange, isValid, language, organizationId }
           {/* Real-time PII detection feedback */}
           {value.length > 50 && (
             <div className="space-y-2">
-              {isDetecting && (
-                <div className="text-xs text-muted-foreground flex items-center gap-2">
-                  <Sparkles className="h-3 w-3 animate-pulse" />
-                  Checking for personal information...
-                </div>
-              )}
-              
-              {!isDetecting && hasPII && (
-                <Alert variant="destructive" className="py-2">
-                  <AlertTriangle className="h-4 w-4" />
-                  <AlertDescription className="text-sm">
-                    <strong>⚠️ Personal Information Detected</strong>
-                    <ul className="mt-2 list-disc list-inside space-y-1">
-                      {detections.slice(0, 5).map((detection, i) => (
-                        <li key={i}>
-                          {detection.type.replace('_', ' ')}: Remove this to maintain anonymity
-                        </li>
-                      ))}
-                      {detections.length > 5 && (
-                        <li className="text-xs">...and {detections.length - 5} more</li>
-                      )}
-                    </ul>
-                    <p className="mt-2 text-xs">
-                      Tip: Use general terms instead of specific names, emails, or phone numbers.
-                    </p>
-                  </AlertDescription>
-                </Alert>
-              )}
+              <PIIWarningBox detections={detections} isDetecting={isDetecting} />
               
               {!isDetecting && !hasPII && value.length > 50 && (
                 <div className="text-xs text-green-600 dark:text-green-400 flex items-center gap-2">

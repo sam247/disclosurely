@@ -1,6 +1,6 @@
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { FileText, HelpCircle } from 'lucide-react';
+import { FileText, HelpCircle, CheckCircle2 } from 'lucide-react';
 import { useEffect, useRef } from 'react';
 import {
   Tooltip,
@@ -9,17 +9,27 @@ import {
   TooltipTrigger,
 } from '@/components/ui/tooltip';
 import { progressiveFormTranslations } from '@/i18n/progressiveFormTranslations';
+import { usePIIDetector } from '@/hooks/usePIIDetector';
+import { PIIWarningBox } from '@/components/forms/PIIWarningBox';
 
 interface Step2TitleProps {
   value: string;
   onChange: (value: string) => void;
   isValid: boolean;
   language: string;
+  organizationId?: string;
 }
 
-const Step2Title = ({ value, onChange, isValid, language }: Step2TitleProps) => {
+const Step2Title = ({ value, onChange, isValid, language, organizationId }: Step2TitleProps) => {
   const t = progressiveFormTranslations[language as keyof typeof progressiveFormTranslations] || progressiveFormTranslations.en;
   const inputRef = useRef<HTMLInputElement>(null);
+
+  // Real-time PII detection
+  const { hasPII, detections, isDetecting } = usePIIDetector(value, {
+    debounce: 500,
+    organizationId,
+    confidenceThreshold: 0.4,
+  });
 
   // Auto-focus on mount
   useEffect(() => {
@@ -68,10 +78,26 @@ const Step2Title = ({ value, onChange, isValid, language }: Step2TitleProps) => 
             value={value}
             onChange={(e) => onChange(e.target.value)}
             placeholder={t.step1.placeholder}
-            className="text-base sm:text-lg min-h-[52px] sm:min-h-[56px]"
+            className={`text-base sm:text-lg min-h-[52px] sm:min-h-[56px] ${
+              hasPII ? 'border-destructive focus-visible:ring-destructive' : ''
+            }`}
             maxLength={200}
             autoComplete="off"
           />
+          
+          {/* PII detection feedback */}
+          {value.length > 10 && (
+            <div className="space-y-2">
+              <PIIWarningBox detections={detections} isDetecting={isDetecting} />
+              {!isDetecting && !hasPII && (
+                <div className="text-xs text-green-600 dark:text-green-400 flex items-center gap-2">
+                  <CheckCircle2 className="h-3 w-3" />
+                  ✅ No personal information detected
+                </div>
+              )}
+            </div>
+          )}
+          
           <div className="flex justify-between items-center text-xs sm:text-sm gap-2 mt-2">
             <div className="text-gray-500 min-w-0 flex-1">
               {!isValid && value.length > 0 && value.length < 5 && (
