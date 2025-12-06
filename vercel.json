@@ -17,8 +17,8 @@
       "permanent": true
     },
     {
-      "source": "/((?!docs/).*)/",
-      "destination": "/$1",
+      "source": "/:path+/",
+      "destination": "/:path+",
       "permanent": true
     },
     {
