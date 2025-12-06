@@ -78,8 +78,29 @@ const Pricing = () => {
         // Try to extract error message from various sources
         let errorMsg = error?.message || 'Unknown error';
         
+        // Try to read the response body if context is a Response object
+        if (error?.context instanceof Response) {
+          try {
+            const responseText = await error.context.text();
+            console.error('[Pricing] Error response body:', responseText);
+            try {
+              const responseJson = JSON.parse(responseText);
+              if (responseJson.error) {
+                errorMsg = responseJson.error;
+              }
+            } catch (e) {
+              // Not JSON, use text as is
+              if (responseText) {
+                errorMsg = responseText;
+              }
+            }
+          } catch (e) {
+            console.error('[Pricing] Could not read error response body:', e);
+          }
+        }
+        
         // If error has context, try to parse it
-        if (error?.context && typeof error.context === 'object') {
+        if (error?.context && typeof error.context === 'object' && !(error.context instanceof Response)) {
           const contextError = error.context as any;
           if (contextError?.error) {
             errorMsg = contextError.error;
