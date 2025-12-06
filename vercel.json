@@ -81,7 +81,13 @@
     { "source": "/sitemap-index.xml", "destination": "/api/sitemap-index.xml" },
     {
       "source": "/docs/:path*",
-      "destination": "https://docs-disclosurely.vercel.app/:path*"
+      "destination": "https://docs.disclosurely.com/:path*",
+      "has": [
+        {
+          "type": "host",
+          "value": "disclosurely.com"
+        }
+      ]
     },
     {
       "source": "/((?!assets/|api/|_next/|favicon\\.ico|robots\\.txt|sitemap.*\\.xml|docs/|.*\\.[a-z]{2,4}$).*)",
