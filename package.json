@@ -5,9 +5,9 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "npm run build:app && npm run build:docs",
+    "build": "npm run build:docs && npm run build:app",
     "build:app": "vite build",
-    "build:docs": "cd docs && npm install && npm run build && cd .. && mkdir -p dist/docs && cp -r docs/docs/.vitepress/dist/* dist/docs/ && echo 'Docs copied to dist directory'",
+    "build:docs": "cd docs && npm install && npm run build && cd .. && mkdir -p public/docs && cp -r docs/docs/.vitepress/dist/* public/docs/ && echo 'Docs copied to public directory'",
     "build:dev": "vite build --mode development",
     "lint": "eslint .",
     "preview": "vite preview",
