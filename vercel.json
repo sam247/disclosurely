@@ -75,7 +75,7 @@
     { "source": "/sitemap.xml", "destination": "/api/sitemap.xml" },
     { "source": "/sitemap-index.xml", "destination": "/api/sitemap-index.xml" },
     {
-      "source": "/((?!assets/|api/|_next/|favicon\\.ico|robots\\.txt|sitemap.*\\.xml|docs|.*\\.[a-z]{2,4}$).*)",
+      "source": "/((?!assets/|api/|_next/|favicon\\.ico|robots\\.txt|sitemap.*\\.xml|docs/|.*\\.[a-z]{2,4}$).*)",
       "destination": "/index.html"
     }
   ],
