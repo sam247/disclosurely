@@ -73,12 +73,15 @@
   ],
   "rewrites": [
     { "source": "/sitemap.xml", "destination": "/api/sitemap.xml" },
-    { "source": "/sitemap-index.xml", "destination": "/api/sitemap-index.xml" },
-    { "source": "/docs", "destination": "/docs/index.html" },
-    { "source": "/docs/", "destination": "/docs/index.html" },
+    { "source": "/sitemap-index.xml", "destination": "/api/sitemap-index.xml" }
+  ],
+  "routes": [
+    { "handle": "filesystem" },
+    { "src": "/docs/?", "dest": "/docs/index.html" },
+    { "src": "/docs/(.*)", "dest": "/docs/$1" },
     {
-      "source": "/((?!assets/|api/|_next/|favicon\\.ico|robots\\.txt|sitemap.*\\.xml|docs/|docs|.*\\.[a-z]{2,4}$).*)",
-      "destination": "/index.html"
+      "src": "/((?!assets/|api/|_next/|favicon\\.ico|robots\\.txt|sitemap.*\\.xml|docs).*)",
+      "dest": "/index.html"
     }
   ]
 }
