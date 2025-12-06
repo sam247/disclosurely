@@ -73,22 +73,12 @@
   ],
   "routes": [
     { "handle": "filesystem" },
+    { "src": "/sitemap.xml", "dest": "/api/sitemap.xml" },
+    { "src": "/sitemap-index.xml", "dest": "/api/sitemap-index.xml" },
     { "src": "/(login|signup|auth/login|auth/signup)", "dest": "/index.html" },
     {
-      "src": "/((?!assets/|api/|_next/|favicon\\.ico|robots\\.txt|sitemap.*\\.xml|docs|.*\\.[a-z]{2,4}$).*)",
+      "src": "/((?!assets/|api/|_next/|favicon\\.ico|robots\\.txt|sitemap.*\\.xml|docs/|docs$|.*\\.[a-z]{2,4}$).*)",
       "dest": "/index.html"
-    }
-  ],
-  "rewrites": [
-    { "source": "/sitemap.xml", "destination": "/api/sitemap.xml" },
-    { "source": "/sitemap-index.xml", "destination": "/api/sitemap-index.xml" },
-    { "source": "/login", "destination": "/index.html" },
-    { "source": "/signup", "destination": "/index.html" },
-    { "source": "/auth/login", "destination": "/index.html" },
-    { "source": "/auth/signup", "destination": "/index.html" },
-    {
-      "source": "/((?!assets/|api/|_next/|favicon\\.ico|robots\\.txt|sitemap.*\\.xml|docs|.*\\.[a-z]{2,4}$).*)",
-      "destination": "/index.html"
     }
   ],
   "cleanUrls": true
