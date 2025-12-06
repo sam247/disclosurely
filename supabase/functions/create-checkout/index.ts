@@ -25,6 +25,14 @@ serve(async (req) => {
 
   try {
     logStep("Function started");
+    
+    // Log environment check (without exposing secrets)
+    const hasStripeKey = !!Deno.env.get("STRIPE_SECRET_KEY");
+    logStep("Environment check", { 
+      hasStripeKey,
+      hasSupabaseUrl: !!Deno.env.get("SUPABASE_URL"),
+      hasSupabaseAnonKey: !!Deno.env.get("SUPABASE_ANON_KEY")
+    });
 
     // interval can be 'month', 'monthly', 'year', or 'annual' (frontend sends 'monthly' or 'annual')
     const { tier, employee_count, rdt_cid, interval = 'month', email, organization_id, referral_code } = await req.json();
