@@ -3,6 +3,7 @@ import { defineConfig } from 'vitepress'
 export default defineConfig({
   title: "Disclosurely Docs",
   description: "Everything you need to build, manage, and optimize your whistleblowing and compliance platform.",
+  base: '/docs/', // Serve docs from /docs path on main domain
 
   // Remove .html extension from URLs (fixes 404s for clean URLs)
   cleanUrls: true,

@@ -13,7 +13,7 @@ head:
       content: website
   - - meta
     - property: og:image
-      content: https://docs.disclosurely.com/ogimage.png
+      content: https://disclosurely.com/docs/ogimage.png
   - - meta
     - name: twitter:card
       content: summary_large_image
@@ -25,7 +25,7 @@ head:
       content: Serve global workforces with comprehensive multi-language whistleblowing portals supporting 12+ languages with auto-detection, language-specific links, and real-time translation.
   - - meta
     - name: twitter:image
-      content: https://docs.disclosurely.com/ogimage.png
+      content: https://disclosurely.com/docs/ogimage.png
 ---
 
 # Internationalization & Multi-Language Support

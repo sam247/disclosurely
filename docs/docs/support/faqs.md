@@ -13,7 +13,7 @@ head:
       content: website
   - - meta
     - property: og:image
-      content: https://docs.disclosurely.com/ogimage.png
+      content: https://disclosurely.com/docs/ogimage.png
   - - meta
     - name: twitter:card
       content: summary_large_image
@@ -25,7 +25,7 @@ head:
       content: Common questions answered about Disclosurely's secure whistleblowing platform, security features, pricing, compliance, reporting, and support options.
   - - meta
     - name: twitter:image
-      content: https://docs.disclosurely.com/ogimage.png
+      content: https://disclosurely.com/docs/ogimage.png
 ---
 
 # Frequently Asked Questions

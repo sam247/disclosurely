@@ -13,7 +13,7 @@ head:
       content: website
   - - meta
     - property: og:image
-      content: https://docs.disclosurely.com/ogimage.png
+      content: https://disclosurely.com/docs/ogimage.png
   - - meta
     - name: twitter:card
       content: summary_large_image
@@ -25,7 +25,7 @@ head:
       content: Role-based access control, user permissions, access levels, least privilege principle, access auditing, and security access management for whistleblowing.
   - - meta
     - name: twitter:image
-      content: https://docs.disclosurely.com/ogimage.png
+      content: https://disclosurely.com/docs/ogimage.png
 ---
 
 # Access Control

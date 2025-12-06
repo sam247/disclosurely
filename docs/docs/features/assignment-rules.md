@@ -13,7 +13,7 @@ head:
       content: website
   - - meta
     - property: og:image
-      content: https://docs.disclosurely.com/ogimage.png
+      content: https://disclosurely.com/docs/ogimage.png
   - - meta
     - name: twitter:card
       content: summary_large_image
@@ -25,7 +25,7 @@ head:
       content: Automatically route incoming whistleblowing reports to the right team members based on category, urgency, keywords, and custom conditions.
   - - meta
     - name: twitter:image
-      content: https://docs.disclosurely.com/ogimage.png
+      content: https://disclosurely.com/docs/ogimage.png
 ---
 
 # Assignment Rules

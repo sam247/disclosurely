@@ -13,7 +13,7 @@ head:
       content: website
   - - meta
     - property: og:image
-      content: https://docs.disclosurely.com/ogimage.png
+      content: https://disclosurely.com/docs/ogimage.png
   - - meta
     - name: twitter:card
       content: summary_large_image
@@ -25,7 +25,7 @@ head:
       content: Close investigations effectively with proper findings, disciplinary actions, and reporting. Learn standards of proof, communication, and resolution best practices.
   - - meta
     - name: twitter:image
-      content: https://docs.disclosurely.com/ogimage.png
+      content: https://disclosurely.com/docs/ogimage.png
 ---
 
 # Case Resolution

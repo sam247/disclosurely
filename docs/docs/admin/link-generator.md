@@ -13,7 +13,7 @@ head:
       content: website
   - - meta
     - property: og:image
-      content: https://docs.disclosurely.com/ogimage.png
+      content: https://disclosurely.com/docs/ogimage.png
   - - meta
     - name: twitter:card
       content: summary_large_image
@@ -25,7 +25,7 @@ head:
       content: Create and manage secure reporting portal links with custom settings, language options, usage limits, expiration dates, and department-specific configurations.
   - - meta
     - name: twitter:image
-      content: https://docs.disclosurely.com/ogimage.png
+      content: https://disclosurely.com/docs/ogimage.png
 ---
 
 # Link Generator & Management
@@ -127,17 +127,17 @@ Set the language displayed when link is first opened.
 
 **Supported Languages:**
 - English
-- Spanish (Español)
-- French (Français)
+- Spanish (Espaï¿½ol)
+- French (Franï¿½ais)
 - German (Deutsch)
 - Polish (Polski)
 - Swedish (Svenska)
 - Norwegian (Norsk)
-- Portuguese (Português)
+- Portuguese (Portuguï¿½s)
 - Italian (Italiano)
 - Dutch (Nederlands)
 - Danish (Dansk)
-- Greek (•»»·½¹º¬)
+- Greek (ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½)
 
 **Language Restriction:**
 -  Allow all languages
@@ -260,12 +260,12 @@ Access all created links in one centralized location.
 
 ### Link Status Indicators
 
-**=â Active:**
+**=ï¿½ Active:**
 - Link is live and accepting submissions
 - Within usage limits
 - Not expired
 
-**=á Paused:**
+**=ï¿½ Paused:**
 - Temporarily disabled by admin
 - Can be reactivated
 - Displays "Temporarily Unavailable" message
@@ -275,7 +275,7 @@ Access all created links in one centralized location.
 - Can be manually reactivated
 - Past submissions accessible
 
-**« Limit Reached:**
+**ï¿½ Limit Reached:**
 - Maximum submissions received
 - Auto-disabled
 - Can increase limit to reactivate

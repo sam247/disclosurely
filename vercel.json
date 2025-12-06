@@ -45,6 +45,17 @@
       "source": "/auth/signup",
       "destination": "/signup",
       "permanent": true
+    },
+    {
+      "source": "/(.*)",
+      "has": [
+        {
+          "type": "host",
+          "value": "docs.disclosurely.com"
+        }
+      ],
+      "destination": "https://disclosurely.com/docs/$1",
+      "permanent": true
     }
   ],
   "headers": [
@@ -69,7 +80,11 @@
     { "source": "/sitemap.xml", "destination": "/api/sitemap.xml" },
     { "source": "/sitemap-index.xml", "destination": "/api/sitemap-index.xml" },
     {
-      "source": "/((?!assets/|api/|_next/|favicon\\.ico|robots\\.txt|sitemap.*\\.xml|.*\\.[a-z]{2,4}$).*)",
+      "source": "/docs/:path*",
+      "destination": "https://docs-disclosurely.vercel.app/:path*"
+    },
+    {
+      "source": "/((?!assets/|api/|_next/|favicon\\.ico|robots\\.txt|sitemap.*\\.xml|docs/|.*\\.[a-z]{2,4}$).*)",
       "destination": "/index.html"
     }
   ]

@@ -13,7 +13,7 @@ head:
       content: website
   - - meta
     - property: og:image
-      content: https://docs.disclosurely.com/ogimage.png
+      content: https://disclosurely.com/docs/ogimage.png
   - - meta
     - name: twitter:card
       content: summary_large_image
@@ -25,7 +25,7 @@ head:
       content: Connect Disclosurely with webhooks, Zapier, email services, custom domains, and referral programs to streamline your whistleblowing workflow and extend platform capabilities.
   - - meta
     - name: twitter:image
-      content: https://docs.disclosurely.com/ogimage.png
+      content: https://disclosurely.com/docs/ogimage.png
 ---
 
 # Integrations & Extensions
@@ -633,7 +633,7 @@ Custom quote based on requirements. Contact: enterprise@disclosurely.com
 
 **For integration help:**
 - Email: integrations@disclosurely.com
-- Developer docs: docs.disclosurely.com/api
+- Developer docs: disclosurely.com/docs/api
 - Status page: status.disclosurely.com
 - Community forum: community.disclosurely.com
 

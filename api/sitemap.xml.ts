@@ -48,7 +48,7 @@ const STATIC_ROUTES = [
 ];
 
 const BASE_URL = 'https://disclosurely.com';
-const DOCS_URL = 'https://docs.disclosurely.com';
+const DOCS_URL = 'https://disclosurely.com/docs';
 
 // Helper function to recursively scan directory for markdown files
 async function scanDocsDirectory(dir: string, baseDir: string = dir): Promise<string[]> {

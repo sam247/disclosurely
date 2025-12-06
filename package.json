@@ -18,7 +18,8 @@
     "test:e2e:headed": "playwright test --headed",
     "test:e2e:debug": "playwright test --debug",
     "test:all": "npm run test:run && npm run test:e2e",
-    "playwright:install": "playwright install"
+    "playwright:install": "playwright install",
+    "fix-docs-links": "node scripts/fix-docs-links.js"
   },
   "dependencies": {
     "@contentful/rich-text-html-renderer": "^17.1.5",
