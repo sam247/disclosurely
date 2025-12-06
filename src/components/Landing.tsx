@@ -89,8 +89,34 @@ const Landing = () => {
 
       if (error) {
         console.error('[Landing] Edge function error:', error);
-        // Extract error message from error object
-        const errorMsg = error?.message || error?.error || JSON.stringify(error);
+        console.error('[Landing] Error details:', {
+          message: error.message,
+          context: error.context,
+          status: error.status,
+          name: error.name
+        });
+        
+        // Try to extract error message from various sources
+        let errorMsg = error?.message || 'Unknown error';
+        
+        // If error has context, try to parse it
+        if (error?.context && typeof error.context === 'object') {
+          const contextError = error.context as any;
+          if (contextError?.error) {
+            errorMsg = contextError.error;
+          } else if (contextError?.message) {
+            errorMsg = contextError.message;
+          }
+        }
+        
+        // If error message is generic, try to get more details
+        if (errorMsg === 'Edge Function returned a non-2xx status code' && data) {
+          // Sometimes the error response is in data even when error is set
+          if (data.error) {
+            errorMsg = data.error;
+          }
+        }
+        
         throw new Error(errorMsg);
       }
 

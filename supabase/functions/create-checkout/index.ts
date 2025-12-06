@@ -90,21 +90,43 @@ serve(async (req) => {
     // Validate Stripe secret key before creating Stripe instance
     const stripeSecretKey = Deno.env.get("STRIPE_SECRET_KEY");
     if (!stripeSecretKey) {
+      logStep("ERROR: STRIPE_SECRET_KEY not found in environment");
       throw new Error("STRIPE_SECRET_KEY environment variable is not set");
     }
+    
+    // Validate key format (should start with sk_)
+    if (!stripeSecretKey.startsWith("sk_")) {
+      logStep("ERROR: STRIPE_SECRET_KEY has invalid format", { 
+        keyPrefix: stripeSecretKey.substring(0, 10) + "..." 
+      });
+      throw new Error("STRIPE_SECRET_KEY has invalid format (should start with sk_)");
+    }
+    
+    logStep("Stripe key validated", { keyPrefix: stripeSecretKey.substring(0, 10) + "..." });
 
     const stripe = new Stripe(stripeSecretKey, { 
       apiVersion: "2023-10-16" 
     });
+    
+    logStep("Stripe instance created successfully");
 
-    // Check if customer exists
-    const customers = await stripe.customers.list({ email: userEmail, limit: 1 });
+    // Check if customer exists (only if we have an email)
     let customerId;
-    if (customers.data.length > 0) {
-      customerId = customers.data[0].id;
-      logStep("Existing customer found", { customerId });
+    if (userEmail && userEmail.trim() !== '') {
+      try {
+        const customers = await stripe.customers.list({ email: userEmail, limit: 1 });
+        if (customers.data.length > 0) {
+          customerId = customers.data[0].id;
+          logStep("Existing customer found", { customerId });
+        } else {
+          logStep("No existing customer found, will create in checkout");
+        }
+      } catch (stripeError: any) {
+        logStep("Error checking for existing customer (non-fatal)", { error: stripeError.message });
+        // Continue without customer ID - Stripe will create one during checkout
+      }
     } else {
-      logStep("Will create new customer in Stripe checkout");
+      logStep("No email provided, Stripe will collect email during checkout");
     }
 
     // Map tier and interval to Stripe price IDs
@@ -160,9 +182,8 @@ serve(async (req) => {
     
     logStep("Checkout URLs", { successUrl, cancelUrl, origin });
 
-    const session = await stripe.checkout.sessions.create({
-      customer: customerId || undefined,
-      customer_email: customerId ? undefined : (userEmail || undefined),
+    // Prepare checkout session parameters
+    const sessionParams: any = {
       line_items: [
         {
           price: priceId,
@@ -177,16 +198,36 @@ serve(async (req) => {
       cancel_url: cancelUrl,
       metadata: {
         user_id: userId || '',
-        email: userEmail,
+        email: userEmail || '',
         organization_id: organizationId || '',
         tier: tier,
         employee_count: employee_count.toString(),
         interval: interval === 'year' || interval === 'annual' ? 'year' : 'month',
-        rdt_cid: rdt_cid || null,
+        rdt_cid: rdt_cid || '',
         referral_code: referral_code || '',
         source: 'website'
       }
+    };
+
+    // Only set customer or customer_email if we have valid values
+    if (customerId) {
+      sessionParams.customer = customerId;
+      logStep("Using existing customer", { customerId });
+    } else if (userEmail && userEmail.trim() !== '') {
+      sessionParams.customer_email = userEmail;
+      logStep("Setting customer email", { email: userEmail });
+    } else {
+      logStep("No customer or email - Stripe will collect email during checkout");
+    }
+
+    logStep("Stripe session params", { 
+      hasCustomer: !!sessionParams.customer,
+      hasCustomerEmail: !!sessionParams.customer_email,
+      priceId,
+      mode: sessionParams.mode
     });
+
+    const session = await stripe.checkout.sessions.create(sessionParams);
 
     logStep("Checkout session created", { sessionId: session.id, url: session.url });
 
