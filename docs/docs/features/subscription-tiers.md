@@ -32,9 +32,9 @@ Choose the right plan for your organization's whistleblowing and compliance prog
 - 10 GB storage
 - 10 team members
 - Full analytics dashboard
-- [Custom branding](/admin/custom-branding)
-- [Assignment rules](/features/assignment-rules)
-- [SLA management](/features/sla-management)
+- [Custom branding](/docs/admin/custom-branding)
+- [Assignment rules](/docs/features/assignment-rules)
+- [SLA management](/docs/features/sla-management)
 - Priority email support
 - 1-year data retention
 
@@ -49,14 +49,14 @@ Choose the right plan for your organization's whistleblowing and compliance prog
 - 100 GB storage (expandable)
 - Unlimited team members
 - Advanced analytics & reporting
-- [Custom domains](/admin/custom-domains)
-- [AI case analysis](/ai/case-helper)
-- [Pattern detection](/ai/pattern-detection)
-- [Workflow automation](/features/workflow-engine)
+- [Custom domains](/docs/admin/custom-domains)
+- [AI case analysis](/docs/ai/case-helper)
+- [Pattern detection](/docs/ai/pattern-detection)
+- [Workflow automation](/docs/features/workflow-engine)
 - Dedicated support
 - Unlimited data retention
-- [GDPR request management](/features/gdpr-requests)
-- [Audit trail](/features/audit-trail)
+- [GDPR request management](/docs/features/gdpr-requests)
+- [Audit trail](/docs/features/audit-trail)
 - White-label branding
 
 **Price:** Contact sales
@@ -73,7 +73,7 @@ Choose the right plan for your organization's whistleblowing and compliance prog
 | Workflows | ❌ | Basic | Advanced |
 | Support | Email | Priority | Dedicated |
 
-**Learn More:** [Subscription Management](/admin/subscription-billing)
+**Learn More:** [Subscription Management](/docs/admin/subscription-billing)
 
 ## Support
 

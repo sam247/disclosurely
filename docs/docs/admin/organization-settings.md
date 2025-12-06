@@ -105,10 +105,10 @@ https://reports.yourcompany.com
 
 **Managing Your Links**:
 - Default subdomain is automatically generated from your organization name
-- Set up custom branded domains in [Custom Domains](/admin/custom-domains) settings
+- Set up custom branded domains in [Custom Domains](/docs/admin/custom-domains) settings
 - Create and manage multiple reporting links in the Link Generator
 - QR codes available for printing and distribution
-- See [Link Generator & Management](/admin/link-generator) for detailed link configuration
+- See [Link Generator & Management](/docs/admin/link-generator) for detailed link configuration
 
 ### Report Form Settings
 
@@ -187,7 +187,7 @@ Customize report categories:
 - Email notifications at each stage
 - Requires Pro or Enterprise plan
 
-See [GDPR Compliance](/compliance/gdpr) for details.
+See [GDPR Compliance](/docs/compliance/gdpr) for details.
 
 ## Notification Preferences
 
@@ -236,7 +236,7 @@ See [GDPR Compliance](/compliance/gdpr) for details.
 
 Subscription details are managed separately.
 
-See [Subscription & Billing](/admin/subscription-billing) for:
+See [Subscription & Billing](/docs/admin/subscription-billing) for:
 - Current plan details
 - Billing information
 - Upgrade/downgrade options
@@ -334,13 +334,13 @@ To delete:
 ## Getting Help
 
 **Questions about settings?**
-- [Contact Support](/support/contact)
-- [FAQs](/support/faqs)
+- [Contact Support](/docs/support/contact)
+- [FAQs](/docs/support/faqs)
 - Email: support@disclosurely.com
 
 ---
 
 **Next Steps:**
-- [Team Management](/admin/team-management)
-- [Custom Branding](/admin/custom-branding)
-- [Subscription & Billing](/admin/subscription-billing)
+- [Team Management](/docs/admin/team-management)
+- [Custom Branding](/docs/admin/custom-branding)
+- [Subscription & Billing](/docs/admin/subscription-billing)

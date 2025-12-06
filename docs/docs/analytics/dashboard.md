@@ -507,19 +507,19 @@ Resolution Rate = (Closed Cases / Total Cases) × 100
 - Export options include anonymization
 - Aggregate data safe for sharing
 
-**Learn More:** [Security Overview](/security/overview)
+**Learn More:** [Security Overview](/docs/security/overview)
 
 ## Related Pages
 
-- [Analytics Overview](/analytics/overview) - Introduction to analytics
-- [Statistics & Metrics](/analytics/statistics) - Detailed metrics guide
-- [Compliance Analytics](/analytics/compliance-analytics) - Regulatory reporting
-- [Pattern Detection](/ai/pattern-detection) - AI-powered insights
-- [Assignment Rules](/features/assignment-rules) - Automated case routing
+- [Analytics Overview](/docs/analytics/overview) - Introduction to analytics
+- [Statistics & Metrics](/docs/analytics/statistics) - Detailed metrics guide
+- [Compliance Analytics](/docs/analytics/compliance-analytics) - Regulatory reporting
+- [Pattern Detection](/docs/ai/pattern-detection) - AI-powered insights
+- [Assignment Rules](/docs/features/assignment-rules) - Automated case routing
 
 ## Support
 
 Need help with the dashboard?
 - Email: support@disclosurely.com
-- [Contact Support](/support/contact)
+- [Contact Support](/docs/support/contact)
 - [Video Tutorials](https://disclosurely.com/tutorials)

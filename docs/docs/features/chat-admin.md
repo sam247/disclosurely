@@ -14,5 +14,5 @@ Detailed documentation is being developed for this feature.
 ## Support
 
 - Email: support@disclosurely.com
-- [Contact Support](/support/contact)
-- [FAQs](/support/faqs)
+- [Contact Support](/docs/support/contact)
+- [FAQs](/docs/support/faqs)

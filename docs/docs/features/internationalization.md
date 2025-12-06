@@ -40,7 +40,7 @@ Disclosurely's internationalization (i18n) system ensures that whistleblowers wo
 
 **Access:** Automatically available on all plans
 
-**Learn More:** [Link Generator](/admin/link-generator) for language-specific portals
+**Learn More:** [Link Generator](/docs/admin/link-generator) for language-specific portals
 
 ## Supported Languages
 
@@ -113,7 +113,7 @@ When a reporter accesses your reporting portal, Disclosurely automatically detec
 
 **Detection Methods (Priority Order):**
 1. **URL Parameter** - `?lang=es` overrides all other detection
-2. **Link-Specific Language** - Language configured on [custom reporting link](/admin/link-generator)
+2. **Link-Specific Language** - Language configured on [custom reporting link](/docs/admin/link-generator)
 3. **Browser Language** - Reads `Accept-Language` header from browser
 4. **Geographic Location** - IP-based country detection (fallback only)
 5. **Organization Default** - Configured default language
@@ -154,7 +154,7 @@ Visible on all reporting portal pages:
 
 **Enforce Specific Languages:**
 
-Using the [Link Generator](/admin/link-generator), create reporting links that force a specific language:
+Using the [Link Generator](/docs/admin/link-generator), create reporting links that force a specific language:
 
 **Use Cases:**
 - Regional office links (French for Paris office)
@@ -181,7 +181,7 @@ https://yourorg.disclosurely.com/report?link=DEPT001&lang=es
 - Emails and notifications in that language
 - Prevents accidental language switching
 
-**Learn More:** [Link Generator & Management](/admin/link-generator)
+**Learn More:** [Link Generator & Management](/docs/admin/link-generator)
 
 ## What Gets Translated
 
@@ -354,7 +354,7 @@ For critical content, we recommend:
 - Native speaker verification
 - Cultural appropriateness review
 
-**Learn More:** [Organization Settings](/admin/organization-settings)
+**Learn More:** [Organization Settings](/docs/admin/organization-settings)
 
 ## Regional Variants
 
@@ -468,7 +468,7 @@ Control which languages are available to reporters:
 
 **Per-Link Configuration:**
 
-Each [custom reporting link](/admin/link-generator) can have unique language settings:
+Each [custom reporting link](/docs/admin/link-generator) can have unique language settings:
 
 **Configuration Options:**
 
@@ -647,7 +647,7 @@ Measure impact of targeted language outreach:
 - Allocate resources to high-need languages
 - Demonstrate inclusivity metrics to leadership
 
-**Learn More:** [Analytics Dashboard](/analytics/dashboard)
+**Learn More:** [Analytics Dashboard](/docs/analytics/dashboard)
 
 ## Accessibility Considerations
 
@@ -689,7 +689,7 @@ Languages tested with popular screen readers:
 - VoiceOver (macOS, iOS)
 - TalkBack (Android)
 
-**Learn More:** [Accessibility Features](/features/accessibility)
+**Learn More:** [Accessibility Features](/docs/features/accessibility)
 
 ## Troubleshooting
 
@@ -805,7 +805,7 @@ Use language-specific custom domains:
 
 **Setup:** Each custom domain requires separate configuration
 
-**Learn More:** [Custom Domains](/admin/custom-domains)
+**Learn More:** [Custom Domains](/docs/admin/custom-domains)
 
 ### Link Generator
 
@@ -825,7 +825,7 @@ Create targeted reporting portals by language:
 - Campaign targeting specific populations
 - Training materials in native languages
 
-**Learn More:** [Link Generator & Management](/admin/link-generator)
+**Learn More:** [Link Generator & Management](/docs/admin/link-generator)
 
 ### Email Notifications
 
@@ -844,7 +844,7 @@ Automatic email translation based on reporter language:
 - Customize for regional appropriateness
 - Include local contact information
 
-**Learn More:** [Notification System](/features/notifications)
+**Learn More:** [Notification System](/docs/features/notifications)
 
 ## Compliance Considerations
 
@@ -878,7 +878,7 @@ Enable all EU official languages for EU operations.
 - Demonstrates good faith compliance
 - Reduces barriers to reporting
 
-**Learn More:** [Compliance Overview](/compliance/overview)
+**Learn More:** [Compliance Overview](/docs/compliance/overview)
 
 ### Data Protection
 
@@ -897,7 +897,7 @@ Language selection constitutes personal data processing:
 - GDPR request portal multilingual
 - Data exports include language metadata
 
-**Learn More:** [GDPR Compliance](/compliance/gdpr)
+**Learn More:** [GDPR Compliance](/docs/compliance/gdpr)
 
 ## Future Enhancements
 
@@ -934,17 +934,17 @@ Email: product@disclosurely.com with language feature requests
 
 ## Related Pages
 
-- [Link Generator](/admin/link-generator) - Language-specific reporting links
-- [Organization Settings](/admin/organization-settings) - Language configuration
-- [Custom Domains](/admin/custom-domains) - Multilingual domain setup
-- [Notification System](/features/notifications) - Multilingual emails
-- [Analytics Dashboard](/analytics/dashboard) - Language usage metrics
-- [Compliance Overview](/compliance/overview) - Regulatory language requirements
+- [Link Generator](/docs/admin/link-generator) - Language-specific reporting links
+- [Organization Settings](/docs/admin/organization-settings) - Language configuration
+- [Custom Domains](/docs/admin/custom-domains) - Multilingual domain setup
+- [Notification System](/docs/features/notifications) - Multilingual emails
+- [Analytics Dashboard](/docs/analytics/dashboard) - Language usage metrics
+- [Compliance Overview](/docs/compliance/overview) - Regulatory language requirements
 
 ## Support
 
 Questions about language support?
 - Email: support@disclosurely.com
 - Translation issues: translations@disclosurely.com
-- [Contact Support](/support/contact)
+- [Contact Support](/docs/support/contact)
 - [Request New Language](mailto:support@disclosurely.com?subject=Language%20Request)

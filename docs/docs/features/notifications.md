@@ -122,16 +122,16 @@ Notifications appear in the application:
 - Click to navigate directly to case
 - Requires browser permission
 
-**Learn More:** [Team Management](/admin/team-management)
+**Learn More:** [Team Management](/docs/admin/team-management)
 
 ## Related Pages
 
-- [Secure Messaging](/reporting/secure-messaging)
-- [Assignment Rules](/features/assignment-rules)
-- [SLA Management](/features/sla-management)
-- [Team Management](/admin/team-management)
+- [Secure Messaging](/docs/reporting/secure-messaging)
+- [Assignment Rules](/docs/features/assignment-rules)
+- [SLA Management](/docs/features/sla-management)
+- [Team Management](/docs/admin/team-management)
 
 ## Support
 
 Email: support@disclosurely.com  
-[Contact Support](/support/contact)
+[Contact Support](/docs/support/contact)

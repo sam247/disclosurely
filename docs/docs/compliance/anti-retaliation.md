@@ -30,7 +30,7 @@ head:
 
 # Anti-Retaliation Measures
 
-Comprehensive protection mechanisms to prevent, detect, and respond to retaliation against whistleblowers. Anti-retaliation measures are critical for encouraging employees to report misconduct without fear of adverse consequences, as required by regulations including the [EU Whistleblowing Directive](/compliance/eu-directive) and [SOX](/compliance/sox).
+Comprehensive protection mechanisms to prevent, detect, and respond to retaliation against whistleblowers. Anti-retaliation measures are critical for encouraging employees to report misconduct without fear of adverse consequences, as required by regulations including the [EU Whistleblowing Directive](/docs/compliance/eu-directive) and [SOX](/docs/compliance/sox).
 
 ## What is Retaliation?
 
@@ -163,7 +163,7 @@ Dashboard > Settings > Policies > Anti-Retaliation Policy
 - Consequences of retaliation (personal and organizational)
 - Q&A scenarios
 
-**Track Training**: [Compliance Calendar](/compliance/calendar) monitors manager training completion
+**Track Training**: [Compliance Calendar](/docs/compliance/calendar) monitors manager training completion
 
 ### Leadership Commitment
 
@@ -191,12 +191,12 @@ Dashboard > Settings > Policies > Anti-Retaliation Policy
 - Tracking ID system for follow-up
 - No way to identify reporter from submission
 - Reporter can remain anonymous throughout investigation
-- See [Report Types](/reporting/report-types) for details
+- See [Report Types](/docs/reporting/report-types) for details
 
 **Confidential Reporting**:
 - Identity known only to authorized investigators
 - Encrypted storage of identity information
-- Access logged in [audit trail](/compliance/audit-trail)
+- Access logged in [audit trail](/docs/compliance/audit-trail)
 - Identity not disclosed without consent (except as legally required)
 - Need-to-know access only
 
@@ -290,7 +290,7 @@ Dashboard > Settings > Policies > Anti-Retaliation Policy
 - Generates retaliation concern report
 
 **Pattern Detection**:
-- [AI Pattern Detection](/ai/pattern-detection) identifies departments with retaliation patterns
+- [AI Pattern Detection](/docs/ai/pattern-detection) identifies departments with retaliation patterns
 - Flags managers with multiple retaliation concerns
 - Identifies serial retaliators
 - Trends analysis of retaliation complaints
@@ -456,7 +456,7 @@ Dashboard > Settings > Policies > Anti-Retaliation Policy
 - Required for regulatory compliance
 - Useful in litigation defense
 
-**Retention**: Retain retaliation investigation records per [data retention](/compliance/retention) policy (typically 7+ years)
+**Retention**: Retain retaliation investigation records per [data retention](/docs/compliance/retention) policy (typically 7+ years)
 
 ## Organizational Culture
 
@@ -550,8 +550,8 @@ Dashboard > Settings > Policies > Anti-Retaliation Policy
 
 ## Related Pages
 
-- [EU Whistleblowing Directive](/compliance/eu-directive) - Anti-retaliation requirements under EU law
-- [SOX Compliance](/compliance/sox) - SOX Section 806 whistleblower protections
-- [Security Overview](/security/overview) - Confidentiality and anonymity protections
-- [Case Assignment](/cases/assignment) - Proper case assignment to avoid conflicts in retaliation investigations
-- [Compliance Overview](/compliance/overview) - Overall compliance framework and best practices
+- [EU Whistleblowing Directive](/docs/compliance/eu-directive) - Anti-retaliation requirements under EU law
+- [SOX Compliance](/docs/compliance/sox) - SOX Section 806 whistleblower protections
+- [Security Overview](/docs/security/overview) - Confidentiality and anonymity protections
+- [Case Assignment](/docs/cases/assignment) - Proper case assignment to avoid conflicts in retaliation investigations
+- [Compliance Overview](/docs/compliance/overview) - Overall compliance framework and best practices

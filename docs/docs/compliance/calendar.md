@@ -34,7 +34,7 @@ The Compliance Calendar is your centralized system for tracking all whistleblowi
 
 ## What is the Compliance Calendar?
 
-Disclosurely's Compliance Calendar manages all time-sensitive compliance activities in one place, ensuring your organization meets regulatory deadlines and maintains ongoing compliance with [EU Directive](/compliance/eu-directive), [SOX](/compliance/sox), [GDPR](/compliance/gdpr), and other whistleblowing regulations.
+Disclosurely's Compliance Calendar manages all time-sensitive compliance activities in one place, ensuring your organization meets regulatory deadlines and maintains ongoing compliance with [EU Directive](/docs/compliance/eu-directive), [SOX](/docs/compliance/sox), [GDPR](/docs/compliance/gdpr), and other whistleblowing regulations.
 
 **Key Features**:
 - **Case Deadlines**: Track 7-day acknowledgment and 3-month feedback requirements
@@ -622,8 +622,8 @@ Create reusable milestone templates for case types:
 
 ## Related Pages
 
-- [EU Whistleblowing Directive](/compliance/eu-directive) - 7-day and 3-month deadline requirements
-- [SOX Compliance](/compliance/sox) - SOX record retention and audit requirements
-- [Data Retention](/compliance/retention) - Retention policies and automated deletion schedules
-- [Audit Trail](/compliance/audit-trail) - Comprehensive logging of all compliance activities
-- [Compliance Overview](/compliance/overview) - Overview of compliance framework and requirements
+- [EU Whistleblowing Directive](/docs/compliance/eu-directive) - 7-day and 3-month deadline requirements
+- [SOX Compliance](/docs/compliance/sox) - SOX record retention and audit requirements
+- [Data Retention](/docs/compliance/retention) - Retention policies and automated deletion schedules
+- [Audit Trail](/docs/compliance/audit-trail) - Comprehensive logging of all compliance activities
+- [Compliance Overview](/docs/compliance/overview) - Overview of compliance framework and requirements

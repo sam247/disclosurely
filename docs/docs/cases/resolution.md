@@ -107,7 +107,7 @@ Choose the appropriate standard for your case:
    - Time period involved
 
 2. **Summarize Evidence**
-   - [Evidence supporting allegation](/cases/evidence)
+   - [Evidence supporting allegation](/docs/cases/evidence)
    - Evidence contradicting allegation
    - Credibility of sources
    - Corroboration or lack thereof
@@ -377,7 +377,7 @@ Sometimes appropriate response is no action:
 - Implementation timeline
 
 **Appendices**:
-- [Evidence index](/cases/evidence)
+- [Evidence index](/docs/cases/evidence)
 - List of interviews conducted
 - Relevant policies
 - Timeline of events
@@ -424,7 +424,7 @@ Sometimes appropriate response is no action:
 
 ### To the Reporter
 
-Use [secure messaging](/reporting/secure-messaging) to communicate outcomes.
+Use [secure messaging](/docs/reporting/secure-messaging) to communicate outcomes.
 
 **What to Share**:
 - Investigation completed
@@ -638,12 +638,12 @@ Before changing status to Resolved:
 - Included in reports and analytics
 
 **Later Archiving**:
-- See [Case Archiving](/cases/archiving) for long-term storage
+- See [Case Archiving](/docs/cases/archiving) for long-term storage
 
 ---
 
 **Related:**
-- [Investigation Workflow](/cases/workflow)
-- [Case Notes & Evidence](/cases/evidence)
-- [Case Archiving](/cases/archiving)
-- [Compliance & Audit](/compliance/audit-trail)
+- [Investigation Workflow](/docs/cases/workflow)
+- [Case Notes & Evidence](/docs/cases/evidence)
+- [Case Archiving](/docs/cases/archiving)
+- [Compliance & Audit](/docs/compliance/audit-trail)

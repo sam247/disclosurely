@@ -32,7 +32,7 @@ head:
 
 Regulatory overview of the **General Data Protection Regulation (EU) 2016/679** in the context of whistleblowing systems. This page provides regulatory context, supervisory authority guidance, enforcement trends, and cross-border considerations.
 
-**For complete compliance implementation details**, see **[GDPR Compliance Guide](/compliance/gdpr)**.
+**For complete compliance implementation details**, see **[GDPR Compliance Guide](/docs/compliance/gdpr)**.
 
 ## Regulatory Background
 
@@ -215,7 +215,7 @@ Supervisory authorities consider (Article 83(2)):
 ### Notable GDPR Enforcement Cases Relevant to Whistleblowing
 
 **Data Security**:
-- British Airways (2020): £20 million fine for data breach affecting 400,000+ customers (reduced from £183 million) - Emphasizes importance of robust security in [Security Overview](/security/overview)
+- British Airways (2020): £20 million fine for data breach affecting 400,000+ customers (reduced from £183 million) - Emphasizes importance of robust security in [Security Overview](/docs/security/overview)
 - Marriott International (2020): £18.4 million fine for security failure - Inherited risk from acquisition
 
 **Data Subject Rights**:
@@ -236,7 +236,7 @@ Supervisory authorities consider (Article 83(2)):
 - Few direct penalties for whistleblowing system GDPR violations yet
 - But general principles apply: security, lawful basis, data subject rights
 - Growing attention to workplace investigations and employee privacy
-- Intersection with [EU Whistleblowing Directive](/regulatory/eu-directive) compliance
+- Intersection with [EU Whistleblowing Directive](/docs/regulatory/eu-directive) compliance
 
 ## Cross-Border Considerations
 
@@ -305,13 +305,13 @@ When using SCCs or other Article 46 safeguards, organizations must:
 - Regional data hosting (EU/US/other)
 - Granular access controls by region
 - Compliance with strictest standard by default
-- See [Compliance Overview](/compliance/overview) for multi-jurisdiction approach
+- See [Compliance Overview](/docs/compliance/overview) for multi-jurisdiction approach
 
 ## GDPR and EU Whistleblowing Directive Intersection
 
 ### Complementary Frameworks
 
-The [EU Whistleblowing Directive](/regulatory/eu-directive) and GDPR must both be respected:
+The [EU Whistleblowing Directive](/docs/regulatory/eu-directive) and GDPR must both be respected:
 
 **EU Directive Requirements**:
 - Confidentiality of reporter identity
@@ -333,7 +333,7 @@ The [EU Whistleblowing Directive](/regulatory/eu-directive) and GDPR must both b
 - Reporter identity is exempt from disclosure to subject (Article 23 GDPR allows restrictions)
 - Subject can access allegations against them but not source
 - Redaction of identifying information
-- Legal basis documented: [GDPR Compliance](/compliance/gdpr)
+- Legal basis documented: [GDPR Compliance](/docs/compliance/gdpr)
 
 ### Lawful Basis for Whistleblowing Processing
 
@@ -359,7 +359,7 @@ The [EU Whistleblowing Directive](/regulatory/eu-directive) and GDPR must both b
 **Approach**:
 - Define retention period based on purpose (investigation, legal claims, regulatory requirements)
 - Typically 3-7 years depending on jurisdiction and case type
-- Automated deletion after retention period: [Data Retention](/compliance/retention)
+- Automated deletion after retention period: [Data Retention](/docs/compliance/retention)
 - Document retention policy
 - Legal hold process for active litigation
 
@@ -428,7 +428,7 @@ Data Protection Impact Assessment (Article 35) required for:
 - **Role-based access**: Least privilege principle (integrity and confidentiality)
 - **Automated retention**: Storage limitation by default
 - **Audit trail**: Accountability and transparency
-- See [Security Overview](/security/overview)
+- See [Security Overview](/docs/security/overview)
 
 ### Regular Compliance Reviews
 
@@ -463,9 +463,9 @@ Data Protection Impact Assessment (Article 35) required for:
 
 ## Related Pages
 
-- **[GDPR Compliance Guide](/compliance/gdpr)** - Complete implementation guide with data subject rights procedures
-- [Data Retention](/compliance/retention) - Implement GDPR storage limitation principle
-- [Audit Trail](/compliance/audit-trail) - GDPR accountability and transparency
-- [Security Overview](/security/overview) - Technical measures for GDPR integrity and confidentiality
-- [Encryption](/security/encryption) - Data protection through encryption
-- [EU Whistleblowing Directive](/regulatory/eu-directive) - Complementary regulatory framework
+- **[GDPR Compliance Guide](/docs/compliance/gdpr)** - Complete implementation guide with data subject rights procedures
+- [Data Retention](/docs/compliance/retention) - Implement GDPR storage limitation principle
+- [Audit Trail](/docs/compliance/audit-trail) - GDPR accountability and transparency
+- [Security Overview](/docs/security/overview) - Technical measures for GDPR integrity and confidentiality
+- [Encryption](/docs/security/encryption) - Data protection through encryption
+- [EU Whistleblowing Directive](/docs/regulatory/eu-directive) - Complementary regulatory framework

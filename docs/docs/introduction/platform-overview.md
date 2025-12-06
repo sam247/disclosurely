@@ -47,30 +47,30 @@ Disclosurely is a complete whistleblowing and compliance solution that enables o
 
 ### 1. Anonymous Reporting System
 
-Our [anonymous reporting system](/reporting/report-types) is built on zero-knowledge architecture, meaning report content is encrypted client-side before it ever reaches our servers. Key features include:
+Our [anonymous reporting system](/docs/reporting/report-types) is built on zero-knowledge architecture, meaning report content is encrypted client-side before it ever reaches our servers. Key features include:
 
-- **End-to-End Encryption**: Reports are encrypted using [AES-256 encryption](/reporting/encryption) on the user's device
+- **End-to-End Encryption**: Reports are encrypted using [AES-256 encryption](/docs/reporting/encryption) on the user's device
 - **Anonymous Submission**: No personal information is collected or stored
-- **Secure Tracking**: Unique [tracking IDs](/reporting/tracking-report) (DIS-XXXXXXXX format) allow whistleblowers to check status
-- **Two-Way Messaging**: [Encrypted messaging](/reporting/secure-messaging) allows dialogue while maintaining anonymity
-- **File Attachments**: Support for [uploading evidence](/reporting/how-to-submit) securely
+- **Secure Tracking**: Unique [tracking IDs](/docs/reporting/tracking-report) (DIS-XXXXXXXX format) allow whistleblowers to check status
+- **Two-Way Messaging**: [Encrypted messaging](/docs/reporting/secure-messaging) allows dialogue while maintaining anonymity
+- **File Attachments**: Support for [uploading evidence](/docs/reporting/how-to-submit) securely
 - **Multi-Language Support**: Interface available in multiple languages
 
 ### 2. Case Management
 
-Comprehensive [case management tools](/cases/workflow) help your team efficiently handle and resolve reports:
+Comprehensive [case management tools](/docs/cases/workflow) help your team efficiently handle and resolve reports:
 
 - **Centralized Dashboard**: All reports in one place with powerful filtering and search
-- **Workflow Management**: Customizable workflows with [status tracking](/cases/status)
-- **Team Collaboration**: [Assign cases](/cases/assignment), add notes, and collaborate securely
+- **Workflow Management**: Customizable workflows with [status tracking](/docs/cases/status)
+- **Team Collaboration**: [Assign cases](/docs/cases/assignment), add notes, and collaborate securely
 - **Priority Management**: Set priority levels and manage workload distribution
 - **Status Timeline**: Track complete history of case status changes
-- **Soft Delete**: [Archive cases](/cases/archiving) with restore capability
+- **Soft Delete**: [Archive cases](/docs/cases/archiving) with restore capability
 - **Export Capabilities**: Export case data for analysis or reporting
 
 ### 3. AI-Powered Analysis
 
-Leverage [artificial intelligence](/ai/case-helper) to enhance your compliance program:
+Leverage [artificial intelligence](/docs/ai/case-helper) to enhance your compliance program:
 
 - **AI Case Helper**: Get AI-powered insights and recommendations for cases
 - **Pattern Detection**: Automatically identify patterns and trends across reports
@@ -86,13 +86,13 @@ Comprehensive compliance tools to manage policies, risks, and obligations:
 - **Policy Management**: Version-controlled policy library with acknowledgment tracking
 - **Risk Register**: Centralized risk assessment and mitigation tracking
 - **Compliance Calendar**: Deadline tracking for compliance obligations
-- **GDPR Automation**: Automated [data export and erasure request processing](/compliance/gdpr)
-- **Audit Logs**: [Tamper-evident audit trails](/compliance/audit-trail) with hash chain integrity
+- **GDPR Automation**: Automated [data export and erasure request processing](/docs/compliance/gdpr)
+- **Audit Logs**: [Tamper-evident audit trails](/docs/compliance/audit-trail) with hash chain integrity
 - **Compliance Scoring**: Track and measure your compliance posture
 
 ### 5. Security & Privacy
 
-Enterprise-grade [security protecting your most sensitive data](/security/overview):
+Enterprise-grade [security protecting your most sensitive data](/docs/security/overview):
 
 - **Zero-Knowledge Architecture**: We cannot access report content - ever
 - **End-to-End Encryption**: AES-256 encryption for all sensitive data
@@ -236,10 +236,10 @@ All customer data is stored securely in ISO 27001-certified data centers. We off
 Ready to get started with Disclosurely? Here's what to do next:
 
 1. **[Sign Up](https://disclosurely.com)** - Create your free account
-2. **[Initial Setup](/admin/initial-setup)** - Configure your organization
-3. **[Invite Your Team](/admin/team-management)** - Add team members
-4. **[Customize Branding](/admin/custom-branding)** - Make it yours
-5. **[Launch Reporting](/reporting/how-to-submit)** - Go live with secure reporting
+2. **[Initial Setup](/docs/admin/initial-setup)** - Configure your organization
+3. **[Invite Your Team](/docs/admin/team-management)** - Add team members
+4. **[Customize Branding](/docs/admin/custom-branding)** - Make it yours
+5. **[Launch Reporting](/docs/reporting/how-to-submit)** - Go live with secure reporting
 
 ## Support & Resources
 
@@ -247,12 +247,12 @@ Need help? We're here for you:
 
 - **Email**: support@disclosurely.com
 - **Documentation**: You're reading it!
-- **FAQs**: [Common questions answered](/support/faqs)
+- **FAQs**: [Common questions answered](/docs/support/faqs)
 - **Live Chat**: Available in the application
 
 ---
 
 **Next Steps:**
-- [Understanding Key Concepts](/introduction/key-concepts)
-- [Initial Setup Guide](/admin/initial-setup)
-- [Platform Security](/security/encryption)
+- [Understanding Key Concepts](/docs/introduction/key-concepts)
+- [Initial Setup Guide](/docs/admin/initial-setup)
+- [Platform Security](/docs/security/encryption)

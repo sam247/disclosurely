@@ -34,7 +34,7 @@ Automate case routing, assignment, escalation, and lifecycle management with Dis
 
 ## Overview
 
-The Workflow Engine is the orchestration layer that automates case handling from submission through resolution. By combining [assignment rules](/features/assignment-rules), [SLA policies](/features/sla-management), escalation triggers, and status workflows, the engine ensures consistent, timely, and efficient case processing.
+The Workflow Engine is the orchestration layer that automates case handling from submission through resolution. By combining [assignment rules](/docs/features/assignment-rules), [SLA policies](/docs/features/sla-management), escalation triggers, and status workflows, the engine ensures consistent, timely, and efficient case processing.
 
 **Key Capabilities:**
 - Automatic case assignment based on rules
@@ -43,7 +43,7 @@ The Workflow Engine is the orchestration layer that automates case handling from
 - Status workflow automation
 - Deadline tracking and alerts
 - Load balancing across team members
-- Integration with [analytics](/analytics/dashboard) and [audit trail](/features/audit-trail)
+- Integration with [analytics](/docs/analytics/dashboard) and [audit trail](/docs/features/audit-trail)
 - Configurable business logic
 
 **Access:** Dashboard > Workflows
@@ -59,14 +59,14 @@ The Workflow Engine is the orchestration layer that automates case handling from
 - Workflow engine triggered
 
 **2. Automatic Assignment**
-- Engine evaluates [assignment rules](/features/assignment-rules)
+- Engine evaluates [assignment rules](/docs/features/assignment-rules)
 - Matches case attributes (category, urgency, keywords, department)
 - Identifies best-fit investigator or team
 - Assigns case automatically
 - Sends notification to assignee
 
 **3. SLA Clock Starts**
-- [SLA policy](/features/sla-management) determines timeline based on priority
+- [SLA policy](/docs/features/sla-management) determines timeline based on priority
 - Response deadline calculated
 - Investigation deadline set
 - Countdown begins
@@ -93,7 +93,7 @@ The Workflow Engine is the orchestration layer that automates case handling from
 - Case closed
 - Retention policy applied
 
-**Learn More:** [Case Workflow](/cases/workflow)
+**Learn More:** [Case Workflow](/docs/cases/workflow)
 
 ### Workflow Components
 
@@ -171,7 +171,7 @@ The Workflow Engine is the orchestration layer that automates case handling from
 - **Assign To:** On-call investigator (rotation)
 - **Priority:** 3
 
-**Learn More:** [Assignment Rules Guide](/features/assignment-rules)
+**Learn More:** [Assignment Rules Guide](/docs/features/assignment-rules)
 
 ### SLA Policies
 
@@ -211,7 +211,7 @@ The Workflow Engine is the orchestration layer that automates case handling from
 - Add holiday calendar
 - SLA clock pauses outside business hours
 
-**Learn More:** [SLA Management Guide](/features/sla-management)
+**Learn More:** [SLA Management Guide](/docs/features/sla-management)
 
 ### Escalation Rules
 
@@ -224,7 +224,7 @@ The Workflow Engine is the orchestration layer that automates case handling from
    - Extended deadline breached
 
 2. **Risk-Based:**
-   - High-risk case detected ([AI risk assessment](/ai/risk-assessment))
+   - High-risk case detected ([AI risk assessment](/docs/ai/risk-assessment))
    - Retaliation allegation
    - Executive involvement
    - Media attention risk
@@ -323,7 +323,7 @@ Any Status → Archived (retention policy)
 - Analyze escalation patterns
 - Optimize rules
 
-**Learn More:** [Audit Trail](/features/audit-trail)
+**Learn More:** [Audit Trail](/docs/features/audit-trail)
 
 ### Workflow Analytics
 
@@ -355,7 +355,7 @@ Any Status → Archived (retention policy)
 
 **Access:** Dashboard > Analytics > Workflows
 
-**Learn More:** [Analytics Dashboard](/analytics/dashboard)
+**Learn More:** [Analytics Dashboard](/docs/analytics/dashboard)
 
 ### Real-Time Monitoring
 
@@ -430,7 +430,7 @@ Trigger multiple workflows concurrently:
 - **Workflow A:** Assign to senior investigator
 - **Workflow B:** Notify audit committee
 - **Workflow C:** Alert legal department
-- **Workflow D:** Trigger [AI risk assessment](/ai/risk-assessment)
+- **Workflow D:** Trigger [AI risk assessment](/docs/ai/risk-assessment)
 - **Workflow E:** Set 4-hour response SLA
 
 **Synchronization:**
@@ -483,7 +483,7 @@ Trigger actions in integrated systems:
 - Receive response and act accordingly
 - Retry logic for failed calls
 
-**Learn More:** [Integrations](/integrations/coming-soon)
+**Learn More:** [Integrations](/docs/integrations/coming-soon)
 
 ## Workflow Best Practices
 
@@ -562,7 +562,7 @@ Trigger actions in integrated systems:
 - Communicate workflow changes clearly
 
 ✅ **Data-Driven Decisions:**
-- Use [analytics](/analytics/dashboard) to identify issues
+- Use [analytics](/docs/analytics/dashboard) to identify issues
 - Track KPIs (assignment time, SLA compliance, escalation rate)
 - Compare before/after workflow changes
 - Make incremental improvements
@@ -716,18 +716,18 @@ Trigger actions in integrated systems:
 
 ## Related Pages
 
-- [Assignment Rules](/features/assignment-rules) - Detailed assignment configuration
-- [SLA Management](/features/sla-management) - SLA policy setup
-- [Case Workflow](/cases/workflow) - Investigation lifecycle
-- [Analytics Dashboard](/analytics/dashboard) - Workflow performance metrics
-- [Audit Trail](/features/audit-trail) - Workflow history logging
-- [AI Risk Assessment](/ai/risk-assessment) - AI-powered escalation
-- [Pattern Detection](/ai/pattern-detection) - Systemic issue identification
+- [Assignment Rules](/docs/features/assignment-rules) - Detailed assignment configuration
+- [SLA Management](/docs/features/sla-management) - SLA policy setup
+- [Case Workflow](/docs/cases/workflow) - Investigation lifecycle
+- [Analytics Dashboard](/docs/analytics/dashboard) - Workflow performance metrics
+- [Audit Trail](/docs/features/audit-trail) - Workflow history logging
+- [AI Risk Assessment](/docs/ai/risk-assessment) - AI-powered escalation
+- [Pattern Detection](/docs/ai/pattern-detection) - Systemic issue identification
 
 ## Support
 
 Questions about workflow automation?
 - Email: support@disclosurely.com
-- [Contact Support](/support/contact)
+- [Contact Support](/docs/support/contact)
 - [Schedule Demo](https://disclosurely.com/demo)
 - [Video Tutorials](https://disclosurely.com/tutorials/workflows)

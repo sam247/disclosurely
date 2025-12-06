@@ -84,7 +84,7 @@ Disclosurely uses Advanced Encryption Standard (AES) with 256-bit keys, the same
 - **Reporter identity**: Separately encrypted for confidential reports
 - **Zero-knowledge**: Disclosurely cannot decrypt without authorization
 
-Learn more about report-specific encryption in the [Report Encryption](/reporting/encryption) documentation.
+Learn more about report-specific encryption in the [Report Encryption](/docs/reporting/encryption) documentation.
 
 ## Zero-Knowledge Architecture
 
@@ -261,7 +261,7 @@ Disclosurely implements privacy by design throughout the platform:
 - Informed consent for data processing
 - Easy exercise of privacy rights
 
-Learn more about GDPR compliance in the [GDPR Compliance](/compliance/gdpr) documentation.
+Learn more about GDPR compliance in the [GDPR Compliance](/docs/compliance/gdpr) documentation.
 
 ## Data Protection Best Practices
 
@@ -302,7 +302,7 @@ Learn more about GDPR compliance in the [GDPR Compliance](/compliance/gdpr) docu
 
 ## Related Pages
 
-- [Security Overview](/security/overview) - Comprehensive security architecture
-- [Report Encryption](/reporting/encryption) - How report encryption works
-- [GDPR Compliance](/compliance/gdpr) - Privacy regulation compliance
-- [Authentication](/security/authentication) - Secure access controls
+- [Security Overview](/docs/security/overview) - Comprehensive security architecture
+- [Report Encryption](/docs/reporting/encryption) - How report encryption works
+- [GDPR Compliance](/docs/compliance/gdpr) - Privacy regulation compliance
+- [Authentication](/docs/security/authentication) - Secure access controls

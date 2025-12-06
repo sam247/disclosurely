@@ -47,7 +47,7 @@ The Disclosurely Referral Program rewards you for helping other organizations im
 
 **Availability:** All plan levels (Free, Starter, Pro, Enterprise)
 
-**Learn More:** [Subscription Tiers](/features/subscription-tiers)
+**Learn More:** [Subscription Tiers](/docs/features/subscription-tiers)
 
 ## How the Referral Program Works
 
@@ -487,7 +487,7 @@ If referring as business entity:
 - Not shared publicly without permission
 - Opt-in to leaderboard display
 
-**Learn More:** [Privacy Policy](/legal/privacy)
+**Learn More:** [Privacy Policy](/docs/legal/privacy)
 
 ## Referral Program Analytics
 
@@ -715,7 +715,7 @@ Instead of `disclosurely.com/signup?ref=ABC123`, use:
 - Brand consistency
 - Professional appearance
 
-**Learn More:** [Custom Domains](/admin/custom-domains)
+**Learn More:** [Custom Domains](/docs/admin/custom-domains)
 
 ### Analytics Integration
 
@@ -731,7 +731,7 @@ Connect referral program to your analytics:
 
 **Setup:** Dashboard > Referral Program > Integrations
 
-**Learn More:** [Analytics Dashboard](/analytics/dashboard)
+**Learn More:** [Analytics Dashboard](/docs/analytics/dashboard)
 
 ## Success Stories
 
@@ -792,15 +792,15 @@ Connect referral program to your analytics:
 
 ## Related Pages
 
-- [Subscription Tiers](/features/subscription-tiers) - Plan comparison
-- [Organization Settings](/admin/organization-settings) - Account management
-- [Analytics Dashboard](/analytics/dashboard) - Referral tracking
-- [Custom Domains](/admin/custom-domains) - Branded landing pages
+- [Subscription Tiers](/docs/features/subscription-tiers) - Plan comparison
+- [Organization Settings](/docs/admin/organization-settings) - Account management
+- [Analytics Dashboard](/docs/analytics/dashboard) - Referral tracking
+- [Custom Domains](/docs/admin/custom-domains) - Branded landing pages
 
 ## Support
 
 Questions about the referral program?
 - Email: referrals@disclosurely.com
 - Partnership inquiries: partnerships@disclosurely.com
-- [Contact Support](/support/contact)
+- [Contact Support](/docs/support/contact)
 - [Referral Program FAQ](https://disclosurely.com/referrals/faq)

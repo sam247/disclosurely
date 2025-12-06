@@ -534,10 +534,10 @@ Ready to try the AI Case Helper?
 ## Support
 
 **Need help with AI Helper?**
-- [AI Feature Guide](/ai/content-generation)
-- [Pattern Detection](/ai/pattern-detection)
-- [Risk Assessment](/ai/risk-assessment)
-- [Contact Support](/support/contact)
+- [AI Feature Guide](/docs/ai/content-generation)
+- [Pattern Detection](/docs/ai/pattern-detection)
+- [Risk Assessment](/docs/ai/risk-assessment)
+- [Contact Support](/docs/support/contact)
 
 ---
 

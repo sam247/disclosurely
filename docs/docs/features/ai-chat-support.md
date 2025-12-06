@@ -596,10 +596,10 @@ Ready to try AI Chat Support?
 - Request new features
 
 **Related Resources**:
-- [AI Case Helper](/ai/case-helper) - AI for case analysis
-- [Support FAQs](/support/faqs)
-- [Contact Support](/support/contact)
-- [Troubleshooting Guide](/support/troubleshooting)
+- [AI Case Helper](/docs/ai/case-helper) - AI for case analysis
+- [Support FAQs](/docs/support/faqs)
+- [Contact Support](/docs/support/contact)
+- [Troubleshooting Guide](/docs/support/troubleshooting)
 
 ---
 

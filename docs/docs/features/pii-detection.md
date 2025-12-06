@@ -9,7 +9,7 @@ Automatically detect and redact personally identifiable information to protect p
 
 ## Overview
 
-Disclosurely's PII detection system automatically identifies and redacts sensitive personal information before AI analysis, ensuring compliance with privacy regulations like [GDPR](/compliance/gdpr) while still enabling powerful AI insights.
+Disclosurely's PII detection system automatically identifies and redacts sensitive personal information before AI analysis, ensuring compliance with privacy regulations like [GDPR](/docs/compliance/gdpr) while still enabling powerful AI insights.
 
 **How It Works:**
 1. Reporter submits case
@@ -89,7 +89,7 @@ Before submitting to AI, reporters/handlers see:
 - List of detected PII types
 - Option to proceed or cancel
 
-**Learn More:** [AI Case Helper](/ai/case-helper)
+**Learn More:** [AI Case Helper](/docs/ai/case-helper)
 
 ## Privacy & Compliance
 
@@ -103,9 +103,9 @@ Before submitting to AI, reporters/handlers see:
 - Redacted versions for AI
 - Audit trail of PII access
 
-**Learn More:** [GDPR Compliance](/compliance/gdpr) | [Security Overview](/security/overview)
+**Learn More:** [GDPR Compliance](/docs/compliance/gdpr) | [Security Overview](/docs/security/overview)
 
 ## Support
 
 Email: support@disclosurely.com  
-[Contact Support](/support/contact)
+[Contact Support](/docs/support/contact)

@@ -72,7 +72,7 @@ Case Handlers have broad access to view and manage all cases across the organiza
    - Note investigators who may need support
    - Check for pending reporter responses
 
-Learn the complete investigation process in [Investigation Workflow](/cases/workflow).
+Learn the complete investigation process in [Investigation Workflow](/docs/cases/workflow).
 
 ### Core Responsibilities
 
@@ -110,7 +110,7 @@ Learn the complete investigation process in [Investigation Workflow](/cases/work
 - Provide assignment instructions and context
 - Set expected completion timeline
 
-See detailed assignment guidance in [Case Assignment](/cases/assignment).
+See detailed assignment guidance in [Case Assignment](/docs/cases/assignment).
 
 ### Managing Active Investigations
 
@@ -138,7 +138,7 @@ See detailed assignment guidance in [Case Assignment](/cases/assignment).
 - Approve timeline extensions when justified
 - Maintain audit-ready compliance records
 
-Learn about status tracking in [Status Management](/cases/status).
+Learn about status tracking in [Status Management](/docs/cases/status).
 
 ## Caseload Management
 
@@ -221,7 +221,7 @@ Learn about status tracking in [Status Management](/cases/status).
 - Set reasonable deadline for response
 - Explain how information will be used
 - Maintain reporter confidentiality
-- Use [secure messaging](/reporting/secure-messaging) only
+- Use [secure messaging](/docs/reporting/secure-messaging) only
 - Thank reporter for their patience and cooperation
 
 **Status Updates:**
@@ -297,7 +297,7 @@ Learn about status tracking in [Status Management](/cases/status).
 - Reporter notification of outcome
 - Compliance certification
 
-Learn more in [Case Notes & Evidence](/cases/evidence) documentation.
+Learn more in [Case Notes & Evidence](/docs/cases/evidence) documentation.
 
 ### Documentation Best Practices
 
@@ -471,16 +471,16 @@ Learn more in [Case Notes & Evidence](/cases/evidence) documentation.
 - Escalate concerns appropriately
 
 **Resources:**
-- [Investigation Workflow](/cases/workflow) - Complete investigation guide
-- [Case Assignment](/cases/assignment) - Assignment strategies
-- [Status Management](/cases/status) - Tracking and updating cases
-- [Case Notes & Evidence](/cases/evidence) - Documentation requirements
+- [Investigation Workflow](/docs/cases/workflow) - Complete investigation guide
+- [Case Assignment](/docs/cases/assignment) - Assignment strategies
+- [Status Management](/docs/cases/status) - Tracking and updating cases
+- [Case Notes & Evidence](/docs/cases/evidence) - Documentation requirements
 
 ---
 
 ## Related Pages
 
-- [Investigation Workflow](/cases/workflow) - Complete investigation process
-- [Case Assignment](/cases/assignment) - Effective case distribution
-- [Status Management](/cases/status) - Tracking case progress
-- [Case Notes & Evidence](/cases/evidence) - Documentation best practices
+- [Investigation Workflow](/docs/cases/workflow) - Complete investigation process
+- [Case Assignment](/docs/cases/assignment) - Effective case distribution
+- [Status Management](/docs/cases/status) - Tracking case progress
+- [Case Notes & Evidence](/docs/cases/evidence) - Documentation best practices

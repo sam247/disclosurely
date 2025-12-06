@@ -39,9 +39,9 @@ Disclosurely is built for GDPR compliance:
 - **Privacy by design**: GDPR principles built-in
 - **Data minimization**: Collect only what's needed
 - **Purpose limitation**: Use data only for investigations
-- **Storage limitation**: [Automated retention and deletion](/compliance/retention)
-- **Integrity and confidentiality**: [Military-grade encryption](/security/overview)
-- **Accountability**: [Comprehensive audit trails](/compliance/audit-trail)
+- **Storage limitation**: [Automated retention and deletion](/docs/compliance/retention)
+- **Integrity and confidentiality**: [Military-grade encryption](/docs/security/overview)
+- **Accountability**: [Comprehensive audit trails](/docs/compliance/audit-trail)
 
 ## GDPR Principles in Disclosurely
 
@@ -127,7 +127,7 @@ Disclosurely is built for GDPR compliance:
 
 **Automated Deletion**:
 - System calculates deletion date
-- [Alerts before deletion](/cases/archiving)
+- [Alerts before deletion](/docs/cases/archiving)
 - Requires approval
 - Secure destruction
 - Deletion certificate generated
@@ -135,7 +135,7 @@ Disclosurely is built for GDPR compliance:
 ### Integrity and Confidentiality
 
 **Encryption**:
-- [AES-256 encryption at rest](/reporting/encryption)
+- [AES-256 encryption at rest](/docs/reporting/encryption)
 - TLS 1.3 for data in transit
 - Zero-knowledge architecture
 - End-to-end encryption
@@ -146,7 +146,7 @@ Disclosurely is built for GDPR compliance:
 - Least privilege principle
 - Multi-factor authentication
 - Session management
-- Access logged in [audit trail](/compliance/audit-trail)
+- Access logged in [audit trail](/docs/compliance/audit-trail)
 
 **Security Measures**:
 - ISO 27001 certified
@@ -728,7 +728,7 @@ Disclosurely is built for GDPR compliance:
 ---
 
 **Related:**
-- [Audit Trail](/compliance/audit-trail)
-- [Data Retention](/compliance/retention)
-- [Security Overview](/security/overview)
-- [Privacy & Encryption](/reporting/encryption)
+- [Audit Trail](/docs/compliance/audit-trail)
+- [Data Retention](/docs/compliance/retention)
+- [Security Overview](/docs/security/overview)
+- [Privacy & Encryption](/docs/reporting/encryption)

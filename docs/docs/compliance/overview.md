@@ -30,7 +30,7 @@ head:
 
 # Compliance Overview
 
-Comprehensive guide to whistleblowing compliance, regulatory requirements, and best practices. Understand how Disclosurely helps your organization meet legal obligations under multiple jurisdictions including [EU Whistleblowing Directive](/compliance/eu-directive), [SOX](/compliance/sox), and [GDPR](/compliance/gdpr).
+Comprehensive guide to whistleblowing compliance, regulatory requirements, and best practices. Understand how Disclosurely helps your organization meet legal obligations under multiple jurisdictions including [EU Whistleblowing Directive](/docs/compliance/eu-directive), [SOX](/docs/compliance/sox), and [GDPR](/docs/compliance/gdpr).
 
 ## Whistleblowing Compliance Framework
 
@@ -67,7 +67,7 @@ Comprehensive guide to whistleblowing compliance, regulatory requirements, and b
 - Accessible to all employees and relevant stakeholders
 
 **Timely Response**:
-- Acknowledgment within 7 days ([EU Directive](/compliance/eu-directive))
+- Acknowledgment within 7 days ([EU Directive](/docs/compliance/eu-directive))
 - Feedback within 3 months (or 6 for complex cases)
 - Prompt investigation commencement
 - Regular status updates to reporter
@@ -85,11 +85,11 @@ Comprehensive guide to whistleblowing compliance, regulatory requirements, and b
 - Detection and monitoring
 - Investigation of retaliation claims
 - Remedies for affected whistleblowers
-- See [Anti-Retaliation Measures](/compliance/anti-retaliation)
+- See [Anti-Retaliation Measures](/docs/compliance/anti-retaliation)
 
 **Documentation and Record-Keeping**:
 - Comprehensive case records
-- [Audit trail](/compliance/audit-trail) of all actions
+- [Audit trail](/docs/compliance/audit-trail) of all actions
 - Evidence management
 - Retention per regulatory requirements (typically 7 years)
 - Deletion certificates when records destroyed
@@ -119,7 +119,7 @@ Comprehensive guide to whistleblowing compliance, regulatory requirements, and b
 - Anti-retaliation measures
 - Record-keeping
 
-**Disclosurely Compliance**: Fully compliant by design with automated acknowledgments, timeline tracking, and comprehensive audit trails. See [EU Whistleblowing Directive](/compliance/eu-directive).
+**Disclosurely Compliance**: Fully compliant by design with automated acknowledgments, timeline tracking, and comprehensive audit trails. See [EU Whistleblowing Directive](/docs/compliance/eu-directive).
 
 ### Sarbanes-Oxley Act (SOX)
 
@@ -136,7 +136,7 @@ Comprehensive guide to whistleblowing compliance, regulatory requirements, and b
 - Whistleblower protection from retaliation
 - 7-year record retention
 
-**Disclosurely Compliance**: SOX-compliant anonymous reporting, audit committee dashboards, 7-year retention policies. See [SOX Compliance](/compliance/sox).
+**Disclosurely Compliance**: SOX-compliant anonymous reporting, audit committee dashboards, 7-year retention policies. See [SOX Compliance](/docs/compliance/sox).
 
 ### GDPR
 
@@ -153,7 +153,7 @@ Comprehensive guide to whistleblowing compliance, regulatory requirements, and b
 - Data processing agreements
 - Privacy by design
 
-**Disclosurely Compliance**: GDPR-compliant data processing, encryption, retention management, data subject rights tools. See [GDPR Compliance](/compliance/gdpr).
+**Disclosurely Compliance**: GDPR-compliant data processing, encryption, retention management, data subject rights tools. See [GDPR Compliance](/docs/compliance/gdpr).
 
 ### Other Jurisdictions
 
@@ -185,7 +185,7 @@ Comprehensive guide to whistleblowing compliance, regulatory requirements, and b
 
 **Automated Compliance**:
 - Instant acknowledgment emails
-- [Compliance calendar](/compliance/calendar) tracks all deadlines
+- [Compliance calendar](/docs/compliance/calendar) tracks all deadlines
 - Automated reminders before deadlines
 - Timeline tracking with alerts
 - Compliance dashboard showing status
@@ -250,7 +250,7 @@ Comprehensive guide to whistleblowing compliance, regulatory requirements, and b
 - Automated deletion workflows
 - Legal hold capabilities
 - Deletion certificates
-- See [Data Retention](/compliance/retention)
+- See [Data Retention](/docs/compliance/retention)
 
 ## Compliance Workflow
 
@@ -269,13 +269,13 @@ Comprehensive guide to whistleblowing compliance, regulatory requirements, and b
 - Contact information shared
 
 **3. Case Assignment**
-- [Case assignment](/cases/assignment) to appropriate investigator
+- [Case assignment](/docs/cases/assignment) to appropriate investigator
 - Conflict of interest checks
 - Impartial investigator designated
 - Resources allocated based on risk level
 
 **4. Investigation**
-- [Investigation workflow](/cases/workflow) guides process
+- [Investigation workflow](/docs/cases/workflow) guides process
 - Evidence collection and documentation
 - Witness interviews
 - Analysis and fact-finding
@@ -292,7 +292,7 @@ Comprehensive guide to whistleblowing compliance, regulatory requirements, and b
 - Disciplinary or remedial actions
 - Feedback provided to reporter
 - Outcome documented
-- [Case resolution](/cases/resolution) recorded
+- [Case resolution](/docs/cases/resolution) recorded
 
 **7. Ongoing Monitoring**
 - Monitor for retaliation
@@ -302,7 +302,7 @@ Comprehensive guide to whistleblowing compliance, regulatory requirements, and b
 - Continuous improvement
 
 **8. Retention and Archiving**
-- [Case archiving](/cases/archiving) per retention policy
+- [Case archiving](/docs/cases/archiving) per retention policy
 - Secure storage (typically 7 years)
 - Legal holds if needed
 - Eventual secure deletion
@@ -382,7 +382,7 @@ Comprehensive guide to whistleblowing compliance, regulatory requirements, and b
 - Managers: Recognizing misconduct, anti-retaliation, culture
 - Investigators: Investigation techniques, compliance requirements
 - Annual refresher training
-- Track completion via [compliance calendar](/compliance/calendar)
+- Track completion via [compliance calendar](/docs/compliance/calendar)
 
 **Clear Policies**:
 - Whistleblowing policy
@@ -391,7 +391,7 @@ Comprehensive guide to whistleblowing compliance, regulatory requirements, and b
 - Investigation procedures
 - Confidentiality policy
 - Data retention policy
-- See [Policy Management](/compliance/policies)
+- See [Policy Management](/docs/compliance/policies)
 
 **Communication**:
 - Publicize reporting channels (intranet, posters, handbook)
@@ -408,7 +408,7 @@ Comprehensive guide to whistleblowing compliance, regulatory requirements, and b
 - Department risk assessment
 - Serial offender detection
 - Retaliation monitoring
-- Use [AI Pattern Detection](/ai/pattern-detection)
+- Use [AI Pattern Detection](/docs/ai/pattern-detection)
 
 **Proactive Assessments**:
 - Regular compliance audits
@@ -593,9 +593,9 @@ Comprehensive guide to whistleblowing compliance, regulatory requirements, and b
 - Inadequate resources
 
 **Solutions**:
-- Use [compliance calendar](/compliance/calendar) automated reminders
+- Use [compliance calendar](/docs/compliance/calendar) automated reminders
 - Allocate adequate investigation resources
-- [Case assignment](/cases/assignment) based on complexity and capacity
+- [Case assignment](/docs/cases/assignment) based on complexity and capacity
 - Extension requests documented and justified
 - Escalation processes for at-risk cases
 
@@ -609,7 +609,7 @@ Comprehensive guide to whistleblowing compliance, regulatory requirements, and b
 
 **Solutions**:
 - Emphasize anonymous reporting option
-- Enhanced [anti-retaliation](/compliance/anti-retaliation) training
+- Enhanced [anti-retaliation](/docs/compliance/anti-retaliation) training
 - Swift, visible consequences for retaliation
 - Proactive monitoring and check-ins
 - Leadership reinforcement of protections
@@ -625,7 +625,7 @@ Comprehensive guide to whistleblowing compliance, regulatory requirements, and b
 **Solutions**:
 - Investigator training on documentation standards
 - Templates and checklists in Disclosurely
-- [Investigation workflow](/cases/workflow) guides documentation
+- [Investigation workflow](/docs/cases/workflow) guides documentation
 - Quality review before case closure
 - Audit trail captures system actions automatically
 
@@ -635,7 +635,7 @@ Comprehensive guide to whistleblowing compliance, regulatory requirements, and b
 - In-app help and tutorials
 - Comprehensive documentation
 - Customer success team
-- [Contact support](/support/contact) for assistance
+- [Contact support](/docs/support/contact) for assistance
 - Training and onboarding
 
 **Regulatory Resources**:
@@ -655,10 +655,10 @@ Comprehensive guide to whistleblowing compliance, regulatory requirements, and b
 
 ## Related Pages
 
-- [EU Whistleblowing Directive](/compliance/eu-directive) - Complete EU compliance guide
-- [SOX Compliance](/compliance/sox) - Sarbanes-Oxley requirements
-- [GDPR Compliance](/compliance/gdpr) - Data protection and privacy
-- [Anti-Retaliation Measures](/compliance/anti-retaliation) - Protect whistleblowers from retaliation
-- [Compliance Calendar](/compliance/calendar) - Track all compliance deadlines
-- [Audit Trail](/compliance/audit-trail) - Comprehensive audit logging
-- [Risk Management](/compliance/risks) - Identify and mitigate compliance risks
+- [EU Whistleblowing Directive](/docs/compliance/eu-directive) - Complete EU compliance guide
+- [SOX Compliance](/docs/compliance/sox) - Sarbanes-Oxley requirements
+- [GDPR Compliance](/docs/compliance/gdpr) - Data protection and privacy
+- [Anti-Retaliation Measures](/docs/compliance/anti-retaliation) - Protect whistleblowers from retaliation
+- [Compliance Calendar](/docs/compliance/calendar) - Track all compliance deadlines
+- [Audit Trail](/docs/compliance/audit-trail) - Comprehensive audit logging
+- [Risk Management](/docs/compliance/risks) - Identify and mitigate compliance risks

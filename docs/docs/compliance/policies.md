@@ -30,7 +30,7 @@ head:
 
 # Policy Management
 
-Comprehensive policy lifecycle management for whistleblowing and compliance policies. Create, distribute, track acknowledgments, maintain versions, and ensure organizational alignment with regulatory requirements including [EU Directive](/compliance/eu-directive), [SOX](/compliance/sox), and [GDPR](/compliance/gdpr).
+Comprehensive policy lifecycle management for whistleblowing and compliance policies. Create, distribute, track acknowledgments, maintain versions, and ensure organizational alignment with regulatory requirements including [EU Directive](/docs/compliance/eu-directive), [SOX](/docs/compliance/sox), and [GDPR](/docs/compliance/gdpr).
 
 ## Why Policy Management Matters
 
@@ -87,7 +87,7 @@ Comprehensive policy lifecycle management for whistleblowing and compliance poli
 
 **Confidentiality and Data Protection**:
 - Reporter identity protection
-- Data processing and [GDPR compliance](/compliance/gdpr)
+- Data processing and [GDPR compliance](/docs/compliance/gdpr)
 - Access limitations
 - Retention and deletion
 
@@ -183,7 +183,7 @@ Comprehensive policy lifecycle management for whistleblowing and compliance poli
 - Identify employees who haven't acknowledged
 - Send automatic reminders
 - Generate compliance reports
-- See [Compliance Calendar](/compliance/calendar) integration
+- See [Compliance Calendar](/docs/compliance/calendar) integration
 
 ### 5. Policy Versioning
 
@@ -255,7 +255,7 @@ Comprehensive policy lifecycle management for whistleblowing and compliance poli
 - Certificates of completion
 - Quiz or assessment results
 - Training effectiveness measurement
-- Integration with [Compliance Calendar](/compliance/calendar)
+- Integration with [Compliance Calendar](/docs/compliance/calendar)
 
 ## Disclosurely Policy Management Features
 
@@ -454,15 +454,15 @@ Dashboard > Settings > Policies
 ## Integration with Compliance Framework
 
 **Policy Alignment**:
-- Whistleblowing policy supports [EU Directive](/compliance/eu-directive) compliance
-- Anti-retaliation policy meets [SOX](/compliance/sox) requirements
-- Privacy policy ensures [GDPR](/compliance/gdpr) alignment
+- Whistleblowing policy supports [EU Directive](/docs/compliance/eu-directive) compliance
+- Anti-retaliation policy meets [SOX](/docs/compliance/sox) requirements
+- Privacy policy ensures [GDPR](/docs/compliance/gdpr) alignment
 - All policies work together
 
 **Policy-Driven Workflow**:
-- Investigation procedures inform [Investigation Workflow](/cases/workflow)
-- Anti-retaliation policy guides [Anti-Retaliation Measures](/compliance/anti-retaliation)
-- Data retention policy sets [Retention](/compliance/retention) requirements
+- Investigation procedures inform [Investigation Workflow](/docs/cases/workflow)
+- Anti-retaliation policy guides [Anti-Retaliation Measures](/docs/compliance/anti-retaliation)
+- Data retention policy sets [Retention](/docs/compliance/retention) requirements
 - Confidentiality policy enforces access controls
 
 **Continuous Monitoring**:
@@ -499,9 +499,9 @@ Dashboard > Settings > Policies
 
 ## Related Pages
 
-- [Compliance Overview](/compliance/overview) - Overall compliance framework including policy requirements
-- [EU Whistleblowing Directive](/compliance/eu-directive) - Policy requirements under EU law
-- [SOX Compliance](/compliance/sox) - Policy requirements under Sarbanes-Oxley
-- [GDPR Compliance](/compliance/gdpr) - Data protection policy requirements
-- [Compliance Calendar](/compliance/calendar) - Track policy review schedules and acknowledgment deadlines
-- [Initial Setup](/admin/initial-setup) - Policy configuration during initial implementation
+- [Compliance Overview](/docs/compliance/overview) - Overall compliance framework including policy requirements
+- [EU Whistleblowing Directive](/docs/compliance/eu-directive) - Policy requirements under EU law
+- [SOX Compliance](/docs/compliance/sox) - Policy requirements under Sarbanes-Oxley
+- [GDPR Compliance](/docs/compliance/gdpr) - Data protection policy requirements
+- [Compliance Calendar](/docs/compliance/calendar) - Track policy review schedules and acknowledgment deadlines
+- [Initial Setup](/docs/admin/initial-setup) - Policy configuration during initial implementation

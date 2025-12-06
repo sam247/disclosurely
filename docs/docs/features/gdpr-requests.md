@@ -46,7 +46,7 @@ Under the General Data Protection Regulation (GDPR), individuals have specific r
 
 **Access:** Dashboard > Compliance > GDPR Requests
 
-**Learn More:** [GDPR Compliance](/compliance/gdpr)
+**Learn More:** [GDPR Compliance](/docs/compliance/gdpr)
 
 ## Types of GDPR Requests
 
@@ -117,7 +117,7 @@ Individuals can request deletion of their personal data when:
 
 ⚠️ **Special Considerations:**
 - **Active Cases:** Cannot erase during investigation (legal obligation)
-- **Retention Periods:** Must retain per [SOX](/compliance/sox), [EU Directive](/compliance/eu-directive)
+- **Retention Periods:** Must retain per [SOX](/docs/compliance/sox), [EU Directive](/docs/compliance/eu-directive)
 - **Anonymous Reports:** Cannot erase what cannot be linked to individual
 - **Legal Holds:** Cannot erase data under legal hold
 
@@ -138,7 +138,7 @@ Individuals can request deletion of their personal data when:
 3. **Erasure Execution:**
    - If approved: Permanent deletion
    - Backup purging scheduled
-   - [Audit trail](/features/audit-trail) entry (irrevocable)
+   - [Audit trail](/docs/features/audit-trail) entry (irrevocable)
    - Confirmation sent to data subject
 
 4. **Partial Erasure:**
@@ -165,7 +165,7 @@ Individuals can request correction of inaccurate or incomplete personal data.
 2. Provides correct information
 3. Admin verifies and updates
 4. Confirmation sent
-5. Change logged in [audit trail](/features/audit-trail)
+5. Change logged in [audit trail](/docs/features/audit-trail)
 
 **Timeline:** 1 month
 
@@ -286,7 +286,7 @@ Data subjects can request restriction while:
 **5. Approval Decision:**
 - Approve, reject, or partially approve
 - Provide clear reasoning if rejected
-- Document decision in [audit trail](/features/audit-trail)
+- Document decision in [audit trail](/docs/features/audit-trail)
 
 **6. Execution:**
 - Fulfill access request (send data package)
@@ -346,7 +346,7 @@ Data subjects can request restriction while:
 - Document decision thoroughly
 
 ✅ **Maintain Records:**
-- [Audit trail](/features/audit-trail) of all requests
+- [Audit trail](/docs/features/audit-trail) of all requests
 - Decisions and justifications
 - Communications with data subject
 - Compliance reporting
@@ -360,10 +360,10 @@ Data subjects can request restriction while:
 **Mitigation:**
 - Automated tracking ensures deadline compliance
 - Clear workflows prevent oversights
-- [Audit trail](/features/audit-trail) demonstrates due diligence
+- [Audit trail](/docs/features/audit-trail) demonstrates due diligence
 - Regular compliance reporting
 
-**Learn More:** [GDPR Compliance](/compliance/gdpr)
+**Learn More:** [GDPR Compliance](/docs/compliance/gdpr)
 
 ## Automation & Features
 
@@ -409,7 +409,7 @@ For low-risk erasure requests, enable auto-approval:
 **Safety Measures:**
 - Cannot auto-approve if any exception applies
 - Manual review queue for edge cases
-- [Audit trail](/features/audit-trail) logs all auto-approvals
+- [Audit trail](/docs/features/audit-trail) logs all auto-approvals
 - Can disable auto-approval organization-wide
 
 ### Third-Party Data Protection
@@ -431,7 +431,7 @@ When providing data subject access:
 
 **Coordinated Deletion:**
 
-GDPR erasure requests integrate with [data retention policies](/compliance/retention):
+GDPR erasure requests integrate with [data retention policies](/docs/compliance/retention):
 
 **Retention-First Approach:**
 - Check retention schedule before erasure
@@ -443,7 +443,7 @@ GDPR erasure requests integrate with [data retention policies](/compliance/reten
 - GDPR erasure can override standard retention
 - Requires legal justification
 - Document override reasoning
-- [Audit trail](/features/audit-trail) records override
+- [Audit trail](/docs/features/audit-trail) records override
 
 ## Reporting & Analytics
 
@@ -465,7 +465,7 @@ GDPR erasure requests integrate with [data retention policies](/compliance/reten
 
 **Access:** Dashboard > Analytics > GDPR
 
-**Learn More:** [Compliance Analytics](/analytics/compliance-analytics)
+**Learn More:** [Compliance Analytics](/docs/analytics/compliance-analytics)
 
 ### Compliance Reports
 
@@ -529,7 +529,7 @@ GDPR erasure requests integrate with [data retention policies](/compliance/reten
 - Every decision logged
 - Reasons for rejection recorded
 - Extensions justified
-- [Audit trail](/features/audit-trail) complete
+- [Audit trail](/docs/features/audit-trail) complete
 
 ### Balancing Privacy and Investigation
 
@@ -569,17 +569,17 @@ GDPR erasure requests integrate with [data retention policies](/compliance/reten
 
 ## Related Pages
 
-- [GDPR Compliance](/compliance/gdpr) - Comprehensive GDPR guide
-- [Data Retention](/compliance/retention) - Retention policies
-- [Audit Trail](/features/audit-trail) - Request logging
-- [Security Overview](/security/overview) - Data protection
-- [Access Control](/security/access-control) - Who can access data
-- [Compliance Analytics](/analytics/compliance-analytics) - Reporting
+- [GDPR Compliance](/docs/compliance/gdpr) - Comprehensive GDPR guide
+- [Data Retention](/docs/compliance/retention) - Retention policies
+- [Audit Trail](/docs/features/audit-trail) - Request logging
+- [Security Overview](/docs/security/overview) - Data protection
+- [Access Control](/docs/security/access-control) - Who can access data
+- [Compliance Analytics](/docs/analytics/compliance-analytics) - Reporting
 
 ## Support
 
 Questions about GDPR requests?
 - Email: support@disclosurely.com
-- [Contact Support](/support/contact)
-- [GDPR Guide](/compliance/gdpr)
+- [Contact Support](/docs/support/contact)
+- [GDPR Guide](/docs/compliance/gdpr)
 - DPO Contact: dpo@disclosurely.com

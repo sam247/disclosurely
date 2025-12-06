@@ -873,8 +873,8 @@ Disclosurely's reporting and analytics capabilities help you:
 ---
 
 **Related:**
-- [Audit Trail](/compliance/audit-trail)
-- [GDPR Compliance](/compliance/gdpr)
-- [EU Directive Compliance](/compliance/eu-directive)
-- [SOX Compliance](/compliance/sox)
-- [Analytics & Insights](/analytics/overview)
+- [Audit Trail](/docs/compliance/audit-trail)
+- [GDPR Compliance](/docs/compliance/gdpr)
+- [EU Directive Compliance](/docs/compliance/eu-directive)
+- [SOX Compliance](/docs/compliance/sox)
+- [Analytics & Insights](/docs/analytics/overview)

@@ -36,7 +36,7 @@ Save partially completed reports as drafts and resume from any device using secu
 
 Draft Management allows whistleblowers to save incomplete reports and return to finish them later, even from different devices. This is especially valuable for complex reports requiring evidence gathering, witness consultation, or simply more time to compose thoughtful allegations.
 
-**Access:** Available during [report submission](/reporting/how-to-submit) process
+**Access:** Available during [report submission](/docs/reporting/how-to-submit) process
 
 ## How Draft Saving Works
 
@@ -231,7 +231,7 @@ Drafts receive same security as submitted reports:
 - Encrypted before leaving reporter's device
 - Zero-knowledge architecture—server cannot decrypt without code
 
-**Learn More:** [Report Encryption](/reporting/encryption)
+**Learn More:** [Report Encryption](/docs/reporting/encryption)
 
 ### Access Control
 
@@ -347,7 +347,7 @@ Aggregated draft statistics (no individual draft access):
 - No access to draft content
 - No reporter identification possible
 - Aggregate data only
-- Complies with [GDPR](/compliance/gdpr) and privacy regulations
+- Complies with [GDPR](/docs/compliance/gdpr) and privacy regulations
 
 ### Improving Form Design
 
@@ -408,7 +408,7 @@ Analyze where reporters abandon drafts:
 - Review all fields before submitting
 - Attach all relevant evidence
 - Proofread descriptions for clarity
-- Use [secure messaging](/reporting/secure-messaging) for follow-ups after submission
+- Use [secure messaging](/docs/reporting/secure-messaging) for follow-ups after submission
 
 ## Troubleshooting
 
@@ -428,7 +428,7 @@ Analyze where reporters abandon drafts:
 
 3. **Already Submitted**
    - Draft codes deactivate after submission
-   - Check [report tracking](/reporting/tracking-report) with report ID instead
+   - Check [report tracking](/docs/reporting/tracking-report) with report ID instead
 
 4. **Rate Limiting**
    - Too many failed attempts trigger lockout
@@ -499,12 +499,12 @@ When draft is submitted, it becomes a full report:
 5. Email/SMS sent with tracking info (if provided)
 
 **Next Steps:**
-- Save report ID for [tracking](/reporting/tracking-report)
-- Use [secure messaging](/reporting/secure-messaging) for follow-ups
+- Save report ID for [tracking](/docs/reporting/tracking-report)
+- Use [secure messaging](/docs/reporting/secure-messaging) for follow-ups
 - Monitor status updates
 - Await investigation
 
-**Learn More:** [How to Submit a Report](/reporting/how-to-submit)
+**Learn More:** [How to Submit a Report](/docs/reporting/how-to-submit)
 
 ### Draft vs. Report Tracking
 
@@ -530,7 +530,7 @@ When draft is submitted, it becomes a full report:
 - Clear browser history after submission
 - Consider VPN for additional privacy
 
-**Learn More:** [Anonymous Reporting](/features/anonymous-reporting)
+**Learn More:** [Anonymous Reporting](/docs/features/anonymous-reporting)
 
 ## Administrator Settings
 
@@ -592,7 +592,7 @@ Drafts are personal data subject to GDPR:
 - Cannot exercise rights on drafts (anonymous, no link to identity)
 - Rights apply to submitted reports only
 
-**Learn More:** [GDPR Compliance](/compliance/gdpr)
+**Learn More:** [GDPR Compliance](/docs/compliance/gdpr)
 
 ### Data Retention
 
@@ -606,21 +606,21 @@ Drafts deleted automatically after 30 days:
 - Consistent application across all drafts
 
 **Retention Policy:**
-- Aligns with [data retention policies](/compliance/retention)
+- Aligns with [data retention policies](/docs/compliance/retention)
 - Minimizes privacy risks
 - Reduces storage requirements
 
 ## Related Pages
 
-- [How to Submit a Report](/reporting/how-to-submit) - Complete reporting guide
-- [Tracking Your Report](/reporting/tracking-report) - Report status lookups
-- [Anonymous Reporting](/features/anonymous-reporting) - Anonymous submission
-- [Secure Messaging](/reporting/secure-messaging) - Communication after submission
-- [Report Encryption](/reporting/encryption) - Security details
+- [How to Submit a Report](/docs/reporting/how-to-submit) - Complete reporting guide
+- [Tracking Your Report](/docs/reporting/tracking-report) - Report status lookups
+- [Anonymous Reporting](/docs/features/anonymous-reporting) - Anonymous submission
+- [Secure Messaging](/docs/reporting/secure-messaging) - Communication after submission
+- [Report Encryption](/docs/reporting/encryption) - Security details
 
 ## Support
 
 Questions about draft management?
-- [Contact Support](/support/contact)
-- [FAQs](/support/faqs)
+- [Contact Support](/docs/support/contact)
+- [FAQs](/docs/support/faqs)
 - Email: support@disclosurely.com

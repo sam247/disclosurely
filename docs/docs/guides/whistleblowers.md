@@ -58,7 +58,7 @@ You have two primary ways to submit a report, each with different levels of iden
 - **Identity protection**: Separately encrypted from report content
 - **Best for**: Cases where you're comfortable revealing your identity to investigators
 
-Learn more about the differences in the [Report Types](/reporting/report-types) documentation.
+Learn more about the differences in the [Report Types](/docs/reporting/report-types) documentation.
 
 ### What You Can Report
 
@@ -134,7 +134,7 @@ Disclosurely accepts reports about various workplace concerns and misconduct:
    - Cannot be recovered if lost (by design for security)
    - Needed to check status and communicate
 
-For detailed submission instructions, see [How to Submit a Report](/reporting/how-to-submit).
+For detailed submission instructions, see [How to Submit a Report](/docs/reporting/how-to-submit).
 
 ### Writing an Effective Report
 
@@ -215,7 +215,7 @@ Use your tracking ID to check report status anytime:
    - All communication encrypted and secure
    - No personal identifiers requested
 
-Learn more about tracking in the [Tracking Your Report](/reporting/tracking-report) guide.
+Learn more about tracking in the [Tracking Your Report](/docs/reporting/tracking-report) guide.
 
 ### Communicating Securely
 
@@ -234,7 +234,7 @@ Learn more about tracking in the [Tracking Your Report](/reporting/tracking-repo
 - Notification of outcome
 - Professional, respectful communication
 
-Read more about [Secure Messaging](/reporting/secure-messaging) features.
+Read more about [Secure Messaging](/docs/reporting/secure-messaging) features.
 
 ## Protecting Your Identity
 
@@ -380,10 +380,10 @@ If you submitted anonymously, protect your identity:
 - Retaliation concerns: Report immediately through platform
 
 **Additional Resources:**
-- [How to Submit a Report](/reporting/how-to-submit) - Detailed submission guide
-- [Report Types](/reporting/report-types) - Anonymous vs confidential
-- [Security Best Practices](/security/best-practices) - Protect your identity
-- [Secure Messaging](/reporting/secure-messaging) - Communication guide
+- [How to Submit a Report](/docs/reporting/how-to-submit) - Detailed submission guide
+- [Report Types](/docs/reporting/report-types) - Anonymous vs confidential
+- [Security Best Practices](/docs/security/best-practices) - Protect your identity
+- [Secure Messaging](/docs/reporting/secure-messaging) - Communication guide
 
 ---
 
@@ -403,7 +403,7 @@ If you submitted anonymously, protect your identity:
 
 ## Related Pages
 
-- [How to Submit a Report](/reporting/how-to-submit) - Complete submission guide
-- [Report Types](/reporting/report-types) - Choosing anonymous or confidential
-- [Tracking Your Report](/reporting/tracking-report) - Check status and updates
-- [Secure Messaging](/reporting/secure-messaging) - Communicate with investigators
+- [How to Submit a Report](/docs/reporting/how-to-submit) - Complete submission guide
+- [Report Types](/docs/reporting/report-types) - Choosing anonymous or confidential
+- [Tracking Your Report](/docs/reporting/tracking-report) - Check status and updates
+- [Secure Messaging](/docs/reporting/secure-messaging) - Communicate with investigators

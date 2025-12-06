@@ -45,7 +45,7 @@ The Administrator role carries significant responsibility: you control who has a
 Complete these critical steps when first setting up your organization:
 
 **1. Organization Configuration**
-- Complete the [initial setup](/admin/initial-setup) wizard
+- Complete the [initial setup](/docs/admin/initial-setup) wizard
 - Configure organization name, logo, and branding
 - Set primary language and timezone
 - Define your organization's structure (departments, locations)
@@ -53,7 +53,7 @@ Complete these critical steps when first setting up your organization:
 - Set up external notification email addresses
 
 **2. Security Configuration**
-- Enable [multi-factor authentication](/security/mfa) requirement for all users
+- Enable [multi-factor authentication](/docs/security/mfa) requirement for all users
 - Configure session timeout policies (recommend 2 hours idle timeout)
 - Set strong password requirements (minimum 12 characters)
 - Review and enable all recommended security settings
@@ -76,7 +76,7 @@ Complete these critical steps when first setting up your organization:
 - Add multilingual support if needed
 - Generate and distribute secure reporting links
 
-Learn more in the [Organization Settings](/admin/organization-settings) documentation.
+Learn more in the [Organization Settings](/docs/admin/organization-settings) documentation.
 
 ### User Management
 
@@ -112,7 +112,7 @@ Learn more in the [Organization Settings](/admin/organization-settings) document
 - Review user access quarterly
 - Remove access immediately when employees depart
 
-See detailed user management in [Team Management](/admin/team-management).
+See detailed user management in [Team Management](/docs/admin/team-management).
 
 ## Key Administrative Responsibilities
 
@@ -176,7 +176,7 @@ Ensure ongoing compliance with whistleblowing regulations:
 - Present compliance status to board or audit committee
 - Update policies to reflect regulatory changes
 
-Learn more about [EU Whistleblowing Directive compliance](/compliance/eu-directive).
+Learn more about [EU Whistleblowing Directive compliance](/docs/compliance/eu-directive).
 
 ### Security Management
 
@@ -191,7 +191,7 @@ Maintain platform security to protect sensitive data and reporter identities:
 - Review and approve SSO integration (Enterprise plan)
 
 **Ongoing Security Monitoring:**
-- Review [security monitoring](/security/monitoring) dashboard daily
+- Review [security monitoring](/docs/security/monitoring) dashboard daily
 - Investigate failed login attempts and access anomalies
 - Respond promptly to security alerts
 - Review audit logs regularly for suspicious activity
@@ -206,7 +206,7 @@ Maintain platform security to protect sensitive data and reporter identities:
 - Report incidents to security@disclosurely.com
 - Implement recommended remediation actions
 
-See complete security guidance in [Security Best Practices](/security/best-practices).
+See complete security guidance in [Security Best Practices](/docs/security/best-practices).
 
 ### User Training and Support
 
@@ -423,7 +423,7 @@ Ensure users understand their responsibilities and platform capabilities:
 - Incident reporting and tracking
 
 **Compliance Questions:**
-- Review [compliance documentation](/compliance/eu-directive)
+- Review [compliance documentation](/docs/compliance/eu-directive)
 - Consult legal counsel for jurisdiction-specific guidance
 - Contact support for platform-specific questions
 
@@ -437,7 +437,7 @@ Ensure users understand their responsibilities and platform capabilities:
 
 ## Related Pages
 
-- [Initial Setup](/admin/initial-setup) - Complete setup wizard
-- [Organization Settings](/admin/organization-settings) - Configure your organization
-- [Team Management](/admin/team-management) - Manage users and roles
-- [Security Best Practices](/security/best-practices) - Administrative security guidance
+- [Initial Setup](/docs/admin/initial-setup) - Complete setup wizard
+- [Organization Settings](/docs/admin/organization-settings) - Configure your organization
+- [Team Management](/docs/admin/team-management) - Manage users and roles
+- [Security Best Practices](/docs/security/best-practices) - Administrative security guidance

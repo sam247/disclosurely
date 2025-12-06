@@ -242,25 +242,25 @@ Each audit entry contains:
 
 ### Regulatory Compliance
 
-**[EU Whistleblowing Directive](/compliance/eu-directive)**:
+**[EU Whistleblowing Directive](/docs/compliance/eu-directive)**:
 - Demonstrates report handling timeline
 - Shows acknowledgment within 7 days
 - Proves feedback within 3 months
 - Documents confidentiality measures
 - Audit trail required for compliance
 
-**[GDPR](/compliance/gdpr)**:
+**[GDPR](/docs/compliance/gdpr)**:
 - Track data access
 - Document data exports
 - Verify deletions occurred
 - Demonstrate consent handling
 - Support data subject requests
 
-**[SOX (Sarbanes-Oxley)](/compliance/sox)**:
+**[SOX (Sarbanes-Oxley)](/docs/compliance/sox)**:
 - Audit trail of financial report investigations
 - Document controls and processes
 - Demonstrate segregation of duties
-- Prove [data retention compliance](/compliance/retention)
+- Prove [data retention compliance](/docs/compliance/retention)
 
 **ISO 27001**:
 - Information security event logging
@@ -419,7 +419,7 @@ Each audit entry contains:
 - Administrative sanctions
 
 **Storage**:
-- [Encrypted at rest](/security/overview)
+- [Encrypted at rest](/docs/security/overview)
 - Geographically redundant
 - Separate from case data
 - Highly available
@@ -683,7 +683,7 @@ Each audit entry contains:
 ---
 
 **Related:**
-- [GDPR Compliance](/compliance/gdpr)
-- [Data Retention](/compliance/retention)
-- [Security Overview](/security/overview)
-- [Organization Settings](/admin/organization-settings)
+- [GDPR Compliance](/docs/compliance/gdpr)
+- [Data Retention](/docs/compliance/retention)
+- [Security Overview](/docs/security/overview)
+- [Organization Settings](/docs/admin/organization-settings)

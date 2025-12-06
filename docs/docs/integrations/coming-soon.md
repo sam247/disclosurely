@@ -51,7 +51,7 @@ Connect Disclosurely with your existing tools, workflows, and systems to create 
 - Custom email address support
 - SEO benefits for compliance documentation
 
-**Setup Guide:** [Custom Domains Configuration](/admin/custom-domains)
+**Setup Guide:** [Custom Domains Configuration](/docs/admin/custom-domains)
 
 **Typical Setup Time:** 15-30 minutes (plus DNS propagation)
 
@@ -104,7 +104,7 @@ Connect Disclosurely with your existing tools, workflows, and systems to create 
 - Spam score optimization
 - Delivery tracking
 
-**Learn More:** [Notification System](/features/notifications)
+**Learn More:** [Notification System](/docs/features/notifications)
 
 ---
 
@@ -131,7 +131,7 @@ Connect Disclosurely with your existing tools, workflows, and systems to create 
 - Generate promotional materials
 - Share via email, social media, or direct links
 
-**Learn More:** [Referral Program Guide](/features/referral-program)
+**Learn More:** [Referral Program Guide](/docs/features/referral-program)
 
 ---
 
@@ -161,7 +161,7 @@ Connect Disclosurely with your existing tools, workflows, and systems to create 
 - Translated interface, forms, and emails
 - Real-time translation for messaging
 
-**Learn More:** [Internationalization & Multi-Language](/features/internationalization)
+**Learn More:** [Internationalization & Multi-Language](/docs/features/internationalization)
 
 ---
 
@@ -187,7 +187,7 @@ Connect Disclosurely with your existing tools, workflows, and systems to create 
 - Direct link sharing
 - Embedded widgets (coming soon)
 
-**Learn More:** [Link Generator & Management](/admin/link-generator)
+**Learn More:** [Link Generator & Management](/docs/admin/link-generator)
 
 ---
 
@@ -641,15 +641,15 @@ Custom quote based on requirements. Contact: enterprise@disclosurely.com
 
 ## Related Pages
 
-- [Custom Domains](/admin/custom-domains) - Branded domain setup
-- [Link Generator](/admin/link-generator) - Custom reporting links
-- [Notification System](/features/notifications) - Email notifications
-- [Referral Program](/features/referral-program) - Referral tracking
-- [Internationalization](/features/internationalization) - Multi-language
+- [Custom Domains](/docs/admin/custom-domains) - Branded domain setup
+- [Link Generator](/docs/admin/link-generator) - Custom reporting links
+- [Notification System](/docs/features/notifications) - Email notifications
+- [Referral Program](/docs/features/referral-program) - Referral tracking
+- [Internationalization](/docs/features/internationalization) - Multi-language
 
 ## Support
 
 Questions about integrations?
 - Email: integrations@disclosurely.com
-- [Contact Support](/support/contact)
+- [Contact Support](/docs/support/contact)
 - [Join Beta Program](mailto:integrations@disclosurely.com?subject=Beta%20Program)

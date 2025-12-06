@@ -68,7 +68,7 @@ Case status is the single most important indicator of where a case is in the inv
 **Investigator Actions**:
 - Read report thoroughly
 - Assess severity and credibility
-- Determine [investigation scope](/cases/workflow)
+- Determine [investigation scope](/docs/cases/workflow)
 - Request additional information if needed
 - Categorize and prioritize
 
@@ -87,7 +87,7 @@ Case status is the single most important indicator of where a case is in the inv
 - Collecting documentary evidence
 - Reviewing records and communications
 - Analyzing findings
-- [Documenting progress in case notes](/cases/evidence)
+- [Documenting progress in case notes](/docs/cases/evidence)
 
 **Reporter Sees**: "We are actively investigating your report. We'll keep you updated on progress."
 
@@ -107,7 +107,7 @@ Case status is the single most important indicator of where a case is in the inv
 - Third party investigation ongoing
 
 **Investigator Actions**:
-- Send clear request for information via [secure messaging](/reporting/secure-messaging)
+- Send clear request for information via [secure messaging](/docs/reporting/secure-messaging)
 - Specify what's needed and why
 - Set reasonable deadline
 - Set reminder to follow up
@@ -513,6 +513,6 @@ Every status change should include note:
 ---
 
 **Related:**
-- [Investigation Workflow](/cases/workflow)
-- [Case Assignment](/cases/assignment)
-- [Secure Messaging](/reporting/secure-messaging)
+- [Investigation Workflow](/docs/cases/workflow)
+- [Case Assignment](/docs/cases/assignment)
+- [Secure Messaging](/docs/reporting/secure-messaging)

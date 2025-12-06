@@ -174,7 +174,7 @@ Draft professional communications for every stage of the investigation.
 3. Select recipient type and message purpose
 4. AI generates appropriate message
 5. Review and customize
-6. Send via [secure messaging](/reporting/secure-messaging)
+6. Send via [secure messaging](/docs/reporting/secure-messaging)
 
 **Example - Status Update to Reporter**:
 
@@ -239,9 +239,9 @@ Generate comprehensive investigation reports that document the entire process, f
 - **Regulatory Report**: Compliance-focused for regulators (if required)
 
 **Compliance Features**:
-- [EU Directive](/compliance/eu-directive) feedback requirements met
-- [SOX](/compliance/sox) documentation standards satisfied
-- [GDPR](/compliance/gdpr) privacy considerations built-in
+- [EU Directive](/docs/compliance/eu-directive) feedback requirements met
+- [SOX](/docs/compliance/sox) documentation standards satisfied
+- [GDPR](/docs/compliance/gdpr) privacy considerations built-in
 - Audit trail references included
 - Legal privilege considerations highlighted
 
@@ -253,7 +253,7 @@ Generate comprehensive investigation reports that document the entire process, f
 5. Review AI-generated report
 6. Edit and refine as needed
 7. Export as PDF, Word, or HTML
-8. Archive with [case records](/cases/archiving)
+8. Archive with [case records](/docs/cases/archiving)
 
 **Quality Assurance**:
 - AI flags incomplete sections for investigator attention
@@ -478,7 +478,7 @@ Sep 10, 2024      Case closed
 - Reporter identity automatically redacted in reports (unless confidential report with consent)
 - Sensitive information flagged for review
 - Access controls limit who can generate content
-- All generated content logged in [audit trail](/compliance/audit-trail)
+- All generated content logged in [audit trail](/docs/compliance/audit-trail)
 
 **Redaction Features**:
 - Automatic personal data minimization
@@ -489,7 +489,7 @@ Sep 10, 2024      Case closed
 
 ### GDPR Compliance
 
-AI Content Generation is designed for [GDPR compliance](/compliance/gdpr):
+AI Content Generation is designed for [GDPR compliance](/docs/compliance/gdpr):
 
 **Data Minimization**: Generates only necessary content for investigation purposes
 **Purpose Limitation**: Content used only for investigation and compliance
@@ -570,7 +570,7 @@ AI Content Generation is designed for [GDPR compliance](/compliance/gdpr):
 
 ### Seamless Workflow Integration
 
-AI Content Generation is embedded throughout the [investigation workflow](/cases/workflow):
+AI Content Generation is embedded throughout the [investigation workflow](/docs/cases/workflow):
 
 **Case Opening**:
 - Generate acknowledgment to reporter
@@ -633,8 +633,8 @@ AI Content Generation is embedded throughout the [investigation workflow](/cases
 
 ## Related Pages
 
-- [AI Case Helper](/ai/case-helper) - Intelligent AI assistant for case analysis and recommendations
-- [AI Risk Assessment](/ai/risk-assessment) - Automated risk scoring and severity assessment
-- [Investigation Workflow](/cases/workflow) - Complete investigation process and best practices
-- [Case Resolution](/cases/resolution) - Close cases and document outcomes
-- [Secure Messaging](/reporting/secure-messaging) - Communicate securely with reporters and subjects
+- [AI Case Helper](/docs/ai/case-helper) - Intelligent AI assistant for case analysis and recommendations
+- [AI Risk Assessment](/docs/ai/risk-assessment) - Automated risk scoring and severity assessment
+- [Investigation Workflow](/docs/cases/workflow) - Complete investigation process and best practices
+- [Case Resolution](/docs/cases/resolution) - Close cases and document outcomes
+- [Secure Messaging](/docs/reporting/secure-messaging) - Communicate securely with reporters and subjects

@@ -247,5 +247,5 @@ A: Yes! Annual billing available with 20% discount. Contact sales.
 
 **Questions?**
 - Email: billing@disclosurely.com
-- [Contact Support](/support/contact)
+- [Contact Support](/docs/support/contact)
 - [Pricing Page](https://disclosurely.com/pricing)

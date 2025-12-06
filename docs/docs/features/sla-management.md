@@ -683,11 +683,11 @@ Default: Yes
 ## Support
 
 **Need help with SLA Management?**
-- [Assignment Rules](/features/assignment-rules) - Automate case routing
-- [Workflow Guide](/cases/workflow) - Full workflow documentation
-- [Compliance Overview](/compliance/overview)
-- [EU Directive](/compliance/eu-directive)
-- [Contact Support](/support/contact)
+- [Assignment Rules](/docs/features/assignment-rules) - Automate case routing
+- [Workflow Guide](/docs/cases/workflow) - Full workflow documentation
+- [Compliance Overview](/docs/compliance/overview)
+- [EU Directive](/docs/compliance/eu-directive)
+- [Contact Support](/docs/support/contact)
 
 ---
 

@@ -169,10 +169,10 @@ Decision: Informed, data-driven, appropriate urgency
 ### Enhanced Compliance
 
 **Regulatory Alignment**:
-- Identifies reports requiring expedited handling under [EU Directive](/compliance/eu-directive)
-- Flags [SOX](/compliance/sox) financial misconduct for proper procedures
-- Ensures [GDPR](/compliance/gdpr) high-risk data breaches get immediate attention
-- Documents risk assessment for [audit trail](/compliance/audit-trail)
+- Identifies reports requiring expedited handling under [EU Directive](/docs/compliance/eu-directive)
+- Flags [SOX](/docs/compliance/sox) financial misconduct for proper procedures
+- Ensures [GDPR](/docs/compliance/gdpr) high-risk data breaches get immediate attention
+- Documents risk assessment for [audit trail](/docs/compliance/audit-trail)
 
 **Defensible Decisions**:
 - AI-generated risk scores provide objective justification
@@ -233,7 +233,7 @@ The AI predicts potential consequences if the issue is not addressed:
 
 ### 4. Pattern Recognition Integration
 
-Risk Assessment integrates with [AI Pattern Detection](/ai/pattern-detection) to identify:
+Risk Assessment integrates with [AI Pattern Detection](/docs/ai/pattern-detection) to identify:
 
 **Historical Patterns**:
 - Similar cases involving same individuals
@@ -304,7 +304,7 @@ Action: Case automatically escalated to senior investigator
 - Data minimization: Analyzes only necessary information
 - Purpose limitation: Used only for risk assessment
 - No training on your data: Your cases don't train the model
-- See [GDPR Compliance](/compliance/gdpr) for full details
+- See [GDPR Compliance](/docs/compliance/gdpr) for full details
 
 ### Security Measures
 
@@ -314,7 +314,7 @@ Action: Case automatically escalated to senior investigator
 - Access controls enforce role-based permissions
 - Audit trail logs all AI analysis activities
 - No data stored outside Disclosurely infrastructure
-- [ISO 27001 certified](/security/overview) security practices
+- [ISO 27001 certified](/docs/security/overview) security practices
 
 ### Human Oversight
 
@@ -387,7 +387,7 @@ Action: Case automatically escalated to senior investigator
 - Priority filters
 - Risk dimension breakdowns
 
-**[Case Assignment](/cases/assignment) Integration**:
+**[Case Assignment](/docs/cases/assignment) Integration**:
 - High-risk cases suggested for senior investigators
 - Low-risk cases can be batch-assigned
 - Workload balancing considers case complexity
@@ -427,7 +427,7 @@ Action: Case automatically escalated to senior investigator
 - Set appropriate thresholds for your industry
 - Review and adjust escalation rules quarterly
 - Train investigators on interpreting AI insights
-- Combine with [AI Pattern Detection](/ai/pattern-detection) and [AI Case Helper](/ai/case-helper)
+- Combine with [AI Pattern Detection](/docs/ai/pattern-detection) and [AI Case Helper](/docs/ai/case-helper)
 
 ## Reporting and Analytics
 
@@ -477,8 +477,8 @@ Action: Case automatically escalated to senior investigator
 
 ## Related Pages
 
-- [AI Case Helper](/ai/case-helper) - Intelligent assistant for case analysis and investigation
-- [AI Pattern Detection](/ai/pattern-detection) - Identify trends and patterns across reports
-- [Case Assignment](/cases/assignment) - Assign cases based on risk and investigator capacity
-- [Investigation Workflow](/cases/workflow) - Complete investigation process and best practices
-- [Compliance Overview](/compliance/overview) - Ensure regulatory compliance with risk-based approach
+- [AI Case Helper](/docs/ai/case-helper) - Intelligent assistant for case analysis and investigation
+- [AI Pattern Detection](/docs/ai/pattern-detection) - Identify trends and patterns across reports
+- [Case Assignment](/docs/cases/assignment) - Assign cases based on risk and investigator capacity
+- [Investigation Workflow](/docs/cases/workflow) - Complete investigation process and best practices
+- [Compliance Overview](/docs/compliance/overview) - Ensure regulatory compliance with risk-based approach

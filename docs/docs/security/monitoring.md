@@ -80,7 +80,7 @@ Our dedicated incident response team is available 24/7 to respond to security ev
 - Post-incident analysis and remediation
 - Continuous improvement of security controls
 
-Learn more about our comprehensive security approach in the [Security Overview](/security/overview) documentation.
+Learn more about our comprehensive security approach in the [Security Overview](/docs/security/overview) documentation.
 
 ## Threat Detection and Prevention
 
@@ -190,13 +190,13 @@ Alerts are distributed through multiple channels for reliability:
 - Webhook notifications to external monitoring systems
 - Mobile app push notifications (Enterprise plan)
 
-Configure alert preferences in your [Organization Settings](/admin/organization-settings).
+Configure alert preferences in your [Organization Settings](/docs/admin/organization-settings).
 
 ## Audit Trail and Compliance Monitoring
 
 ### Comprehensive Activity Logging
 
-Every action in Disclosurely is logged to an immutable [audit trail](/compliance/audit-trail) that records:
+Every action in Disclosurely is logged to an immutable [audit trail](/docs/compliance/audit-trail) that records:
 
 **User Activity:**
 - Login and logout events with timestamps
@@ -344,7 +344,7 @@ If you suspect a security issue:
 
 ## Related Pages
 
-- [Security Overview](/security/overview) - Comprehensive security architecture
-- [Access Control](/security/access-control) - User permissions and role management
-- [Audit Trail](/compliance/audit-trail) - Complete activity logging
-- [Best Practices](/security/best-practices) - Security recommendations
+- [Security Overview](/docs/security/overview) - Comprehensive security architecture
+- [Access Control](/docs/security/access-control) - User permissions and role management
+- [Audit Trail](/docs/compliance/audit-trail) - Complete activity logging
+- [Best Practices](/docs/security/best-practices) - Security recommendations

@@ -79,7 +79,7 @@ A single compromised account could expose this sensitive data, damage trust in y
 - Network interception of login sessions
 - MFA with device binding prevents session theft
 
-Learn more about overall security controls in the [Security Overview](/security/overview) documentation.
+Learn more about overall security controls in the [Security Overview](/docs/security/overview) documentation.
 
 ## Supported MFA Methods
 
@@ -259,7 +259,7 @@ Device biometrics like fingerprint and Face ID can be used in conjunction with o
 - Disable less secure methods if required by policy
 - Regularly audit MFA usage and compliance
 
-Learn more about configuring security settings in [Team Management](/admin/team-management).
+Learn more about configuring security settings in [Team Management](/docs/admin/team-management).
 
 ## Troubleshooting MFA
 
@@ -360,7 +360,7 @@ Learn more about configuring security settings in [Team Management](/admin/team-
 
 ## Related Pages
 
-- [Authentication](/security/authentication) - Complete authentication overview
-- [Security Overview](/security/overview) - Comprehensive security architecture
-- [Access Control](/security/access-control) - User permissions and roles
-- [Best Practices](/security/best-practices) - Security recommendations
+- [Authentication](/docs/security/authentication) - Complete authentication overview
+- [Security Overview](/docs/security/overview) - Comprehensive security architecture
+- [Access Control](/docs/security/access-control) - User permissions and roles
+- [Best Practices](/docs/security/best-practices) - Security recommendations

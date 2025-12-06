@@ -60,7 +60,7 @@ Upgrade to a custom branded domain for professional appearance:
 https://reports.yourcompany.com
 ```
 
-Learn more: [Custom Domains](/admin/custom-domains)
+Learn more: [Custom Domains](/docs/admin/custom-domains)
 
 ## Creating Custom Links
 
@@ -579,15 +579,15 @@ https://yourorg.disclosurely.com/report?dept=finance
 
 ## Related Pages
 
-- [Organization Settings](/admin/organization-settings) - General org configuration
-- [Custom Domains](/admin/custom-domains) - Branded domain setup
-- [Custom Branding](/admin/custom-branding) - Visual customization
-- [Team Management](/admin/team-management) - User assignments
-- [Assignment Rules](/features/assignment-rules) - Auto-routing configuration
+- [Organization Settings](/docs/admin/organization-settings) - General org configuration
+- [Custom Domains](/docs/admin/custom-domains) - Branded domain setup
+- [Custom Branding](/docs/admin/custom-branding) - Visual customization
+- [Team Management](/docs/admin/team-management) - User assignments
+- [Assignment Rules](/docs/features/assignment-rules) - Auto-routing configuration
 
 ## Support
 
 Questions about link management?
 - Email: support@disclosurely.com
-- [Contact Support](/support/contact)
+- [Contact Support](/docs/support/contact)
 - [Video Tutorial](https://disclosurely.com/tutorials/link-generator)
