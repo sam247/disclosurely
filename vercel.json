@@ -71,6 +71,14 @@
       ]
     }
   ],
+  "routes": [
+    { "handle": "filesystem" },
+    { "src": "/(login|signup|auth/login|auth/signup)", "dest": "/index.html" },
+    {
+      "src": "/((?!assets/|api/|_next/|favicon\\.ico|robots\\.txt|sitemap.*\\.xml|docs|.*\\.[a-z]{2,4}$).*)",
+      "dest": "/index.html"
+    }
+  ],
   "rewrites": [
     { "source": "/sitemap.xml", "destination": "/api/sitemap.xml" },
     { "source": "/sitemap-index.xml", "destination": "/api/sitemap-index.xml" },
