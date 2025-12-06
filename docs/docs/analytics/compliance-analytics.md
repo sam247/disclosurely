@@ -80,7 +80,7 @@ Unlike basic reporting (what happened), analytics answers **why it happened** an
 
 ### Regulatory Timeline Compliance
 
-**Critical for**: [EU Whistleblowing Directive](/docs/regulatory/eu-directive), [SOX](/docs/regulatory/sox), internal policies
+**Critical for**: [EU Whistleblowing Directive](/regulatory/eu-directive), [SOX](/regulatory/sox), internal policies
 
 #### 7-Day Acknowledgment Compliance (EU Directive)
 
@@ -390,7 +390,7 @@ Sum of all (Case Close Date - Case Open Date) / Number of closed cases
 - Pre-deletion notifications
 - Legal hold integration
 - Exception handling process
-- See [Data Retention](/docs/compliance/retention) for implementation
+- See [Data Retention](/compliance/retention) for implementation
 
 ### Training and Awareness
 
@@ -452,7 +452,7 @@ Sum of all (Case Close Date - Case Open Date) / Number of closed cases
 **Audience**: Compliance officer, audit committee, board
 
 **Generate Report**: Dashboard > Compliance > EU Directive
-See [EU Whistleblowing Directive](/docs/regulatory/eu-directive) for requirements
+See [EU Whistleblowing Directive](/regulatory/eu-directive) for requirements
 
 ### GDPR Compliance Dashboard
 
@@ -479,7 +479,7 @@ See [EU Whistleblowing Directive](/docs/regulatory/eu-directive) for requirement
 **Audience**: Data Protection Officer, legal, audit committee
 
 **Generate Report**: Dashboard > Compliance > GDPR
-See [GDPR Compliance](/docs/regulatory/gdpr) for details
+See [GDPR Compliance](/regulatory/gdpr) for details
 
 ### SOX Compliance Dashboard (Public Companies)
 
@@ -506,7 +506,7 @@ See [GDPR Compliance](/docs/regulatory/gdpr) for details
 **Audience**: Audit committee, CFO, external auditors
 
 **Generate Report**: Dashboard > Compliance > SOX
-See [SOX Compliance](/docs/regulatory/sox) for requirements
+See [SOX Compliance](/regulatory/sox) for requirements
 
 ### Industry-Specific Compliance
 
@@ -868,7 +868,7 @@ See [SOX Compliance](/docs/regulatory/sox) for requirements
 - Redaction (automatic removal of identifiers)
 - Legal review (before external sharing)
 
-**See**: [GDPR Compliance](/docs/compliance/gdpr) for data protection requirements
+**See**: [GDPR Compliance](/compliance/gdpr) for data protection requirements
 
 ### 7. Close the Loop with Action
 
@@ -890,9 +890,9 @@ See [SOX Compliance](/docs/regulatory/sox) for requirements
 
 ## Related Pages
 
-- **[Compliance Reporting & Analytics](/docs/compliance/reporting-analytics)** - Detailed guide on generating compliance reports and using report builder
-- [Audit Trail](/docs/compliance/audit-trail) - Comprehensive logging provides data foundation for analytics
-- [Compliance Overview](/docs/compliance/overview) - Framework for overall compliance program management
-- [EU Whistleblowing Directive](/docs/regulatory/eu-directive) - Requirements for timeline compliance tracking
-- [GDPR Compliance](/docs/regulatory/gdpr) - Data protection requirements for analytics and reporting
-- [Data Retention](/docs/compliance/retention) - Retention and deletion compliance metrics
+- **[Compliance Reporting & Analytics](/compliance/reporting-analytics)** - Detailed guide on generating compliance reports and using report builder
+- [Audit Trail](/compliance/audit-trail) - Comprehensive logging provides data foundation for analytics
+- [Compliance Overview](/compliance/overview) - Framework for overall compliance program management
+- [EU Whistleblowing Directive](/regulatory/eu-directive) - Requirements for timeline compliance tracking
+- [GDPR Compliance](/regulatory/gdpr) - Data protection requirements for analytics and reporting
+- [Data Retention](/compliance/retention) - Retention and deletion compliance metrics

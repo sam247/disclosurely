@@ -139,7 +139,7 @@ Your message is:
 ### Encryption
 
 All messages use:
-- [AES-256 encryption](/docs/reporting/encryption)
+- [AES-256 encryption](/reporting/encryption)
 - Client-side encryption
 - Encrypted in transit and at rest
 - Zero-knowledge architecture
@@ -166,7 +166,7 @@ All message access is logged:
 - Who viewed messages
 - When they were viewed
 - What actions were taken
-- [Tamper-evident audit logs](/docs/compliance/audit-trail)
+- [Tamper-evident audit logs](/compliance/audit-trail)
 
 ## Message History
 
@@ -230,6 +230,6 @@ All messages are retained and accessible:
 ---
 
 **Related Topics:**
-- [Tracking Your Report](/docs/reporting/tracking-report)
-- [Report Encryption](/docs/reporting/encryption)
-- [How to Submit](/docs/reporting/how-to-submit)
+- [Tracking Your Report](/reporting/tracking-report)
+- [Report Encryption](/reporting/encryption)
+- [How to Submit](/reporting/how-to-submit)

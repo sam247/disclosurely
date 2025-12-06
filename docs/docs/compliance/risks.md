@@ -30,7 +30,7 @@ head:
 
 # Risk Management
 
-Comprehensive risk management for whistleblowing compliance, combining human expertise with [AI Risk Assessment](/docs/ai/risk-assessment) to identify, evaluate, prioritize, and mitigate organizational risks identified through whistleblowing reports.
+Comprehensive risk management for whistleblowing compliance, combining human expertise with [AI Risk Assessment](/ai/risk-assessment) to identify, evaluate, prioritize, and mitigate organizational risks identified through whistleblowing reports.
 
 ## What is Whistleblowing Risk Management?
 
@@ -50,7 +50,7 @@ Whistleblowing reports reveal critical risks to your organization. Effective ris
 
 **Sources of Risk**:
 - Whistleblower reports (primary source)
-- [AI Pattern Detection](/docs/ai/pattern-detection) identifies trends
+- [AI Pattern Detection](/ai/pattern-detection) identifies trends
 - Internal audits and assessments
 - Compliance monitoring
 - External intelligence (regulatory changes, industry issues)
@@ -85,7 +85,7 @@ Whistleblowing reports reveal critical risks to your organization. Effective ris
 **Combined Risk Score** = Impact × Likelihood
 
 **AI-Powered Risk Scoring**:
-Disclosurely's [AI Risk Assessment](/docs/ai/risk-assessment) automatically evaluates all reports across 20+ risk factors, providing instant risk scores (0-100) and severity classifications (Critical, High, Medium, Low). This ensures:
+Disclosurely's [AI Risk Assessment](/ai/risk-assessment) automatically evaluates all reports across 20+ risk factors, providing instant risk scores (0-100) and severity classifications (Critical, High, Medium, Low). This ensures:
 - Objective, consistent risk assessment
 - Instant prioritization
 - Pattern-based risk adjustment
@@ -141,7 +141,7 @@ Unlikely    LOW      LOW       LOW       MEDIUM
 1. **Contain the Risk**: Stop ongoing harm (suspend subject if appropriate, secure evidence, implement interim controls)
 2. **Escalate**: Notify compliance officer, legal counsel, senior leadership immediately
 3. **Expedite Investigation**: Assign experienced investigator, allocate resources, set aggressive timeline
-4. **Protect Reporter**: Enhanced [anti-retaliation](/docs/compliance/anti-retaliation) monitoring
+4. **Protect Reporter**: Enhanced [anti-retaliation](/compliance/anti-retaliation) monitoring
 5. **Communication Plan**: Prepare for potential public disclosure, brief stakeholders
 
 **Investigation-Based Mitigation**:
@@ -180,7 +180,7 @@ Unlikely    LOW      LOW       LOW       MEDIUM
 - Serial offender identification
 
 **Pattern Monitoring**:
-Use [AI Pattern Detection](/docs/ai/pattern-detection) to identify:
+Use [AI Pattern Detection](/ai/pattern-detection) to identify:
 - Similar cases involving same individuals
 - Department-specific risk concentrations
 - Emerging trends
@@ -216,8 +216,8 @@ Use [AI Pattern Detection](/docs/ai/pattern-detection) to identify:
 
 **Common Issues**:
 - GDPR violations and data breaches
-- [EU Directive](/docs/compliance/eu-directive) non-compliance
-- [SOX](/docs/compliance/sox) financial reporting issues
+- [EU Directive](/compliance/eu-directive) non-compliance
+- [SOX](/compliance/sox) financial reporting issues
 - Employment law violations (harassment, discrimination, wrongful termination)
 - Industry-specific regulations (financial services, healthcare, etc.)
 - Contractual breaches
@@ -458,7 +458,7 @@ Use [AI Pattern Detection](/docs/ai/pattern-detection) to identify:
 - Expense analysis
 - Procurement monitoring
 - Anomaly detection
-- [AI Pattern Detection](/docs/ai/pattern-detection)
+- [AI Pattern Detection](/ai/pattern-detection)
 
 ### Corrective Controls
 
@@ -510,9 +510,9 @@ Use [AI Pattern Detection](/docs/ai/pattern-detection) to identify:
 
 ## Related Pages
 
-- [AI Risk Assessment](/docs/ai/risk-assessment) - Automated risk scoring and severity assessment
-- [AI Pattern Detection](/docs/ai/pattern-detection) - Identify trends and patterns across reports
-- [Compliance Overview](/docs/compliance/overview) - Overall compliance framework and requirements
-- [Case Assignment](/docs/cases/assignment) - Assign cases based on risk level and investigator capacity
-- [Investigation Workflow](/docs/cases/workflow) - Investigation process and best practices
-- [Anti-Retaliation Measures](/docs/compliance/anti-retaliation) - Protect whistleblowers from retaliation
+- [AI Risk Assessment](/ai/risk-assessment) - Automated risk scoring and severity assessment
+- [AI Pattern Detection](/ai/pattern-detection) - Identify trends and patterns across reports
+- [Compliance Overview](/compliance/overview) - Overall compliance framework and requirements
+- [Case Assignment](/cases/assignment) - Assign cases based on risk level and investigator capacity
+- [Investigation Workflow](/cases/workflow) - Investigation process and best practices
+- [Anti-Retaliation Measures](/compliance/anti-retaliation) - Protect whistleblowers from retaliation

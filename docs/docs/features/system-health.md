@@ -271,7 +271,7 @@ Disclosurely targets:
 - **Pro Plan:** 99.9% uptime (guaranteed with SLA)
 - **Enterprise Plan:** 99.95% uptime (guaranteed with SLA and credits)
 
-**Learn More:** [Subscription Tiers](/docs/features/subscription-tiers)
+**Learn More:** [Subscription Tiers](/features/subscription-tiers)
 
 ## Incident Management
 
@@ -445,7 +445,7 @@ Customers can choose data region:
 - US customers: Data stored in US
 - Other regions: Closest data center
 
-**Learn More:** [Security Overview](/docs/security/overview)
+**Learn More:** [Security Overview](/security/overview)
 
 ### Failover & Redundancy
 
@@ -508,7 +508,7 @@ Downtime not counted toward SLA:
 - Third-party service failures (DNS, CDN, etc.)
 - DDoS attacks (we mitigate but don't guarantee)
 
-**Learn More:** [Subscription Tiers](/docs/features/subscription-tiers)
+**Learn More:** [Subscription Tiers](/features/subscription-tiers)
 
 ### SLA Credit Requests
 
@@ -860,7 +860,7 @@ When third-party outages occur:
 ✅ **Extend Deadlines:**
 - If SLA timers affected by outage
 - Communicate extension clearly
-- Document in [audit trail](/docs/features/audit-trail)
+- Document in [audit trail](/features/audit-trail)
 
 ✅ **Preserve Trust:**
 - Be transparent about issues
@@ -874,26 +874,26 @@ When third-party outages occur:
 
 **System Events Logged:**
 
-All system health events recorded in [audit trail](/docs/features/audit-trail):
+All system health events recorded in [audit trail](/features/audit-trail):
 - Incident start/end times
 - Maintenance windows
 - Performance degradation
 - Failover events
 - SLA breaches
 
-**Learn More:** [Audit Trail](/docs/features/audit-trail)
+**Learn More:** [Audit Trail](/features/audit-trail)
 
 ### Notifications
 
 **System Health Notifications:**
 
-Integrated with [notification system](/docs/features/notifications):
+Integrated with [notification system](/features/notifications):
 - Incident alerts
 - Maintenance reminders
 - Performance warnings
 - SLA breach notifications
 
-**Learn More:** [Notification System](/docs/features/notifications)
+**Learn More:** [Notification System](/features/notifications)
 
 ### Security Monitoring
 
@@ -905,15 +905,15 @@ Security-related incidents handled separately:
 - User notification if data affected
 - Regulatory reporting as required
 
-**Learn More:** [Security Overview](/docs/security/overview)
+**Learn More:** [Security Overview](/security/overview)
 
 ## Related Pages
 
-- [Security Overview](/docs/security/overview) - Platform security details
-- [Audit Trail](/docs/features/audit-trail) - System event logging
-- [Notification System](/docs/features/notifications) - Alert configuration
-- [Subscription Tiers](/docs/features/subscription-tiers) - SLA by plan
-- [Analytics Dashboard](/docs/analytics/dashboard) - Usage metrics
+- [Security Overview](/security/overview) - Platform security details
+- [Audit Trail](/features/audit-trail) - System event logging
+- [Notification System](/features/notifications) - Alert configuration
+- [Subscription Tiers](/features/subscription-tiers) - SLA by plan
+- [Analytics Dashboard](/analytics/dashboard) - Usage metrics
 
 ## Support
 
@@ -921,5 +921,5 @@ Questions about system health?
 - Status page: status.disclosurely.com
 - Email: support@disclosurely.com
 - SLA inquiries: sla@disclosurely.com
-- [Contact Support](/docs/support/contact)
+- [Contact Support](/support/contact)
 - Emergency hotline (Enterprise): Available in account dashboard

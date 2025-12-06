@@ -45,9 +45,9 @@ Evidence documentation is critical for effective whistleblowing investigations. 
 - Preview capabilities
 - Version tracking
 
-**Access:** Available during [report submission](/docs/reporting/how-to-submit) and via [secure messaging](/docs/reporting/secure-messaging)
+**Access:** Available during [report submission](/reporting/how-to-submit) and via [secure messaging](/reporting/secure-messaging)
 
-**Storage Limits:** Vary by plan—see [Subscription Tiers](/docs/features/subscription-tiers)
+**Storage Limits:** Vary by plan—see [Subscription Tiers](/features/subscription-tiers)
 
 ## Supported File Types
 
@@ -271,7 +271,7 @@ Large files upload in chunks to prevent timeout:
 **Upload Interface:**
 
 **Step 1: Access Upload Area**
-- Navigate to [report submission form](/docs/reporting/how-to-submit)
+- Navigate to [report submission form](/reporting/how-to-submit)
 - Proceed to "Evidence & Attachments" step
 - Click **"Upload Files"** button or drag files into upload zone
 
@@ -313,8 +313,8 @@ Upload up to 20 files simultaneously. Total report limits still apply.
 **Add Evidence After Submission:**
 
 **How to Upload:**
-1. Track your report using [report tracking](/docs/reporting/tracking-report)
-2. Access [secure messaging](/docs/reporting/secure-messaging)
+1. Track your report using [report tracking](/reporting/tracking-report)
+2. Access [secure messaging](/reporting/secure-messaging)
 3. Type message or go directly to attachment icon
 4. Click paperclip/attachment icon
 5. Select file(s) using same methods above
@@ -327,7 +327,7 @@ Upload up to 20 files simultaneously. Total report limits still apply.
 - Clarification documents
 - Follow-up evidence
 
-**Learn More:** [Secure Messaging](/docs/reporting/secure-messaging)
+**Learn More:** [Secure Messaging](/reporting/secure-messaging)
 
 ### Mobile Upload
 
@@ -461,7 +461,7 @@ All uploaded files are encrypted:
 3. **Storage:** AES-256 encryption at rest
 4. **Access:** Decrypted only when authorized user views
 
-**Learn More:** [Security Overview](/docs/security/overview)
+**Learn More:** [Security Overview](/security/overview)
 
 ### Virus Scanning
 
@@ -518,7 +518,7 @@ Occasionally legitimate files flagged:
 
 **Access Logging:**
 
-All file access logged in [audit trail](/docs/features/audit-trail):
+All file access logged in [audit trail](/features/audit-trail):
 - Who accessed file
 - When accessed
 - From where (IP address)
@@ -537,7 +537,7 @@ Configure file download permissions:
 
 **Access:** Dashboard > Settings > Security > File Access
 
-**Learn More:** [Access Control](/docs/security/access-control)
+**Learn More:** [Access Control](/security/access-control)
 
 ## File Preview & Viewing
 
@@ -598,7 +598,7 @@ Download all case files at once:
 
 **Download Audit:**
 
-All downloads logged in [audit trail](/docs/features/audit-trail) for compliance.
+All downloads logged in [audit trail](/features/audit-trail) for compliance.
 
 ### Annotation Tools (Pro/Enterprise)
 
@@ -675,7 +675,7 @@ Files automatically organized by:
 - **OCR search** in images (scanned documents)
 - **Metadata search** (if preserved for internal files)
 
-**Learn More:** [Analytics Dashboard](/docs/analytics/dashboard)
+**Learn More:** [Analytics Dashboard](/analytics/dashboard)
 
 ## File Retention
 
@@ -683,7 +683,7 @@ Files automatically organized by:
 
 **Evidence Retention:**
 
-Files retained according to [data retention policies](/docs/compliance/retention):
+Files retained according to [data retention policies](/compliance/retention):
 
 **Default Retention:**
 - **Active Cases:** Retained until case closed
@@ -696,7 +696,7 @@ Files retained according to [data retention policies](/docs/compliance/retention
 Files under legal hold cannot be deleted:
 - Retention period extended
 - Deletion blocked automatically
-- [Audit trail](/docs/features/audit-trail) logs hold status
+- [Audit trail](/features/audit-trail) logs hold status
 - Released when legal matter resolved
 
 **GDPR Considerations:**
@@ -707,8 +707,8 @@ Evidence in erasure requests:
 - Documented justification required
 
 **Learn More:**
-- [Data Retention Policies](/docs/compliance/retention)
-- [GDPR Requests](/docs/features/gdpr-requests)
+- [Data Retention Policies](/compliance/retention)
+- [GDPR Requests](/features/gdpr-requests)
 
 ### Storage Management
 
@@ -834,7 +834,7 @@ Evidence in erasure requests:
 ✅ **Privacy Protection:**
 - Review files for unintended sensitive information
 - Redact third-party personal information
-- Use [anonymous reporting](/docs/features/anonymous-reporting) if needed
+- Use [anonymous reporting](/features/anonymous-reporting) if needed
 - Don't include your name in file names
 
 ✅ **Descriptions:**
@@ -849,7 +849,7 @@ Evidence in erasure requests:
 - Download files immediately upon receipt
 - Create backup copy for legal purposes
 - Document chain of custody
-- Note any file modifications in [audit trail](/docs/features/audit-trail)
+- Note any file modifications in [audit trail](/features/audit-trail)
 
 ✅ **File Analysis:**
 - Review all evidence thoroughly
@@ -859,7 +859,7 @@ Evidence in erasure requests:
 
 ✅ **Sharing Evidence:**
 - Redact before sharing externally
-- Use [access controls](/docs/security/access-control) appropriately
+- Use [access controls](/security/access-control) appropriately
 - Share via secure methods only
 - Log all evidence sharing
 
@@ -873,21 +873,21 @@ Files uploaded in anonymous reports:
 - Metadata automatically stripped
 - No reporter identification preserved
 - File access limited to case team
-- [Audit trail](/docs/features/audit-trail) doesn't link to reporter identity
+- [Audit trail](/features/audit-trail) doesn't link to reporter identity
 
-**Learn More:** [Anonymous Reporting](/docs/features/anonymous-reporting)
+**Learn More:** [Anonymous Reporting](/features/anonymous-reporting)
 
 ### Secure Messaging
 
 **Evidence via Messages:**
 
-Upload additional evidence through [secure messaging](/docs/reporting/secure-messaging):
+Upload additional evidence through [secure messaging](/reporting/secure-messaging):
 - Same security as initial submission
 - Supports all file types
 - Integrated with case timeline
 - Notifies investigators automatically
 
-**Learn More:** [Secure Messaging](/docs/reporting/secure-messaging)
+**Learn More:** [Secure Messaging](/reporting/secure-messaging)
 
 ### Audit Trail
 
@@ -901,21 +901,21 @@ All file activity logged:
 - Deletions
 - Access attempts (authorized and unauthorized)
 
-**Learn More:** [Audit Trail](/docs/features/audit-trail)
+**Learn More:** [Audit Trail](/features/audit-trail)
 
 ## Related Pages
 
-- [How to Submit a Report](/docs/reporting/how-to-submit) - Full submission guide
-- [Secure Messaging](/docs/reporting/secure-messaging) - Post-submission uploads
-- [Anonymous Reporting](/docs/features/anonymous-reporting) - Anonymous file uploads
-- [Security Overview](/docs/security/overview) - File encryption details
-- [Audit Trail](/docs/features/audit-trail) - File access logging
-- [Subscription Tiers](/docs/features/subscription-tiers) - Storage limits by plan
+- [How to Submit a Report](/reporting/how-to-submit) - Full submission guide
+- [Secure Messaging](/reporting/secure-messaging) - Post-submission uploads
+- [Anonymous Reporting](/features/anonymous-reporting) - Anonymous file uploads
+- [Security Overview](/security/overview) - File encryption details
+- [Audit Trail](/features/audit-trail) - File access logging
+- [Subscription Tiers](/features/subscription-tiers) - Storage limits by plan
 
 ## Support
 
 Questions about file uploads?
 - Email: support@disclosurely.com
-- [Contact Support](/docs/support/contact)
-- [FAQs](/docs/support/faqs)
+- [Contact Support](/support/contact)
+- [FAQs](/support/faqs)
 - File type requests: support@disclosurely.com

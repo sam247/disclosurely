@@ -522,12 +522,12 @@ Currently, active sessions are tracked but not displayed in a management interfa
 ## Support
 
 **Need help with Session Management?**
-- [Security Overview](/docs/security/overview)
-- [Authentication](/docs/security/authentication)
-- [Multi-Factor Authentication (MFA)](/docs/security/mfa)
-- [Access Control](/docs/security/access-control)
-- [Security Best Practices](/docs/security/best-practices)
-- [Contact Support](/docs/support/contact)
+- [Security Overview](/security/overview)
+- [Authentication](/security/authentication)
+- [Multi-Factor Authentication (MFA)](/security/mfa)
+- [Access Control](/security/access-control)
+- [Security Best Practices](/security/best-practices)
+- [Contact Support](/support/contact)
 
 **Security Concerns?**
 Email: [security@disclosurely.com](mailto:security@disclosurely.com)

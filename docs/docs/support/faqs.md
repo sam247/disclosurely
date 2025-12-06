@@ -46,7 +46,7 @@ A: Free Basic plan available. Pro plan is £39.99/month. Enterprise plans have c
 ## Security & Privacy
 
 **Q: How secure is Disclosurely?**
-A: Military-grade AES-256 encryption, zero-knowledge architecture, ISO 27001 certified. See [Security](/docs/security/encryption).
+A: Military-grade AES-256 encryption, zero-knowledge architecture, ISO 27001 certified. See [Security](/security/encryption).
 
 **Q: Can Disclosurely see my reports?**
 A: No. Zero-knowledge encryption means we cannot access report content. Only authorized users in your organization can decrypt reports.
@@ -60,10 +60,10 @@ A: Anonymous reports cannot be recovered if tracking ID is lost (by design for s
 ## Reporting
 
 **Q: How do I submit a report?**
-A: Access your organization's secure reporting link and follow the submission process. See [How to Submit](/docs/reporting/how-to-submit).
+A: Access your organization's secure reporting link and follow the submission process. See [How to Submit](/reporting/how-to-submit).
 
 **Q: Should I report anonymously or confidentially?**
-A: Anonymous for maximum privacy. Confidential if you're comfortable sharing identity for easier communication. See [Report Types](/docs/reporting/report-types).
+A: Anonymous for maximum privacy. Confidential if you're comfortable sharing identity for easier communication. See [Report Types](/reporting/report-types).
 
 **Q: How long does investigation take?**
 A: Typically 2-4 weeks, varies by complexity. Check your tracking ID for updates.
@@ -74,16 +74,16 @@ A: Yes, you'll receive status updates and final outcome (within confidentiality 
 ## For Administrators
 
 **Q: How do I set up my organization?**
-A: See [Initial Setup Guide](/docs/admin/initial-setup).
+A: See [Initial Setup Guide](/admin/initial-setup).
 
 **Q: Can I customize the branding?**
-A: Yes, on Pro and Enterprise plans. See [Custom Branding](/docs/admin/custom-branding).
+A: Yes, on Pro and Enterprise plans. See [Custom Branding](/admin/custom-branding).
 
 **Q: How do I invite team members?**
-A: Navigate to Dashboard > Team > Invite. See [Team Management](/docs/admin/team-management).
+A: Navigate to Dashboard > Team > Invite. See [Team Management](/admin/team-management).
 
 **Q: What user roles are available?**
-A: Admin, Org Admin, Case Handler, and Reviewer. See [Team Management](/docs/admin/team-management).
+A: Admin, Org Admin, Case Handler, and Reviewer. See [Team Management](/admin/team-management).
 
 ## Billing
 
@@ -121,4 +121,4 @@ A: Yes, documentation, video tutorials, and live training for Enterprise custome
 ---
 
 **Still have questions?**  
-[Contact Support](/docs/support/contact) or email support@disclosurely.com
+[Contact Support](/support/contact) or email support@disclosurely.com

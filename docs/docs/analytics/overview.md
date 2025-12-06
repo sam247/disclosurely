@@ -63,7 +63,7 @@ The central hub for all your whistleblowing program metrics.
 - Active cases monitoring
 - Escalation rate analysis
 
-**Learn More:** [Analytics Dashboard Guide](/docs/analytics/dashboard)
+**Learn More:** [Analytics Dashboard Guide](/analytics/dashboard)
 
 ### 2. Case Statistics
 
@@ -79,7 +79,7 @@ Detailed statistics and metrics for case management.
 - Status distribution
 - Department/location analysis
 
-**Learn More:** [Statistics & Metrics](/docs/analytics/statistics)
+**Learn More:** [Statistics & Metrics](/analytics/statistics)
 
 ### 3. Compliance Analytics
 
@@ -94,7 +94,7 @@ Specialized analytics for regulatory compliance and audit reporting.
 - Deadline tracking and alerts
 - Regulatory submission templates
 
-**Learn More:** [Compliance Analytics](/docs/analytics/compliance-analytics)
+**Learn More:** [Compliance Analytics](/analytics/compliance-analytics)
 
 ## Key Metrics Explained
 
@@ -149,14 +149,14 @@ Specialized analytics for regulatory compliance and audit reporting.
 
 ### Related Pages
 
-- [Analytics Dashboard](/docs/analytics/dashboard) - Detailed dashboard guide
-- [Statistics & Metrics](/docs/analytics/statistics) - Deep dive into metrics
-- [Compliance Analytics](/docs/analytics/compliance-analytics) - Regulatory reporting
-- [Pattern Detection](/docs/ai/pattern-detection) - AI-powered insights
+- [Analytics Dashboard](/analytics/dashboard) - Detailed dashboard guide
+- [Statistics & Metrics](/analytics/statistics) - Deep dive into metrics
+- [Compliance Analytics](/analytics/compliance-analytics) - Regulatory reporting
+- [Pattern Detection](/ai/pattern-detection) - AI-powered insights
 
 ## Support
 
 Need help with analytics?
 - Email: support@disclosurely.com
-- [Contact Support](/docs/support/contact)
-- [FAQs](/docs/support/faqs)
+- [Contact Support](/support/contact)
+- [FAQs](/support/faqs)

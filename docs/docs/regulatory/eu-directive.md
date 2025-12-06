@@ -32,7 +32,7 @@ head:
 
 Regulatory overview of **Directive (EU) 2019/1937 on the protection of persons who report breaches of Union law**. This page provides regulatory context, comparison with other jurisdictions, and implementation guidance.
 
-**For complete compliance details**, see **[EU Whistleblowing Directive Compliance](/docs/compliance/eu-directive)**.
+**For complete compliance details**, see **[EU Whistleblowing Directive Compliance](/compliance/eu-directive)**.
 
 ## Regulatory Background
 
@@ -148,7 +148,7 @@ Whistleblowing systems must comply with both EU Directive and GDPR:
 - Purpose limitation: Use data only for investigations
 - Retention: Delete when no longer needed (but respect Directive requirements)
 - Data subject rights: Balanced with investigation needs
-- See [GDPR Compliance](/docs/compliance/gdpr)
+- See [GDPR Compliance](/compliance/gdpr)
 
 **Balancing Acts**:
 - Reporter's right to confidentiality vs. subject's right to access their data
@@ -365,15 +365,15 @@ Each member state designates competent authorities to:
 - Compliance templates
 - Training materials
 - Technical configuration assistance
-- See [Contact Support](/docs/support/contact)
+- See [Contact Support](/support/contact)
 
 ---
 
 ## Related Pages
 
-- **[EU Whistleblowing Directive Compliance](/docs/compliance/eu-directive)** - Complete compliance guide and implementation details
-- [GDPR Compliance](/docs/compliance/gdpr) - Data protection requirements for whistleblowing systems
-- [Compliance Overview](/docs/compliance/overview) - Overall compliance framework
-- [SOX Compliance (Regulatory)](/docs/regulatory/sox) - US regulatory comparison
-- [Compliance Calendar](/docs/compliance/calendar) - Track EU Directive deadlines (7-day, 3-month)
-- [Anti-Retaliation Measures](/docs/compliance/anti-retaliation) - Implement EU Directive anti-retaliation requirements
+- **[EU Whistleblowing Directive Compliance](/compliance/eu-directive)** - Complete compliance guide and implementation details
+- [GDPR Compliance](/compliance/gdpr) - Data protection requirements for whistleblowing systems
+- [Compliance Overview](/compliance/overview) - Overall compliance framework
+- [SOX Compliance (Regulatory)](/regulatory/sox) - US regulatory comparison
+- [Compliance Calendar](/compliance/calendar) - Track EU Directive deadlines (7-day, 3-month)
+- [Anti-Retaliation Measures](/compliance/anti-retaliation) - Implement EU Directive anti-retaliation requirements

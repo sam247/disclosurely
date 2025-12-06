@@ -84,7 +84,7 @@ Role-based access control assigns permissions based on job functions rather than
 - Cannot modify cases or send messages
 - Limited access for compliance oversight roles
 
-Learn more about configuring these roles in the [Team Management](/docs/admin/team-management) documentation.
+Learn more about configuring these roles in the [Team Management](/admin/team-management) documentation.
 
 ## Principle of Least Privilege
 
@@ -127,7 +127,7 @@ The principle of least privilege means granting users the minimum level of acces
 
 ### Comprehensive Audit Logging
 
-Every access event in Disclosurely is recorded in an immutable [audit trail](/docs/compliance/audit-trail) that captures:
+Every access event in Disclosurely is recorded in an immutable [audit trail](/compliance/audit-trail) that captures:
 
 - **User identification**: Who accessed the data
 - **Resource accessed**: Which case, report, or file
@@ -162,7 +162,7 @@ Disclosurely actively monitors for suspicious access patterns:
 - Permission changes notification
 - Compliance threshold violations
 
-Learn more about security monitoring in the [Security Monitoring](/docs/security/monitoring) documentation.
+Learn more about security monitoring in the [Security Monitoring](/security/monitoring) documentation.
 
 ## Regular Access Reviews
 
@@ -205,7 +205,7 @@ User roles and responsibilities change over time. Regular access reviews ensure 
 
 ### For Administrators
 
-- Enable [multi-factor authentication](/docs/security/mfa) for all users
+- Enable [multi-factor authentication](/security/mfa) for all users
 - Assign the minimum role necessary for job function
 - Document reasons for privileged access
 - Conduct quarterly access reviews
@@ -229,7 +229,7 @@ User roles and responsibilities change over time. Regular access reviews ensure 
 
 ## Related Pages
 
-- [Security Overview](/docs/security/overview) - Complete security architecture
-- [Authentication](/docs/security/authentication) - Login and identity verification
-- [Multi-Factor Authentication](/docs/security/mfa) - Enhanced account security
-- [Team Management](/docs/admin/team-management) - Managing users and roles
+- [Security Overview](/security/overview) - Complete security architecture
+- [Authentication](/security/authentication) - Login and identity verification
+- [Multi-Factor Authentication](/security/mfa) - Enhanced account security
+- [Team Management](/admin/team-management) - Managing users and roles

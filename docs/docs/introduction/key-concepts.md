@@ -47,25 +47,25 @@ A **report** is a submission made through your organization's secure reporting c
 
 ### Report Types
 
-Disclosurely supports [two types of reports](/docs/reporting/report-types):
+Disclosurely supports [two types of reports](/reporting/report-types):
 
 **Anonymous Reports**
 - No personal information collected
 - Fully encrypted end-to-end
-- [Tracking ID provided](/docs/reporting/tracking-report) for status checks
-- [Two-way messaging](/docs/reporting/secure-messaging) available while maintaining anonymity
+- [Tracking ID provided](/reporting/tracking-report) for status checks
+- [Two-way messaging](/reporting/secure-messaging) available while maintaining anonymity
 - Cannot be traced back to the reporter
 
 **Confidential Reports**
 - Reporter identity known to organization
 - Higher level of trust
 - Easier follow-up communication
-- Still [encrypted and secure](/docs/reporting/encryption)
+- Still [encrypted and secure](/reporting/encryption)
 - Identity protected from unauthorized access
 
 ### Report Lifecycle
 
-Reports move through a [standard investigation lifecycle](/docs/cases/workflow):
+Reports move through a [standard investigation lifecycle](/cases/workflow):
 
 1. **New** - Just submitted, awaiting review
 2. **In Review** - Initial assessment underway
@@ -74,7 +74,7 @@ Reports move through a [standard investigation lifecycle](/docs/cases/workflow):
 5. **Closed** - Case closed with outcome documented
 6. **Archived** - Historical record, no longer active
 
-Learn more about [case status management](/docs/cases/status).
+Learn more about [case status management](/cases/status).
 
 ### Tracking IDs
 
@@ -133,7 +133,7 @@ Read-only access:
 
 ### Team Invitations
 
-[Adding team members](/docs/admin/team-management) requires sending an invitation:
+[Adding team members](/admin/team-management) requires sending an invitation:
 
 1. Admin or Org Admin sends invitation by email
 2. Invitation includes unique token and expires in 7 days
@@ -144,9 +144,9 @@ Read-only access:
 
 ### Zero-Knowledge Architecture
 
-Disclosurely is built on [zero-knowledge security principles](/docs/security/overview):
+Disclosurely is built on [zero-knowledge security principles](/security/overview):
 
-- **Client-Side Encryption**: All sensitive report content is [encrypted in the user's browser](/docs/reporting/encryption) before transmission
+- **Client-Side Encryption**: All sensitive report content is [encrypted in the user's browser](/reporting/encryption) before transmission
 - **Server Cannot Decrypt**: Our servers never have access to encryption keys
 - **True Anonymity**: We cannot read report content or identify reporters
 - **You Control Keys**: Only users with proper access can decrypt reports
@@ -455,5 +455,5 @@ Real-time in-app notifications for:
 
 **Next Steps:**
 - [Getting Started Guide](/)
-- [Platform Overview](/docs/introduction/platform-overview)
-- [Initial Setup](/docs/admin/initial-setup)
+- [Platform Overview](/introduction/platform-overview)
+- [Initial Setup](/admin/initial-setup)

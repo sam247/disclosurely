@@ -58,8 +58,8 @@ Disclosurely is built security-first to protect whistleblowers, organizations, a
 - Regular security audits
 
 **Data Layer**:
-- [AES-256 encryption at rest](/docs/reporting/encryption)
-- [End-to-end encryption for reports](/docs/reporting/encryption)
+- [AES-256 encryption at rest](/reporting/encryption)
+- [End-to-end encryption for reports](/reporting/encryption)
 - Zero-knowledge encryption for anonymous reports
 - Encrypted database
 - Encrypted backups
@@ -143,7 +143,7 @@ Zero-knowledge architecture means Disclosurely cannot access the content of encr
 - **HSTS**: Enabled (forces HTTPS)
 - **Perfect forward secrecy**: Enabled
 
-**[End-to-End Encryption](/docs/reporting/encryption)**:
+**[End-to-End Encryption](/reporting/encryption)**:
 - **Reports**: Encrypted client-side
 - **Messages**: Encrypted before transmission
 - **Evidence**: Encrypted before upload
@@ -258,7 +258,7 @@ Zero-knowledge architecture means Disclosurely cannot access the content of encr
 - Cannot delete audit logs
 - Verifiable integrity
 - Retained permanently
-- [Available for compliance](/docs/compliance/audit-trail)
+- [Available for compliance](/compliance/audit-trail)
 
 **Monitoring**:
 - Unusual access patterns detected
@@ -438,13 +438,13 @@ Zero-knowledge architecture means Disclosurely cannot access the content of encr
 - Report available to customers
 - Independent attestation
 
-**[GDPR Compliant](/docs/compliance/gdpr)**: General Data Protection Regulation
+**[GDPR Compliant](/compliance/gdpr)**: General Data Protection Regulation
 - Privacy by design
 - Data subject rights
 - Data protection impact assessments
 - Data processing agreements
 
-**[EU Whistleblowing Directive](/docs/compliance/eu-directive)**: Directive 2019/1937
+**[EU Whistleblowing Directive](/compliance/eu-directive)**: Directive 2019/1937
 - Built for full compliance
 - All requirements met
 - Documented controls
@@ -453,7 +453,7 @@ Zero-knowledge architecture means Disclosurely cannot access the content of encr
 ### Regulatory Compliance Support
 
 **Financial Services**:
-- [SOX compliance features](/docs/compliance/sox)
+- [SOX compliance features](/compliance/sox)
 - SEC requirements
 - Financial services regulations
 - Audit committee oversight
@@ -679,7 +679,7 @@ We understand you may need to complete security questionnaires for your procurem
 ---
 
 **Related:**
-- [Encryption & Privacy](/docs/security/encryption)
-- [Access Controls](/docs/security/access-control)
-- [Authentication & MFA](/docs/security/authentication)
-- [Security Best Practices](/docs/security/best-practices)
+- [Encryption & Privacy](/security/encryption)
+- [Access Controls](/security/access-control)
+- [Authentication & MFA](/security/authentication)
+- [Security Best Practices](/security/best-practices)

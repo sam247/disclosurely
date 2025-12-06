@@ -183,6 +183,6 @@ Default Disclosurely branding will be restored.
 ---
 
 **Next Steps:**
-- [Custom Domains](/docs/admin/custom-domains)
-- [Organization Settings](/docs/admin/organization-settings)
-- [Initial Setup](/docs/admin/initial-setup)
+- [Custom Domains](/admin/custom-domains)
+- [Organization Settings](/admin/organization-settings)
+- [Initial Setup](/admin/initial-setup)

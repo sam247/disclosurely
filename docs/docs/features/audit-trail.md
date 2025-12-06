@@ -145,12 +145,12 @@ Disclosurely's audit trail provides an immutable, chronological record of every 
 
 **Configuration Changes:**
 - Organization settings modified (field, old → new value)
-- [Assignment rules](/docs/features/assignment-rules) created/modified/deleted
-- [SLA policies](/docs/features/sla-management) updated
+- [Assignment rules](/features/assignment-rules) created/modified/deleted
+- [SLA policies](/features/sla-management) updated
 - Category added/removed/renamed
 - Custom fields created/modified
 - Branding changes (logo, colors)
-- [Custom domain](/docs/admin/custom-domains) configuration
+- [Custom domain](/admin/custom-domains) configuration
 
 **Integration Activity:**
 - Webhook triggered (event type, endpoint, response)
@@ -167,7 +167,7 @@ Disclosurely's audit trail provides an immutable, chronological record of every 
 - Certificate renewals/expiration
 
 **Compliance Events:**
-- [GDPR request](/docs/features/gdpr-requests) received (type, requestor)
+- [GDPR request](/features/gdpr-requests) received (type, requestor)
 - Data subject access request fulfilled
 - Data erasure request completed
 - Retention policy executed (records deleted)
@@ -407,7 +407,7 @@ Visual timeline showing:
 - CSV: Detailed event data
 - JSON: Machine-readable format
 
-**Learn More:** [Case Workflow](/docs/cases/workflow)
+**Learn More:** [Case Workflow](/cases/workflow)
 
 ## Retention and Storage
 
@@ -422,9 +422,9 @@ Visual timeline showing:
 - Enterprise: Unlimited (or custom)
 
 **Compliance-Driven Retention:**
-- [SOX compliance](/docs/compliance/sox): 7 years minimum
-- [GDPR](/docs/compliance/gdpr): As long as data subject data retained
-- [EU Whistleblowing Directive](/docs/compliance/eu-directive): 3+ years
+- [SOX compliance](/compliance/sox): 7 years minimum
+- [GDPR](/compliance/gdpr): As long as data subject data retained
+- [EU Whistleblowing Directive](/compliance/eu-directive): 3+ years
 - Legal hold: Indefinite until hold released
 
 **Automatic Archival:**
@@ -454,7 +454,7 @@ Visual timeline showing:
 - Regular disaster recovery testing
 - Multi-region failover capability
 
-**Learn More:** [Data Retention](/docs/compliance/retention)
+**Learn More:** [Data Retention](/compliance/retention)
 
 ## Compliance Reporting
 
@@ -529,7 +529,7 @@ Visual timeline showing:
 - Annual: Comprehensive year-end reports
 - On-demand: Generate anytime for audits
 
-**Learn More:** [Compliance Analytics](/docs/analytics/compliance-analytics)
+**Learn More:** [Compliance Analytics](/analytics/compliance-analytics)
 
 ## Exporting Audit Logs
 
@@ -634,7 +634,7 @@ Visual timeline showing:
 - ⏱️ Time-limited access
 - 🔒 Restricted to specific date ranges
 
-**Learn More:** [Access Control](/docs/security/access-control)
+**Learn More:** [Access Control](/security/access-control)
 
 ### Audit Trail Security
 
@@ -880,18 +880,18 @@ Visual timeline showing:
 
 ## Related Pages
 
-- [Compliance Overview](/docs/compliance/overview) - Regulatory compliance framework
-- [Data Retention](/docs/compliance/retention) - Retention policies and archival
-- [GDPR Compliance](/docs/compliance/gdpr) - GDPR data handling
-- [SOX Compliance](/docs/compliance/sox) - Sarbanes-Oxley requirements
-- [Security Overview](/docs/security/overview) - Platform security architecture
-- [Access Control](/docs/security/access-control) - Role-based permissions
-- [Analytics Dashboard](/docs/analytics/dashboard) - Analytics and reporting
+- [Compliance Overview](/compliance/overview) - Regulatory compliance framework
+- [Data Retention](/compliance/retention) - Retention policies and archival
+- [GDPR Compliance](/compliance/gdpr) - GDPR data handling
+- [SOX Compliance](/compliance/sox) - Sarbanes-Oxley requirements
+- [Security Overview](/security/overview) - Platform security architecture
+- [Access Control](/security/access-control) - Role-based permissions
+- [Analytics Dashboard](/analytics/dashboard) - Analytics and reporting
 
 ## Support
 
 Need help with audit trails?
 - Email: support@disclosurely.com
-- [Contact Support](/docs/support/contact)
-- [Compliance Documentation](/docs/compliance/overview)
-- [Security Best Practices](/docs/security/best-practices)
+- [Contact Support](/support/contact)
+- [Compliance Documentation](/compliance/overview)
+- [Security Best Practices](/security/best-practices)

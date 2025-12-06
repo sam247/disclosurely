@@ -87,8 +87,8 @@ You can also:
 
 ## What's Next?
 
-- [Set up AI Case Analysis](/docs/features/ai-case-analysis)
-- [Learn about Anonymous Reporting](/docs/features/anonymous-reporting)
+- [Set up AI Case Analysis](/features/ai-case-analysis)
+- [Learn about Anonymous Reporting](/features/anonymous-reporting)
 - Explore the Compliance Module (coming soon)
 - Enable two-factor authentication (coming soon)
 

@@ -69,7 +69,7 @@ Reviewers have **view-only access** to assigned cases, which includes:
 - Provides oversight without interference
 - Creates clear audit trail of who made what changes
 
-Learn more about roles in the [Team Management](/docs/admin/team-management) documentation.
+Learn more about roles in the [Team Management](/admin/team-management) documentation.
 
 ### Assigned vs. All Cases
 
@@ -126,7 +126,7 @@ If you believe you should have access to a case but don't, contact your organiza
 - Is the standard of proof appropriate?
 - Are similar cases handled consistently?
 
-See detailed investigation process in [Investigation Workflow](/docs/cases/workflow).
+See detailed investigation process in [Investigation Workflow](/cases/workflow).
 
 ### Quality Assurance
 
@@ -186,7 +186,7 @@ See detailed investigation process in [Investigation Workflow](/docs/cases/workf
 - Flag cases with compliance concerns
 - Verify remediation of past issues
 
-Learn about compliance requirements in [EU Whistleblowing Directive](/docs/compliance/eu-directive) documentation.
+Learn about compliance requirements in [EU Whistleblowing Directive](/compliance/eu-directive) documentation.
 
 ## Daily Reviewer Workflow
 
@@ -440,7 +440,7 @@ Learn about compliance requirements in [EU Whistleblowing Directive](/docs/compl
 
 **For Compliance Questions:**
 - Consult your organization's legal counsel
-- Review [compliance documentation](/docs/compliance/eu-directive)
+- Review [compliance documentation](/compliance/eu-directive)
 - Contact administrator for process questions
 - Escalate regulatory concerns appropriately
 
@@ -448,7 +448,7 @@ Learn about compliance requirements in [EU Whistleblowing Directive](/docs/compl
 
 ## Related Pages
 
-- [Investigation Workflow](/docs/cases/workflow) - Complete investigation process
-- [Case Resolution](/docs/cases/resolution) - Determining findings and actions
-- [Team Management](/docs/admin/team-management) - Understanding roles and permissions
-- [EU Whistleblowing Directive](/docs/compliance/eu-directive) - Compliance requirements
+- [Investigation Workflow](/cases/workflow) - Complete investigation process
+- [Case Resolution](/cases/resolution) - Determining findings and actions
+- [Team Management](/admin/team-management) - Understanding roles and permissions
+- [EU Whistleblowing Directive](/compliance/eu-directive) - Compliance requirements

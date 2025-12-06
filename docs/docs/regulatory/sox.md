@@ -32,7 +32,7 @@ head:
 
 Regulatory overview of the **Sarbanes-Oxley Act of 2002 (SOX)** whistleblower provisions. This page provides regulatory context, SEC enforcement, comparison with other jurisdictions, and industry best practices.
 
-**For complete compliance details**, see **[SOX Compliance Guide](/docs/compliance/sox)**.
+**For complete compliance details**, see **[SOX Compliance Guide](/compliance/sox)**.
 
 ## Regulatory Background
 
@@ -237,7 +237,7 @@ Regulatory overview of the **Sarbanes-Oxley Act of 2002 (SOX)** whistleblower pr
 - Quarterly: Number of reports, categories, high-risk cases
 - Ad-hoc: Critical issues requiring immediate attention
 - Annually: Comprehensive program assessment
-- See [Compliance Calendar](/docs/compliance/calendar) for reporting schedule
+- See [Compliance Calendar](/compliance/calendar) for reporting schedule
 
 ## Anti-Retaliation Enforcement
 
@@ -286,7 +286,7 @@ Regulatory overview of the **Sarbanes-Oxley Act of 2002 (SOX)** whistleblower pr
 - Starts from case closure (not submission date)
 - No deletion before 7 years
 - Legal holds override deletion
-- See [Data Retention](/docs/compliance/retention)
+- See [Data Retention](/compliance/retention)
 
 **Penalties for Destruction**:
 - Criminal penalties (up to 20 years imprisonment)
@@ -325,7 +325,7 @@ Regulatory overview of the **Sarbanes-Oxley Act of 2002 (SOX)** whistleblower pr
 - EU subsidiaries of US public companies must comply with both SOX and GDPR
 - Balance SOX retention (7 years) with GDPR data minimization
 - Document legal basis for retention (legal obligation, legitimate interest)
-- See [GDPR Compliance](/docs/compliance/gdpr)
+- See [GDPR Compliance](/compliance/gdpr)
 
 **Practical Approach**:
 - Retention periods justified by SOX requirements
@@ -459,9 +459,9 @@ Regulatory overview of the **Sarbanes-Oxley Act of 2002 (SOX)** whistleblower pr
 
 ## Related Pages
 
-- **[SOX Compliance Guide](/docs/compliance/sox)** - Complete compliance guide and implementation details
-- [Compliance Overview](/docs/compliance/overview) - Overall compliance framework
-- [EU Whistleblowing Directive (Regulatory)](/docs/regulatory/eu-directive) - EU regulatory comparison
-- [Audit Trail](/docs/compliance/audit-trail) - SOX-compliant audit logging
-- [Data Retention](/docs/compliance/retention) - 7-year retention requirements
-- [Anti-Retaliation Measures](/docs/compliance/anti-retaliation) - SOX Section 806 anti-retaliation implementation
+- **[SOX Compliance Guide](/compliance/sox)** - Complete compliance guide and implementation details
+- [Compliance Overview](/compliance/overview) - Overall compliance framework
+- [EU Whistleblowing Directive (Regulatory)](/regulatory/eu-directive) - EU regulatory comparison
+- [Audit Trail](/compliance/audit-trail) - SOX-compliant audit logging
+- [Data Retention](/compliance/retention) - 7-year retention requirements
+- [Anti-Retaliation Measures](/compliance/anti-retaliation) - SOX Section 806 anti-retaliation implementation

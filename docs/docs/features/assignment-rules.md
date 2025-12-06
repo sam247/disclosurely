@@ -609,10 +609,10 @@ Assign to Team: finance
 ## Support
 
 **Need help with Assignment Rules?**
-- [SLA Management](/docs/features/sla-management) - Manage response times
-- [Workflow Guide](/docs/cases/workflow) - Full workflow documentation
-- [Team Management](/docs/admin/team-management) - Manage team members
-- [Contact Support](/docs/support/contact)
+- [SLA Management](/features/sla-management) - Manage response times
+- [Workflow Guide](/cases/workflow) - Full workflow documentation
+- [Team Management](/admin/team-management) - Manage team members
+- [Contact Support](/support/contact)
 
 ---
 

@@ -275,11 +275,11 @@ Navigate to **Dashboard > Team** to see:
 - Annual billing options
 - Dedicated support
 
-See [Subscription & Billing](/docs/admin/subscription-billing) for details.
+See [Subscription & Billing](/admin/subscription-billing) for details.
 
 ---
 
 **Next Steps:**
-- [Organization Settings](/docs/admin/organization-settings)
-- [User Guides](/docs/guides/administrators)
-- [Security & Access Control](/docs/security/access-control)
+- [Organization Settings](/admin/organization-settings)
+- [User Guides](/guides/administrators)
+- [Security & Access Control](/security/access-control)

@@ -130,9 +130,9 @@ Reduced hours on UK bank holidays
 Before contacting support:
 
 - [Getting Started](/)
-- [FAQs](/docs/support/faqs)
-- [Troubleshooting](/docs/support/troubleshooting)
-- [User Guides](/docs/guides/administrators)
+- [FAQs](/support/faqs)
+- [Troubleshooting](/support/troubleshooting)
+- [User Guides](/guides/administrators)
 
 ---
 

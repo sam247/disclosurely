@@ -173,6 +173,6 @@ Enterprise customers: Call emergency hotline (provided in dashboard)
 ---
 
 **Related:**
-- [FAQs](/docs/support/faqs)
-- [Contact Support](/docs/support/contact)
+- [FAQs](/support/faqs)
+- [Contact Support](/support/contact)
 - [Documentation Home](/)

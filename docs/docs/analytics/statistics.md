@@ -247,7 +247,7 @@ Report Statistics provides detailed metrics and analytics beyond the dashboard's
 - Risk prediction indicators
 - Anomaly detection
 
-**Learn More:** [Pattern Detection](/docs/ai/pattern-detection)
+**Learn More:** [Pattern Detection](/ai/pattern-detection)
 
 ### Predictive Analytics
 
@@ -452,15 +452,15 @@ Report Statistics provides detailed metrics and analytics beyond the dashboard's
 
 ## Related Pages
 
-- [Analytics Dashboard](/docs/analytics/dashboard) - Visual dashboard guide
-- [Analytics Overview](/docs/analytics/overview) - Introduction to analytics
-- [Compliance Analytics](/docs/analytics/compliance-analytics) - Regulatory reporting
-- [Pattern Detection](/docs/ai/pattern-detection) - AI-powered insights
-- [Case Workflow](/docs/cases/workflow) - Investigation process
+- [Analytics Dashboard](/analytics/dashboard) - Visual dashboard guide
+- [Analytics Overview](/analytics/overview) - Introduction to analytics
+- [Compliance Analytics](/analytics/compliance-analytics) - Regulatory reporting
+- [Pattern Detection](/ai/pattern-detection) - AI-powered insights
+- [Case Workflow](/cases/workflow) - Investigation process
 
 ## Support
 
 Questions about statistics?
 - Email: support@disclosurely.com
-- [Contact Support](/docs/support/contact)
-- [FAQs](/docs/support/faqs)
+- [Contact Support](/support/contact)
+- [FAQs](/support/faqs)

@@ -89,7 +89,7 @@ Disclosurely never stores passwords in plain text or reversible encryption:
 **For Users:**
 - Use a unique password for Disclosurely (don't reuse)
 - Use password manager to generate and store strong passwords
-- Enable [multi-factor authentication](/docs/security/mfa) immediately
+- Enable [multi-factor authentication](/security/mfa) immediately
 - Never share password with anyone, including support staff
 - Change password if suspected compromise
 - Don't write passwords down
@@ -104,7 +104,7 @@ Disclosurely never stores passwords in plain text or reversible encryption:
 - Disable accounts immediately upon employee departure
 - Audit password reset requests for suspicious patterns
 
-Learn more about multi-factor authentication in the [MFA documentation](/docs/security/mfa).
+Learn more about multi-factor authentication in the [MFA documentation](/security/mfa).
 
 ## Session Management
 
@@ -240,7 +240,7 @@ Enterprise customers can integrate Disclosurely with their existing identity pro
 ### For Administrators
 
 **Security Configuration:**
-- Enforce [multi-factor authentication](/docs/security/mfa) organization-wide
+- Enforce [multi-factor authentication](/security/mfa) organization-wide
 - Set appropriate session timeout policies
 - Enable SSO if available for your plan
 - Monitor failed authentication attempts
@@ -265,7 +265,7 @@ Enterprise customers can integrate Disclosurely with their existing identity pro
 - Review authentication security annually
 - Update policies to reflect evolving threats
 
-Learn more about access controls in the [Access Control documentation](/docs/security/access-control).
+Learn more about access controls in the [Access Control documentation](/security/access-control).
 
 ### For All Users
 
@@ -299,7 +299,7 @@ Learn more about access controls in the [Access Control documentation](/docs/sec
 - Use secure device and network
 - Consider using VPN for additional privacy
 
-Learn more about anonymous reporting in the [How to Submit a Report](/docs/reporting/how-to-submit) guide.
+Learn more about anonymous reporting in the [How to Submit a Report](/reporting/how-to-submit) guide.
 
 ## Troubleshooting Authentication Issues
 
@@ -357,7 +357,7 @@ Learn more about anonymous reporting in the [How to Submit a Report](/docs/repor
 
 ## Related Pages
 
-- [Multi-Factor Authentication](/docs/security/mfa) - Enhanced account security
-- [Security Overview](/docs/security/overview) - Comprehensive security architecture
-- [Access Control](/docs/security/access-control) - User permissions and roles
-- [Best Practices](/docs/security/best-practices) - Security recommendations
+- [Multi-Factor Authentication](/security/mfa) - Enhanced account security
+- [Security Overview](/security/overview) - Comprehensive security architecture
+- [Access Control](/security/access-control) - User permissions and roles
+- [Best Practices](/security/best-practices) - Security recommendations

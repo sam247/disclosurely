@@ -66,7 +66,7 @@ Configure automatic assignment rules to route cases based on:
 ### Setting Up Auto-Assignment
 
 1. **Navigate to Settings**
-   - Go to Dashboard > [Organization Settings](/docs/admin/organization-settings)
+   - Go to Dashboard > [Organization Settings](/admin/organization-settings)
    - Click "Case Assignment Rules"
 
 2. **Create Assignment Rule**
@@ -106,7 +106,7 @@ Distribute cases evenly across team members:
 5. Ensures fair distribution
 
 **Configuration:**
-- Go to [Team Management](/docs/admin/team-management)
+- Go to [Team Management](/admin/team-management)
 - Create "Investigation Team" group
 - Enable round-robin for group
 - Set maximum concurrent cases per person
@@ -151,7 +151,7 @@ For more detailed assignment:
    - Optional: Add note explaining assignment
    - Set expected response timeframe
    - Mark as urgent if needed
-   - Add case to specific [investigation project](/docs/cases/workflow)
+   - Add case to specific [investigation project](/cases/workflow)
 
 4. **Notify Assignee**
    - Email notification sent automatically
@@ -447,6 +447,6 @@ Use metrics to improve:
 ---
 
 **Related:**
-- [Investigation Workflow](/docs/cases/workflow)
-- [Team Management](/docs/admin/team-management)
-- [Status Management](/docs/cases/status)
+- [Investigation Workflow](/cases/workflow)
+- [Team Management](/admin/team-management)
+- [Status Management](/cases/status)

@@ -51,9 +51,9 @@ Disclosurely supports two types of report submissions: Anonymous and Confidentia
 - Concerns about investigation impartiality
 
 ### Features
-✅ [End-to-end encryption](/docs/reporting/encryption)
+✅ [End-to-end encryption](/reporting/encryption)
 ✅ Zero-knowledge architecture
-✅ [Two-way secure messaging](/docs/reporting/secure-messaging)
+✅ [Two-way secure messaging](/reporting/secure-messaging)
 ✅ Status tracking
 ✅ File uploads supported
 ✅ Cannot be traced to you
@@ -138,6 +138,6 @@ No - once identity is shared, it cannot be undone.
 ---
 
 **Next Steps:**
-- [How to Submit a Report](/docs/reporting/how-to-submit)
-- [Tracking Your Report](/docs/reporting/tracking-report)
-- [Secure Messaging](/docs/reporting/secure-messaging)
+- [How to Submit a Report](/reporting/how-to-submit)
+- [Tracking Your Report](/reporting/tracking-report)
+- [Secure Messaging](/reporting/secure-messaging)

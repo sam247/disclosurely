@@ -60,7 +60,7 @@ Every report receives a unique tracking ID in the format: **DIS-XXXXXXXX**
 
 ### Report Statuses
 
-Learn more about [case status management](/docs/cases/status).
+Learn more about [case status management](/cases/status).
 
 **New**
 - Report just submitted
@@ -213,6 +213,6 @@ When resolved or closed:
 ---
 
 **Next Steps:**
-- [Secure Messaging](/docs/reporting/secure-messaging)
-- [Report Types](/docs/reporting/report-types)
-- [How to Submit](/docs/reporting/how-to-submit)
+- [Secure Messaging](/reporting/secure-messaging)
+- [Report Types](/reporting/report-types)
+- [How to Submit](/reporting/how-to-submit)

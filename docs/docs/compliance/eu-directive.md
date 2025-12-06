@@ -92,7 +92,7 @@ Each EU member state has implemented the Directive through national legislation:
 
 **Disclosurely Compliance**:
 - ✅ Secure web-based reporting portal
-- ✅ [Anonymous reporting](/docs/reporting/report-types) via tracking ID
+- ✅ [Anonymous reporting](/reporting/report-types) via tracking ID
 - ✅ Confidential reporting with identity protection
 - ✅ Military-grade AES-256 encryption
 - ✅ Customizable reporting forms
@@ -139,14 +139,14 @@ Each EU member state has implemented the Directive through national legislation:
 **Requirement**: Provide feedback on investigation outcome within **3 months** (extendable to 6 months for complex cases)
 
 **Disclosurely Compliance**:
-- ✅ [Secure messaging](/docs/reporting/secure-messaging) system for communication
+- ✅ [Secure messaging](/reporting/secure-messaging) system for communication
 - ✅ Case status updates
 - ✅ Investigation outcome notification
 - ✅ Timeline tracking with alerts
 - ✅ Automated compliance monitoring
 
 **Timeline Management**:
-1. [Case created](/docs/cases/workflow) → 3-month timer starts
+1. [Case created](/cases/workflow) → 3-month timer starts
 2. Alerts at 60 days, 75 days, 85 days
 3. Extend to 6 months if needed (document reason)
 4. Provide feedback before deadline
@@ -238,7 +238,7 @@ Each EU member state has implemented the Directive through national legislation:
 - ✅ Data subject rights support
 - ✅ Data processing agreements
 
-**See**: [GDPR Compliance](/docs/compliance/gdpr) for detailed information
+**See**: [GDPR Compliance](/compliance/gdpr) for detailed information
 
 **Key Points**:
 - Process only necessary data
@@ -642,7 +642,7 @@ Each member state establishes penalties for:
 ---
 
 **Related:**
-- [GDPR Compliance](/docs/compliance/gdpr)
-- [Data Retention](/docs/compliance/retention)
-- [Initial Setup](/docs/admin/initial-setup)
-- [Anti-Retaliation Measures](/docs/compliance/anti-retaliation)
+- [GDPR Compliance](/compliance/gdpr)
+- [Data Retention](/compliance/retention)
+- [Initial Setup](/admin/initial-setup)
+- [Anti-Retaliation Measures](/compliance/anti-retaliation)

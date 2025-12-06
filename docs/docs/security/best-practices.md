@@ -43,8 +43,8 @@ Following these best practices protects whistleblower identities, prevents unaut
 ### Initial Setup and Configuration
 
 **Secure Platform Configuration:**
-- Complete [initial setup](/docs/admin/initial-setup) with security as top priority
-- Enable [multi-factor authentication](/docs/security/mfa) requirement for all users immediately
+- Complete [initial setup](/admin/initial-setup) with security as top priority
+- Enable [multi-factor authentication](/security/mfa) requirement for all users immediately
 - Configure appropriate session timeout settings (2 hours idle recommended)
 - Set strong password requirements (minimum 12 characters, complexity required)
 - Enable email notifications for security events
@@ -61,7 +61,7 @@ Following these best practices protects whistleblower identities, prevents unaut
 - Review and approve all user access requests formally
 - Document justification for elevated access
 
-Learn more about user management in the [Team Management](/docs/admin/team-management) documentation.
+Learn more about user management in the [Team Management](/admin/team-management) documentation.
 
 ### Ongoing Security Operations
 
@@ -75,7 +75,7 @@ Learn more about user management in the [Team Management](/docs/admin/team-manag
 - Document review findings for compliance
 
 **Security Monitoring:**
-- Review [security monitoring](/docs/security/monitoring) dashboard daily
+- Review [security monitoring](/security/monitoring) dashboard daily
 - Respond promptly to security alerts (same day for high priority)
 - Investigate unusual access patterns even if they seem minor
 - Monitor failed authentication attempts for brute force indicators
@@ -126,8 +126,8 @@ Learn more about user management in the [Team Management](/docs/admin/team-manag
 - Prepare compliance reports quarterly
 
 **Audit Preparation:**
-- Understand [compliance requirements](/docs/compliance/eu-directive) for your jurisdiction
-- Regularly review [audit trail](/docs/compliance/audit-trail) functionality
+- Understand [compliance requirements](/compliance/eu-directive) for your jurisdiction
+- Regularly review [audit trail](/compliance/audit-trail) functionality
 - Test ability to generate compliance reports
 - Prepare evidence of security controls
 - Document security policies and procedures
@@ -143,7 +143,7 @@ Learn more about user management in the [Team Management](/docs/admin/team-manag
 - Never reuse passwords from other services
 - Use password manager to generate and store passwords
 - Don't write passwords down or save in unsecured locations
-- Enable [multi-factor authentication](/docs/security/mfa) immediately after account creation
+- Enable [multi-factor authentication](/security/mfa) immediately after account creation
 - Change password immediately if compromise suspected
 - Don't share passwords with anyone, including support staff
 
@@ -193,7 +193,7 @@ Learn more about user management in the [Team Management](/docs/admin/team-manag
 - Protect confidential reporter identities strictly
 - Report any inadvertent identity disclosure immediately
 
-Learn more about access controls in the [Access Control](/docs/security/access-control) documentation.
+Learn more about access controls in the [Access Control](/security/access-control) documentation.
 
 ### Threat Awareness
 
@@ -229,7 +229,7 @@ Learn more about access controls in the [Access Control](/docs/security/access-c
 ### Protecting Your Identity
 
 **Anonymous Reporting:**
-- Use [anonymous reporting](/docs/reporting/report-types) if you fear retaliation
+- Use [anonymous reporting](/reporting/report-types) if you fear retaliation
 - Access reporting portal from personal device, not work computer
 - Use personal internet connection, not employer's network
 - Consider using VPN for additional privacy protection
@@ -247,7 +247,7 @@ Learn more about access controls in the [Access Control](/docs/security/access-c
 - Remember: If lost, anonymous report tracking IDs cannot be recovered
 
 **Communication Security:**
-- Use [secure messaging](/docs/reporting/secure-messaging) within platform only
+- Use [secure messaging](/reporting/secure-messaging) within platform only
 - Don't communicate about your report via work email
 - Don't discuss report with coworkers, even trusted ones
 - Be vague about details that might identify you
@@ -255,7 +255,7 @@ Learn more about access controls in the [Access Control](/docs/security/access-c
 - Keep communications about report strictly confidential
 - Report any attempts to identify you
 
-Learn more about safe reporting in the [How to Submit a Report](/docs/reporting/how-to-submit) guide.
+Learn more about safe reporting in the [How to Submit a Report](/reporting/how-to-submit) guide.
 
 ### Evidence Submission
 
@@ -269,7 +269,7 @@ Learn more about safe reporting in the [How to Submit a Report](/docs/reporting/
 - Focus evidence on the misconduct, not your identity
 
 **Upload Security:**
-- All files automatically [encrypted during upload](/docs/security/encryption)
+- All files automatically [encrypted during upload](/security/encryption)
 - Upload only relevant evidence
 - Keep file sizes reasonable (10MB per file limit)
 - Don't upload personal identification documents unnecessarily
@@ -355,16 +355,16 @@ Learn more about safe reporting in the [How to Submit a Report](/docs/reporting/
 - Learn from security incidents (sanitized case studies)
 
 **Additional Resources:**
-- [Security Overview](/docs/security/overview) - Comprehensive platform security
-- [Authentication](/docs/security/authentication) - Login security
-- [Encryption](/docs/security/encryption) - Data protection
-- [Access Control](/docs/security/access-control) - Permission management
+- [Security Overview](/security/overview) - Comprehensive platform security
+- [Authentication](/security/authentication) - Login security
+- [Encryption](/security/encryption) - Data protection
+- [Access Control](/security/access-control) - Permission management
 
 ---
 
 ## Related Pages
 
-- [Security Overview](/docs/security/overview) - Complete security architecture
-- [Multi-Factor Authentication](/docs/security/mfa) - Enhanced account security
-- [Authentication](/docs/security/authentication) - Login and identity verification
-- [Monitoring](/docs/security/monitoring) - Security operations and alerts
+- [Security Overview](/security/overview) - Complete security architecture
+- [Multi-Factor Authentication](/security/mfa) - Enhanced account security
+- [Authentication](/security/authentication) - Login and identity verification
+- [Monitoring](/security/monitoring) - Security operations and alerts

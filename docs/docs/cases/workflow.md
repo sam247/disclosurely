@@ -78,7 +78,7 @@ The investigation workflow in Disclosurely follows a structured process to ensur
    - What records need review?
 
 5. **Request Additional Information**
-   - Use [secure messaging](/docs/reporting/secure-messaging) to ask reporter:
+   - Use [secure messaging](/reporting/secure-messaging) to ask reporter:
      - Specific dates and times
      - Names of witnesses
      - Location details
@@ -86,7 +86,7 @@ The investigation workflow in Disclosurely follows a structured process to ensur
    - Set reasonable deadline for response
 
 6. **Update Status**
-   - Change from "New" to "Under Review" using [status management](/docs/cases/status)
+   - Change from "New" to "Under Review" using [status management](/cases/status)
    - Add initial assessment notes
    - Set expected investigation timeline
    - Notify reporter of next steps
@@ -150,14 +150,14 @@ The investigation workflow in Disclosurely follows a structured process to ensur
    - Get receipt if taking from location
 
 4. **Organize Evidence**
-   - Upload all [evidence to case](/docs/cases/evidence)
+   - Upload all [evidence to case](/cases/evidence)
    - Tag and categorize each item
    - Create evidence index
    - Link evidence to specific allegations
    - Note relevance and weight
 
 5. **Update Case Notes**
-   - [Document investigation activities](/docs/cases/evidence) daily
+   - [Document investigation activities](/cases/evidence) daily
    - Note who interviewed when
    - Record evidence obtained
    - Track outstanding actions
@@ -218,7 +218,7 @@ The investigation workflow in Disclosurely follows a structured process to ensur
    - Regulatory implications
 
 6. **Document AI Assistance**
-   - If using [AI Case Helper](/docs/ai/case-helper) for analysis
+   - If using [AI Case Helper](/ai/case-helper) for analysis
    - Note which AI insights used
    - Verify AI conclusions independently
    - Document human review and decision
@@ -278,7 +278,7 @@ The investigation workflow in Disclosurely follows a structured process to ensur
 - Ensure consistency and fairness
 - Document thoroughly
 
-Learn more about [determining findings and appropriate actions](/docs/cases/resolution).
+Learn more about [determining findings and appropriate actions](/cases/resolution).
 
 **Actions:**
 
@@ -577,7 +577,7 @@ Learn from each investigation:
 ---
 
 **Related:**
-- [Case Assignment](/docs/cases/assignment)
-- [Status Management](/docs/cases/status)
-- [Evidence Management](/docs/cases/evidence)
-- [AI Case Helper](/docs/ai/case-helper)
+- [Case Assignment](/cases/assignment)
+- [Status Management](/cases/status)
+- [Evidence Management](/cases/evidence)
+- [AI Case Helper](/ai/case-helper)

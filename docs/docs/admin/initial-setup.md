@@ -102,7 +102,7 @@ Every organization gets a unique secure reporting link:
 
 **Format**: `https://disclosurely.com/secure/tool/submit/[your-unique-token]`
 
-This link is your organization's anonymous reporting portal where whistleblowers can [submit anonymous reports](/docs/reporting/how-to-submit):
+This link is your organization's anonymous reporting portal where whistleblowers can [submit anonymous reports](/reporting/how-to-submit):
 - Submit anonymous reports
 - Track report status
 - Communicate securely with your team
@@ -174,7 +174,7 @@ Before inviting team members, understand the four user roles:
 | **Case Handler** | Case management | Investigators, compliance team |
 | **Reviewer** | View-only | Auditors, oversight roles |
 
-See [Team Management](/docs/admin/team-management) for detailed role descriptions.
+See [Team Management](/admin/team-management) for detailed role descriptions.
 
 ### Sending Invitations
 
@@ -210,7 +210,7 @@ You can always add more team members as your program grows.
 
 ## Step 5: Customize Branding (Pro/Enterprise)
 
-If you're on a Pro or Enterprise plan, [customize your reporting portal](/docs/admin/custom-branding) to match your brand.
+If you're on a Pro or Enterprise plan, [customize your reporting portal](/admin/custom-branding) to match your brand.
 
 ### Upload Your Logo
 
@@ -285,7 +285,7 @@ Navigate to **Settings > Notifications** and configure:
 - Customize email template if desired
 
 **Assignment Notifications**:
-- ✅ Notify team members when [assigned to a case](/docs/cases/assignment)
+- ✅ Notify team members when [assigned to a case](/cases/assignment)
 - Immediate email notification
 - Include case summary in email
 
@@ -332,7 +332,7 @@ If you plan to use Disclosurely for broader compliance management, set up these 
 6. Set next review date
 7. Click **"Save"**
 
-See [Policy Management](/docs/compliance/policies) for details.
+See [Policy Management](/compliance/policies) for details.
 
 ### Risk Register
 
@@ -348,7 +348,7 @@ See [Policy Management](/docs/compliance/policies) for details.
 6. Set review date
 7. Click **"Save"**
 
-See [Risk Management](/docs/compliance/risks) for details.
+See [Risk Management](/compliance/risks) for details.
 
 ### Compliance Calendar
 
@@ -363,7 +363,7 @@ See [Risk Management](/docs/compliance/risks) for details.
 5. Set reminder preferences
 6. Click **"Save"**
 
-See [Compliance Calendar](/docs/compliance/calendar) for details.
+See [Compliance Calendar](/compliance/calendar) for details.
 
 ## Step 8: Test Your Setup
 
@@ -503,10 +503,10 @@ Need assistance during setup?
 
 Now that you've completed initial setup:
 
-1. **[Customize Your Branding](/docs/admin/custom-branding)** - Make it yours
-2. **[Add Custom Domain](/docs/admin/custom-domains)** - Use your own domain (Pro/Enterprise)
-3. **[Configure GDPR Settings](/docs/compliance/gdpr)** - Ensure data compliance
-4. **[Explore AI Features](/docs/ai/case-helper)** - Leverage AI for case analysis
-5. **[Set Up Compliance Modules](/docs/compliance/overview)** - Expand beyond whistleblowing
+1. **[Customize Your Branding](/admin/custom-branding)** - Make it yours
+2. **[Add Custom Domain](/admin/custom-domains)** - Use your own domain (Pro/Enterprise)
+3. **[Configure GDPR Settings](/compliance/gdpr)** - Ensure data compliance
+4. **[Explore AI Features](/ai/case-helper)** - Leverage AI for case analysis
+5. **[Set Up Compliance Modules](/compliance/overview)** - Expand beyond whistleblowing
 
 Welcome to Disclosurely! You're all set to run an effective, compliant whistleblowing and ethics program.

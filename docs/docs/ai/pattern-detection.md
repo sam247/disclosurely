@@ -509,7 +509,7 @@ Notification: Immediate email + dashboard alert
 - Personal data minimized in pattern reports
 - Purpose limitation: Patterns used only for compliance and risk management
 - Data subjects can request pattern data deletion (subject to legal retention)
-- See [GDPR Compliance](/docs/compliance/gdpr) for full details
+- See [GDPR Compliance](/compliance/gdpr) for full details
 
 ### Bias Prevention
 
@@ -580,7 +580,7 @@ Notification: Immediate email + dashboard alert
 
 ### Pattern Detection + Risk Assessment
 
-[AI Risk Assessment](/docs/ai/risk-assessment) uses pattern data to adjust risk scores:
+[AI Risk Assessment](/ai/risk-assessment) uses pattern data to adjust risk scores:
 - Cases involving serial offenders: +20% risk score
 - Cases in high-risk departments: +10% risk score
 - Cases matching concerning trends: +15% risk score
@@ -588,7 +588,7 @@ Notification: Immediate email + dashboard alert
 
 ### Pattern Detection + Case Helper
 
-[AI Case Helper](/docs/ai/case-helper) leverages patterns in its recommendations:
+[AI Case Helper](/ai/case-helper) leverages patterns in its recommendations:
 - "This subject has 2 prior substantiated complaints"
 - "Similar cases resolved with X outcome"
 - "Department has pattern requiring systemic intervention"
@@ -596,7 +596,7 @@ Notification: Immediate email + dashboard alert
 
 ### Pattern Detection + Content Generation
 
-[AI Content Generation](/docs/ai/content-generation) incorporates pattern insights:
+[AI Content Generation](/ai/content-generation) incorporates pattern insights:
 - Investigation reports mention relevant patterns
 - Policy recommendations address systemic issues
 - Executive summaries highlight trend concerns
@@ -652,8 +652,8 @@ Generate comprehensive pattern reports for leadership:
 
 ## Related Pages
 
-- [AI Case Helper](/docs/ai/case-helper) - Get AI-powered recommendations using pattern insights
-- [AI Risk Assessment](/docs/ai/risk-assessment) - Automated risk scoring enhanced by pattern data
-- [Compliance Overview](/docs/compliance/overview) - Use patterns to improve organizational compliance
-- [Case Assignment](/docs/cases/assignment) - Assign pattern-related cases to appropriate investigators
-- [Analytics and Reporting](/docs/analytics/overview) - Visualize patterns and trends across your organization
+- [AI Case Helper](/ai/case-helper) - Get AI-powered recommendations using pattern insights
+- [AI Risk Assessment](/ai/risk-assessment) - Automated risk scoring enhanced by pattern data
+- [Compliance Overview](/compliance/overview) - Use patterns to improve organizational compliance
+- [Case Assignment](/cases/assignment) - Assign pattern-related cases to appropriate investigators
+- [Analytics and Reporting](/analytics/overview) - Visualize patterns and trends across your organization

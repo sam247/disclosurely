@@ -225,6 +225,6 @@ Enterprise customers can configure multiple domains:
 ---
 
 **Next Steps:**
-- [Custom Branding](/docs/admin/custom-branding)
-- [Organization Settings](/docs/admin/organization-settings)
-- [Subscription & Billing](/docs/admin/subscription-billing)
+- [Custom Branding](/admin/custom-branding)
+- [Organization Settings](/admin/organization-settings)
+- [Subscription & Billing](/admin/subscription-billing)

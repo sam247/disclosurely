@@ -124,7 +124,7 @@ Proper archiving ensures:
 **In Disclosurely**:
 
 1. **Navigate to Settings**
-   - Dashboard > [Organization Settings](/docs/admin/organization-settings)
+   - Dashboard > [Organization Settings](/admin/organization-settings)
    - "Data Retention & Archiving"
 
 2. **Set Default Retention**
@@ -534,7 +534,7 @@ Proper archiving ensures:
 - Access to archived cases
 
 **Preservation**:
-- [Audit logs](/docs/compliance/audit-trail) never deleted
+- [Audit logs](/compliance/audit-trail) never deleted
 - Even after case deleted
 - Anonymized if necessary
 - Meet regulatory requirements
@@ -544,7 +544,7 @@ Proper archiving ensures:
 
 **Longer Isn't Always Better**:
 - Privacy laws favor deletion
-- [GDPR "right to erasure"](/docs/compliance/gdpr)
+- [GDPR "right to erasure"](/compliance/gdpr)
 - Storage costs increase
 - Breach exposure grows
 - Discovery burdens expand
@@ -602,8 +602,8 @@ Proper archiving ensures:
 ---
 
 **Related:**
-- [Case Resolution](/docs/cases/resolution)
-- [Compliance & Audit Trail](/docs/compliance/audit-trail)
-- [Data Retention](/docs/compliance/retention)
-- [GDPR Compliance](/docs/compliance/gdpr)
-- [Organization Settings](/docs/admin/organization-settings)
+- [Case Resolution](/cases/resolution)
+- [Compliance & Audit Trail](/compliance/audit-trail)
+- [Data Retention](/compliance/retention)
+- [GDPR Compliance](/compliance/gdpr)
+- [Organization Settings](/admin/organization-settings)
