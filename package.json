@@ -7,7 +7,7 @@
     "dev": "vite",
     "build": "npm run build:app && npm run build:docs",
     "build:app": "vite build",
-    "build:docs": "cd docs && npm install && npm run build && cd .. && cp -r docs/docs/.vitepress/dist dist/docs",
+    "build:docs": "cd docs && npm install && npm run build && cd .. && mkdir -p dist/docs && cp -r docs/docs/.vitepress/dist/* dist/docs/ && echo 'Docs copied successfully'",
     "build:dev": "vite build --mode development",
     "lint": "eslint .",
     "preview": "vite preview",
