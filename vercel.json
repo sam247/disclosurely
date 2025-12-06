@@ -74,10 +74,7 @@
   "rewrites": [
     { "source": "/sitemap.xml", "destination": "/api/sitemap.xml" },
     { "source": "/sitemap-index.xml", "destination": "/api/sitemap-index.xml" },
-    {
-      "source": "/:path((?!api|assets|_next|docs).*)",
-      "destination": "/index.html"
-    }
+    { "source": "/:path*", "destination": "/index.html" }
   ],
   "cleanUrls": true
 }
