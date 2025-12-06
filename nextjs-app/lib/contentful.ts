@@ -1,4 +1,8 @@
-import { createClient, type EntryCollection } from "contentful";
+import {
+  createClient,
+  type EntryCollection,
+  type EntrySkeletonType
+} from "contentful";
 
 const space = process.env.NEXT_PUBLIC_CONTENTFUL_SPACE_ID;
 const token = process.env.CONTENTFUL_DELIVERY_TOKEN;
@@ -14,12 +18,14 @@ function assertEnv() {
 export function createContentfulClient() {
   assertEnv();
   return createClient({
-    space,
-    accessToken: token
+    space: space!,
+    accessToken: token!
   });
 }
 
-export async function fetchEntries<T>(query: Record<string, unknown>) {
+export async function fetchEntries<T extends EntrySkeletonType>(
+  query: Record<string, unknown>
+) {
   const client = createContentfulClient();
   const response: EntryCollection<T> = await client.getEntries<T>(query);
   return response.items;
