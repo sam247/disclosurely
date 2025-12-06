@@ -34,6 +34,8 @@ const Pricing = () => {
   const handleSubscribe = async (tier: 'tier1' | 'tier2') => {
     setLoading(tier);
     try {
+      console.log('[Pricing] Starting subscription for tier:', tier);
+      
       // Check if user is logged in (optional - checkout works without auth)
       const { data: { session } } = await supabase.auth.getSession();
       
@@ -57,21 +59,32 @@ const Pricing = () => {
         headers.Authorization = `Bearer ${session.access_token}`;
       }
 
+      console.log('[Pricing] Invoking create-checkout with:', { tier, interval: billingInterval, hasAuth: !!session });
+
       const { data, error } = await supabase.functions.invoke('create-checkout', {
         headers,
         body: requestBody
       });
 
-      if (error) throw error;
+      if (error) {
+        console.error('[Pricing] Edge function error:', error);
+        throw error;
+      }
+
+      console.log('[Pricing] Checkout response:', data);
 
       if (data?.url) {
+        console.log('[Pricing] Redirecting to checkout URL:', data.url);
         window.location.href = data.url;
+      } else {
+        throw new Error('No checkout URL returned from server');
       }
-    } catch (error) {
-      console.error('Error creating checkout session:', error);
+    } catch (error: any) {
+      console.error('[Pricing] Error creating checkout session:', error);
+      const errorMessage = error?.message || error?.error || 'Failed to start subscription process. Please try again.';
       toast({
         title: "Error",
-        description: "Failed to start subscription process. Please try again.",
+        description: errorMessage,
         variant: "destructive",
       });
       setLoading(null);
@@ -210,8 +223,13 @@ const Pricing = () => {
                   </div>
                 </div>
                 <Button 
+                  type="button"
                   className="w-full mt-6" 
-                  onClick={() => handleSubscribe('tier1')}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    handleSubscribe('tier1');
+                  }}
                   disabled={loading === 'tier1'}
                 >
                   {loading === 'tier1' ? 'Loading...' : t("pricing.cta.startTrial")}
@@ -279,8 +297,13 @@ const Pricing = () => {
                   </div>
                 </div>
                 <Button 
+                  type="button"
                   className="w-full mt-6" 
-                  onClick={() => handleSubscribe('tier2')}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    handleSubscribe('tier2');
+                  }}
                   disabled={loading === 'tier2'}
                 >
                   {loading === 'tier2' ? 'Loading...' : t("pricing.cta.startTrial")}
