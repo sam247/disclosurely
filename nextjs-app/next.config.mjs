@@ -1,3 +1,9 @@
+import path from "path";
+import { fileURLToPath } from "url";
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+const rootDir = path.join(__dirname, "..");
+
 const dashboardOrigin =
   process.env.NEXT_PUBLIC_DASHBOARD_ORIGIN ??
   "https://disclosurely-dashboard.vercel.app";
@@ -5,6 +11,7 @@ const dashboardOrigin =
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
+  outputFileTracingRoot: rootDir,
   experimental: {
     optimizePackageImports: [
       "@radix-ui/react-slot",
