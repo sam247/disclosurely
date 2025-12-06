@@ -1,5 +1,4 @@
-docs/
-docs/**
+docs/.vitepress/dist
 *.md
 !README.md
 
