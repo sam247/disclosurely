@@ -11,13 +11,5 @@
 - `npm run lint` — Next.js lint rules.
 
 ## Env
-Create `nextjs-app/.env.local` with:
-- `NEXT_PUBLIC_SUPABASE_URL`
-- `NEXT_PUBLIC_SUPABASE_KEY`
-- `NEXT_PUBLIC_DASHBOARD_ORIGIN` (your Vite dashboard URL)
-- `NEXT_PUBLIC_CONTENTFUL_SPACE_ID`
-- `CONTENTFUL_DELIVERY_TOKEN`
-- `NEXT_PUBLIC_SENTRY_DSN` (optional)
-
-Copy the existing `VITE_` values as `NEXT_PUBLIC_` equivalents. Without Supabase/Contentful vars, server helpers will fail fast to avoid silent misconfigurations.
+Copy the relevant `VITE_` values as `NEXT_PUBLIC_` equivalents in `.env.local` (Supabase URL/key, Contentful tokens, Sentry, Stripe publishable key, etc.). Set `NEXT_PUBLIC_DASHBOARD_ORIGIN` to the deployed Vite dashboard URL if different from the default.
 
