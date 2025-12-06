@@ -9,8 +9,18 @@
 **Disclosurely** is a secure, GDPR-compliant whistleblowing SaaS platform that enables organizations to receive, manage, and resolve misconduct reports safely and anonymously.
 
 - **Primary URL**: https://disclosurely.com
+- **App URL**: https://app.disclosurely.com
 - **Documentation URL**: https://docs.disclosurely.com (VitePress)
 - **Support**: support@disclosurely.com
+
+### 🔐 Canonical Authentication URLs
+
+**IMPORTANT**: These are the ONLY official authentication URLs that should be used:
+
+- **Sign In**: `https://app.disclosurely.com/auth/signin`
+- **Sign Up**: `https://app.disclosurely.com/auth/signup`
+
+All other authentication URL variations (e.g., `/login`, `/signin`, `/signup` on any domain) automatically redirect to these canonical URLs via Vercel redirects.
 
 ### Core Value Proposition
 - Secure anonymous reporting with end-to-end encryption
@@ -442,6 +452,18 @@ submit-anonymous-report Edge Function:
 - `/contact` - Contact page
 - `/terms` - Terms of Service
 - `/privacy` - Privacy Policy
+
+### Authentication Routes
+
+**Canonical URLs (use these everywhere):**
+- `/auth/signin` - Sign in page (redirects from `/login`, `/signin`)
+- `/auth/signup` - Sign up page (redirects from `/signup`)
+
+**Legacy/Redirect URLs (automatically redirect to canonical URLs):**
+- `/login` → `/auth/signin`
+- `/signin` → `/auth/signin`
+- `/signup` → `/auth/signup`
+- `/auth/login` → `/auth/signin`
 
 ### Anonymous Reporting Routes (Public, No Auth)
 

@@ -34,13 +34,23 @@
       "permanent": true
     },
     {
-      "source": "/auth/login",
-      "destination": "/login",
+      "source": "/login",
+      "destination": "/auth/signin",
       "permanent": true
     },
     {
-      "source": "/auth/signup",
-      "destination": "/signup",
+      "source": "/signin",
+      "destination": "/auth/signin",
+      "permanent": true
+    },
+    {
+      "source": "/signup",
+      "destination": "/auth/signup",
+      "permanent": true
+    },
+    {
+      "source": "/auth/login",
+      "destination": "/auth/signin",
       "permanent": true
     },
     {

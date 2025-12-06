@@ -143,11 +143,14 @@ const AppContent = () => {
         <Route path="/security" element={<Security />} />
         <Route path="/faq" element={<FAQ />} />
 
-        {/* Authentication routes */}
-        <Route path="/login" element={<Login />} />
-        <Route path="/signup" element={<Signup />} />
-        <Route path="/auth/login" element={<Login />} />
+        {/* Authentication routes - Canonical URLs */}
+        <Route path="/auth/signin" element={<Login />} />
         <Route path="/auth/signup" element={<Signup />} />
+        {/* Legacy routes - kept for backwards compatibility */}
+        <Route path="/auth/login" element={<Login />} />
+        <Route path="/login" element={<Login />} />
+        <Route path="/signin" element={<Login />} />
+        <Route path="/signup" element={<Signup />} />
         <Route path="/invite/:token" element={<AcceptInvite />} />
 
         {/* Organization Onboarding - Protected Route */}
@@ -214,7 +217,7 @@ const AppContent = () => {
         <Route path="/:lang/anonymous-hotline" element={<AnonymousHotline />} />
         <Route path="/:lang/security" element={<Security />} />
         <Route path="/:lang/faq" element={<FAQ />} />
-        <Route path="/:lang/auth/login" element={<Login />} />
+        <Route path="/:lang/auth/signin" element={<Login />} />
         <Route path="/:lang/auth/signup" element={<Signup />} />
 
         {/* Authenticated routes */}
