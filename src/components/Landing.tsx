@@ -89,10 +89,17 @@ const Landing = () => {
 
       if (error) {
         console.error('[Landing] Edge function error:', error);
-        throw error;
+        // Extract error message from error object
+        const errorMsg = error?.message || error?.error || JSON.stringify(error);
+        throw new Error(errorMsg);
       }
 
       console.log('[Landing] Checkout response:', data);
+
+      // Check if response contains an error
+      if (data?.error) {
+        throw new Error(data.error);
+      }
 
       if (data?.url) {
         console.log('[Landing] Redirecting to checkout URL:', data.url);
@@ -102,7 +109,19 @@ const Landing = () => {
       }
     } catch (error: any) {
       console.error('[Landing] Error creating checkout session:', error);
-      const errorMessage = error?.message || error?.error || 'Failed to start subscription process. Please try again.';
+      // Extract error message from various possible formats
+      let errorMessage = 'Failed to start subscription process. Please try again.';
+      
+      if (error?.message) {
+        errorMessage = error.message;
+      } else if (error?.error) {
+        errorMessage = error.error;
+      } else if (typeof error === 'string') {
+        errorMessage = error;
+      } else if (error?.details) {
+        errorMessage = `${error.message || 'Error'}: ${error.details}`;
+      }
+      
       toast({
         title: "Error",
         description: errorMessage,

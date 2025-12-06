@@ -87,7 +87,13 @@ serve(async (req) => {
 
     logStep("Request data", { tier, employee_count, rdt_cid, interval, email: userEmail, userId });
 
-    const stripe = new Stripe(Deno.env.get("STRIPE_SECRET_KEY") || "", { 
+    // Validate Stripe secret key before creating Stripe instance
+    const stripeSecretKey = Deno.env.get("STRIPE_SECRET_KEY");
+    if (!stripeSecretKey) {
+      throw new Error("STRIPE_SECRET_KEY environment variable is not set");
+    }
+
+    const stripe = new Stripe(stripeSecretKey, { 
       apiVersion: "2023-10-16" 
     });
 
@@ -147,6 +153,13 @@ serve(async (req) => {
 
     logStep("Creating checkout session", { priceId, tierName, interval, trialDays: 7 });
 
+    // Get origin from request headers, with fallback to default domain
+    const origin = req.headers.get("origin") || req.headers.get("referer")?.split('/').slice(0, 3).join('/') || "https://app.disclosurely.com";
+    const successUrl = `${origin}/dashboard?subscription=success`;
+    const cancelUrl = `${origin}/pricing?subscription=cancelled`;
+    
+    logStep("Checkout URLs", { successUrl, cancelUrl, origin });
+
     const session = await stripe.checkout.sessions.create({
       customer: customerId || undefined,
       customer_email: customerId ? undefined : (userEmail || undefined),
@@ -160,8 +173,8 @@ serve(async (req) => {
       subscription_data: {
         trial_period_days: 7,
       },
-      success_url: `${req.headers.get("origin")}/dashboard?subscription=success`,
-      cancel_url: `${req.headers.get("origin")}/pricing?subscription=cancelled`,
+      success_url: successUrl,
+      cancel_url: cancelUrl,
       metadata: {
         user_id: userId || '',
         email: userEmail,
@@ -181,12 +194,33 @@ serve(async (req) => {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
       status: 200,
     });
-  } catch (error) {
-    const errorMessage = error instanceof Error ? error.message : String(error);
-    logStep("ERROR in create-checkout", { message: errorMessage });
-    return new Response(JSON.stringify({ error: errorMessage }), {
+  } catch (error: any) {
+    let errorMessage = "An unexpected error occurred";
+    let statusCode = 500;
+    
+    if (error instanceof Error) {
+      errorMessage = error.message;
+    } else if (typeof error === 'string') {
+      errorMessage = error;
+    } else if (error?.message) {
+      errorMessage = error.message;
+    }
+    
+    // Log full error details for debugging
+    logStep("ERROR in create-checkout", { 
+      message: errorMessage,
+      errorType: error?.constructor?.name,
+      stack: error?.stack,
+      fullError: JSON.stringify(error, Object.getOwnPropertyNames(error))
+    });
+    
+    // Return detailed error (but don't expose sensitive info in production)
+    return new Response(JSON.stringify({ 
+      error: errorMessage,
+      details: error?.type || error?.code || undefined
+    }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
-      status: 500,
+      status: statusCode,
     });
   }
 });
