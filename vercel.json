@@ -81,47 +81,7 @@
     { "source": "/sitemap-index.xml", "destination": "/api/sitemap-index.xml" },
     {
       "source": "/docs/:path*",
-      "destination": "https://docs.disclosurely.com/:path*",
-      "has": [
-        {
-          "type": "host",
-          "value": "disclosurely.com"
-        }
-      ]
-    },
-    {
-      "source": "/assets/:path*",
-      "destination": "https://docs.disclosurely.com/assets/:path*",
-      "has": [
-        {
-          "type": "host",
-          "value": "disclosurely.com"
-        }
-      ]
-    },
-    {
-      "source": "/logo.png",
-      "destination": "https://docs.disclosurely.com/logo.png",
-      "has": [
-        {
-          "type": "host",
-          "value": "disclosurely.com"
-        }
-      ]
-    },
-    {
-      "source": "/logo-light.png",
-      "destination": "https://docs.disclosurely.com/logo-light.png",
-      "has": [
-        {
-          "type": "host",
-          "value": "disclosurely.com"
-        }
-      ]
-    },
-    {
-      "source": "/logo-dark.png",
-      "destination": "https://docs.disclosurely.com/logo-dark.png",
+      "destination": "https://docs.disclosurely.com/docs/:path*",
       "has": [
         {
           "type": "host",
