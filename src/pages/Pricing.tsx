@@ -34,10 +34,25 @@ const Pricing = () => {
   const handleSubscribe = async (tier: 'tier1' | 'tier2') => {
     setLoading(tier);
     try {
-      console.log('[Pricing] Starting subscription for tier:', tier);
-      
-      // Check if user is logged in (optional - checkout works without auth)
+      // Check if user is logged in
       const { data: { session } } = await supabase.auth.getSession();
+      
+      if (!session) {
+        // Not logged in - redirect to signup with tier info
+        const referralCode = getReferralCode();
+        const params = new URLSearchParams({
+          tier,
+          interval: billingInterval,
+        });
+        if (referralCode) {
+          params.set('ref', referralCode);
+        }
+        window.location.href = `https://app.disclosurely.com/auth/signup?${params.toString()}`;
+        return;
+      }
+
+      // User is logged in - proceed with checkout
+      console.log('[Pricing] Starting subscription for tier:', tier);
       
       const referralCode = getReferralCode();
       
@@ -52,14 +67,11 @@ const Pricing = () => {
         requestBody.referral_code = referralCode;
       }
 
-      // If not logged in, we'll let Stripe collect email during checkout
-      // If logged in, include auth token
-      const headers: any = {};
-      if (session?.access_token) {
-        headers.Authorization = `Bearer ${session.access_token}`;
-      }
+      const headers: any = {
+        Authorization: `Bearer ${session.access_token}`,
+      };
 
-      console.log('[Pricing] Invoking create-checkout with:', { tier, interval: billingInterval, hasAuth: !!session });
+      console.log('[Pricing] Invoking create-checkout with:', { tier, interval: billingInterval, hasAuth: true });
 
       const { data, error } = await supabase.functions.invoke('create-checkout', {
         headers,
@@ -68,14 +80,12 @@ const Pricing = () => {
 
       if (error) {
         console.error('[Pricing] Edge function error:', error);
-        // Extract error message from error object
         const errorMsg = error?.message || error?.error || JSON.stringify(error);
         throw new Error(errorMsg);
       }
 
       console.log('[Pricing] Checkout response:', data);
 
-      // Check if response contains an error
       if (data?.error) {
         throw new Error(data.error);
       }
@@ -88,7 +98,6 @@ const Pricing = () => {
       }
     } catch (error: any) {
       console.error('[Pricing] Error creating checkout session:', error);
-      // Extract error message from various possible formats
       let errorMessage = 'Failed to start subscription process. Please try again.';
       
       if (error?.message) {
