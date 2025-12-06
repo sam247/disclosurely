@@ -292,7 +292,7 @@ serve(async (req) => {
     let body: any;
     try {
       body = await req.json()
-      console.log('Request body parsed:', Object.keys(body || {}))
+    console.log('Request body parsed:', Object.keys(body || {}))
     } catch (jsonError) {
       console.error('❌ Failed to parse request body:', jsonError)
       return new Response(
@@ -430,36 +430,36 @@ serve(async (req) => {
     
     try {
       console.log('🔐 Starting encryption process...')
-      const iv = crypto.getRandomValues(new Uint8Array(12))
-      const keyBytes = new Uint8Array(organizationKey.match(/.{1,2}/g)!.map(byte => parseInt(byte, 16)))
+    const iv = crypto.getRandomValues(new Uint8Array(12))
+    const keyBytes = new Uint8Array(organizationKey.match(/.{1,2}/g)!.map(byte => parseInt(byte, 16)))
       
       console.log('🔐 Importing crypto key...')
-      const cryptoKey = await crypto.subtle.importKey(
-        'raw',
-        keyBytes,
-        { name: 'AES-GCM' },
-        false,
-        ['encrypt']
-      )
-      
-      const dataString = JSON.stringify(contentToEncrypt)
+    const cryptoKey = await crypto.subtle.importKey(
+      'raw',
+      keyBytes,
+      { name: 'AES-GCM' },
+      false,
+      ['encrypt']
+    )
+    
+    const dataString = JSON.stringify(contentToEncrypt)
       console.log('🔐 Data to encrypt length:', dataString.length)
-      const dataBuffer = new TextEncoder().encode(dataString)
+    const dataBuffer = new TextEncoder().encode(dataString)
       
       console.log('🔐 Encrypting data...')
-      const encryptedBuffer = await crypto.subtle.encrypt(
-        { name: 'AES-GCM', iv: iv },
-        cryptoKey,
-        dataBuffer
-      )
+    const encryptedBuffer = await crypto.subtle.encrypt(
+      { name: 'AES-GCM', iv: iv },
+      cryptoKey,
+      dataBuffer
+    )
       
       console.log('🔐 Encryption successful, buffer size:', encryptedBuffer.byteLength)
-      
-      // Combine IV and encrypted data
-      const combined = new Uint8Array(iv.length + encryptedBuffer.byteLength)
-      combined.set(iv)
-      combined.set(new Uint8Array(encryptedBuffer), iv.length)
-      
+    
+    // Combine IV and encrypted data
+    const combined = new Uint8Array(iv.length + encryptedBuffer.byteLength)
+    combined.set(iv)
+    combined.set(new Uint8Array(encryptedBuffer), iv.length)
+    
       console.log('🔐 Converting to base64, combined size:', combined.length)
       // Convert to base64 - handle large arrays by chunking
       // String.fromCharCode has argument limit, so we chunk it
@@ -722,7 +722,7 @@ serve(async (req) => {
 
     // Trigger email notifications directly (no bridge)
     try {
-      await sendReportNotificationEmails(supabase, report, linkData.organization_id)
+    await sendReportNotificationEmails(supabase, report, linkData.organization_id)
     } catch (emailError) {
       console.error('⚠️ Email notification error (non-blocking):', emailError)
     }
@@ -730,31 +730,31 @@ serve(async (req) => {
     // Log audit event
     console.log('📋 Logging audit event...')
     try {
-      await logAuditEvent(supabase, {
-        eventType: 'report_created',
-        category: 'security',
-        action: 'create',
-        severity: piiScanResult.hasPII && piiScanResult.highSeverityCount > 0 ? 'high' : 'medium',
-        actorType: 'anonymous',
-        actorId: null,
-        actorEmail: reportData.submitted_by_email,
-        actorIpAddress: null, // Set to null to avoid inet type issues
-        actorUserAgent: req.headers.get('user-agent'),
-        targetType: 'report',
-        targetId: report.id,
-        targetName: reportData.title,
-        summary: `Anonymous report submitted: ${reportData.title}`,
-        description: `Report ${reportData.tracking_id} submitted via secure link${piiScanResult.hasPII ? ` (PII detected: ${piiScanResult.detected.length} items)` : ''}`,
-        metadata: {
-          linkToken: linkToken.substring(0, 8) + '...',
-          organizationId: linkData.organization_id,
-          reportType: reportData.report_type,
-          priority: reportData.priority,
-          pii_detected: piiScanResult.hasPII,
-          pii_count: piiScanResult.detected.length,
-          pii_high_severity: piiScanResult.highSeverityCount,
-        }
-      })
+    await logAuditEvent(supabase, {
+      eventType: 'report_created',
+      category: 'security',
+      action: 'create',
+      severity: piiScanResult.hasPII && piiScanResult.highSeverityCount > 0 ? 'high' : 'medium',
+      actorType: 'anonymous',
+      actorId: null,
+      actorEmail: reportData.submitted_by_email,
+      actorIpAddress: null, // Set to null to avoid inet type issues
+      actorUserAgent: req.headers.get('user-agent'),
+      targetType: 'report',
+      targetId: report.id,
+      targetName: reportData.title,
+      summary: `Anonymous report submitted: ${reportData.title}`,
+      description: `Report ${reportData.tracking_id} submitted via secure link${piiScanResult.hasPII ? ` (PII detected: ${piiScanResult.detected.length} items)` : ''}`,
+      metadata: {
+        linkToken: linkToken.substring(0, 8) + '...',
+        organizationId: linkData.organization_id,
+        reportType: reportData.report_type,
+        priority: reportData.priority,
+        pii_detected: piiScanResult.hasPII,
+        pii_count: piiScanResult.detected.length,
+        pii_high_severity: piiScanResult.highSeverityCount,
+      }
+    })
     } catch (auditError) {
       console.error('⚠️ Audit logging error (non-blocking):', auditError)
     }

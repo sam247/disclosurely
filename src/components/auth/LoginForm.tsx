@@ -29,15 +29,15 @@ const LoginForm = () => {
     try {
       // Check if account is locked before attempting login (via Edge Function to handle CORS)
       const isLocked = await checkAccountLocked(email, null);
-      
+
       if (isLocked) {
-        toast({
-          title: "Account Temporarily Locked",
-          description: "Too many failed login attempts. Please try again later.",
-          variant: "destructive",
-        });
-        setLoading(false);
-        return;
+          toast({
+            title: "Account Temporarily Locked",
+            description: "Too many failed login attempts. Please try again later.",
+            variant: "destructive",
+          });
+          setLoading(false);
+          return;
       }
 
       // Use standard OTP authentication flow

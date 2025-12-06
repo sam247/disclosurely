@@ -74,9 +74,9 @@ const ProgressiveReportForm = ({
   // Check for privacy risks whenever title/description changes
   useEffect(() => {
     const checkPrivacyRisks = async () => {
-      const combinedText = `${formData.title}\n\n${formData.description}`;
+    const combinedText = `${formData.title}\n\n${formData.description}`;
       const risks = await scanForPrivacyRisks(combinedText, organizationId);
-      setPrivacyRisks(risks);
+    setPrivacyRisks(risks);
     };
     
     checkPrivacyRisks();
