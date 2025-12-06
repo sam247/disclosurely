@@ -80,17 +80,7 @@
     { "source": "/sitemap.xml", "destination": "/api/sitemap.xml" },
     { "source": "/sitemap-index.xml", "destination": "/api/sitemap-index.xml" },
     {
-      "source": "/docs/:path*",
-      "destination": "https://docs.disclosurely.com/docs/:path*",
-      "has": [
-        {
-          "type": "host",
-          "value": "disclosurely.com"
-        }
-      ]
-    },
-    {
-      "source": "/((?!assets/|api/|_next/|favicon\\.ico|robots\\.txt|sitemap.*\\.xml|docs/|logo.*\\.png|.*\\.[a-z]{2,4}$).*)",
+      "source": "/((?!assets/|api/|_next/|favicon\\.ico|robots\\.txt|sitemap.*\\.xml|docs/|.*\\.[a-z]{2,4}$).*)",
       "destination": "/index.html"
     }
   ]
