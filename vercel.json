@@ -74,6 +74,10 @@
   "rewrites": [
     { "source": "/sitemap.xml", "destination": "/api/sitemap.xml" },
     { "source": "/sitemap-index.xml", "destination": "/api/sitemap-index.xml" },
+    { "source": "/login", "destination": "/index.html" },
+    { "source": "/signup", "destination": "/index.html" },
+    { "source": "/auth/login", "destination": "/index.html" },
+    { "source": "/auth/signup", "destination": "/index.html" },
     {
       "source": "/((?!assets/|api/|_next/|favicon\\.ico|robots\\.txt|sitemap.*\\.xml|docs|.*\\.[a-z]{2,4}$).*)",
       "destination": "/index.html"
