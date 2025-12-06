@@ -17,11 +17,6 @@
       "permanent": true
     },
     {
-      "source": "/:path+/",
-      "destination": "/:path+",
-      "permanent": true
-    },
-    {
       "source": "/en",
       "destination": "/",
       "permanent": true
