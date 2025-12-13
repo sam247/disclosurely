@@ -268,7 +268,6 @@ submit-anonymous-report Edge Function:
 - `analyze-case-with-ai` - AI case analysis
 - `ai-gateway-generate` - AI API gateway with PII redaction
 - `case-workflow-engine` - Auto-assignment and SLA calculation
-- `chat-support` - AI chat widget backend
 - `check-feature-flag` - Feature flag checking (public endpoint)
 - `check-account-locked` - Account lockout checking (public endpoint)
 
@@ -423,14 +422,20 @@ submit-anonymous-report Edge Function:
   - Automatic transaction tracking on subscription
   - Referral code passed through checkout flow
 
-### 9. AI Chat Support (Backend Only)
-- **Note**: Frontend chat widget has been removed. Backend functions remain available for future use.
+### 9. PII Detection & Redaction
+- **Default Implementation**: Custom regex-based PII detection system (20+ patterns)
+  - Detects: emails, SSNs, credit cards, phone numbers, addresses, employee IDs, etc.
+  - Includes validators to reduce false positives (Luhn algorithm for credit cards, etc.)
+  - Name detection using heuristics
+  - UK address detection
+- **OpenRedaction API** (when feature flag enabled):
+  - Uses OpenRedaction.com API with both regex patterns and AI
+  - Maximum coverage for PII detection
+  - Falls back to custom regex implementation if API fails
 - **Key Files**:
-  - `src/components/dashboard/ChatAdminView.tsx` - Admin panel
-  - `supabase/functions/chat-support/index.ts` - Edge function
-  - `supabase/functions/delete-chat-conversation/index.ts` - Delete handler
-- **Features**:
-  - AI-powered support using DeepSeek API (backend only)
+  - `supabase/functions/_shared/pii-detector.ts` - PII redaction engine
+  - `supabase/functions/_shared/pii-scanner.ts` - PII scanning for reports
+  - `supabase/functions/_shared/openredact-api.ts` - OpenRedaction API client
   - "Speak to Human" button with email notifications (3-4 min wait time)
   - Admin panel for managing conversations
   - Delete conversations permanently
@@ -797,8 +802,8 @@ docker stop supabase_db_cxmuzperkittvibslnff supabase_edge_runtime_cxmuzperkittv
 - ✅ Added bulk policy actions
 - ✅ Progress bars for policy acknowledgments
 - ✅ **Referral Program Integration** (Partnero) - Users can refer others and earn rewards
-- ✅ **Chat Admin Panel** - Admin interface for managing chat conversations with delete functionality (frontend widget removed)
 - ✅ **PII Scanner** - Server-side PII detection and redaction for anonymous reports
+- ✅ **OpenRedaction API Integration** - Optional API-based PII detection with regex + AI (feature flag controlled)
 - ✅ **Privacy Enhancements** - Filename hashing, audit log filtering, PII sanitization in logs
 - ✅ **Subscription Access Fixes** - Improved subscription status checking and access control
 - ✅ **Removed Hardcoded Secrets** - Fixed critical security vulnerability (see SECURITY_MITIGATION_PLAN.md)
