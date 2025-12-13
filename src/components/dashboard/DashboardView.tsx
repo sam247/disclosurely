@@ -1412,12 +1412,15 @@ Additional Details: ${decryptedContent.additionalDetails || 'None provided'}
     setCurrentPage(1);
   }, [searchTerm, statusFilter, sortField, sortDirection, smartFilters]);
 
-  // Calculate and apply height constraint accounting for alerts
+  // Calculate and apply height constraint accounting for alerts and measure space
   useEffect(() => {
     const updateContentHeight = () => {
       const subscriptionAlert = document.querySelector('[data-dashboard-alert-subscription]');
       const patternAlert = document.querySelector('[data-dashboard-alert-patterns]');
       const contentContainer = document.querySelector('[data-dashboard-content]') as HTMLElement;
+      const card = document.querySelector('[data-dashboard-card-active]') as HTMLElement;
+      const tableContainer = document.querySelector('[data-dashboard-table-active]') as HTMLElement;
+      const rootContainer = contentContainer?.closest('[style*="overflow: hidden"]') as HTMLElement;
       
       if (contentContainer) {
         const subscriptionHeight = subscriptionAlert ? subscriptionAlert.clientHeight + 16 : 0; // +16 for mt-4
@@ -1425,31 +1428,47 @@ Additional Details: ${decryptedContent.additionalDetails || 'None provided'}
         const totalAlertsHeight = subscriptionHeight + patternHeight;
         const viewportHeight = window.innerHeight;
         const headerHeight = 64; // 4rem = 64px
-        const calculatedHeight = viewportHeight - headerHeight - totalAlertsHeight;
+        const contentPadding = 16; // pt-4 = 16px
+        const calculatedHeight = viewportHeight - headerHeight - totalAlertsHeight - contentPadding;
         
         // Set max-height to constrain the content area
         contentContainer.style.maxHeight = `${calculatedHeight}px`;
         contentContainer.style.height = `${calculatedHeight}px`;
+        
+        // Measure actual heights to find extra space
+        const measurements: any = {
+          viewportHeight,
+          headerHeight,
+          subscriptionHeight: subscriptionAlert?.clientHeight || 0,
+          patternHeight: patternAlert?.clientHeight || 0,
+          totalAlertsHeight,
+          contentPadding,
+          calculatedHeight,
+          contentContainerHeight: contentContainer.clientHeight,
+          contentContainerScrollHeight: contentContainer.scrollHeight,
+          contentContainerOffsetHeight: contentContainer.offsetHeight,
+          rootContainerHeight: rootContainer?.clientHeight,
+          rootContainerScrollHeight: rootContainer?.scrollHeight,
+          cardHeight: card?.clientHeight,
+          cardScrollHeight: card?.scrollHeight,
+          tableContainerHeight: tableContainer?.clientHeight,
+          tableContainerScrollHeight: tableContainer?.scrollHeight,
+          extraSpace: contentContainer.scrollHeight - contentContainer.clientHeight
+        };
+        
+        console.log('🔍 Dashboard Space Debug:', measurements);
         
         fetch('http://127.0.0.1:7243/ingest/07d80fb8-251f-44b3-a7af-ce7afb45a49c', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             location: 'DashboardView.tsx:useEffect',
-            message: 'Applied height constraint accounting for alerts',
-            data: {
-              viewportHeight,
-              headerHeight,
-              subscriptionHeight: subscriptionAlert?.clientHeight || 0,
-              patternHeight: patternAlert?.clientHeight || 0,
-              totalAlertsHeight,
-              calculatedHeight,
-              appliedMaxHeight: contentContainer.style.maxHeight
-            },
+            message: 'Applied height constraint and measured space',
+            data: measurements,
             timestamp: Date.now(),
             sessionId: 'debug-session',
-            runId: 'height-constraint',
-            hypothesisId: 'E'
+            runId: 'space-measurement',
+            hypothesisId: 'F'
           })
         }).catch(() => {});
       }
@@ -1457,10 +1476,12 @@ Additional Details: ${decryptedContent.additionalDetails || 'None provided'}
     
     // Update on mount and when alerts change
     const timeoutId = setTimeout(updateContentHeight, 100);
+    const timeoutId2 = setTimeout(updateContentHeight, 500);
     window.addEventListener('resize', updateContentHeight);
     
     return () => {
       clearTimeout(timeoutId);
+      clearTimeout(timeoutId2);
       window.removeEventListener('resize', updateContentHeight);
     };
   }, [subscriptionData, patterns]);
@@ -1522,7 +1543,7 @@ Additional Details: ${decryptedContent.additionalDetails || 'None provided'}
           </div>
         )}
 
-        <div className="flex-1 flex flex-col overflow-hidden min-h-0 px-4 pt-4" data-dashboard-content style={{ overflow: 'hidden', maxHeight: '100%' }}>
+        <div className="flex-1 flex flex-col overflow-hidden min-h-0 px-4 pt-4 pb-0" data-dashboard-content style={{ overflow: 'hidden', maxHeight: '100%' }}>
           {/* #region agent log */}
           {(() => {
             const subscriptionAlert = document.querySelector('[data-dashboard-alert-subscription]');
