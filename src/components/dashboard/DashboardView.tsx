@@ -1514,7 +1514,7 @@ Additional Details: ${decryptedContent.additionalDetails || 'None provided'}
             </div>
           </div>
             <TabsContent value="active" className="flex flex-col overflow-hidden min-h-0">
-              <Card className="md:border md:shadow-sm border-0 shadow-none flex flex-col overflow-hidden" style={{ height: '595px', minHeight: '595px', maxHeight: '595px' }} data-dashboard-card-active>
+              <Card className="md:border md:shadow-sm border-0 shadow-none flex flex-col overflow-hidden" style={{ height: '575px', minHeight: '575px', maxHeight: '575px' }} data-dashboard-card-active>
                 <CardContent className="p-0 flex-1 flex flex-col overflow-hidden min-h-0">
               {filteredReports.length === 0 ? (
                 <div className="text-center py-8 text-muted-foreground px-6">
@@ -2167,8 +2167,8 @@ Additional Details: ${decryptedContent.additionalDetails || 'None provided'}
           </Card>
         </TabsContent>
 
-            <TabsContent value="archived" className="flex-1 flex flex-col overflow-hidden min-h-0">
-              <Card className="flex flex-col overflow-hidden" style={{ height: '595px', minHeight: '595px', maxHeight: '595px' }} data-dashboard-card-archived>
+            <TabsContent value="archived" className="flex flex-col overflow-hidden min-h-0">
+              <Card className="flex flex-col overflow-hidden" style={{ height: '575px', minHeight: '575px', maxHeight: '575px' }} data-dashboard-card-archived>
                 <CardHeader className="flex-shrink-0">
               <CardTitle>Archived Reports</CardTitle>
               <CardDescription>Closed and archived reports</CardDescription>
