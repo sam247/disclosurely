@@ -2073,96 +2073,98 @@ Additional Details: ${decryptedContent.additionalDetails || 'None provided'}
               ) : (
                 <>
                   {/* Desktop Table View - Same height as audit table (620px) */}
-                  <div className="hidden md:block overflow-x-auto overflow-y-auto flex-1" style={{ maxHeight: '100%' }}>
-                    <Table>
-                      <TableHeader>
-                        <TableRow>
-                          <TableHead className="px-2 py-1 text-xs">Tracking ID</TableHead>
-                          <TableHead className="px-2 py-1 text-xs">Title</TableHead>
-                          <TableHead className="px-2 py-1 text-xs">Status</TableHead>
-                          <TableHead className="px-2 py-1 text-xs">Category</TableHead>
-                          <TableHead className="px-2 py-1 text-xs">Archived Date</TableHead>
-                          <TableHead className="text-right px-2 py-1 text-xs">Actions</TableHead>
-                        </TableRow>
-                      </TableHeader>
-                      <TableBody>
-                        {archivedReports.map((report) => (
-                          <TableRow key={report.id} style={{ height: '22px' }}>
-                            <TableCell className="font-mono text-xs px-2 py-0">
-                              <div className="flex items-center gap-2">
-                                <span>{report.tracking_id}</span>
-                                <button
-                                  onClick={async () => {
-                                    try {
-                                      await navigator.clipboard.writeText(report.tracking_id);
-                                      setCopiedTrackingId(report.tracking_id);
-                                      setTimeout(() => setCopiedTrackingId(null), 1000);
-                                } catch (error) {
-                                  log.error(LogContext.FRONTEND, 'Failed to copy tracking ID', error as Error);
-                                }
-                                  }}
-                                  className="text-muted-foreground hover:text-foreground transition-colors"
-                                  title="Copy tracking ID"
-                                >
-                                  {copiedTrackingId === report.tracking_id ? (
-                                    <Check className="h-3 w-3 text-green-600" />
-                                  ) : (
-                                    <Copy className="h-3 w-3" />
-                                  )}
-                                </button>
-                              </div>
-                            </TableCell>
-                            <TableCell className="font-medium text-xs px-2 py-0">{report.title}</TableCell>
-                            <TableCell className="px-2 py-0">
-                              <Badge variant="secondary" className="text-xs px-1 py-0">{report.status}</Badge>
-                            </TableCell>
-                            <TableCell className="px-2 py-0">
-                              {decryptedCategories[report.id] ? (
-                                <div className="text-xs">
-                                  <div className="font-medium">{decryptedCategories[report.id].main}</div>
-                                  {decryptedCategories[report.id].sub && (
-                                    <div className="text-muted-foreground text-[10px]">{decryptedCategories[report.id].sub}</div>
-                                  )}
-                                </div>
-                              ) : (
-                                <span className="text-xs text-muted-foreground">-</span>
-                              )}
-                            </TableCell>
-                            <TableCell className="text-xs text-muted-foreground px-2 py-0">
-                              {new Date(report.created_at).toLocaleDateString()}
-                            </TableCell>
-                            <TableCell className="text-right px-2 py-0">
-                              <div className="flex items-center justify-end gap-2">
-                                <Button 
-                                  variant="ghost" 
-                                  size="sm"
-                                  onClick={() => handleViewReport(report)}
-                                  className="text-primary hover:text-primary"
-                                >
-                                  View
-                                </Button>
-                                <DropdownMenu>
-                                  <DropdownMenuTrigger asChild>
-                                    <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
-                                      <MoreVertical className="h-4 w-4" />
-                                    </Button>
-                                  </DropdownMenuTrigger>
-                                  <DropdownMenuContent align="end" className="w-40">
-                                    <DropdownMenuItem 
-                                      onClick={() => handleUnarchiveReport(report.id)}
-                                      disabled={processingReportId === report.id}
-                                    >
-                                      <RotateCcw className="h-4 w-4 mr-2" />
-                                      {processingReportId === report.id ? 'Unarchiving...' : 'Unarchive'}
-                                    </DropdownMenuItem>
-                                  </DropdownMenuContent>
-                                </DropdownMenu>
-                              </div>
-                            </TableCell>
+                  <div className="hidden md:block flex-1 overflow-hidden min-h-0 flex flex-col">
+                    {/* Scrollable table body */}
+                    <div className="flex-1 overflow-y-auto overflow-x-auto min-h-0" style={{ maxHeight: 'calc(100% - 40px)' }}>
+                      <Table>
+                        <TableHeader>
+                          <TableRow>
+                            <TableHead className="px-2 py-1 text-xs">Tracking ID</TableHead>
+                            <TableHead className="px-2 py-1 text-xs">Title</TableHead>
+                            <TableHead className="px-2 py-1 text-xs">Status</TableHead>
+                            <TableHead className="px-2 py-1 text-xs">Category</TableHead>
+                            <TableHead className="px-2 py-1 text-xs">Archived Date</TableHead>
+                            <TableHead className="text-right px-2 py-1 text-xs">Actions</TableHead>
                           </TableRow>
-                        ))}
-                      </TableBody>
-                    </Table>
+                        </TableHeader>
+                        <TableBody>
+                          {archivedReports.map((report) => (
+                            <TableRow key={report.id} style={{ height: '22px' }}>
+                              <TableCell className="font-mono text-xs px-2 py-0">
+                                <div className="flex items-center gap-2">
+                                  <span>{report.tracking_id}</span>
+                                  <button
+                                    onClick={async () => {
+                                      try {
+                                        await navigator.clipboard.writeText(report.tracking_id);
+                                        setCopiedTrackingId(report.tracking_id);
+                                        setTimeout(() => setCopiedTrackingId(null), 1000);
+                                  } catch (error) {
+                                    log.error(LogContext.FRONTEND, 'Failed to copy tracking ID', error as Error);
+                                  }
+                                    }}
+                                    className="text-muted-foreground hover:text-foreground transition-colors"
+                                    title="Copy tracking ID"
+                                  >
+                                    {copiedTrackingId === report.tracking_id ? (
+                                      <Check className="h-3 w-3 text-green-600" />
+                                    ) : (
+                                      <Copy className="h-3 w-3" />
+                                    )}
+                                  </button>
+                                </div>
+                              </TableCell>
+                              <TableCell className="font-medium text-xs px-2 py-0">{report.title}</TableCell>
+                              <TableCell className="px-2 py-0">
+                                <Badge variant="secondary" className="text-xs px-1 py-0">{report.status}</Badge>
+                              </TableCell>
+                              <TableCell className="px-2 py-0">
+                                {decryptedCategories[report.id] ? (
+                                  <div className="text-xs">
+                                    <div className="font-medium">{decryptedCategories[report.id].main}</div>
+                                    {decryptedCategories[report.id].sub && (
+                                      <div className="text-muted-foreground text-[10px]">{decryptedCategories[report.id].sub}</div>
+                                    )}
+                                  </div>
+                                ) : (
+                                  <span className="text-xs text-muted-foreground">-</span>
+                                )}
+                              </TableCell>
+                              <TableCell className="text-xs text-muted-foreground px-2 py-0">
+                                {new Date(report.created_at).toLocaleDateString()}
+                              </TableCell>
+                              <TableCell className="text-right px-2 py-0">
+                                <div className="flex items-center justify-end gap-2">
+                                  <Button 
+                                    variant="ghost" 
+                                    size="sm"
+                                    onClick={() => handleViewReport(report)}
+                                    className="text-primary hover:text-primary"
+                                  >
+                                    View
+                                  </Button>
+                                  <DropdownMenu>
+                                    <DropdownMenuTrigger asChild>
+                                      <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+                                        <MoreVertical className="h-4 w-4" />
+                                      </Button>
+                                    </DropdownMenuTrigger>
+                                    <DropdownMenuContent align="end" className="w-40">
+                                      <DropdownMenuItem 
+                                        onClick={() => handleUnarchiveReport(report.id)}
+                                        disabled={processingReportId === report.id}
+                                      >
+                                        <RotateCcw className="h-4 w-4 mr-2" />
+                                        {processingReportId === report.id ? 'Unarchiving...' : 'Unarchive'}
+                                      </DropdownMenuItem>
+                                    </DropdownMenuContent>
+                                  </DropdownMenu>
+                                </div>
+                              </TableCell>
+                            </TableRow>
+                          ))}
+                        </TableBody>
+                      </Table>
                     </div>
                     
                     {/* Bottom toolbar - closes the table */}
