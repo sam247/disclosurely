@@ -1433,15 +1433,24 @@ Additional Details: ${decryptedContent.additionalDetails || 'None provided'}
         const calculatedContentHeight = viewportHeight - headerHeight - totalAlertsHeight - contentPadding;
         const rootHeight = viewportHeight - headerHeight;
         
+        // Constrain body to prevent page scroll
+        document.body.style.overflow = 'hidden';
+        document.body.style.height = `${viewportHeight}px`;
+        document.body.style.maxHeight = `${viewportHeight}px`;
+        
         // Set root container height to exactly fit viewport
         rootContainer.style.height = `${rootHeight}px`;
         rootContainer.style.maxHeight = `${rootHeight}px`;
         rootContainer.style.overflow = 'hidden';
+        rootContainer.style.margin = '0';
+        rootContainer.style.padding = '0';
         
         // Set content wrapper to fill remaining space
         if (contentWrapper) {
           contentWrapper.style.overflow = 'hidden';
           contentWrapper.style.maxHeight = '100%';
+          contentWrapper.style.margin = '0';
+          contentWrapper.style.padding = '0';
         }
         
         // Set max-height to constrain the content area
