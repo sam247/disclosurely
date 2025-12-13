@@ -1412,6 +1412,64 @@ Additional Details: ${decryptedContent.additionalDetails || 'None provided'}
     setCurrentPage(1);
   }, [searchTerm, statusFilter, sortField, sortDirection, smartFilters]);
 
+  // Measure table heights after render
+  useEffect(() => {
+    if (loading) return;
+    
+    const measureHeights = () => {
+      const activeTable = document.querySelector('[data-dashboard-table-active]');
+      const archivedTable = document.querySelector('[data-dashboard-table-archived]');
+      
+      if (activeTable) {
+        fetch('http://127.0.0.1:7243/ingest/07d80fb8-251f-44b3-a7af-ce7afb45a49c', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            location: 'DashboardView.tsx:useEffect',
+            message: 'Active table height after render',
+            data: {
+              containerHeight: activeTable.clientHeight,
+              scrollHeight: activeTable.scrollHeight,
+              viewportHeight: window.innerHeight,
+              computedHeight: window.getComputedStyle(activeTable).height,
+              expectedHeight: '620px'
+            },
+            timestamp: Date.now(),
+            sessionId: 'debug-session',
+            runId: 'post-fix',
+            hypothesisId: 'A'
+          })
+        }).catch(() => {});
+      }
+      
+      if (archivedTable) {
+        fetch('http://127.0.0.1:7243/ingest/07d80fb8-251f-44b3-a7af-ce7afb45a49c', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            location: 'DashboardView.tsx:useEffect',
+            message: 'Archived table height after render',
+            data: {
+              containerHeight: archivedTable.clientHeight,
+              scrollHeight: archivedTable.scrollHeight,
+              viewportHeight: window.innerHeight,
+              computedHeight: window.getComputedStyle(archivedTable).height,
+              expectedHeight: '620px'
+            },
+            timestamp: Date.now(),
+            sessionId: 'debug-session',
+            runId: 'post-fix',
+            hypothesisId: 'A'
+          })
+        }).catch(() => {});
+      }
+    };
+    
+    // Measure after a short delay to ensure DOM is ready
+    const timeoutId = setTimeout(measureHeights, 100);
+    return () => clearTimeout(timeoutId);
+  }, [reports, archivedReports, loading]);
+
   if (loading) {
     return (
       <div className="p-8 flex items-center justify-center">
