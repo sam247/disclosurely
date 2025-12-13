@@ -2165,13 +2165,13 @@ Additional Details: ${decryptedContent.additionalDetails || 'None provided'}
         </TabsContent>
 
         <TabsContent value="archived">
-          <Card className="flex flex-col" style={{ height: '620px', overflow: 'hidden' }}>
+          <Card className="flex flex-col" style={{ height: '550px', overflow: 'hidden' }}>
             <CardHeader className="flex-shrink-0">
               <CardTitle>Archived Reports</CardTitle>
               <CardDescription>Closed and archived reports</CardDescription>
             </CardHeader>
             <CardContent className="flex-1 flex flex-col overflow-hidden min-h-0">
-              {archivedReports.length === 0 ? (
+              {totalArchived === 0 ? (
                 <div className="text-center py-8 text-muted-foreground">
                   {isOrgAdmin ? (
                     "No archived reports"
@@ -2357,7 +2357,7 @@ Additional Details: ${decryptedContent.additionalDetails || 'None provided'}
 
                   {/* Mobile Card View */}
                   <div className="md:hidden space-y-4">
-                    {archivedReports.map((report) => (
+                    {paginatedArchivedReports.map((report) => (
                       <Card key={report.id} className="overflow-hidden">
                         <CardContent className="p-5 md:p-4 space-y-4 md:space-y-3">
                           <div className="flex items-start justify-between gap-2">
