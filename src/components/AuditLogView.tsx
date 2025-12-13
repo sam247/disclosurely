@@ -537,8 +537,8 @@ const AuditLogView = () => {
         )}
       </div>
 
-      {/* Excel-Style Table - Fits screen height with internal scrolling */}
-      <div className="border rounded-lg bg-white flex-1 flex flex-col overflow-hidden min-h-0 mx-2 sm:mx-0 mb-2 sm:mb-0">
+      {/* Excel-Style Table - Fits screen height with internal scrolling, reduced by ~2 rows (44px) */}
+      <div className="border rounded-lg bg-white flex flex-col overflow-hidden mx-2 sm:mx-0 mb-2 sm:mb-0" style={{ height: 'calc(100vh - 260px)' }}>
         {/* Table Header */}
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between p-2 sm:p-3 border-b bg-gray-50 gap-2 sm:gap-0 flex-shrink-0">
           <div className="flex items-center space-x-2 sm:space-x-4">
@@ -600,7 +600,7 @@ const AuditLogView = () => {
             {/* Desktop Table View */}
             <div className="hidden md:block flex-1 overflow-hidden min-h-0 flex flex-col">
               {/* Scrollable table body - fits screen height, accounting for pagination toolbar (40px) */}
-              <div className="flex-1 overflow-y-auto overflow-x-auto min-h-0" style={{ maxHeight: 'calc(100% - 40px)' }}>
+              <div className="flex-1 overflow-y-auto overflow-x-auto min-h-0">
                 <table className="w-full">
               {/* Fixed Header */}
               <thead className="bg-gray-50 sticky top-0 z-10">
