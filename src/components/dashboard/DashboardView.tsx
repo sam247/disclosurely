@@ -1531,7 +1531,7 @@ Additional Details: ${decryptedContent.additionalDetails || 'None provided'}
                 </div>
               ) : (
                 <>
-                  {/* Desktop Table View - Fixed height 595px */}
+                  {/* Desktop Table View - Fixed height 575px */}
                   <div className="hidden md:block flex-1 overflow-hidden flex flex-col min-h-0" data-dashboard-table-active>
                     {/* Scrollable table body */}
                     <div className="flex-1 overflow-y-auto overflow-x-auto min-h-0" style={{ maxHeight: 'calc(100% - 40px)' }}>
@@ -2168,7 +2168,7 @@ Additional Details: ${decryptedContent.additionalDetails || 'None provided'}
         </TabsContent>
 
             <TabsContent value="archived" className="flex flex-col overflow-hidden min-h-0">
-              <Card className="flex flex-col overflow-hidden" style={{ height: '575px', minHeight: '575px', maxHeight: '575px' }} data-dashboard-card-archived>
+              <Card className="flex flex-col overflow-hidden" style={{ height: '555px', minHeight: '555px', maxHeight: '555px' }} data-dashboard-card-archived>
                 <CardHeader className="flex-shrink-0">
               <CardTitle>Archived Reports</CardTitle>
               <CardDescription>Closed and archived reports</CardDescription>
