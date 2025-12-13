@@ -48,3 +48,34 @@ global.ResizeObserver = class ResizeObserver {
   observe() {}
   unobserve() {}
 } as any;
+
+// Mock scrollIntoView for Element - ensure it exists and is callable
+if (!Element.prototype.scrollIntoView) {
+  Element.prototype.scrollIntoView = vi.fn();
+} else {
+  Element.prototype.scrollIntoView = vi.fn(Element.prototype.scrollIntoView);
+}
+
+// Also mock it on HTMLElement to be safe
+if (!HTMLElement.prototype.scrollIntoView) {
+  HTMLElement.prototype.scrollIntoView = vi.fn();
+}
+
+// Mock logger to prevent fetch errors in tests
+vi.mock('@/utils/logger', () => ({
+  logger: {
+    log: vi.fn(),
+    error: vi.fn(),
+    warn: vi.fn(),
+    info: vi.fn(),
+    debug: vi.fn(),
+  },
+}));
+
+// Global Supabase mock - individual tests can override this
+vi.mock('@/integrations/supabase/client', () => {
+  const { createMockSupabaseClient } = require('./utils');
+  return {
+    supabase: createMockSupabaseClient(),
+  };
+});
