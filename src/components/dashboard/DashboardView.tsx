@@ -75,7 +75,7 @@ const RiskLevelSelector = ({
         <Button 
           variant="outline" 
           size="sm" 
-          className={`h-8 px-2 text-xs ${currentLevel ? getRiskLevelColor(currentLevel) : 'bg-gray-100 text-gray-600'}`}
+          className={`h-6 px-2 text-xs ${currentLevel ? getRiskLevelColor(currentLevel) : 'bg-gray-100 text-gray-600'}`}
           disabled={isUpdating}
         >
           {currentLevel ? `${getRiskLevelText(currentLevel)} (${currentLevel}/5)` : 'Set Risk'}
@@ -1583,12 +1583,12 @@ Additional Details: ${decryptedContent.additionalDetails || 'None provided'}
                               )}
                             </TableCell>
 
-                            <TableCell>
+                            <TableCell className="px-2 py-0">
                               <Select
                                 value={report.assigned_to || 'unassigned'}
                                 onValueChange={(value) => assignReport(report.id, value)}
                               >
-                                <SelectTrigger className="w-40 h-8 text-xs">
+                                <SelectTrigger className="w-40 h-6 text-xs">
                                   <SelectValue placeholder="Assign to..." />
                                 </SelectTrigger>
                                 <SelectContent>
@@ -1604,14 +1604,15 @@ Additional Details: ${decryptedContent.additionalDetails || 'None provided'}
                                 </SelectContent>
                               </Select>
                             </TableCell>
-                            <TableCell className="text-sm text-muted-foreground">
+                            <TableCell className="text-xs text-muted-foreground px-2 py-0">
                               {new Date(report.created_at).toLocaleDateString()}
                             </TableCell>
-                            <TableCell className="text-right">
+                            <TableCell className="text-right px-2 py-0">
                                <div className="flex items-center justify-end gap-2">
                                 <Button 
                                   variant="default" 
                                   size="sm"
+                                  className="h-6 text-xs px-2"
                                   onClick={() => handleViewReport(report)}
                                 >
                                   {t('viewReport')}
