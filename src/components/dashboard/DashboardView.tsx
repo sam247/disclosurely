@@ -1429,7 +1429,7 @@ Additional Details: ${decryptedContent.additionalDetails || 'None provided'}
         {subscriptionData && 
          (subscriptionData.isInGracePeriod || subscriptionData.subscription_status === 'past_due') && 
          subscriptionData.subscription_tier !== 'pro' && (
-          <Alert className="border-yellow-500 bg-yellow-50 flex-shrink-0 mx-4 mt-4">
+          <Alert className="border-yellow-500 bg-yellow-50 flex-shrink-0 mx-4 mt-4" data-dashboard-alert-subscription>
             <Clock className="h-4 w-4 text-yellow-600" />
             <AlertTitle className="text-yellow-800">Subscription Notice</AlertTitle>
             <AlertDescription className="text-yellow-700">
@@ -1460,7 +1460,7 @@ Additional Details: ${decryptedContent.additionalDetails || 'None provided'}
 
         {/* Pattern Detection Alerts */}
         {patterns && patterns.totalPatterns > 0 && (
-          <div className="flex-shrink-0 mx-4 mt-4">
+          <div className="flex-shrink-0 mx-4 mt-4" data-dashboard-alert-patterns>
             <PatternAlerts
               patterns={patterns}
               onReportClick={handlePatternReportClick}
@@ -1469,7 +1469,40 @@ Additional Details: ${decryptedContent.additionalDetails || 'None provided'}
           </div>
         )}
 
-        <div className="flex-1 flex flex-col overflow-hidden min-h-0 px-4 pt-4">
+        <div className="flex-1 flex flex-col overflow-hidden min-h-0 px-4 pt-4" data-dashboard-content>
+          {/* #region agent log */}
+          {(() => {
+            const subscriptionAlert = document.querySelector('[data-dashboard-alert-subscription]');
+            const patternAlert = document.querySelector('[data-dashboard-alert-patterns]');
+            const contentContainer = document.querySelector('[data-dashboard-content]');
+            if (contentContainer) {
+              const subscriptionHeight = subscriptionAlert ? subscriptionAlert.clientHeight + 16 : 0; // +16 for mt-4
+              const patternHeight = patternAlert ? patternAlert.clientHeight + 16 : 0; // +16 for mt-4
+              const totalAlertsHeight = subscriptionHeight + patternHeight;
+              fetch('http://127.0.0.1:7243/ingest/07d80fb8-251f-44b3-a7af-ce7afb45a49c', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                  location: 'DashboardView.tsx:1472',
+                  message: 'Measuring alert heights for layout calculation',
+                  data: {
+                    viewportHeight: window.innerHeight,
+                    subscriptionAlertHeight: subscriptionAlert?.clientHeight || 0,
+                    patternAlertHeight: patternAlert?.clientHeight || 0,
+                    totalAlertsHeight,
+                    contentContainerHeight: contentContainer.clientHeight,
+                    contentContainerOffsetHeight: contentContainer.offsetHeight
+                  },
+                  timestamp: Date.now(),
+                  sessionId: 'debug-session',
+                  runId: 'alert-accounting',
+                  hypothesisId: 'E'
+                })
+              }).catch(() => {});
+            }
+            return null;
+          })()}
+          {/* #endregion */}
           {/* Title and Subtitle */}
           <div className="flex-shrink-0 mb-4">
             <h2 className="text-xl sm:text-2xl font-bold">{t('reportsOverview')}</h2>
