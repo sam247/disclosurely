@@ -1,6 +1,5 @@
 {
   "buildCommand": "npm run build",
-  "outputDirectory": "dist",
   "redirects": [
     {
       "source": "/(.*)",
@@ -11,46 +10,6 @@
         }
       ],
       "destination": "https://disclosurely.com/$1",
-      "permanent": true
-    },
-    {
-      "source": "/en",
-      "destination": "/",
-      "permanent": true
-    },
-    {
-      "source": "/en/:path*",
-      "destination": "/:path*",
-      "permanent": true
-    },
-    {
-      "source": "/submit",
-      "destination": "/report",
-      "permanent": true
-    },
-    {
-      "source": "/whistleblow",
-      "destination": "/report",
-      "permanent": true
-    },
-    {
-      "source": "/login",
-      "destination": "/auth/signin",
-      "permanent": true
-    },
-    {
-      "source": "/signin",
-      "destination": "/auth/signin",
-      "permanent": true
-    },
-    {
-      "source": "/signup",
-      "destination": "/auth/signup",
-      "permanent": true
-    },
-    {
-      "source": "/auth/login",
-      "destination": "/auth/signin",
       "permanent": true
     },
     {
@@ -75,17 +34,12 @@
         {
           "key": "Permissions-Policy",
           "value": "camera=(), microphone=(), geolocation=(), payment=()"
-        },
-        {
-          "key": "Content-Security-Policy",
-          "value": "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://www.googletagmanager.com https://www.google-analytics.com https://js.stripe.com https://*.sentry.io https://www.redditstatic.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: https: blob: https://staticmap.openstreetmap.de; font-src 'self' data: https://fonts.gstatic.com; connect-src 'self' https://cxmuzperkittvibslnff.supabase.co wss://cxmuzperkittvibslnff.supabase.co https://api.stripe.com https://*.sentry.io https://ipapi.co https://status.disclosurely.com https://www.google-analytics.com https://events.reddit.com https://ads-api.reddit.com https://conversions-config.reddit.com https://pixel-config.reddit.com https://cdn.contentful.com; worker-src 'self' blob:; frame-src 'self' https://js.stripe.com https://www.googletagmanager.com https://www.openstreetmap.org; frame-ancestors 'none'; base-uri 'self'; form-action 'self'; upgrade-insecure-requests"
         }
       ]
     }
   ],
   "rewrites": [
     { "source": "/sitemap.xml", "destination": "/api/sitemap.xml" },
-    { "source": "/sitemap-index.xml", "destination": "/api/sitemap-index.xml" },
-    { "source": "/:path*", "destination": "/index.html" }
+    { "source": "/sitemap-index.xml", "destination": "/api/sitemap-index.xml" }
   ]
 }

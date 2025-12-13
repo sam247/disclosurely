@@ -5,6 +5,7 @@
   "type": "module",
   "description": "Disclosurely backend - Supabase Edge Functions, migrations, and API routes",
   "scripts": {
+    "build": "echo 'No build required for backend-only repo'",
     "lint": "eslint .",
     "diagnose-reports": "tsx scripts/diagnose-reports-issue.ts",
     "fix-docs-links": "node scripts/fix-docs-links.js",
