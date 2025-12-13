@@ -22,7 +22,7 @@ interface PatternAlertsProps {
 }
 
 const PatternAlerts = ({ patterns, onReportClick, onDismiss }: PatternAlertsProps) => {
-  const [isOpen, setIsOpen] = useState(true);
+  const [isOpen, setIsOpen] = useState(false); // Collapsed by default, like audit filters
   const [expandedSection, setExpandedSection] = useState<string | null>(null);
 
   if (patterns.totalPatterns === 0) {
@@ -49,39 +49,52 @@ const PatternAlerts = ({ patterns, onReportClick, onDismiss }: PatternAlertsProp
   };
 
   return (
-    <Card className="border-2 border-orange-200 bg-orange-50/50">
-      <CardHeader className="pb-3 px-3 sm:px-6">
-        <div className="flex items-start justify-between gap-2">
-          <div className="flex items-center gap-1.5 sm:gap-2 flex-1 min-w-0">
-            <AlertTriangle className="h-4 w-4 sm:h-5 sm:w-5 text-orange-600 flex-shrink-0" />
-            <CardTitle className="text-sm sm:text-base font-semibold text-orange-900 truncate">
-              Pattern Detection Alert
-            </CardTitle>
-            {patterns.highSeverityCount > 0 && (
-              <Badge variant="destructive" className="text-[10px] sm:text-xs flex-shrink-0">
-                {patterns.highSeverityCount} High Priority
-              </Badge>
-            )}
-          </div>
+    <div className="border rounded-lg bg-white flex-shrink-0 mx-2 sm:mx-0" style={{ maxHeight: isOpen ? 'none' : '60px', overflow: 'hidden' }}>
+      <div 
+        className="flex items-center justify-between p-2 cursor-pointer hover:bg-gray-50"
+        onClick={() => setIsOpen(!isOpen)}
+      >
+        <div className="flex items-center space-x-2">
+          <AlertTriangle className="h-3 w-3 text-orange-600" />
+          <span className="font-medium text-xs sm:text-sm">Pattern Detection Alert</span>
+          {patterns.highSeverityCount > 0 && (
+            <Badge variant="destructive" className="text-xs px-1 py-0">
+              {patterns.highSeverityCount} High Priority
+            </Badge>
+          )}
+          <Badge variant="secondary" className="text-xs px-1 py-0">
+            {patterns.totalPatterns} {patterns.totalPatterns === 1 ? 'pattern' : 'patterns'}
+          </Badge>
+        </div>
+        <div className="flex items-center gap-2">
           {onDismiss && (
             <Button
               variant="ghost"
               size="sm"
-              className="h-6 w-6 p-0 hover:bg-orange-100 flex-shrink-0"
-              onClick={onDismiss}
+              className="h-6 w-6 p-0 hover:bg-gray-100 flex-shrink-0"
+              onClick={(e) => {
+                e.stopPropagation();
+                onDismiss();
+              }}
             >
               <X className="h-4 w-4" />
             </Button>
           )}
+          {isOpen ? (
+            <ChevronUp className="h-3 w-3" />
+          ) : (
+            <ChevronDown className="h-3 w-3" />
+          )}
         </div>
-        <p className="text-xs sm:text-sm text-orange-800 mt-1">
-          We've detected {patterns.totalPatterns} suspicious{' '}
-          {patterns.totalPatterns === 1 ? 'pattern' : 'patterns'} that may indicate systemic
-          issues requiring attention.
-        </p>
-      </CardHeader>
-
-      <CardContent className="space-y-3 px-3 sm:px-6">
+      </div>
+      
+      {isOpen && (
+        <div className="space-y-3 px-3 sm:px-6 pb-3 sm:pb-6">
+          <p className="text-xs sm:text-sm text-gray-600 mt-2">
+            We've detected {patterns.totalPatterns} suspicious{' '}
+            {patterns.totalPatterns === 1 ? 'pattern' : 'patterns'} that may indicate systemic
+            issues requiring attention.
+          </p>
         {/* Repeated Names Section */}
         {patterns.repeatedNames.length > 0 && (
           <Collapsible
@@ -284,8 +297,9 @@ const PatternAlerts = ({ patterns, onReportClick, onDismiss }: PatternAlertsProp
             </Card>
           </Collapsible>
         )}
-      </CardContent>
-    </Card>
+        </div>
+      )}
+    </div>
   );
 };
 

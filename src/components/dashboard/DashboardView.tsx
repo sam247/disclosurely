@@ -1376,36 +1376,6 @@ Additional Details: ${decryptedContent.additionalDetails || 'None provided'}
     <div className="flex flex-col h-[calc(100vh-4rem)] md:h-[calc(100vh-4rem)] overflow-hidden">
       {/* Scrollable Content */}
       <div className="flex-1 overflow-y-auto space-y-6 pb-[calc(1rem+env(safe-area-inset-bottom))]">
-      {/* Summary Cards */}
-      <div className="grid gap-4 grid-cols-3 md:grid-cols-3">
-        <Card className="md:col-span-1">
-          <CardContent className="pt-4 md:pt-6">
-            <div className="text-center">
-              <p className="text-lg md:text-2xl font-bold">{reports.length}</p>
-              <p className="text-xs md:text-sm text-muted-foreground mt-1">{t('activeReports')}</p>
-            </div>
-          </CardContent>
-        </Card>
-        
-        <Card className="md:col-span-1">
-          <CardContent className="pt-4 md:pt-6">
-            <div className="text-center">
-              <p className="text-lg md:text-2xl font-bold">{archivedReports.length}</p>
-              <p className="text-xs md:text-sm text-muted-foreground mt-1">{t('archivedReports')}</p>
-            </div>
-          </CardContent>
-        </Card>
-        
-        <Card className="md:col-span-1">
-          <CardContent className="pt-4 md:pt-6">
-            <div className="text-center">
-              <p className="text-lg md:text-2xl font-bold">{t('active')}</p>
-              <p className="text-xs md:text-sm text-muted-foreground mt-1">{t('quickReport')}</p>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-
       {/* Subscription Grace Period Warning - Hidden for pro users on mobile */}
       {subscriptionData && 
        (subscriptionData.isInGracePeriod || subscriptionData.subscription_status === 'past_due') && 
