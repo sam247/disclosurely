@@ -54,15 +54,15 @@ const PatternAlerts = ({ patterns, onReportClick, onDismiss }: PatternAlertsProp
         className="flex items-center justify-between p-2 cursor-pointer hover:bg-gray-50"
         onClick={() => setIsOpen(!isOpen)}
       >
-        <div className="flex items-center space-x-2">
-          <AlertTriangle className="h-3 w-3 text-orange-600" />
-          <span className="font-medium text-xs sm:text-sm">Pattern Detection Alert</span>
+        <div className="flex items-center space-x-1 sm:space-x-2 flex-wrap gap-1 sm:gap-0">
+          <AlertTriangle className="h-3 w-3 text-orange-600 flex-shrink-0" />
+          <span className="font-medium text-xs sm:text-sm whitespace-nowrap">Pattern Detection Alert</span>
           {patterns.highSeverityCount > 0 && (
-            <Badge variant="destructive" className="text-xs px-1 py-0">
+            <Badge variant="destructive" className="text-[10px] sm:text-xs px-1 sm:px-1.5 py-0 whitespace-nowrap">
               {patterns.highSeverityCount} High Priority
             </Badge>
           )}
-          <Badge variant="secondary" className="text-xs px-1 py-0">
+          <Badge variant="secondary" className="text-[10px] sm:text-xs px-1 sm:px-1.5 py-0 whitespace-nowrap">
             {patterns.totalPatterns} {patterns.totalPatterns === 1 ? 'pattern' : 'patterns'}
           </Badge>
         </div>

@@ -1434,8 +1434,9 @@ Additional Details: ${decryptedContent.additionalDetails || 'None provided'}
         const rootHeight = viewportHeight - headerHeight;
         
         // Constrain body to prevent page scroll (desktop only - mobile needs natural scrolling)
-        const isMobile = window.innerWidth < 768;
-        if (!isMobile) {
+        // Use state isMobile instead of window.innerWidth check for consistency
+        const currentIsMobile = window.innerWidth < 768;
+        if (!currentIsMobile) {
           document.body.style.overflow = 'hidden';
           document.body.style.height = `${viewportHeight}px`;
           document.body.style.maxHeight = `${viewportHeight}px`;
