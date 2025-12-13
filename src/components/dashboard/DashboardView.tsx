@@ -1422,60 +1422,62 @@ Additional Details: ${decryptedContent.additionalDetails || 'None provided'}
 
   return (
     <div className="flex flex-col h-[calc(100vh-4rem)] md:h-[calc(100vh-4rem)] overflow-hidden">
-      {/* Scrollable Content */}
-      <div className="flex-1 overflow-y-auto overflow-x-hidden space-y-6 pb-[calc(1rem+env(safe-area-inset-bottom))]">
-      {/* Subscription Grace Period Warning - Hidden for pro users on mobile */}
-      {subscriptionData && 
-       (subscriptionData.isInGracePeriod || subscriptionData.subscription_status === 'past_due') && 
-       subscriptionData.subscription_tier !== 'pro' && (
-        <Alert className="border-yellow-500 bg-yellow-50">
-          <Clock className="h-4 w-4 text-yellow-600" />
-          <AlertTitle className="text-yellow-800">Subscription Notice</AlertTitle>
-          <AlertDescription className="text-yellow-700">
-            {subscriptionData.isInGracePeriod ? (
-              <>
-                Your subscription has expired. You're currently in a grace period with read-only access.
-                {subscriptionData.grace_period_ends_at && (
-                  <> Grace period ends: {new Date(subscriptionData.grace_period_ends_at).toLocaleString()}</>
-                )}
-                {' '}Please renew your subscription to restore full access.
-              </>
-            ) : (
-              <>
-                Your payment failed and your subscription is past due. Please update your payment method to restore full access.
-              </>
-            )}
-            <Button
-              variant="outline"
-              size="sm"
-              className="ml-4 mt-2"
-              onClick={() => navigate('/dashboard/settings?tab=subscription')}
-            >
-              Manage Subscription
-            </Button>
-          </AlertDescription>
-        </Alert>
-      )}
+      {/* Content - No scrolling, only table scrolls internally */}
+      <div className="flex-1 overflow-hidden overflow-x-hidden flex flex-col min-h-0">
+        {/* Subscription Grace Period Warning - Hidden for pro users on mobile */}
+        {subscriptionData && 
+         (subscriptionData.isInGracePeriod || subscriptionData.subscription_status === 'past_due') && 
+         subscriptionData.subscription_tier !== 'pro' && (
+          <Alert className="border-yellow-500 bg-yellow-50 flex-shrink-0 mx-4 mt-4">
+            <Clock className="h-4 w-4 text-yellow-600" />
+            <AlertTitle className="text-yellow-800">Subscription Notice</AlertTitle>
+            <AlertDescription className="text-yellow-700">
+              {subscriptionData.isInGracePeriod ? (
+                <>
+                  Your subscription has expired. You're currently in a grace period with read-only access.
+                  {subscriptionData.grace_period_ends_at && (
+                    <> Grace period ends: {new Date(subscriptionData.grace_period_ends_at).toLocaleString()}</>
+                  )}
+                  {' '}Please renew your subscription to restore full access.
+                </>
+              ) : (
+                <>
+                  Your payment failed and your subscription is past due. Please update your payment method to restore full access.
+                </>
+              )}
+              <Button
+                variant="outline"
+                size="sm"
+                className="ml-4 mt-2"
+                onClick={() => navigate('/dashboard/settings?tab=subscription')}
+              >
+                Manage Subscription
+              </Button>
+            </AlertDescription>
+          </Alert>
+        )}
 
-      {/* Pattern Detection Alerts */}
-      {patterns && patterns.totalPatterns > 0 && (
-        <PatternAlerts
-          patterns={patterns}
-          onReportClick={handlePatternReportClick}
-          onDismiss={handlePatternDismiss}
-        />
-      )}
+        {/* Pattern Detection Alerts */}
+        {patterns && patterns.totalPatterns > 0 && (
+          <div className="flex-shrink-0 mx-4 mt-4">
+            <PatternAlerts
+              patterns={patterns}
+              onReportClick={handlePatternReportClick}
+              onDismiss={handlePatternDismiss}
+            />
+          </div>
+        )}
 
-      <div className="space-y-4">
-        {/* Title and Subtitle */}
-        <div>
-          <h2 className="text-xl sm:text-2xl font-bold">{t('reportsOverview')}</h2>
-          <p className="text-muted-foreground break-words hyphens-auto">{t('manageAndReviewReports')}</p>
-        </div>
+        <div className="flex-1 flex flex-col overflow-hidden min-h-0 px-4 pt-4">
+          {/* Title and Subtitle */}
+          <div className="flex-shrink-0 mb-4">
+            <h2 className="text-xl sm:text-2xl font-bold">{t('reportsOverview')}</h2>
+            <p className="text-muted-foreground break-words hyphens-auto">{t('manageAndReviewReports')}</p>
+          </div>
 
-        <Tabs defaultValue="active" className="space-y-4">
-          {/* Tabs, Search, and Filter Row */}
-          <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center">
+          <Tabs defaultValue="active" className="flex-1 flex flex-col overflow-hidden min-h-0">
+            {/* Tabs, Search, and Filter Row */}
+            <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center flex-shrink-0 mb-4">
             <TabsList className="w-full md:w-auto">
               <TabsTrigger value="active" className="flex-1 md:flex-none">{t('activeReports')} ({reports.length})</TabsTrigger>
               <TabsTrigger value="archived" className="flex-1 md:flex-none">{t('archived')} ({archivedReports.length})</TabsTrigger>
@@ -1510,8 +1512,8 @@ Additional Details: ${decryptedContent.additionalDetails || 'None provided'}
               </Button>
             </div>
           </div>
-          <TabsContent value="active">
-          <Card className="md:border md:shadow-sm border-0 shadow-none flex flex-col" style={{ height: '550px', overflow: 'hidden' }}>
+            <TabsContent value="active" className="flex-1 flex flex-col overflow-hidden min-h-0">
+              <Card className="md:border md:shadow-sm border-0 shadow-none flex flex-col flex-1 overflow-hidden">
             <CardContent className="pt-0 px-0 md:pt-6 md:px-6 flex-1 flex flex-col overflow-hidden min-h-0">
               {filteredReports.length === 0 ? (
                 <div className="text-center py-8 text-muted-foreground">
@@ -2164,8 +2166,8 @@ Additional Details: ${decryptedContent.additionalDetails || 'None provided'}
           </Card>
         </TabsContent>
 
-        <TabsContent value="archived">
-          <Card className="flex flex-col" style={{ height: '550px', overflow: 'hidden' }}>
+            <TabsContent value="archived" className="flex-1 flex flex-col overflow-hidden min-h-0">
+              <Card className="flex flex-col flex-1 overflow-hidden">
             <CardHeader className="flex-shrink-0">
               <CardTitle>Archived Reports</CardTitle>
               <CardDescription>Closed and archived reports</CardDescription>
@@ -2480,8 +2482,9 @@ Additional Details: ${decryptedContent.additionalDetails || 'None provided'}
               )}
             </CardContent>
           </Card>
-        </TabsContent>
-      </Tabs>
+            </TabsContent>
+          </Tabs>
+        </div>
       </div>
       </div>
 
