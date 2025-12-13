@@ -73,9 +73,5 @@ vi.mock('@/utils/logger', () => ({
 }));
 
 // Global Supabase mock - individual tests can override this
-vi.mock('@/integrations/supabase/client', () => {
-  const { createMockSupabaseClient } = require('./utils');
-  return {
-    supabase: createMockSupabaseClient(),
-  };
-});
+// Note: This is a fallback mock. Individual test files should provide their own mocks
+// to avoid conflicts and ensure proper test isolation.
