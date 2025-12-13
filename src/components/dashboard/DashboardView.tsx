@@ -2090,8 +2090,8 @@ Additional Details: ${decryptedContent.additionalDetails || 'None provided'}
                 </div>
               ) : (
                 <>
-                  {/* Desktop Table View */}
-                  <div className="hidden md:block overflow-x-auto">
+                  {/* Desktop Table View - Same height as audit table (620px) */}
+                  <div className="hidden md:block overflow-x-auto overflow-y-auto flex-1" style={{ maxHeight: '100%' }}>
                     <Table>
                       <TableHeader>
                         <TableRow>
