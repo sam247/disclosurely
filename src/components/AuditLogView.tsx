@@ -405,7 +405,7 @@ const AuditLogView = () => {
   }
 
   return (
-    <div className="flex flex-col h-full" style={{ minHeight: 'calc(100vh - 200px)', maxHeight: 'calc(100vh - 200px)', overflow: 'hidden' }} data-audit-container>
+    <div className="flex flex-col" style={{ height: 'calc(100vh - 180px)', overflow: 'hidden' }} data-audit-container>
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 flex-shrink-0 px-2 sm:px-0 mb-2">
         <div>
@@ -619,7 +619,7 @@ const AuditLogView = () => {
       </div>
 
       {/* Excel-Style Table - Fits screen height with internal scrolling, fills remaining space */}
-      <div className="border rounded-lg bg-white flex-1 flex flex-col overflow-hidden min-h-0 mx-2 sm:mx-0" style={{ minHeight: 0, height: '100%' }} data-audit-table>
+      <div className="border rounded-lg bg-white flex-1 flex flex-col overflow-hidden min-h-0 mx-2 sm:mx-0" style={{ minHeight: 0 }} data-audit-table>
         {/* Table Header */}
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between p-2 sm:p-3 border-b bg-gray-50 gap-2 sm:gap-0 flex-shrink-0">
           <div className="flex items-center space-x-2 sm:space-x-4">
