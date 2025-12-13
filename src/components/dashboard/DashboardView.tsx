@@ -1433,30 +1433,52 @@ Additional Details: ${decryptedContent.additionalDetails || 'None provided'}
         const calculatedContentHeight = viewportHeight - headerHeight - totalAlertsHeight - contentPadding;
         const rootHeight = viewportHeight - headerHeight;
         
-        // Constrain body to prevent page scroll
-        document.body.style.overflow = 'hidden';
-        document.body.style.height = `${viewportHeight}px`;
-        document.body.style.maxHeight = `${viewportHeight}px`;
-        
-        // Set root container height to exactly fit viewport
-        rootContainer.style.height = `${rootHeight}px`;
-        rootContainer.style.maxHeight = `${rootHeight}px`;
-        rootContainer.style.overflow = 'hidden';
-        rootContainer.style.margin = '0';
-        rootContainer.style.padding = '0';
-        
-        // Set content wrapper to fill remaining space
-        if (contentWrapper) {
-          contentWrapper.style.overflow = 'hidden';
-          contentWrapper.style.maxHeight = '100%';
-          contentWrapper.style.margin = '0';
-          contentWrapper.style.padding = '0';
+        // Constrain body to prevent page scroll (desktop only - mobile needs natural scrolling)
+        const isMobile = window.innerWidth < 768;
+        if (!isMobile) {
+          document.body.style.overflow = 'hidden';
+          document.body.style.height = `${viewportHeight}px`;
+          document.body.style.maxHeight = `${viewportHeight}px`;
+        } else {
+          // On mobile, allow natural body scrolling
+          document.body.style.overflow = '';
+          document.body.style.height = '';
+          document.body.style.maxHeight = '';
         }
         
-        // Set max-height to constrain the content area
-        contentContainer.style.maxHeight = `${calculatedContentHeight}px`;
-        contentContainer.style.height = `${calculatedContentHeight}px`;
-        contentContainer.style.overflow = 'hidden';
+        // Set root container height to exactly fit viewport (desktop only)
+        if (!isMobile) {
+          rootContainer.style.height = `${rootHeight}px`;
+          rootContainer.style.maxHeight = `${rootHeight}px`;
+          rootContainer.style.overflow = 'hidden';
+          rootContainer.style.margin = '0';
+          rootContainer.style.padding = '0';
+          
+          // Set content wrapper to fill remaining space
+          if (contentWrapper) {
+            contentWrapper.style.overflow = 'hidden';
+            contentWrapper.style.maxHeight = '100%';
+            contentWrapper.style.margin = '0';
+            contentWrapper.style.padding = '0';
+          }
+          
+          // Set max-height to constrain the content area
+          contentContainer.style.maxHeight = `${calculatedContentHeight}px`;
+          contentContainer.style.height = `${calculatedContentHeight}px`;
+          contentContainer.style.overflow = 'hidden';
+        } else {
+          // On mobile, allow natural flow
+          rootContainer.style.height = '';
+          rootContainer.style.maxHeight = '';
+          rootContainer.style.overflow = '';
+          if (contentWrapper) {
+            contentWrapper.style.overflow = '';
+            contentWrapper.style.maxHeight = '';
+          }
+          contentContainer.style.maxHeight = '';
+          contentContainer.style.height = '';
+          contentContainer.style.overflow = '';
+        }
         
         // Measure actual heights to find extra space
         const measurements: any = {
@@ -2048,8 +2070,8 @@ Additional Details: ${decryptedContent.additionalDetails || 'None provided'}
                     )}
                   </div>
                   
-                  {/* Mobile Card View */}
-                  <div className="md:hidden space-y-4">
+                  {/* Mobile Card View - Allow natural scrolling on mobile */}
+                  <div className="md:hidden space-y-4 overflow-y-auto">
                     {paginatedReports.map((report) => (
                       <Card key={report.id} className="overflow-hidden">
                         <CardContent className="p-5 md:p-4 space-y-4 md:space-y-3">
@@ -2496,8 +2518,8 @@ Additional Details: ${decryptedContent.additionalDetails || 'None provided'}
                     )}
                   </div>
 
-                  {/* Mobile Card View */}
-                  <div className="md:hidden space-y-4">
+                  {/* Mobile Card View - Allow natural scrolling on mobile */}
+                  <div className="md:hidden space-y-4 overflow-y-auto">
                     {paginatedArchivedReports.map((report) => (
                       <Card key={report.id} className="overflow-hidden">
                         <CardContent className="p-5 md:p-4 space-y-4 md:space-y-3">
