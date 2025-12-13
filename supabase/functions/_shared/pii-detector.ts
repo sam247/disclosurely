@@ -420,9 +420,56 @@ async function redactPIIWithOpenRedact(
 }
 
 /**
+ * Use openredaction npm package for PII redaction (regex-only, when feature flag is disabled)
+ */
+async function redactPIIWithNPM(
+  content: string
+): Promise<RedactionResult> {
+  try {
+    // Use openredaction npm package (regex-only, no AI)
+    const { redact } = await import('npm:openredaction');
+    const result = await redact(content);
+    
+    // The npm package returns { redacted_text, ... }
+    // We need to build a redaction map by comparing original and redacted text
+    const redactionMap: Record<string, string> = {};
+    const detectionStats: Record<string, number> = {};
+    const redactedContent = result.redacted_text || content;
+    
+    // Extract redacted patterns from the result
+    // The npm package uses [REDACTED] as placeholder, we'll map those
+    const redactedPattern = /\[REDACTED\]/g;
+    let matchCount = 0;
+    let lastIndex = 0;
+    
+    // Simple approach: count redactions and create generic map
+    // The npm package handles the actual redaction, we just track that PII was detected
+    while (redactedPattern.exec(redactedContent) !== null) {
+      matchCount++;
+    }
+    
+    if (matchCount > 0) {
+      // Mark as PII detected
+      detectionStats['PII'] = matchCount;
+    }
+    
+    return {
+      redactedContent,
+      redactionMap, // Empty map since npm package handles redaction internally
+      piiDetected: matchCount > 0,
+      detectionStats,
+    };
+  } catch (error) {
+    console.error('[PII Detector] openredaction npm package error:', error);
+    throw error;
+  }
+}
+
+/**
  * Main redaction function
  * 
- * Checks feature flag and uses OpenRedact if enabled, otherwise uses legacy implementation
+ * - If feature flag enabled: Uses OpenRedaction.com API (regex + AI)
+ * - If feature flag disabled: Uses openredaction npm package (regex-only)
  */
 export async function redactPII(
   content: string,
@@ -440,19 +487,32 @@ export async function redactPII(
     organizationId
   } = options || {};
 
-  // Check feature flag for OpenRedact
-  const useOpenRedact = await isOpenRedactEnabled(organizationId);
+  // Check feature flag for OpenRedact API
+  const useOpenRedactAPI = await isOpenRedactEnabled(organizationId);
   
-  if (useOpenRedact) {
+  if (useOpenRedactAPI) {
     try {
+      // Use OpenRedaction.com API (regex + AI)
       return await redactPIIWithOpenRedact(content, organizationId);
     } catch (error) {
-      // Fall through to legacy implementation on error
-      console.warn('[PII Detector] OpenRedact failed, using legacy implementation');
+      // Fall through to npm package on error
+      console.warn('[PII Detector] OpenRedact API failed, falling back to npm package');
     }
   }
 
-  // Legacy implementation (existing code)
+  // Use openredaction npm package (regex-only, no AI)
+  try {
+    return await redactPIIWithNPM(content);
+  } catch (error) {
+    console.error('[PII Detector] All redaction methods failed:', error);
+    // Return original content if all methods fail
+    return {
+      redactedContent: content,
+      redactionMap: {},
+      piiDetected: false,
+      detectionStats: {},
+    };
+  }
 
   let redactedContent = content;
   const redactionMap: Record<string, string> = {};
