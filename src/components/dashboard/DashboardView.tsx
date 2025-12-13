@@ -2069,12 +2069,12 @@ Additional Details: ${decryptedContent.additionalDetails || 'None provided'}
         </TabsContent>
 
         <TabsContent value="archived">
-          <Card>
-            <CardHeader>
+          <Card className="flex flex-col" style={{ height: '620px', overflow: 'hidden' }}>
+            <CardHeader className="flex-shrink-0">
               <CardTitle>Archived Reports</CardTitle>
               <CardDescription>Closed and archived reports</CardDescription>
             </CardHeader>
-            <CardContent>
+            <CardContent className="flex-1 flex flex-col overflow-hidden min-h-0">
               {archivedReports.length === 0 ? (
                 <div className="text-center py-8 text-muted-foreground">
                   {isOrgAdmin ? (
