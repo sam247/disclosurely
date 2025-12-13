@@ -367,7 +367,7 @@ const AuditLogView = () => {
 
   if (!organization) {
     return (
-      <div className="flex flex-col" style={{ height: 'calc(100vh - 160px)', overflow: 'hidden' }}>
+      <div className="flex flex-col" style={{ height: 'calc(100vh - 88px)', overflow: 'hidden' }}>
         {/* Header */}
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 flex-shrink-0">
           <div>
@@ -384,7 +384,7 @@ const AuditLogView = () => {
   }
 
   return (
-    <div className="flex flex-col" style={{ height: 'calc(100vh - 160px)', overflow: 'hidden' }} data-audit-container>
+    <div className="flex flex-col" style={{ height: 'calc(100vh - 88px)', overflow: 'hidden' }} data-audit-container>
       {/* Debug Info - Temporary */}
       {debugInfo && debugInfo.gap > 0 && (
         <div className="bg-yellow-100 border border-yellow-400 text-xs p-2 mb-2 mx-2">
