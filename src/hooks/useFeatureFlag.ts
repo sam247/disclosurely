@@ -64,6 +64,7 @@ export const useAllFeatureFlags = () => {
 
 /**
  * Function to enable/disable a feature flag (admin only)
+ * Uses RPC function to bypass RLS issues
  */
 export const updateFeatureFlag = async (
   featureName: string,
@@ -72,15 +73,12 @@ export const updateFeatureFlag = async (
     rollout_percentage?: number;
   }
 ) => {
-  const { data, error } = await (supabase as any)
-    .from('feature_flags')
-    .update({
-      ...updates,
-      updated_at: new Date().toISOString()
-    })
-    .eq('feature_name', featureName)
-    .select()
-    .single();
+  // Use RPC function instead of direct update to bypass RLS
+  const { data, error } = await (supabase.rpc as any)('update_feature_flag', {
+    p_feature_name: featureName,
+    p_is_enabled: updates.is_enabled ?? null,
+    p_rollout_percentage: updates.rollout_percentage ?? null,
+  });
 
   if (error) {
     throw error;
