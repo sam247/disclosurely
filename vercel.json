@@ -16,6 +16,17 @@
       "has": [
         {
           "type": "host",
+          "value": "app.disclosurely.com"
+        }
+      ],
+      "destination": "https://disclosurely.com/$1",
+      "permanent": false
+    },
+    {
+      "source": "/(.*)",
+      "has": [
+        {
+          "type": "host",
           "value": "docs.disclosurely.com"
         }
       ],
