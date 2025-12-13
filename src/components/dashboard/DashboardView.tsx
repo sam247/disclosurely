@@ -1412,6 +1412,17 @@ Additional Details: ${decryptedContent.additionalDetails || 'None provided'}
     setCurrentPage(1);
   }, [searchTerm, statusFilter, sortField, sortDirection, smartFilters]);
 
+  const [isMobile, setIsMobile] = useState(false);
+  
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
+
   // Calculate and apply height constraint accounting for alerts and measure space
   useEffect(() => {
     const updateContentHeight = () => {
@@ -1434,9 +1445,7 @@ Additional Details: ${decryptedContent.additionalDetails || 'None provided'}
         const rootHeight = viewportHeight - headerHeight;
         
         // Constrain body to prevent page scroll (desktop only - mobile needs natural scrolling)
-        // Use state isMobile instead of window.innerWidth check for consistency
-        const currentIsMobile = window.innerWidth < 768;
-        if (!currentIsMobile) {
+        if (!isMobile) {
           document.body.style.overflow = 'hidden';
           document.body.style.height = `${viewportHeight}px`;
           document.body.style.maxHeight = `${viewportHeight}px`;
@@ -1448,7 +1457,7 @@ Additional Details: ${decryptedContent.additionalDetails || 'None provided'}
         }
         
         // Set root container height to exactly fit viewport (desktop only)
-        if (!currentIsMobile) {
+        if (!isMobile) {
           rootContainer.style.height = `${rootHeight}px`;
           rootContainer.style.maxHeight = `${rootHeight}px`;
           rootContainer.style.overflow = 'hidden';
@@ -1538,7 +1547,7 @@ Additional Details: ${decryptedContent.additionalDetails || 'None provided'}
       clearTimeout(timeoutId2);
       window.removeEventListener('resize', updateContentHeight);
     };
-  }, [subscriptionData, patterns]);
+  }, [subscriptionData, patterns, isMobile]);
 
 
   if (loading) {
