@@ -325,7 +325,7 @@ const AuditLogView = () => {
   }
 
   return (
-    <div className="flex flex-col" style={{ height: 'calc(100vh - 88px)', overflow: 'hidden' }} data-audit-container>
+    <div className="flex flex-col" style={{ height: 'calc(100vh - 99px)', overflow: 'hidden' }} data-audit-container>
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 flex-shrink-0 px-2 sm:px-0 mb-2">
         <div>
