@@ -1514,9 +1514,9 @@ Additional Details: ${decryptedContent.additionalDetails || 'None provided'}
           </div>
             <TabsContent value="active" className="flex-1 flex flex-col overflow-hidden min-h-0">
               <Card className="md:border md:shadow-sm border-0 shadow-none flex flex-col flex-1 overflow-hidden min-h-0">
-                <CardContent className="pt-0 px-0 md:pt-6 md:px-6 flex-1 flex flex-col overflow-hidden min-h-0 p-0 md:p-6">
+                <CardContent className="p-0 flex-1 flex flex-col overflow-hidden min-h-0">
               {filteredReports.length === 0 ? (
-                <div className="text-center py-8 text-muted-foreground">
+                <div className="text-center py-8 text-muted-foreground px-6">
                   {isOrgAdmin ? (
                     t('noReportsFound')
                   ) : (
@@ -1530,7 +1530,7 @@ Additional Details: ${decryptedContent.additionalDetails || 'None provided'}
                 </div>
               ) : (
                 <>
-                  {/* Desktop Table View - Height: 550px */}
+                  {/* Desktop Table View - Fills available space */}
                   <div className="hidden md:block flex-1 overflow-hidden min-h-0 flex flex-col">
                     {/* Scrollable table body */}
                     <div className="flex-1 overflow-y-auto overflow-x-auto min-h-0" style={{ maxHeight: 'calc(100% - 40px)' }}>
@@ -1908,6 +1908,8 @@ Additional Details: ${decryptedContent.additionalDetails || 'None provided'}
                       </div>
                     )}
                   </div>
+                </CardContent>
+              </Card>
                   
                   {/* Mobile Card View */}
                   <div className="md:hidden space-y-4">
@@ -2167,14 +2169,14 @@ Additional Details: ${decryptedContent.additionalDetails || 'None provided'}
         </TabsContent>
 
             <TabsContent value="archived" className="flex-1 flex flex-col overflow-hidden min-h-0">
-              <Card className="flex flex-col flex-1 overflow-hidden">
-            <CardHeader className="flex-shrink-0">
+              <Card className="flex flex-col flex-1 overflow-hidden min-h-0">
+                <CardHeader className="flex-shrink-0">
               <CardTitle>Archived Reports</CardTitle>
               <CardDescription>Closed and archived reports</CardDescription>
             </CardHeader>
-            <CardContent className="flex-1 flex flex-col overflow-hidden min-h-0">
+                <CardContent className="flex-1 flex flex-col overflow-hidden min-h-0 p-0">
               {totalArchived === 0 ? (
-                <div className="text-center py-8 text-muted-foreground">
+                <div className="text-center py-8 text-muted-foreground px-6">
                   {isOrgAdmin ? (
                     "No archived reports"
                   ) : (
@@ -2188,7 +2190,7 @@ Additional Details: ${decryptedContent.additionalDetails || 'None provided'}
                 </div>
               ) : (
                 <>
-                  {/* Desktop Table View - Height: 550px */}
+                  {/* Desktop Table View - Fills available space */}
                   <div className="hidden md:block flex-1 overflow-hidden min-h-0 flex flex-col">
                     {/* Scrollable table body */}
                     <div className="flex-1 overflow-y-auto overflow-x-auto min-h-0" style={{ maxHeight: 'calc(100% - 40px)' }}>
@@ -2480,8 +2482,8 @@ Additional Details: ${decryptedContent.additionalDetails || 'None provided'}
                   </div>
                 </>
               )}
-            </CardContent>
-          </Card>
+                </CardContent>
+              </Card>
             </TabsContent>
           </Tabs>
         </div>
