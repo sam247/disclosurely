@@ -324,7 +324,7 @@ const AuditLogView = () => {
   }
 
   return (
-    <div className="space-y-2 h-screen flex flex-col overflow-hidden">
+    <div className="space-y-2 h-screen flex flex-col overflow-hidden" style={{ maxHeight: '100vh', overflow: 'hidden' }}>
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 flex-shrink-0 px-2 sm:px-0">
         <div>
@@ -537,8 +537,8 @@ const AuditLogView = () => {
         )}
       </div>
 
-      {/* Excel-Style Table - Fits screen height with internal scrolling, reduced by ~2 rows (44px) */}
-      <div className="border rounded-lg bg-white flex flex-col overflow-hidden mx-2 sm:mx-0 mb-2 sm:mb-0" style={{ height: 'calc(100vh - 260px)' }}>
+      {/* Excel-Style Table - Fits screen height with internal scrolling, fills remaining space */}
+      <div className="border rounded-lg bg-white flex flex-col overflow-hidden mx-2 sm:mx-0 mb-2 sm:mb-0" style={{ height: 'calc(100vh - 250px)' }}>
         {/* Table Header */}
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between p-2 sm:p-3 border-b bg-gray-50 gap-2 sm:gap-0 flex-shrink-0">
           <div className="flex items-center space-x-2 sm:space-x-4">
