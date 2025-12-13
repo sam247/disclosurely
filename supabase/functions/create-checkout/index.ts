@@ -76,10 +76,16 @@ serve(async (req) => {
           }
         }
       } else {
-        // Auth header provided but invalid - use email from body if provided
-        if (!email) throw new Error("Invalid authentication and no email provided");
-        userEmail = email;
-        logStep("Invalid auth, using email from body", { email: userEmail });
+        // Auth header provided but invalid - fall back to unauthenticated checkout
+        // Use email from body if provided, otherwise let Stripe collect it
+        if (email) {
+          userEmail = email;
+          logStep("Invalid auth, using email from body", { email: userEmail });
+        } else {
+          // No email provided - Stripe will collect it during checkout
+          userEmail = ''; // Will be set by Stripe
+          logStep("Invalid auth and no email - Stripe will collect email during checkout");
+        }
       }
     } else {
       // No auth header - email optional (Stripe will collect it during checkout)
