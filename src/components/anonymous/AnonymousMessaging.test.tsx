@@ -32,57 +32,60 @@ vi.mock('react-router-dom', async () => {
 });
 
 // Mock Supabase - Use chainable query builder
-const mockInvoke = vi.fn().mockResolvedValue({ data: null, error: null });
-const mockMaybeSingle = vi.fn();
-const mockSingle = vi.fn();
+// Note: Variables used in vi.mock must be defined inside the factory function due to hoisting
+vi.mock('@/integrations/supabase/client', () => {
+  const mockInvoke = vi.fn().mockResolvedValue({ data: null, error: null });
+  const mockMaybeSingle = vi.fn();
+  const mockSingle = vi.fn();
 
-const createChainableQueryBuilder = (finalResult: any = { data: null, error: null }) => {
-  const builder: any = {
-    select: vi.fn().mockReturnThis(),
-    insert: vi.fn().mockReturnThis(),
-    update: vi.fn().mockReturnThis(),
-    delete: vi.fn().mockReturnThis(),
-    upsert: vi.fn().mockResolvedValue(finalResult),
-    eq: vi.fn().mockReturnThis(),
-    neq: vi.fn().mockReturnThis(),
-    is: vi.fn().mockReturnThis(),
-    gt: vi.fn().mockReturnThis(),
-    gte: vi.fn().mockReturnThis(),
-    lt: vi.fn().mockReturnThis(),
-    lte: vi.fn().mockReturnThis(),
-    like: vi.fn().mockReturnThis(),
-    ilike: vi.fn().mockReturnThis(),
-    in: vi.fn().mockReturnThis(),
-    contains: vi.fn().mockReturnThis(),
-    order: vi.fn().mockReturnThis(),
-    limit: vi.fn().mockReturnThis(),
-    range: vi.fn().mockReturnThis(),
-    single: mockSingle.mockResolvedValue(finalResult),
-    maybeSingle: mockMaybeSingle.mockResolvedValue(finalResult),
+  const createChainableQueryBuilder = (finalResult: any = { data: null, error: null }) => {
+    const builder: any = {
+      select: vi.fn().mockReturnThis(),
+      insert: vi.fn().mockReturnThis(),
+      update: vi.fn().mockReturnThis(),
+      delete: vi.fn().mockReturnThis(),
+      upsert: vi.fn().mockResolvedValue(finalResult),
+      eq: vi.fn().mockReturnThis(),
+      neq: vi.fn().mockReturnThis(),
+      is: vi.fn().mockReturnThis(),
+      gt: vi.fn().mockReturnThis(),
+      gte: vi.fn().mockReturnThis(),
+      lt: vi.fn().mockReturnThis(),
+      lte: vi.fn().mockReturnThis(),
+      like: vi.fn().mockReturnThis(),
+      ilike: vi.fn().mockReturnThis(),
+      in: vi.fn().mockReturnThis(),
+      contains: vi.fn().mockReturnThis(),
+      order: vi.fn().mockReturnThis(),
+      limit: vi.fn().mockReturnThis(),
+      range: vi.fn().mockReturnThis(),
+      single: mockSingle.mockResolvedValue(finalResult),
+      maybeSingle: mockMaybeSingle.mockResolvedValue(finalResult),
+    };
+    
+    // Make it thenable (Promise-like)
+    builder.then = (onResolve: any) => Promise.resolve(finalResult).then(onResolve);
+    builder.catch = (onReject: any) => Promise.resolve(finalResult).catch(onReject);
+    builder.finally = (onFinally: any) => Promise.resolve(finalResult).finally(onFinally);
+    
+    return builder;
   };
-  
-  // Make it thenable (Promise-like)
-  builder.then = (onResolve: any) => Promise.resolve(finalResult).then(onResolve);
-  builder.catch = (onReject: any) => Promise.resolve(finalResult).catch(onReject);
-  builder.finally = (onFinally: any) => Promise.resolve(finalResult).finally(onFinally);
-  
-  return builder;
-};
 
-vi.mock('@/integrations/supabase/client', () => ({
-  supabase: {
-    functions: {
-      invoke: mockInvoke,
+  return {
+    supabase: {
+      functions: {
+        invoke: mockInvoke,
+      },
+      from: vi.fn(() => createChainableQueryBuilder()),
+      auth: {
+        getSession: vi.fn().mockResolvedValue({
+          data: { session: null },
+          error: null,
+        }),
+      },
     },
-    from: vi.fn(() => createChainableQueryBuilder()),
-    auth: {
-      getSession: vi.fn().mockResolvedValue({
-        data: { session: null },
-        error: null,
-      }),
-    },
-  },
-}));
+  };
+});
 
 describe('AnonymousMessaging', () => {
   beforeEach(() => {

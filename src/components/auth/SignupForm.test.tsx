@@ -19,39 +19,52 @@ vi.mock('@/hooks/use-toast', () => ({
   useToast: () => ({ toast: mockToast }),
 }));
 
-// Mock Supabase
-const mockSignUp = vi.fn();
-const mockInsert = vi.fn();
-const mockUpdate = vi.fn();
-const mockSelect = vi.fn();
-const mockEq = vi.fn();
-const mockSingle = vi.fn();
-
-const createChainableBuilder = () => {
-  const builder: any = {
-    select: vi.fn().mockReturnThis(),
-    insert: vi.fn().mockReturnThis(),
-    update: vi.fn().mockReturnThis(),
-    upsert: vi.fn().mockResolvedValue({ data: null, error: null }),
-    eq: vi.fn().mockReturnThis(),
-    neq: vi.fn().mockReturnThis(),
-    is: vi.fn().mockReturnThis(),
-    single: vi.fn().mockResolvedValue({ data: null, error: null }),
-    maybeSingle: vi.fn().mockResolvedValue({ data: null, error: null }),
-  };
-  builder.then = (onResolve: any) => Promise.resolve({ data: null, error: null }).then(onResolve);
-  builder.catch = (onReject: any) => Promise.resolve({ data: null, error: null }).catch(onReject);
-  return builder;
-};
-
-vi.mock('@/integrations/supabase/client', () => ({
-  supabase: {
-    auth: {
-      signUp: (...args: any[]) => mockSignUp(...args),
-    },
-    from: vi.fn(() => createChainableBuilder()),
-  },
+// Mock Supabase - use vi.hoisted to create mocks that can be accessed in tests
+const { mockSignUp, mockInsert, mockSingle } = vi.hoisted(() => ({
+  mockSignUp: vi.fn(),
+  mockInsert: vi.fn(),
+  mockSingle: vi.fn(),
 }));
+
+vi.mock('@/integrations/supabase/client', () => {
+  const createChainableBuilder = () => {
+    const builder: any = {
+      select: vi.fn().mockReturnThis(),
+      insert: (...args: any[]) => {
+        mockInsert(...args);
+        // Return a new builder that supports .select().single() chain
+        const insertBuilder: any = {
+          select: vi.fn().mockReturnThis(),
+          single: (...singleArgs: any[]) => {
+            return mockSingle(...singleArgs);
+          },
+        };
+        return insertBuilder;
+      },
+      update: vi.fn().mockReturnThis(),
+      upsert: vi.fn().mockResolvedValue({ data: null, error: null }),
+      eq: vi.fn().mockReturnThis(),
+      neq: vi.fn().mockReturnThis(),
+      is: vi.fn().mockReturnThis(),
+      single: (...args: any[]) => {
+        return mockSingle(...args);
+      },
+      maybeSingle: vi.fn().mockResolvedValue({ data: null, error: null }),
+    };
+    builder.then = (onResolve: any) => Promise.resolve({ data: null, error: null }).then(onResolve);
+    builder.catch = (onReject: any) => Promise.resolve({ data: null, error: null }).catch(onReject);
+    return builder;
+  };
+
+  return {
+    supabase: {
+      auth: {
+        signUp: mockSignUp,
+      },
+      from: vi.fn(() => createChainableBuilder()),
+    },
+  };
+});
 
 describe('SignupForm', () => {
   beforeEach(() => {

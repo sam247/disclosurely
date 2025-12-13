@@ -45,53 +45,56 @@ vi.mock('@/hooks/useSubscriptionLimits', () => ({
 }));
 
 // Mock Supabase - Create chainable query builder
-const createChainableQueryBuilder = (finalResult: any = { data: [], error: null }) => {
-  const builder: any = {
-    select: vi.fn().mockReturnThis(),
-    insert: vi.fn().mockReturnThis(),
-    update: vi.fn().mockReturnThis(),
-    delete: vi.fn().mockReturnThis(),
-    upsert: vi.fn().mockResolvedValue(finalResult),
-    eq: vi.fn().mockReturnThis(),
-    neq: vi.fn().mockReturnThis(),
-    is: vi.fn().mockReturnThis(),
-    gt: vi.fn().mockReturnThis(),
-    gte: vi.fn().mockReturnThis(),
-    lt: vi.fn().mockReturnThis(),
-    lte: vi.fn().mockReturnThis(),
-    like: vi.fn().mockReturnThis(),
-    ilike: vi.fn().mockReturnThis(),
-    in: vi.fn().mockReturnThis(),
-    contains: vi.fn().mockReturnThis(),
-    order: vi.fn().mockReturnThis(),
-    limit: vi.fn().mockReturnThis(),
-    range: vi.fn().mockReturnThis(),
-    single: vi.fn().mockResolvedValue(finalResult),
-    maybeSingle: vi.fn().mockResolvedValue(finalResult),
+// Use vi.hoisted to avoid hoisting issues
+vi.mock('@/integrations/supabase/client', () => {
+  const createChainableQueryBuilder = (finalResult: any = { data: [], error: null }) => {
+    const builder: any = {
+      select: vi.fn().mockReturnThis(),
+      insert: vi.fn().mockReturnThis(),
+      update: vi.fn().mockReturnThis(),
+      delete: vi.fn().mockReturnThis(),
+      upsert: vi.fn().mockResolvedValue(finalResult),
+      eq: vi.fn().mockReturnThis(),
+      neq: vi.fn().mockReturnThis(),
+      is: vi.fn().mockReturnThis(),
+      gt: vi.fn().mockReturnThis(),
+      gte: vi.fn().mockReturnThis(),
+      lt: vi.fn().mockReturnThis(),
+      lte: vi.fn().mockReturnThis(),
+      like: vi.fn().mockReturnThis(),
+      ilike: vi.fn().mockReturnThis(),
+      in: vi.fn().mockReturnThis(),
+      contains: vi.fn().mockReturnThis(),
+      order: vi.fn().mockReturnThis(),
+      limit: vi.fn().mockReturnThis(),
+      range: vi.fn().mockReturnThis(),
+      single: vi.fn().mockResolvedValue(finalResult),
+      maybeSingle: vi.fn().mockResolvedValue(finalResult),
+    };
+    
+    // Make it thenable (Promise-like)
+    builder.then = (onResolve: any) => Promise.resolve(finalResult).then(onResolve);
+    builder.catch = (onReject: any) => Promise.resolve(finalResult).catch(onReject);
+    builder.finally = (onFinally: any) => Promise.resolve(finalResult).finally(onFinally);
+    
+    return builder;
   };
-  
-  // Make it thenable (Promise-like)
-  builder.then = (onResolve: any) => Promise.resolve(finalResult).then(onResolve);
-  builder.catch = (onReject: any) => Promise.resolve(finalResult).catch(onReject);
-  builder.finally = (onFinally: any) => Promise.resolve(finalResult).finally(onFinally);
-  
-  return builder;
-};
 
-vi.mock('@/integrations/supabase/client', () => ({
-  supabase: {
-    from: vi.fn(() => createChainableQueryBuilder()),
-    functions: {
-      invoke: vi.fn().mockResolvedValue({ data: null, error: null }),
+  return {
+    supabase: {
+      from: vi.fn(() => createChainableQueryBuilder()),
+      functions: {
+        invoke: vi.fn().mockResolvedValue({ data: null, error: null }),
+      },
+      auth: {
+        getSession: vi.fn().mockResolvedValue({
+          data: { session: null },
+          error: null,
+        }),
+      },
     },
-    auth: {
-      getSession: vi.fn().mockResolvedValue({
-        data: { session: null },
-        error: null,
-      }),
-    },
-  },
-}));
+  };
+});
 
 describe('UserManagement', () => {
   beforeEach(() => {
