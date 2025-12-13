@@ -356,23 +356,22 @@ async function isOpenRedactEnabled(organizationId?: string): Promise<boolean> {
 }
 
 /**
- * Use OpenRedact for PII redaction (when feature flag is enabled)
+ * Use OpenRedaction.com API for PII redaction (when feature flag is enabled)
+ * Uses both regex library and AI for maximum coverage
  */
 async function redactPIIWithOpenRedact(
   content: string,
   organizationId?: string
 ): Promise<RedactionResult> {
   try {
-    // Import OpenRedact from published package
-    const { OpenRedact } = await import('npm:@openredaction/openredaction');
-    const detector = new OpenRedact({ 
-      preset: 'gdpr',
-      enableContextAnalysis: true,
-      confidenceThreshold: 0.6,
+    // Use OpenRedaction.com API instead of npm package
+    const { callOpenRedactAPI } = await import('./openredact-api.ts');
+    const result = await callOpenRedactAPI({
+      text: content,
+      enable_ai: true, // Use AI for maximum coverage
     });
-    const result = detector.detect(content);
     
-    // Map OpenRedact result to RedactionResult format
+    // Map OpenRedact API result to RedactionResult format
     const redactionMap: Record<string, string> = {};
     const detectionStats: Record<string, number> = {};
     
@@ -385,13 +384,13 @@ async function redactPIIWithOpenRedact(
     }
     
     return {
-      redactedContent: result.redacted || content,
+      redactedContent: result.redacted_text || content,
       redactionMap,
       piiDetected: (result.detections?.length || 0) > 0,
       detectionStats,
     };
   } catch (error) {
-    console.error('[PII Detector] OpenRedact error, falling back to legacy:', error);
+    console.error('[PII Detector] OpenRedact API error, falling back to legacy:', error);
     // Fall through to legacy implementation
     throw error;
   }

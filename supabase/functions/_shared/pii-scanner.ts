@@ -149,35 +149,46 @@ async function isOpenRedactEnabled(organizationId?: string): Promise<boolean> {
 }
 
 /**
- * Use OpenRedact for PII scanning (when feature flag is enabled)
+ * Use OpenRedaction.com API for PII scanning (when feature flag is enabled)
+ * Uses both regex library and AI for maximum coverage
  */
 async function scanForPIIWithOpenRedact(
   text: string,
   organizationId?: string
 ): Promise<PIIScanResult> {
   try {
-    // Import OpenRedact from published package
-    const { OpenRedact } = await import('npm:@openredaction/openredaction');
-    const detector = new OpenRedact({ 
-      preset: 'gdpr', 
-      confidenceThreshold: 0.4,
-      enableContextAnalysis: true,
-    });
-    const result = detector.detect(text);
+    // Use OpenRedaction.com API instead of npm package
+    const { detectPIIWithAPI } = await import('./openredact-api.ts');
+    const detections = await detectPIIWithAPI(text, true); // Enable AI for maximum coverage
     
-    // Map OpenRedact result to PIIScanResult format
+    // Map OpenRedact API result to PIIScanResult format
     const detected: PIIDetection[] = [];
     let highSeverityCount = 0;
     let mediumSeverityCount = 0;
     let lowSeverityCount = 0;
     
-    if (result.detections && result.detections.length > 0) {
-      result.detections.forEach((detection: any) => {
+    if (detections && detections.length > 0) {
+      detections.forEach((detection: any) => {
         const severity = detection.severity || 'medium';
         const mappedSeverity = severity === 'high' ? 'high' : severity === 'low' ? 'low' : 'medium';
         
+        // Map API detection types to our internal types
+        const typeMap: Record<string, PIIDetection['type']> = {
+          'email': 'email',
+          'phone': 'phone',
+          'ssn': 'ssn',
+          'credit_card': 'creditCard',
+          'ip_address': 'ipAddress',
+          'url': 'url',
+          'person': 'possibleName',
+          'name': 'possibleName',
+          'address': 'address',
+        };
+        
+        const mappedType = typeMap[detection.type?.toLowerCase()] || 'possibleName';
+        
         detected.push({
-          type: detection.type.toLowerCase().replace(/_/g, '') as PIIDetection['type'],
+          type: mappedType,
           text: detection.value || detection.text || '',
           position: detection.position || { start: 0, end: 0 },
           severity: mappedSeverity,
@@ -198,7 +209,7 @@ async function scanForPIIWithOpenRedact(
       lowSeverityCount,
     };
   } catch (error) {
-    console.error('[PII Scanner] OpenRedact error, falling back to legacy:', error);
+    console.error('[PII Scanner] OpenRedact API error, falling back to legacy:', error);
     throw error;
   }
 }
