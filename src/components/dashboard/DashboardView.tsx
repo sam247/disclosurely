@@ -1423,8 +1423,7 @@ Additional Details: ${decryptedContent.additionalDetails || 'None provided'}
     setCurrentPage(1);
   }, [searchTerm, statusFilter, sortField, sortDirection, smartFilters]);
 
-  const [isMobile, setIsMobile] = useState(false);
-  
+  // Calculate and apply height constraint accounting for alerts and measure space
   useEffect(() => {
     const checkMobile = () => {
       setIsMobile(window.innerWidth < 768);
