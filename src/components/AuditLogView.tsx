@@ -123,7 +123,8 @@ const AuditLogView = () => {
     }
   }, [organization?.id]);
 
-  // Debug: Measure container heights
+  // Debug: Measure container heights and display gap
+  const [debugInfo, setDebugInfo] = useState<any>(null);
   useEffect(() => {
     const measureHeights = () => {
       const container = document.querySelector('[data-audit-container]') as HTMLElement;
@@ -132,75 +133,53 @@ const AuditLogView = () => {
       const header = document.querySelector('[data-audit-container] > div:first-child') as HTMLElement;
       const filters = document.querySelector('[data-audit-container] > div:nth-child(2)') as HTMLElement;
       
-      if (container) {
+      if (container && parentMain) {
         const containerRect = container.getBoundingClientRect();
+        const mainRect = parentMain.getBoundingClientRect();
         const viewportHeight = window.innerHeight;
-        const computedStyle = window.getComputedStyle(container);
+        const gap = mainRect.bottom - containerRect.bottom;
         
         const measurements: any = {
           viewportHeight,
           containerHeight: containerRect.height,
-          containerStyleHeight: container.style.height,
-          containerComputedHeight: computedStyle.height,
           containerBottom: containerRect.bottom,
-          containerTop: containerRect.top,
+          mainBottom: mainRect.bottom,
+          gap: gap,
+          recommendedHeight: containerRect.height + gap,
         };
         
         if (tableContainer) {
           const tableRect = tableContainer.getBoundingClientRect();
-          const tableComputed = window.getComputedStyle(tableContainer);
           measurements.tableHeight = tableRect.height;
-          measurements.tableComputedHeight = tableComputed.height;
           measurements.tableBottom = tableRect.bottom;
         }
         
-        if (parentMain) {
-          const mainRect = parentMain.getBoundingClientRect();
-          const mainComputed = window.getComputedStyle(parentMain);
-          measurements.mainHeight = mainRect.height;
-          measurements.mainPaddingTop = mainComputed.paddingTop;
-          measurements.mainPaddingBottom = mainComputed.paddingBottom;
-          measurements.mainBottom = mainRect.bottom;
-          measurements.gapToMainBottom = mainRect.bottom - containerRect.bottom;
-        }
-        
         if (header) {
-          const headerRect = header.getBoundingClientRect();
-          measurements.headerHeight = headerRect.height;
+          measurements.headerHeight = header.getBoundingClientRect().height;
         }
         
         if (filters) {
-          const filtersRect = filters.getBoundingClientRect();
-          measurements.filtersHeight = filtersRect.height;
+          measurements.filtersHeight = filters.getBoundingClientRect().height;
         }
+        
+        setDebugInfo(measurements);
         
         // #region agent log
         const logData = {location:'AuditLogView.tsx:measureHeights',message:'Height measurements',data:measurements,timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'A'};
         console.log('DEBUG HEIGHTS:', logData);
         fetch('http://127.0.0.1:7243/ingest/07d80fb8-251f-44b3-a7af-ce7afb45a49c',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(logData)}).catch((e)=>{console.error('Log fetch failed:',e);});
         // #endregion
-      } else {
-        // #region agent log
-        console.log('DEBUG: Container not found');
-        fetch('http://127.0.0.1:7243/ingest/07d80fb8-251f-44b3-a7af-ce7afb45a49c',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'AuditLogView.tsx:measureHeights',message:'Container not found',data:{},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'A'})}).catch(()=>{});
-        // #endregion
       }
     };
     
-    // Wait for DOM to be ready
-    const timeout = setTimeout(() => {
-      measureHeights();
-      window.addEventListener('resize', measureHeights);
-      const interval = setInterval(measureHeights, 2000);
-      
-      return () => {
-        window.removeEventListener('resize', measureHeights);
-        clearInterval(interval);
-      };
-    }, 500);
+    const timeout = setTimeout(measureHeights, 500);
+    window.addEventListener('resize', measureHeights);
+    const interval = setInterval(measureHeights, 2000);
     
     return () => {
       clearTimeout(timeout);
+      window.removeEventListener('resize', measureHeights);
+      clearInterval(interval);
     };
   }, [organization?.id, logs.length]);
 
@@ -406,6 +385,12 @@ const AuditLogView = () => {
 
   return (
     <div className="flex flex-col" style={{ height: 'calc(100vh - 160px)', overflow: 'hidden' }} data-audit-container>
+      {/* Debug Info - Temporary */}
+      {debugInfo && debugInfo.gap > 0 && (
+        <div className="bg-yellow-100 border border-yellow-400 text-xs p-2 mb-2 mx-2">
+          Gap: {debugInfo.gap.toFixed(0)}px | Container: {debugInfo.containerHeight.toFixed(0)}px | Recommended: {debugInfo.recommendedHeight.toFixed(0)}px
+        </div>
+      )}
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 flex-shrink-0 px-2 sm:px-0 mb-2">
         <div>
