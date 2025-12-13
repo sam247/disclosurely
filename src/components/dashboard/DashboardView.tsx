@@ -1485,15 +1485,15 @@ Additional Details: ${decryptedContent.additionalDetails || 'None provided'}
                     <Table className="min-w-full">
                       <TableHeader>
                         <TableRow>
-                          <TableHead>{t('trackingId')}</TableHead>
-                          <TableHead>{t('title')}</TableHead>
-                          <TableHead>{t('status')}</TableHead>
-                          <TableHead>{t('category')}</TableHead>
-                          <TableHead>{t('priority')}</TableHead>
-                          <TableHead>{t('ai.triage')}</TableHead>
-                          <TableHead>{t('assignedTo')}</TableHead>
-                          <TableHead>{t('date')}</TableHead>
-                          <TableHead className="text-right">{t('actions')}</TableHead>
+                          <TableHead className="px-2 py-1 text-xs">{t('trackingId')}</TableHead>
+                          <TableHead className="px-2 py-1 text-xs">{t('title')}</TableHead>
+                          <TableHead className="px-2 py-1 text-xs">{t('status')}</TableHead>
+                          <TableHead className="px-2 py-1 text-xs">{t('category')}</TableHead>
+                          <TableHead className="px-2 py-1 text-xs">{t('priority')}</TableHead>
+                          <TableHead className="px-2 py-1 text-xs">{t('ai.triage')}</TableHead>
+                          <TableHead className="px-2 py-1 text-xs">{t('assignedTo')}</TableHead>
+                          <TableHead className="px-2 py-1 text-xs">{t('date')}</TableHead>
+                          <TableHead className="text-right px-2 py-1 text-xs">{t('actions')}</TableHead>
                         </TableRow>
                       </TableHeader>
                       <TableBody>
@@ -1501,8 +1501,9 @@ Additional Details: ${decryptedContent.additionalDetails || 'None provided'}
                           <TableRow
                             key={report.id}
                             className={highlightedReportIds.includes(report.id) ? 'bg-yellow-50 border-l-4 border-l-orange-400' : ''}
+                            style={{ height: '22px' }}
                           >
-                            <TableCell className="font-mono text-sm">
+                            <TableCell className="font-mono text-xs px-2 py-0">
                               <div className="flex items-center gap-2">
                                 <span>{report.tracking_id}</span>
                                 <button
@@ -2065,18 +2066,18 @@ Additional Details: ${decryptedContent.additionalDetails || 'None provided'}
                     <Table>
                       <TableHeader>
                         <TableRow>
-                          <TableHead>Tracking ID</TableHead>
-                          <TableHead>Title</TableHead>
-                          <TableHead>Status</TableHead>
-                          <TableHead>Category</TableHead>
-                          <TableHead>Archived Date</TableHead>
-                          <TableHead className="text-right">Actions</TableHead>
+                          <TableHead className="px-2 py-1 text-xs">Tracking ID</TableHead>
+                          <TableHead className="px-2 py-1 text-xs">Title</TableHead>
+                          <TableHead className="px-2 py-1 text-xs">Status</TableHead>
+                          <TableHead className="px-2 py-1 text-xs">Category</TableHead>
+                          <TableHead className="px-2 py-1 text-xs">Archived Date</TableHead>
+                          <TableHead className="text-right px-2 py-1 text-xs">Actions</TableHead>
                         </TableRow>
                       </TableHeader>
                       <TableBody>
                         {archivedReports.map((report) => (
-                          <TableRow key={report.id}>
-                            <TableCell className="font-mono text-sm">
+                          <TableRow key={report.id} style={{ height: '22px' }}>
+                            <TableCell className="font-mono text-xs px-2 py-0">
                               <div className="flex items-center gap-2">
                                 <span>{report.tracking_id}</span>
                                 <button
@@ -2100,26 +2101,26 @@ Additional Details: ${decryptedContent.additionalDetails || 'None provided'}
                                 </button>
                               </div>
                             </TableCell>
-                            <TableCell className="font-medium">{report.title}</TableCell>
-                            <TableCell>
-                              <Badge variant="secondary">{report.status}</Badge>
+                            <TableCell className="font-medium text-xs px-2 py-0">{report.title}</TableCell>
+                            <TableCell className="px-2 py-0">
+                              <Badge variant="secondary" className="text-xs px-1 py-0">{report.status}</Badge>
                             </TableCell>
-                            <TableCell>
+                            <TableCell className="px-2 py-0">
                               {decryptedCategories[report.id] ? (
-                                <div className="text-sm">
+                                <div className="text-xs">
                                   <div className="font-medium">{decryptedCategories[report.id].main}</div>
                                   {decryptedCategories[report.id].sub && (
-                                    <div className="text-muted-foreground text-xs">{decryptedCategories[report.id].sub}</div>
+                                    <div className="text-muted-foreground text-[10px]">{decryptedCategories[report.id].sub}</div>
                                   )}
                                 </div>
                               ) : (
-                                <span className="text-sm text-muted-foreground">-</span>
+                                <span className="text-xs text-muted-foreground">-</span>
                               )}
                             </TableCell>
-                            <TableCell className="text-sm text-muted-foreground">
+                            <TableCell className="text-xs text-muted-foreground px-2 py-0">
                               {new Date(report.created_at).toLocaleDateString()}
                             </TableCell>
-                            <TableCell className="text-right">
+                            <TableCell className="text-right px-2 py-0">
                               <div className="flex items-center justify-end gap-2">
                                 <Button 
                                   variant="ghost" 
