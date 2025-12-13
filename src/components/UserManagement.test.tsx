@@ -44,10 +44,9 @@ vi.mock('@/hooks/useSubscriptionLimits', () => ({
   }),
 }));
 
-// Mock Supabase - Create chainable query builder
-// Use vi.hoisted to avoid hoisting issues
-vi.mock('@/integrations/supabase/client', () => {
-  const createChainableQueryBuilder = (finalResult: any = { data: [], error: null }) => {
+// Mock Supabase - Use vi.hoisted to make mocks accessible in tests
+const { createChainableQueryBuilder } = vi.hoisted(() => {
+  const createChainableQueryBuilderFn = (finalResult: any = { data: [], error: null }) => {
     const builder: any = {
       select: vi.fn().mockReturnThis(),
       insert: vi.fn().mockReturnThis(),
@@ -80,6 +79,12 @@ vi.mock('@/integrations/supabase/client', () => {
     return builder;
   };
 
+  return {
+    createChainableQueryBuilder: createChainableQueryBuilderFn,
+  };
+});
+
+vi.mock('@/integrations/supabase/client', () => {
   return {
     supabase: {
       from: vi.fn(() => createChainableQueryBuilder()),

@@ -31,14 +31,13 @@ vi.mock('react-router-dom', async () => {
   };
 });
 
-// Mock Supabase - Use chainable query builder
-// Note: Variables used in vi.mock must be defined inside the factory function due to hoisting
-vi.mock('@/integrations/supabase/client', () => {
-  const mockInvoke = vi.fn().mockResolvedValue({ data: null, error: null });
-  const mockMaybeSingle = vi.fn();
-  const mockSingle = vi.fn();
+// Mock Supabase - Use vi.hoisted to make mocks accessible in tests
+const { mockInvoke, mockMaybeSingle, mockSingle, createChainableQueryBuilder } = vi.hoisted(() => {
+  const mockInvokeFn = vi.fn().mockResolvedValue({ data: null, error: null });
+  const mockMaybeSingleFn = vi.fn();
+  const mockSingleFn = vi.fn();
 
-  const createChainableQueryBuilder = (finalResult: any = { data: null, error: null }) => {
+  const createChainableQueryBuilderFn = (finalResult: any = { data: null, error: null }) => {
     const builder: any = {
       select: vi.fn().mockReturnThis(),
       insert: vi.fn().mockReturnThis(),
@@ -59,8 +58,8 @@ vi.mock('@/integrations/supabase/client', () => {
       order: vi.fn().mockReturnThis(),
       limit: vi.fn().mockReturnThis(),
       range: vi.fn().mockReturnThis(),
-      single: mockSingle.mockResolvedValue(finalResult),
-      maybeSingle: mockMaybeSingle.mockResolvedValue(finalResult),
+      single: mockSingleFn.mockResolvedValue(finalResult),
+      maybeSingle: mockMaybeSingleFn.mockResolvedValue(finalResult),
     };
     
     // Make it thenable (Promise-like)
@@ -71,6 +70,15 @@ vi.mock('@/integrations/supabase/client', () => {
     return builder;
   };
 
+  return {
+    mockInvoke: mockInvokeFn,
+    mockMaybeSingle: mockMaybeSingleFn,
+    mockSingle: mockSingleFn,
+    createChainableQueryBuilder: createChainableQueryBuilderFn,
+  };
+});
+
+vi.mock('@/integrations/supabase/client', () => {
   return {
     supabase: {
       functions: {
