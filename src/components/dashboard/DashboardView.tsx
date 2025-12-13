@@ -246,6 +246,17 @@ const DashboardView = () => {
   const [selectedReportIds, setSelectedReportIds] = useState<string[]>([]);
   const [smartFilters, setSmartFilters] = useState<SmartFilter[]>([]);
   const [isBulkProcessing, setIsBulkProcessing] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
+  
+  // Check if mobile on mount and resize
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
   
   // Pagination state for active reports
   const [currentPage, setCurrentPage] = useState(1);
