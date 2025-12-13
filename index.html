@@ -1,0 +1,176 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <!-- Set HTML lang attribute based on URL path BEFORE React loads (critical for SEO) -->
+    <script>
+      (function() {
+        var path = window.location.pathname;
+        var langMatch = path.match(/^\/([a-z]{2})(\/|$)/);
+        if (langMatch) {
+          var lang = langMatch[1];
+          var supportedLangs = ['es', 'fr', 'de', 'pl', 'sv', 'no', 'pt', 'it', 'nl', 'da', 'el'];
+          if (supportedLangs.indexOf(lang) !== -1) {
+            document.documentElement.setAttribute('lang', lang);
+          }
+        }
+      })();
+    </script>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.ico" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link rel="dns-prefetch" href="https://cxmuzperkittvibslnff.supabase.co" />
+    <link rel="dns-prefetch" href="https://cdn.contentful.com" />
+    <title>Disclosurely - GDPR Compliant Whistleblowing Platform | Secure Anonymous Reporting</title>
+    <meta
+      name="description"
+      content="GDPR-compliant whistleblowing platform for UK & EU organisations. Anonymous reporting, AI case analysis, end-to-end encryption. Complies with EU Whistleblowing Directive 2019/1937."
+    />
+    <meta
+      name="keywords"
+      content="whistleblowing software, GDPR compliance, EU whistleblowing directive, anonymous reporting, secure reporting, UK whistleblower protection, compliance software, speak up platform, ethics hotline"
+    />
+    <meta name="author" content="Disclosurely" />
+    <meta name="robots" content="index, follow" />
+
+    <!-- Google Tag Manager - Disabled: Server-side tagging cancelled -->
+    <!-- GTM is commented out because it may be configured for server-side tagging which has been cancelled -->
+    <!--
+    <script>
+      (function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src='https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);})(window,document,'script','dataLayer','GTM-PT54C5M7');
+    </script>
+    -->
+
+    <!-- Reddit Click ID Capture -->
+    <script>
+      (function() {
+        try {
+          const usp = new URLSearchParams(window.location.search);
+          const rdt = usp.get('rdt_cid');
+          if (rdt) {
+            localStorage.setItem('rdt_cid', rdt);
+            document.cookie = "rdt_cid=" + rdt + "; Path=/; Max-Age=2592000; SameSite=Lax";
+          }
+        } catch (e) {}
+      })();
+    </script>
+
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://disclosurely.com" />
+    <meta property="og:site_name" content="Disclosurely" />
+    <meta property="og:locale" content="en_GB" />
+    <meta property="og:title" content="Disclosurely - GDPR Compliant Whistleblowing Platform" />
+    <meta
+      property="og:description"
+      content="GDPR-compliant whistleblowing platform for UK & EU organisations. Anonymous reporting, AI case analysis, end-to-end encryption."
+    />
+    <meta property="og:image" content="https://disclosurely.com/ogimage.png" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content="Disclosurely - Secure Whistleblowing Platform" />
+
+    <!-- Twitter -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:url" content="https://disclosurely.com" />
+    <meta name="twitter:title" content="Disclosurely - GDPR Compliant Whistleblowing Platform" />
+    <meta
+      name="twitter:description"
+      content="GDPR-compliant whistleblowing platform for UK & EU organisations. Anonymous reporting, AI case analysis, end-to-end encryption."
+    />
+    <meta name="twitter:image" content="https://disclosurely.com/ogimage.png" />
+    <meta name="twitter:image:alt" content="Disclosurely - Secure Whistleblowing Platform" />
+
+    <!-- Canonical URL set dynamically by DynamicHelmet component based on current page -->
+
+    <!-- Additional SEO Meta Tags -->
+    <meta name="theme-color" content="#2563eb" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+    <meta name="format-detection" content="telephone=no" />
+
+    <!-- JSON-LD Schema -->
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "SoftwareApplication",
+        "name": "Disclosurely",
+        "description": "GDPR-compliant whistleblowing and compliance platform for UK and EU organisations. Anonymous reporting, AI case analysis, end-to-end encryption, and compliance with EU Whistleblowing Directive 2019/1937.",
+        "url": "https://disclosurely.com",
+        "applicationCategory": "BusinessApplication",
+        "operatingSystem": "Web",
+        "aggregateRating": {
+          "@type": "AggregateRating",
+          "ratingValue": "4.8",
+          "reviewCount": "127",
+          "bestRating": "5",
+          "worstRating": "1"
+        },
+        "offers": {
+          "@type": "Offer",
+          "price": "19.99",
+          "priceCurrency": "GBP",
+          "priceValidUntil": "2026-12-31",
+          "availability": "https://schema.org/InStock",
+          "url": "https://disclosurely.com/pricing"
+        },
+        "provider": {
+          "@type": "Organization",
+          "name": "Disclosurely Limited",
+          "url": "https://disclosurely.com",
+          "logo": "https://disclosurely.com/lovable-uploads/c46ace0e-df58-4119-b5e3-8dcfa075ea2f.png",
+          "sameAs": [
+            "https://www.linkedin.com/company/disclosurely"
+          ],
+          "address": {
+            "@type": "PostalAddress",
+            "addressCountry": "GB",
+            "addressLocality": "London",
+            "postalCode": "EC1V 2NX"
+          }
+        },
+        "featureList": [
+          "Anonymous whistleblowing",
+          "GDPR compliance",
+          "EU Whistleblowing Directive compliance",
+          "End-to-end encryption",
+          "AI case analysis",
+          "Secure two-way messaging",
+          "Case management dashboard",
+          "Audit trails",
+          "Multi-language support"
+        ]
+      }
+    </script>
+  </head>
+  <body>
+    <!-- Google Tag Manager (noscript) -->
+    <noscript
+      ><iframe
+        src="https://www.googletagmanager.com/ns.html?id=GTM-PT54C5M7"
+        height="0"
+        width="0"
+        style="display:none;visibility:hidden"
+      ></iframe
+    ></noscript>
+    <!-- End Google Tag Manager (noscript) -->
+
+    <!-- Fallback navigation for crawlers without JavaScript -->
+    <noscript>
+      <nav style="padding: 20px; text-align: center; background: #f9fafb; border-bottom: 1px solid #e5e7eb;">
+        <a href="/" style="margin: 0 15px; color: #1f2937; text-decoration: none;">Home</a>
+        <a href="/features" style="margin: 0 15px; color: #1f2937; text-decoration: none;">Features</a>
+        <a href="/pricing" style="margin: 0 15px; color: #1f2937; text-decoration: none;">Pricing</a>
+        <a href="/about" style="margin: 0 15px; color: #1f2937; text-decoration: none;">About</a>
+        <a href="/contact" style="margin: 0 15px; color: #1f2937; text-decoration: none;">Contact</a>
+        <a href="/blog" style="margin: 0 15px; color: #1f2937; text-decoration: none;">Blog</a>
+        <a href="/careers" style="margin: 0 15px; color: #1f2937; text-decoration: none;">Careers</a>
+      </nav>
+    </noscript>
+
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>

@@ -1,0 +1,14 @@
+User-agent: *
+Allow: /
+Disallow: /dashboard
+Disallow: /admin
+Disallow: /api
+Disallow: /app
+Disallow: /onboarding
+Disallow: /secure/tool/submit/
+Disallow: /secure/tool/success
+Disallow: /secure/tool/lookup
+Disallow: /secure/tool/messaging/
+Disallow: /test/
+
+Sitemap: https://disclosurely.com/sitemap.xml
