@@ -1531,7 +1531,7 @@ Additional Details: ${decryptedContent.additionalDetails || 'None provided'}
                 </div>
               ) : (
                 <>
-                  {/* Desktop Table View - Fixed height 575px */}
+                  {/* Desktop Table View - Fixed height 555px */}
                   <div className="hidden md:block flex-1 overflow-hidden flex flex-col min-h-0" data-dashboard-table-active>
                     {/* Scrollable table body */}
                     <div className="flex-1 overflow-y-auto overflow-x-auto min-h-0" style={{ maxHeight: 'calc(100% - 40px)' }}>
@@ -1554,7 +1554,7 @@ Additional Details: ${decryptedContent.additionalDetails || 'None provided'}
                           <TableRow
                             key={report.id}
                             className={highlightedReportIds.includes(report.id) ? 'bg-yellow-50 border-l-4 border-l-orange-400' : ''}
-                            style={{ height: '22px' }}
+                            style={{ height: '17px' }}
                           >
                             <TableCell className="font-mono text-xs px-2 py-0">
                               <div className="flex items-center gap-2">
@@ -2189,7 +2189,7 @@ Additional Details: ${decryptedContent.additionalDetails || 'None provided'}
                 </div>
               ) : (
                 <>
-                  {/* Desktop Table View - Fixed height 575px */}
+                  {/* Desktop Table View - Fixed height 555px */}
                   <div className="hidden md:block flex-1 overflow-hidden flex flex-col min-h-0" data-dashboard-table-archived>
                     {/* Scrollable table body */}
                     <div className="flex-1 overflow-y-auto overflow-x-auto min-h-0" style={{ maxHeight: 'calc(100% - 40px)' }}>
@@ -2206,7 +2206,7 @@ Additional Details: ${decryptedContent.additionalDetails || 'None provided'}
                         </TableHeader>
                       <TableBody>
                         {paginatedArchivedReports.map((report) => (
-                            <TableRow key={report.id} style={{ height: '22px' }}>
+                            <TableRow key={report.id} style={{ height: '17px' }}>
                               <TableCell className="font-mono text-xs px-2 py-0">
                                 <div className="flex items-center gap-2">
                                   <span>{report.tracking_id}</span>
