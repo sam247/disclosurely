@@ -1493,7 +1493,7 @@ Additional Details: ${decryptedContent.additionalDetails || 'None provided'}
             </div>
           </div>
           <TabsContent value="active">
-          <Card className="md:border md:shadow-sm border-0 shadow-none flex flex-col" style={{ height: 'calc(100vh - 109px)', overflow: 'hidden' }}>
+          <Card className="md:border md:shadow-sm border-0 shadow-none flex flex-col" style={{ height: '620px', overflow: 'hidden' }}>
             <CardContent className="pt-0 px-0 md:pt-6 md:px-6 flex-1 flex flex-col overflow-hidden min-h-0">
               {filteredReports.length === 0 ? (
                 <div className="text-center py-8 text-muted-foreground">
