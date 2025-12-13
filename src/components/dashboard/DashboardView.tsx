@@ -1513,8 +1513,8 @@ Additional Details: ${decryptedContent.additionalDetails || 'None provided'}
             </div>
           </div>
             <TabsContent value="active" className="flex-1 flex flex-col overflow-hidden min-h-0">
-              <Card className="md:border md:shadow-sm border-0 shadow-none flex flex-col flex-1 overflow-hidden">
-            <CardContent className="pt-0 px-0 md:pt-6 md:px-6 flex-1 flex flex-col overflow-hidden min-h-0">
+              <Card className="md:border md:shadow-sm border-0 shadow-none flex flex-col flex-1 overflow-hidden min-h-0">
+                <CardContent className="pt-0 px-0 md:pt-6 md:px-6 flex-1 flex flex-col overflow-hidden min-h-0 p-0 md:p-6">
               {filteredReports.length === 0 ? (
                 <div className="text-center py-8 text-muted-foreground">
                   {isOrgAdmin ? (
