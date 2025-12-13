@@ -1420,20 +1420,34 @@ Additional Details: ${decryptedContent.additionalDetails || 'None provided'}
       const contentContainer = document.querySelector('[data-dashboard-content]') as HTMLElement;
       const card = document.querySelector('[data-dashboard-card-active]') as HTMLElement;
       const tableContainer = document.querySelector('[data-dashboard-table-active]') as HTMLElement;
-      const rootContainer = contentContainer?.closest('[style*="overflow: hidden"]') as HTMLElement;
+      const rootContainer = document.querySelector('[data-dashboard-root]') as HTMLElement;
+      const contentWrapper = document.querySelector('[data-dashboard-wrapper]') as HTMLElement;
       
-      if (contentContainer) {
+      if (contentContainer && rootContainer) {
         const subscriptionHeight = subscriptionAlert ? subscriptionAlert.clientHeight + 16 : 0; // +16 for mt-4
         const patternHeight = patternAlert ? patternAlert.clientHeight + 16 : 0; // +16 for mt-4
         const totalAlertsHeight = subscriptionHeight + patternHeight;
         const viewportHeight = window.innerHeight;
         const headerHeight = 64; // 4rem = 64px
         const contentPadding = 16; // pt-4 = 16px
-        const calculatedHeight = viewportHeight - headerHeight - totalAlertsHeight - contentPadding;
+        const calculatedContentHeight = viewportHeight - headerHeight - totalAlertsHeight - contentPadding;
+        const rootHeight = viewportHeight - headerHeight;
+        
+        // Set root container height to exactly fit viewport
+        rootContainer.style.height = `${rootHeight}px`;
+        rootContainer.style.maxHeight = `${rootHeight}px`;
+        rootContainer.style.overflow = 'hidden';
+        
+        // Set content wrapper to fill remaining space
+        if (contentWrapper) {
+          contentWrapper.style.overflow = 'hidden';
+          contentWrapper.style.maxHeight = '100%';
+        }
         
         // Set max-height to constrain the content area
-        contentContainer.style.maxHeight = `${calculatedHeight}px`;
-        contentContainer.style.height = `${calculatedHeight}px`;
+        contentContainer.style.maxHeight = `${calculatedContentHeight}px`;
+        contentContainer.style.height = `${calculatedContentHeight}px`;
+        contentContainer.style.overflow = 'hidden';
         
         // Measure actual heights to find extra space
         const measurements: any = {
@@ -1443,17 +1457,25 @@ Additional Details: ${decryptedContent.additionalDetails || 'None provided'}
           patternHeight: patternAlert?.clientHeight || 0,
           totalAlertsHeight,
           contentPadding,
-          calculatedHeight,
+          calculatedContentHeight,
+          rootHeight,
+          rootContainerHeight: rootContainer.clientHeight,
+          rootContainerScrollHeight: rootContainer.scrollHeight,
+          rootContainerOffsetHeight: rootContainer.offsetHeight,
+          contentWrapperHeight: contentWrapper?.clientHeight,
+          contentWrapperScrollHeight: contentWrapper?.scrollHeight,
           contentContainerHeight: contentContainer.clientHeight,
           contentContainerScrollHeight: contentContainer.scrollHeight,
           contentContainerOffsetHeight: contentContainer.offsetHeight,
-          rootContainerHeight: rootContainer?.clientHeight,
-          rootContainerScrollHeight: rootContainer?.scrollHeight,
           cardHeight: card?.clientHeight,
           cardScrollHeight: card?.scrollHeight,
           tableContainerHeight: tableContainer?.clientHeight,
           tableContainerScrollHeight: tableContainer?.scrollHeight,
-          extraSpace: contentContainer.scrollHeight - contentContainer.clientHeight
+          documentBodyScrollHeight: document.body.scrollHeight,
+          documentBodyClientHeight: document.body.clientHeight,
+          extraSpace: contentContainer.scrollHeight - contentContainer.clientHeight,
+          rootExtraSpace: rootContainer.scrollHeight - rootContainer.clientHeight,
+          bodyExtraSpace: document.body.scrollHeight - window.innerHeight
         };
         
         console.log('🔍 Dashboard Space Debug:', measurements);
@@ -1467,8 +1489,8 @@ Additional Details: ${decryptedContent.additionalDetails || 'None provided'}
             data: measurements,
             timestamp: Date.now(),
             sessionId: 'debug-session',
-            runId: 'space-measurement',
-            hypothesisId: 'F'
+            runId: 'root-constraint-fix',
+            hypothesisId: 'G'
           })
         }).catch(() => {});
       }
@@ -1496,9 +1518,9 @@ Additional Details: ${decryptedContent.additionalDetails || 'None provided'}
   }
 
   return (
-    <div className="flex flex-col" style={{ height: 'calc(100vh - 4rem)', overflow: 'hidden', maxHeight: 'calc(100vh - 4rem)' }}>
+    <div className="flex flex-col" style={{ height: 'calc(100vh - 4rem)', overflow: 'hidden', maxHeight: 'calc(100vh - 4rem)' }} data-dashboard-root>
       {/* Content - No scrolling, only table scrolls internally */}
-      <div className="flex-1 overflow-hidden flex flex-col min-h-0" style={{ overflow: 'hidden', maxHeight: '100%' }}>
+      <div className="flex-1 overflow-hidden flex flex-col min-h-0" style={{ overflow: 'hidden', maxHeight: '100%' }} data-dashboard-wrapper>
         {/* Subscription Grace Period Warning - Hidden for pro users on mobile */}
         {subscriptionData && 
          (subscriptionData.isInGracePeriod || subscriptionData.subscription_status === 'past_due') && 
