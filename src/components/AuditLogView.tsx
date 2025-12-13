@@ -376,7 +376,7 @@ const AuditLogView = () => {
       </div>
 
       {/* Filters - Collapsible Horizontal Layout */}
-      <div className="border rounded-lg bg-white flex-shrink-0 mx-2 sm:mx-0">
+      <div className="border rounded-lg bg-white flex-shrink-0 mx-2 sm:mx-0" style={{ maxHeight: filtersExpanded ? 'none' : '60px' }}>
         <div 
           className="flex items-center justify-between p-2 cursor-pointer hover:bg-gray-50"
           onClick={() => setFiltersExpanded(!filtersExpanded)}
