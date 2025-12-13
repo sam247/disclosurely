@@ -1412,70 +1412,115 @@ Additional Details: ${decryptedContent.additionalDetails || 'None provided'}
     setCurrentPage(1);
   }, [searchTerm, statusFilter, sortField, sortDirection, smartFilters]);
 
-  // Measure table heights after render
+    // Measure table heights after render with visible debug output
   useEffect(() => {
     if (loading) return;
     
     const measureHeights = () => {
-      const activeCard = document.querySelector('[data-dashboard-card-active]');
-      const activeTable = document.querySelector('[data-dashboard-table-active]');
-      const archivedCard = document.querySelector('[data-dashboard-card-archived]');
-      const archivedTable = document.querySelector('[data-dashboard-table-archived]');
+      const activeCard = document.querySelector('[data-dashboard-card-active]') as HTMLElement;
+      const activeTable = document.querySelector('[data-dashboard-table-active]') as HTMLElement;
+      const archivedCard = document.querySelector('[data-dashboard-card-archived]') as HTMLElement;
+      const archivedTable = document.querySelector('[data-dashboard-table-archived]') as HTMLElement;
       
-      if (activeCard || activeTable) {
-        fetch('http://127.0.0.1:7243/ingest/07d80fb8-251f-44b3-a7af-ce7afb45a49c', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            location: 'DashboardView.tsx:useEffect',
-            message: 'Active table height after render',
-            data: {
-              cardHeight: activeCard ? activeCard.clientHeight : null,
-              cardComputedHeight: activeCard ? window.getComputedStyle(activeCard).height : null,
-              cardOffsetHeight: activeCard ? activeCard.offsetHeight : null,
-              tableHeight: activeTable ? activeTable.clientHeight : null,
-              tableComputedHeight: activeTable ? window.getComputedStyle(activeTable).height : null,
-              tableOffsetHeight: activeTable ? activeTable.offsetHeight : null,
-              viewportHeight: window.innerHeight,
-              expectedHeight: '620px'
-            },
-            timestamp: Date.now(),
-            sessionId: 'debug-session',
-            runId: 'fix-attempt-2',
-            hypothesisId: 'B'
-          })
-        }).catch(() => {});
+      const measurements: any = {
+        viewportHeight: window.innerHeight,
+        expectedHeight: '620px'
+      };
+      
+      if (activeCard) {
+        const computed = window.getComputedStyle(activeCard);
+        measurements.activeCard = {
+          clientHeight: activeCard.clientHeight,
+          offsetHeight: activeCard.offsetHeight,
+          scrollHeight: activeCard.scrollHeight,
+          computedHeight: computed.height,
+          computedMinHeight: computed.minHeight,
+          computedMaxHeight: computed.maxHeight,
+          inlineStyle: activeCard.style.height,
+          parentHeight: activeCard.parentElement?.clientHeight,
+          parentComputedHeight: activeCard.parentElement ? window.getComputedStyle(activeCard.parentElement).height : null
+        };
+        
+        // Force height if not correct
+        if (activeCard.clientHeight !== 620) {
+          activeCard.style.setProperty('height', '620px', 'important');
+          activeCard.style.setProperty('min-height', '620px', 'important');
+          activeCard.style.setProperty('max-height', '620px', 'important');
+          measurements.activeCard.forced = true;
+        }
       }
       
-      if (archivedCard || archivedTable) {
-        fetch('http://127.0.0.1:7243/ingest/07d80fb8-251f-44b3-a7af-ce7afb45a49c', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            location: 'DashboardView.tsx:useEffect',
-            message: 'Archived table height after render',
-            data: {
-              cardHeight: archivedCard ? archivedCard.clientHeight : null,
-              cardComputedHeight: archivedCard ? window.getComputedStyle(archivedCard).height : null,
-              cardOffsetHeight: archivedCard ? archivedCard.offsetHeight : null,
-              tableHeight: archivedTable ? archivedTable.clientHeight : null,
-              tableComputedHeight: archivedTable ? window.getComputedStyle(archivedTable).height : null,
-              tableOffsetHeight: archivedTable ? archivedTable.offsetHeight : null,
-              viewportHeight: window.innerHeight,
-              expectedHeight: '620px'
-            },
-            timestamp: Date.now(),
-            sessionId: 'debug-session',
-            runId: 'fix-attempt-2',
-            hypothesisId: 'B'
-          })
-        }).catch(() => {});
+      if (activeTable) {
+        const computed = window.getComputedStyle(activeTable);
+        measurements.activeTable = {
+          clientHeight: activeTable.clientHeight,
+          offsetHeight: activeTable.offsetHeight,
+          scrollHeight: activeTable.scrollHeight,
+          computedHeight: computed.height
+        };
       }
+      
+      if (archivedCard) {
+        const computed = window.getComputedStyle(archivedCard);
+        measurements.archivedCard = {
+          clientHeight: archivedCard.clientHeight,
+          offsetHeight: archivedCard.offsetHeight,
+          scrollHeight: archivedCard.scrollHeight,
+          computedHeight: computed.height,
+          computedMinHeight: computed.minHeight,
+          computedMaxHeight: computed.maxHeight,
+          inlineStyle: archivedCard.style.height,
+          parentHeight: archivedCard.parentElement?.clientHeight,
+          parentComputedHeight: archivedCard.parentElement ? window.getComputedStyle(archivedCard.parentElement).height : null
+        };
+        
+        // Force height if not correct
+        if (archivedCard.clientHeight !== 620) {
+          archivedCard.style.setProperty('height', '620px', 'important');
+          archivedCard.style.setProperty('min-height', '620px', 'important');
+          archivedCard.style.setProperty('max-height', '620px', 'important');
+          measurements.archivedCard.forced = true;
+        }
+      }
+      
+      if (archivedTable) {
+        const computed = window.getComputedStyle(archivedTable);
+        measurements.archivedTable = {
+          clientHeight: archivedTable.clientHeight,
+          offsetHeight: archivedTable.offsetHeight,
+          scrollHeight: archivedTable.scrollHeight,
+          computedHeight: computed.height
+        };
+      }
+      
+      // Log to console for immediate visibility
+      console.log('🔍 Dashboard Table Height Debug:', measurements);
+      
+      // Also send to log endpoint
+      fetch('http://127.0.0.1:7243/ingest/07d80fb8-251f-44b3-a7af-ce7afb45a49c', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          location: 'DashboardView.tsx:useEffect',
+          message: 'Table height measurements with forced fix',
+          data: measurements,
+          timestamp: Date.now(),
+          sessionId: 'debug-session',
+          runId: 'fix-attempt-3',
+          hypothesisId: 'C'
+        })
+      }).catch(() => {});
     };
     
-    // Measure after a short delay to ensure DOM is ready
-    const timeoutId = setTimeout(measureHeights, 100);
-    return () => clearTimeout(timeoutId);
+    // Measure multiple times to catch any layout shifts
+    const timeoutId1 = setTimeout(measureHeights, 100);
+    const timeoutId2 = setTimeout(measureHeights, 500);
+    const timeoutId3 = setTimeout(measureHeights, 1000);
+    return () => {
+      clearTimeout(timeoutId1);
+      clearTimeout(timeoutId2);
+      clearTimeout(timeoutId3);
+    };
   }, [reports, archivedReports, loading]);
 
   if (loading) {
@@ -1578,8 +1623,8 @@ Additional Details: ${decryptedContent.additionalDetails || 'None provided'}
               </Button>
             </div>
           </div>
-            <TabsContent value="active" className="flex-1 flex flex-col overflow-hidden min-h-0">
-              <Card className="md:border md:shadow-sm border-0 shadow-none flex flex-col overflow-hidden" style={{ height: '620px' }} data-dashboard-card-active>
+            <TabsContent value="active" className="flex flex-col overflow-hidden min-h-0">
+              <Card className="md:border md:shadow-sm border-0 shadow-none flex flex-col overflow-hidden" style={{ height: '620px', minHeight: '620px', maxHeight: '620px' }} data-dashboard-card-active>
                 <CardContent className="p-0 flex-1 flex flex-col overflow-hidden min-h-0">
               {filteredReports.length === 0 ? (
                 <div className="text-center py-8 text-muted-foreground px-6">
