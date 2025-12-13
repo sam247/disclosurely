@@ -1,6 +1,7 @@
 import { ReactNode } from 'react';
 import { Navigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
+import { useUserRoles } from '@/hooks/useUserRoles';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Shield } from 'lucide-react';
 
@@ -9,8 +10,8 @@ interface OwnerOnlyRouteProps {
 }
 
 /**
- * STRICT OWNER-ONLY ROUTE PROTECTION
- * Only allows access to sampettiford@googlemail.com
+ * ADMIN-ONLY ROUTE PROTECTION
+ * Only allows access to system admins
  * This check is done in multiple layers for absolute security:
  * 1. In the sidebar (to hide the menu item)
  * 2. In this route wrapper (to block direct URL access)
@@ -18,8 +19,9 @@ interface OwnerOnlyRouteProps {
  */
 const OwnerOnlyRoute = ({ children }: OwnerOnlyRouteProps) => {
   const { user, loading } = useAuth();
+  const { isAdmin, loading: rolesLoading } = useUserRoles();
 
-  if (loading) {
+  if (loading || rolesLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
@@ -27,8 +29,8 @@ const OwnerOnlyRoute = ({ children }: OwnerOnlyRouteProps) => {
     );
   }
 
-  // STRICT CHECK: Only sampettiford@googlemail.com
-  const isOwner = user?.email === 'sampettiford@googlemail.com';
+  // STRICT CHECK: Only system admins
+  const isOwner = isAdmin;
 
   if (!user) {
     return <Navigate to="/login" replace />;

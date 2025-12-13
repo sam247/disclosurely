@@ -5,40 +5,43 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
-import { CreditCard, Calendar, FileText, Shield, Zap } from 'lucide-react';
-import { useUsageStats } from '@/hooks/useUsageStats';
-import { useSubscriptionLimits } from '@/hooks/useSubscriptionLimits';
+import { CreditCard, Calendar, Shield, Zap } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 
 const SubscriptionManagement = () => {
   const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const { subscriptionData, refreshSubscription } = useAuth();
-  const { stats, loading: statsLoading, formatStorage } = useUsageStats();
-  const { 
-    limits, 
-    isAtCaseLimit, 
-    isAtStorageLimit, 
-    getCaseUsagePercentage, 
-    getStorageUsagePercentage,
-    formatStorageLimit,
-    formatCaseLimit
-  } = useSubscriptionLimits();
 
   
 
   const handleManageSubscription = async () => {
     setIsLoading(true);
+    setError(null);
     try {
       // Call Supabase edge function to create customer portal session
-      const { data, error } = await supabase.functions.invoke('customer-portal');
+      const { data, error: invokeError } = await supabase.functions.invoke('customer-portal', {
+        headers: {
+          Authorization: `Bearer ${(await supabase.auth.getSession()).data.session?.access_token}`,
+        },
+      });
       
-      if (error) throw error;
+      if (invokeError) {
+        console.error('Error accessing customer portal:', invokeError);
+        setError(invokeError.message || 'Failed to open customer portal. Please try again.');
+        throw invokeError;
+      }
       
       if (data?.url) {
         window.location.href = data.url;
+      } else if (data?.error) {
+        setError(data.error);
+      } else {
+        setError('No portal URL returned. Please contact support.');
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error accessing customer portal:', error);
+      setError(error?.message || 'Failed to open customer portal. Please try again.');
     } finally {
       setIsLoading(false);
     }
@@ -122,146 +125,94 @@ const SubscriptionManagement = () => {
 
   return (
     <div className="space-y-6">
-      {/* Current Subscription */}
+      {/* Consolidated Subscription & Features Card */}
       <Card>
         <CardHeader>
-          <CardTitle className="flex items-center space-x-2">
-            <CreditCard className="h-5 w-5" />
-            <span>Current Subscription</span>
+          <div className="flex items-center justify-between">
+            <div>
+              <CardTitle className="flex items-center space-x-2">
+                <CreditCard className="h-5 w-5" />
+                <span>Current Subscription</span>
+              </CardTitle>
+              <CardDescription>
+                Manage your subscription plan and billing
+              </CardDescription>
+            </div>
             <Button
               variant="outline"
               size="sm"
               onClick={() => refreshSubscription(null, true)}
-              className="ml-auto"
             >
               Refresh Status
             </Button>
-          </CardTitle>
-          <CardDescription>
-            Manage your subscription plan and billing
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="font-semibold text-lg">{subscription.plan}</p>
-              <p className="text-gray-600">
-                £{subscription.price}/month
-              </p>
-            </div>
-            <Badge variant={subscription.status === 'active' ? 'default' : 'secondary'}>
-              {subscription.status === 'active' ? 'Active' : 'Free'}
-            </Badge>
           </div>
-
-          {subscription.currentPeriodEnd && (
-            <div className="flex items-center space-x-2 text-sm text-gray-600">
-              <Calendar className="h-4 w-4" />
-              <span>Renews on {new Date(subscription.currentPeriodEnd).toLocaleDateString()}</span>
-            </div>
-          )}
-
-          <div className="flex space-x-2">
-            {subscription.status === 'active' && (
-              <Button 
-                onClick={handleManageSubscription}
-                disabled={isLoading}
-                variant="outline"
-              >
-                {isLoading ? 'Loading...' : 'Manage Subscription'}
-              </Button>
-            )}
-            
-            {subscription.plan !== 'Pro' && (
-              <Button 
-                onClick={handleUpgrade}
-                disabled={isLoading}
-              >
-                {isLoading ? 'Loading...' : subscription.plan === 'Free' ? 'Subscribe Now' : 'Upgrade Plan'}
-              </Button>
-            )}
-          </div>
-        </CardContent>
-      </Card>
-
-      <Separator />
-
-      {/* Plan Features */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center space-x-2">
-            <Zap className="h-5 w-5" />
-            <span>Plan Features</span>
-          </CardTitle>
-          <CardDescription>
-            Features included in your current plan
-          </CardDescription>
         </CardHeader>
-        <CardContent>
-          <div className="grid gap-3">
-            {subscription.features?.map((feature, index) => (
-              <div key={index} className="flex items-center space-x-3">
-                <Shield className="h-4 w-4 text-green-500" />
-                <span className="text-sm">{feature}</span>
+        <CardContent className="space-y-6">
+          {/* Subscription Info */}
+          <div className="space-y-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="font-semibold text-lg">{subscription.plan}</p>
+                <p className="text-gray-600">
+                  £{subscription.price}/month
+                </p>
               </div>
-            ))}
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Usage Statistics */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center space-x-2">
-            <FileText className="h-5 w-5" />
-            <span>Usage This Month</span>
-          </CardTitle>
-          <CardDescription>
-            Track your monthly usage against plan limits
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          {statsLoading ? (
-            <div className="text-center py-8">
-              <p className="text-gray-500">Loading usage statistics...</p>
+              <Badge variant={subscription.status === 'active' ? 'default' : 'secondary'}>
+                {subscription.status === 'active' ? 'Active' : 'Free'}
+              </Badge>
             </div>
-          ) : (
-            <>
-              <div className="grid grid-cols-2 gap-4">
-                <div className="text-center p-4 bg-gray-50 rounded-lg">
-                  <p className="text-2xl font-bold text-blue-600">{stats.reportsThisMonth}</p>
-                  <p className="text-sm text-gray-600">Cases This Month</p>
-                  <p className="text-xs text-gray-500">{formatCaseLimit()}</p>
-                  {limits.maxCasesPerMonth > 0 && (
-                    <div className="w-full bg-gray-200 rounded-full h-2 mt-2">
-                      <div 
-                        className={`h-2 rounded-full ${isAtCaseLimit() ? 'bg-red-600' : 'bg-blue-600'}`}
-                        style={{ width: `${getCaseUsagePercentage()}%` }}
-                      ></div>
-                    </div>
-                  )}
-                </div>
-                <div className="text-center p-4 bg-gray-50 rounded-lg">
-                  <p className="text-2xl font-bold text-green-600">{stats.activeUsers}</p>
-                  <p className="text-sm text-gray-600">Active Users</p>
-                </div>
+
+            {subscription.currentPeriodEnd && (
+              <div className="flex items-center space-x-2 text-sm text-gray-600">
+                <Calendar className="h-4 w-4" />
+                <span>Renews on {new Date(subscription.currentPeriodEnd).toLocaleDateString()}</span>
               </div>
-              
-              <div className="text-center p-4 bg-gray-50 rounded-lg">
-                <p className="text-2xl font-bold text-purple-600">{formatStorage(stats.storageUsed)}</p>
-                <p className="text-sm text-gray-600">Storage Used</p>
-                <p className="text-xs text-gray-500">{formatStorageLimit()} limit</p>
-                {limits.maxStorageGB > 0 && (
-                  <div className="w-full bg-gray-200 rounded-full h-2 mt-2">
-                    <div 
-                      className={`h-2 rounded-full ${isAtStorageLimit() ? 'bg-red-600' : 'bg-purple-600'}`}
-                      style={{ width: `${getStorageUsagePercentage()}%` }}
-                    ></div>
-                  </div>
+            )}
+
+            <div className="flex flex-col space-y-2">
+              <div className="flex space-x-2">
+                {subscription.status === 'active' && (
+                  <Button 
+                    onClick={handleManageSubscription}
+                    disabled={isLoading}
+                    variant="outline"
+                  >
+                    {isLoading ? 'Loading...' : 'Manage Subscription'}
+                  </Button>
+                )}
+                
+                {subscription.plan !== 'Pro' && (
+                  <Button 
+                    onClick={handleUpgrade}
+                    disabled={isLoading}
+                  >
+                    {isLoading ? 'Loading...' : subscription.plan === 'Free' ? 'Subscribe Now' : 'Upgrade Plan'}
+                  </Button>
                 )}
               </div>
-            </>
-          )}
+              {error && (
+                <p className="text-sm text-red-600">{error}</p>
+              )}
+            </div>
+          </div>
+
+          <Separator />
+
+          {/* Plan Features */}
+          <div className="space-y-3">
+            <div className="flex items-center space-x-2">
+              <Zap className="h-5 w-5" />
+              <h3 className="font-semibold">Plan Features</h3>
+            </div>
+            <div className="grid gap-3">
+              {subscription.features?.map((feature, index) => (
+                <div key={index} className="flex items-center space-x-3">
+                  <Shield className="h-4 w-4 text-green-500" />
+                  <span className="text-sm">{feature}</span>
+                </div>
+              ))}
+            </div>
+          </div>
         </CardContent>
       </Card>
     </div>

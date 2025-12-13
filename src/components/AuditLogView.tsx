@@ -11,6 +11,7 @@ import { Separator } from '@/components/ui/separator';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/hooks/useAuth';
 import { useOrganization } from '@/hooks/useOrganization';
+import { useUserRoles } from '@/hooks/useUserRoles';
 import { 
   Search, 
   Filter, 
@@ -41,6 +42,7 @@ const AuditLogView = () => {
   const { toast } = useToast();
   const { user } = useAuth();
   const { organization } = useOrganization();
+  const { isAdmin } = useUserRoles();
   
   // Core state
   const [logs, setLogs] = useState<AuditLogEntry[]>([]);
@@ -322,7 +324,7 @@ const AuditLogView = () => {
   }
 
   return (
-    <div className="space-y-2 h-[100dvh] sm:h-screen flex flex-col overflow-hidden">
+    <div className="space-y-2 h-screen flex flex-col overflow-hidden">
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 flex-shrink-0 px-2 sm:px-0">
         <div>
@@ -535,8 +537,8 @@ const AuditLogView = () => {
         )}
       </div>
 
-      {/* Excel-Style Table */}
-      <div className="border rounded-lg bg-white flex-1 flex flex-col overflow-hidden min-h-0 mx-2 sm:mx-0 mb-2 sm:mb-0">
+      {/* Excel-Style Table - Fits screen height with internal scrolling */}
+      <div className="border rounded-lg bg-white flex-1 flex flex-col overflow-hidden min-h-0 mx-2 sm:mx-0 mb-2 sm:mb-0" style={{ maxHeight: 'calc(100vh - 280px)' }}>
         {/* Table Header */}
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between p-2 sm:p-3 border-b bg-gray-50 gap-2 sm:gap-0 flex-shrink-0">
           <div className="flex items-center space-x-2 sm:space-x-4">
@@ -597,8 +599,8 @@ const AuditLogView = () => {
           <>
             {/* Desktop Table View */}
             <div className="hidden md:block flex-1 overflow-hidden min-h-0 flex flex-col">
-              {/* Scrollable table body */}
-              <div className="flex-1 overflow-y-auto overflow-x-auto min-h-0" style={{ maxHeight: 'calc(100dvh - 380px)' }}>
+              {/* Scrollable table body - fits screen height */}
+              <div className="flex-1 overflow-y-auto overflow-x-auto min-h-0">
                 <table className="w-full">
               {/* Fixed Header */}
               <thead className="bg-gray-50 sticky top-0 z-10">
@@ -825,7 +827,7 @@ const AuditLogView = () => {
             </div>
 
             {/* Mobile Card View */}
-            <div className="md:hidden space-y-2 p-2 overflow-y-auto flex-1 min-h-0" style={{ maxHeight: 'calc(100dvh - 420px)' }}>
+            <div className="md:hidden space-y-2 p-2 overflow-y-auto flex-1 min-h-0">
               {logs.map((log) => (
                 <div
                   key={log.id}
@@ -1026,7 +1028,7 @@ const AuditLogView = () => {
                       <p className="text-xs sm:text-sm">{new Date(selectedLog.created_at).toLocaleString()}</p>
                     </div>
                     {/* Hide sensitive fields for anonymous cases (PRIVACY FIX H3) */}
-                    {selectedLog.actor_type !== 'anonymous' || user?.email === 'sampettiford@googlemail.com' ? (
+                    {selectedLog.actor_type !== 'anonymous' || isAdmin ? (
                       <>
                         <div>
                           <Label className="text-xs sm:text-sm font-medium">IP Address</Label>

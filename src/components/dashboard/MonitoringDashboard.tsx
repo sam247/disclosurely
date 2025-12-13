@@ -50,8 +50,9 @@ const MonitoringDashboard = () => {
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
 
-  // Only show to owner (sampettiford@googlemail.com)
-  const isOwner = user?.email === 'sampettiford@googlemail.com';
+  // Only show to system admins
+  const { isAdmin } = useUserRoles();
+  const isOwner = isAdmin;
 
   useEffect(() => {
     if (isOwner) {
@@ -67,20 +68,20 @@ const MonitoringDashboard = () => {
 
     setRefreshing(true);
     try {
-      // Note: In a real implementation, these would call backend endpoints
-      // that use the Sentry and Supabase MCPs server-side
-      // For now, we'll create a structure that can be populated
+      // Fetch Sentry metrics via edge function that uses Sentry MCP
+      // For now, we'll use a placeholder structure
+      // TODO: Create edge function that uses Sentry MCP to fetch real metrics
       
       const monitoringData: MonitoringMetrics = {
         sentry: {
-          errorsLast24h: 0, // Would be fetched via MCP
-          errorsLast7d: 0, // Would be fetched via MCP
-          unresolvedIssues: 0, // Would be fetched via MCP
+          errorsLast24h: 0, // Would be fetched via Sentry MCP
+          errorsLast7d: 0, // Would be fetched via Sentry MCP
+          unresolvedIssues: 0, // Would be fetched via Sentry MCP
           lastUpdated: new Date().toISOString(),
         },
         supabase: {
-          edgeFunctionErrors: [], // Would be fetched via MCP
-          apiErrors: 0, // Would be fetched via MCP
+          edgeFunctionErrors: [], // Would be fetched via Supabase MCP
+          apiErrors: 0, // Would be fetched via Supabase MCP
           lastUpdated: new Date().toISOString(),
         },
         system: {

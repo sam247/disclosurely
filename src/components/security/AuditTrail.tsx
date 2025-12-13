@@ -8,6 +8,7 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
+import { useUserRoles } from '@/hooks/useUserRoles';
 import { Shield, Activity, Search, Download, AlertTriangle, CheckCircle, XCircle } from 'lucide-react';
 import { format } from 'date-fns';
 
@@ -46,8 +47,9 @@ const AuditTrail = () => {
 
     setLoading(true);
     try {
-      // Use filtered view for non-owner users to hide sensitive data for anonymous cases (PRIVACY FIX H3)
-      const isOwner = user?.email === 'sampettiford@googlemail.com';
+      // Use filtered view for non-admin users to hide sensitive data for anonymous cases (PRIVACY FIX H3)
+      const { isAdmin } = useUserRoles();
+      const isOwner = isAdmin;
       
       let query = supabase
         .from(isOwner ? 'audit_logs' as any : 'audit_logs_filtered')

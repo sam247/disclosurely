@@ -73,8 +73,9 @@ const SystemHealthDashboard = () => {
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
 
-  // Only show to owner (sampettiford@googlemail.com)
-  const isOwner = user?.email === 'sampettiford@googlemail.com';
+  // Only show to system admins
+  const { isAdmin } = useUserRoles();
+  const isOwner = isAdmin;
 
   useEffect(() => {
     if (isOwner) {

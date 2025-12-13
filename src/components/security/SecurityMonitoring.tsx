@@ -7,6 +7,7 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
+import { useUserRoles } from '@/hooks/useUserRoles';
 import { Shield, AlertTriangle, CheckCircle, XCircle, Clock, Users, Database, Activity } from 'lucide-react';
 import { format } from 'date-fns';
 
@@ -32,6 +33,7 @@ interface SecurityMetrics {
 const SecurityMonitoring = () => {
   const { user } = useAuth();
   const { toast } = useToast();
+  const { isAdmin } = useUserRoles();
   const [alerts, setAlerts] = useState<SecurityAlert[]>([]);
   const [metrics, setMetrics] = useState<SecurityMetrics>({
     totalEvents: 0,
@@ -81,8 +83,8 @@ const SecurityMonitoring = () => {
         setAlerts(typedAlerts);
       }
 
-      // Fetch audit logs for metrics (use filtered view for non-owners - PRIVACY FIX H3)
-      const isOwner = user?.email === 'sampettiford@googlemail.com';
+      // Fetch audit logs for metrics (use filtered view for non-admins - PRIVACY FIX H3)
+      const isOwner = isAdmin;
       
       const { data: auditData, error: auditError } = await supabase
         .from(isOwner ? 'audit_logs' as any : 'audit_logs_filtered')

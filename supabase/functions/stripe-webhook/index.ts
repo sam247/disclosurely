@@ -322,7 +322,41 @@ serve(async (req) => {
 
         console.log(`[STRIPE-WEBHOOK] Marked subscription as past_due for ${customer.email}`);
         
-        // TODO: Send email notification
+        // Send email notification about payment failure
+        try {
+          const { Resend } = await import('https://esm.sh/resend@4.0.0');
+          const resend = new Resend(Deno.env.get('RESEND_API_KEY'));
+          
+          await resend.emails.send({
+            from: 'Disclosurely <support@disclosurely.com>',
+            to: [customer.email],
+            subject: 'Payment Failed - Action Required',
+            html: `
+              <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+                <div style="background-color: #dc2626; color: white; padding: 20px; text-align: center;">
+                  <h1>Payment Failed</h1>
+                </div>
+                <div style="padding: 30px; background-color: #f9fafb;">
+                  <p>Hello,</p>
+                  <p>We were unable to process your payment for your Disclosurely subscription. Your subscription is now past due.</p>
+                  <p>To avoid service interruption, please update your payment method as soon as possible.</p>
+                  <div style="text-align: center; margin: 30px 0;">
+                    <a href="https://app.disclosurely.com/dashboard/settings?tab=subscription" 
+                       style="background-color: #2563eb; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; display: inline-block;">
+                      Update Payment Method
+                    </a>
+                  </div>
+                  <p style="color: #6b7280; font-size: 14px; margin-top: 30px;">
+                    If you have any questions, please contact our support team.
+                  </p>
+                </div>
+              </div>
+            `,
+          });
+          console.log(`[STRIPE-WEBHOOK] Payment failure email sent to ${customer.email}`);
+        } catch (emailError) {
+          console.error('[STRIPE-WEBHOOK] Failed to send payment failure email:', emailError);
+        }
         break;
       }
 
@@ -366,7 +400,41 @@ serve(async (req) => {
 
         console.log(`[STRIPE-WEBHOOK] Canceled subscription for ${customer.email}, grace period until ${gracePeriodEnds.toISOString()}`);
         
-        // TODO: Send email notification
+        // Send email notification about subscription cancellation
+        try {
+          const { Resend } = await import('https://esm.sh/resend@4.0.0');
+          const resend = new Resend(Deno.env.get('RESEND_API_KEY'));
+          
+          await resend.emails.send({
+            from: 'Disclosurely <support@disclosurely.com>',
+            to: [customer.email],
+            subject: 'Subscription Canceled - Grace Period Active',
+            html: `
+              <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+                <div style="background-color: #f59e0b; color: white; padding: 20px; text-align: center;">
+                  <h1>Subscription Canceled</h1>
+                </div>
+                <div style="padding: 30px; background-color: #f9fafb;">
+                  <p>Hello,</p>
+                  <p>Your Disclosurely subscription has been canceled. You have a 7-day grace period until ${new Date(gracePeriodEnds).toLocaleDateString()} to continue using the service.</p>
+                  <p>After the grace period ends, your account will be downgraded to the free tier.</p>
+                  <div style="text-align: center; margin: 30px 0;">
+                    <a href="https://app.disclosurely.com/dashboard/settings?tab=subscription" 
+                       style="background-color: #2563eb; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; display: inline-block;">
+                      Reactivate Subscription
+                    </a>
+                  </div>
+                  <p style="color: #6b7280; font-size: 14px; margin-top: 30px;">
+                    If you have any questions, please contact our support team.
+                  </p>
+                </div>
+              </div>
+            `,
+          });
+          console.log(`[STRIPE-WEBHOOK] Cancellation email sent to ${customer.email}`);
+        } catch (emailError) {
+          console.error('[STRIPE-WEBHOOK] Failed to send cancellation email:', emailError);
+        }
         break;
       }
 
@@ -486,10 +554,44 @@ serve(async (req) => {
           updated_at: new Date().toISOString(),
         }).eq('email', customer.email);
 
-        console.log(`[STRIPE-WEBHOOK] Trial ending soon for ${customer.email} - trial ends at ${subscription.trial_end ? new Date(subscription.trial_end * 1000).toISOString() : 'unknown'}`);
+        const trialEndDate = subscription.trial_end ? new Date(subscription.trial_end * 1000) : null;
+        console.log(`[STRIPE-WEBHOOK] Trial ending soon for ${customer.email} - trial ends at ${trialEndDate?.toISOString() || 'unknown'}`);
         
-        // TODO: Send email notification about trial ending
-        // This can be implemented via send-notification-emails edge function
+        // Send email notification about trial ending
+        try {
+          const { Resend } = await import('https://esm.sh/resend@4.0.0');
+          const resend = new Resend(Deno.env.get('RESEND_API_KEY'));
+          
+          await resend.emails.send({
+            from: 'Disclosurely <support@disclosurely.com>',
+            to: [customer.email],
+            subject: 'Your Free Trial is Ending Soon',
+            html: `
+              <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+                <div style="background-color: #2563eb; color: white; padding: 20px; text-align: center;">
+                  <h1>Trial Ending Soon</h1>
+                </div>
+                <div style="padding: 30px; background-color: #f9fafb;">
+                  <p>Hello,</p>
+                  <p>Your free trial of Disclosurely is ending ${trialEndDate ? `on ${trialEndDate.toLocaleDateString()}` : 'soon'}.</p>
+                  <p>To continue using all features, please ensure your payment method is up to date. Your subscription will automatically begin after the trial period ends.</p>
+                  <div style="text-align: center; margin: 30px 0;">
+                    <a href="https://app.disclosurely.com/dashboard/settings?tab=subscription" 
+                       style="background-color: #2563eb; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; display: inline-block;">
+                      Manage Subscription
+                    </a>
+                  </div>
+                  <p style="color: #6b7280; font-size: 14px; margin-top: 30px;">
+                    If you have any questions, please contact our support team.
+                  </p>
+                </div>
+              </div>
+            `,
+          });
+          console.log(`[STRIPE-WEBHOOK] Trial ending email sent to ${customer.email}`);
+        } catch (emailError) {
+          console.error('[STRIPE-WEBHOOK] Failed to send trial ending email:', emailError);
+        }
         break;
       }
 
@@ -511,7 +613,53 @@ serve(async (req) => {
 
         console.log(`[STRIPE-WEBHOOK] Payment action required for ${customer.email}`);
         
-        // TODO: Send email notification with payment link
+        // Get payment link from invoice
+        const paymentLink = invoice.hosted_invoice_url || invoice.invoice_pdf;
+        
+        // Send email notification with payment link
+        try {
+          const { Resend } = await import('https://esm.sh/resend@4.0.0');
+          const resend = new Resend(Deno.env.get('RESEND_API_KEY'));
+          
+          await resend.emails.send({
+            from: 'Disclosurely <support@disclosurely.com>',
+            to: [customer.email],
+            subject: 'Payment Action Required',
+            html: `
+              <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+                <div style="background-color: #dc2626; color: white; padding: 20px; text-align: center;">
+                  <h1>Payment Action Required</h1>
+                </div>
+                <div style="padding: 30px; background-color: #f9fafb;">
+                  <p>Hello,</p>
+                  <p>We need additional information to process your payment for your Disclosurely subscription.</p>
+                  <p>Please complete the payment to avoid service interruption.</p>
+                  ${paymentLink ? `
+                    <div style="text-align: center; margin: 30px 0;">
+                      <a href="${paymentLink}" 
+                         style="background-color: #2563eb; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; display: inline-block;">
+                        Complete Payment
+                      </a>
+                    </div>
+                  ` : `
+                    <div style="text-align: center; margin: 30px 0;">
+                      <a href="https://app.disclosurely.com/dashboard/settings?tab=subscription" 
+                         style="background-color: #2563eb; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; display: inline-block;">
+                        Update Payment Method
+                      </a>
+                    </div>
+                  `}
+                  <p style="color: #6b7280; font-size: 14px; margin-top: 30px;">
+                    If you have any questions, please contact our support team.
+                  </p>
+                </div>
+              </div>
+            `,
+          });
+          console.log(`[STRIPE-WEBHOOK] Payment action required email sent to ${customer.email}`);
+        } catch (emailError) {
+          console.error('[STRIPE-WEBHOOK] Failed to send payment action required email:', emailError);
+        }
         break;
       }
 

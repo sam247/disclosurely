@@ -11,14 +11,14 @@ export const AdminPanel = () => {
   const { user } = useAuth();
   const { section } = useParams<{ section?: string }>();
   const navigate = useNavigate();
-  const { loading: rolesLoading } = useUserRoles();
+  const { isAdmin, loading: rolesLoading } = useUserRoles();
   
-  // STRICT OWNER CHECK - Only sampettiford@googlemail.com
+  // STRICT ADMIN CHECK - Only system admins
   // This is the final security layer - checks are also done in:
   // 1. DashboardSidebar (to hide menu item)
   // 2. OwnerOnlyRoute (to block direct URL access)
   // 3. Here (as final check in component)
-  const isOwner = user?.email === 'sampettiford@googlemail.com';
+  const isOwner = isAdmin;
 
   // Redirect to default section if no section specified
   useEffect(() => {

@@ -32,9 +32,10 @@ const DashboardSidebar = ({
   const { isOrgAdmin, isCaseHandler } = useUserRoles();
   const { user } = useAuth();
   
-  // STRICT OWNER CHECK - Only sampettiford@googlemail.com
+  // STRICT ADMIN CHECK - Only system admins
   // This check is done here AND in the component itself for absolute security
-  const isOwner = user?.email === 'sampettiford@googlemail.com';
+  const { isAdmin } = useUserRoles();
+  const isOwner = isAdmin;
 
   const menuItems = [{
     title: t('dashboard'),
