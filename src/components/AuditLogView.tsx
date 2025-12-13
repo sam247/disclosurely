@@ -599,8 +599,8 @@ const AuditLogView = () => {
           <>
             {/* Desktop Table View */}
             <div className="hidden md:block flex-1 overflow-hidden min-h-0 flex flex-col">
-              {/* Scrollable table body - fits screen height, accounting for pagination */}
-              <div className="flex-1 overflow-y-auto overflow-x-auto min-h-0">
+              {/* Scrollable table body - fits screen height, accounting for pagination toolbar (40px) */}
+              <div className="flex-1 overflow-y-auto overflow-x-auto min-h-0" style={{ maxHeight: 'calc(100% - 40px)' }}>
                 <table className="w-full">
               {/* Fixed Header */}
               <thead className="bg-gray-50 sticky top-0 z-10">
@@ -752,9 +752,9 @@ const AuditLogView = () => {
             </table>
               </div>
               
-              {/* Pagination Footer - Airtable/Spreadsheet style fixed at bottom */}
+              {/* Pagination Footer - Airtable/Spreadsheet style fixed at bottom - Always visible */}
               {total > 0 && (
-                <div className="flex flex-row items-center justify-between px-3 py-2 border-t bg-gray-50 flex-shrink-0 h-10 z-10">
+                <div className="flex flex-row items-center justify-between px-3 py-2 border-t bg-gray-50 flex-shrink-0 h-10 z-10 relative">
                   <div className="flex items-center space-x-3">
                     <div className="flex items-center space-x-2">
                       <Label className="text-xs whitespace-nowrap font-medium">Rows per page:</Label>
