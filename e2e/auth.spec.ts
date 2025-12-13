@@ -3,7 +3,8 @@ import { test, expect } from '@playwright/test';
 test.describe('Authentication Flows', () => {
   test.beforeEach(async ({ page }) => {
     // Navigate to login page with more lenient options
-    await page.goto('/auth/login', { waitUntil: 'domcontentloaded', timeout: 15000 });
+    // Try /auth/signin first (canonical route), fallback to /auth/login (redirects)
+    await page.goto('/auth/signin', { waitUntil: 'domcontentloaded', timeout: 15000 });
     // Wait a bit for any async loading
     await page.waitForTimeout(1000);
   });

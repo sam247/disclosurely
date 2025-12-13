@@ -5,7 +5,8 @@ import { componentTagger } from "lovable-tagger";
 import { sentryVitePlugin } from "@sentry/vite-plugin";
 
 // https://vitejs.dev/config/
-export default defineConfig(({ mode }) => ({
+export default defineConfig(({ mode }) => {
+  return {
   server: {
     host: process.env.CI ? "127.0.0.1" : "::", // Use localhost in CI for better compatibility
     port: 8080,
@@ -59,4 +60,29 @@ export default defineConfig(({ mode }) => ({
     // Increase chunk size warning limit
     chunkSizeWarningLimit: 1000,
   },
-}));
+  // Vitest configuration
+  test: {
+    globals: true,
+    environment: 'jsdom',
+    setupFiles: ['./src/test/setup.ts'],
+    css: true,
+    coverage: {
+      provider: 'v8',
+      reporter: ['text', 'json', 'html'],
+      exclude: [
+        'node_modules/',
+        'src/test/',
+        '**/*.d.ts',
+        '**/*.config.*',
+        '**/mockData',
+        'dist/',
+        'coverage/',
+        'e2e/',
+        'playwright-report/',
+        'test-results/',
+      ],
+    },
+    testTimeout: 10000,
+    hookTimeout: 10000,
+  },
+}});
