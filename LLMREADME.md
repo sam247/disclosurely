@@ -423,15 +423,14 @@ submit-anonymous-report Edge Function:
   - Automatic transaction tracking on subscription
   - Referral code passed through checkout flow
 
-### 9. AI Chat Support
-- **Location**: Available on all pages (floating widget, bottom-right)
+### 9. AI Chat Support (Backend Only)
+- **Note**: Frontend chat widget has been removed. Backend functions remain available for future use.
 - **Key Files**:
-  - `src/components/ChatWidget.tsx` - Frontend chat widget
   - `src/components/dashboard/ChatAdminView.tsx` - Admin panel
   - `supabase/functions/chat-support/index.ts` - Edge function
   - `supabase/functions/delete-chat-conversation/index.ts` - Delete handler
 - **Features**:
-  - AI-powered support using DeepSeek API
+  - AI-powered support using DeepSeek API (backend only)
   - "Speak to Human" button with email notifications (3-4 min wait time)
   - Admin panel for managing conversations
   - Delete conversations permanently
@@ -798,8 +797,7 @@ docker stop supabase_db_cxmuzperkittvibslnff supabase_edge_runtime_cxmuzperkittv
 - ✅ Added bulk policy actions
 - ✅ Progress bars for policy acknowledgments
 - ✅ **Referral Program Integration** (Partnero) - Users can refer others and earn rewards
-- ✅ **AI Chat Support** - 24/7 AI-powered chat widget with "Speak to Human" feature
-- ✅ **Chat Admin Panel** - Admin interface for managing chat conversations with delete functionality
+- ✅ **Chat Admin Panel** - Admin interface for managing chat conversations with delete functionality (frontend widget removed)
 - ✅ **PII Scanner** - Server-side PII detection and redaction for anonymous reports
 - ✅ **Privacy Enhancements** - Filename hashing, audit log filtering, PII sanitization in logs
 - ✅ **Subscription Access Fixes** - Improved subscription status checking and access control
