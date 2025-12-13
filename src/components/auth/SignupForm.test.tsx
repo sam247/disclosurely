@@ -27,34 +27,29 @@ const mockSelect = vi.fn();
 const mockEq = vi.fn();
 const mockSingle = vi.fn();
 
+const createChainableBuilder = () => {
+  const builder: any = {
+    select: vi.fn().mockReturnThis(),
+    insert: vi.fn().mockReturnThis(),
+    update: vi.fn().mockReturnThis(),
+    upsert: vi.fn().mockResolvedValue({ data: null, error: null }),
+    eq: vi.fn().mockReturnThis(),
+    neq: vi.fn().mockReturnThis(),
+    is: vi.fn().mockReturnThis(),
+    single: vi.fn().mockResolvedValue({ data: null, error: null }),
+    maybeSingle: vi.fn().mockResolvedValue({ data: null, error: null }),
+  };
+  builder.then = (onResolve: any) => Promise.resolve({ data: null, error: null }).then(onResolve);
+  builder.catch = (onReject: any) => Promise.resolve({ data: null, error: null }).catch(onReject);
+  return builder;
+};
+
 vi.mock('@/integrations/supabase/client', () => ({
   supabase: {
     auth: {
       signUp: (...args: any[]) => mockSignUp(...args),
     },
-    from: (...args: any[]) => {
-      return {
-        insert: (...args: any[]) => {
-          mockInsert(...args);
-          return {
-            select: () => ({
-              single: () => mockSingle(),
-            }),
-          };
-        },
-        update: (...args: any[]) => {
-          mockUpdate(...args);
-          return {
-            eq: () => Promise.resolve({ data: null, error: null }),
-          };
-        },
-        select: () => ({
-          eq: () => ({
-            single: () => mockSingle(),
-          }),
-        }),
-      };
-    },
+    from: vi.fn(() => createChainableBuilder()),
   },
 }));
 

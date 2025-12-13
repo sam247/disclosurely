@@ -51,6 +51,7 @@ const createChainableQueryBuilder = (finalResult: any = { data: [], error: null 
     insert: vi.fn().mockReturnThis(),
     update: vi.fn().mockReturnThis(),
     delete: vi.fn().mockReturnThis(),
+    upsert: vi.fn().mockResolvedValue(finalResult),
     eq: vi.fn().mockReturnThis(),
     neq: vi.fn().mockReturnThis(),
     is: vi.fn().mockReturnThis(),

@@ -32,7 +32,7 @@ vi.mock('react-router-dom', async () => {
 });
 
 // Mock Supabase - Use chainable query builder
-const mockInvoke = vi.fn();
+const mockInvoke = vi.fn().mockResolvedValue({ data: null, error: null });
 const mockMaybeSingle = vi.fn();
 const mockSingle = vi.fn();
 
@@ -42,6 +42,7 @@ const createChainableQueryBuilder = (finalResult: any = { data: null, error: nul
     insert: vi.fn().mockReturnThis(),
     update: vi.fn().mockReturnThis(),
     delete: vi.fn().mockReturnThis(),
+    upsert: vi.fn().mockResolvedValue(finalResult),
     eq: vi.fn().mockReturnThis(),
     neq: vi.fn().mockReturnThis(),
     is: vi.fn().mockReturnThis(),
@@ -71,7 +72,7 @@ const createChainableQueryBuilder = (finalResult: any = { data: null, error: nul
 vi.mock('@/integrations/supabase/client', () => ({
   supabase: {
     functions: {
-      invoke: (...args: any[]) => mockInvoke(...args),
+      invoke: mockInvoke,
     },
     from: vi.fn(() => createChainableQueryBuilder()),
     auth: {
