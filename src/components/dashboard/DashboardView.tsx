@@ -14,7 +14,7 @@ import { useToast } from '@/hooks/use-toast';
 import { useTranslation } from 'react-i18next';
 import { log, LogContext } from '@/utils/logger';
 import { auditLogger } from '@/utils/auditLogger';
-import { FileText, Eye, Archive, Trash2, RotateCcw, MoreVertical, XCircle, ChevronUp, ChevronDown, CheckCircle, Search, Download, FileSpreadsheet, Bot, Zap, AlertCircle, Clock, Flame, User, Copy, Check } from 'lucide-react';
+import { FileText, Eye, Archive, Trash2, RotateCcw, MoreVertical, XCircle, ChevronUp, ChevronDown, CheckCircle, Search, Download, FileSpreadsheet, Bot, Zap, AlertCircle, Clock, Flame, User, Copy, Check, ChevronLeft, ChevronRight } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import ReportMessaging from '@/components/ReportMessaging';
 import ReportContentDisplay from '@/components/ReportContentDisplay';
@@ -26,6 +26,7 @@ import SmartFilters, { createSmartFilters, SmartFilter } from '@/components/dash
 import { Input } from '@/components/ui/input';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Label } from '@/components/ui/label';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
@@ -245,6 +246,14 @@ const DashboardView = () => {
   const [selectedReportIds, setSelectedReportIds] = useState<string[]>([]);
   const [smartFilters, setSmartFilters] = useState<SmartFilter[]>([]);
   const [isBulkProcessing, setIsBulkProcessing] = useState(false);
+  
+  // Pagination state for active reports
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState(25);
+  
+  // Pagination state for archived reports
+  const [archivedCurrentPage, setArchivedCurrentPage] = useState(1);
+  const [archivedPageSize, setArchivedPageSize] = useState(25);
   const [processingReportId, setProcessingReportId] = useState<string | null>(null);
   const [exportingReportId, setExportingReportId] = useState<string | null>(null);
   const [resolvingReportId, setResolvingReportId] = useState<string | null>(null);
@@ -1364,6 +1373,45 @@ Additional Details: ${decryptedContent.additionalDetails || 'None provided'}
     return sortDirection === 'asc' ? comparison : -comparison;
   });
 
+  // Pagination calculations for active reports
+  const totalReports = filteredReports.length;
+  const totalPages = Math.ceil(totalReports / pageSize);
+  const startRecord = (currentPage - 1) * pageSize + 1;
+  const endRecord = Math.min(currentPage * pageSize, totalReports);
+  const paginatedReports = filteredReports.slice((currentPage - 1) * pageSize, currentPage * pageSize);
+
+  // Pagination calculations for archived reports
+  const totalArchived = archivedReports.length;
+  const totalArchivedPages = Math.ceil(totalArchived / archivedPageSize);
+  const archivedStartRecord = (archivedCurrentPage - 1) * archivedPageSize + 1;
+  const archivedEndRecord = Math.min(archivedCurrentPage * archivedPageSize, totalArchived);
+  const paginatedArchivedReports = archivedReports.slice((archivedCurrentPage - 1) * archivedPageSize, archivedCurrentPage * archivedPageSize);
+
+  // Pagination handlers for active reports
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page);
+  };
+
+  const handlePageSizeChange = (newSize: number) => {
+    setPageSize(newSize);
+    setCurrentPage(1);
+  };
+
+  // Pagination handlers for archived reports
+  const handleArchivedPageChange = (page: number) => {
+    setArchivedCurrentPage(page);
+  };
+
+  const handleArchivedPageSizeChange = (newSize: number) => {
+    setArchivedPageSize(newSize);
+    setArchivedCurrentPage(1);
+  };
+
+  // Reset pagination when filters change
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchTerm, statusFilter, sortField, sortDirection, smartFilters]);
+
   if (loading) {
     return (
       <div className="p-8 flex items-center justify-center">
@@ -1480,7 +1528,7 @@ Additional Details: ${decryptedContent.additionalDetails || 'None provided'}
                 </div>
               ) : (
                 <>
-                  {/* Desktop Table View - Same height as audit table (620px) */}
+                  {/* Desktop Table View - Height: 550px */}
                   <div className="hidden md:block flex-1 overflow-hidden min-h-0 flex flex-col">
                     {/* Scrollable table body */}
                     <div className="flex-1 overflow-y-auto overflow-x-auto min-h-0" style={{ maxHeight: 'calc(100% - 40px)' }}>
@@ -1499,7 +1547,7 @@ Additional Details: ${decryptedContent.additionalDetails || 'None provided'}
                         </TableRow>
                       </TableHeader>
                       <TableBody>
-                        {filteredReports.map((report) => (
+                        {paginatedReports.map((report) => (
                           <TableRow
                             key={report.id}
                             className={highlightedReportIds.includes(report.id) ? 'bg-yellow-50 border-l-4 border-l-orange-400' : ''}
@@ -1785,17 +1833,83 @@ Additional Details: ${decryptedContent.additionalDetails || 'None provided'}
                     </Table>
                     </div>
                     
-                    {/* Bottom toolbar - closes the table */}
-                    <div className="flex items-center justify-between px-3 py-2 border-t bg-gray-50 flex-shrink-0 h-10 z-20 bg-white">
-                      <div className="text-xs text-gray-600 font-medium">
-                        Showing {filteredReports.length} {filteredReports.length === 1 ? 'report' : 'reports'}
+                    {/* Pagination Footer - Same as audit table */}
+                    {totalReports > 0 && (
+                      <div className="flex flex-row items-center justify-between px-3 py-2 border-t bg-gray-50 flex-shrink-0 h-10 z-20 bg-white">
+                        <div className="flex items-center space-x-3">
+                          <div className="flex items-center space-x-2">
+                            <Label className="text-xs whitespace-nowrap font-medium">Rows per page:</Label>
+                            <Select value={pageSize.toString()} onValueChange={(value) => handlePageSizeChange(Number(value))}>
+                              <SelectTrigger className="h-7 text-xs w-16 border-gray-300">
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="10">10</SelectItem>
+                                <SelectItem value="25">25</SelectItem>
+                                <SelectItem value="50">50</SelectItem>
+                                <SelectItem value="100">100</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+                          
+                          <div className="text-xs text-gray-600 font-medium">
+                            Page {currentPage} of {totalPages}
+                          </div>
+                          
+                          <div className="text-xs text-gray-500">
+                            {startRecord}-{endRecord} of {totalReports}
+                          </div>
+                        </div>
+                        
+                        <div className="flex items-center space-x-1">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => handlePageChange(currentPage - 1)}
+                            disabled={currentPage === 1 || loading}
+                            className="h-7 w-7 text-xs p-0 border-gray-300"
+                          >
+                            <ChevronLeft className="h-3.5 w-3.5" />
+                          </Button>
+                          
+                          {/* Page Numbers */}
+                          <div className="flex items-center space-x-0.5">
+                            {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
+                              const pageNum = Math.max(1, Math.min(totalPages - 4, currentPage - 2)) + i;
+                              if (pageNum > totalPages) return null;
+                              
+                              return (
+                                <Button
+                                  key={pageNum}
+                                  variant={pageNum === currentPage ? "default" : "outline"}
+                                  size="sm"
+                                  onClick={() => handlePageChange(pageNum)}
+                                  disabled={loading}
+                                  className={`h-7 w-7 text-xs p-0 ${pageNum === currentPage ? '' : 'border-gray-300'}`}
+                                >
+                                  {pageNum}
+                                </Button>
+                              );
+                            })}
+                          </div>
+                          
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => handlePageChange(currentPage + 1)}
+                            disabled={currentPage === totalPages || loading}
+                            className="h-7 w-7 text-xs p-0 border-gray-300"
+                          >
+                            <ChevronRight className="h-3.5 w-3.5" />
+                          </Button>
+                        </div>
                       </div>
-                    </div>
+                    )}
                   </div>
                   
                   {/* Mobile Card View */}
                   <div className="md:hidden space-y-4">
-                    {filteredReports.map((report) => (
+                    {paginatedReports.map((report) => (
                       <Card key={report.id} className="overflow-hidden">
                         <CardContent className="p-5 md:p-4 space-y-4 md:space-y-3">
                           <div className="flex items-start justify-between gap-2">
@@ -2051,7 +2165,7 @@ Additional Details: ${decryptedContent.additionalDetails || 'None provided'}
         </TabsContent>
 
         <TabsContent value="archived">
-          <Card className="flex flex-col" style={{ height: '550px', overflow: 'hidden' }}>
+          <Card className="flex flex-col" style={{ height: '620px', overflow: 'hidden' }}>
             <CardHeader className="flex-shrink-0">
               <CardTitle>Archived Reports</CardTitle>
               <CardDescription>Closed and archived reports</CardDescription>
@@ -2072,7 +2186,7 @@ Additional Details: ${decryptedContent.additionalDetails || 'None provided'}
                 </div>
               ) : (
                 <>
-                  {/* Desktop Table View - Same height as audit table (620px) */}
+                  {/* Desktop Table View - Height: 550px */}
                   <div className="hidden md:block flex-1 overflow-hidden min-h-0 flex flex-col">
                     {/* Scrollable table body */}
                     <div className="flex-1 overflow-y-auto overflow-x-auto min-h-0" style={{ maxHeight: 'calc(100% - 40px)' }}>
@@ -2087,8 +2201,8 @@ Additional Details: ${decryptedContent.additionalDetails || 'None provided'}
                             <TableHead className="text-right px-2 py-1 text-xs">Actions</TableHead>
                           </TableRow>
                         </TableHeader>
-                        <TableBody>
-                          {archivedReports.map((report) => (
+                      <TableBody>
+                        {paginatedArchivedReports.map((report) => (
                             <TableRow key={report.id} style={{ height: '22px' }}>
                               <TableCell className="font-mono text-xs px-2 py-0">
                                 <div className="flex items-center gap-2">
@@ -2167,12 +2281,78 @@ Additional Details: ${decryptedContent.additionalDetails || 'None provided'}
                       </Table>
                     </div>
                     
-                    {/* Bottom toolbar - closes the table */}
-                    <div className="flex items-center justify-between px-3 py-2 border-t bg-gray-50 flex-shrink-0 h-10 z-20 bg-white">
-                      <div className="text-xs text-gray-600 font-medium">
-                        Showing {archivedReports.length} {archivedReports.length === 1 ? 'archived report' : 'archived reports'}
+                    {/* Pagination Footer - Same as audit table */}
+                    {totalArchived > 0 && (
+                      <div className="flex flex-row items-center justify-between px-3 py-2 border-t bg-gray-50 flex-shrink-0 h-10 z-20 bg-white">
+                        <div className="flex items-center space-x-3">
+                          <div className="flex items-center space-x-2">
+                            <Label className="text-xs whitespace-nowrap font-medium">Rows per page:</Label>
+                            <Select value={archivedPageSize.toString()} onValueChange={(value) => handleArchivedPageSizeChange(Number(value))}>
+                              <SelectTrigger className="h-7 text-xs w-16 border-gray-300">
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="10">10</SelectItem>
+                                <SelectItem value="25">25</SelectItem>
+                                <SelectItem value="50">50</SelectItem>
+                                <SelectItem value="100">100</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+                          
+                          <div className="text-xs text-gray-600 font-medium">
+                            Page {archivedCurrentPage} of {totalArchivedPages}
+                          </div>
+                          
+                          <div className="text-xs text-gray-500">
+                            {archivedStartRecord}-{archivedEndRecord} of {totalArchived}
+                          </div>
+                        </div>
+                        
+                        <div className="flex items-center space-x-1">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => handleArchivedPageChange(archivedCurrentPage - 1)}
+                            disabled={archivedCurrentPage === 1 || loading}
+                            className="h-7 w-7 text-xs p-0 border-gray-300"
+                          >
+                            <ChevronLeft className="h-3.5 w-3.5" />
+                          </Button>
+                          
+                          {/* Page Numbers */}
+                          <div className="flex items-center space-x-0.5">
+                            {Array.from({ length: Math.min(5, totalArchivedPages) }, (_, i) => {
+                              const pageNum = Math.max(1, Math.min(totalArchivedPages - 4, archivedCurrentPage - 2)) + i;
+                              if (pageNum > totalArchivedPages) return null;
+                              
+                              return (
+                                <Button
+                                  key={pageNum}
+                                  variant={pageNum === archivedCurrentPage ? "default" : "outline"}
+                                  size="sm"
+                                  onClick={() => handleArchivedPageChange(pageNum)}
+                                  disabled={loading}
+                                  className={`h-7 w-7 text-xs p-0 ${pageNum === archivedCurrentPage ? '' : 'border-gray-300'}`}
+                                >
+                                  {pageNum}
+                                </Button>
+                              );
+                            })}
+                          </div>
+                          
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => handleArchivedPageChange(archivedCurrentPage + 1)}
+                            disabled={archivedCurrentPage === totalArchivedPages || loading}
+                            className="h-7 w-7 text-xs p-0 border-gray-300"
+                          >
+                            <ChevronRight className="h-3.5 w-3.5" />
+                          </Button>
+                        </div>
                       </div>
-                    </div>
+                    )}
                   </div>
 
                   {/* Mobile Card View */}
