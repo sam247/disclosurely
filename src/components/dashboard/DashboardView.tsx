@@ -1560,7 +1560,6 @@ Additional Details: ${decryptedContent.additionalDetails || 'None provided'}
     };
   }, [subscriptionData, patterns, isMobile]);
 
-
   if (loading) {
     return (
       <div className="p-8 flex items-center justify-center">
@@ -1568,15 +1567,6 @@ Additional Details: ${decryptedContent.additionalDetails || 'None provided'}
       </div>
     );
   }
-
-  useEffect(() => {
-    const checkMobile = () => {
-      setIsMobile(window.innerWidth < 768);
-    };
-    checkMobile();
-    window.addEventListener('resize', checkMobile);
-    return () => window.removeEventListener('resize', checkMobile);
-  }, []);
 
   return (
     <div 
