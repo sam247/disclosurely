@@ -324,6 +324,9 @@ const AuditLogView = () => {
     );
   }
 
+  // LOCKED: Table height is perfect at 620px (calc(100vh - 109px)) - DO NOT CHANGE
+  // This height was carefully calibrated to fill the screen without gaps
+  // If you need to adjust, you must get explicit approval first
   return (
     <div className="flex flex-col" style={{ height: 'calc(100vh - 109px)', overflow: 'hidden' }} data-audit-container>
       {/* Header */}
