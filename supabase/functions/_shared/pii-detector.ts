@@ -374,17 +374,40 @@ async function redactPIIWithOpenRedact(
     // Map OpenRedact API result to RedactionResult format
     const redactionMap: Record<string, string> = {};
     const detectionStats: Record<string, number> = {};
+    let redactedContent = result.redacted_text || content;
     
     if (result.detections && result.detections.length > 0) {
-      result.detections.forEach((detection: any, index: number) => {
-        const placeholder = `[${detection.type}_${index + 1}]`;
-        redactionMap[detection.value || detection.text || ''] = placeholder;
-        detectionStats[detection.type] = (detectionStats[detection.type] || 0) + 1;
-      });
+      // If API didn't return redacted_text, perform redaction ourselves
+      if (!result.redacted_text && result.detections.length > 0) {
+        redactedContent = content;
+        // Sort detections by position (reverse order) to avoid position shifts during replacement
+        const sortedDetections = [...result.detections].sort((a, b) => b.position.start - a.position.start);
+        
+        sortedDetections.forEach((detection: any, index: number) => {
+          const placeholder = `[${detection.type}_${index + 1}]`;
+          const originalValue = detection.value || content.substring(detection.position.start, detection.position.end);
+          redactionMap[originalValue] = placeholder;
+          detectionStats[detection.type] = (detectionStats[detection.type] || 0) + 1;
+          
+          // Replace in reverse order to maintain positions
+          redactedContent = 
+            redactedContent.substring(0, detection.position.start) +
+            placeholder +
+            redactedContent.substring(detection.position.end);
+        });
+      } else {
+        // API returned redacted text, build map from detections
+        result.detections.forEach((detection: any, index: number) => {
+          const placeholder = `[${detection.type}_${index + 1}]`;
+          const originalValue = detection.value || content.substring(detection.position.start, detection.position.end);
+          redactionMap[originalValue] = placeholder;
+          detectionStats[detection.type] = (detectionStats[detection.type] || 0) + 1;
+        });
+      }
     }
     
     return {
-      redactedContent: result.redacted_text || content,
+      redactedContent,
       redactionMap,
       piiDetected: (result.detections?.length || 0) > 0,
       detectionStats,
