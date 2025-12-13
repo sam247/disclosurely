@@ -1417,10 +1417,12 @@ Additional Details: ${decryptedContent.additionalDetails || 'None provided'}
     if (loading) return;
     
     const measureHeights = () => {
+      const activeCard = document.querySelector('[data-dashboard-card-active]');
       const activeTable = document.querySelector('[data-dashboard-table-active]');
+      const archivedCard = document.querySelector('[data-dashboard-card-archived]');
       const archivedTable = document.querySelector('[data-dashboard-table-archived]');
       
-      if (activeTable) {
+      if (activeCard || activeTable) {
         fetch('http://127.0.0.1:7243/ingest/07d80fb8-251f-44b3-a7af-ce7afb45a49c', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -1428,21 +1430,24 @@ Additional Details: ${decryptedContent.additionalDetails || 'None provided'}
             location: 'DashboardView.tsx:useEffect',
             message: 'Active table height after render',
             data: {
-              containerHeight: activeTable.clientHeight,
-              scrollHeight: activeTable.scrollHeight,
+              cardHeight: activeCard ? activeCard.clientHeight : null,
+              cardComputedHeight: activeCard ? window.getComputedStyle(activeCard).height : null,
+              cardOffsetHeight: activeCard ? activeCard.offsetHeight : null,
+              tableHeight: activeTable ? activeTable.clientHeight : null,
+              tableComputedHeight: activeTable ? window.getComputedStyle(activeTable).height : null,
+              tableOffsetHeight: activeTable ? activeTable.offsetHeight : null,
               viewportHeight: window.innerHeight,
-              computedHeight: window.getComputedStyle(activeTable).height,
               expectedHeight: '620px'
             },
             timestamp: Date.now(),
             sessionId: 'debug-session',
-            runId: 'post-fix',
-            hypothesisId: 'A'
+            runId: 'fix-attempt-2',
+            hypothesisId: 'B'
           })
         }).catch(() => {});
       }
       
-      if (archivedTable) {
+      if (archivedCard || archivedTable) {
         fetch('http://127.0.0.1:7243/ingest/07d80fb8-251f-44b3-a7af-ce7afb45a49c', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -1450,16 +1455,19 @@ Additional Details: ${decryptedContent.additionalDetails || 'None provided'}
             location: 'DashboardView.tsx:useEffect',
             message: 'Archived table height after render',
             data: {
-              containerHeight: archivedTable.clientHeight,
-              scrollHeight: archivedTable.scrollHeight,
+              cardHeight: archivedCard ? archivedCard.clientHeight : null,
+              cardComputedHeight: archivedCard ? window.getComputedStyle(archivedCard).height : null,
+              cardOffsetHeight: archivedCard ? archivedCard.offsetHeight : null,
+              tableHeight: archivedTable ? archivedTable.clientHeight : null,
+              tableComputedHeight: archivedTable ? window.getComputedStyle(archivedTable).height : null,
+              tableOffsetHeight: archivedTable ? archivedTable.offsetHeight : null,
               viewportHeight: window.innerHeight,
-              computedHeight: window.getComputedStyle(archivedTable).height,
               expectedHeight: '620px'
             },
             timestamp: Date.now(),
             sessionId: 'debug-session',
-            runId: 'post-fix',
-            hypothesisId: 'A'
+            runId: 'fix-attempt-2',
+            hypothesisId: 'B'
           })
         }).catch(() => {});
       }
@@ -1571,7 +1579,7 @@ Additional Details: ${decryptedContent.additionalDetails || 'None provided'}
             </div>
           </div>
             <TabsContent value="active" className="flex-1 flex flex-col overflow-hidden min-h-0">
-              <Card className="md:border md:shadow-sm border-0 shadow-none flex flex-col flex-1 overflow-hidden min-h-0">
+              <Card className="md:border md:shadow-sm border-0 shadow-none flex flex-col overflow-hidden" style={{ height: '620px' }} data-dashboard-card-active>
                 <CardContent className="p-0 flex-1 flex flex-col overflow-hidden min-h-0">
               {filteredReports.length === 0 ? (
                 <div className="text-center py-8 text-muted-foreground px-6">
@@ -1591,31 +1599,34 @@ Additional Details: ${decryptedContent.additionalDetails || 'None provided'}
                   {/* Desktop Table View - Fixed height matching audit table (620px) */}
                   {/* #region agent log */}
                   {(() => {
+                    const cardContainer = document.querySelector('[data-dashboard-card-active]');
                     const tableContainer = document.querySelector('[data-dashboard-table-active]');
-                    if (tableContainer) {
+                    if (cardContainer || tableContainer) {
                       fetch('http://127.0.0.1:7243/ingest/07d80fb8-251f-44b3-a7af-ce7afb45a49c', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({
-                          location: 'DashboardView.tsx:1534',
-                          message: 'Active table container height measurement',
+                          location: 'DashboardView.tsx:1618',
+                          message: 'Active table height measurement',
                           data: {
-                            containerHeight: tableContainer.clientHeight,
-                            scrollHeight: tableContainer.scrollHeight,
+                            cardHeight: cardContainer ? cardContainer.clientHeight : null,
+                            cardComputedHeight: cardContainer ? window.getComputedStyle(cardContainer).height : null,
+                            tableHeight: tableContainer ? tableContainer.clientHeight : null,
+                            tableComputedHeight: tableContainer ? window.getComputedStyle(tableContainer).height : null,
                             viewportHeight: window.innerHeight,
-                            tableContainerStyle: window.getComputedStyle(tableContainer).height
+                            expectedHeight: '620px'
                           },
                           timestamp: Date.now(),
                           sessionId: 'debug-session',
-                          runId: 'post-fix',
-                          hypothesisId: 'A'
+                          runId: 'fix-attempt-2',
+                          hypothesisId: 'B'
                         })
                       }).catch(() => {});
                     }
                     return null;
                   })()}
                   {/* #endregion */}
-                  <div className="hidden md:block overflow-hidden flex flex-col" style={{ height: '620px' }} data-dashboard-table-active>
+                  <div className="hidden md:block flex-1 overflow-hidden flex flex-col min-h-0" data-dashboard-table-active>
                     {/* Scrollable table body */}
                     <div className="flex-1 overflow-y-auto overflow-x-auto min-h-0" style={{ maxHeight: 'calc(100% - 40px)' }}>
                       <Table className="min-w-full">
@@ -2251,7 +2262,7 @@ Additional Details: ${decryptedContent.additionalDetails || 'None provided'}
         </TabsContent>
 
             <TabsContent value="archived" className="flex-1 flex flex-col overflow-hidden min-h-0">
-              <Card className="flex flex-col flex-1 overflow-hidden min-h-0">
+              <Card className="flex flex-col overflow-hidden" style={{ height: '620px' }} data-dashboard-card-archived>
                 <CardHeader className="flex-shrink-0">
               <CardTitle>Archived Reports</CardTitle>
               <CardDescription>Closed and archived reports</CardDescription>
@@ -2275,31 +2286,34 @@ Additional Details: ${decryptedContent.additionalDetails || 'None provided'}
                   {/* Desktop Table View - Fixed height matching audit table */}
                   {/* #region agent log */}
                   {(() => {
+                    const cardContainer = document.querySelector('[data-dashboard-card-archived]');
                     const tableContainer = document.querySelector('[data-dashboard-table-archived]');
-                    if (tableContainer) {
+                    if (cardContainer || tableContainer) {
                       fetch('http://127.0.0.1:7243/ingest/07d80fb8-251f-44b3-a7af-ce7afb45a49c', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({
-                          location: 'DashboardView.tsx:2194',
-                          message: 'Archived table container height measurement',
+                          location: 'DashboardView.tsx:2302',
+                          message: 'Archived table height measurement',
                           data: {
-                            containerHeight: tableContainer.clientHeight,
-                            scrollHeight: tableContainer.scrollHeight,
+                            cardHeight: cardContainer ? cardContainer.clientHeight : null,
+                            cardComputedHeight: cardContainer ? window.getComputedStyle(cardContainer).height : null,
+                            tableHeight: tableContainer ? tableContainer.clientHeight : null,
+                            tableComputedHeight: tableContainer ? window.getComputedStyle(tableContainer).height : null,
                             viewportHeight: window.innerHeight,
-                            tableContainerStyle: window.getComputedStyle(tableContainer).height
+                            expectedHeight: '620px'
                           },
                           timestamp: Date.now(),
                           sessionId: 'debug-session',
-                          runId: 'pre-fix',
-                          hypothesisId: 'A'
+                          runId: 'fix-attempt-2',
+                          hypothesisId: 'B'
                         })
                       }).catch(() => {});
                     }
                     return null;
                   })()}
                   {/* #endregion */}
-                  <div className="hidden md:block overflow-hidden flex flex-col" style={{ height: '620px' }} data-dashboard-table-archived>
+                  <div className="hidden md:block flex-1 overflow-hidden flex flex-col min-h-0" data-dashboard-table-archived>
                     {/* Scrollable table body */}
                     <div className="flex-1 overflow-y-auto overflow-x-auto min-h-0" style={{ maxHeight: 'calc(100% - 40px)' }}>
                       <Table>
