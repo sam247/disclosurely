@@ -1,4 +1,3 @@
-docs/.vitepress/dist
 *.md
 !README.md
-
+!LLMREADME.md

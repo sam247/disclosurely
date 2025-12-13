@@ -5,16 +5,12 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "npm run build:docs && npm run build:app",
-    "build:app": "vite build",
-    "build:docs": "cd docs && npm install && npm run build && cd .. && mkdir -p public/docs && cp -r docs/docs/.vitepress/dist/* public/docs/ && echo 'Docs copied to public directory'",
+    "build": "vite build",
     "build:dev": "vite build --mode development",
     "lint": "eslint .",
     "preview": "vite preview",
     "test": "echo 'No tests configured'",
-    "diagnose-reports": "tsx scripts/diagnose-reports-issue.ts",
-    "fix-docs-links": "node scripts/fix-docs-links.js",
-    "fix-docs-internal-links": "node scripts/fix-docs-internal-links.js"
+    "diagnose-reports": "tsx scripts/diagnose-reports-issue.ts"
   },
   "dependencies": {
     "@contentful/rich-text-html-renderer": "^17.1.5",
