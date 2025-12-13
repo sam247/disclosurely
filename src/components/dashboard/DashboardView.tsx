@@ -1475,9 +1475,9 @@ Additional Details: ${decryptedContent.additionalDetails || 'None provided'}
   }
 
   return (
-    <div className="flex flex-col h-[calc(100vh-4rem)] md:h-[calc(100vh-4rem)] overflow-hidden">
+    <div className="flex flex-col" style={{ height: 'calc(100vh - 4rem)', overflow: 'hidden', maxHeight: 'calc(100vh - 4rem)' }}>
       {/* Content - No scrolling, only table scrolls internally */}
-      <div className="flex-1 overflow-hidden overflow-x-hidden flex flex-col min-h-0">
+      <div className="flex-1 overflow-hidden flex flex-col min-h-0" style={{ overflow: 'hidden', maxHeight: '100%' }}>
         {/* Subscription Grace Period Warning - Hidden for pro users on mobile */}
         {subscriptionData && 
          (subscriptionData.isInGracePeriod || subscriptionData.subscription_status === 'past_due') && 
@@ -1522,7 +1522,7 @@ Additional Details: ${decryptedContent.additionalDetails || 'None provided'}
           </div>
         )}
 
-        <div className="flex-1 flex flex-col overflow-hidden min-h-0 px-4 pt-4" data-dashboard-content>
+        <div className="flex-1 flex flex-col overflow-hidden min-h-0 px-4 pt-4" data-dashboard-content style={{ overflow: 'hidden', maxHeight: '100%' }}>
           {/* #region agent log */}
           {(() => {
             const subscriptionAlert = document.querySelector('[data-dashboard-alert-subscription]');
