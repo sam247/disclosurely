@@ -38,7 +38,11 @@ CREATE OR REPLACE FUNCTION is_feature_enabled(
   p_feature_name TEXT,
   p_organization_id UUID DEFAULT NULL
 )
-RETURNS BOOLEAN AS $$
+RETURNS BOOLEAN
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
 DECLARE
   v_flag RECORD;
   v_org_override BOOLEAN;
@@ -83,7 +87,7 @@ BEGIN
     END IF;
   END IF;
 END;
-$$ LANGUAGE plpgsql SECURITY DEFINER;
+$$;
 
 -- Function to enable feature for specific organization
 CREATE OR REPLACE FUNCTION enable_feature_for_org(
@@ -91,7 +95,11 @@ CREATE OR REPLACE FUNCTION enable_feature_for_org(
   p_organization_id UUID,
   p_enabled BOOLEAN DEFAULT true
 )
-RETURNS VOID AS $$
+RETURNS VOID
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
 DECLARE
   v_overrides JSONB;
 BEGIN
@@ -114,7 +122,7 @@ BEGIN
     updated_at = now()
   WHERE feature_name = p_feature_name;
 END;
-$$ LANGUAGE plpgsql SECURITY DEFINER;
+$$;
 
 -- Enable RLS
 ALTER TABLE feature_flags ENABLE ROW LEVEL SECURITY;
