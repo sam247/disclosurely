@@ -1375,7 +1375,7 @@ Additional Details: ${decryptedContent.additionalDetails || 'None provided'}
   return (
     <div className="flex flex-col h-[calc(100vh-4rem)] md:h-[calc(100vh-4rem)] overflow-hidden">
       {/* Scrollable Content */}
-      <div className="flex-1 overflow-y-auto space-y-6 pb-[calc(1rem+env(safe-area-inset-bottom))]">
+      <div className="flex-1 overflow-y-auto overflow-x-hidden space-y-6 pb-[calc(1rem+env(safe-area-inset-bottom))]">
       {/* Subscription Grace Period Warning - Hidden for pro users on mobile */}
       {subscriptionData && 
        (subscriptionData.isInGracePeriod || subscriptionData.subscription_status === 'past_due') && 
@@ -1481,8 +1481,10 @@ Additional Details: ${decryptedContent.additionalDetails || 'None provided'}
               ) : (
                 <>
                   {/* Desktop Table View - Same height as audit table (620px) */}
-                  <div className="hidden md:block overflow-x-auto overflow-y-auto flex-1 max-w-full" style={{ maxHeight: '100%' }}>
-                    <Table className="min-w-full">
+                  <div className="hidden md:block flex-1 overflow-hidden min-h-0 flex flex-col">
+                    {/* Scrollable table body */}
+                    <div className="flex-1 overflow-y-auto overflow-x-auto min-h-0" style={{ maxHeight: 'calc(100% - 40px)' }}>
+                      <Table className="min-w-full">
                       <TableHeader>
                         <TableRow>
                           <TableHead className="px-2 py-1 text-xs">{t('trackingId')}</TableHead>
@@ -1781,6 +1783,14 @@ Additional Details: ${decryptedContent.additionalDetails || 'None provided'}
                         ))}
                       </TableBody>
                     </Table>
+                    </div>
+                    
+                    {/* Bottom toolbar - closes the table */}
+                    <div className="flex items-center justify-between px-3 py-2 border-t bg-gray-50 flex-shrink-0 h-10 z-20 bg-white">
+                      <div className="text-xs text-gray-600 font-medium">
+                        Showing {filteredReports.length} {filteredReports.length === 1 ? 'report' : 'reports'}
+                      </div>
+                    </div>
                   </div>
                   
                   {/* Mobile Card View */}
@@ -2153,6 +2163,14 @@ Additional Details: ${decryptedContent.additionalDetails || 'None provided'}
                         ))}
                       </TableBody>
                     </Table>
+                    </div>
+                    
+                    {/* Bottom toolbar - closes the table */}
+                    <div className="flex items-center justify-between px-3 py-2 border-t bg-gray-50 flex-shrink-0 h-10 z-20 bg-white">
+                      <div className="text-xs text-gray-600 font-medium">
+                        Showing {archivedReports.length} {archivedReports.length === 1 ? 'archived report' : 'archived reports'}
+                      </div>
+                    </div>
                   </div>
 
                   {/* Mobile Card View */}
