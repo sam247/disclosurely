@@ -1908,8 +1908,6 @@ Additional Details: ${decryptedContent.additionalDetails || 'None provided'}
                       </div>
                     )}
                   </div>
-                </CardContent>
-              </Card>
                   
                   {/* Mobile Card View */}
                   <div className="md:hidden space-y-4">
