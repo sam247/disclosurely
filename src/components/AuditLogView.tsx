@@ -123,6 +123,87 @@ const AuditLogView = () => {
     }
   }, [organization?.id]);
 
+  // Debug: Measure container heights
+  useEffect(() => {
+    const measureHeights = () => {
+      const container = document.querySelector('[data-audit-container]') as HTMLElement;
+      const tableContainer = document.querySelector('[data-audit-table]') as HTMLElement;
+      const parentMain = document.querySelector('main') as HTMLElement;
+      const header = document.querySelector('[data-audit-container] > div:first-child') as HTMLElement;
+      const filters = document.querySelector('[data-audit-container] > div:nth-child(2)') as HTMLElement;
+      
+      if (container) {
+        const containerRect = container.getBoundingClientRect();
+        const viewportHeight = window.innerHeight;
+        const computedStyle = window.getComputedStyle(container);
+        
+        const measurements: any = {
+          viewportHeight,
+          containerHeight: containerRect.height,
+          containerStyleHeight: container.style.height,
+          containerComputedHeight: computedStyle.height,
+          containerBottom: containerRect.bottom,
+          containerTop: containerRect.top,
+        };
+        
+        if (tableContainer) {
+          const tableRect = tableContainer.getBoundingClientRect();
+          const tableComputed = window.getComputedStyle(tableContainer);
+          measurements.tableHeight = tableRect.height;
+          measurements.tableComputedHeight = tableComputed.height;
+          measurements.tableBottom = tableRect.bottom;
+        }
+        
+        if (parentMain) {
+          const mainRect = parentMain.getBoundingClientRect();
+          const mainComputed = window.getComputedStyle(parentMain);
+          measurements.mainHeight = mainRect.height;
+          measurements.mainPaddingTop = mainComputed.paddingTop;
+          measurements.mainPaddingBottom = mainComputed.paddingBottom;
+          measurements.mainBottom = mainRect.bottom;
+          measurements.gapToMainBottom = mainRect.bottom - containerRect.bottom;
+        }
+        
+        if (header) {
+          const headerRect = header.getBoundingClientRect();
+          measurements.headerHeight = headerRect.height;
+        }
+        
+        if (filters) {
+          const filtersRect = filters.getBoundingClientRect();
+          measurements.filtersHeight = filtersRect.height;
+        }
+        
+        // #region agent log
+        const logData = {location:'AuditLogView.tsx:measureHeights',message:'Height measurements',data:measurements,timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'A'};
+        console.log('DEBUG HEIGHTS:', logData);
+        fetch('http://127.0.0.1:7243/ingest/07d80fb8-251f-44b3-a7af-ce7afb45a49c',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(logData)}).catch((e)=>{console.error('Log fetch failed:',e);});
+        // #endregion
+      } else {
+        // #region agent log
+        console.log('DEBUG: Container not found');
+        fetch('http://127.0.0.1:7243/ingest/07d80fb8-251f-44b3-a7af-ce7afb45a49c',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'AuditLogView.tsx:measureHeights',message:'Container not found',data:{},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'A'})}).catch(()=>{});
+        // #endregion
+      }
+    };
+    
+    // Wait for DOM to be ready
+    const timeout = setTimeout(() => {
+      measureHeights();
+      window.addEventListener('resize', measureHeights);
+      const interval = setInterval(measureHeights, 2000);
+      
+      return () => {
+        window.removeEventListener('resize', measureHeights);
+        clearInterval(interval);
+      };
+    }, 500);
+    
+    return () => {
+      clearTimeout(timeout);
+    };
+  }, [organization?.id, logs.length]);
+
   const fetchLogs = useCallback(async (resetPage = false) => {
     if (!organization?.id) return;
     
@@ -324,7 +405,7 @@ const AuditLogView = () => {
   }
 
   return (
-    <div className="flex flex-col" style={{ height: 'calc(100vh - 190px)', maxHeight: 'calc(100vh - 190px)', overflow: 'hidden' }}>
+    <div className="flex flex-col" style={{ height: 'calc(100vh - 190px)', maxHeight: 'calc(100vh - 190px)', overflow: 'hidden' }} data-audit-container>
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 flex-shrink-0 px-2 sm:px-0 mb-2">
         <div>
@@ -538,7 +619,7 @@ const AuditLogView = () => {
       </div>
 
       {/* Excel-Style Table - Fits screen height with internal scrolling, fills remaining space */}
-      <div className="border rounded-lg bg-white flex-1 flex flex-col overflow-hidden min-h-0 mx-2 sm:mx-0" style={{ minHeight: 0 }}>
+      <div className="border rounded-lg bg-white flex-1 flex flex-col overflow-hidden min-h-0 mx-2 sm:mx-0" style={{ minHeight: 0 }} data-audit-table>
         {/* Table Header */}
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between p-2 sm:p-3 border-b bg-gray-50 gap-2 sm:gap-0 flex-shrink-0">
           <div className="flex items-center space-x-2 sm:space-x-4">
