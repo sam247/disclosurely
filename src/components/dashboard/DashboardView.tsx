@@ -2486,7 +2486,6 @@ Additional Details: ${decryptedContent.additionalDetails || 'None provided'}
           </Tabs>
         </div>
       </div>
-      </div>
 
       {/* Delete Confirmation Dialog */}
       <AlertDialog open={isDeleteDialogOpen} onOpenChange={(open) => {
