@@ -2168,7 +2168,7 @@ Additional Details: ${decryptedContent.additionalDetails || 'None provided'}
         </TabsContent>
 
             <TabsContent value="archived" className="flex-1 flex flex-col overflow-hidden min-h-0">
-              <Card className="flex flex-col overflow-hidden" style={{ height: '620px' }} data-dashboard-card-archived>
+              <Card className="flex flex-col overflow-hidden" style={{ height: '595px', minHeight: '595px', maxHeight: '595px' }} data-dashboard-card-archived>
                 <CardHeader className="flex-shrink-0">
               <CardTitle>Archived Reports</CardTitle>
               <CardDescription>Closed and archived reports</CardDescription>
