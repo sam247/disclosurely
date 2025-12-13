@@ -308,7 +308,7 @@ const AuditLogView = () => {
 
   if (!organization) {
     return (
-      <div className="flex flex-col" style={{ height: 'calc(100vh - 88px)', overflow: 'hidden' }}>
+      <div className="flex flex-col" style={{ height: 'calc(100vh - 109px)', overflow: 'hidden' }}>
         {/* Header */}
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 flex-shrink-0">
           <div>
@@ -325,7 +325,7 @@ const AuditLogView = () => {
   }
 
   return (
-    <div className="flex flex-col" style={{ height: 'calc(100vh - 99px)', overflow: 'hidden' }} data-audit-container>
+    <div className="flex flex-col" style={{ height: 'calc(100vh - 109px)', overflow: 'hidden' }} data-audit-container>
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 flex-shrink-0 px-2 sm:px-0 mb-2">
         <div>
@@ -539,7 +539,7 @@ const AuditLogView = () => {
       </div>
 
       {/* Excel-Style Table - Fits screen height with internal scrolling, fills remaining space */}
-      <div className="border rounded-lg bg-white flex-1 flex flex-col overflow-hidden min-h-0 mx-2 sm:mx-0" style={{ minHeight: 0 }} data-audit-table>
+      <div className="border rounded-lg bg-white flex-1 flex flex-col overflow-hidden min-h-0 mx-2 sm:mx-0" style={{ minHeight: 0, marginTop: '15px' }} data-audit-table>
         {/* Table Header */}
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between p-2 sm:p-3 border-b bg-gray-50 gap-2 sm:gap-0 flex-shrink-0">
           <div className="flex items-center space-x-2 sm:space-x-4">
@@ -572,8 +572,7 @@ const AuditLogView = () => {
             <Select onValueChange={(value) => exportLogs(value as 'csv' | 'json' | 'excel')}>
               <SelectTrigger className="h-8 text-xs w-full sm:w-24">
                 <Download className="h-3 w-3 sm:mr-1" />
-                <span className="hidden sm:inline">Export</span>
-                <span className="sm:hidden">Export</span>
+                <span>Export</span>
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="csv">CSV</SelectItem>
