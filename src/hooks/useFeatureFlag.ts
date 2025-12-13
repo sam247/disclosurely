@@ -76,14 +76,16 @@ export const updateFeatureFlag = async (
   // Use RPC function instead of direct update to bypass RLS
   const { data, error } = await (supabase.rpc as any)('update_feature_flag', {
     p_feature_name: featureName,
-    p_is_enabled: updates.is_enabled ?? null,
-    p_rollout_percentage: updates.rollout_percentage ?? null,
+    p_is_enabled: updates.is_enabled !== undefined ? updates.is_enabled : null,
+    p_rollout_percentage: updates.rollout_percentage !== undefined ? updates.rollout_percentage : null,
   });
 
   if (error) {
-    throw error;
+    console.error('RPC error details:', error);
+    throw new Error(error.message || error.error?.message || 'Failed to update feature flag');
   }
 
+  // RPC functions return the result directly, not wrapped in an array
   return data;
 };
 

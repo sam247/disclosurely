@@ -36,21 +36,23 @@ export const FeatureFlagManager: React.FC = () => {
   const handleToggle = async (featureName: string, enabled: boolean) => {
     setUpdating(featureName);
     try {
-      await updateFeatureFlag(featureName, { is_enabled: enabled });
+      const result = await updateFeatureFlag(featureName, { is_enabled: enabled });
+      console.log('Update result:', result);
       
       // Invalidate cache
-      queryClient.invalidateQueries({ queryKey: ['feature-flags'] });
-      queryClient.invalidateQueries({ queryKey: ['feature-flag'] });
+      await queryClient.invalidateQueries({ queryKey: ['feature-flags'] });
+      await queryClient.invalidateQueries({ queryKey: ['feature-flag'] });
       
       toast({
         title: enabled ? 'Feature Enabled' : 'Feature Disabled',
         description: `${featureName} has been ${enabled ? 'enabled' : 'disabled'}`,
       });
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error updating feature flag:', error);
+      const errorMessage = error?.message || error?.error?.message || 'Failed to update feature flag';
       toast({
         title: 'Error',
-        description: 'Failed to update feature flag',
+        description: errorMessage,
         variant: 'destructive',
       });
     } finally {

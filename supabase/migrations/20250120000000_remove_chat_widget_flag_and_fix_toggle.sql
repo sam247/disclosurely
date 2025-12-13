@@ -20,16 +20,16 @@ DECLARE
   v_user_role TEXT;
   v_result feature_flags;
 BEGIN
-  -- Check if user is admin
+  -- Check if user is admin or org_admin (org_admin can also manage feature flags)
   SELECT role INTO v_user_role
   FROM user_roles
   WHERE user_id = auth.uid()
-    AND role = 'admin'
+    AND role IN ('admin', 'org_admin')
     AND is_active = true
   LIMIT 1;
   
   IF v_user_role IS NULL THEN
-    RAISE EXCEPTION 'Only system admins can modify feature flags';
+    RAISE EXCEPTION 'Only admins can modify feature flags. Current user role not found or inactive.';
   END IF;
   
   -- Update feature flag
