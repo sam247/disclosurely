@@ -14,8 +14,7 @@ import {
   Shield,
   Workflow,
   Bot,
-  MessageCircle,
-  MessageSquare
+  MessageCircle
 } from 'lucide-react';
 import { useAllFeatureFlags, updateFeatureFlag } from '@/hooks/useFeatureFlag';
 import { useToast } from '@/hooks/use-toast';
@@ -25,8 +24,7 @@ const featureIcons: Record<string, React.ReactNode> = {
   ai_gateway: <Shield className="h-5 w-5" />,
   workflows: <Workflow className="h-5 w-5" />,
   ai_case_helper: <Bot className="h-5 w-5" />,
-  secure_messaging: <MessageCircle className="h-5 w-5" />,
-  chat_widget: <MessageSquare className="h-5 w-5" />
+  secure_messaging: <MessageCircle className="h-5 w-5" />
 };
 
 export const FeatureFlagManager: React.FC = () => {

@@ -107,11 +107,6 @@ const DashboardSidebar = ({
       path: '/dashboard/admin/features'
     },
     {
-      title: t('sidebar.chatSupport'),
-      icon: MessageSquare,
-      path: '/dashboard/admin/chat'
-    },
-    {
       title: t('sidebar.systemHealth'),
       icon: Activity,
       path: '/dashboard/admin/health'
