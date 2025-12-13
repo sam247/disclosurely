@@ -1514,7 +1514,7 @@ Additional Details: ${decryptedContent.additionalDetails || 'None provided'}
             </div>
           </div>
             <TabsContent value="active" className="flex flex-col overflow-hidden min-h-0">
-              <Card className="md:border md:shadow-sm border-0 shadow-none flex flex-col overflow-hidden" style={{ height: '575px', minHeight: '575px', maxHeight: '575px' }} data-dashboard-card-active>
+              <Card className="md:border md:shadow-sm border-0 shadow-none flex flex-col flex-1 overflow-hidden min-h-0" data-dashboard-card-active>
                 <CardContent className="p-0 flex-1 flex flex-col overflow-hidden min-h-0">
               {filteredReports.length === 0 ? (
                 <div className="text-center py-8 text-muted-foreground px-6">
@@ -1531,7 +1531,7 @@ Additional Details: ${decryptedContent.additionalDetails || 'None provided'}
                 </div>
               ) : (
                 <>
-                  {/* Desktop Table View - Fixed height 535px */}
+                  {/* Desktop Table View - Uses flex-1 to fill remaining space */}
                   <div className="hidden md:block flex-1 overflow-hidden flex flex-col min-h-0" data-dashboard-table-active>
                     {/* Scrollable table body */}
                     <div className="flex-1 overflow-y-auto overflow-x-auto min-h-0" style={{ maxHeight: 'calc(100% - 40px)' }}>
@@ -2168,7 +2168,7 @@ Additional Details: ${decryptedContent.additionalDetails || 'None provided'}
         </TabsContent>
 
             <TabsContent value="archived" className="flex flex-col overflow-hidden min-h-0">
-              <Card className="flex flex-col overflow-hidden" style={{ height: '535px', minHeight: '535px', maxHeight: '535px' }} data-dashboard-card-archived>
+              <Card className="flex flex-col flex-1 overflow-hidden min-h-0" data-dashboard-card-archived>
                 <CardHeader className="flex-shrink-0">
               <CardTitle>Archived Reports</CardTitle>
               <CardDescription>Closed and archived reports</CardDescription>
@@ -2189,7 +2189,7 @@ Additional Details: ${decryptedContent.additionalDetails || 'None provided'}
                 </div>
               ) : (
                 <>
-                  {/* Desktop Table View - Fixed height 535px */}
+                  {/* Desktop Table View - Uses flex-1 to fill remaining space */}
                   <div className="hidden md:block flex-1 overflow-hidden flex flex-col min-h-0" data-dashboard-table-archived>
                     {/* Scrollable table body */}
                     <div className="flex-1 overflow-y-auto overflow-x-auto min-h-0" style={{ maxHeight: 'calc(100% - 40px)' }}>
