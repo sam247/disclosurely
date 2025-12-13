@@ -324,9 +324,9 @@ const AuditLogView = () => {
   }
 
   return (
-    <div className="space-y-2 flex flex-col" style={{ height: 'calc(100vh - 190px)', maxHeight: 'calc(100vh - 190px)', overflow: 'hidden' }}>
+    <div className="flex flex-col" style={{ height: 'calc(100vh - 190px)', maxHeight: 'calc(100vh - 190px)', overflow: 'hidden' }}>
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 flex-shrink-0 px-2 sm:px-0">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 flex-shrink-0 px-2 sm:px-0 mb-2">
         <div>
           <h1 className="text-xl sm:text-2xl font-bold">Audit Trail</h1>
           <p className="text-xs sm:text-sm text-muted-foreground mt-0.5">
