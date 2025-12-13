@@ -1412,6 +1412,59 @@ Additional Details: ${decryptedContent.additionalDetails || 'None provided'}
     setCurrentPage(1);
   }, [searchTerm, statusFilter, sortField, sortDirection, smartFilters]);
 
+  // Calculate and apply height constraint accounting for alerts
+  useEffect(() => {
+    const updateContentHeight = () => {
+      const subscriptionAlert = document.querySelector('[data-dashboard-alert-subscription]');
+      const patternAlert = document.querySelector('[data-dashboard-alert-patterns]');
+      const contentContainer = document.querySelector('[data-dashboard-content]') as HTMLElement;
+      
+      if (contentContainer) {
+        const subscriptionHeight = subscriptionAlert ? subscriptionAlert.clientHeight + 16 : 0; // +16 for mt-4
+        const patternHeight = patternAlert ? patternAlert.clientHeight + 16 : 0; // +16 for mt-4
+        const totalAlertsHeight = subscriptionHeight + patternHeight;
+        const viewportHeight = window.innerHeight;
+        const headerHeight = 64; // 4rem = 64px
+        const calculatedHeight = viewportHeight - headerHeight - totalAlertsHeight;
+        
+        // Set max-height to constrain the content area
+        contentContainer.style.maxHeight = `${calculatedHeight}px`;
+        contentContainer.style.height = `${calculatedHeight}px`;
+        
+        fetch('http://127.0.0.1:7243/ingest/07d80fb8-251f-44b3-a7af-ce7afb45a49c', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            location: 'DashboardView.tsx:useEffect',
+            message: 'Applied height constraint accounting for alerts',
+            data: {
+              viewportHeight,
+              headerHeight,
+              subscriptionHeight: subscriptionAlert?.clientHeight || 0,
+              patternHeight: patternAlert?.clientHeight || 0,
+              totalAlertsHeight,
+              calculatedHeight,
+              appliedMaxHeight: contentContainer.style.maxHeight
+            },
+            timestamp: Date.now(),
+            sessionId: 'debug-session',
+            runId: 'height-constraint',
+            hypothesisId: 'E'
+          })
+        }).catch(() => {});
+      }
+    };
+    
+    // Update on mount and when alerts change
+    const timeoutId = setTimeout(updateContentHeight, 100);
+    window.addEventListener('resize', updateContentHeight);
+    
+    return () => {
+      clearTimeout(timeoutId);
+      window.removeEventListener('resize', updateContentHeight);
+    };
+  }, [subscriptionData, patterns]);
+
 
   if (loading) {
     return (
