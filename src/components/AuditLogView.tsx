@@ -538,7 +538,7 @@ const AuditLogView = () => {
       </div>
 
       {/* Excel-Style Table - Fits screen height with internal scrolling */}
-      <div className="border rounded-lg bg-white flex-1 flex flex-col overflow-hidden min-h-0 mx-2 sm:mx-0 mb-2 sm:mb-0" style={{ maxHeight: 'calc(100vh - 280px)' }}>
+      <div className="border rounded-lg bg-white flex-1 flex flex-col overflow-hidden min-h-0 mx-2 sm:mx-0 mb-2 sm:mb-0">
         {/* Table Header */}
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between p-2 sm:p-3 border-b bg-gray-50 gap-2 sm:gap-0 flex-shrink-0">
           <div className="flex items-center space-x-2 sm:space-x-4">

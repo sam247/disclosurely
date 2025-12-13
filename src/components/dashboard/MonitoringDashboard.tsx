@@ -311,6 +311,16 @@ const MonitoringDashboard = () => {
                   <li>• Performance monitoring</li>
                   <li>• Session replay available</li>
                 </ul>
+                <div className="mt-3">
+                  <a 
+                    href="https://disclosurely.sentry.io/settings/alerts/" 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    className="text-blue-600 hover:underline text-xs"
+                  >
+                    Configure Sentry Alerts →
+                  </a>
+                </div>
               </div>
               <div>
                 <h4 className="font-semibold mb-2">Supabase Monitoring</h4>
