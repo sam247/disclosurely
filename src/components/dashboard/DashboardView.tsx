@@ -1448,7 +1448,7 @@ Additional Details: ${decryptedContent.additionalDetails || 'None provided'}
         }
         
         // Set root container height to exactly fit viewport (desktop only)
-        if (!isMobile) {
+        if (!currentIsMobile) {
           rootContainer.style.height = `${rootHeight}px`;
           rootContainer.style.maxHeight = `${rootHeight}px`;
           rootContainer.style.overflow = 'hidden';
@@ -1549,10 +1549,29 @@ Additional Details: ${decryptedContent.additionalDetails || 'None provided'}
     );
   }
 
+  const [isMobile, setIsMobile] = useState(false);
+  
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
+  
   return (
-    <div className="flex flex-col" style={{ height: 'calc(100vh - 4rem)', overflow: 'hidden', maxHeight: 'calc(100vh - 4rem)' }} data-dashboard-root>
-      {/* Content - No scrolling, only table scrolls internally */}
-      <div className="flex-1 overflow-hidden flex flex-col min-h-0" style={{ overflow: 'hidden', maxHeight: '100%' }} data-dashboard-wrapper>
+    <div 
+      className="flex flex-col" 
+      style={!isMobile ? { height: 'calc(100vh - 4rem)', overflow: 'hidden', maxHeight: 'calc(100vh - 4rem)' } : {}}
+      data-dashboard-root
+    >
+      {/* Content - No scrolling, only table scrolls internally (desktop) */}
+      <div 
+        className="flex-1 overflow-hidden flex flex-col min-h-0" 
+        style={!isMobile ? { overflow: 'hidden', maxHeight: '100%' } : {}}
+        data-dashboard-wrapper
+      >
         {/* Subscription Grace Period Warning - Hidden for pro users on mobile */}
         {subscriptionData && 
          (subscriptionData.isInGracePeriod || subscriptionData.subscription_status === 'past_due') && 
