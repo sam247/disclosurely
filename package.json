@@ -5,7 +5,7 @@
   "type": "module",
   "description": "Disclosurely backend - Supabase Edge Functions, migrations, and API routes",
   "scripts": {
-    "build": "echo 'No build required for backend-only repo'",
+    "build": "mkdir -p dist && echo 'Backend-only repo - no build required' > dist/.vercel-build",
     "lint": "eslint .",
     "diagnose-reports": "tsx scripts/diagnose-reports-issue.ts",
     "fix-docs-links": "node scripts/fix-docs-links.js",
