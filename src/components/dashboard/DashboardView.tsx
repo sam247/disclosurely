@@ -1530,8 +1530,34 @@ Additional Details: ${decryptedContent.additionalDetails || 'None provided'}
                 </div>
               ) : (
                 <>
-                  {/* Desktop Table View - Fills available space */}
-                  <div className="hidden md:block flex-1 overflow-hidden min-h-0 flex flex-col">
+                  {/* Desktop Table View - Fixed height matching audit table (620px) */}
+                  {/* #region agent log */}
+                  {(() => {
+                    const tableContainer = document.querySelector('[data-dashboard-table-active]');
+                    if (tableContainer) {
+                      fetch('http://127.0.0.1:7243/ingest/07d80fb8-251f-44b3-a7af-ce7afb45a49c', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                          location: 'DashboardView.tsx:1534',
+                          message: 'Active table container height measurement',
+                          data: {
+                            containerHeight: tableContainer.clientHeight,
+                            scrollHeight: tableContainer.scrollHeight,
+                            viewportHeight: window.innerHeight,
+                            tableContainerStyle: window.getComputedStyle(tableContainer).height
+                          },
+                          timestamp: Date.now(),
+                          sessionId: 'debug-session',
+                          runId: 'post-fix',
+                          hypothesisId: 'A'
+                        })
+                      }).catch(() => {});
+                    }
+                    return null;
+                  })()}
+                  {/* #endregion */}
+                  <div className="hidden md:block overflow-hidden flex flex-col" style={{ height: '620px' }} data-dashboard-table-active>
                     {/* Scrollable table body */}
                     <div className="flex-1 overflow-y-auto overflow-x-auto min-h-0" style={{ maxHeight: 'calc(100% - 40px)' }}>
                       <Table className="min-w-full">
@@ -2188,8 +2214,34 @@ Additional Details: ${decryptedContent.additionalDetails || 'None provided'}
                 </div>
               ) : (
                 <>
-                  {/* Desktop Table View - Fills available space */}
-                  <div className="hidden md:block flex-1 overflow-hidden min-h-0 flex flex-col">
+                  {/* Desktop Table View - Fixed height matching audit table */}
+                  {/* #region agent log */}
+                  {(() => {
+                    const tableContainer = document.querySelector('[data-dashboard-table-archived]');
+                    if (tableContainer) {
+                      fetch('http://127.0.0.1:7243/ingest/07d80fb8-251f-44b3-a7af-ce7afb45a49c', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                          location: 'DashboardView.tsx:2194',
+                          message: 'Archived table container height measurement',
+                          data: {
+                            containerHeight: tableContainer.clientHeight,
+                            scrollHeight: tableContainer.scrollHeight,
+                            viewportHeight: window.innerHeight,
+                            tableContainerStyle: window.getComputedStyle(tableContainer).height
+                          },
+                          timestamp: Date.now(),
+                          sessionId: 'debug-session',
+                          runId: 'pre-fix',
+                          hypothesisId: 'A'
+                        })
+                      }).catch(() => {});
+                    }
+                    return null;
+                  })()}
+                  {/* #endregion */}
+                  <div className="hidden md:block overflow-hidden flex flex-col" style={{ height: '620px' }} data-dashboard-table-archived>
                     {/* Scrollable table body */}
                     <div className="flex-1 overflow-y-auto overflow-x-auto min-h-0" style={{ maxHeight: 'calc(100% - 40px)' }}>
                       <Table>
