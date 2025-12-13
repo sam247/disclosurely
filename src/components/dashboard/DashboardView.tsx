@@ -1558,8 +1558,6 @@ Additional Details: ${decryptedContent.additionalDetails || 'None provided'}
     );
   }
 
-  const [isMobile, setIsMobile] = useState(false);
-  
   useEffect(() => {
     const checkMobile = () => {
       setIsMobile(window.innerWidth < 768);
@@ -1568,7 +1566,7 @@ Additional Details: ${decryptedContent.additionalDetails || 'None provided'}
     window.addEventListener('resize', checkMobile);
     return () => window.removeEventListener('resize', checkMobile);
   }, []);
-  
+
   return (
     <div 
       className="flex flex-col" 
