@@ -1562,22 +1562,39 @@ Additional Details: ${decrypted.additionalDetails || 'None provided'}`;
 
       // Set container height and prevent overflow
       if (containerRef.current) {
-        // Account for DashboardLayout padding: p-4 (1rem) on mobile, md:p-6 (1.5rem) on desktop
+        // Account for DashboardLayout padding: p-4 (1rem = 16px) on mobile, md:p-6 (1.5rem = 24px) on desktop
         const isMobileLayout = window.innerWidth < 768;
-        const layoutPadding = isMobileLayout ? 16 : 24; // 1rem = 16px, 1.5rem = 24px
-        const fullWidth = window.innerWidth;
-        const fullHeight = calculatedHeight + (layoutPadding * 2); // Add padding back since we're breaking out
+        const layoutPadding = isMobileLayout ? 16 : 24;
         
-        containerRef.current.style.height = `${fullHeight}px`;
-        containerRef.current.style.maxHeight = `${fullHeight}px`;
-        containerRef.current.style.overflow = 'hidden';
-        containerRef.current.style.width = `${fullWidth}px`;
-        containerRef.current.style.maxWidth = `${fullWidth}px`;
-        containerRef.current.style.marginLeft = `-${layoutPadding}px`;
-        containerRef.current.style.marginRight = `-${layoutPadding}px`;
-        containerRef.current.style.marginTop = `-${layoutPadding}px`;
-        containerRef.current.style.marginBottom = `-${layoutPadding}px`;
-        containerRef.current.style.padding = '0';
+        // Get the main content element (parent with padding)
+        const mainContent = containerRef.current.closest('main');
+        if (mainContent) {
+          const mainRect = mainContent.getBoundingClientRect();
+          const sidebarWidth = 260; // Sidebar is w-[260px]
+          const availableWidth = window.innerWidth - sidebarWidth;
+          const availableHeight = calculatedHeight;
+          
+          // Break out of padding with negative margins and fill full available space
+          containerRef.current.style.height = `${availableHeight}px`;
+          containerRef.current.style.maxHeight = `${availableHeight}px`;
+          containerRef.current.style.overflow = 'hidden';
+          containerRef.current.style.width = `${availableWidth}px`;
+          containerRef.current.style.maxWidth = `${availableWidth}px`;
+          containerRef.current.style.marginLeft = `-${layoutPadding}px`;
+          containerRef.current.style.marginRight = `-${layoutPadding}px`;
+          containerRef.current.style.marginTop = `-${layoutPadding}px`;
+          containerRef.current.style.marginBottom = `-${layoutPadding}px`;
+          containerRef.current.style.padding = '0';
+        } else {
+          // Fallback if main element not found
+          containerRef.current.style.height = `${calculatedHeight}px`;
+          containerRef.current.style.maxHeight = `${calculatedHeight}px`;
+          containerRef.current.style.overflow = 'hidden';
+          containerRef.current.style.width = '100%';
+          containerRef.current.style.maxWidth = '100%';
+          containerRef.current.style.margin = `-${layoutPadding}px`;
+          containerRef.current.style.padding = '0';
+        }
       }
 
       // #region agent log - Comprehensive layout debugging
