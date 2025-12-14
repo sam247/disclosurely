@@ -1549,7 +1549,6 @@ Additional Details: ${decrypted.additionalDetails || 'None provided'}`;
       const viewportHeight = window.innerHeight;
       const viewportWidth = window.innerWidth;
       const headerHeight = 64; // DashboardLayout header is h-16 (64px)
-      // No contentPadding subtraction - the container should fill the full available height
       const calculatedHeight = viewportHeight - headerHeight;
 
       // Constrain body to prevent page scroll (both mobile and desktop for zoom handling)
@@ -1569,6 +1568,38 @@ Additional Details: ${decrypted.additionalDetails || 'None provided'}`;
         containerRef.current.style.width = '100%';
         containerRef.current.style.maxWidth = '100%';
       }
+
+      // #region agent log
+      const rightPanel = document.querySelector('[data-ai-assistant-right-panel]');
+      const messageBar = document.querySelector('[data-ai-assistant-message-bar]');
+      const messagesContainer = document.querySelector('[data-ai-assistant-messages]');
+      
+      fetch('http://127.0.0.1:7243/ingest/07d80fb8-251f-44b3-a7af-ce7afb45a49c', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          location: 'AIAssistantView.tsx:useLayoutEffect:updateLayout',
+          message: 'Layout update - checking panel heights',
+          data: {
+            viewportHeight,
+            headerHeight,
+            calculatedHeight,
+            rootHeight: containerRef.current?.clientHeight,
+            rootComputedHeight: containerRef.current ? window.getComputedStyle(containerRef.current).height : null,
+            rightPanelHeight: rightPanel?.clientHeight,
+            rightPanelComputedHeight: rightPanel ? window.getComputedStyle(rightPanel).height : null,
+            messageBarVisible: messageBar ? window.getComputedStyle(messageBar).display !== 'none' : false,
+            messageBarHeight: messageBar?.clientHeight,
+            messagesHeight: messagesContainer?.clientHeight,
+            messagesComputedHeight: messagesContainer ? window.getComputedStyle(messagesContainer).height : null
+          },
+          timestamp: Date.now(),
+          sessionId: 'debug-session',
+          runId: 'layout-regression-debug',
+          hypothesisId: 'A'
+        })
+      }).catch(() => {});
+      // #endregion
     };
 
     updateLayout();
@@ -1663,7 +1694,7 @@ Additional Details: ${decrypted.additionalDetails || 'None provided'}`;
     <div 
       ref={containerRef}
       className="flex h-full overflow-hidden bg-background"
-      style={{ height: 'calc(100vh - 4rem)', overflow: 'hidden', maxHeight: 'calc(100vh - 4rem)', width: '100%', maxWidth: '100%' }}
+      style={{ height: 'calc(100vh - 4rem)', overflow: 'hidden', maxHeight: 'calc(100vh - 4rem)', width: '100%', maxWidth: '100%', display: 'flex' }}
       data-ai-assistant-root
     >
       {/* Left Sidebar */}
@@ -1851,7 +1882,7 @@ Additional Details: ${decrypted.additionalDetails || 'None provided'}`;
       </div>
 
       {/* Main Content Area */}
-      <div className="flex-1 flex flex-col overflow-hidden bg-background h-full" data-ai-assistant-right-panel>
+      <div className="flex-1 flex flex-col overflow-hidden bg-background" data-ai-assistant-right-panel>
         {/* Toolbar - Full width */}
         <div className="h-14 border-b flex items-center justify-between px-4 md:px-6 flex-shrink-0 w-full bg-background">
           <div className="flex items-center gap-2">
@@ -1889,7 +1920,7 @@ Additional Details: ${decrypted.additionalDetails || 'None provided'}`;
         {/* Chat Messages Area - Scrollable */}
         <div className="flex-1 overflow-y-auto p-4 md:p-6 min-h-0 bg-background" data-ai-assistant-messages>
           {isEmptyState && !showPIIChoice ? (
-            <div className="flex flex-col items-center justify-center h-full">
+            <div className="flex flex-col items-center justify-center min-h-full">
               <Sparkles className="h-12 w-12 text-muted-foreground mb-4" />
               <h2 className="text-xl font-semibold mb-2">AI Assistant</h2>
               <p className="text-sm text-muted-foreground text-center max-w-md">
@@ -1897,7 +1928,7 @@ Additional Details: ${decrypted.additionalDetails || 'None provided'}`;
               </p>
             </div>
           ) : showPIIChoice && selectedCaseId && !hasAnalyzedCase ? (
-            <div className="flex flex-col items-center justify-center h-full">
+            <div className="flex flex-col items-center justify-center min-h-full">
               <div className="max-w-2xl w-full space-y-6">
                 <div className="text-center space-y-2">
                   <Sparkles className="h-12 w-12 text-primary mx-auto mb-4" />
