@@ -1541,19 +1541,18 @@ Additional Details: ${decrypted.additionalDetails || 'None provided'}`;
 
   // Main Layout - ChatGPT Style
     // ============================================================================
-  // LOCKED: Mobile Layout & Scroll Control - Same pattern as Dashboard
+  // LOCKED: Layout & Scroll Control - Same pattern as Dashboard
   // ============================================================================
-  // Apply scroll fixes for mobile to prevent page scrolling and handle zoom
+  // Apply scroll fixes for both mobile and desktop to prevent page scrolling and handle zoom
   useLayoutEffect(() => {
-    if (!isMobile) return;
-
     const updateLayout = () => {
       const viewportHeight = window.innerHeight;
+      const viewportWidth = window.innerWidth;
       const headerHeight = 64; // DashboardLayout header is h-16 (64px)
-      const contentPadding = 32; // p-4 md:p-6 = 16px top + 16px bottom on mobile
+      const contentPadding = isMobile ? 32 : 48; // p-4 md:p-6
       const calculatedHeight = viewportHeight - headerHeight - contentPadding;
 
-      // Constrain body to prevent page scroll on mobile (same as dashboard)
+      // Constrain body to prevent page scroll (both mobile and desktop for zoom handling)
       document.body.style.overflow = 'hidden';
       document.body.style.height = `${viewportHeight}px`;
       document.body.style.maxHeight = `${viewportHeight}px`;
@@ -1562,11 +1561,13 @@ Additional Details: ${decrypted.additionalDetails || 'None provided'}`;
       document.body.style.top = '0';
       document.body.style.left = '0';
 
-      // Set container height
+      // Set container height and prevent overflow
       if (containerRef.current) {
         containerRef.current.style.height = `${calculatedHeight}px`;
         containerRef.current.style.maxHeight = `${calculatedHeight}px`;
         containerRef.current.style.overflow = 'hidden';
+        containerRef.current.style.width = '100%';
+        containerRef.current.style.maxWidth = '100%';
       }
     };
 
@@ -1575,24 +1576,68 @@ Additional Details: ${decrypted.additionalDetails || 'None provided'}`;
     
     return () => {
       window.removeEventListener('resize', updateLayout);
-      // Reset body styles on unmount or when switching to desktop
-      if (isMobile) {
-        document.body.style.overflow = '';
-        document.body.style.height = '';
-        document.body.style.maxHeight = '';
-        document.body.style.position = '';
-        document.body.style.width = '';
-        document.body.style.top = '';
-        document.body.style.left = '';
-      }
+      // Reset body styles on unmount
+      document.body.style.overflow = '';
+      document.body.style.height = '';
+      document.body.style.maxHeight = '';
+      document.body.style.position = '';
+      document.body.style.width = '';
+      document.body.style.top = '';
+      document.body.style.left = '';
     };
   }, [isMobile]);
+
+  // #region agent log
+  useEffect(() => {
+    const logLayout = () => {
+      const root = containerRef.current;
+      const messageBar = document.querySelector('[data-ai-assistant-message-bar]');
+      const messagesContainer = document.querySelector('[data-ai-assistant-messages]');
+      const rightPanel = document.querySelector('[data-ai-assistant-right-panel]');
+      
+      fetch('http://127.0.0.1:7243/ingest/07d80fb8-251f-44b3-a7af-ce7afb45a49c', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          location: 'AIAssistantView.tsx:useEffect:layout',
+          message: 'Layout measurements',
+          data: {
+            isMobile,
+            viewportWidth: window.innerWidth,
+            viewportHeight: window.innerHeight,
+            zoomLevel: window.devicePixelRatio,
+            rootWidth: root?.clientWidth,
+            rootHeight: root?.clientHeight,
+            rootScrollWidth: root?.scrollWidth,
+            rootScrollHeight: root?.scrollHeight,
+            messageBarWidth: messageBar?.clientWidth,
+            messageBarOffsetWidth: messageBar?.offsetWidth,
+            messagesContainerWidth: messagesContainer?.clientWidth,
+            rightPanelWidth: rightPanel?.clientWidth,
+            bodyScrollHeight: document.body.scrollHeight,
+            bodyClientHeight: document.body.clientHeight,
+            hasHorizontalScroll: document.body.scrollWidth > window.innerWidth,
+            hasVerticalScroll: document.body.scrollHeight > window.innerHeight
+          },
+          timestamp: Date.now(),
+          sessionId: 'debug-session',
+          runId: 'ai-assistant-layout',
+          hypothesisId: 'A'
+        })
+      }).catch(() => {});
+    };
+    
+    logLayout();
+    window.addEventListener('resize', logLayout);
+    return () => window.removeEventListener('resize', logLayout);
+  }, [isMobile]);
+  // #endregion
 
   return (
     <div 
       ref={containerRef}
       className="flex h-full overflow-hidden -m-4 md:-m-6"
-      style={isMobile ? { height: 'calc(100vh - 4rem)', overflow: 'hidden', maxHeight: 'calc(100vh - 4rem)' } : {}}
+      style={{ height: 'calc(100vh - 4rem)', overflow: 'hidden', maxHeight: 'calc(100vh - 4rem)', width: '100%', maxWidth: '100%' }}
       data-ai-assistant-root
     >
       {/* Left Sidebar */}
@@ -1772,7 +1817,7 @@ Additional Details: ${decrypted.additionalDetails || 'None provided'}`;
           </div>
 
       {/* Main Content Area */}
-      <div className="flex-1 flex flex-col overflow-hidden">
+      <div className="flex-1 flex flex-col overflow-hidden" data-ai-assistant-right-panel>
         {/* Toolbar */}
         <div className="h-14 border-b flex items-center justify-between px-4 md:px-6 flex-shrink-0">
           <div className="flex items-center gap-2">
@@ -1807,8 +1852,8 @@ Additional Details: ${decrypted.additionalDetails || 'None provided'}`;
         </div>
           </div>
 
-        {/* Chat Messages Area */}
-        <div className="flex-1 overflow-y-auto p-4 md:p-6">
+        {/* Chat Messages Area - Scrollable */}
+        <div className="flex-1 overflow-y-auto p-4 md:p-6 min-h-0">
           {isEmptyState && !showPIIChoice ? (
             <div className="flex flex-col items-center justify-center h-full">
               <Sparkles className="h-12 w-12 text-muted-foreground mb-4" />
@@ -1948,7 +1993,7 @@ Additional Details: ${decrypted.additionalDetails || 'None provided'}`;
               </div>
             </div>
           ) : (
-            <div className="max-w-4xl mx-auto space-y-6">
+            <div className="w-full space-y-6">
               {Array.isArray(messages) && messages.map((message) => (
               <div
                 key={message.id}
@@ -2012,9 +2057,9 @@ Additional Details: ${decrypted.additionalDetails || 'None provided'}`;
           )}
           </div>
 
-        {/* Input Area - Fixed at Bottom */}
-        <div className="border-t p-4 md:p-6 flex-shrink-0">
-          <div className="max-w-4xl mx-auto">
+        {/* Input Area - Fixed at Bottom - Full width to match assistant window */}
+        <div className="border-t p-4 md:p-6 flex-shrink-0 w-full" data-ai-assistant-message-bar>
+          <div className="w-full">
             <div className="flex gap-2">
               <Input
                 value={inputQuery}
