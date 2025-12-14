@@ -1589,8 +1589,9 @@ Additional Details: ${decrypted.additionalDetails || 'None provided'}`;
         // Get the main content element (parent with padding)
         const mainContent = containerRef.current.closest('main');
         if (mainContent) {
-          // On mobile, sidebar is hidden/collapsed, so full width is available
-          // On desktop, sidebar is 260px wide
+          // On mobile, AI Assistant sidebar is hidden (hidden md:flex), so full width is available
+          // On desktop, AI Assistant sidebar is 260px wide (w-[260px])
+          // DashboardLayout sidebar is also hidden on mobile (drawer), visible on desktop
           const sidebarWidth = isMobileLayout ? 0 : 260;
           const availableWidth = window.innerWidth - sidebarWidth;
           const availableHeight = calculatedHeight;
