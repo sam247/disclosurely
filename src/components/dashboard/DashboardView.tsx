@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useLayoutEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -1434,8 +1434,35 @@ Additional Details: ${decryptedContent.additionalDetails || 'None provided'}
   }, []);
 
   // Calculate and apply height constraint accounting for alerts and measure space
-  useEffect(() => {
+  // Use useLayoutEffect to apply styles synchronously before paint to prevent initial scrollbar flash
+  useLayoutEffect(() => {
     const updateContentHeight = () => {
+      // #region agent log
+      fetch('http://127.0.0.1:7243/ingest/07d80fb8-251f-44b3-a7af-ce7afb45a49c', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          location: 'DashboardView.tsx:updateContentHeight:entry',
+          message: 'updateContentHeight called',
+          data: {
+            isMobile,
+            subscriptionDataExists: !!subscriptionData,
+            patternsExists: !!patterns,
+            bodyOverflowBefore: document.body.style.overflow,
+            bodyHeightBefore: document.body.style.height,
+            bodyPositionBefore: document.body.style.position,
+            bodyScrollHeight: document.body.scrollHeight,
+            bodyClientHeight: document.body.clientHeight,
+            windowInnerHeight: window.innerHeight
+          },
+          timestamp: Date.now(),
+          sessionId: 'debug-session',
+          runId: 'scroll-debug',
+          hypothesisId: 'A'
+        })
+      }).catch(() => {});
+      // #endregion
+
       const subscriptionAlert = document.querySelector('[data-dashboard-alert-subscription]');
       const patternAlert = document.querySelector('[data-dashboard-alert-patterns]');
       const contentContainer = document.querySelector('[data-dashboard-content]') as HTMLElement;
@@ -1456,6 +1483,31 @@ Additional Details: ${decryptedContent.additionalDetails || 'None provided'}
         
         // Constrain body to prevent page scroll (desktop only - mobile needs natural scrolling)
         if (!isMobile) {
+          // #region agent log
+          fetch('http://127.0.0.1:7243/ingest/07d80fb8-251f-44b3-a7af-ce7afb45a49c', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              location: 'DashboardView.tsx:updateContentHeight:beforeBodySet',
+              message: 'About to set body styles for desktop',
+              data: {
+                viewportHeight,
+                bodyOverflowBefore: document.body.style.overflow,
+                bodyHeightBefore: document.body.style.height,
+                bodyPositionBefore: document.body.style.position,
+                computedOverflow: window.getComputedStyle(document.body).overflow,
+                computedHeight: window.getComputedStyle(document.body).height,
+                computedPosition: window.getComputedStyle(document.body).position,
+                computedMinHeight: window.getComputedStyle(document.body).minHeight
+              },
+              timestamp: Date.now(),
+              sessionId: 'debug-session',
+              runId: 'scroll-debug',
+              hypothesisId: 'B'
+            })
+          }).catch(() => {});
+          // #endregion
+
           // Force body to exact viewport height to eliminate any scroll
           document.body.style.overflow = 'hidden';
           document.body.style.height = `${viewportHeight}px`;
@@ -1464,6 +1516,33 @@ Additional Details: ${decryptedContent.additionalDetails || 'None provided'}
           document.body.style.width = '100%';
           document.body.style.top = '0';
           document.body.style.left = '0';
+
+          // #region agent log
+          fetch('http://127.0.0.1:7243/ingest/07d80fb8-251f-44b3-a7af-ce7afb45a49c', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              location: 'DashboardView.tsx:updateContentHeight:afterBodySet',
+              message: 'Just set body styles for desktop',
+              data: {
+                bodyOverflowAfter: document.body.style.overflow,
+                bodyHeightAfter: document.body.style.height,
+                bodyPositionAfter: document.body.style.position,
+                computedOverflow: window.getComputedStyle(document.body).overflow,
+                computedHeight: window.getComputedStyle(document.body).height,
+                computedPosition: window.getComputedStyle(document.body).position,
+                computedMinHeight: window.getComputedStyle(document.body).minHeight,
+                bodyScrollHeight: document.body.scrollHeight,
+                bodyClientHeight: document.body.clientHeight,
+                windowInnerHeight: window.innerHeight
+              },
+              timestamp: Date.now(),
+              sessionId: 'debug-session',
+              runId: 'scroll-debug',
+              hypothesisId: 'C'
+            })
+          }).catch(() => {});
+          // #endregion
         } else {
           // On mobile, allow natural body scrolling
           document.body.style.overflow = '';
@@ -1556,15 +1635,108 @@ Additional Details: ${decryptedContent.additionalDetails || 'None provided'}
       }
     };
     
-    // Update on mount and when alerts change
+    // Apply styles immediately (synchronously) to prevent initial scrollbar
+    updateContentHeight();
+    
+    // Also update after a short delay to catch any dynamic content that loads
     const timeoutId = setTimeout(updateContentHeight, 100);
     const timeoutId2 = setTimeout(updateContentHeight, 500);
+    const timeoutId3 = setTimeout(() => {
+      // #region agent log
+      fetch('http://127.0.0.1:7243/ingest/07d80fb8-251f-44b3-a7af-ce7afb45a49c', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          location: 'DashboardView.tsx:useEffect:delayedCheck',
+          message: 'Checking body styles 1 second after setting',
+          data: {
+            isMobile,
+            bodyOverflow: document.body.style.overflow,
+            bodyHeight: document.body.style.height,
+            bodyPosition: document.body.style.position,
+            computedOverflow: window.getComputedStyle(document.body).overflow,
+            computedHeight: window.getComputedStyle(document.body).height,
+            computedPosition: window.getComputedStyle(document.body).position,
+            computedMinHeight: window.getComputedStyle(document.body).minHeight,
+            bodyScrollHeight: document.body.scrollHeight,
+            bodyClientHeight: document.body.clientHeight,
+            windowInnerHeight: window.innerHeight,
+            hasScroll: document.body.scrollHeight > window.innerHeight
+          },
+          timestamp: Date.now(),
+          sessionId: 'debug-session',
+          runId: 'scroll-debug',
+          hypothesisId: 'D'
+        })
+      }).catch(() => {});
+      // #endregion
+      updateContentHeight();
+    }, 1000);
     window.addEventListener('resize', updateContentHeight);
+    
+    // Monitor for style changes using MutationObserver
+    const observer = new MutationObserver((mutations) => {
+      mutations.forEach((mutation) => {
+        if (mutation.type === 'attributes' && mutation.attributeName === 'style' && mutation.target === document.body) {
+          // #region agent log
+          fetch('http://127.0.0.1:7243/ingest/07d80fb8-251f-44b3-a7af-ce7afb45a49c', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              location: 'DashboardView.tsx:useEffect:mutationObserver',
+              message: 'Body style attribute changed',
+              data: {
+                isMobile,
+                bodyOverflow: document.body.style.overflow,
+                bodyHeight: document.body.style.height,
+                bodyPosition: document.body.style.position,
+                computedOverflow: window.getComputedStyle(document.body).overflow,
+                computedHeight: window.getComputedStyle(document.body).height,
+                computedPosition: window.getComputedStyle(document.body).position,
+                oldValue: mutation.oldValue,
+                hasScroll: document.body.scrollHeight > window.innerHeight
+              },
+              timestamp: Date.now(),
+              sessionId: 'debug-session',
+              runId: 'scroll-debug',
+              hypothesisId: 'E'
+            })
+          }).catch(() => {});
+          // #endregion
+        }
+      });
+    });
+    observer.observe(document.body, {
+      attributes: true,
+      attributeOldValue: true,
+      attributeFilter: ['style']
+    });
     
     return () => {
       clearTimeout(timeoutId);
       clearTimeout(timeoutId2);
+      clearTimeout(timeoutId3);
       window.removeEventListener('resize', updateContentHeight);
+      observer.disconnect();
+      // #region agent log
+      fetch('http://127.0.0.1:7243/ingest/07d80fb8-251f-44b3-a7af-ce7afb45a49c', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          location: 'DashboardView.tsx:useEffect:cleanup',
+          message: 'useEffect cleanup - checking if styles persist',
+          data: {
+            bodyOverflow: document.body.style.overflow,
+            bodyHeight: document.body.style.height,
+            bodyPosition: document.body.style.position
+          },
+          timestamp: Date.now(),
+          sessionId: 'debug-session',
+          runId: 'scroll-debug',
+          hypothesisId: 'F'
+        })
+      }).catch(() => {});
+      // #endregion
     };
   }, [subscriptionData, patterns, isMobile]);
 
