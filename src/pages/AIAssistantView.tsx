@@ -1653,17 +1653,17 @@ Additional Details: ${decrypted.additionalDetails || 'None provided'}`;
   return (
     <div 
       ref={containerRef}
-      className="flex h-full overflow-hidden"
+      className="flex h-full overflow-hidden bg-background"
       style={{ height: 'calc(100vh - 4rem)', overflow: 'hidden', maxHeight: 'calc(100vh - 4rem)', width: '100%', maxWidth: '100%' }}
       data-ai-assistant-root
     >
       {/* Left Sidebar */}
       <div className="w-[260px] border-r bg-muted/30 flex flex-col overflow-hidden flex-shrink-0" data-ai-assistant-sidebar>
-        <div className="flex flex-col h-full">
+        <div className="flex flex-col h-full bg-muted/30">
           {/* Scrollable Cases Section */}
-          <div className="flex-1 min-h-0 overflow-hidden">
+          <div className="flex-1 min-h-0 overflow-hidden bg-muted/30">
             <ScrollArea className="h-full">
-              <div className="p-4 pb-2">
+              <div className="p-4 pb-2 bg-muted/30">
                 {/* Case Selection Section */}
                 <div>
                   <h3 className="text-sm font-semibold mb-2 px-2">Cases</h3>
