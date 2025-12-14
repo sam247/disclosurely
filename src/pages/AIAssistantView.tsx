@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useLayoutEffect, useRef } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -237,14 +237,26 @@ const AIAssistantView = () => {
   const [showPIIChoice, setShowPIIChoice] = useState(false); // Show inline PII choice when case selected
   const [savedAnalyses, setSavedAnalyses] = useState<any[]>([]);
   const [isLoadingSavedAnalyses, setIsLoadingSavedAnalyses] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
   
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
   const [searchParams] = useSearchParams();
   const { user } = useAuth();
   const { organization } = useOrganization();
   const { toast } = useToast();
   const navigate = useNavigate();
+
+  // Detect mobile screen size
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
 
   // Check for caseId in URL params
   useEffect(() => {
@@ -1528,11 +1540,64 @@ Additional Details: ${decrypted.additionalDetails || 'None provided'}`;
   };
 
   // Main Layout - ChatGPT Style
-    return (
-    <div className="flex h-full overflow-hidden -m-4 md:-m-6">
+    // ============================================================================
+  // LOCKED: Mobile Layout & Scroll Control - Same pattern as Dashboard
+  // ============================================================================
+  // Apply scroll fixes for mobile to prevent page scrolling and handle zoom
+  useLayoutEffect(() => {
+    if (!isMobile) return;
+
+    const updateLayout = () => {
+      const viewportHeight = window.innerHeight;
+      const headerHeight = 64; // DashboardLayout header is h-16 (64px)
+      const contentPadding = 32; // p-4 md:p-6 = 16px top + 16px bottom on mobile
+      const calculatedHeight = viewportHeight - headerHeight - contentPadding;
+
+      // Constrain body to prevent page scroll on mobile (same as dashboard)
+      document.body.style.overflow = 'hidden';
+      document.body.style.height = `${viewportHeight}px`;
+      document.body.style.maxHeight = `${viewportHeight}px`;
+      document.body.style.position = 'fixed';
+      document.body.style.width = '100%';
+      document.body.style.top = '0';
+      document.body.style.left = '0';
+
+      // Set container height
+      if (containerRef.current) {
+        containerRef.current.style.height = `${calculatedHeight}px`;
+        containerRef.current.style.maxHeight = `${calculatedHeight}px`;
+        containerRef.current.style.overflow = 'hidden';
+      }
+    };
+
+    updateLayout();
+    window.addEventListener('resize', updateLayout);
+    
+    return () => {
+      window.removeEventListener('resize', updateLayout);
+      // Reset body styles on unmount or when switching to desktop
+      if (isMobile) {
+        document.body.style.overflow = '';
+        document.body.style.height = '';
+        document.body.style.maxHeight = '';
+        document.body.style.position = '';
+        document.body.style.width = '';
+        document.body.style.top = '';
+        document.body.style.left = '';
+      }
+    };
+  }, [isMobile]);
+
+  return (
+    <div 
+      ref={containerRef}
+      className="flex h-full overflow-hidden -m-4 md:-m-6"
+      style={isMobile ? { height: 'calc(100vh - 4rem)', overflow: 'hidden', maxHeight: 'calc(100vh - 4rem)' } : {}}
+      data-ai-assistant-root
+    >
       {/* Left Sidebar */}
-      <div className="w-[260px] border-r bg-muted/30 flex flex-col overflow-hidden">
-        <ScrollArea className="flex-1">
+      <div className="w-[260px] border-r bg-muted/30 flex flex-col overflow-hidden flex-shrink-0">
+        <ScrollArea className="flex-1 min-h-0">
           <div className="p-4 space-y-6">
             {/* Case Selection Section */}
             <div>
