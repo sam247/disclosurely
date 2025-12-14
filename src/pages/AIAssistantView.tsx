@@ -1594,6 +1594,8 @@ Additional Details: ${decrypted.additionalDetails || 'None provided'}`;
       const messageBar = document.querySelector('[data-ai-assistant-message-bar]');
       const messagesContainer = document.querySelector('[data-ai-assistant-messages]');
       const rightPanel = document.querySelector('[data-ai-assistant-right-panel]');
+      const sidebar = document.querySelector('[data-ai-assistant-sidebar]');
+      const savedAnalyses = document.querySelector('[data-ai-assistant-saved-analyses]');
       
       fetch('http://127.0.0.1:7243/ingest/07d80fb8-251f-44b3-a7af-ce7afb45a49c', {
         method: 'POST',
@@ -1610,10 +1612,18 @@ Additional Details: ${decrypted.additionalDetails || 'None provided'}`;
             rootHeight: root?.clientHeight,
             rootScrollWidth: root?.scrollWidth,
             rootScrollHeight: root?.scrollHeight,
+            rootOffsetWidth: root?.offsetWidth,
             messageBarWidth: messageBar?.clientWidth,
             messageBarOffsetWidth: messageBar?.offsetWidth,
+            messageBarScrollWidth: messageBar?.scrollWidth,
             messagesContainerWidth: messagesContainer?.clientWidth,
             rightPanelWidth: rightPanel?.clientWidth,
+            rightPanelOffsetWidth: rightPanel?.offsetWidth,
+            sidebarWidth: sidebar?.clientWidth,
+            sidebarScrollHeight: sidebar?.scrollHeight,
+            sidebarClientHeight: sidebar?.clientHeight,
+            savedAnalysesVisible: savedAnalyses ? window.getComputedStyle(savedAnalyses).display !== 'none' : false,
+            savedAnalysesOffsetTop: savedAnalyses?.offsetTop,
             bodyScrollHeight: document.body.scrollHeight,
             bodyClientHeight: document.body.clientHeight,
             hasHorizontalScroll: document.body.scrollWidth > window.innerWidth,
@@ -1641,9 +1651,9 @@ Additional Details: ${decrypted.additionalDetails || 'None provided'}`;
       data-ai-assistant-root
     >
       {/* Left Sidebar */}
-      <div className="w-[260px] border-r bg-muted/30 flex flex-col overflow-hidden flex-shrink-0">
-        <ScrollArea className="flex-1 min-h-0">
-          <div className="p-4 space-y-6">
+      <div className="w-[260px] border-r bg-muted/30 flex flex-col overflow-hidden flex-shrink-0" data-ai-assistant-sidebar>
+        <ScrollArea className="flex-1 min-h-0" style={{ maxHeight: '100%' }}>
+          <div className="p-4 space-y-6 pb-6">
             {/* Case Selection Section */}
             <div>
               <h3 className="text-sm font-semibold mb-2 px-2">Cases</h3>
@@ -1769,8 +1779,8 @@ Additional Details: ${decrypted.additionalDetails || 'None provided'}`;
 
             <Separator />
 
-            {/* Saved Analyses Section */}
-            <div>
+            {/* Saved Analyses Section - Ensure it's always visible */}
+            <div className="flex-shrink-0" data-ai-assistant-saved-analyses>
               <h3 className="text-sm font-semibold mb-2 px-2">Saved Analyses</h3>
               {isLoadingSavedAnalyses ? (
                 <div className="flex items-center justify-center py-4">
@@ -1814,12 +1824,12 @@ Additional Details: ${decrypted.additionalDetails || 'None provided'}`;
           </div>
         </div>
         </ScrollArea>
-          </div>
+      </div>
 
       {/* Main Content Area */}
       <div className="flex-1 flex flex-col overflow-hidden" data-ai-assistant-right-panel>
-        {/* Toolbar */}
-        <div className="h-14 border-b flex items-center justify-between px-4 md:px-6 flex-shrink-0">
+        {/* Toolbar - Full width */}
+        <div className="h-14 border-b flex items-center justify-between px-4 md:px-6 flex-shrink-0 w-full">
           <div className="flex items-center gap-2">
             <h1 className="text-lg font-semibold">AI Assistant</h1>
             {selectedCaseData && (
