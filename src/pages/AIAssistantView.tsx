@@ -1589,7 +1589,9 @@ Additional Details: ${decrypted.additionalDetails || 'None provided'}`;
         // Get the main content element (parent with padding)
         const mainContent = containerRef.current.closest('main');
         if (mainContent) {
-          const sidebarWidth = 260; // Sidebar is w-[260px]
+          // On mobile, sidebar is hidden/collapsed, so full width is available
+          // On desktop, sidebar is 260px wide
+          const sidebarWidth = isMobileLayout ? 0 : 260;
           const availableWidth = window.innerWidth - sidebarWidth;
           const availableHeight = calculatedHeight;
           
