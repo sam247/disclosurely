@@ -1539,11 +1539,31 @@ Additional Details: ${decrypted.additionalDetails || 'None provided'}`;
     }
   };
 
-  // Main Layout - ChatGPT Style
-    // ============================================================================
-  // LOCKED: Layout & Scroll Control - Same pattern as Dashboard
   // ============================================================================
-  // Apply scroll fixes for both mobile and desktop to prevent page scrolling and handle zoom
+  // LOCKED: AI Assistant Layout & Scroll Control - DO NOT MODIFY WITHOUT EXPLICIT APPROVAL
+  // ============================================================================
+  // This useLayoutEffect is CRITICAL for:
+  // 1. Preventing page scroll (both mobile and desktop)
+  // 2. Removing all padding around the window (breaking out of DashboardLayout padding)
+  // 3. Ensuring full-width/full-height layout with no white gaps
+  // 4. Handling zoom correctly on desktop
+  //
+  // Key points:
+  // - useLayoutEffect runs synchronously before browser paint (prevents scrollbar flash)
+  // - Body is set to position: fixed with exact viewport height (both mobile and desktop)
+  // - Container uses negative margins to break out of DashboardLayout's p-4 md:p-6 padding
+  // - Width calculation accounts for sidebar (260px) to fill entire available space
+  // - Height calculation accounts for header (64px) to fill entire available space
+  // - All padding removed (margin: negative padding values, padding: 0)
+  //
+  // DO NOT:
+  // - Change useLayoutEffect back to useEffect (causes scrollbar flash)
+  // - Remove negative margin calculations (causes white padding gaps)
+  // - Change the body position: fixed logic
+  // - Modify width/height calculations without accounting for sidebar/header
+  // - Remove overflow: hidden constraints
+  // - Add any padding or margins to the root container
+  // ============================================================================
   useLayoutEffect(() => {
     const updateLayout = () => {
       const viewportHeight = window.innerHeight;
@@ -1569,12 +1589,12 @@ Additional Details: ${decrypted.additionalDetails || 'None provided'}`;
         // Get the main content element (parent with padding)
         const mainContent = containerRef.current.closest('main');
         if (mainContent) {
-          const mainRect = mainContent.getBoundingClientRect();
           const sidebarWidth = 260; // Sidebar is w-[260px]
           const availableWidth = window.innerWidth - sidebarWidth;
           const availableHeight = calculatedHeight;
           
           // Break out of padding with negative margins and fill full available space
+          // This eliminates all white padding areas around the window
           containerRef.current.style.height = `${availableHeight}px`;
           containerRef.current.style.maxHeight = `${availableHeight}px`;
           containerRef.current.style.overflow = 'hidden';
@@ -1780,6 +1800,20 @@ Additional Details: ${decrypted.additionalDetails || 'None provided'}`;
   }, [isMobile]);
   // #endregion
 
+  // ============================================================================
+  // LOCKED: Root Container Structure - DO NOT MODIFY WITHOUT EXPLICIT APPROVAL
+  // ============================================================================
+  // This root container:
+  // - Uses flex layout for sidebar + main content
+  // - Has zero padding (padding removed via negative margins in useLayoutEffect)
+  // - Height/width set dynamically in useLayoutEffect to break out of DashboardLayout padding
+  // - Background color ensures no white gaps
+  //
+  // DO NOT:
+  // - Add padding or margins here (use negative margins in useLayoutEffect instead)
+  // - Change flex layout structure
+  // - Add inline height/width styles (handled in useLayoutEffect)
+  // ============================================================================
   return (
     <div 
       ref={containerRef}
