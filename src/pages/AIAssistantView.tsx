@@ -2287,7 +2287,7 @@ Additional Details: ${decrypted.additionalDetails || 'None provided'}`;
                 )}
               </Button>
             </div>
-            <p className="text-xs text-muted-foreground text-center">
+            <p className="text-xs text-muted-foreground text-center mt-3">
               Powered by AI • Your queries are logged for audit purposes
             </p>
           </div>
