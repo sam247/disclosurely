@@ -1652,11 +1652,14 @@ Additional Details: ${decrypted.additionalDetails || 'None provided'}`;
     >
       {/* Left Sidebar */}
       <div className="w-[260px] border-r bg-muted/30 flex flex-col overflow-hidden flex-shrink-0" data-ai-assistant-sidebar>
-        <ScrollArea className="flex-1 min-h-0" style={{ maxHeight: '100%' }}>
-          <div className="p-4 space-y-6 pb-6">
-            {/* Case Selection Section */}
-            <div>
-              <h3 className="text-sm font-semibold mb-2 px-2">Cases</h3>
+        <div className="flex flex-col h-full">
+          {/* Scrollable Cases Section */}
+          <div className="flex-1 min-h-0 overflow-hidden">
+            <ScrollArea className="h-full">
+              <div className="p-4 pb-2">
+                {/* Case Selection Section */}
+                <div>
+                  <h3 className="text-sm font-semibold mb-2 px-2">Cases</h3>
               {isLoadingCases ? (
                 <div className="flex items-center justify-center py-4">
                   <Loader2 className="h-4 w-4 animate-spin" />
@@ -1700,10 +1703,10 @@ Additional Details: ${decrypted.additionalDetails || 'None provided'}`;
 
             <Separator />
 
-            {/* Document Management Section */}
-            <div>
-              <div className="flex items-center justify-between mb-2 px-2">
-                <h3 className="text-sm font-semibold">Documents</h3>
+              {/* Document Management Section - Fixed at bottom */}
+              <div className="flex-shrink-0">
+                <div className="flex items-center justify-between mb-2 px-2">
+                  <h3 className="text-sm font-semibold">Documents</h3>
                 <input
                   ref={fileInputRef}
                   type="file"
