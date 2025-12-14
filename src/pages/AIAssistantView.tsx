@@ -1569,34 +1569,96 @@ Additional Details: ${decrypted.additionalDetails || 'None provided'}`;
         containerRef.current.style.maxWidth = '100%';
       }
 
-      // #region agent log
+      // #region agent log - Comprehensive layout debugging
       const rightPanel = document.querySelector('[data-ai-assistant-right-panel]');
       const messageBar = document.querySelector('[data-ai-assistant-message-bar]');
       const messagesContainer = document.querySelector('[data-ai-assistant-messages]');
+      const toolbar = rightPanel?.querySelector('.h-14');
+      
+      const rootRect = containerRef.current?.getBoundingClientRect();
+      const rightPanelRect = rightPanel?.getBoundingClientRect();
+      const messageBarRect = messageBar?.getBoundingClientRect();
+      const messagesRect = messagesContainer?.getBoundingClientRect();
+      const toolbarRect = toolbar?.getBoundingClientRect();
+      
+      const rootStyles = containerRef.current ? window.getComputedStyle(containerRef.current) : null;
+      const rightPanelStyles = rightPanel ? window.getComputedStyle(rightPanel) : null;
+      const messageBarStyles = messageBar ? window.getComputedStyle(messageBar) : null;
+      const messagesStyles = messagesContainer ? window.getComputedStyle(messagesContainer) : null;
       
       fetch('http://127.0.0.1:7243/ingest/07d80fb8-251f-44b3-a7af-ce7afb45a49c', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           location: 'AIAssistantView.tsx:useLayoutEffect:updateLayout',
-          message: 'Layout update - checking panel heights',
+          message: 'Comprehensive layout debugging - all hypotheses',
           data: {
+            // Hypothesis A: Root container height calculation
             viewportHeight,
             headerHeight,
             calculatedHeight,
-            rootHeight: containerRef.current?.clientHeight,
-            rootComputedHeight: containerRef.current ? window.getComputedStyle(containerRef.current).height : null,
-            rightPanelHeight: rightPanel?.clientHeight,
-            rightPanelComputedHeight: rightPanel ? window.getComputedStyle(rightPanel).height : null,
+            rootClientHeight: containerRef.current?.clientHeight,
+            rootOffsetHeight: containerRef.current?.offsetHeight,
+            rootScrollHeight: containerRef.current?.scrollHeight,
+            rootComputedHeight: rootStyles?.height,
+            rootComputedDisplay: rootStyles?.display,
+            rootComputedFlex: rootStyles?.display === 'flex' ? rootStyles.flexDirection : null,
+            rootBottom: rootRect?.bottom,
+            rootTop: rootRect?.top,
+            
+            // Hypothesis B: Right panel flex container
+            rightPanelClientHeight: rightPanel?.clientHeight,
+            rightPanelOffsetHeight: rightPanel?.offsetHeight,
+            rightPanelScrollHeight: rightPanel?.scrollHeight,
+            rightPanelComputedHeight: rightPanelStyles?.height,
+            rightPanelComputedDisplay: rightPanelStyles?.display,
+            rightPanelComputedFlex: rightPanelStyles?.display === 'flex' ? rightPanelStyles.flexDirection : null,
+            rightPanelComputedFlexGrow: rightPanelStyles?.flexGrow,
+            rightPanelBottom: rightPanelRect?.bottom,
+            rightPanelTop: rightPanelRect?.top,
+            
+            // Hypothesis C: Messages area flex-1
+            messagesClientHeight: messagesContainer?.clientHeight,
+            messagesOffsetHeight: messagesContainer?.offsetHeight,
+            messagesScrollHeight: messagesContainer?.scrollHeight,
+            messagesComputedHeight: messagesStyles?.height,
+            messagesComputedFlex: messagesStyles?.flexGrow,
+            messagesComputedMinHeight: messagesStyles?.minHeight,
+            messagesBottom: messagesRect?.bottom,
+            messagesTop: messagesRect?.top,
+            
+            // Hypothesis D: Message bar visibility and positioning
             messageBarVisible: messageBar ? window.getComputedStyle(messageBar).display !== 'none' : false,
-            messageBarHeight: messageBar?.clientHeight,
-            messagesHeight: messagesContainer?.clientHeight,
-            messagesComputedHeight: messagesContainer ? window.getComputedStyle(messagesContainer).height : null
+            messageBarClientHeight: messageBar?.clientHeight,
+            messageBarOffsetHeight: messageBar?.offsetHeight,
+            messageBarComputedHeight: messageBarStyles?.height,
+            messageBarComputedDisplay: messageBarStyles?.display,
+            messageBarComputedPosition: messageBarStyles?.position,
+            messageBarTop: messageBarRect?.top,
+            messageBarBottom: messageBarRect?.bottom,
+            messageBarComputedFlexShrink: messageBarStyles?.flexShrink,
+            
+            // Hypothesis E: Toolbar height
+            toolbarClientHeight: toolbar?.clientHeight,
+            toolbarComputedHeight: toolbar ? window.getComputedStyle(toolbar).height : null,
+            
+            // Calculated totals
+            toolbarPlusMessagesPlusBar: toolbar?.clientHeight && messagesContainer?.clientHeight && messageBar?.clientHeight
+              ? toolbar.clientHeight + messagesContainer.clientHeight + messageBar.clientHeight
+              : null,
+            gapAtBottom: rightPanelRect && messageBarRect
+              ? window.innerHeight - messageBarRect.bottom
+              : null,
+            
+            // Body state
+            bodyScrollHeight: document.body.scrollHeight,
+            bodyClientHeight: document.body.clientHeight,
+            hasVerticalScroll: document.body.scrollHeight > window.innerHeight
           },
           timestamp: Date.now(),
           sessionId: 'debug-session',
-          runId: 'layout-regression-debug',
-          hypothesisId: 'A'
+          runId: 'comprehensive-layout-debug',
+          hypothesisId: 'ALL'
         })
       }).catch(() => {});
       // #endregion
