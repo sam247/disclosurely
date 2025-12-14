@@ -59,12 +59,9 @@ const PatternAlerts = ({ patterns, onReportClick, onDismiss }: PatternAlertsProp
           <span className="font-medium text-xs sm:text-sm whitespace-nowrap">Pattern Detection Alert</span>
           {patterns.highSeverityCount > 0 && (
             <Badge variant="destructive" className="text-[10px] sm:text-xs px-1 sm:px-1.5 py-0 whitespace-nowrap">
-              {patterns.highSeverityCount} High Priority
+              High Alert
             </Badge>
           )}
-          <Badge variant="secondary" className="text-[10px] sm:text-xs px-1 sm:px-1.5 py-0 whitespace-nowrap">
-            {patterns.totalPatterns} {patterns.totalPatterns === 1 ? 'pattern' : 'patterns'}
-          </Badge>
         </div>
         <div className="flex items-center gap-2">
           {onDismiss && (

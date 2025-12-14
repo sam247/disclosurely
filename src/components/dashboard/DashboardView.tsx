@@ -1456,14 +1456,23 @@ Additional Details: ${decryptedContent.additionalDetails || 'None provided'}
         
         // Constrain body to prevent page scroll (desktop only - mobile needs natural scrolling)
         if (!isMobile) {
+          // Force body to exact viewport height to eliminate any scroll
           document.body.style.overflow = 'hidden';
           document.body.style.height = `${viewportHeight}px`;
           document.body.style.maxHeight = `${viewportHeight}px`;
+          document.body.style.position = 'fixed';
+          document.body.style.width = '100%';
+          document.body.style.top = '0';
+          document.body.style.left = '0';
         } else {
           // On mobile, allow natural body scrolling
           document.body.style.overflow = '';
           document.body.style.height = '';
           document.body.style.maxHeight = '';
+          document.body.style.position = '';
+          document.body.style.width = '';
+          document.body.style.top = '';
+          document.body.style.left = '';
         }
         
         // Set root container height to exactly fit viewport (desktop only)
@@ -1482,9 +1491,9 @@ Additional Details: ${decryptedContent.additionalDetails || 'None provided'}
             contentWrapper.style.padding = '0';
           }
           
-          // Set max-height to constrain the content area
-          contentContainer.style.maxHeight = `${calculatedContentHeight}px`;
-          contentContainer.style.height = `${calculatedContentHeight}px`;
+          // Set max-height to constrain the content area - reduce by 1px to prevent any overflow
+          contentContainer.style.maxHeight = `${calculatedContentHeight - 1}px`;
+          contentContainer.style.height = `${calculatedContentHeight - 1}px`;
           contentContainer.style.overflow = 'hidden';
         } else {
           // On mobile, allow natural flow
