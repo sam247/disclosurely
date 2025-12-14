@@ -1433,8 +1433,26 @@ Additional Details: ${decryptedContent.additionalDetails || 'None provided'}
     return () => window.removeEventListener('resize', checkMobile);
   }, []);
 
-  // Calculate and apply height constraint accounting for alerts and measure space
-  // Use useLayoutEffect to apply styles synchronously before paint to prevent initial scrollbar flash
+  // ============================================================================
+  // LOCKED: Dashboard Layout & Scroll Control - DO NOT MODIFY WITHOUT EXPLICIT APPROVAL
+  // ============================================================================
+  // This useLayoutEffect is CRITICAL for preventing page scroll and initial scrollbar flash.
+  // It applies body styles synchronously before paint using useLayoutEffect (not useEffect).
+  // 
+  // Key points:
+  // - useLayoutEffect runs synchronously before browser paint (prevents scrollbar flash)
+  // - Body is set to position: fixed with exact viewport height on desktop
+  // - Mobile uses natural scrolling (conditional based on isMobile state)
+  // - Content container height is calculated dynamically accounting for alerts
+  // - Row heights are locked at 15px for both active and archived tables
+  // 
+  // DO NOT:
+  // - Change useLayoutEffect back to useEffect (causes scrollbar flash)
+  // - Remove the immediate updateContentHeight() call
+  // - Change the body position: fixed logic for desktop
+  // - Modify row heights without explicit approval
+  // - Remove overflow: hidden constraints
+  // ============================================================================
   useLayoutEffect(() => {
     const updateContentHeight = () => {
       // #region agent log
@@ -1748,9 +1766,16 @@ Additional Details: ${decryptedContent.additionalDetails || 'None provided'}
     );
   }
 
+  // ============================================================================
+  // LOCKED: Root Container Structure - DO NOT MODIFY
+  // ============================================================================
+  // This root div structure is carefully calibrated to prevent page scrolling.
+  // Desktop: Fixed height with overflow hidden
+  // Mobile: Natural flow (empty style object)
+  // ============================================================================
   return (
-    <div 
-      className="flex flex-col" 
+    <div
+      className="flex flex-col"
       style={!isMobile ? { height: 'calc(100vh - 4rem)', overflow: 'hidden', maxHeight: 'calc(100vh - 4rem)' } : {}}
       data-dashboard-root
     >
@@ -1881,6 +1906,7 @@ Additional Details: ${decryptedContent.additionalDetails || 'None provided'}
               </Button>
             </div>
           </div>
+            {/* LOCKED: Active Reports Tab - Card structure must use flex-1, overflow-hidden, min-h-0 */}
             <TabsContent value="active" className="flex flex-col overflow-hidden min-h-0">
               <Card className="md:border md:shadow-sm border-0 shadow-none flex flex-col flex-1 overflow-hidden min-h-0" data-dashboard-card-active>
                 <CardContent className="p-0 flex-1 flex flex-col overflow-hidden min-h-0">
@@ -2535,6 +2561,7 @@ Additional Details: ${decryptedContent.additionalDetails || 'None provided'}
           </Card>
         </TabsContent>
 
+            {/* LOCKED: Archived Reports Tab - Must match active tab structure exactly */}
             <TabsContent value="archived" className="flex flex-col overflow-hidden min-h-0">
               {/* LOCKED: Card uses flex-1 to fill remaining space - DO NOT CHANGE to fixed height */}
               <Card className="md:border md:shadow-sm border-0 shadow-none flex flex-col flex-1 overflow-hidden min-h-0" data-dashboard-card-archived>
@@ -2570,6 +2597,7 @@ Additional Details: ${decryptedContent.additionalDetails || 'None provided'}
                           </TableRow>
                         </TableHeader>
                       <TableBody>
+                        {/* LOCKED: Row height is 15px - matches active table - DO NOT CHANGE */}
                         {paginatedArchivedReports.map((report) => (
                             <TableRow key={report.id} style={{ height: '15px' }}>
                               <TableCell className="font-mono text-xs px-2 py-0">
