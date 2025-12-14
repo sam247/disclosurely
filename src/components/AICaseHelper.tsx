@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useLayoutEffect, useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Textarea } from '@/components/ui/textarea';
@@ -75,12 +75,23 @@ const AICaseHelper: React.FC<AICaseHelperProps> = ({ reportId, reportContent }) 
   const [previewContent, setPreviewContent] = useState<string>(''); // Content for PII preview
   const [isLoadingPreview, setIsLoadingPreview] = useState(false); // Loading state for preview
   const [hasViewedPreview, setHasViewedPreview] = useState(false); // Track if user has previewed current case
+  const [isMobile, setIsMobile] = useState(false); // Track mobile state
   const containerRef = useRef<HTMLDivElement>(null);
   const chatMessagesEndRef = useRef<HTMLDivElement>(null);
   const isDeletingRef = useRef<boolean>(false); // Track if we're deleting to prevent selection
   const { user } = useAuth();
   const { organization } = useOrganization();
   const { toast } = useToast();
+
+  // Detect mobile screen size
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
 
   useEffect(() => {
     if (reportId) {
@@ -736,14 +747,74 @@ Guidelines:
     }
   };
 
+  // ============================================================================
+  // LOCKED: Mobile Layout & Scroll Control - Same pattern as Dashboard
+  // ============================================================================
+  // Apply scroll fixes for mobile to prevent page scrolling
+  useLayoutEffect(() => {
+    if (!isMobile) return;
+
+    const updateLayout = () => {
+      const viewportHeight = window.innerHeight;
+      const headerHeight = 64; // DashboardLayout header is h-16 (64px)
+      const announcementBarHeight = 0; // May vary, but typically 0 or small
+      const contentPadding = 32; // p-4 md:p-6 = 16px top + 16px bottom on mobile
+      const calculatedHeight = viewportHeight - headerHeight - announcementBarHeight - contentPadding;
+
+      // Constrain body to prevent page scroll on mobile (same as dashboard)
+      document.body.style.overflow = 'hidden';
+      document.body.style.height = `${viewportHeight}px`;
+      document.body.style.maxHeight = `${viewportHeight}px`;
+      document.body.style.position = 'fixed';
+      document.body.style.width = '100%';
+      document.body.style.top = '0';
+      document.body.style.left = '0';
+
+      // Set container height
+      if (containerRef.current) {
+        containerRef.current.style.height = `${calculatedHeight}px`;
+        containerRef.current.style.maxHeight = `${calculatedHeight}px`;
+        containerRef.current.style.overflow = 'hidden';
+      }
+    };
+
+    updateLayout();
+    window.addEventListener('resize', updateLayout);
+    
+    return () => {
+      window.removeEventListener('resize', updateLayout);
+      // Reset body styles on unmount or when switching to desktop
+      if (isMobile) {
+        document.body.style.overflow = '';
+        document.body.style.height = '';
+        document.body.style.maxHeight = '';
+        document.body.style.position = '';
+        document.body.style.width = '';
+        document.body.style.top = '';
+        document.body.style.left = '';
+      }
+    };
+  }, [isMobile]);
+
   return (
-    <div className="flex flex-col min-h-0 md:h-[calc(100vh-12rem)]">
+    <div 
+      className="flex flex-col min-h-0"
+      style={isMobile ? { height: '100%', overflow: 'hidden', maxHeight: '100%' } : { height: 'calc(100vh - 12rem)' }}
+      data-ai-case-helper-root
+    >
       {/* Resizable Panel Layout */}
-      <div ref={containerRef} className="flex flex-col md:flex-row flex-1 min-h-0 md:overflow-hidden bg-gray-50" style={{ userSelect: isResizing ? 'none' : 'auto' }}>
+      <div 
+        ref={containerRef} 
+        className="flex flex-col md:flex-row flex-1 min-h-0 overflow-hidden bg-gray-50" 
+        style={{ userSelect: isResizing ? 'none' : 'auto' }}
+        data-ai-case-helper-container
+      >
         {/* Left Panel - Controls */}
+        {/* Mobile: Full width, Desktop: Resizable width */}
         <div 
-          className="bg-white border-r flex flex-col w-full md:flex-col"
-          style={{ width: typeof window !== 'undefined' && window.innerWidth >= 768 ? `${leftPanelWidth}%` : undefined }}
+          className={`bg-white border-r flex flex-col ${isMobile ? 'w-full' : ''}`}
+          style={!isMobile ? { width: `${leftPanelWidth}%` } : undefined}
+          data-ai-case-helper-left-panel
         >
           {/* Scrollable content area */}
           <div className="flex-1 overflow-y-auto p-4 space-y-4 min-h-0">
@@ -1019,9 +1090,10 @@ Guidelines:
         </div>
 
         {/* Right Panel - Chat Interface */}
-        <div className="flex-1 flex flex-col bg-white w-full md:w-auto min-h-0">
+        {/* Mobile: Full width below left panel, Desktop: Side-by-side */}
+        <div className={`flex-1 flex flex-col bg-white min-h-0 ${isMobile ? 'w-full border-t' : 'w-auto'}`} data-ai-case-helper-right-panel>
           {/* Chat Messages - Scrolling Area */}
-          <div className="flex-1 overflow-y-auto p-4 sm:p-6 space-y-4 min-h-0">
+          <div className="flex-1 overflow-y-auto p-4 sm:p-6 space-y-4 min-h-0" data-ai-case-helper-chat-area>
             {chatMessages.length === 0 ? (
               <div className="flex items-center justify-center h-full">
                 <div className="text-center text-muted-foreground max-w-md">
@@ -1082,8 +1154,8 @@ Guidelines:
             )}
           </div>
           
-          {/* Chat Input */}
-          <div className="p-4 border-t bg-gray-50">
+          {/* Chat Input - Mobile: Full width, Desktop: Constrained to right panel */}
+          <div className={`p-4 border-t bg-gray-50 ${isMobile ? 'w-full' : ''}`} data-ai-case-helper-message-bar>
             <div className="flex gap-3">
               <Textarea
                 placeholder="Ask a follow-up question or request specific guidance..."

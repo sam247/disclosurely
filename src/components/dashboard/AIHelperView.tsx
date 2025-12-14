@@ -1,4 +1,5 @@
 import AICaseHelper from '@/components/AICaseHelper';
+import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Info, AlertTriangle } from 'lucide-react';
 import {
@@ -15,6 +16,17 @@ const AIHelperView = () => {
   const { t } = useTranslation();
   const { organization } = useOrganization();
   const { data: aiCaseHelperEnabled, isLoading: aiCaseHelperLoading } = useFeatureFlag('ai_case_helper', organization?.id);
+  const [isMobile, setIsMobile] = useState(false);
+
+  // Detect mobile screen size
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
   
   if (aiCaseHelperLoading) {
     return (
@@ -38,8 +50,8 @@ const AIHelperView = () => {
   }
   
   return (
-    <div className="space-y-6">
-      <div>
+    <div className={isMobile ? 'h-full flex flex-col min-h-0' : 'space-y-6'}>
+      <div className={isMobile ? 'flex-shrink-0 mb-4' : ''}>
         <h1 className="text-xl sm:text-2xl font-bold">{t('aiCaseHelperTitle')}</h1>
         <div className="flex items-center gap-2 mt-2 flex-wrap">
           <p className="text-muted-foreground text-sm sm:text-base">{t('aiCaseHelperDescription')}</p>
@@ -74,7 +86,9 @@ const AIHelperView = () => {
           </TooltipProvider>
         </div>
       </div>
-      <AICaseHelper />
+      <div className={isMobile ? 'flex-1 min-h-0 overflow-hidden' : ''}>
+        <AICaseHelper />
+      </div>
     </div>
   );
 };
