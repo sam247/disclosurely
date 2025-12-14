@@ -1750,7 +1750,7 @@ Additional Details: ${decryptedContent.additionalDetails || 'None provided'}
                           <TableRow
                             key={report.id}
                             className={highlightedReportIds.includes(report.id) ? 'bg-yellow-50 border-l-4 border-l-orange-400' : ''}
-                            style={{ height: '17px' }}
+                            style={{ height: '15px' }}
                           >
                             <TableCell className="font-mono text-xs px-2 py-0">
                               <div className="flex items-center gap-2">
@@ -2364,12 +2364,9 @@ Additional Details: ${decryptedContent.additionalDetails || 'None provided'}
         </TabsContent>
 
             <TabsContent value="archived" className="flex flex-col overflow-hidden min-h-0">
-              <Card className="flex flex-col flex-1 overflow-hidden min-h-0" data-dashboard-card-archived>
-                <CardHeader className="flex-shrink-0">
-              <CardTitle>Archived Reports</CardTitle>
-              <CardDescription>Closed and archived reports</CardDescription>
-            </CardHeader>
-                <CardContent className="flex-1 flex flex-col overflow-hidden min-h-0 p-0">
+              {/* LOCKED: Card uses flex-1 to fill remaining space - DO NOT CHANGE to fixed height */}
+              <Card className="md:border md:shadow-sm border-0 shadow-none flex flex-col flex-1 overflow-hidden min-h-0" data-dashboard-card-archived>
+                <CardContent className="p-0 flex-1 flex flex-col overflow-hidden min-h-0">
               {totalArchived === 0 ? (
                 <div className="text-center py-8 text-muted-foreground px-6">
                   {isOrgAdmin ? (
@@ -2389,7 +2386,7 @@ Additional Details: ${decryptedContent.additionalDetails || 'None provided'}
                   <div className="hidden md:block flex-1 overflow-hidden flex flex-col min-h-0" data-dashboard-table-archived>
                     {/* Scrollable table body */}
                     <div className="flex-1 overflow-y-auto overflow-x-auto min-h-0" style={{ maxHeight: 'calc(100% - 40px)' }}>
-                      <Table>
+                      <Table className="min-w-full">
                         <TableHeader>
                           <TableRow>
                             <TableHead className="px-2 py-1 text-xs">Tracking ID</TableHead>
@@ -2402,7 +2399,7 @@ Additional Details: ${decryptedContent.additionalDetails || 'None provided'}
                         </TableHeader>
                       <TableBody>
                         {paginatedArchivedReports.map((report) => (
-                            <TableRow key={report.id} style={{ height: '17px' }}>
+                            <TableRow key={report.id} style={{ height: '15px' }}>
                               <TableCell className="font-mono text-xs px-2 py-0">
                                 <div className="flex items-center gap-2">
                                   <span>{report.tracking_id}</span>
@@ -2427,35 +2424,35 @@ Additional Details: ${decryptedContent.additionalDetails || 'None provided'}
                                   </button>
                                 </div>
                               </TableCell>
-                              <TableCell className="font-medium text-xs px-2 py-0">{report.title}</TableCell>
-                              <TableCell className="px-2 py-0">
-                                <Badge variant="secondary" className="text-xs px-1 py-0">{report.status}</Badge>
-                              </TableCell>
-                              <TableCell className="px-2 py-0">
-                                {decryptedCategories[report.id] ? (
-                                  <div className="text-xs">
-                                    <div className="font-medium">{decryptedCategories[report.id].main}</div>
-                                    {decryptedCategories[report.id].sub && (
-                                      <div className="text-muted-foreground text-[10px]">{decryptedCategories[report.id].sub}</div>
-                                    )}
-                                  </div>
-                                ) : (
-                                  <span className="text-xs text-muted-foreground">-</span>
-                                )}
-                              </TableCell>
-                              <TableCell className="text-xs text-muted-foreground px-2 py-0">
-                                {new Date(report.created_at).toLocaleDateString()}
-                              </TableCell>
-                              <TableCell className="text-right px-2 py-0">
-                                <div className="flex items-center justify-end gap-2">
-                                  <Button 
-                                    variant="ghost" 
-                                    size="sm"
-                                    onClick={() => handleViewReport(report)}
-                                    className="text-primary hover:text-primary"
-                                  >
-                                    View
-                                  </Button>
+                            <TableCell className="font-medium">{report.title}</TableCell>
+                            <TableCell>
+                              <Badge variant="secondary">{report.status}</Badge>
+                            </TableCell>
+                            <TableCell>
+                              {decryptedCategories[report.id] ? (
+                                <div className="text-sm">
+                                  <div className="font-medium">{decryptedCategories[report.id].main}</div>
+                                  {decryptedCategories[report.id].sub && (
+                                    <div className="text-muted-foreground text-xs">{decryptedCategories[report.id].sub}</div>
+                                  )}
+                                </div>
+                              ) : (
+                                <span className="text-sm text-muted-foreground">-</span>
+                              )}
+                            </TableCell>
+                            <TableCell className="text-xs text-muted-foreground px-2 py-0">
+                              {new Date(report.archived_at || report.created_at).toLocaleDateString()}
+                            </TableCell>
+                            <TableCell className="text-right px-2 py-0">
+                               <div className="flex items-center justify-end gap-2">
+                                <Button 
+                                  variant="default" 
+                                  size="sm"
+                                  className="h-6 text-xs px-2"
+                                  onClick={() => handleViewReport(report)}
+                                >
+                                  {t('viewReport')}
+                                </Button>
                                   <DropdownMenu>
                                     <DropdownMenuTrigger asChild>
                                       <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
