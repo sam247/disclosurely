@@ -1667,7 +1667,7 @@ Additional Details: ${decrypted.additionalDetails || 'None provided'}`;
               ) : (
                 <div className="space-y-1">
                   {Array.isArray(cases) && cases.length > 0 ? (
-                    cases.slice(0, 20).map((caseItem) => (
+                    cases.map((caseItem) => (
                       <button
                         key={caseItem.id}
                         onClick={() => {
@@ -1699,64 +1699,115 @@ Additional Details: ${decrypted.additionalDetails || 'None provided'}`;
                   )}
                 </div>
               )}
+                </div>
+              </div>
+            </ScrollArea>
           </div>
 
-            <Separator />
-
+          {/* Fixed Bottom Sections - Documents and Saved Analyses */}
+          <div className="flex-shrink-0 border-t bg-muted/30">
+            <div className="p-4 space-y-4">
               {/* Document Management Section - Fixed at bottom */}
               <div className="flex-shrink-0">
                 <div className="flex items-center justify-between mb-2 px-2">
                   <h3 className="text-sm font-semibold">Documents</h3>
-                <input
-                  ref={fileInputRef}
-                  type="file"
-                  accept=".pdf,.docx,.txt,.doc"
-                  multiple
-                  onChange={handleFileUpload}
-                  className="hidden"
-              />
-              <Button
-                  variant="ghost"
-                  size="sm"
-                  className="h-6 w-6 p-0"
-                  onClick={() => fileInputRef.current?.click()}
-                  disabled={isUploading}
-                  title="Upload document"
-                >
-                  <Upload className="h-3 w-3" />
-                </Button>
-              </div>
-              {isLoadingDocs ? (
-                <div className="flex items-center justify-center py-4">
-                  <Loader2 className="h-4 w-4 animate-spin" />
+                  <input
+                    ref={fileInputRef}
+                    type="file"
+                    accept=".pdf,.docx,.txt,.doc"
+                    multiple
+                    onChange={handleFileUpload}
+                    className="hidden"
+                  />
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="h-6 w-6 p-0"
+                    onClick={() => fileInputRef.current?.click()}
+                    disabled={isUploading}
+                    title="Upload document"
+                  >
+                    <Upload className="h-3 w-3" />
+                  </Button>
                 </div>
-              ) : (
-                <div className="space-y-1">
-                  {Array.isArray(documents) && documents.length > 0 ? (
-                    documents.map((doc) => {
-                      const isSelected = Array.isArray(selectedDocs) && selectedDocs.includes(doc.id);
-                      return (
-                        <div key={doc.id} className="flex items-center gap-1 group">
+                {isLoadingDocs ? (
+                  <div className="flex items-center justify-center py-4">
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                  </div>
+                ) : (
+                  <div className="space-y-1 max-h-32 overflow-y-auto">
+                    {Array.isArray(documents) && documents.length > 0 ? (
+                      documents.map((doc) => {
+                        const isSelected = Array.isArray(selectedDocs) && selectedDocs.includes(doc.id);
+                        return (
+                          <div key={doc.id} className="flex items-center gap-1 group">
+                            <button
+                              onClick={() => {
+                                setSelectedDocs(prev => {
+                                  const prevArray = Array.isArray(prev) ? prev : [];
+                                  return prevArray.includes(doc.id)
+                                    ? prevArray.filter(id => id !== doc.id)
+                                    : [...prevArray, doc.id];
+                                });
+                              }}
+                              className={cn(
+                                "flex-1 text-left px-3 py-2 rounded-md text-xs transition-colors truncate",
+                                isSelected
+                                  ? "bg-primary text-primary-foreground"
+                                  : "hover:bg-muted"
+                              )}
+                              title={doc.name}
+                            >
+                              <FileText className="h-3 w-3 inline mr-1" />
+                              <span className="truncate">{doc.name}</span>
+                              {isSelected && <span className="ml-1">✓</span>}
+                            </button>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              className="h-6 w-6 p-0 opacity-0 group-hover:opacity-100 transition-opacity"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                deleteDocument(doc);
+                              }}
+                              title="Delete document"
+                            >
+                              <Trash2 className="h-3 w-3 text-destructive" />
+                            </Button>
+                          </div>
+                        );
+                      })
+                    ) : (
+                      <p className="text-xs text-muted-foreground px-2">No documents</p>
+                    )}
+                  </div>
+                )}
+              </div>
+
+              <Separator />
+
+              {/* Saved Analyses Section - Fixed at bottom, always visible */}
+              <div className="flex-shrink-0" data-ai-assistant-saved-analyses>
+                <h3 className="text-sm font-semibold mb-2 px-2">Saved Analyses</h3>
+                {isLoadingSavedAnalyses ? (
+                  <div className="flex items-center justify-center py-4">
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                  </div>
+                ) : (
+                  <div className="space-y-1 max-h-32 overflow-y-auto">
+                    {savedAnalyses.length > 0 ? (
+                      savedAnalyses.map((analysis) => (
+                        <div key={analysis.id} className="flex items-center gap-1 group">
                           <button
-                            onClick={() => {
-                              setSelectedDocs(prev => {
-                                const prevArray = Array.isArray(prev) ? prev : [];
-                                return prevArray.includes(doc.id)
-                                  ? prevArray.filter(id => id !== doc.id)
-                                  : [...prevArray, doc.id];
-                              });
-                            }}
-                            className={cn(
-                              "flex-1 text-left px-3 py-2 rounded-md text-xs transition-colors truncate",
-                              isSelected
-                                ? "bg-primary text-primary-foreground"
-                                : "hover:bg-muted"
-                            )}
-                            title={doc.name}
+                            onClick={() => loadSavedAnalysis(analysis.id)}
+                            className="flex-1 text-left px-3 py-2 rounded-md text-xs transition-colors hover:bg-muted truncate"
+                            title={`${analysis.tracking_id} - ${analysis.case_title}`}
                           >
-                            <FileText className="h-3 w-3 inline mr-1" />
-                            <span className="truncate">{doc.name}</span>
-                            {isSelected && <span className="ml-1">✓</span>}
+                            <div className="font-medium truncate">{analysis.tracking_id}</div>
+                            <div className="text-muted-foreground truncate">{analysis.case_title}</div>
+                            <div className="text-muted-foreground text-[10px]">
+                              {new Date(analysis.created_at).toLocaleDateString()}
+                            </div>
                           </button>
                           <Button
                             variant="ghost"
@@ -1764,69 +1815,23 @@ Additional Details: ${decrypted.additionalDetails || 'None provided'}`;
                             className="h-6 w-6 p-0 opacity-0 group-hover:opacity-100 transition-opacity"
                             onClick={(e) => {
                               e.stopPropagation();
-                              deleteDocument(doc);
+                              deleteSavedAnalysis(analysis.id);
                             }}
-                            title="Delete document"
+                            title="Delete saved analysis"
                           >
                             <Trash2 className="h-3 w-3 text-destructive" />
-              </Button>
+                          </Button>
                         </div>
-                      );
-                    })
-                  ) : (
-                    <p className="text-xs text-muted-foreground px-2">No documents</p>
-                  )}
-                </div>
-              )}
-            </div>
-
-            <Separator />
-
-            {/* Saved Analyses Section - Ensure it's always visible */}
-            <div className="flex-shrink-0" data-ai-assistant-saved-analyses>
-              <h3 className="text-sm font-semibold mb-2 px-2">Saved Analyses</h3>
-              {isLoadingSavedAnalyses ? (
-                <div className="flex items-center justify-center py-4">
-                  <Loader2 className="h-4 w-4 animate-spin" />
-                </div>
-              ) : (
-                <div className="space-y-1">
-                  {savedAnalyses.length > 0 ? (
-                    savedAnalyses.map((analysis) => (
-                      <div key={analysis.id} className="flex items-center gap-1 group">
-                        <button
-                          onClick={() => loadSavedAnalysis(analysis.id)}
-                          className="flex-1 text-left px-3 py-2 rounded-md text-xs transition-colors hover:bg-muted truncate"
-                          title={`${analysis.tracking_id} - ${analysis.case_title}`}
-                        >
-                          <div className="font-medium truncate">{analysis.tracking_id}</div>
-                          <div className="text-muted-foreground truncate">{analysis.case_title}</div>
-                          <div className="text-muted-foreground text-[10px]">
-                            {new Date(analysis.created_at).toLocaleDateString()}
-                          </div>
-                        </button>
-                  <Button
-                          variant="ghost"
-                          size="sm"
-                          className="h-6 w-6 p-0 opacity-0 group-hover:opacity-100 transition-opacity"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            deleteSavedAnalysis(analysis.id);
-                          }}
-                          title="Delete saved analysis"
-                        >
-                          <Trash2 className="h-3 w-3 text-destructive" />
-                  </Button>
+                      ))
+                    ) : (
+                      <p className="text-xs text-muted-foreground px-2">No saved analyses</p>
+                    )}
+                  </div>
+                )}
               </div>
-                    ))
-                  ) : (
-                    <p className="text-xs text-muted-foreground px-2">No saved analyses</p>
-                  )}
             </div>
-              )}
           </div>
         </div>
-        </ScrollArea>
       </div>
 
       {/* Main Content Area */}
