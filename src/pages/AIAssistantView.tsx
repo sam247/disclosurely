@@ -1636,7 +1636,7 @@ Additional Details: ${decrypted.additionalDetails || 'None provided'}`;
   return (
     <div 
       ref={containerRef}
-      className="flex h-full overflow-hidden -m-4 md:-m-6"
+      className="flex h-full overflow-hidden"
       style={{ height: 'calc(100vh - 4rem)', overflow: 'hidden', maxHeight: 'calc(100vh - 4rem)', width: '100%', maxWidth: '100%' }}
       data-ai-assistant-root
     >
