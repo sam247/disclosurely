@@ -1596,13 +1596,14 @@ Additional Details: ${decrypted.additionalDetails || 'None provided'}`;
       const rightPanel = document.querySelector('[data-ai-assistant-right-panel]');
       const sidebar = document.querySelector('[data-ai-assistant-sidebar]');
       const savedAnalyses = document.querySelector('[data-ai-assistant-saved-analyses]');
+      const fixedBottomSection = document.querySelector('[data-ai-assistant-fixed-bottom]');
       
       fetch('http://127.0.0.1:7243/ingest/07d80fb8-251f-44b3-a7af-ce7afb45a49c', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           location: 'AIAssistantView.tsx:useEffect:layout',
-          message: 'Layout measurements',
+          message: 'Layout measurements - checking for white gaps',
           data: {
             isMobile,
             viewportWidth: window.innerWidth,
@@ -1613,17 +1614,23 @@ Additional Details: ${decrypted.additionalDetails || 'None provided'}`;
             rootScrollWidth: root?.scrollWidth,
             rootScrollHeight: root?.scrollHeight,
             rootOffsetWidth: root?.offsetWidth,
-            messageBarWidth: messageBar?.clientWidth,
-            messageBarOffsetWidth: messageBar?.offsetWidth,
-            messageBarScrollWidth: messageBar?.scrollWidth,
-            messagesContainerWidth: messagesContainer?.clientWidth,
-            rightPanelWidth: rightPanel?.clientWidth,
-            rightPanelOffsetWidth: rightPanel?.offsetWidth,
+            rootComputedBg: root ? window.getComputedStyle(root).backgroundColor : null,
+            rootComputedPadding: root ? window.getComputedStyle(root).padding : null,
             sidebarWidth: sidebar?.clientWidth,
+            sidebarHeight: sidebar?.clientHeight,
             sidebarScrollHeight: sidebar?.scrollHeight,
-            sidebarClientHeight: sidebar?.clientHeight,
+            sidebarComputedBg: sidebar ? window.getComputedStyle(sidebar).backgroundColor : null,
+            fixedBottomHeight: fixedBottomSection?.clientHeight,
+            fixedBottomOffsetTop: fixedBottomSection?.offsetTop,
+            fixedBottomComputedBg: fixedBottomSection ? window.getComputedStyle(fixedBottomSection).backgroundColor : null,
             savedAnalysesVisible: savedAnalyses ? window.getComputedStyle(savedAnalyses).display !== 'none' : false,
             savedAnalysesOffsetTop: savedAnalyses?.offsetTop,
+            savedAnalysesHeight: savedAnalyses?.clientHeight,
+            messageBarWidth: messageBar?.clientWidth,
+            messageBarOffsetWidth: messageBar?.offsetWidth,
+            rightPanelWidth: rightPanel?.clientWidth,
+            rightPanelHeight: rightPanel?.clientHeight,
+            rightPanelComputedBg: rightPanel ? window.getComputedStyle(rightPanel).backgroundColor : null,
             bodyScrollHeight: document.body.scrollHeight,
             bodyClientHeight: document.body.clientHeight,
             hasHorizontalScroll: document.body.scrollWidth > window.innerWidth,
@@ -1631,7 +1638,7 @@ Additional Details: ${decrypted.additionalDetails || 'None provided'}`;
           },
           timestamp: Date.now(),
           sessionId: 'debug-session',
-          runId: 'ai-assistant-layout',
+          runId: 'white-gaps-debug',
           hypothesisId: 'A'
         })
       }).catch(() => {});
@@ -1835,7 +1842,7 @@ Additional Details: ${decrypted.additionalDetails || 'None provided'}`;
       </div>
 
       {/* Main Content Area */}
-      <div className="flex-1 flex flex-col overflow-hidden" data-ai-assistant-right-panel>
+      <div className="flex-1 flex flex-col overflow-hidden bg-background" data-ai-assistant-right-panel>
         {/* Toolbar - Full width */}
         <div className="h-14 border-b flex items-center justify-between px-4 md:px-6 flex-shrink-0 w-full">
           <div className="flex items-center gap-2">
