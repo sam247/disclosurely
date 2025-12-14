@@ -1562,11 +1562,22 @@ Additional Details: ${decrypted.additionalDetails || 'None provided'}`;
 
       // Set container height and prevent overflow
       if (containerRef.current) {
-        containerRef.current.style.height = `${calculatedHeight}px`;
-        containerRef.current.style.maxHeight = `${calculatedHeight}px`;
+        // Account for DashboardLayout padding: p-4 (1rem) on mobile, md:p-6 (1.5rem) on desktop
+        const isMobileLayout = window.innerWidth < 768;
+        const layoutPadding = isMobileLayout ? 16 : 24; // 1rem = 16px, 1.5rem = 24px
+        const fullWidth = window.innerWidth;
+        const fullHeight = calculatedHeight + (layoutPadding * 2); // Add padding back since we're breaking out
+        
+        containerRef.current.style.height = `${fullHeight}px`;
+        containerRef.current.style.maxHeight = `${fullHeight}px`;
         containerRef.current.style.overflow = 'hidden';
-        containerRef.current.style.width = '100%';
-        containerRef.current.style.maxWidth = '100%';
+        containerRef.current.style.width = `${fullWidth}px`;
+        containerRef.current.style.maxWidth = `${fullWidth}px`;
+        containerRef.current.style.marginLeft = `-${layoutPadding}px`;
+        containerRef.current.style.marginRight = `-${layoutPadding}px`;
+        containerRef.current.style.marginTop = `-${layoutPadding}px`;
+        containerRef.current.style.marginBottom = `-${layoutPadding}px`;
+        containerRef.current.style.padding = '0';
       }
 
       // #region agent log - Comprehensive layout debugging
@@ -1756,7 +1767,9 @@ Additional Details: ${decrypted.additionalDetails || 'None provided'}`;
     <div 
       ref={containerRef}
       className="flex h-full overflow-hidden bg-background"
-      style={{ height: 'calc(100vh - 4rem)', overflow: 'hidden', maxHeight: 'calc(100vh - 4rem)', width: '100%', maxWidth: '100%', display: 'flex' }}
+      style={{ 
+        padding: 0
+      }}
       data-ai-assistant-root
     >
       {/* Left Sidebar */}
