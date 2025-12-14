@@ -1549,8 +1549,8 @@ Additional Details: ${decrypted.additionalDetails || 'None provided'}`;
       const viewportHeight = window.innerHeight;
       const viewportWidth = window.innerWidth;
       const headerHeight = 64; // DashboardLayout header is h-16 (64px)
-      const contentPadding = isMobile ? 32 : 48; // p-4 md:p-6
-      const calculatedHeight = viewportHeight - headerHeight - contentPadding;
+      // No contentPadding subtraction - the container should fill the full available height
+      const calculatedHeight = viewportHeight - headerHeight;
 
       // Constrain body to prevent page scroll (both mobile and desktop for zoom handling)
       document.body.style.overflow = 'hidden';
@@ -1573,7 +1573,7 @@ Additional Details: ${decrypted.additionalDetails || 'None provided'}`;
 
     updateLayout();
     window.addEventListener('resize', updateLayout);
-    
+
     return () => {
       window.removeEventListener('resize', updateLayout);
       // Reset body styles on unmount
@@ -1597,13 +1597,20 @@ Additional Details: ${decrypted.additionalDetails || 'None provided'}`;
       const sidebar = document.querySelector('[data-ai-assistant-sidebar]');
       const savedAnalyses = document.querySelector('[data-ai-assistant-saved-analyses]');
       const fixedBottomSection = document.querySelector('[data-ai-assistant-fixed-bottom]');
+      const toolbar = rightPanel?.querySelector('.h-14');
+      
+      const rootRect = root?.getBoundingClientRect();
+      const rightPanelRect = rightPanel?.getBoundingClientRect();
+      const messageBarRect = messageBar?.getBoundingClientRect();
+      const messagesRect = messagesContainer?.getBoundingClientRect();
+      const toolbarRect = toolbar?.getBoundingClientRect();
       
       fetch('http://127.0.0.1:7243/ingest/07d80fb8-251f-44b3-a7af-ce7afb45a49c', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           location: 'AIAssistantView.tsx:useEffect:layout',
-          message: 'Layout measurements - checking for white gaps',
+          message: 'Layout measurements - checking for white gap at bottom-right',
           data: {
             isMobile,
             viewportWidth: window.innerWidth,
@@ -1611,34 +1618,36 @@ Additional Details: ${decrypted.additionalDetails || 'None provided'}`;
             zoomLevel: window.devicePixelRatio,
             rootWidth: root?.clientWidth,
             rootHeight: root?.clientHeight,
-            rootScrollWidth: root?.scrollWidth,
+            rootBottom: rootRect?.bottom,
             rootScrollHeight: root?.scrollHeight,
-            rootOffsetWidth: root?.offsetWidth,
-            rootComputedBg: root ? window.getComputedStyle(root).backgroundColor : null,
-            rootComputedPadding: root ? window.getComputedStyle(root).padding : null,
-            sidebarWidth: sidebar?.clientWidth,
-            sidebarHeight: sidebar?.clientHeight,
-            sidebarScrollHeight: sidebar?.scrollHeight,
-            sidebarComputedBg: sidebar ? window.getComputedStyle(sidebar).backgroundColor : null,
-            fixedBottomHeight: fixedBottomSection?.clientHeight,
-            fixedBottomOffsetTop: fixedBottomSection?.offsetTop,
-            fixedBottomComputedBg: fixedBottomSection ? window.getComputedStyle(fixedBottomSection).backgroundColor : null,
-            savedAnalysesVisible: savedAnalyses ? window.getComputedStyle(savedAnalyses).display !== 'none' : false,
-            savedAnalysesOffsetTop: savedAnalyses?.offsetTop,
-            savedAnalysesHeight: savedAnalyses?.clientHeight,
-            messageBarWidth: messageBar?.clientWidth,
-            messageBarOffsetWidth: messageBar?.offsetWidth,
             rightPanelWidth: rightPanel?.clientWidth,
             rightPanelHeight: rightPanel?.clientHeight,
-            rightPanelComputedBg: rightPanel ? window.getComputedStyle(rightPanel).backgroundColor : null,
+            rightPanelBottom: rightPanelRect?.bottom,
+            rightPanelComputedHeight: rightPanel ? window.getComputedStyle(rightPanel).height : null,
+            toolbarHeight: toolbar?.clientHeight,
+            toolbarBottom: toolbarRect?.bottom,
+            messagesHeight: messagesContainer?.clientHeight,
+            messagesBottom: messagesRect?.bottom,
+            messagesComputedHeight: messagesContainer ? window.getComputedStyle(messagesContainer).height : null,
+            messageBarHeight: messageBar?.clientHeight,
+            messageBarTop: messageBarRect?.top,
+            messageBarBottom: messageBarRect?.bottom,
+            messageBarComputedHeight: messageBar ? window.getComputedStyle(messageBar).height : null,
+            calculatedRightPanelHeight: toolbar?.clientHeight && messagesContainer?.clientHeight && messageBar?.clientHeight 
+              ? toolbar.clientHeight + messagesContainer.clientHeight + messageBar.clientHeight 
+              : null,
+            gapAtBottom: rightPanelRect && messageBarRect 
+              ? window.innerHeight - messageBarRect.bottom 
+              : null,
+            sidebarHeight: sidebar?.clientHeight,
+            sidebarBottom: sidebar?.getBoundingClientRect()?.bottom,
             bodyScrollHeight: document.body.scrollHeight,
             bodyClientHeight: document.body.clientHeight,
-            hasHorizontalScroll: document.body.scrollWidth > window.innerWidth,
             hasVerticalScroll: document.body.scrollHeight > window.innerHeight
           },
           timestamp: Date.now(),
           sessionId: 'debug-session',
-          runId: 'white-gaps-debug',
+          runId: 'white-gap-bottom-right',
           hypothesisId: 'A'
         })
       }).catch(() => {});
@@ -1842,9 +1851,9 @@ Additional Details: ${decrypted.additionalDetails || 'None provided'}`;
       </div>
 
       {/* Main Content Area */}
-      <div className="flex-1 flex flex-col overflow-hidden bg-background" data-ai-assistant-right-panel>
+      <div className="flex-1 flex flex-col overflow-hidden bg-background h-full" data-ai-assistant-right-panel>
         {/* Toolbar - Full width */}
-        <div className="h-14 border-b flex items-center justify-between px-4 md:px-6 flex-shrink-0 w-full">
+        <div className="h-14 border-b flex items-center justify-between px-4 md:px-6 flex-shrink-0 w-full bg-background">
           <div className="flex items-center gap-2">
             <h1 className="text-lg font-semibold">AI Assistant</h1>
             {selectedCaseData && (
@@ -1878,7 +1887,7 @@ Additional Details: ${decrypted.additionalDetails || 'None provided'}`;
           </div>
 
         {/* Chat Messages Area - Scrollable */}
-        <div className="flex-1 overflow-y-auto p-4 md:p-6 min-h-0">
+        <div className="flex-1 overflow-y-auto p-4 md:p-6 min-h-0 bg-background" data-ai-assistant-messages>
           {isEmptyState && !showPIIChoice ? (
             <div className="flex flex-col items-center justify-center h-full">
               <Sparkles className="h-12 w-12 text-muted-foreground mb-4" />
@@ -2083,7 +2092,7 @@ Additional Details: ${decrypted.additionalDetails || 'None provided'}`;
           </div>
 
         {/* Input Area - Fixed at Bottom - Full width to match assistant window */}
-        <div className="border-t p-4 md:p-6 flex-shrink-0 w-full" data-ai-assistant-message-bar>
+        <div className="border-t p-4 md:p-6 flex-shrink-0 w-full bg-background" data-ai-assistant-message-bar>
           <div className="w-full">
             <div className="flex gap-2">
               <Input
