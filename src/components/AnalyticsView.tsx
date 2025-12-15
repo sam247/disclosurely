@@ -123,12 +123,19 @@ const AnalyticsView: React.FC = () => {
       const previousPeriodEnd = currentPeriodStart;
 
       // Query current period reports - include encrypted_content for category decryption
-      const { data: currentReports, error: currentError } = await supabase
+      let currentReportsQuery = supabase
         .from('reports')
         .select('id, title, status, created_at, updated_at, report_type, priority, manual_risk_level, encrypted_content')
         .eq('organization_id', organization.id)
         .is('deleted_at', null) // Only exclude deleted reports
         .gte('created_at', currentPeriodStart);
+
+      // For 1y period, also filter to end of 2025
+      if (selectedPeriod === '1y') {
+        currentReportsQuery = currentReportsQuery.lte('created_at', new Date('2025-12-31T23:59:59Z').toISOString());
+      }
+
+      const { data: currentReports, error: currentError } = await currentReportsQuery;
 
       if (currentError) {
         console.error('Reports query error:', currentError);
@@ -149,9 +156,9 @@ const AnalyticsView: React.FC = () => {
       // Decrypt categories for current period reports
       const reportsWithCategories = await decryptCategoriesForReports(currentReports || [], organization.id);
       
-      // Process data
-      const processedData = processSimpleAnalytics(reportsWithCategories);
-      const previousData = previousReports ? processSimpleAnalytics(previousReports) : null;
+      // Process data - pass selectedPeriod for monthly trends generation
+      const processedData = processSimpleAnalytics(reportsWithCategories, selectedPeriod);
+      const previousData = previousReports ? processSimpleAnalytics(previousReports, selectedPeriod) : null;
       
       
       setAnalyticsData(processedData);
@@ -264,11 +271,11 @@ const AnalyticsView: React.FC = () => {
       .sort((a, b) => a.week.localeCompare(b.week));
   };
 
-  const generateMonthlyTrends = (reports: any[]) => {
+  const generateMonthlyTrends = (reports: any[], period: string = '30d') => {
     const trends: Record<string, { count: number; categories: string[] }> = {};
     
     // For 1y period, ensure we have all 12 months of 2025
-    if (selectedPeriod === '1y') {
+    if (period === '1y') {
       for (let month = 1; month <= 12; month++) {
         const monthKey = `2025-${String(month).padStart(2, '0')}`;
         trends[monthKey] = { count: 0, categories: [] };
@@ -278,6 +285,11 @@ const AnalyticsView: React.FC = () => {
     reports.forEach(report => {
       const date = new Date(report.created_at);
       const monthKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
+      
+      // Only include 2025 months for 1y period
+      if (period === '1y' && date.getFullYear() !== 2025) {
+        return;
+      }
       
       if (!trends[monthKey]) {
         trends[monthKey] = { count: 0, categories: [] };
@@ -390,7 +402,7 @@ const AnalyticsView: React.FC = () => {
     // Generate trend data
     const dailyTrends = generateDailyTrends(reports);
     const weeklyTrends = generateWeeklyTrends(reports);
-    const monthlyTrends = generateMonthlyTrends(reports, selectedPeriod);
+    const monthlyTrends = generateMonthlyTrends(reports, period);
     const yearlyTrends = generateYearlyTrends(reports);
 
     // Status breakdown
