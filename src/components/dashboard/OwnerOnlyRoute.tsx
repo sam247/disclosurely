@@ -11,7 +11,7 @@ interface OwnerOnlyRouteProps {
 
 /**
  * ADMIN-ONLY ROUTE PROTECTION
- * Only allows access to system admins
+ * Allows access to system admins and org admins
  * This check is done in multiple layers for absolute security:
  * 1. In the sidebar (to hide the menu item)
  * 2. In this route wrapper (to block direct URL access)
@@ -19,7 +19,7 @@ interface OwnerOnlyRouteProps {
  */
 const OwnerOnlyRoute = ({ children }: OwnerOnlyRouteProps) => {
   const { user, loading } = useAuth();
-  const { isAdmin, loading: rolesLoading } = useUserRoles();
+  const { isAdmin, isOrgAdmin, loading: rolesLoading } = useUserRoles();
 
   if (loading || rolesLoading) {
     return (
@@ -29,8 +29,8 @@ const OwnerOnlyRoute = ({ children }: OwnerOnlyRouteProps) => {
     );
   }
 
-  // STRICT CHECK: Only system admins
-  const isOwner = isAdmin;
+  // Allow system admins and org admins
+  const isOwner = isAdmin || isOrgAdmin;
 
   if (!user) {
     return <Navigate to="/login" replace />;
@@ -46,7 +46,7 @@ const OwnerOnlyRoute = ({ children }: OwnerOnlyRouteProps) => {
               <div>
                 <CardTitle className="text-destructive">Access Denied</CardTitle>
                 <CardDescription>
-                  This area is restricted to the owner only.
+                  This area is restricted to admins.
                 </CardDescription>
               </div>
             </div>

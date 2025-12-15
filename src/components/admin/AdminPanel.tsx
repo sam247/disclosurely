@@ -11,14 +11,11 @@ export const AdminPanel = () => {
   const { user } = useAuth();
   const { section } = useParams<{ section?: string }>();
   const navigate = useNavigate();
-  const { isAdmin, loading: rolesLoading } = useUserRoles();
+  const { isAdmin, isOrgAdmin, loading: rolesLoading } = useUserRoles();
   
-  // STRICT ADMIN CHECK - Only system admins
-  // This is the final security layer - checks are also done in:
-  // 1. DashboardSidebar (to hide menu item)
-  // 2. OwnerOnlyRoute (to block direct URL access)
-  // 3. Here (as final check in component)
-  const isOwner = isAdmin;
+  // Final security layer - aligns with sidebar and route guard
+  // Allow org admins alongside system admins for admin console access
+  const isOwner = isAdmin || isOrgAdmin;
 
   // Redirect to default section if no section specified
   useEffect(() => {
@@ -42,7 +39,7 @@ export const AdminPanel = () => {
         <div className="text-center">
           <h3 className="text-lg font-semibold mb-2 text-destructive">Access Denied</h3>
           <p className="text-muted-foreground">
-            This area is restricted to the owner only.
+            This area is restricted to administrators.
           </p>
         </div>
       </div>

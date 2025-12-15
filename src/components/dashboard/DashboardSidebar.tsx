@@ -32,48 +32,10 @@ const DashboardSidebar = ({
   const { isOrgAdmin, isCaseHandler } = useUserRoles();
   const { user } = useAuth();
   
-  // STRICT ADMIN CHECK - Only system admins
-  // This check is done here AND in the component itself for absolute security
+  // Admin/owner visibility now allows system admins or org admins
+  // This check is mirrored in route guards and the admin panel itself
   const { isAdmin } = useUserRoles();
-  const isOwner = isAdmin;
-
-  // #region agent log
-  useEffect(() => {
-    try {
-      fetch('http://127.0.0.1:7243/ingest/07d80fb8-251f-44b3-a7af-ce7afb45a49c', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          location: 'DashboardSidebar.tsx:role-check',
-          message: 'Sidebar role/limits state',
-          data: {
-            isAdmin,
-            isOwner,
-            isOrgAdmin,
-            isCaseHandler,
-            hasAIHelper: limits?.hasAIHelper,
-            subscribed: subscriptionData?.subscribed,
-            subscription_tier: subscriptionData?.subscription_tier
-          },
-          timestamp: Date.now(),
-          sessionId: 'debug-session',
-          runId: 'admin-visibility-debug',
-          hypothesisId: 'C'
-        })
-      }).catch(() => {});
-    } catch (err) {
-      console.log('[admin-visibility-debug] fetch blocked (likely CSP); data:', {
-        isAdmin,
-        isOwner,
-        isOrgAdmin,
-        isCaseHandler,
-        hasAIHelper: limits?.hasAIHelper,
-        subscribed: subscriptionData?.subscribed,
-        subscription_tier: subscriptionData?.subscription_tier
-      });
-    }
-  }, [isAdmin, isOwner, isOrgAdmin, isCaseHandler, limits?.hasAIHelper, subscriptionData?.subscribed, subscriptionData?.subscription_tier]);
-  // #endregion
+  const isOwner = isAdmin || isOrgAdmin;
 
   const menuItems = [{
     title: t('dashboard'),
