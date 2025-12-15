@@ -533,28 +533,27 @@ const AnalyticsView: React.FC = () => {
 
   if (loading || orgLoading) {
     return (
-      <div className="h-screen bg-background overflow-hidden flex flex-col">
-        <div className="max-w-7xl mx-auto flex-1 flex flex-col overflow-hidden w-full">
-          {/* Header */}
-          <div className="flex flex-col gap-2 flex-shrink-0">
-            <div>
+      <div 
+        className="flex-1 overflow-hidden flex flex-col min-h-0" 
+        style={{ height: 'calc(100vh - 4rem)', overflow: 'hidden', maxHeight: 'calc(100vh - 4rem)' }}
+      >
+        <div className="flex-1 overflow-hidden flex flex-col min-h-0" style={{ overflow: 'hidden', maxHeight: '100%' }}>
+          <div className="flex-1 flex flex-col overflow-hidden min-h-0 px-4 pt-4 pb-0" style={{ overflow: 'hidden', maxHeight: '100%' }}>
+            <div className="flex-shrink-0 mb-4">
               <h1 className="text-xl sm:text-2xl font-bold">Analytics</h1>
               <p className="text-xs sm:text-sm text-muted-foreground mt-0.5">
                 {orgLoading ? 'Loading organization...' : 'Loading insights...'}
               </p>
             </div>
-          </div>
-          {/* Loading content area */}
-          <div className="flex-1 overflow-hidden min-h-0">
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-4 pt-2 sm:pt-4">
-              {[...Array(4)].map((_, i) => (
-                <Card key={i} className="animate-pulse">
-                  <CardContent className="p-3 sm:p-4">
-                    <div className="h-3 sm:h-4 bg-muted rounded w-3/4 mb-2"></div>
-                    <div className="h-6 sm:h-8 bg-muted rounded w-1/2"></div>
+            <div className="flex-1 min-h-0 overflow-y-auto">
+              <div className="space-y-4">
+                <Card className="animate-pulse">
+                  <CardContent className="p-4">
+                    <div className="h-4 bg-muted rounded w-3/4 mb-2"></div>
+                    <div className="h-8 bg-muted rounded w-1/2"></div>
                   </CardContent>
                 </Card>
-              ))}
+              </div>
             </div>
           </div>
         </div>
@@ -564,44 +563,44 @@ const AnalyticsView: React.FC = () => {
 
   if (!analyticsData && !loading && !orgLoading) {
     return (
-      <div className="h-screen bg-background overflow-hidden flex flex-col">
-        <div className="max-w-7xl mx-auto flex-1 flex flex-col overflow-hidden w-full">
-          {/* Header */}
-          <div className="flex flex-col gap-2 flex-shrink-0">
-            <div>
+      <div 
+        className="flex-1 overflow-hidden flex flex-col min-h-0" 
+        style={{ height: 'calc(100vh - 4rem)', overflow: 'hidden', maxHeight: 'calc(100vh - 4rem)' }}
+      >
+        <div className="flex-1 overflow-hidden flex flex-col min-h-0" style={{ overflow: 'hidden', maxHeight: '100%' }}>
+          <div className="flex-1 flex flex-col overflow-hidden min-h-0 px-4 pt-4 pb-0" style={{ overflow: 'hidden', maxHeight: '100%' }}>
+            <div className="flex-shrink-0 mb-4">
               <h1 className="text-xl sm:text-2xl font-bold">Analytics</h1>
               <p className="text-xs sm:text-sm text-muted-foreground mt-0.5">
                 {!organization?.id ? 'No organization found. Please contact support.' : 'No data available for the selected period.'}
               </p>
-            </div>
-            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
-              <Button 
-                onClick={fetchAnalyticsData} 
-                variant="outline"
-                size="sm"
-                className="text-xs sm:text-sm"
-              >
-                Retry
-              </Button>
-              {organization?.id && (
-                <div className="flex items-center gap-2">
-                  <label className="text-xs sm:text-sm font-medium whitespace-nowrap">Period:</label>
-                  <select 
-                    value={selectedPeriod} 
-                    onChange={(e) => setSelectedPeriod(e.target.value as any)}
-                    className="px-2 py-1 sm:py-1.5 border rounded-md text-xs sm:text-sm bg-background"
-                  >
-                    <option value="7d">Last 7 days</option>
-                    <option value="30d">Last 30 days</option>
-                    <option value="90d">Last 90 days</option>
-                    <option value="1y">Last year</option>
-                  </select>
-                </div>
-              )}
+              <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 mt-2">
+                <Button 
+                  onClick={fetchAnalyticsData} 
+                  variant="outline"
+                  size="sm"
+                  className="text-xs sm:text-sm"
+                >
+                  Retry
+                </Button>
+                {organization?.id && (
+                  <div className="flex items-center gap-2">
+                    <label className="text-xs sm:text-sm font-medium whitespace-nowrap">Period:</label>
+                    <select 
+                      value={selectedPeriod} 
+                      onChange={(e) => setSelectedPeriod(e.target.value as any)}
+                      className="px-2 py-1 sm:py-1.5 border rounded-md text-xs sm:text-sm bg-background"
+                    >
+                      <option value="7d">Last 7 days</option>
+                      <option value="30d">Last 30 days</option>
+                      <option value="90d">Last 90 days</option>
+                      <option value="1y">Last year</option>
+                    </select>
+                  </div>
+                )}
+              </div>
             </div>
           </div>
-          {/* Empty content area */}
-          <div className="flex-1 overflow-hidden min-h-0"></div>
         </div>
       </div>
     );
@@ -610,125 +609,79 @@ const AnalyticsView: React.FC = () => {
   if (!analyticsData) return null;
 
   return (
-    <div className="h-screen bg-background overflow-hidden flex flex-col">
-      <div className="max-w-7xl mx-auto flex-1 flex flex-col overflow-hidden w-full">
-        {/* Header */}
-        <div className="flex flex-col gap-2 flex-shrink-0">
-          <div>
-            <h1 className="text-xl sm:text-2xl font-bold">Analytics</h1>
-            <p className="text-xs sm:text-sm text-muted-foreground mt-0.5">
-              Decision-ready insights for compliance teams
-            </p>
-          </div>
-          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
-            <div className="flex items-center gap-2 flex-1 sm:flex-initial">
-              <label className="text-xs sm:text-sm font-medium whitespace-nowrap">Period:</label>
-              <select 
-                value={selectedPeriod} 
-                onChange={(e) => setSelectedPeriod(e.target.value as any)}
-                className="px-2 py-1 sm:py-1.5 border rounded-md text-xs sm:text-sm bg-background flex-1 sm:flex-initial touch-manipulation"
-              >
-                <option value="7d">Last 7 days</option>
-                <option value="30d">Last 30 days</option>
-                <option value="90d">Last 90 days</option>
-                <option value="1y">Last year</option>
-              </select>
+    <div 
+      className="flex-1 overflow-hidden flex flex-col min-h-0" 
+      style={{ height: 'calc(100vh - 4rem)', overflow: 'hidden', maxHeight: 'calc(100vh - 4rem)' }}
+    >
+      {/* Content - Standardized structure matching dashboard */}
+      <div 
+        className="flex-1 overflow-hidden flex flex-col min-h-0" 
+        style={{ overflow: 'hidden', maxHeight: '100%' }}
+      >
+        <div className="flex-1 flex flex-col overflow-hidden min-h-0 px-4 pt-4 pb-0" style={{ overflow: 'hidden', maxHeight: '100%' }}>
+          {/* Title and Subtitle */}
+          <div className="flex-shrink-0 mb-4">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 mb-2">
+              <div>
+                <h1 className="text-xl sm:text-2xl font-bold">Analytics</h1>
+                <p className="text-xs sm:text-sm text-muted-foreground mt-0.5">
+                  Decision-ready insights for compliance teams
+                </p>
+              </div>
+              <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
+                <div className="flex items-center gap-2 flex-1 sm:flex-initial">
+                  <label className="text-xs sm:text-sm font-medium whitespace-nowrap">Period:</label>
+                  <select 
+                    value={selectedPeriod} 
+                    onChange={(e) => setSelectedPeriod(e.target.value as any)}
+                    className="px-2 py-1 sm:py-1.5 border rounded-md text-xs sm:text-sm bg-background flex-1 sm:flex-initial touch-manipulation"
+                  >
+                    <option value="7d">Last 7 days</option>
+                    <option value="30d">Last 30 days</option>
+                    <option value="90d">Last 90 days</option>
+                    <option value="1y">Last year</option>
+                  </select>
+                </div>
+                <Button
+                  onClick={handleExport}
+                  disabled={exporting}
+                  variant="outline"
+                  size="sm"
+                  className="gap-2 w-full sm:w-auto touch-manipulation text-xs sm:text-sm h-7 sm:h-8"
+                >
+                  <Download className="h-3 w-3 sm:h-4 sm:w-4" />
+                  {exporting ? 'Exporting...' : 'Export'}
+                </Button>
+              </div>
             </div>
-            <Button
-              onClick={handleExport}
-              disabled={exporting}
-              variant="outline"
-              size="sm"
-              className="gap-2 w-full sm:w-auto touch-manipulation text-xs sm:text-sm h-7 sm:h-8"
-            >
-              <Download className="h-3 w-3 sm:h-4 sm:w-4" />
-              {exporting ? 'Exporting...' : 'Export'}
-            </Button>
+
+            {/* Compact Metric Cards - Small inline row */}
+            <div className="flex flex-wrap gap-2 mb-4">
+              <div className="flex items-center gap-2 px-3 py-1.5 bg-muted/50 rounded-md border text-xs">
+                <FileText className="h-3 w-3 text-muted-foreground" />
+                <span className="font-semibold">{analyticsData.totalReports}</span>
+                <span className="text-muted-foreground">Total</span>
+              </div>
+              <div className="flex items-center gap-2 px-3 py-1.5 bg-muted/50 rounded-md border text-xs">
+                <Activity className="h-3 w-3 text-muted-foreground" />
+                <span className="font-semibold">{analyticsData.activeReports}</span>
+                <span className="text-muted-foreground">Active</span>
+              </div>
+              <div className="flex items-center gap-2 px-3 py-1.5 bg-muted/50 rounded-md border text-xs">
+                <Clock className="h-3 w-3 text-muted-foreground" />
+                <span className="font-semibold">{analyticsData.avgResponseTime.toFixed(1)}d</span>
+                <span className="text-muted-foreground">Response</span>
+              </div>
+              <div className="flex items-center gap-2 px-3 py-1.5 bg-muted/50 rounded-md border text-xs">
+                <Target className="h-3 w-3 text-muted-foreground" />
+                <span className="font-semibold">{analyticsData.resolutionRate.toFixed(1)}%</span>
+                <span className="text-muted-foreground">Resolved</span>
+              </div>
+            </div>
           </div>
-        </div>
 
-        {/* Metric Cards - Optimized for mobile */}
-        <div className="grid gap-3 sm:gap-4 grid-cols-2 md:grid-cols-4 flex-shrink-0 mt-3 sm:mt-4">
-          <Card className="col-span-1">
-            <CardContent className="pt-3 pb-3 sm:pt-4 sm:pb-4">
-              <div className="text-center">
-                <p className="text-lg sm:text-xl md:text-2xl font-bold">{analyticsData.totalReports}</p>
-                <p className="text-[11px] sm:text-xs text-muted-foreground mt-0.5">Total Reports</p>
-                {totalReportsTrend && (
-                  <div className={`flex items-center justify-center gap-1 mt-1.5 text-[10px] sm:text-xs ${totalReportsTrend.isPositive ? 'text-green-600' : 'text-red-600'} hidden sm:flex`}>
-                    {totalReportsTrend.isPositive ? (
-                      <ArrowUpRight className="h-2.5 w-2.5 sm:h-3 sm:w-3" />
-                    ) : (
-                      <ArrowDownRight className="h-2.5 w-2.5 sm:h-3 sm:w-3" />
-                    )}
-                    <span>{totalReportsTrend.value.toFixed(1)}%</span>
-                  </div>
-                )}
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Active Cases - Hidden on mobile, shown on desktop */}
-          <Card className="hidden md:block md:col-span-1">
-            <CardContent className="pt-3 pb-3 sm:pt-4 sm:pb-4">
-              <div className="text-center">
-                <p className="text-lg sm:text-xl md:text-2xl font-bold">{analyticsData.activeReports}</p>
-                <p className="text-[11px] sm:text-xs text-muted-foreground mt-0.5">Active Cases</p>
-                {activeReportsTrend && (
-                  <div className={`flex items-center justify-center gap-1 mt-1.5 text-[10px] sm:text-xs ${activeReportsTrend.isPositive ? 'text-green-600' : 'text-red-600'} hidden sm:flex`}>
-                    {activeReportsTrend.isPositive ? (
-                      <ArrowUpRight className="h-2.5 w-2.5 sm:h-3 sm:w-3" />
-                    ) : (
-                      <ArrowDownRight className="h-2.5 w-2.5 sm:h-3 sm:w-3" />
-                    )}
-                    <span>{activeReportsTrend.value.toFixed(1)}%</span>
-                  </div>
-                )}
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card className="col-span-1">
-            <CardContent className="pt-3 pb-3 sm:pt-4 sm:pb-4">
-              <div className="text-center">
-                <p className="text-lg sm:text-xl md:text-2xl font-bold">{analyticsData.avgResponseTime.toFixed(1)}d</p>
-                <p className="text-[11px] sm:text-xs text-muted-foreground mt-0.5">Avg Response Time</p>
-                {avgResponseTimeTrend && (
-                  <div className={`flex items-center justify-center gap-1 mt-1.5 text-[10px] sm:text-xs ${avgResponseTimeTrend.isPositive ? 'text-red-600' : 'text-green-600'} hidden sm:flex`}>
-                    {avgResponseTimeTrend.isPositive ? (
-                      <ArrowUpRight className="h-2.5 w-2.5 sm:h-3 sm:w-3" />
-                    ) : (
-                      <ArrowDownRight className="h-2.5 w-2.5 sm:h-3 sm:w-3" />
-                    )}
-                    <span>{avgResponseTimeTrend.value.toFixed(1)}d</span>
-                  </div>
-                )}
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card className="col-span-1">
-            <CardContent className="pt-3 pb-3 sm:pt-4 sm:pb-4">
-              <div className="text-center">
-                <p className="text-lg sm:text-xl md:text-2xl font-bold">{analyticsData.resolutionRate.toFixed(1)}%</p>
-                <p className="text-[11px] sm:text-xs text-muted-foreground mt-0.5">Resolution Rate</p>
-                {resolutionRateTrend && (
-                  <div className={`flex items-center justify-center gap-1 mt-1.5 text-[10px] sm:text-xs ${resolutionRateTrend.isPositive ? 'text-green-600' : 'text-red-600'} hidden sm:flex`}>
-                    {resolutionRateTrend.isPositive ? (
-                      <ArrowUpRight className="h-2.5 w-2.5 sm:h-3 sm:w-3" />
-                    ) : (
-                      <ArrowDownRight className="h-2.5 w-2.5 sm:h-3 sm:w-3" />
-                    )}
-                    <span>{resolutionRateTrend.value.toFixed(1)}%</span>
-                  </div>
-                )}
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-
-        {/* Scrollable Content Area */}
-        <div className="flex-1 min-h-0 overflow-y-auto overflow-x-hidden mt-3 sm:mt-4 space-y-3 sm:space-y-4">
+          {/* Scrollable Content Area */}
+          <div className="flex-1 min-h-0 overflow-y-auto overflow-x-hidden space-y-3 sm:space-y-4">
           {/* Main Chart - Full Width on Mobile */}
           <Card className="flex flex-col min-h-0">
             <CardHeader className="pb-2 sm:pb-3 flex-shrink-0">
