@@ -114,31 +114,48 @@ const getCorsHeaders = (req: Request) => ({
 });
 
 serve(async (req) => {
-  // Handle CORS preflight FIRST - before any other code
-  if (req.method === 'OPTIONS') {
-    try {
-      const corsHeaders = getCorsHeaders(req);
-      return new Response('ok', { status: 200, headers: corsHeaders });
-    } catch (error) {
-      // Fallback CORS headers if getCorsHeaders fails
-      return new Response('ok', { 
-        status: 200, 
-        headers: {
-          'Access-Control-Allow-Origin': '*',
-          'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
-          'Access-Control-Allow-Methods': 'POST, OPTIONS',
-        }
-      });
-    }
-  }
-  
-  const corsHeaders = getCorsHeaders(req);
+  // Default CORS headers for error responses
+  const defaultCorsHeaders = {
+    'Access-Control-Allow-Origin': '*',
+    'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+    'Access-Control-Allow-Methods': 'POST, OPTIONS',
+    'Content-Type': 'application/json',
+  };
 
   try {
+    // Handle CORS preflight FIRST - before any other code
+    if (req.method === 'OPTIONS') {
+      try {
+        const corsHeaders = getCorsHeaders(req);
+        return new Response('ok', { status: 200, headers: corsHeaders });
+      } catch (error) {
+        // Fallback CORS headers if getCorsHeaders fails
+        return new Response('ok', { 
+          status: 200, 
+          headers: defaultCorsHeaders
+        });
+      }
+    }
+    
+    const corsHeaders = getCorsHeaders(req);
+
     // Parse request
-    console.log('[Detect PII] Request received');
-    const body = await req.json();
-    console.log('[Detect PII] Request body keys:', Object.keys(body));
+    console.log('[Detect PII] Request received, method:', req.method);
+    console.log('[Detect PII] Request headers:', Object.fromEntries(req.headers.entries()));
+    
+    let body;
+    try {
+      const bodyText = await req.text();
+      console.log('[Detect PII] Request body text length:', bodyText.length);
+      body = JSON.parse(bodyText);
+      console.log('[Detect PII] Request body keys:', Object.keys(body));
+    } catch (parseError: any) {
+      console.error('[Detect PII] Failed to parse request body:', parseError);
+      return new Response(
+        JSON.stringify({ error: 'Invalid JSON in request body', details: parseError.message }),
+        { status: 400, headers: corsHeaders }
+      );
+    }
     
     const { text, enable_ai = true } = body;
 
@@ -212,7 +229,20 @@ serve(async (req) => {
     console.error('[Detect PII] Error type:', error?.constructor?.name);
     console.error('[Detect PII] Error message:', error?.message);
     console.error('[Detect PII] Error stack:', error?.stack);
-    console.error('[Detect PII] Full error object:', JSON.stringify(error, Object.getOwnPropertyNames(error)));
+    
+    try {
+      console.error('[Detect PII] Full error object:', JSON.stringify(error, Object.getOwnPropertyNames(error)));
+    } catch (stringifyError) {
+      console.error('[Detect PII] Could not stringify error:', stringifyError);
+    }
+    
+    // Try to get CORS headers, but fallback to default if it fails
+    let errorCorsHeaders;
+    try {
+      errorCorsHeaders = getCorsHeaders(req);
+    } catch {
+      errorCorsHeaders = defaultCorsHeaders;
+    }
     
     return new Response(
       JSON.stringify({ 
@@ -224,7 +254,7 @@ serve(async (req) => {
         stats: {},
         redactionMap: {},
       }),
-      { status: 500, headers: corsHeaders }
+      { status: 500, headers: errorCorsHeaders }
     );
   }
 });
