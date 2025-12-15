@@ -1562,7 +1562,7 @@ Additional Details: ${decryptedContent.additionalDetails || 'None provided'}
   }
 
   return (
-    <div className="flex flex-col" style={{ height: 'calc(100vh - 109px)', overflow: 'hidden' }} data-dashboard-root>
+    <div className="flex flex-col gap-0" style={{ height: 'calc(100vh - 109px)', overflow: 'hidden' }} data-dashboard-root>
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 flex-shrink-0 px-2 sm:px-0 mb-2">
         <div>
