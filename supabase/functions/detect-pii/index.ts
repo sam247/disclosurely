@@ -57,6 +57,7 @@ async function callOpenRedactAPI(text: string, enableAI: boolean = true) {
     console.log('[Detect PII] Entities count:', data.entities?.length || 0);
     console.log('[Detect PII] Has redacted_text:', !!data.redacted_text);
     console.log('[Detect PII] AI used:', data.aiUsed);
+    console.log('[Detect PII] Full API response:', JSON.stringify(data, null, 2));
     
     // Map API response entities to detections format
     // API returns: { entities: [...], aiUsed: boolean, redacted_text?: string }
@@ -173,10 +174,13 @@ serve(async (req) => {
     }
 
     console.log('[Detect PII] Processing text, length:', text.length);
+    console.log('[Detect PII] Text preview (first 200 chars):', text.substring(0, 200));
+    console.log('[Detect PII] Text preview (last 200 chars):', text.substring(Math.max(0, text.length - 200)));
 
     // Call OpenRedaction API
     const apiResult = await callOpenRedactAPI(text, enable_ai);
     console.log('[Detect PII] API result received, detections:', apiResult.detections?.length || 0);
+    console.log('[Detect PII] Full API result:', JSON.stringify(apiResult, null, 2));
 
     // Use redacted_text from API if available, otherwise build from detections
     let redactedText = apiResult.redacted_text || text;
