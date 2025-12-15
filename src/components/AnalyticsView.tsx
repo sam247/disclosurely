@@ -71,9 +71,6 @@ interface SimpleAnalyticsData {
   monthlyTrends: Array<{ month: string; count: number; categories: string[] }>;
   yearlyTrends: Array<{ year: string; count: number; categories: string[] }>;
   statusBreakdown: Array<{ status: string; count: number }>;
-  responseTimeByCategory: Array<{ category: string; avgDays: number; count: number }>;
-  resolutionRateByCategory: Array<{ category: string; rate: number; total: number; resolved: number }>;
-  recentActivity: Array<{ date: string; count: number; label: string }>;
 }
 
 const AnalyticsView: React.FC = () => {
@@ -499,79 +496,6 @@ const AnalyticsView: React.FC = () => {
       count: count as number
     }));
 
-    // Response Time by Category
-    const responseTimeByCategoryMap = reports.reduce((acc, r) => {
-      const category = r.mainCategory || 'Uncategorized';
-      if (!acc[category]) {
-        acc[category] = { totalTime: 0, count: 0 };
-      }
-      if (r.updated_at && r.created_at) {
-        const responseTime = new Date(r.updated_at).getTime() - new Date(r.created_at).getTime();
-        acc[category].totalTime += responseTime;
-        acc[category].count += 1;
-      }
-      return acc;
-    }, {} as Record<string, { totalTime: number; count: number }>);
-
-    const responseTimeByCategory = Object.entries(responseTimeByCategoryMap)
-      .map(([category, data]) => ({
-        category,
-        avgDays: data.count > 0 ? Math.round((data.totalTime / data.count / (1000 * 60 * 60 * 24)) * 10) / 10 : 0,
-        count: data.count
-      }))
-      .filter(item => item.count > 0)
-      .sort((a, b) => b.avgDays - a.avgDays)
-      .slice(0, 5);
-
-    // Resolution Rate by Category
-    const resolutionByCategoryMap = reports.reduce((acc, r) => {
-      const category = r.mainCategory || 'Uncategorized';
-      if (!acc[category]) {
-        acc[category] = { total: 0, resolved: 0 };
-      }
-      acc[category].total += 1;
-      if (r.status === 'closed' || r.status === 'resolved') {
-        acc[category].resolved += 1;
-      }
-      return acc;
-    }, {} as Record<string, { total: number; resolved: number }>);
-
-    const resolutionRateByCategory = Object.entries(resolutionByCategoryMap)
-      .map(([category, data]) => ({
-        category,
-        rate: data.total > 0 ? Math.round((data.resolved / data.total) * 100 * 10) / 10 : 0,
-        total: data.total,
-        resolved: data.resolved
-      }))
-      .filter(item => item.total > 0)
-      .sort((a, b) => b.rate - a.rate)
-      .slice(0, 5);
-
-    // Recent Activity (last 7 days)
-    const recentActivityMap: Record<string, number> = {};
-    const now = new Date();
-    for (let i = 6; i >= 0; i--) {
-      const date = new Date(now);
-      date.setDate(date.getDate() - i);
-      const dateKey = date.toISOString().split('T')[0];
-      recentActivityMap[dateKey] = 0;
-    }
-
-    reports.forEach(r => {
-      const reportDate = new Date(r.created_at).toISOString().split('T')[0];
-      if (recentActivityMap.hasOwnProperty(reportDate)) {
-        recentActivityMap[reportDate] += 1;
-      }
-    });
-
-    const recentActivity = Object.entries(recentActivityMap)
-      .map(([date, count]) => {
-        const d = new Date(date);
-        const label = d.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
-        return { date, count, label };
-      })
-      .sort((a, b) => a.date.localeCompare(b.date));
-
     return {
       totalReports,
       activeReports,
@@ -586,10 +510,7 @@ const AnalyticsView: React.FC = () => {
       weeklyTrends,
       monthlyTrends,
       yearlyTrends,
-      statusBreakdown,
-      responseTimeByCategory,
-      resolutionRateByCategory,
-      recentActivity
+      statusBreakdown
     };
   };
 
@@ -1191,81 +1112,6 @@ const AnalyticsView: React.FC = () => {
               </CardContent>
             </Card>
 
-          </div>
-
-          {/* Business Analytics - 3 Column Layout */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-3 sm:gap-4">
-            {/* Response Time by Category */}
-            <Card className="flex flex-col min-h-0">
-              <CardHeader className="pb-2 sm:pb-3 flex-shrink-0">
-                <CardTitle className="text-xs sm:text-sm">Response Time by Category</CardTitle>
-                <CardDescription className="text-[11px] sm:text-xs mt-0.5">Average days to respond</CardDescription>
-              </CardHeader>
-              <CardContent className="pt-0 pb-4 flex-1 min-h-0">
-                <div className="space-y-1.5">
-                  {analyticsData.responseTimeByCategory.length > 0 ? (
-                    analyticsData.responseTimeByCategory.map((item, index) => (
-                      <div key={index} className="flex items-center justify-between py-0.5">
-                        <span className="text-[10px] sm:text-xs truncate flex-1">{item.category}</span>
-                        <span className="text-[10px] sm:text-xs font-medium flex-shrink-0 ml-2">{item.avgDays}d</span>
-                      </div>
-                    ))
-                  ) : (
-                    <div className="text-center py-4 text-muted-foreground text-[11px] sm:text-xs">
-                      No response time data available
-                    </div>
-                  )}
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* Resolution Rate by Category */}
-            <Card className="flex flex-col min-h-0">
-              <CardHeader className="pb-2 sm:pb-3 flex-shrink-0">
-                <CardTitle className="text-xs sm:text-sm">Resolution Rate by Category</CardTitle>
-                <CardDescription className="text-[11px] sm:text-xs mt-0.5">Percentage of cases resolved</CardDescription>
-              </CardHeader>
-              <CardContent className="pt-0 pb-4 flex-1 min-h-0">
-                <div className="space-y-1.5">
-                  {analyticsData.resolutionRateByCategory.length > 0 ? (
-                    analyticsData.resolutionRateByCategory.map((item, index) => (
-                      <div key={index} className="flex items-center justify-between py-0.5">
-                        <span className="text-[10px] sm:text-xs truncate flex-1">{item.category}</span>
-                        <span className="text-[10px] sm:text-xs font-medium flex-shrink-0 ml-2">{item.rate}%</span>
-                      </div>
-                    ))
-                  ) : (
-                    <div className="text-center py-4 text-muted-foreground text-[11px] sm:text-xs">
-                      No resolution data available
-                    </div>
-                  )}
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* Recent Activity */}
-            <Card className="flex flex-col min-h-0">
-              <CardHeader className="pb-2 sm:pb-3 flex-shrink-0">
-                <CardTitle className="text-xs sm:text-sm">Recent Activity</CardTitle>
-                <CardDescription className="text-[11px] sm:text-xs mt-0.5">Reports submitted (last 7 days)</CardDescription>
-              </CardHeader>
-              <CardContent className="pt-0 pb-4 flex-1 min-h-0">
-                <div className="space-y-1.5">
-                  {analyticsData.recentActivity.length > 0 ? (
-                    analyticsData.recentActivity.map((item, index) => (
-                      <div key={index} className="flex items-center justify-between py-0.5">
-                        <span className="text-[10px] sm:text-xs truncate flex-1">{item.label}</span>
-                        <span className="text-[10px] sm:text-xs font-medium flex-shrink-0 ml-2">{item.count}</span>
-                      </div>
-                    ))
-                  ) : (
-                    <div className="text-center py-4 text-muted-foreground text-[11px] sm:text-xs">
-                      No recent activity
-                    </div>
-                  )}
-                </div>
-              </CardContent>
-            </Card>
           </div>
       </div>
     </div>
