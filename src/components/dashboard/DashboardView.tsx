@@ -1600,9 +1600,10 @@ Additional Details: ${decryptedContent.additionalDetails || 'None provided'}
             contentWrapper.style.padding = '0';
           }
           
-          // Set max-height to constrain the content area - reduce by 1px to prevent any overflow
-          contentContainer.style.maxHeight = `${calculatedContentHeight - 1}px`;
-          contentContainer.style.height = `${calculatedContentHeight - 1}px`;
+          // Set max-height to constrain the content area - but don't constrain too much to allow table to grow
+          // The table container uses flex-1, so it will fill available space
+          contentContainer.style.maxHeight = `${calculatedContentHeight + 200}px`; // Add extra space for table
+          contentContainer.style.height = `${calculatedContentHeight + 200}px`; // Add extra space for table
           contentContainer.style.overflow = 'hidden';
         } else {
           // On mobile, allow natural flow
