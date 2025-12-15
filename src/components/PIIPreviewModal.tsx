@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
-import { Shield, Info, Lock, AlertCircle } from 'lucide-react';
+import { Shield, Info, Lock, AlertCircle, Loader2 } from 'lucide-react';
 import { highlightPIIForDisplay, formatPIIType } from '@/utils/pii-detector-client';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
@@ -25,6 +25,7 @@ export const PIIPreviewModal: React.FC<PIIPreviewModalProps> = ({
   const { toast } = useToast();
   const { organization } = useOrganization();
   const [reportingFalsePositive, setReportingFalsePositive] = useState<string | null>(null);
+  const [isDetecting, setIsDetecting] = useState(true);
   const [redactionResult, setRedactionResult] = useState<{
     redactedText: string;
     detections: Array<{ original: string; placeholder: string; type: string; start: number; end: number }>;
@@ -37,6 +38,7 @@ export const PIIPreviewModal: React.FC<PIIPreviewModalProps> = ({
   useEffect(() => {
     const detectPII = async () => {
       if (!originalText) {
+        setIsDetecting(false);
         setRedactionResult({
           redactedText: '',
           detections: [],
@@ -46,6 +48,8 @@ export const PIIPreviewModal: React.FC<PIIPreviewModalProps> = ({
         setHighlightedParts([{ text: '', isPII: false }]);
         return;
       }
+
+      setIsDetecting(true);
 
       try {
         const { data, error } = await supabase.functions.invoke('detect-pii', {
@@ -80,6 +84,8 @@ export const PIIPreviewModal: React.FC<PIIPreviewModalProps> = ({
           stats: {}
         });
         setHighlightedParts([{ text: originalText || '', isPII: false }]);
+      } finally {
+        setIsDetecting(false);
       }
     };
 
@@ -137,7 +143,7 @@ export const PIIPreviewModal: React.FC<PIIPreviewModalProps> = ({
 
   return (
     <Dialog open onOpenChange={onCancel}>
-      <DialogContent className="max-w-6xl max-h-[85vh] overflow-hidden flex flex-col">
+      <DialogContent className="w-[calc(100vw-2rem)] sm:w-[calc(100vw-4rem)] sm:max-w-lg md:!max-w-[800px] max-h-[90vh] overflow-hidden flex flex-col">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2 text-xl">
             <Shield className="h-5 w-5 text-green-600" />
@@ -160,8 +166,16 @@ export const PIIPreviewModal: React.FC<PIIPreviewModalProps> = ({
                 AI Will See (Protected)
               </h3>
             </div>
-            <div className="p-4 bg-white text-sm leading-relaxed whitespace-pre-wrap font-mono">
-              {redactionResult?.redactedText || originalText || ''}
+            <div className="p-4 bg-white text-sm leading-relaxed whitespace-pre-wrap font-mono min-h-[200px]">
+              {isDetecting ? (
+                <div className="flex flex-col items-center justify-center py-12 space-y-4">
+                  <Loader2 className="h-8 w-8 animate-spin text-green-600" />
+                  <p className="text-gray-600 font-medium">Redacting personal information...</p>
+                  <p className="text-xs text-gray-500">Please wait while we scan for PII</p>
+                </div>
+              ) : (
+                redactionResult?.redactedText || originalText || ''
+              )}
             </div>
           </div>
 
