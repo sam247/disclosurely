@@ -119,13 +119,12 @@ const AnalyticsView: React.FC = () => {
       const previousPeriodStart = getPreviousPeriodStart(selectedPeriod);
       const previousPeriodEnd = currentPeriodStart;
 
-      // Query current period reports
+      // Query current period reports - include all reports (like normal reports view), just filter by date
       const { data: currentReports, error: currentError } = await supabase
         .from('reports')
         .select('id, title, status, created_at, updated_at, report_type, priority, manual_risk_level')
         .eq('organization_id', organization.id)
-        .not('status', 'in', '(archived,closed,deleted)')
-        .is('deleted_at', null)
+        .is('deleted_at', null) // Only exclude deleted reports
         .gte('created_at', currentPeriodStart);
 
       if (currentError) {
@@ -133,13 +132,12 @@ const AnalyticsView: React.FC = () => {
         throw currentError;
       }
 
-      // Query previous period reports for comparison
+      // Query previous period reports for comparison - include all reports
       const { data: previousReports } = await supabase
         .from('reports')
         .select('id, title, status, created_at, updated_at, report_type, priority, manual_risk_level')
         .eq('organization_id', organization.id)
-        .not('status', 'in', '(archived,closed,deleted)')
-        .is('deleted_at', null)
+        .is('deleted_at', null) // Only exclude deleted reports
         .gte('created_at', previousPeriodStart)
         .lt('created_at', previousPeriodEnd);
 
@@ -273,7 +271,7 @@ const AnalyticsView: React.FC = () => {
 
   const processSimpleAnalytics = (reports: any[]): SimpleAnalyticsData => {
     const totalReports = reports.length;
-    const activeReports = reports.filter(r => !['closed', 'archived'].includes(r.status)).length;
+    const activeReports = reports.filter(r => !['closed', 'resolved', 'archived'].includes(r.status)).length;
     
     // Calculate average response time
     let avgResponseTime = 0;
@@ -720,7 +718,7 @@ const AnalyticsView: React.FC = () => {
                 </div>
               </div>
             </CardHeader>
-            <CardContent className="pt-0 flex-1 min-h-0 flex flex-col" style={{ minHeight: '200px', height: '200px' }}>
+            <CardContent className="pt-0 flex-1 min-h-0 flex flex-col" style={{ minHeight: '150px', height: '150px' }}>
               {getChartData() ? (
                 <div className="flex-1 min-h-0 -mx-2 sm:mx-0 px-2 sm:px-0">
                 <Line 
@@ -783,7 +781,7 @@ const AnalyticsView: React.FC = () => {
                 <CardTitle className="text-xs sm:text-sm">Category Distribution</CardTitle>
                 <CardDescription className="text-[11px] sm:text-xs mt-0.5">Breakdown by report type</CardDescription>
               </CardHeader>
-              <CardContent className="pt-0 flex-1 min-h-0 flex flex-col" style={{ minHeight: '200px', height: '200px' }}>
+              <CardContent className="pt-0 flex-1 min-h-0 flex flex-col" style={{ minHeight: '150px', height: '150px' }}>
                 {getCategoryChartData() ? (
                   <div className="flex-1 min-h-0 -mx-2 sm:mx-0 px-2 sm:px-0">
                   <Doughnut 
@@ -836,7 +834,7 @@ const AnalyticsView: React.FC = () => {
                 <CardTitle className="text-xs sm:text-sm">Status Breakdown</CardTitle>
                 <CardDescription className="text-[11px] sm:text-xs mt-0.5">Cases by status</CardDescription>
               </CardHeader>
-              <CardContent className="pt-0 flex-1 min-h-0 flex flex-col" style={{ minHeight: '200px', height: '200px' }}>
+              <CardContent className="pt-0 flex-1 min-h-0 flex flex-col" style={{ minHeight: '150px', height: '150px' }}>
                 {getStatusChartData() ? (
                   <div className="flex-1 min-h-0 -mx-2 sm:mx-0 px-2 sm:px-0">
                   <Bar 

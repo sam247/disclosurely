@@ -1,9 +1,0 @@
-{
-  "permissions": {
-    "allow": [
-      "Bash(gh pr:*)"
-    ],
-    "deny": [],
-    "ask": []
-  }
-}
