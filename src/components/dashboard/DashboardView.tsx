@@ -1511,6 +1511,11 @@ Additional Details: ${decryptedContent.additionalDetails || 'None provided'}
       const controls = root?.querySelector('.border.rounded-lg.bg-white.flex-shrink-0') as HTMLElement;
       
       if (root && tableContainer) {
+        const desktopTableWrapper = tableContainer.querySelector('[data-dashboard-desktop-table-wrapper]') as HTMLElement;
+        const scrollableDiv = tableContainer.querySelector('[data-dashboard-scrollable-div]') as HTMLElement;
+        const pagination = tableContainer.querySelector('[data-dashboard-pagination]') as HTMLElement;
+        const table = scrollableDiv?.querySelector('table') as HTMLElement;
+        
         const tableMarginTop = parseInt(window.getComputedStyle(tableContainer).marginTop) || 0;
         const tableMarginBottom = parseInt(window.getComputedStyle(tableContainer).marginBottom) || 0;
         const headerMarginBottom = parseInt(window.getComputedStyle(header || document.createElement('div')).marginBottom) || 0;
@@ -1528,6 +1533,13 @@ Additional Details: ${decryptedContent.additionalDetails || 'None provided'}
           tableContainerHeight: tableContainer.offsetHeight,
           tableContainerClientHeight: tableContainer.clientHeight,
           tableContainerComputedHeight: window.getComputedStyle(tableContainer).height,
+          desktopTableWrapperHeight: desktopTableWrapper?.offsetHeight,
+          desktopTableWrapperClientHeight: desktopTableWrapper?.clientHeight,
+          scrollableDivHeight: scrollableDiv?.offsetHeight,
+          scrollableDivClientHeight: scrollableDiv?.clientHeight,
+          scrollableDivComputedHeight: scrollableDiv ? window.getComputedStyle(scrollableDiv).height : null,
+          tableHeight: table?.offsetHeight,
+          paginationHeight: pagination?.offsetHeight,
           tableMarginTop,
           tableMarginBottom,
           headerHeight: header?.offsetHeight,
@@ -1537,6 +1549,7 @@ Additional Details: ${decryptedContent.additionalDetails || 'None provided'}
           controlsMarginBottom,
           availableSpace: root.clientHeight - (header?.offsetHeight || 0) - (alert?.offsetHeight || 0) - (controls?.offsetHeight || 0),
           expectedTableHeight: root.clientHeight - (header?.offsetHeight || 0) - (alert?.offsetHeight || 0) - (controls?.offsetHeight || 0) - tableMarginTop - headerMarginBottom,
+          expectedScrollableHeight: (desktopTableWrapper?.clientHeight || 0) - (pagination?.offsetHeight || 0),
           difference: (root.clientHeight - (header?.offsetHeight || 0) - (alert?.offsetHeight || 0) - (controls?.offsetHeight || 0) - tableMarginTop - headerMarginBottom) - tableContainer.clientHeight
         };
         console.log('[Dashboard Layout Debug]', measurements);
@@ -2063,7 +2076,7 @@ Additional Details: ${decryptedContent.additionalDetails || 'None provided'}
                     
                       {/* Pagination Footer - Airtable/Spreadsheet style fixed at bottom - Always visible */}
                       {totalReports > 0 && (
-                        <div className="flex flex-row items-center justify-between px-3 py-2 border-t bg-gray-50 flex-shrink-0 h-10 z-20 bg-white">
+                        <div className="flex flex-row items-center justify-between px-3 py-2 border-t bg-gray-50 flex-shrink-0 h-10 z-20 bg-white" data-dashboard-pagination>
                         <div className="flex items-center space-x-3">
                           <div className="flex items-center space-x-2">
                             <Label className="text-xs whitespace-nowrap font-medium">Rows per page:</Label>
@@ -2427,9 +2440,9 @@ Additional Details: ${decryptedContent.additionalDetails || 'None provided'}
                 ) : (
                   <>
                     {/* Desktop Table View */}
-                    <div className="hidden md:block flex-1 overflow-hidden min-h-0 flex flex-col">
+                    <div className="hidden md:block flex-1 overflow-hidden min-h-0 flex flex-col" data-dashboard-desktop-table-wrapper>
                       {/* Scrollable table body - always fills available space, pagination fixed at bottom */}
-                      <div className="flex-1 overflow-y-auto overflow-x-auto min-h-0" style={{ minHeight: 0 }}>
+                      <div className="flex-1 overflow-y-auto overflow-x-auto min-h-0" style={{ minHeight: 0 }} data-dashboard-scrollable-div>
                         <table className="w-full">
                           {/* Fixed Header */}
                           <thead className="bg-gray-50 sticky top-0 z-10">
