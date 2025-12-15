@@ -1653,7 +1653,7 @@ Additional Details: ${decryptedContent.additionalDetails || 'None provided'}
 
       {/* Table - Directly in root like audit page */}
       {!showArchived ? (
-        <div className="border rounded-lg bg-white flex-1 flex flex-col overflow-hidden min-h-0 mx-2 sm:mx-0" style={{ marginTop: '15px' }} data-dashboard-table-active>
+        <div className="border rounded-lg bg-white flex-1 flex flex-col overflow-hidden min-h-0 mx-2 sm:mx-0" style={{ minHeight: 0, marginTop: '15px' }} data-dashboard-table-active>
                 {/* Table Header */}
                 <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between p-2 sm:p-3 border-b bg-gray-50 gap-2 sm:gap-0 flex-shrink-0">
                   <div className="flex items-center space-x-2 sm:space-x-4">
