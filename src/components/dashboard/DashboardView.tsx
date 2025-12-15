@@ -1592,7 +1592,7 @@ Additional Details: ${decryptedContent.additionalDetails || 'None provided'}
       )}
 
       {/* Controls Bar - Replaces filter bar */}
-      <div className="border rounded-lg bg-white flex-shrink-0 mx-2 sm:mx-0 mb-2">
+      <div className="border rounded-lg bg-white flex-shrink-0 mx-2 sm:mx-0">
         <div className="p-2 sm:p-3 space-y-2 sm:space-y-3">
           <div className="flex flex-col sm:flex-row gap-2 sm:gap-4 items-start sm:items-center">
             {/* Tabs */}
@@ -1638,7 +1638,7 @@ Additional Details: ${decryptedContent.additionalDetails || 'None provided'}
 
       {/* Table - Directly in root like audit page */}
       {!showArchived ? (
-        <div className="border rounded-lg bg-white flex-1 flex flex-col overflow-hidden min-h-0 mx-2 sm:mx-0" style={{ minHeight: 0, marginTop: '15px' }} data-dashboard-table-active>
+        <div className="border rounded-lg bg-white flex-1 flex flex-col overflow-hidden min-h-0 mx-2 sm:mx-0 mt-[15px]" data-dashboard-table-active>
                 {/* Table Header */}
                 <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between p-2 sm:p-3 border-b bg-gray-50 gap-2 sm:gap-0 flex-shrink-0">
                   <div className="flex items-center space-x-2 sm:space-x-4">
@@ -2375,7 +2375,7 @@ Additional Details: ${decryptedContent.additionalDetails || 'None provided'}
                 )}
               </div>
       ) : (
-        <div className="border rounded-lg bg-white flex-1 flex flex-col overflow-hidden min-h-0 mx-2 sm:mx-0" style={{ minHeight: 0, marginTop: '15px' }} data-dashboard-table-archived>
+        <div className="border rounded-lg bg-white flex-1 flex flex-col overflow-hidden min-h-0 mx-2 sm:mx-0 mt-[15px]" data-dashboard-table-archived>
                 {/* Table Header */}
                 <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between p-2 sm:p-3 border-b bg-gray-50 gap-2 sm:gap-0 flex-shrink-0">
                   <div className="flex items-center space-x-2 sm:space-x-4">
