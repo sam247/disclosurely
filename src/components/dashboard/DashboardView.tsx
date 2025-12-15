@@ -1752,7 +1752,7 @@ Additional Details: ${decryptedContent.additionalDetails || 'None provided'}
               ) : (
                 <>
                   {/* Desktop Table View - Uses flex-1 to fill remaining space */}
-                  <div className="hidden md:block flex-1 overflow-hidden flex flex-col min-h-0" data-dashboard-table-active>
+                  <div className="hidden md:block flex-1 overflow-hidden flex flex-col min-h-0 pb-4" data-dashboard-table-active>
                     {/* Scrollable table body */}
                     <div className="flex-1 overflow-y-auto overflow-x-auto min-h-0" style={{ maxHeight: 'calc(100% - 40px)' }}>
                       <Table className="min-w-full">
