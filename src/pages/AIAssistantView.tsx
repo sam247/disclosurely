@@ -604,62 +604,80 @@ Remember: Compliance teams need confidence and clarity under pressure. Be the ad
     let piiMetadata = undefined;
     if (data.metadata && data.metadata.pii_redacted) {
       // #region agent log
-      fetch('http://127.0.0.1:7243/ingest/07d80fb8-251f-44b3-a7af-ce7afb45a49c', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          location: 'AIAssistantView.tsx:handleCaseAnalysis:pii-metadata',
-          message: 'PII metadata received from ai-gateway-generate',
-          data: {
-            preserve_pii: skipPIIRedaction,
-            hasMetadata: !!data.metadata,
-            pii_redacted: data.metadata?.pii_redacted,
-            redaction_map_keys: data.metadata?.redaction_map ? Object.keys(data.metadata.redaction_map).length : 0
-          },
-          timestamp: Date.now(),
-          sessionId: 'debug-session',
-          runId: 'pii-debug',
-          hypothesisId: 'A'
-        })
-      }).catch(() => {});
+      try {
+        fetch('http://127.0.0.1:7243/ingest/07d80fb8-251f-44b3-a7af-ce7afb45a49c', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            location: 'AIAssistantView.tsx:handleCaseAnalysis:pii-metadata',
+            message: 'PII metadata received from ai-gateway-generate',
+            data: {
+              preserve_pii: skipPIIRedaction,
+              hasMetadata: !!data.metadata,
+              pii_redacted: data.metadata?.pii_redacted,
+              redaction_map_keys: data.metadata?.redaction_map ? Object.keys(data.metadata.redaction_map).length : 0
+            },
+            timestamp: Date.now(),
+            sessionId: 'debug-session',
+            runId: 'pii-debug',
+            hypothesisId: 'A'
+          })
+        }).catch(() => {});
+      } catch (err) {
+        console.log('[pii-debug] pii-metadata log failed (likely CSP); data:', {
+          preserve_pii: skipPIIRedaction,
+          hasMetadata: !!data.metadata,
+          pii_redacted: data.metadata?.pii_redacted,
+          redaction_map_keys: data.metadata?.redaction_map ? Object.keys(data.metadata.redaction_map).length : 0
+        });
+      }
       // #endregion
 
       // Detect PII in case description only (not documents)
       const { detectPII } = await import('@/utils/pii-detector-client');
       const caseOnlyPII = await detectPII(decryptedContent, organization?.id);
       
-      // Build stats from case-only PII detection
+      // Build stats from case-only PII detection (safe guards if detections missing)
       const caseStats: Record<string, number> = {};
-      if (caseOnlyPII.detections && Array.isArray(caseOnlyPII.detections)) {
-        caseOnlyPII.detections.forEach((detection: any) => {
-          const type = detection.type || 'unknown';
-          caseStats[type] = (caseStats[type] || 0) + 1;
-        });
-      }
+      const detections = Array.isArray(caseOnlyPII?.detections) ? caseOnlyPII.detections : [];
+      detections.forEach((detection: any) => {
+        const type = detection?.type || 'unknown';
+        caseStats[type] = (caseStats[type] || 0) + 1;
+      });
       
       // Only show metadata if case has PII (ignore document PII in count)
       const casePIICount = Object.values(caseStats).reduce((sum, count) => sum + count, 0);
+      const redactionMapKeys = data.metadata?.redaction_map ? Object.keys(data.metadata.redaction_map).length : 0;
       
       // #region agent log
-      fetch('http://127.0.0.1:7243/ingest/07d80fb8-251f-44b3-a7af-ce7afb45a49c', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          location: 'AIAssistantView.tsx:handleCaseAnalysis:case-pii-detection',
-          message: 'Case-only PII detection results',
-          data: {
-            casePIICount,
-            caseStats
-          },
-          timestamp: Date.now(),
-          sessionId: 'debug-session',
-          runId: 'pii-debug',
-          hypothesisId: 'B'
-        })
-      }).catch(() => {});
+      try {
+        fetch('http://127.0.0.1:7243/ingest/07d80fb8-251f-44b3-a7af-ce7afb45a49c', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            location: 'AIAssistantView.tsx:handleCaseAnalysis:case-pii-detection',
+            message: 'Case-only PII detection results',
+            data: {
+              casePIICount,
+              caseStats,
+              redactionMapKeys
+            },
+            timestamp: Date.now(),
+            sessionId: 'debug-session',
+            runId: 'pii-debug',
+            hypothesisId: 'B'
+          })
+        }).catch(() => {});
+      } catch (err) {
+        console.log('[pii-debug] case-pii-detection log failed (likely CSP); data:', {
+          casePIICount,
+          caseStats,
+          redactionMapKeys
+        });
+      }
       // #endregion
 
-      if (casePIICount > 0) {
+      if (casePIICount > 0 || redactionMapKeys > 0) {
         piiMetadata = {
           redacted: true,
           stats: caseStats, // Use case-only stats, not document stats
