@@ -1506,13 +1506,25 @@ Additional Details: ${decryptedContent.additionalDetails || 'None provided'}
     const measureLayout = () => {
       const root = document.querySelector('[data-dashboard-root]') as HTMLElement;
       const tableContainer = document.querySelector('[data-dashboard-table-active]') as HTMLElement;
-      const wrapper = root?.querySelector('.flex-1.overflow-hidden.min-h-0.flex.flex-col') as HTMLElement;
       const header = root?.querySelector('h1')?.parentElement?.parentElement as HTMLElement;
       const alert = root?.querySelector('.border-yellow-500') as HTMLElement;
       const controls = root?.querySelector('.border.rounded-lg.bg-white.flex-shrink-0') as HTMLElement;
       
       if (root && tableContainer) {
-        fetch('http://127.0.0.1:7243/ingest/07d80fb8-251f-44b3-a7af-ce7afb45a49c',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'DashboardView.tsx:measureLayout',message:'Layout measurements',data:{viewportHeight:window.innerHeight,rootHeight:root.offsetHeight,rootClientHeight:root.clientHeight,rootScrollHeight:root.scrollHeight,rootComputedHeight:window.getComputedStyle(root).height,tableContainerHeight:tableContainer.offsetHeight,tableContainerClientHeight:tableContainer.clientHeight,tableContainerComputedHeight:window.getComputedStyle(tableContainer).height,wrapperHeight:wrapper?.offsetHeight,wrapperClientHeight:wrapper?.clientHeight,headerHeight:header?.offsetHeight,alertHeight:alert?.offsetHeight,controlsHeight:controls?.offsetHeight,availableSpace:root.clientHeight - (header?.offsetHeight || 0) - (alert?.offsetHeight || 0) - (controls?.offsetHeight || 0)},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'A'})}).catch(()=>{});
+        const measurements = {
+          viewportHeight: window.innerHeight,
+          rootHeight: root.offsetHeight,
+          rootClientHeight: root.clientHeight,
+          rootComputedHeight: window.getComputedStyle(root).height,
+          tableContainerHeight: tableContainer.offsetHeight,
+          tableContainerClientHeight: tableContainer.clientHeight,
+          tableContainerComputedHeight: window.getComputedStyle(tableContainer).height,
+          headerHeight: header?.offsetHeight,
+          alertHeight: alert?.offsetHeight,
+          controlsHeight: controls?.offsetHeight,
+          availableSpace: root.clientHeight - (header?.offsetHeight || 0) - (alert?.offsetHeight || 0) - (controls?.offsetHeight || 0)
+        };
+        console.log('[Dashboard Layout Debug]', measurements);
       }
     };
     const timeout = setTimeout(measureLayout, 100);
