@@ -142,6 +142,8 @@ const AnalyticsView: React.FC = () => {
         throw currentError;
       }
 
+      console.log('Analytics: Fetched reports count:', currentReports?.length || 0, 'for period:', selectedPeriod, 'from:', currentPeriodStart);
+
       // Query previous period reports for comparison - include all reports
       const { data: previousReports } = await supabase
         .from('reports')
