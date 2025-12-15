@@ -1534,7 +1534,7 @@ Additional Details: ${decryptedContent.additionalDetails || 'None provided'}
         const subscriptionHeight = subscriptionAlert ? subscriptionAlert.clientHeight + 16 : 0; // +16 for mt-4
         const totalAlertsHeight = subscriptionHeight;
         const viewportHeight = window.innerHeight;
-        const headerHeight = 64; // 4rem = 64px
+        const headerHeight = 109; // Match audit page: calc(100vh - 109px)
         const contentPadding = 16; // pt-4 = 16px
         const calculatedContentHeight = viewportHeight - headerHeight - totalAlertsHeight - contentPadding;
         const rootHeight = viewportHeight - headerHeight;
