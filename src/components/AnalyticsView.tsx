@@ -202,8 +202,7 @@ const AnalyticsView: React.FC = () => {
         weeklyTrends: [],
         monthlyTrends: [],
         yearlyTrends: [],
-        statusBreakdown: [],
-        priorityBreakdown: []
+        statusBreakdown: []
       });
       toast({
         title: "Analytics Error",
