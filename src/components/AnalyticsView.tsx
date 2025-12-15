@@ -78,7 +78,7 @@ const AnalyticsView: React.FC = () => {
   const { toast } = useToast();
   const [analyticsData, setAnalyticsData] = useState<SimpleAnalyticsData | null>(null);
   const [loading, setLoading] = useState(true);
-  const [selectedPeriod, setSelectedPeriod] = useState<'7d' | '30d' | '90d' | '1y'>('30d');
+  const [selectedPeriod, setSelectedPeriod] = useState<'7d' | '30d' | '90d' | '1y'>('90d'); // Default to 90d to include November reports
   const [chartPeriod, setChartPeriod] = useState<'day' | 'week' | 'month'>('month');
   const [exporting, setExporting] = useState(false);
   const [previousPeriodData, setPreviousPeriodData] = useState<SimpleAnalyticsData | null>(null);
@@ -170,7 +170,14 @@ const AnalyticsView: React.FC = () => {
       }
       
       // Process data - pass selectedPeriod for monthly trends generation
+      console.log('Analytics: Processing', reportsWithCategories.length, 'reports');
       const processedData = processSimpleAnalytics(reportsWithCategories, selectedPeriod);
+      console.log('Analytics: Processed data:', {
+        totalReports: processedData.totalReports,
+        mainCategories: processedData.mainCategories.length,
+        subCategories: processedData.subCategories.length,
+        statusBreakdown: processedData.statusBreakdown.length
+      });
       
       // Process previous period data (without decryption for now to speed things up)
       const previousData = previousReports ? processSimpleAnalytics(
@@ -912,7 +919,7 @@ const AnalyticsView: React.FC = () => {
                 )}
               </div>
             </CardHeader>
-            <CardContent className="pt-0 flex-1 min-h-0 flex flex-col" style={{ minHeight: '100px', height: '100px' }}>
+            <CardContent className="pt-0 pb-4 flex-1 min-h-0 flex flex-col" style={{ minHeight: '100px', height: '100px' }}>
               {getChartData() ? (
                 <div className="flex-1 min-h-0 -mx-2 sm:mx-0 px-2 sm:px-0">
                 <Line 
@@ -975,7 +982,7 @@ const AnalyticsView: React.FC = () => {
                 <CardTitle className="text-xs sm:text-sm">By Category</CardTitle>
                 <CardDescription className="text-[11px] sm:text-xs mt-0.5">Financial Misconduct, Workplace Behaviour, etc.</CardDescription>
               </CardHeader>
-              <CardContent className="pt-0 flex-1 min-h-0 flex flex-col" style={{ minHeight: '120px', height: '120px' }}>
+              <CardContent className="pt-0 pb-4 flex-1 min-h-0 flex flex-col" style={{ minHeight: '120px', height: '120px' }}>
                 {getCategoryChartData() ? (
                   <div className="flex-1 min-h-0 -mx-2 sm:mx-0 px-2 sm:px-0">
                   <Doughnut 
@@ -1028,7 +1035,7 @@ const AnalyticsView: React.FC = () => {
                 <CardTitle className="text-xs sm:text-sm">By Sub Category</CardTitle>
                 <CardDescription className="text-[11px] sm:text-xs mt-0.5">Fraud, Harassment, etc.</CardDescription>
               </CardHeader>
-              <CardContent className="pt-0 flex-1 min-h-0 flex flex-col" style={{ minHeight: '120px', height: '120px' }}>
+              <CardContent className="pt-0 pb-4 flex-1 min-h-0 flex flex-col" style={{ minHeight: '120px', height: '120px' }}>
                 {getSubCategoryChartData() ? (
                   <div className="flex-1 min-h-0 -mx-2 sm:mx-0 px-2 sm:px-0">
                   <Doughnut 
@@ -1081,7 +1088,7 @@ const AnalyticsView: React.FC = () => {
                 <CardTitle className="text-xs sm:text-sm">Status Breakdown</CardTitle>
                 <CardDescription className="text-[11px] sm:text-xs mt-0.5">Cases by status</CardDescription>
               </CardHeader>
-              <CardContent className="pt-0 flex-1 min-h-0 flex flex-col" style={{ minHeight: '120px', height: '120px' }}>
+              <CardContent className="pt-0 pb-4 flex-1 min-h-0 flex flex-col" style={{ minHeight: '120px', height: '120px' }}>
                 {getStatusChartData() ? (
                   <div className="flex-1 min-h-0 -mx-2 sm:mx-0 px-2 sm:px-0">
                   <Bar 
@@ -1137,7 +1144,7 @@ const AnalyticsView: React.FC = () => {
               <CardHeader className="pb-2 sm:pb-3 flex-shrink-0">
                 <CardTitle className="text-xs sm:text-sm">Priority Breakdown</CardTitle>
               </CardHeader>
-              <CardContent className="pt-0 flex-1 min-h-0">
+              <CardContent className="pt-0 pb-4 flex-1 min-h-0">
                 <div className="space-y-1.5">
                 {analyticsData.priorityBreakdown
                   .sort((a, b) => b.priority - a.priority)
