@@ -1887,7 +1887,7 @@ Additional Details: ${decryptedContent.additionalDetails || 'None provided'}
                                 className={`border-b hover:bg-gray-50 ${highlightedReportIds.includes(report.id) ? 'bg-yellow-50 border-l-4 border-l-orange-400' : index % 2 === 0 ? 'bg-white' : 'bg-gray-50'}`}
                                 style={{ height: '28px' }}
                               >
-                                <td className="px-2 py-0 text-xs text-gray-900 border-r font-mono">
+                                <td className="px-2 py-1 text-xs text-gray-900 border-r font-mono">
                                   <div className="flex items-center gap-2">
                                     <span>{report.tracking_id}</span>
                                     <button
@@ -1911,7 +1911,7 @@ Additional Details: ${decryptedContent.additionalDetails || 'None provided'}
                                     </button>
                                   </div>
                                 </td>
-                                <td className="px-2 py-0 text-xs text-gray-900 border-r font-medium">
+                                <td className="px-2 py-1 text-xs text-gray-900 border-r font-medium">
                                   <div className="truncate" title={report.title}>
                                     {report.title}
                                   </div>
@@ -1933,7 +1933,7 @@ Additional Details: ${decryptedContent.additionalDetails || 'None provided'}
                                     <span className="text-muted-foreground">-</span>
                                   )}
                                 </td>
-                                <td className="px-2 py-0 text-xs border-r">
+                                <td className="px-2 py-1 text-xs border-r">
                                   <div className="flex items-center">
                                     <RiskLevelSelector
                                       reportId={report.id}
@@ -1966,7 +1966,7 @@ Additional Details: ${decryptedContent.additionalDetails || 'None provided'}
                                     <span className="text-muted-foreground">Pending...</span>
                                   )}
                                 </td>
-                                <td className="px-2 py-0 text-xs border-r">
+                                <td className="px-2 py-1 text-xs border-r">
                                   <Select
                                     value={report.assigned_to || 'unassigned'}
                                     onValueChange={(value) => assignReport(report.id, value)}
@@ -1987,10 +1987,10 @@ Additional Details: ${decryptedContent.additionalDetails || 'None provided'}
                                     </SelectContent>
                                   </Select>
                                 </td>
-                                <td className="px-2 py-0 text-xs text-gray-900 border-r">
+                                <td className="px-2 py-1 text-xs text-gray-900 border-r">
                                   {new Date(report.created_at).toLocaleDateString()}
                                 </td>
-                                <td className="px-2 py-0 text-center">
+                                <td className="px-2 py-1 text-center">
                                   <div className="flex items-center justify-center gap-1">
                                     <Button 
                                       variant="default" 
@@ -2590,7 +2590,7 @@ Additional Details: ${decryptedContent.additionalDetails || 'None provided'}
                                 className={`border-b hover:bg-gray-50 ${index % 2 === 0 ? 'bg-white' : 'bg-gray-50'}`}
                                 style={{ height: '28px' }}
                               >
-                                <td className="px-2 py-0 text-xs text-gray-900 border-r font-mono">
+                                <td className="px-2 py-1 text-xs text-gray-900 border-r font-mono">
                                   <div className="flex items-center gap-2">
                                     <span>{report.tracking_id}</span>
                                     <button
@@ -2614,17 +2614,17 @@ Additional Details: ${decryptedContent.additionalDetails || 'None provided'}
                                     </button>
                                   </div>
                                 </td>
-                                <td className="px-2 py-0 text-xs text-gray-900 border-r font-medium">
+                                <td className="px-2 py-1 text-xs text-gray-900 border-r font-medium">
                                   <div className="truncate" title={report.title}>
                                     {report.title}
                                   </div>
                                 </td>
-                                <td className="px-2 py-0 text-xs border-r">
+                                <td className="px-2 py-1 text-xs border-r">
                                   <Badge variant="secondary" className="text-xs px-1 py-0">
                                     {report.status}
                                   </Badge>
                                 </td>
-                                <td className="px-2 py-0 text-xs text-gray-900 border-r">
+                                <td className="px-2 py-1 text-xs text-gray-900 border-r">
                                   {decryptedCategories[report.id] ? (
                                     <div>
                                       <div className="font-medium">{decryptedCategories[report.id].main}</div>
@@ -2636,10 +2636,10 @@ Additional Details: ${decryptedContent.additionalDetails || 'None provided'}
                                     <span className="text-muted-foreground">-</span>
                                   )}
                                 </td>
-                                <td className="px-2 py-0 text-xs text-gray-900 border-r">
+                                <td className="px-2 py-1 text-xs text-gray-900 border-r">
                                   {new Date(report.archived_at || report.created_at).toLocaleDateString()}
                                 </td>
-                                <td className="px-2 py-0 text-center">
+                                <td className="px-2 py-1 text-center">
                                   <div className="flex items-center justify-center gap-1">
                                     <Button 
                                       variant="default" 
