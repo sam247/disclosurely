@@ -1550,7 +1550,13 @@ Additional Details: ${decryptedContent.additionalDetails || 'None provided'}
           availableSpace: root.clientHeight - (header?.offsetHeight || 0) - (alert?.offsetHeight || 0) - (controls?.offsetHeight || 0),
           expectedTableHeight: root.clientHeight - (header?.offsetHeight || 0) - (alert?.offsetHeight || 0) - (controls?.offsetHeight || 0) - tableMarginTop - headerMarginBottom,
           expectedScrollableHeight: (desktopTableWrapper?.clientHeight || 0) - (pagination?.offsetHeight || 0),
-          difference: (root.clientHeight - (header?.offsetHeight || 0) - (alert?.offsetHeight || 0) - (controls?.offsetHeight || 0) - tableMarginTop - headerMarginBottom) - tableContainer.clientHeight
+          scrollableDivFlexGrow: scrollableDiv ? window.getComputedStyle(scrollableDiv).flexGrow : null,
+          scrollableDivFlexShrink: scrollableDiv ? window.getComputedStyle(scrollableDiv).flexShrink : null,
+          scrollableDivFlexBasis: scrollableDiv ? window.getComputedStyle(scrollableDiv).flexBasis : null,
+          desktopTableWrapperFlexGrow: desktopTableWrapper ? window.getComputedStyle(desktopTableWrapper).flexGrow : null,
+          desktopTableWrapperDisplay: desktopTableWrapper ? window.getComputedStyle(desktopTableWrapper).display : null,
+          difference: (root.clientHeight - (header?.offsetHeight || 0) - (alert?.offsetHeight || 0) - (controls?.offsetHeight || 0) - tableMarginTop - headerMarginBottom) - tableContainer.clientHeight,
+          scrollableDivShouldBeHeight: desktopTableWrapper && pagination ? `${desktopTableWrapper.clientHeight - pagination.offsetHeight}px` : 'unknown'
         };
         console.log('[Dashboard Layout Debug]', measurements);
       }
@@ -1704,8 +1710,8 @@ Additional Details: ${decryptedContent.additionalDetails || 'None provided'}
                   <>
                     {/* Desktop Table View */}
                     <div className="hidden md:block flex-1 overflow-hidden min-h-0 flex flex-col" data-dashboard-desktop-table-wrapper>
-                      {/* Scrollable table body - always fills available space, pagination fixed at bottom */}
-                      <div className="flex-1 overflow-y-auto overflow-x-auto min-h-0" style={{ minHeight: 0 }} data-dashboard-scrollable-div>
+                      {/* Scrollable table body - fits screen height, accounting for pagination toolbar (40px) */}
+                      <div className="flex-1 overflow-y-auto overflow-x-auto min-h-0" style={{ minHeight: 0, maxHeight: 'calc(100% - 40px)' }} data-dashboard-scrollable-div>
                         <table className="w-full">
                           {/* Fixed Header */}
                           <thead className="bg-gray-50 sticky top-0 z-10">
@@ -2441,8 +2447,8 @@ Additional Details: ${decryptedContent.additionalDetails || 'None provided'}
                   <>
                     {/* Desktop Table View */}
                     <div className="hidden md:block flex-1 overflow-hidden min-h-0 flex flex-col" data-dashboard-desktop-table-wrapper>
-                      {/* Scrollable table body - always fills available space, pagination fixed at bottom */}
-                      <div className="flex-1 overflow-y-auto overflow-x-auto min-h-0" style={{ minHeight: 0 }} data-dashboard-scrollable-div>
+                      {/* Scrollable table body - fits screen height, accounting for pagination toolbar (40px) */}
+                      <div className="flex-1 overflow-y-auto overflow-x-auto min-h-0" style={{ minHeight: 0, maxHeight: 'calc(100% - 40px)' }} data-dashboard-scrollable-div>
                         <table className="w-full">
                           {/* Fixed Header */}
                           <thead className="bg-gray-50 sticky top-0 z-10">
