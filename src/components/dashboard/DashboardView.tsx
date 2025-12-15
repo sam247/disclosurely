@@ -1735,7 +1735,7 @@ Additional Details: ${decryptedContent.additionalDetails || 'None provided'}
             {/* LOCKED: Active Reports Tab - Card structure must use flex-1, overflow-hidden, min-h-0 */}
             <TabsContent value="active" className="flex flex-col overflow-hidden min-h-0">
               <Card className="md:border md:shadow-sm border-0 shadow-none flex flex-col flex-1 overflow-hidden min-h-0" data-dashboard-card-active>
-                <CardContent className="p-0 sm:p-4 flex-1 flex flex-col overflow-hidden min-h-0">
+                <CardContent className="p-0 sm:p-4 flex-1 flex flex-col overflow-hidden min-h-0 pb-4">
               {filteredReports.length === 0 ? (
                 <div className="text-center py-8 text-muted-foreground px-6">
                   {isOrgAdmin ? (
@@ -1752,7 +1752,7 @@ Additional Details: ${decryptedContent.additionalDetails || 'None provided'}
               ) : (
                 <>
                   {/* Desktop Table View - Uses flex-1 to fill remaining space */}
-                  <div className="hidden md:block flex-1 overflow-hidden flex flex-col min-h-0 pb-4" data-dashboard-table-active>
+                  <div className="hidden md:block flex-1 overflow-hidden flex flex-col min-h-0" data-dashboard-table-active>
                     {/* Scrollable table body */}
                     <div className="flex-1 overflow-y-auto overflow-x-auto min-h-0" style={{ maxHeight: 'calc(100% - 40px)' }}>
                       <Table className="min-w-full">
@@ -2391,7 +2391,7 @@ Additional Details: ${decryptedContent.additionalDetails || 'None provided'}
             <TabsContent value="archived" className="flex flex-col overflow-hidden min-h-0">
               {/* LOCKED: Card uses flex-1 to fill remaining space - DO NOT CHANGE to fixed height */}
               <Card className="md:border md:shadow-sm border-0 shadow-none flex flex-col flex-1 overflow-hidden min-h-0" data-dashboard-card-archived>
-                <CardContent className="p-0 sm:p-4 flex-1 flex flex-col overflow-hidden min-h-0">
+                <CardContent className="p-0 sm:p-4 flex-1 flex flex-col overflow-hidden min-h-0 pb-4">
               {totalArchived === 0 ? (
                 <div className="text-center py-8 text-muted-foreground px-6">
                   {isOrgAdmin ? (
@@ -2408,7 +2408,7 @@ Additional Details: ${decryptedContent.additionalDetails || 'None provided'}
               ) : (
                 <>
                   {/* Desktop Table View - Uses flex-1 to fill remaining space */}
-                  <div className="hidden md:block flex-1 overflow-hidden flex flex-col min-h-0 pb-4" data-dashboard-table-archived>
+                  <div className="hidden md:block flex-1 overflow-hidden flex flex-col min-h-0" data-dashboard-table-archived>
                     {/* Scrollable table body */}
                     <div className="flex-1 overflow-y-auto overflow-x-auto min-h-0" style={{ maxHeight: 'calc(100% - 40px)' }}>
                       <Table className="min-w-full">
