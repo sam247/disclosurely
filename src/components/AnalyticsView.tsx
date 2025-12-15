@@ -181,9 +181,27 @@ const AnalyticsView: React.FC = () => {
       setPreviousPeriodData(previousData);
     } catch (error) {
       console.error('Error fetching analytics:', error);
+      // Set empty analytics data so the page still renders
+      setAnalyticsData({
+        totalReports: 0,
+        activeReports: 0,
+        avgResponseTime: 0,
+        resolutionRate: 0,
+        escalationRate: 0,
+        categories: [],
+        mainCategories: [],
+        subCategories: [],
+        recentReports: [],
+        dailyTrends: [],
+        weeklyTrends: [],
+        monthlyTrends: [],
+        yearlyTrends: [],
+        statusBreakdown: [],
+        priorityBreakdown: []
+      });
       toast({
         title: "Analytics Error",
-        description: "Failed to load analytics data. Please try again.",
+        description: error instanceof Error ? error.message : "Failed to load analytics data. Please try again.",
         variant: "destructive",
       });
     } finally {
@@ -218,30 +236,70 @@ const AnalyticsView: React.FC = () => {
 
   // Helper function to decrypt categories for reports
   const decryptCategoriesForReports = async (reports: any[], organizationId: string) => {
-    const reportsWithCategories = await Promise.all(
-      reports.map(async (report) => {
-        if (report.encrypted_content) {
-          try {
-            const decrypted = await decryptReport(report.encrypted_content, organizationId);
-            if (decrypted && decrypted.category) {
-              const parts = decrypted.category.split(' - ');
-              return {
-                ...report,
-                mainCategory: parts[0] || decrypted.category,
-                subCategory: parts[1] || ''
-              };
+    // If no reports, return empty array
+    if (!reports || reports.length === 0) {
+      return [];
+    }
+    
+    // Limit decryption to avoid timeout issues - decrypt in batches
+    // Also limit total number of reports to decrypt to prevent performance issues
+    const maxReportsToDecrypt = 100;
+    const reportsToProcess = reports.slice(0, maxReportsToDecrypt);
+    const batchSize = 10;
+    const reportsWithCategories = [];
+    
+    for (let i = 0; i < reportsToProcess.length; i += batchSize) {
+      const batch = reportsToProcess.slice(i, i + batchSize);
+      const batchResults = await Promise.allSettled(
+        batch.map(async (report) => {
+          if (report.encrypted_content) {
+            try {
+              const decrypted = await decryptReport(report.encrypted_content, organizationId);
+              if (decrypted && decrypted.category) {
+                const parts = decrypted.category.split(' - ');
+                return {
+                  ...report,
+                  mainCategory: parts[0] || decrypted.category,
+                  subCategory: parts[1] || ''
+                };
+              }
+            } catch (error) {
+              console.warn('Failed to decrypt category for report:', report.id, error);
             }
-          } catch (error) {
-            console.error('Failed to decrypt category for report:', report.id, error);
           }
+          return {
+            ...report,
+            mainCategory: null,
+            subCategory: null
+          };
+        })
+      );
+      
+      // Extract results from Promise.allSettled
+      batchResults.forEach((result, index) => {
+        if (result.status === 'fulfilled') {
+          reportsWithCategories.push(result.value);
+        } else {
+          // If decryption failed, add report without categories
+          reportsWithCategories.push({
+            ...batch[index],
+            mainCategory: null,
+            subCategory: null
+          });
         }
-        return {
-          ...report,
-          mainCategory: null,
-          subCategory: null
-        };
-      })
-    );
+      });
+    }
+    
+    // Add remaining reports without decryption if we hit the limit
+    if (reports.length > maxReportsToDecrypt) {
+      const remainingReports = reports.slice(maxReportsToDecrypt).map(r => ({
+        ...r,
+        mainCategory: null,
+        subCategory: null
+      }));
+      reportsWithCategories.push(...remainingReports);
+    }
+    
     return reportsWithCategories;
   };
 
