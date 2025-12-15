@@ -27,6 +27,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { useOrganization } from '@/hooks/useOrganization';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import { decryptReport } from '@/utils/encryption';
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -60,6 +61,8 @@ interface SimpleAnalyticsData {
   resolutionRate: number;
   escalationRate: number;
   categories: Array<{ category: string; count: number }>;
+  mainCategories: Array<{ category: string; count: number }>;
+  subCategories: Array<{ category: string; count: number }>;
   recentReports: Array<{ id: string; title: string; status: string; created_at: string }>;
   dailyTrends: Array<{ date: string; count: number; categories: string[] }>;
   weeklyTrends: Array<{ week: string; count: number; categories: string[] }>;
@@ -119,10 +122,10 @@ const AnalyticsView: React.FC = () => {
       const previousPeriodStart = getPreviousPeriodStart(selectedPeriod);
       const previousPeriodEnd = currentPeriodStart;
 
-      // Query current period reports - include all reports (like normal reports view), just filter by date
+      // Query current period reports - include encrypted_content for category decryption
       const { data: currentReports, error: currentError } = await supabase
         .from('reports')
-        .select('id, title, status, created_at, updated_at, report_type, priority, manual_risk_level')
+        .select('id, title, status, created_at, updated_at, report_type, priority, manual_risk_level, encrypted_content')
         .eq('organization_id', organization.id)
         .is('deleted_at', null) // Only exclude deleted reports
         .gte('created_at', currentPeriodStart);
@@ -135,7 +138,7 @@ const AnalyticsView: React.FC = () => {
       // Query previous period reports for comparison - include all reports
       const { data: previousReports } = await supabase
         .from('reports')
-        .select('id, title, status, created_at, updated_at, report_type, priority, manual_risk_level')
+        .select('id, title, status, created_at, updated_at, report_type, priority, manual_risk_level, encrypted_content')
         .eq('organization_id', organization.id)
         .is('deleted_at', null) // Only exclude deleted reports
         .gte('created_at', previousPeriodStart)
@@ -143,8 +146,11 @@ const AnalyticsView: React.FC = () => {
 
       
 
+      // Decrypt categories for current period reports
+      const reportsWithCategories = await decryptCategoriesForReports(currentReports || [], organization.id);
+      
       // Process data
-      const processedData = processSimpleAnalytics(currentReports || []);
+      const processedData = processSimpleAnalytics(reportsWithCategories);
       const previousData = previousReports ? processSimpleAnalytics(previousReports) : null;
       
       
@@ -180,10 +186,40 @@ const AnalyticsView: React.FC = () => {
       case '90d':
         return new Date(now.getTime() - 90 * 24 * 60 * 60 * 1000).toISOString();
       case '1y':
-        return new Date(now.getTime() - 365 * 24 * 60 * 60 * 1000).toISOString();
+        // For 1y, show full 2025 year (Jan 1, 2025 to Dec 31, 2025)
+        return new Date('2025-01-01T00:00:00Z').toISOString();
       default:
         return new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000).toISOString();
     }
+  };
+
+  // Helper function to decrypt categories for reports
+  const decryptCategoriesForReports = async (reports: any[], organizationId: string) => {
+    const reportsWithCategories = await Promise.all(
+      reports.map(async (report) => {
+        if (report.encrypted_content) {
+          try {
+            const decrypted = await decryptReport(report.encrypted_content, organizationId);
+            if (decrypted && decrypted.category) {
+              const parts = decrypted.category.split(' - ');
+              return {
+                ...report,
+                mainCategory: parts[0] || decrypted.category,
+                subCategory: parts[1] || ''
+              };
+            }
+          } catch (error) {
+            console.error('Failed to decrypt category for report:', report.id, error);
+          }
+        }
+        return {
+          ...report,
+          mainCategory: null,
+          subCategory: null
+        };
+      })
+    );
+    return reportsWithCategories;
   };
 
   const generateDailyTrends = (reports: any[]) => {
@@ -230,6 +266,14 @@ const AnalyticsView: React.FC = () => {
 
   const generateMonthlyTrends = (reports: any[]) => {
     const trends: Record<string, { count: number; categories: string[] }> = {};
+    
+    // For 1y period, ensure we have all 12 months of 2025
+    if (selectedPeriod === '1y') {
+      for (let month = 1; month <= 12; month++) {
+        const monthKey = `2025-${String(month).padStart(2, '0')}`;
+        trends[monthKey] = { count: 0, categories: [] };
+      }
+    }
     
     reports.forEach(report => {
       const date = new Date(report.created_at);
@@ -291,7 +335,7 @@ const AnalyticsView: React.FC = () => {
     // Calculate escalation rate
     const escalationRate = totalReports > 0 ? (reports.filter(r => (r.priority || 0) >= 4).length / totalReports) * 100 : 0;
 
-    // Get categories
+    // Get categories (legacy report_type)
     const categoryCounts = reports.reduce((acc, r) => {
       const category = r.report_type || 'Other';
       acc[category] = (acc[category] || 0) + 1;
@@ -302,6 +346,35 @@ const AnalyticsView: React.FC = () => {
       category,
       count: count as number
     }));
+
+    // Get main categories (Financial Misconduct, Workplace Behaviour, etc.)
+    const mainCategoryCounts = reports.reduce((acc, r) => {
+      const mainCategory = r.mainCategory || 'Uncategorized';
+      acc[mainCategory] = (acc[mainCategory] || 0) + 1;
+      return acc;
+    }, {} as Record<string, number>);
+
+    const mainCategories = Object.entries(mainCategoryCounts)
+      .map(([category, count]) => ({
+        category,
+        count: count as number
+      }))
+      .sort((a, b) => b.count - a.count);
+
+    // Get sub categories (Fraud, Harassment, etc.)
+    const subCategoryCounts = reports.reduce((acc, r) => {
+      if (r.subCategory) {
+        acc[r.subCategory] = (acc[r.subCategory] || 0) + 1;
+      }
+      return acc;
+    }, {} as Record<string, number>);
+
+    const subCategories = Object.entries(subCategoryCounts)
+      .map(([category, count]) => ({
+        category,
+        count: count as number
+      }))
+      .sort((a, b) => b.count - a.count);
 
     // Get recent reports
     const recentReports = reports
@@ -317,7 +390,7 @@ const AnalyticsView: React.FC = () => {
     // Generate trend data
     const dailyTrends = generateDailyTrends(reports);
     const weeklyTrends = generateWeeklyTrends(reports);
-    const monthlyTrends = generateMonthlyTrends(reports);
+    const monthlyTrends = generateMonthlyTrends(reports, selectedPeriod);
     const yearlyTrends = generateYearlyTrends(reports);
 
     // Status breakdown
@@ -350,6 +423,8 @@ const AnalyticsView: React.FC = () => {
       resolutionRate: Math.round(resolutionRate * 10) / 10,
       escalationRate: Math.round(escalationRate * 10) / 10,
       categories,
+      mainCategories,
+      subCategories,
       recentReports,
       dailyTrends,
       weeklyTrends,
@@ -406,13 +481,14 @@ const AnalyticsView: React.FC = () => {
 
     let trends, labels, data;
     
-    // If period is "1y", show monthly trends (yearly view)
+    // If period is "1y", show monthly trends for 2025 (yearly view)
     // Otherwise use chartPeriod selection
     if (selectedPeriod === '1y') {
       trends = analyticsData.monthlyTrends;
+      // Ensure we show all 12 months of 2025
       labels = trends.map(t => {
         const [year, month] = t.month.split('-');
-        return new Date(parseInt(year), parseInt(month) - 1).toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
+        return new Date(parseInt(year), parseInt(month) - 1).toLocaleDateString('en-US', { month: 'short' });
       });
       data = trends.map(t => t.count);
     } else {
@@ -471,25 +547,42 @@ const AnalyticsView: React.FC = () => {
   };
 
   const getCategoryChartData = () => {
-    if (!analyticsData) return null;
+    if (!analyticsData || analyticsData.mainCategories.length === 0) return null;
+
+    const colors = [
+      '#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', '#9966FF',
+      '#FF9900', '#FF9F40', '#C9CBCF', '#FF6384', '#4BC0C0'
+    ];
 
     return {
-      labels: analyticsData.categories.map(c => c.category),
+      labels: analyticsData.mainCategories.map(c => c.category),
       datasets: [
         {
-          data: analyticsData.categories.map(c => c.count),
-          backgroundColor: [
-            '#FF6384',
-            '#36A2EB', 
-            '#FFCE56',
-            '#4BC0C0',
-            '#9966FF',
-            '#FF9900',
-            '#FF9F40',
-            '#FF6384',
-            '#C9CBCF',
-            '#4BC0C0'
-          ],
+          data: analyticsData.mainCategories.map(c => c.count),
+          backgroundColor: colors.slice(0, analyticsData.mainCategories.length),
+        },
+      ],
+    };
+  };
+
+  const getSubCategoryChartData = () => {
+    if (!analyticsData || analyticsData.subCategories.length === 0) return null;
+
+    const colors = [
+      '#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', '#9966FF',
+      '#FF9900', '#FF9F40', '#C9CBCF', '#FF6384', '#4BC0C0',
+      '#FF6B9D', '#4ECDC4', '#FFE66D', '#95E1D3', '#F38181'
+    ];
+
+    // Show top 10 subcategories
+    const topSubCategories = analyticsData.subCategories.slice(0, 10);
+
+    return {
+      labels: topSubCategories.map(c => c.category),
+      datasets: [
+        {
+          data: topSubCategories.map(c => c.count),
+          backgroundColor: colors.slice(0, topSubCategories.length),
         },
       ],
     };
@@ -788,11 +881,11 @@ const AnalyticsView: React.FC = () => {
 
           {/* Charts Grid - 3 Column Layout */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-3 sm:gap-4">
-            {/* Category Distribution */}
+            {/* By Category (Main Categories) */}
             <Card className="flex flex-col min-h-0">
               <CardHeader className="pb-2 sm:pb-3 flex-shrink-0">
-                <CardTitle className="text-xs sm:text-sm">Category Distribution</CardTitle>
-                <CardDescription className="text-[11px] sm:text-xs mt-0.5">Breakdown by report type</CardDescription>
+                <CardTitle className="text-xs sm:text-sm">By Category</CardTitle>
+                <CardDescription className="text-[11px] sm:text-xs mt-0.5">Financial Misconduct, Workplace Behaviour, etc.</CardDescription>
               </CardHeader>
               <CardContent className="pt-0 flex-1 min-h-0 flex flex-col" style={{ minHeight: '120px', height: '120px' }}>
                 {getCategoryChartData() ? (
@@ -836,6 +929,59 @@ const AnalyticsView: React.FC = () => {
               ) : (
                 <div className="h-full flex items-center justify-center text-muted-foreground text-[11px] sm:text-xs">
                   No category data available
+                </div>
+              )}
+              </CardContent>
+            </Card>
+
+            {/* By Sub Category */}
+            <Card className="flex flex-col min-h-0">
+              <CardHeader className="pb-2 sm:pb-3 flex-shrink-0">
+                <CardTitle className="text-xs sm:text-sm">By Sub Category</CardTitle>
+                <CardDescription className="text-[11px] sm:text-xs mt-0.5">Fraud, Harassment, etc.</CardDescription>
+              </CardHeader>
+              <CardContent className="pt-0 flex-1 min-h-0 flex flex-col" style={{ minHeight: '120px', height: '120px' }}>
+                {getSubCategoryChartData() ? (
+                  <div className="flex-1 min-h-0 -mx-2 sm:mx-0 px-2 sm:px-0">
+                  <Doughnut 
+                    data={getSubCategoryChartData()!} 
+                    options={{
+                      responsive: true,
+                      maintainAspectRatio: false,
+                      plugins: {
+                        legend: {
+                          position: 'bottom' as const,
+                          labels: {
+                            padding: 6,
+                            font: {
+                              size: 9
+                            },
+                            boxWidth: 10
+                          }
+                        },
+                        tooltip: {
+                          padding: 10,
+                          titleFont: {
+                            size: 11
+                          },
+                          bodyFont: {
+                            size: 10
+                          },
+                          callbacks: {
+                            label: function(context) {
+                              const total = analyticsData?.totalReports || 1;
+                              const percentage = ((context.parsed / total) * 100).toFixed(1);
+                              return `${context.label}: ${context.parsed} (${percentage}%)`;
+                            }
+                          }
+                        }
+                      }
+                    }}
+                  />
+                </div>
+              ) : (
+                <div className="h-full flex items-center justify-center text-muted-foreground text-[11px] sm:text-xs">
+                  No subcategory data available
                 </div>
               )}
               </CardContent>
