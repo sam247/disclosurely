@@ -5,8 +5,51 @@
  */
 
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts';
-import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
-import { callOpenRedactAPI } from '../_shared/openredact-api.ts';
+
+const OPENREDACT_API_URL = 'https://openredaction-api.onrender.com';
+const OPENREDACT_API_KEY = Deno.env.get('OPENREDACT_API_KEY');
+
+/**
+ * Call OpenRedaction.com API for PII detection and redaction
+ */
+async function callOpenRedactAPI(text: string, enableAI: boolean = true) {
+  const headers: Record<string, string> = {
+    'Content-Type': 'application/json',
+  };
+  
+  if (OPENREDACT_API_KEY) {
+    headers['x-api-key'] = OPENREDACT_API_KEY;
+  }
+
+  const response = await fetch(`${OPENREDACT_API_URL}/v1/ai-detect`, {
+    method: 'POST',
+    headers,
+    body: JSON.stringify({
+      text,
+      enable_ai: enableAI,
+    }),
+  });
+
+  if (!response.ok) {
+    const errorText = await response.text();
+    throw new Error(`OpenRedact API error (${response.status}): ${errorText}`);
+  }
+
+  const data = await response.json();
+  
+  // Map API response entities to detections format
+  const detections = (data.entities || []).map((entity: any) => ({
+    type: entity.type,
+    value: entity.value,
+    position: { start: entity.start, end: entity.end },
+    confidence: entity.confidence,
+  }));
+  
+  return {
+    redacted_text: data.redacted_text || data.text,
+    detections,
+  };
+}
 
 // CORS handling - same pattern as ai-gateway-generate
 const getAllowedOrigin = (req: Request): string => {
@@ -79,10 +122,7 @@ serve(async (req) => {
     }
 
     // Call OpenRedaction API
-    const apiResult = await callOpenRedactAPI({
-      text,
-      enable_ai,
-    });
+    const apiResult = await callOpenRedactAPI(text, enable_ai);
 
     // Use redacted_text from API if available, otherwise build from detections
     let redactedText = apiResult.redacted_text || text;
