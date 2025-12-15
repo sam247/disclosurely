@@ -39,6 +39,7 @@ import {
   Tooltip,
   Legend,
   ArcElement,
+  Filler,
 } from 'chart.js';
 import { Line, Bar, Doughnut } from 'react-chartjs-2';
 
@@ -51,7 +52,8 @@ ChartJS.register(
   Title,
   Tooltip,
   Legend,
-  ArcElement
+  ArcElement,
+  Filler
 );
 
 interface SimpleAnalyticsData {
@@ -404,7 +406,7 @@ const AnalyticsView: React.FC = () => {
       .sort((a, b) => a.year.localeCompare(b.year));
   };
 
-  const processSimpleAnalytics = (reports: any[]): SimpleAnalyticsData => {
+  const processSimpleAnalytics = (reports: any[], period: string = '90d'): SimpleAnalyticsData => {
     const totalReports = reports.length;
     const activeReports = reports.filter(r => !['closed', 'resolved', 'archived'].includes(r.status)).length;
     
