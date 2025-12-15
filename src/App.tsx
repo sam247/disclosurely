@@ -6,7 +6,6 @@ import { useSessionTimeout } from './hooks/useSessionTimeout';
 import { useAuth } from './hooks/useAuth';
 import { useMultipleSessionDetection } from './hooks/useMultipleSessionDetection';
 import ProtectedRoute from './components/ProtectedRoute';
-import OwnerOnlyRoute from './components/dashboard/OwnerOnlyRoute';
 import ScrollToTop from './components/ScrollToTop';
 import UrlRedirectMiddleware from './components/UrlRedirectMiddleware';
 import ErrorBoundary from './components/forms/ErrorBoundary';
@@ -62,7 +61,6 @@ const IntegrationsView = lazyWithRetry(() => import('./components/IntegrationsVi
 const AnalyticsView = lazyWithRetry(() => import('./components/AnalyticsView'));
 const AuditLogView = lazyWithRetry(() => import('./components/AuditLogView'));
 const WorkflowsView = lazyWithRetry(() => import('./components/dashboard/WorkflowsView'));
-const AdminPanel = lazy(() => import('./components/admin/AdminPanel').then(module => ({ default: module.AdminPanel })));
 
 // Lazy load form components
 const SubmissionFormWrapper = lazy(() => import('./components/forms/SubmissionFormWrapper'));
