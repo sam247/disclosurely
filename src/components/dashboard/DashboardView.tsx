@@ -1677,7 +1677,7 @@ Additional Details: ${decryptedContent.additionalDetails || 'None provided'}
   return (
     <div
       className="flex flex-col"
-      style={!isMobile ? { height: 'calc(100vh - 4rem)', overflow: 'hidden', maxHeight: 'calc(100vh - 4rem)' } : {}}
+      style={!isMobile ? { height: 'calc(100vh - 109px)', overflow: 'hidden', maxHeight: 'calc(100vh - 109px)' } : {}}
       data-dashboard-root
     >
       {/* Content - No scrolling, only table scrolls internally (desktop) */}
