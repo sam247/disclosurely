@@ -236,13 +236,14 @@ export const PIIPreviewModal: React.FC<PIIPreviewModalProps> = ({
             <div className="flex gap-3">
               <Info className="h-5 w-5 text-blue-600 flex-shrink-0 mt-0.5" />
               <div className="text-sm text-blue-900 space-y-2">
-                <p className="font-semibold">How Privacy Protection Works:</p>
+                <p className="font-semibold">How Our PII Redaction Works:</p>
                 <ul className="list-disc list-inside space-y-1 text-blue-800 ml-2">
                   <li>Personal information is <strong>automatically detected</strong> and redacted before AI analysis</li>
-                  <li>The AI provider (DeepSeek) will <strong>NEVER see</strong> your emails, phone numbers, or other PII</li>
-                  <li>Original data is <strong>encrypted and stored securely</strong> in your Supabase database</li>
-                  <li>Redaction mapping is stored for <strong>24 hours</strong> then permanently deleted</li>
-                  <li>Zero data retention with AI provider - <strong>no model training</strong> on your data</li>
+                  <li>The AI provider will <strong>NEVER see</strong> your PII</li>
+                  <li>Redactions are stored for <strong>24 hours</strong> to allow your analysis then permanently deleted</li>
+                  <li>Zero data retention with AI - <strong>no model training</strong> on your data</li>
+                  <li>No data held or kept by Disclosurely in any circumstance</li>
+                  <li>We are committed to your employees anonymity and your privacy</li>
                 </ul>
               </div>
             </div>
