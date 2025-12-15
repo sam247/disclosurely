@@ -1455,31 +1455,6 @@ Additional Details: ${decryptedContent.additionalDetails || 'None provided'}
   // ============================================================================
   useLayoutEffect(() => {
     const updateContentHeight = () => {
-      // #region agent log
-      fetch('http://127.0.0.1:7243/ingest/07d80fb8-251f-44b3-a7af-ce7afb45a49c', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          location: 'DashboardView.tsx:updateContentHeight:entry',
-          message: 'updateContentHeight called',
-          data: {
-            isMobile,
-            subscriptionDataExists: !!subscriptionData,
-            patternsExists: !!patterns,
-            bodyOverflowBefore: document.body.style.overflow,
-            bodyHeightBefore: document.body.style.height,
-            bodyPositionBefore: document.body.style.position,
-            bodyScrollHeight: document.body.scrollHeight,
-            bodyClientHeight: document.body.clientHeight,
-            windowInnerHeight: window.innerHeight
-          },
-          timestamp: Date.now(),
-          sessionId: 'debug-session',
-          runId: 'scroll-debug',
-          hypothesisId: 'A'
-        })
-      }).catch(() => {});
-      // #endregion
 
       const subscriptionAlert = document.querySelector('[data-dashboard-alert-subscription]');
       const patternAlert = document.querySelector('[data-dashboard-alert-patterns]');
@@ -1501,30 +1476,6 @@ Additional Details: ${decryptedContent.additionalDetails || 'None provided'}
         
         // Constrain body to prevent page scroll (desktop only - mobile needs natural scrolling)
         if (!isMobile) {
-          // #region agent log
-          fetch('http://127.0.0.1:7243/ingest/07d80fb8-251f-44b3-a7af-ce7afb45a49c', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              location: 'DashboardView.tsx:updateContentHeight:beforeBodySet',
-              message: 'About to set body styles for desktop',
-              data: {
-                viewportHeight,
-                bodyOverflowBefore: document.body.style.overflow,
-                bodyHeightBefore: document.body.style.height,
-                bodyPositionBefore: document.body.style.position,
-                computedOverflow: window.getComputedStyle(document.body).overflow,
-                computedHeight: window.getComputedStyle(document.body).height,
-                computedPosition: window.getComputedStyle(document.body).position,
-                computedMinHeight: window.getComputedStyle(document.body).minHeight
-              },
-              timestamp: Date.now(),
-              sessionId: 'debug-session',
-              runId: 'scroll-debug',
-              hypothesisId: 'B'
-            })
-          }).catch(() => {});
-          // #endregion
 
           // Force body to exact viewport height to eliminate any scroll
           document.body.style.overflow = 'hidden';
@@ -1535,18 +1486,6 @@ Additional Details: ${decryptedContent.additionalDetails || 'None provided'}
           document.body.style.top = '0';
           document.body.style.left = '0';
 
-          // #region agent log
-          fetch('http://127.0.0.1:7243/ingest/07d80fb8-251f-44b3-a7af-ce7afb45a49c', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              location: 'DashboardView.tsx:updateContentHeight:afterBodySet',
-              message: 'Just set body styles for desktop',
-              data: {
-                bodyOverflowAfter: document.body.style.overflow,
-                bodyHeightAfter: document.body.style.height,
-                bodyPositionAfter: document.body.style.position,
-                computedOverflow: window.getComputedStyle(document.body).overflow,
                 computedHeight: window.getComputedStyle(document.body).height,
                 computedPosition: window.getComputedStyle(document.body).position,
                 computedMinHeight: window.getComputedStyle(document.body).minHeight,
@@ -1634,22 +1573,6 @@ Additional Details: ${decryptedContent.additionalDetails || 'None provided'}
           rootExtraSpace: rootContainer.scrollHeight - rootContainer.clientHeight,
           bodyExtraSpace: document.body.scrollHeight - window.innerHeight
         };
-        
-        console.log('🔍 Dashboard Space Debug:', measurements);
-        
-        fetch('http://127.0.0.1:7243/ingest/07d80fb8-251f-44b3-a7af-ce7afb45a49c', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            location: 'DashboardView.tsx:useEffect',
-            message: 'Applied height constraint and measured space',
-            data: measurements,
-            timestamp: Date.now(),
-            sessionId: 'debug-session',
-            runId: 'root-constraint-fix',
-            hypothesisId: 'G'
-          })
-        }).catch(() => {});
       }
     };
     
@@ -1660,34 +1583,6 @@ Additional Details: ${decryptedContent.additionalDetails || 'None provided'}
     const timeoutId = setTimeout(updateContentHeight, 100);
     const timeoutId2 = setTimeout(updateContentHeight, 500);
     const timeoutId3 = setTimeout(() => {
-      // #region agent log
-      fetch('http://127.0.0.1:7243/ingest/07d80fb8-251f-44b3-a7af-ce7afb45a49c', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          location: 'DashboardView.tsx:useEffect:delayedCheck',
-          message: 'Checking body styles 1 second after setting',
-          data: {
-            isMobile,
-            bodyOverflow: document.body.style.overflow,
-            bodyHeight: document.body.style.height,
-            bodyPosition: document.body.style.position,
-            computedOverflow: window.getComputedStyle(document.body).overflow,
-            computedHeight: window.getComputedStyle(document.body).height,
-            computedPosition: window.getComputedStyle(document.body).position,
-            computedMinHeight: window.getComputedStyle(document.body).minHeight,
-            bodyScrollHeight: document.body.scrollHeight,
-            bodyClientHeight: document.body.clientHeight,
-            windowInnerHeight: window.innerHeight,
-            hasScroll: document.body.scrollHeight > window.innerHeight
-          },
-          timestamp: Date.now(),
-          sessionId: 'debug-session',
-          runId: 'scroll-debug',
-          hypothesisId: 'D'
-        })
-      }).catch(() => {});
-      // #endregion
       updateContentHeight();
     }, 1000);
     window.addEventListener('resize', updateContentHeight);
@@ -1696,31 +1591,7 @@ Additional Details: ${decryptedContent.additionalDetails || 'None provided'}
     const observer = new MutationObserver((mutations) => {
       mutations.forEach((mutation) => {
         if (mutation.type === 'attributes' && mutation.attributeName === 'style' && mutation.target === document.body) {
-          // #region agent log
-          fetch('http://127.0.0.1:7243/ingest/07d80fb8-251f-44b3-a7af-ce7afb45a49c', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              location: 'DashboardView.tsx:useEffect:mutationObserver',
-              message: 'Body style attribute changed',
-              data: {
-                isMobile,
-                bodyOverflow: document.body.style.overflow,
-                bodyHeight: document.body.style.height,
-                bodyPosition: document.body.style.position,
-                computedOverflow: window.getComputedStyle(document.body).overflow,
-                computedHeight: window.getComputedStyle(document.body).height,
-                computedPosition: window.getComputedStyle(document.body).position,
-                oldValue: mutation.oldValue,
-                hasScroll: document.body.scrollHeight > window.innerHeight
-              },
-              timestamp: Date.now(),
-              sessionId: 'debug-session',
-              runId: 'scroll-debug',
-              hypothesisId: 'E'
-            })
-          }).catch(() => {});
-          // #endregion
+          // Body style changed - no action needed
         }
       });
     });
@@ -1736,25 +1607,6 @@ Additional Details: ${decryptedContent.additionalDetails || 'None provided'}
       clearTimeout(timeoutId3);
       window.removeEventListener('resize', updateContentHeight);
       observer.disconnect();
-      // #region agent log
-      fetch('http://127.0.0.1:7243/ingest/07d80fb8-251f-44b3-a7af-ce7afb45a49c', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          location: 'DashboardView.tsx:useEffect:cleanup',
-          message: 'useEffect cleanup - checking if styles persist',
-          data: {
-            bodyOverflow: document.body.style.overflow,
-            bodyHeight: document.body.style.height,
-            bodyPosition: document.body.style.position
-          },
-          timestamp: Date.now(),
-          sessionId: 'debug-session',
-          runId: 'scroll-debug',
-          hypothesisId: 'F'
-        })
-      }).catch(() => {});
-      // #endregion
     };
   }, [subscriptionData, patterns, isMobile]);
 
@@ -1830,39 +1682,6 @@ Additional Details: ${decryptedContent.additionalDetails || 'None provided'}
         )}
 
         <div className="flex-1 flex flex-col overflow-hidden min-h-0 px-4 pt-4 pb-0" data-dashboard-content style={{ overflow: 'hidden', maxHeight: '100%' }}>
-          {/* #region agent log */}
-          {(() => {
-            const subscriptionAlert = document.querySelector('[data-dashboard-alert-subscription]');
-            const patternAlert = document.querySelector('[data-dashboard-alert-patterns]');
-            const contentContainer = document.querySelector('[data-dashboard-content]');
-            if (contentContainer) {
-              const subscriptionHeight = subscriptionAlert ? subscriptionAlert.clientHeight + 16 : 0; // +16 for mt-4
-              const patternHeight = patternAlert ? patternAlert.clientHeight + 16 : 0; // +16 for mt-4
-              const totalAlertsHeight = subscriptionHeight + patternHeight;
-              fetch('http://127.0.0.1:7243/ingest/07d80fb8-251f-44b3-a7af-ce7afb45a49c', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                  location: 'DashboardView.tsx:1472',
-                  message: 'Measuring alert heights for layout calculation',
-                  data: {
-                    viewportHeight: window.innerHeight,
-                    subscriptionAlertHeight: subscriptionAlert?.clientHeight || 0,
-                    patternAlertHeight: patternAlert?.clientHeight || 0,
-                    totalAlertsHeight,
-                    contentContainerHeight: contentContainer.clientHeight,
-                    contentContainerOffsetHeight: contentContainer.offsetHeight
-                  },
-                  timestamp: Date.now(),
-                  sessionId: 'debug-session',
-                  runId: 'alert-accounting',
-                  hypothesisId: 'E'
-                })
-              }).catch(() => {});
-            }
-            return null;
-          })()}
-          {/* #endregion */}
           {/* Title and Subtitle */}
           <div className="flex-shrink-0 mb-4">
             <h2 className="text-xl sm:text-2xl font-bold">{t('reportsOverview')}</h2>

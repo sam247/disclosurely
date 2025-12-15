@@ -487,25 +487,12 @@ export async function redactPII(
     organizationId
   } = options || {};
 
-  // Check feature flag for OpenRedact API
-  const useOpenRedactAPI = await isOpenRedactEnabled(organizationId);
-  
-  if (useOpenRedactAPI) {
-    try {
-      // Use OpenRedaction.com API (regex + AI)
-      return await redactPIIWithOpenRedact(content, organizationId);
-    } catch (error) {
-      // Fall through to npm package on error
-      console.warn('[PII Detector] OpenRedact API failed, falling back to npm package');
-    }
-  }
-
-  // Use openredaction npm package (regex-only, no AI)
+  // Always use OpenRedaction.com API (regex + AI)
   try {
-    return await redactPIIWithNPM(content);
+    return await redactPIIWithOpenRedact(content, organizationId);
   } catch (error) {
-    console.error('[PII Detector] All redaction methods failed:', error);
-    // Return original content if all methods fail
+    console.error('[PII Detector] OpenRedact API failed:', error);
+    // Return original content if API fails (fail-safe)
     return {
       redactedContent: content,
       redactionMap: {},

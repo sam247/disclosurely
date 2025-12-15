@@ -603,35 +603,6 @@ Remember: Compliance teams need confidence and clarity under pressure. Be the ad
     // Calculate PII stats only from case description (exclude document PII)
     let piiMetadata = undefined;
     if (data.metadata && data.metadata.pii_redacted) {
-      // #region agent log
-      try {
-        fetch('http://127.0.0.1:7243/ingest/07d80fb8-251f-44b3-a7af-ce7afb45a49c', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            location: 'AIAssistantView.tsx:handleCaseAnalysis:pii-metadata',
-            message: 'PII metadata received from ai-gateway-generate',
-            data: {
-              preserve_pii: skipPIIRedaction,
-              hasMetadata: !!data.metadata,
-              pii_redacted: data.metadata?.pii_redacted,
-              redaction_map_keys: data.metadata?.redaction_map ? Object.keys(data.metadata.redaction_map).length : 0
-            },
-            timestamp: Date.now(),
-            sessionId: 'debug-session',
-            runId: 'pii-debug',
-            hypothesisId: 'A'
-          })
-        }).catch(() => {});
-      } catch (err) {
-        console.log('[pii-debug] pii-metadata log failed (likely CSP); data:', {
-          preserve_pii: skipPIIRedaction,
-          hasMetadata: !!data.metadata,
-          pii_redacted: data.metadata?.pii_redacted,
-          redaction_map_keys: data.metadata?.redaction_map ? Object.keys(data.metadata.redaction_map).length : 0
-        });
-      }
-      // #endregion
 
       // Detect PII in case description only (not documents)
       const { detectPII } = await import('@/utils/pii-detector-client');
@@ -649,33 +620,6 @@ Remember: Compliance teams need confidence and clarity under pressure. Be the ad
       const casePIICount = Object.values(caseStats).reduce((sum, count) => sum + count, 0);
       const redactionMapKeys = data.metadata?.redaction_map ? Object.keys(data.metadata.redaction_map).length : 0;
       
-      // #region agent log
-      try {
-        fetch('http://127.0.0.1:7243/ingest/07d80fb8-251f-44b3-a7af-ce7afb45a49c', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            location: 'AIAssistantView.tsx:handleCaseAnalysis:case-pii-detection',
-            message: 'Case-only PII detection results',
-            data: {
-              casePIICount,
-              caseStats,
-              redactionMapKeys
-            },
-            timestamp: Date.now(),
-            sessionId: 'debug-session',
-            runId: 'pii-debug',
-            hypothesisId: 'B'
-          })
-        }).catch(() => {});
-      } catch (err) {
-        console.log('[pii-debug] case-pii-detection log failed (likely CSP); data:', {
-          casePIICount,
-          caseStats,
-          redactionMapKeys
-        });
-      }
-      // #endregion
 
       if (casePIICount > 0 || redactionMapKeys > 0) {
         piiMetadata = {
@@ -1679,99 +1623,6 @@ Additional Details: ${decrypted.additionalDetails || 'None provided'}`;
         }
       }
 
-      // #region agent log - Comprehensive layout debugging
-      const rightPanel = document.querySelector('[data-ai-assistant-right-panel]');
-      const messageBar = document.querySelector('[data-ai-assistant-message-bar]');
-      const messagesContainer = document.querySelector('[data-ai-assistant-messages]');
-      const toolbar = rightPanel?.querySelector('.h-14');
-      
-      const rootRect = containerRef.current?.getBoundingClientRect();
-      const rightPanelRect = rightPanel?.getBoundingClientRect();
-      const messageBarRect = messageBar?.getBoundingClientRect();
-      const messagesRect = messagesContainer?.getBoundingClientRect();
-      const toolbarRect = toolbar?.getBoundingClientRect();
-      
-      const rootStyles = containerRef.current ? window.getComputedStyle(containerRef.current) : null;
-      const rightPanelStyles = rightPanel ? window.getComputedStyle(rightPanel) : null;
-      const messageBarStyles = messageBar ? window.getComputedStyle(messageBar) : null;
-      const messagesStyles = messagesContainer ? window.getComputedStyle(messagesContainer) : null;
-      
-      fetch('http://127.0.0.1:7243/ingest/07d80fb8-251f-44b3-a7af-ce7afb45a49c', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          location: 'AIAssistantView.tsx:useLayoutEffect:updateLayout',
-          message: 'Comprehensive layout debugging - all hypotheses',
-          data: {
-            // Hypothesis A: Root container height calculation
-            viewportHeight,
-            headerHeight,
-            calculatedHeight,
-            rootClientHeight: containerRef.current?.clientHeight,
-            rootOffsetHeight: containerRef.current?.offsetHeight,
-            rootScrollHeight: containerRef.current?.scrollHeight,
-            rootComputedHeight: rootStyles?.height,
-            rootComputedDisplay: rootStyles?.display,
-            rootComputedFlex: rootStyles?.display === 'flex' ? rootStyles.flexDirection : null,
-            rootBottom: rootRect?.bottom,
-            rootTop: rootRect?.top,
-            
-            // Hypothesis B: Right panel flex container
-            rightPanelClientHeight: rightPanel?.clientHeight,
-            rightPanelOffsetHeight: rightPanel?.offsetHeight,
-            rightPanelScrollHeight: rightPanel?.scrollHeight,
-            rightPanelComputedHeight: rightPanelStyles?.height,
-            rightPanelComputedDisplay: rightPanelStyles?.display,
-            rightPanelComputedFlex: rightPanelStyles?.display === 'flex' ? rightPanelStyles.flexDirection : null,
-            rightPanelComputedFlexGrow: rightPanelStyles?.flexGrow,
-            rightPanelBottom: rightPanelRect?.bottom,
-            rightPanelTop: rightPanelRect?.top,
-            
-            // Hypothesis C: Messages area flex-1
-            messagesClientHeight: messagesContainer?.clientHeight,
-            messagesOffsetHeight: messagesContainer?.offsetHeight,
-            messagesScrollHeight: messagesContainer?.scrollHeight,
-            messagesComputedHeight: messagesStyles?.height,
-            messagesComputedFlex: messagesStyles?.flexGrow,
-            messagesComputedMinHeight: messagesStyles?.minHeight,
-            messagesBottom: messagesRect?.bottom,
-            messagesTop: messagesRect?.top,
-            
-            // Hypothesis D: Message bar visibility and positioning
-            messageBarVisible: messageBar ? window.getComputedStyle(messageBar).display !== 'none' : false,
-            messageBarClientHeight: messageBar?.clientHeight,
-            messageBarOffsetHeight: messageBar?.offsetHeight,
-            messageBarComputedHeight: messageBarStyles?.height,
-            messageBarComputedDisplay: messageBarStyles?.display,
-            messageBarComputedPosition: messageBarStyles?.position,
-            messageBarTop: messageBarRect?.top,
-            messageBarBottom: messageBarRect?.bottom,
-            messageBarComputedFlexShrink: messageBarStyles?.flexShrink,
-            
-            // Hypothesis E: Toolbar height
-            toolbarClientHeight: toolbar?.clientHeight,
-            toolbarComputedHeight: toolbar ? window.getComputedStyle(toolbar).height : null,
-            
-            // Calculated totals
-            toolbarPlusMessagesPlusBar: toolbar?.clientHeight && messagesContainer?.clientHeight && messageBar?.clientHeight
-              ? toolbar.clientHeight + messagesContainer.clientHeight + messageBar.clientHeight
-              : null,
-            gapAtBottom: rightPanelRect && messageBarRect
-              ? window.innerHeight - messageBarRect.bottom
-              : null,
-            
-            // Body state
-            bodyScrollHeight: document.body.scrollHeight,
-            bodyClientHeight: document.body.clientHeight,
-            hasVerticalScroll: document.body.scrollHeight > window.innerHeight
-          },
-          timestamp: Date.now(),
-          sessionId: 'debug-session',
-          runId: 'comprehensive-layout-debug',
-          hypothesisId: 'ALL'
-        })
-      }).catch(() => {});
-      // #endregion
     };
 
     updateLayout();
@@ -1790,77 +1641,6 @@ Additional Details: ${decrypted.additionalDetails || 'None provided'}`;
     };
   }, [isMobile]);
 
-  // #region agent log
-  useEffect(() => {
-    const logLayout = () => {
-      const root = containerRef.current;
-      const messageBar = document.querySelector('[data-ai-assistant-message-bar]');
-      const messagesContainer = document.querySelector('[data-ai-assistant-messages]');
-      const rightPanel = document.querySelector('[data-ai-assistant-right-panel]');
-      const sidebar = document.querySelector('[data-ai-assistant-sidebar]');
-      const savedAnalyses = document.querySelector('[data-ai-assistant-saved-analyses]');
-      const fixedBottomSection = document.querySelector('[data-ai-assistant-fixed-bottom]');
-      const toolbar = rightPanel?.querySelector('.h-14');
-      
-      const rootRect = root?.getBoundingClientRect();
-      const rightPanelRect = rightPanel?.getBoundingClientRect();
-      const messageBarRect = messageBar?.getBoundingClientRect();
-      const messagesRect = messagesContainer?.getBoundingClientRect();
-      const toolbarRect = toolbar?.getBoundingClientRect();
-      
-      fetch('http://127.0.0.1:7243/ingest/07d80fb8-251f-44b3-a7af-ce7afb45a49c', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          location: 'AIAssistantView.tsx:useEffect:layout',
-          message: 'Layout measurements - checking for white gap at bottom-right',
-          data: {
-            isMobile,
-            viewportWidth: window.innerWidth,
-            viewportHeight: window.innerHeight,
-            zoomLevel: window.devicePixelRatio,
-            rootWidth: root?.clientWidth,
-            rootHeight: root?.clientHeight,
-            rootBottom: rootRect?.bottom,
-            rootScrollHeight: root?.scrollHeight,
-            rightPanelWidth: rightPanel?.clientWidth,
-            rightPanelHeight: rightPanel?.clientHeight,
-            rightPanelBottom: rightPanelRect?.bottom,
-            rightPanelComputedHeight: rightPanel ? window.getComputedStyle(rightPanel).height : null,
-            toolbarHeight: toolbar?.clientHeight,
-            toolbarBottom: toolbarRect?.bottom,
-            messagesHeight: messagesContainer?.clientHeight,
-            messagesBottom: messagesRect?.bottom,
-            messagesComputedHeight: messagesContainer ? window.getComputedStyle(messagesContainer).height : null,
-            messageBarHeight: messageBar?.clientHeight,
-            messageBarTop: messageBarRect?.top,
-            messageBarBottom: messageBarRect?.bottom,
-            messageBarComputedHeight: messageBar ? window.getComputedStyle(messageBar).height : null,
-            calculatedRightPanelHeight: toolbar?.clientHeight && messagesContainer?.clientHeight && messageBar?.clientHeight 
-              ? toolbar.clientHeight + messagesContainer.clientHeight + messageBar.clientHeight 
-              : null,
-            gapAtBottom: rightPanelRect && messageBarRect 
-              ? window.innerHeight - messageBarRect.bottom 
-              : null,
-            sidebarHeight: sidebar?.clientHeight,
-            sidebarBottom: sidebar?.getBoundingClientRect()?.bottom,
-            bodyScrollHeight: document.body.scrollHeight,
-            bodyClientHeight: document.body.clientHeight,
-            hasVerticalScroll: document.body.scrollHeight > window.innerHeight
-          },
-          timestamp: Date.now(),
-          sessionId: 'debug-session',
-          runId: 'white-gap-bottom-right',
-          hypothesisId: 'A'
-        })
-      }).catch(() => {});
-    };
-    
-    logLayout();
-    window.addEventListener('resize', logLayout);
-    return () => window.removeEventListener('resize', logLayout);
-  }, [isMobile]);
-  // #endregion
 
   // ============================================================================
   // LOCKED: Root Container Structure - DO NOT MODIFY WITHOUT EXPLICIT APPROVAL
