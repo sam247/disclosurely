@@ -1885,7 +1885,7 @@ Additional Details: ${decryptedContent.additionalDetails || 'None provided'}
                               <tr 
                                 key={report.id} 
                                 className={`border-b hover:bg-gray-50 ${highlightedReportIds.includes(report.id) ? 'bg-yellow-50 border-l-4 border-l-orange-400' : index % 2 === 0 ? 'bg-white' : 'bg-gray-50'}`}
-                                style={{ height: '22px' }}
+                                style={{ height: '28px' }}
                               >
                                 <td className="px-2 py-0 text-xs text-gray-900 border-r font-mono">
                                   <div className="flex items-center gap-2">
@@ -1916,7 +1916,7 @@ Additional Details: ${decryptedContent.additionalDetails || 'None provided'}
                                     {report.title}
                                   </div>
                                 </td>
-                                <td className="px-2 py-0 text-xs border-r">
+                                <td className="px-2 py-1 text-xs border-r">
                                   <Badge variant={report.status === 'new' ? 'default' : 'secondary'} className="text-xs px-1 py-0">
                                     {report.status}
                                   </Badge>
@@ -1943,7 +1943,7 @@ Additional Details: ${decryptedContent.additionalDetails || 'None provided'}
                                     />
                                   </div>
                                 </td>
-                                <td className="px-2 py-0 text-xs border-r">
+                                <td className="px-2 py-1 text-xs border-r">
                                   {report.ai_risk_level ? (
                                     <Popover>
                                       <PopoverTrigger asChild>
@@ -2588,7 +2588,7 @@ Additional Details: ${decryptedContent.additionalDetails || 'None provided'}
                               <tr 
                                 key={report.id} 
                                 className={`border-b hover:bg-gray-50 ${index % 2 === 0 ? 'bg-white' : 'bg-gray-50'}`}
-                                style={{ height: '22px' }}
+                                style={{ height: '28px' }}
                               >
                                 <td className="px-2 py-0 text-xs text-gray-900 border-r font-mono">
                                   <div className="flex items-center gap-2">
