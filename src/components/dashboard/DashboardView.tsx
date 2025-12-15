@@ -2594,7 +2594,7 @@ Additional Details: ${decryptedContent.additionalDetails || 'None provided'}
                     
                       {/* Pagination Footer - Airtable/Spreadsheet style fixed at bottom - Always visible */}
                       {totalArchived > 0 && (
-                        <div className="flex flex-row items-center justify-between px-3 py-2 border-t bg-gray-50 flex-shrink-0 h-10 z-20 bg-white">
+                        <div className="flex flex-row items-center justify-between px-3 py-2 border-t bg-gray-50 flex-shrink-0 h-10 z-20 bg-white" data-dashboard-pagination>
                         <div className="flex items-center space-x-3">
                           <div className="flex items-center space-x-2">
                             <Label className="text-xs whitespace-nowrap font-medium">Rows per page:</Label>
