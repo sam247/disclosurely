@@ -373,31 +373,6 @@ const AppContent = () => {
             </ProtectedRoute>
           }
         />
-        <Route
-          path="/dashboard/admin"
-          element={
-            <ProtectedRoute>
-              <OwnerOnlyRoute>
-                <DashboardLayout>
-                  <AdminPanel />
-                </DashboardLayout>
-              </OwnerOnlyRoute>
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/dashboard/admin/:section"
-          element={
-            <ProtectedRoute>
-              <OwnerOnlyRoute>
-                <DashboardLayout>
-                  <AdminPanel />
-                </DashboardLayout>
-              </OwnerOnlyRoute>
-            </ProtectedRoute>
-          }
-        />
-
         {/* Catch all - 404 */}
         <Route path="*" element={<NotFound />} />
       </Routes>
