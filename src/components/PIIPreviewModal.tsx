@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
-import { Shield, Eye, EyeOff, Info, Lock, AlertCircle } from 'lucide-react';
-import { highlightPIIForDisplay, formatPIIType } from '@/utils/pii-detector-client';
+import { Shield, Info, Lock, AlertCircle } from 'lucide-react';
+import { detectPIISync, highlightPIIForDisplay, formatPIIType } from '@/utils/pii-detector-client';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { useOrganization } from '@/hooks/useOrganization';
@@ -33,47 +33,45 @@ export const PIIPreviewModal: React.FC<PIIPreviewModalProps> = ({
   } | null>(null);
   const [highlightedParts, setHighlightedParts] = useState<Array<{ text: string; isPII: boolean; type?: string; placeholder?: string }>>([]);
   
-  // Detect PII using server-side OpenRedaction API
+  // Detect PII using client-side detection (same as anonymous report form)
   useEffect(() => {
-    const detectPII = async () => {
-      try {
-        const { data, error } = await supabase.functions.invoke('detect-pii', {
-          body: { 
-            text: originalText || '',
-            enable_ai: true 
-          }
-        });
+    if (!originalText) {
+      setRedactionResult({
+        redactedText: '',
+        detections: [],
+        piiCount: 0,
+        stats: {}
+      });
+      setHighlightedParts([{ text: '', isPII: false }]);
+      return;
+    }
 
-        if (error) throw error;
-
-        const result = data;
-        setRedactionResult({
-          redactedText: result.redactedText || originalText || '',
-          detections: result.detections || [],
-          piiCount: result.piiCount || 0,
-          stats: result.stats || {}
-        });
-        
-        // Generate highlighted parts
-        const highlighted = highlightPIIForDisplay(
-          originalText || '', 
-          Array.isArray(result?.detections) ? result.detections : []
-        );
-        setHighlightedParts(Array.isArray(highlighted) ? highlighted : [{ text: originalText || '', isPII: false }]);
-      } catch (error) {
-        console.error('Error detecting PII:', error);
-        setRedactionResult({
-          redactedText: originalText || '',
-          detections: [],
-          piiCount: 0,
-          stats: {}
-        });
-        setHighlightedParts([{ text: originalText || '', isPII: false }]);
-      }
-    };
-
-    if (originalText) {
-      detectPII();
+    try {
+      // Use the same client-side detection that works in the anonymous report
+      const result = detectPIISync(originalText);
+      
+      setRedactionResult({
+        redactedText: result.redactedText || originalText,
+        detections: result.detections || [],
+        piiCount: result.piiCount || 0,
+        stats: result.stats || {}
+      });
+      
+      // Generate highlighted parts for display
+      const highlighted = highlightPIIForDisplay(
+        originalText, 
+        result.detections || []
+      );
+      setHighlightedParts(Array.isArray(highlighted) ? highlighted : [{ text: originalText, isPII: false }]);
+    } catch (error) {
+      console.error('Error detecting PII:', error);
+      setRedactionResult({
+        redactedText: originalText,
+        detections: [],
+        piiCount: 0,
+        stats: {}
+      });
+      setHighlightedParts([{ text: originalText, isPII: false }]);
     }
   }, [originalText]);
 
@@ -141,44 +139,16 @@ export const PIIPreviewModal: React.FC<PIIPreviewModalProps> = ({
 
         {/* Scrollable content area */}
         <div className="flex-1 overflow-y-auto space-y-4 pr-2">
-          {/* Side-by-side comparison */}
-          <div className="grid grid-cols-2 gap-4">
-            {/* Original with highlights */}
-            <div className="border rounded-lg overflow-hidden">
-              <div className="bg-red-50 border-b p-3 sticky top-0">
-                <h3 className="font-semibold flex items-center gap-2 text-sm">
-                  <Eye className="h-4 w-4" />
-                  Your Input (Contains PII)
-                </h3>
-              </div>
-              <div className="p-4 bg-white text-sm leading-relaxed whitespace-pre-wrap font-mono">
-                {Array.isArray(highlightedParts) && highlightedParts.map((part, idx) => (
-                  part.isPII ? (
-                    <span
-                      key={idx}
-                      className="bg-yellow-200 border-b-2 border-yellow-500 font-semibold px-1 cursor-help"
-                      title={`${formatPIIType(part.type!)} - Will be redacted as ${part.placeholder}`}
-                    >
-                      {part.text}
-                    </span>
-                  ) : (
-                    <span key={idx}>{part.text}</span>
-                  )
-                ))}
-              </div>
+          {/* Redacted version only */}
+          <div className="border rounded-lg overflow-hidden">
+            <div className="bg-green-50 border-b p-3 sticky top-0">
+              <h3 className="font-semibold flex items-center gap-2 text-sm">
+                <Lock className="h-4 w-4" />
+                AI Will See (Protected)
+              </h3>
             </div>
-
-            {/* Redacted version */}
-            <div className="border rounded-lg overflow-hidden">
-              <div className="bg-green-50 border-b p-3 sticky top-0">
-                <h3 className="font-semibold flex items-center gap-2 text-sm">
-                  <EyeOff className="h-4 w-4" />
-                  AI Will See (Protected)
-                </h3>
-              </div>
-              <div className="p-4 bg-white text-sm leading-relaxed whitespace-pre-wrap font-mono">
-                {redactionResult?.redactedText || originalText || ''}
-              </div>
+            <div className="p-4 bg-white text-sm leading-relaxed whitespace-pre-wrap font-mono">
+              {redactionResult?.redactedText || originalText || ''}
             </div>
           </div>
 
