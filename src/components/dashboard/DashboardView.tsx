@@ -1752,7 +1752,7 @@ Additional Details: ${decryptedContent.additionalDetails || 'None provided'}
               ) : (
                 <>
                   {/* Desktop Table View - Matches audit page structure */}
-                  <div className="hidden md:block flex-1 overflow-hidden flex flex-col min-h-0" style={{ maxHeight: '100%' }} data-dashboard-table-active>
+                  <div className="hidden md:block flex-1 overflow-hidden flex flex-col" style={{ maxHeight: 'calc(100% - 0px)' }} data-dashboard-table-active>
                     {/* Scrollable table body */}
                     <div className="flex-1 overflow-y-auto overflow-x-auto min-h-0" style={{ maxHeight: 'calc(100% - 40px)' }}>
                       <Table className="min-w-full">
@@ -2408,7 +2408,7 @@ Additional Details: ${decryptedContent.additionalDetails || 'None provided'}
               ) : (
                 <>
                   {/* Desktop Table View - Matches audit page structure */}
-                  <div className="hidden md:block flex-1 overflow-hidden flex flex-col min-h-0" style={{ maxHeight: '100%' }} data-dashboard-table-archived>
+                  <div className="hidden md:block flex-1 overflow-hidden flex flex-col" style={{ maxHeight: 'calc(100% - 0px)' }} data-dashboard-table-archived>
                     {/* Scrollable table body */}
                     <div className="flex-1 overflow-y-auto overflow-x-auto min-h-0" style={{ maxHeight: 'calc(100% - 40px)' }}>
                       <Table className="min-w-full">
