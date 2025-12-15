@@ -75,10 +75,10 @@ const RiskLevelSelector = ({
         <Button 
           variant="outline" 
           size="sm" 
-          className={`h-6 px-2 text-xs ${currentLevel ? getRiskLevelColor(currentLevel) : 'bg-gray-100 text-gray-600'}`}
+          className={`h-5 px-1.5 text-xs ${currentLevel ? getRiskLevelColor(currentLevel) : 'bg-gray-100 text-gray-600'}`}
           disabled={isUpdating}
         >
-          {currentLevel ? `${getRiskLevelText(currentLevel)} (${currentLevel}/5)` : 'Set Risk'}
+          {currentLevel ? `${getRiskLevelText(currentLevel)} (${currentLevel}/5)` : 'Set'}
         </Button>
       </PopoverTrigger>
       <PopoverContent className="w-64 p-2">
@@ -1921,7 +1921,7 @@ Additional Details: ${decryptedContent.additionalDetails || 'None provided'}
                                     {report.status}
                                   </Badge>
                                 </td>
-                                <td className="px-2 py-0 text-xs border-r">
+                                <td className="px-2 py-0 text-xs text-gray-900 border-r">
                                   {decryptedCategories[report.id] ? (
                                     <div>
                                       <div className="font-medium">{decryptedCategories[report.id].main}</div>
@@ -1934,26 +1934,28 @@ Additional Details: ${decryptedContent.additionalDetails || 'None provided'}
                                   )}
                                 </td>
                                 <td className="px-2 py-0 text-xs border-r">
-                                  <RiskLevelSelector
-                                    reportId={report.id}
-                                    currentLevel={report.manual_risk_level}
-                                    onUpdate={(level) => updateManualRiskLevel(report.id, level)}
-                                    isUpdating={updatingRiskLevel === report.id}
-                                  />
+                                  <div className="flex items-center">
+                                    <RiskLevelSelector
+                                      reportId={report.id}
+                                      currentLevel={report.manual_risk_level}
+                                      onUpdate={(level) => updateManualRiskLevel(report.id, level)}
+                                      isUpdating={updatingRiskLevel === report.id}
+                                    />
+                                  </div>
                                 </td>
                                 <td className="px-2 py-0 text-xs border-r">
                                   {report.ai_risk_level ? (
                                     <Popover>
                                       <PopoverTrigger asChild>
                                         <button
-                                          className={`inline-flex items-center gap-1 px-2 py-1 rounded-md text-xs font-semibold cursor-pointer transition-all hover:ring-2 hover:ring-offset-1 ${
+                                          className={`inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-xs font-semibold cursor-pointer transition-all hover:ring-1 hover:ring-offset-0 ${
                                             getUrgencyLevel(report.ai_risk_level) === 'HIGH' ? 'bg-red-600 text-white hover:ring-red-400' :
                                             getUrgencyLevel(report.ai_risk_level) === 'MEDIUM' ? 'bg-yellow-500 text-white hover:ring-yellow-400' :
                                             'bg-green-500 text-white hover:ring-green-400'
                                           }`}
                                         >
                                           <span>{getUrgencyLevel(report.ai_risk_level)}</span>
-                                          <Eye className="w-3 h-3 opacity-70" />
+                                          <Eye className="w-2.5 h-2.5 opacity-70" />
                                         </button>
                                       </PopoverTrigger>
                                       <PopoverContent className="w-80">
@@ -1969,8 +1971,8 @@ Additional Details: ${decryptedContent.additionalDetails || 'None provided'}
                                     value={report.assigned_to || 'unassigned'}
                                     onValueChange={(value) => assignReport(report.id, value)}
                                   >
-                                    <SelectTrigger className="w-40 h-6 text-xs">
-                                      <SelectValue placeholder="Assign to..." />
+                                    <SelectTrigger className="h-5 text-xs border-gray-300">
+                                      <SelectValue placeholder="Assign..." />
                                     </SelectTrigger>
                                     <SelectContent>
                                       <SelectItem value="unassigned">Unassigned</SelectItem>
@@ -2622,7 +2624,7 @@ Additional Details: ${decryptedContent.additionalDetails || 'None provided'}
                                     {report.status}
                                   </Badge>
                                 </td>
-                                <td className="px-2 py-0 text-xs border-r">
+                                <td className="px-2 py-0 text-xs text-gray-900 border-r">
                                   {decryptedCategories[report.id] ? (
                                     <div>
                                       <div className="font-medium">{decryptedCategories[report.id].main}</div>
@@ -2642,14 +2644,14 @@ Additional Details: ${decryptedContent.additionalDetails || 'None provided'}
                                     <Button 
                                       variant="default" 
                                       size="sm"
-                                      className="h-6 text-xs px-2"
+                                      className="h-5 text-xs px-2"
                                       onClick={() => handleViewReport(report)}
                                     >
-                                      {t('viewReport')}
+                                      View
                                     </Button>
                                     <DropdownMenu>
                                       <DropdownMenuTrigger asChild>
-                                        <Button variant="ghost" size="sm" className="h-6 w-6 p-0">
+                                        <Button variant="ghost" size="sm" className="h-5 w-5 p-0">
                                           <MoreVertical className="h-3 w-3" />
                                         </Button>
                                       </DropdownMenuTrigger>
