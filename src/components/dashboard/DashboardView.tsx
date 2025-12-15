@@ -14,7 +14,7 @@ import { useToast } from '@/hooks/use-toast';
 import { useTranslation } from 'react-i18next';
 import { log, LogContext } from '@/utils/logger';
 import { auditLogger } from '@/utils/auditLogger';
-import { FileText, Eye, Archive, Trash2, RotateCcw, MoreVertical, XCircle, ChevronUp, ChevronDown, CheckCircle, Search, Download, FileSpreadsheet, Bot, Zap, AlertCircle, Clock, Flame, User, Copy, Check, ChevronLeft, ChevronRight, MoreHorizontal } from 'lucide-react';
+import { FileText, Eye, Archive, Trash2, RotateCcw, MoreVertical, XCircle, ChevronUp, ChevronDown, CheckCircle, Search, Download, FileSpreadsheet, Bot, Zap, AlertCircle, Clock, Flame, User, Copy, Check, ChevronLeft, ChevronRight, MoreHorizontal, RefreshCw } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import ReportMessaging from '@/components/ReportMessaging';
 import ReportContentDisplay from '@/components/ReportContentDisplay';
@@ -1500,221 +1500,6 @@ Additional Details: ${decryptedContent.additionalDetails || 'None provided'}
     return () => window.removeEventListener('resize', checkMobile);
   }, []);
 
-  // ============================================================================
-  // LOCKED: Dashboard Layout & Scroll Control - DO NOT MODIFY WITHOUT EXPLICIT APPROVAL
-  // ============================================================================
-  // This useLayoutEffect is CRITICAL for preventing page scroll and initial scrollbar flash.
-  // It applies body styles synchronously before paint using useLayoutEffect (not useEffect).
-  // 
-  // Key points:
-  // - useLayoutEffect runs synchronously before browser paint (prevents scrollbar flash)
-  // - Body is set to position: fixed with exact viewport height on desktop
-  // - Mobile uses natural scrolling (conditional based on isMobile state)
-  // - Content container height is calculated dynamically accounting for alerts
-  // - Row heights are locked at 15px for both active and archived tables
-  // 
-  // DO NOT:
-  // - Change useLayoutEffect back to useEffect (causes scrollbar flash)
-  // - Remove the immediate updateContentHeight() call
-  // - Change the body position: fixed logic for desktop
-  // - Modify row heights without explicit approval
-  // - Remove overflow: hidden constraints
-  // ============================================================================
-  useLayoutEffect(() => {
-    const updateContentHeight = () => {
-
-      const subscriptionAlert = document.querySelector('[data-dashboard-alert-subscription]');
-      const contentContainer = document.querySelector('[data-dashboard-content]') as HTMLElement;
-      const card = document.querySelector('[data-dashboard-card-active]') as HTMLElement;
-      const tableContainer = document.querySelector('[data-dashboard-table-active]') as HTMLElement;
-      const rootContainer = document.querySelector('[data-dashboard-root]') as HTMLElement;
-      const contentWrapper = document.querySelector('[data-dashboard-wrapper]') as HTMLElement;
-      const titleSection = contentContainer?.querySelector('div:first-of-type') as HTMLElement; // Title section
-      const tabsSection = contentContainer?.querySelector('[role="tablist"]')?.parentElement as HTMLElement; // Tabs/filters section
-      
-      if (contentContainer && rootContainer) {
-        const subscriptionHeight = subscriptionAlert ? subscriptionAlert.clientHeight + 16 : 0; // +16 for mt-4
-        const totalAlertsHeight = subscriptionHeight;
-        const viewportHeight = window.innerHeight;
-        const headerHeight = 109; // Match audit page: calc(100vh - 109px)
-        // Reduced padding to give more space to table (was 16px, now 8px)
-        const contentPadding = 8; // pt-2 = 8px (reduced from pt-4 = 16px)
-        // Account for title (approx 60px) and tabs/filters (approx 60px) to give table more space
-        const titleAndTabsHeight = 120; // Approximate height of title + tabs/filters section
-        const calculatedContentHeight = viewportHeight - headerHeight - totalAlertsHeight - contentPadding;
-        const rootHeight = viewportHeight - headerHeight;
-        
-        // Debug: Log height calculations
-        console.log('[Dashboard Height Debug]', {
-          viewportHeight,
-          headerHeight,
-          rootHeight,
-          calculatedContentHeight,
-          totalAlertsHeight,
-          contentPadding,
-          rootContainerComputedHeight: rootContainer.style.height
-        });
-        
-        // Constrain body to prevent page scroll (desktop only - mobile needs natural scrolling)
-        if (!isMobile) {
-
-          // Force body to exact viewport height to eliminate any scroll
-          document.body.style.overflow = 'hidden';
-          document.body.style.height = `${viewportHeight}px`;
-          document.body.style.maxHeight = `${viewportHeight}px`;
-          document.body.style.position = 'fixed';
-          document.body.style.width = '100%';
-          document.body.style.top = '0';
-          document.body.style.left = '0';
-        } else {
-          // On mobile, allow natural body scrolling
-          document.body.style.overflow = '';
-          document.body.style.height = '';
-          document.body.style.maxHeight = '';
-          document.body.style.position = '';
-          document.body.style.width = '';
-          document.body.style.top = '';
-          document.body.style.left = '';
-        }
-        
-        // Set root container height to exactly fit viewport (desktop only)
-        if (!isMobile) {
-          rootContainer.style.height = `${rootHeight}px`;
-          rootContainer.style.maxHeight = `${rootHeight}px`;
-          rootContainer.style.overflow = 'hidden';
-          rootContainer.style.margin = '0';
-          rootContainer.style.padding = '0';
-          
-          // Debug: Log after setting heights
-          console.log('[Dashboard Height Debug] After setting', {
-            rootHeight,
-            actualRootHeight: rootContainer.style.height,
-            tableContainerHeight: tableContainer?.clientHeight,
-            tableContainerComputedHeight: tableContainer ? window.getComputedStyle(tableContainer).height : null,
-            contentContainerHeight: contentContainer.clientHeight
-          });
-          
-          // Set content wrapper to fill remaining space
-          if (contentWrapper) {
-            contentWrapper.style.overflow = 'hidden';
-            contentWrapper.style.maxHeight = '100%';
-            contentWrapper.style.margin = '0';
-            contentWrapper.style.padding = '0';
-          }
-          
-          // Don't constrain content container height - let flex handle it so table can grow
-          // Remove height constraint to allow table container (flex-1) to fill available space
-          contentContainer.style.maxHeight = '';
-          contentContainer.style.height = '';
-          contentContainer.style.overflow = 'hidden';
-          
-          // Calculate available space for table and set minimum height
-          // Account for title section and tabs/filters section
-          const titleHeight = titleSection?.offsetHeight || 60;
-          const tabsHeight = tabsSection?.offsetHeight || 60;
-          const availableForTable = rootHeight - titleHeight - tabsHeight - 32; // 32px for padding/margins
-          
-          // Set minimum height on table container to ensure it gets enough space
-          if (tableContainer) {
-            const minTableHeight = Math.max(availableForTable, 600); // At least 600px or calculated available space
-            tableContainer.style.minHeight = `${minTableHeight}px`;
-            
-            // Debug: Log table height calculation
-            console.log('[Dashboard Height Debug] Table height calculation', {
-              rootHeight,
-              titleHeight,
-              tabsHeight,
-              availableForTable,
-              minTableHeight,
-              tableContainerActualHeight: tableContainer.clientHeight
-            });
-          }
-        } else {
-          // On mobile, allow natural flow
-          rootContainer.style.height = '';
-          rootContainer.style.maxHeight = '';
-          rootContainer.style.overflow = '';
-          if (contentWrapper) {
-            contentWrapper.style.overflow = '';
-            contentWrapper.style.maxHeight = '';
-          }
-          contentContainer.style.maxHeight = '';
-          contentContainer.style.height = '';
-          contentContainer.style.overflow = '';
-        }
-        
-        // Debug: Log final measurements
-        console.log('[Dashboard Height Debug] Final measurements', {
-          tableContainerClientHeight: tableContainer?.clientHeight,
-          tableContainerOffsetHeight: tableContainer?.offsetHeight,
-          tableContainerScrollHeight: tableContainer?.scrollHeight,
-          rootContainerClientHeight: rootContainer.clientHeight,
-          contentContainerClientHeight: contentContainer.clientHeight
-        });
-        
-        // Measure actual heights to find extra space
-        const measurements: any = {
-          viewportHeight,
-          headerHeight,
-          subscriptionHeight: subscriptionAlert?.clientHeight || 0,
-          totalAlertsHeight,
-          contentPadding,
-          calculatedContentHeight,
-          rootHeight,
-          rootContainerHeight: rootContainer.clientHeight,
-          rootContainerScrollHeight: rootContainer.scrollHeight,
-          rootContainerOffsetHeight: rootContainer.offsetHeight,
-          contentWrapperHeight: contentWrapper?.clientHeight,
-          contentWrapperScrollHeight: contentWrapper?.scrollHeight,
-          contentContainerHeight: contentContainer.clientHeight,
-          contentContainerScrollHeight: contentContainer.scrollHeight,
-          contentContainerOffsetHeight: contentContainer.offsetHeight,
-          cardHeight: card?.clientHeight,
-          cardScrollHeight: card?.scrollHeight,
-          tableContainerHeight: tableContainer?.clientHeight,
-          tableContainerScrollHeight: tableContainer?.scrollHeight,
-          documentBodyScrollHeight: document.body.scrollHeight,
-          documentBodyClientHeight: document.body.clientHeight,
-          extraSpace: contentContainer.scrollHeight - contentContainer.clientHeight,
-          rootExtraSpace: rootContainer.scrollHeight - rootContainer.clientHeight,
-          bodyExtraSpace: document.body.scrollHeight - window.innerHeight
-        };
-      }
-    };
-    
-    // Apply styles immediately (synchronously) to prevent initial scrollbar
-    updateContentHeight();
-    
-    // Also update after a short delay to catch any dynamic content that loads
-    const timeoutId = setTimeout(updateContentHeight, 100);
-    const timeoutId2 = setTimeout(updateContentHeight, 500);
-    const timeoutId3 = setTimeout(() => {
-      updateContentHeight();
-    }, 1000);
-    window.addEventListener('resize', updateContentHeight);
-    
-    // Monitor for style changes using MutationObserver
-    const observer = new MutationObserver((mutations) => {
-      mutations.forEach((mutation) => {
-        if (mutation.type === 'attributes' && mutation.attributeName === 'style' && mutation.target === document.body) {
-          // Body style changed - no action needed
-        }
-      });
-    });
-    observer.observe(document.body, {
-      attributes: true,
-      attributeOldValue: true,
-      attributeFilter: ['style']
-    });
-    
-    return () => {
-      clearTimeout(timeoutId);
-      clearTimeout(timeoutId2);
-      clearTimeout(timeoutId3);
-      window.removeEventListener('resize', updateContentHeight);
-      observer.disconnect();
-    };
-  }, [subscriptionData, patterns, isMobile]);
 
   if (loading) {
     return (
@@ -1724,75 +1509,90 @@ Additional Details: ${decryptedContent.additionalDetails || 'None provided'}
     );
   }
 
-  // ============================================================================
-  // LOCKED: Root Container Structure - DO NOT MODIFY
-  // ============================================================================
-  // This root div structure is carefully calibrated to prevent page scrolling.
-  // Desktop: Fixed height with overflow hidden
-  // Mobile: Natural flow (empty style object)
-  // ============================================================================
+  // #region agent log
+  useEffect(() => {
+    const measureLayout = () => {
+      const root = document.querySelector('[data-dashboard-root]') as HTMLElement;
+      const tableContainer = document.querySelector('[data-dashboard-table-active]') as HTMLElement;
+      const wrapper = root?.querySelector('.flex-1.overflow-hidden.min-h-0.flex.flex-col') as HTMLElement;
+      const header = root?.querySelector('h1')?.parentElement?.parentElement as HTMLElement;
+      const alert = root?.querySelector('.border-yellow-500') as HTMLElement;
+      const controls = root?.querySelector('.border.rounded-lg.bg-white.flex-shrink-0') as HTMLElement;
+      
+      if (root && tableContainer) {
+        fetch('http://127.0.0.1:7243/ingest/07d80fb8-251f-44b3-a7af-ce7afb45a49c',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'DashboardView.tsx:measureLayout',message:'Layout measurements',data:{viewportHeight:window.innerHeight,rootHeight:root.offsetHeight,rootClientHeight:root.clientHeight,rootScrollHeight:root.scrollHeight,rootComputedHeight:window.getComputedStyle(root).height,tableContainerHeight:tableContainer.offsetHeight,tableContainerClientHeight:tableContainer.clientHeight,tableContainerComputedHeight:window.getComputedStyle(tableContainer).height,wrapperHeight:wrapper?.offsetHeight,wrapperClientHeight:wrapper?.clientHeight,headerHeight:header?.offsetHeight,alertHeight:alert?.offsetHeight,controlsHeight:controls?.offsetHeight,availableSpace:root.clientHeight - (header?.offsetHeight || 0) - (alert?.offsetHeight || 0) - (controls?.offsetHeight || 0)},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'A'})}).catch(()=>{});
+      }
+    };
+    const timeout = setTimeout(measureLayout, 100);
+    const timeout2 = setTimeout(measureLayout, 500);
+    window.addEventListener('resize', measureLayout);
+    return () => {
+      clearTimeout(timeout);
+      clearTimeout(timeout2);
+      window.removeEventListener('resize', measureLayout);
+    };
+  }, [subscriptionData, showArchived]);
+  // #endregion
+
   return (
-    <div
-      className="flex flex-col"
-      style={!isMobile ? { height: 'calc(100vh - 109px)', overflow: 'hidden', maxHeight: 'calc(100vh - 109px)' } : {}}
-      data-dashboard-root
-    >
-      {/* Content - No scrolling, only table scrolls internally (desktop) */}
-      <div 
-        className="flex-1 overflow-hidden flex flex-col min-h-0" 
-        style={!isMobile ? { overflow: 'hidden', maxHeight: '100%' } : {}}
-        data-dashboard-wrapper
-      >
-        {/* Subscription Grace Period Warning - Hidden for pro users on mobile */}
-        {subscriptionData && 
-         (subscriptionData.isInGracePeriod || subscriptionData.subscription_status === 'past_due') && 
-         subscriptionData.subscription_tier !== 'pro' && (
-          <Alert className="border-yellow-500 bg-yellow-50 flex-shrink-0 mx-4 mt-4" data-dashboard-alert-subscription>
-            <Clock className="h-4 w-4 text-yellow-600" />
-            <AlertTitle className="text-yellow-800">Subscription Notice</AlertTitle>
-            <AlertDescription className="text-yellow-700">
-              {subscriptionData.isInGracePeriod ? (
-                <>
-                  Your subscription has expired. You're currently in a grace period with read-only access.
-                  {subscriptionData.grace_period_ends_at && (
-                    <> Grace period ends: {new Date(subscriptionData.grace_period_ends_at).toLocaleString()}</>
-                  )}
-                  {' '}Please renew your subscription to restore full access.
-                </>
-              ) : (
-                <>
-                  Your payment failed and your subscription is past due. Please update your payment method to restore full access.
-                </>
-              )}
-              <Button
-                variant="outline"
-                size="sm"
-                className="ml-4 mt-2"
-                onClick={() => navigate('/dashboard/settings?tab=subscription')}
-              >
-                Manage Subscription
-              </Button>
-            </AlertDescription>
-          </Alert>
-        )}
+    <div className="flex flex-col" style={{ height: 'calc(100vh - 109px)', overflow: 'hidden' }} data-dashboard-root>
+      {/* Header */}
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 flex-shrink-0 px-2 sm:px-0 mb-2">
+        <div>
+          <h1 className="text-xl sm:text-2xl font-bold">{t('reportsOverview')}</h1>
+          <p className="text-xs sm:text-sm text-muted-foreground mt-0.5">
+            {t('manageAndReviewReports')}
+          </p>
+        </div>
+      </div>
 
+      {/* Subscription Grace Period Warning */}
+      {subscriptionData && 
+       (subscriptionData.isInGracePeriod || subscriptionData.subscription_status === 'past_due') && 
+       subscriptionData.subscription_tier !== 'pro' && (
+        <Alert className="border-yellow-500 bg-yellow-50 flex-shrink-0 mx-2 sm:mx-0 mb-2">
+          <Clock className="h-4 w-4 text-yellow-600" />
+          <AlertTitle className="text-yellow-800">Subscription Notice</AlertTitle>
+          <AlertDescription className="text-yellow-700">
+            {subscriptionData.isInGracePeriod ? (
+              <>
+                Your subscription has expired. You're currently in a grace period with read-only access.
+                {subscriptionData.grace_period_ends_at && (
+                  <> Grace period ends: {new Date(subscriptionData.grace_period_ends_at).toLocaleString()}</>
+                )}
+                {' '}Please renew your subscription to restore full access.
+              </>
+            ) : (
+              <>
+                Your payment failed and your subscription is past due. Please update your payment method to restore full access.
+              </>
+            )}
+            <Button
+              variant="outline"
+              size="sm"
+              className="ml-4 mt-2"
+              onClick={() => navigate('/dashboard/settings?tab=subscription')}
+            >
+              Manage Subscription
+            </Button>
+          </AlertDescription>
+        </Alert>
+      )}
 
-        <div className="flex-1 flex flex-col overflow-hidden min-h-0 px-4 pt-4 pb-0" data-dashboard-content style={{ overflow: 'hidden' }}>
-          {/* Title and Subtitle */}
-          <div className="flex-shrink-0 mb-2">
-            <h2 className="text-xl sm:text-2xl font-bold">{t('reportsOverview')}</h2>
-            <p className="text-muted-foreground break-words hyphens-auto">{t('manageAndReviewReports')}</p>
-          </div>
-
-          <Tabs defaultValue="active" className="flex-1 flex flex-col overflow-hidden min-h-0">
-            {/* Tabs, Search, and Filter Row */}
-            <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center flex-shrink-0 mb-2">
-            <TabsList className="w-full md:w-auto">
-              <TabsTrigger value="active" className="flex-1 md:flex-none">{t('activeReports')} ({reports.length})</TabsTrigger>
-              <TabsTrigger value="archived" className="flex-1 md:flex-none">{t('archived')} ({archivedReports.length})</TabsTrigger>
-            </TabsList>
+      {/* Controls Bar - Replaces filter bar */}
+      <div className="border rounded-lg bg-white flex-shrink-0 mx-2 sm:mx-0 mb-2">
+        <div className="p-2 sm:p-3 space-y-2 sm:space-y-3">
+          <div className="flex flex-col sm:flex-row gap-2 sm:gap-4 items-start sm:items-center">
+            {/* Tabs */}
+            <Tabs value={showArchived ? "archived" : "active"} onValueChange={(value) => setShowArchived(value === "archived")} className="w-full sm:w-auto">
+              <TabsList className="w-full sm:w-auto">
+                <TabsTrigger value="active" className="flex-1 sm:flex-none">{t('activeReports')} ({reports.length})</TabsTrigger>
+                <TabsTrigger value="archived" className="flex-1 sm:flex-none">{t('archived')} ({archivedReports.length})</TabsTrigger>
+              </TabsList>
+            </Tabs>
             
-            <div className="flex flex-col sm:flex-row gap-4 flex-1 w-full sm:w-auto">
+            {/* Search, Status, Export */}
+            <div className="flex flex-col sm:flex-row gap-2 sm:gap-4 flex-1 w-full sm:w-auto">
               <Input
                 placeholder={t('searchReports')}
                 value={searchTerm}
@@ -1821,10 +1621,12 @@ Additional Details: ${decryptedContent.additionalDetails || 'None provided'}
               </Button>
             </div>
           </div>
-            {/* LOCKED: Active Reports Tab - Replicated from audit page structure */}
-            <TabsContent value="active" className="flex flex-col overflow-hidden min-h-0">
-              {/* Excel-Style Table - Matches audit page exactly */}
-              <div className="border rounded-lg bg-white flex-1 flex flex-col overflow-hidden min-h-0 mx-2 sm:mx-0" style={{ minHeight: 0, marginTop: '15px' }} data-dashboard-table-active>
+        </div>
+      </div>
+
+      {/* Table - Directly in root like audit page */}
+      {!showArchived ? (
+        <div className="border rounded-lg bg-white flex-1 flex flex-col overflow-hidden min-h-0 mx-2 sm:mx-0" style={{ minHeight: 0, marginTop: '15px' }} data-dashboard-table-active>
                 {/* Table Header */}
                 <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between p-2 sm:p-3 border-b bg-gray-50 gap-2 sm:gap-0 flex-shrink-0">
                   <div className="flex items-center space-x-2 sm:space-x-4">
@@ -1834,6 +1636,18 @@ Additional Details: ${decryptedContent.additionalDetails || 'None provided'}
                         Showing {startRecord}-{endRecord} of {totalReports} records
                       </p>
                     </div>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <Button 
+                      variant="outline" 
+                      onClick={fetchData}
+                      disabled={loading}
+                      size="sm"
+                      className="h-8 text-xs"
+                    >
+                      <RefreshCw className={`h-3 w-3 mr-1 ${loading ? 'animate-spin' : ''}`} />
+                      Refresh
+                    </Button>
                   </div>
                 </div>
                 
@@ -2548,12 +2362,8 @@ Additional Details: ${decryptedContent.additionalDetails || 'None provided'}
                   </>
                 )}
               </div>
-            </TabsContent>
-
-            {/* LOCKED: Archived Reports Tab - Replicated from audit page structure */}
-            <TabsContent value="archived" className="flex flex-col overflow-hidden min-h-0">
-              {/* Excel-Style Table - Matches audit page exactly */}
-              <div className="border rounded-lg bg-white flex-1 flex flex-col overflow-hidden min-h-0 mx-2 sm:mx-0" style={{ minHeight: 0, marginTop: '15px' }} data-dashboard-table-archived>
+      ) : (
+        <div className="border rounded-lg bg-white flex-1 flex flex-col overflow-hidden min-h-0 mx-2 sm:mx-0" style={{ minHeight: 0, marginTop: '15px' }} data-dashboard-table-archived>
                 {/* Table Header */}
                 <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between p-2 sm:p-3 border-b bg-gray-50 gap-2 sm:gap-0 flex-shrink-0">
                   <div className="flex items-center space-x-2 sm:space-x-4">
@@ -2563,6 +2373,18 @@ Additional Details: ${decryptedContent.additionalDetails || 'None provided'}
                         Showing {archivedStartRecord}-{archivedEndRecord} of {totalArchived} records
                       </p>
                     </div>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <Button 
+                      variant="outline" 
+                      onClick={fetchData}
+                      disabled={loading}
+                      size="sm"
+                      className="h-8 text-xs"
+                    >
+                      <RefreshCw className={`h-3 w-3 mr-1 ${loading ? 'animate-spin' : ''}`} />
+                      Refresh
+                    </Button>
                   </div>
                 </div>
                 
@@ -2928,10 +2750,7 @@ Additional Details: ${decryptedContent.additionalDetails || 'None provided'}
                   </>
                 )}
               </div>
-            </TabsContent>
-          </Tabs>
-        </div>
-      </div>
+      )}
 
       {/* Delete Confirmation Dialog */}
       <AlertDialog open={isDeleteDialogOpen} onOpenChange={(open) => {
