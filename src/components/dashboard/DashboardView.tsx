@@ -1500,17 +1500,9 @@ Additional Details: ${decryptedContent.additionalDetails || 'None provided'}
     return () => window.removeEventListener('resize', checkMobile);
   }, []);
 
-
-  if (loading) {
-    return (
-      <div className="p-8 flex items-center justify-center">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-      </div>
-    );
-  }
-
   // #region agent log
   useEffect(() => {
+    if (loading) return; // Don't measure during loading
     const measureLayout = () => {
       const root = document.querySelector('[data-dashboard-root]') as HTMLElement;
       const tableContainer = document.querySelector('[data-dashboard-table-active]') as HTMLElement;
@@ -1531,8 +1523,16 @@ Additional Details: ${decryptedContent.additionalDetails || 'None provided'}
       clearTimeout(timeout2);
       window.removeEventListener('resize', measureLayout);
     };
-  }, [subscriptionData, showArchived]);
+  }, [subscriptionData, showArchived, loading]);
   // #endregion
+
+  if (loading) {
+    return (
+      <div className="p-8 flex items-center justify-center">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+      </div>
+    );
+  }
 
   return (
     <div className="flex flex-col" style={{ height: 'calc(100vh - 109px)', overflow: 'hidden' }} data-dashboard-root>
