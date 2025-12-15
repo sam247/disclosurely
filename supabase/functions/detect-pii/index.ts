@@ -17,8 +17,13 @@ async function callOpenRedactAPI(text: string, enableAI: boolean = true) {
     'Content-Type': 'application/json',
   };
   
+  // Log API key status (without exposing the actual key)
   if (OPENREDACT_API_KEY) {
     headers['x-api-key'] = OPENREDACT_API_KEY;
+    console.log('[Detect PII] API key is set, length:', OPENREDACT_API_KEY.length);
+  } else {
+    console.warn('[Detect PII] WARNING: OPENREDACT_API_KEY environment variable is not set!');
+    console.warn('[Detect PII] API calls may fail without a valid API key.');
   }
 
   const apiUrl = `${OPENREDACT_API_URL}/v1/ai-detect`;
