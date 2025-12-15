@@ -125,22 +125,7 @@ const DashboardSidebar = ({
                 
                 const isActive = location.pathname === item.path;
                 const Icon = item.icon;
-                                    >
-                                      <SubIcon className="h-4 w-4" />
-                                      <span>{subItem.title}</span>
-                                    </a>
-                                  </SidebarMenuSubButton>
-                                </SidebarMenuSubItem>
-                              );
-                            })}
-                          </SidebarMenuSub>
-                        </CollapsibleContent>
-                      </SidebarMenuItem>
-                    </Collapsible>
-                  );
-                }
                 
-                // Regular menu items
                 return (
                   <SidebarMenuItem key={item.path}>
                     <SidebarMenuButton 
