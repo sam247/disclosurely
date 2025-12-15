@@ -408,6 +408,59 @@ const DashboardView = () => {
 
       if (detectedPatterns.totalPatterns > 0) {
         setPatterns(detectedPatterns);
+        
+        // Create notifications for pattern alerts (persist even when dismissed from dashboard)
+        if (user && effectiveOrganizationId) {
+          try {
+            // Check if we've already created notifications for these patterns
+            // We'll create one notification per pattern type to avoid duplicates
+            const { data: existingNotifications } = await supabase
+              .from('notifications')
+              .select('id')
+              .eq('user_id', user.id)
+              .eq('type', 'pattern_alert')
+              .eq('is_read', false)
+              .gte('created_at', new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString()) // Last 24 hours
+              .limit(1);
+            
+            // Only create notification if we don't have a recent unread one
+            if (!existingNotifications || existingNotifications.length === 0) {
+              const patternTypes = [];
+              if (detectedPatterns.repeatedNames.length > 0) {
+                patternTypes.push(`${detectedPatterns.repeatedNames.length} repeated name${detectedPatterns.repeatedNames.length > 1 ? 's' : ''}`);
+              }
+              if (detectedPatterns.categorySpikes.length > 0) {
+                patternTypes.push(`${detectedPatterns.categorySpikes.length} category spike${detectedPatterns.categorySpikes.length > 1 ? 's' : ''}`);
+              }
+              if (detectedPatterns.timeClusters.length > 0) {
+                patternTypes.push(`${detectedPatterns.timeClusters.length} time cluster${detectedPatterns.timeClusters.length > 1 ? 's' : ''}`);
+              }
+              
+              const { error: notifError } = await supabase
+                .from('notifications')
+                .insert({
+                  user_id: user.id,
+                  organization_id: effectiveOrganizationId,
+                  type: 'pattern_alert',
+                  title: 'Pattern Detection Alert',
+                  message: `Detected ${detectedPatterns.totalPatterns} suspicious pattern${detectedPatterns.totalPatterns > 1 ? 's' : ''}: ${patternTypes.join(', ')}`,
+                  metadata: {
+                    total_patterns: detectedPatterns.totalPatterns,
+                    high_severity_count: detectedPatterns.highSeverityCount,
+                    repeated_names_count: detectedPatterns.repeatedNames.length,
+                    category_spikes_count: detectedPatterns.categorySpikes.length,
+                    time_clusters_count: detectedPatterns.timeClusters.length,
+                  }
+                });
+              
+              if (notifError) {
+                console.error('Error creating pattern alert notification:', notifError);
+              }
+            }
+          } catch (error) {
+            console.error('Error creating pattern alert notification:', error);
+          }
+        }
       }
     };
 

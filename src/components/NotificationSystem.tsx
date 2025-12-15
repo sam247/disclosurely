@@ -195,9 +195,11 @@ const NotificationSystem = () => {
                           <h4 className="text-sm font-medium">
                             {notification.type === 'new_report' ? 'New Case Submitted' : 
                              notification.type === 'new_message' ? 'New Message Received' :
+                             notification.type === 'organization_message' ? 'Organization Message Sent' :
                              notification.type === 'category_change' ? 'Case Category Updated' :
                              notification.type === 'workflow_escalation' ? 'Case Escalated' :
                              notification.type === 'team_member_joined' ? 'New Team Member Joined' :
+                             notification.type === 'pattern_alert' ? 'Pattern Detection Alert' :
                              notification.title}
                           </h4>
                           {notification.metadata?.tracking_id && (
@@ -215,6 +217,8 @@ const NotificationSystem = () => {
                           ? `A new case has been submitted on ${formatDate(notification.created_at)} via an anonymous submission using your secure link.`
                           : notification.type === 'new_message'
                           ? `A new message has been received for case ${notification.metadata?.tracking_id || ''}. Please check your messages.`
+                          : notification.type === 'organization_message'
+                          ? `A message was sent on case ${notification.metadata?.tracking_id || ''}.`
                           : notification.type === 'category_change'
                           ? `The category for case ${notification.metadata?.tracking_id || ''} has been updated.`
                           : notification.type === 'workflow_escalation'
@@ -223,6 +227,8 @@ const NotificationSystem = () => {
                             : `Case ${notification.metadata?.tracking_id || ''} has been escalated to you.${notification.metadata?.reason ? ' Reason: ' + notification.metadata.reason : ''}`
                           : notification.type === 'team_member_joined'
                           ? `${notification.metadata?.user_name || notification.metadata?.user_email || 'A new team member'} has joined your organization as ${notification.metadata?.role || 'a team member'}.`
+                          : notification.type === 'pattern_alert'
+                          ? notification.message
                           : notification.message}
                       </p>
                     </div>

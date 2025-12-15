@@ -299,6 +299,7 @@ const AIAssistantView = () => {
         .select('id, tracking_id, title, status, created_at, priority')
         .eq('organization_id', organization.id)
         .neq('status', 'archived')
+        .is('deleted_at', null) // Exclude deleted cases
         .order('created_at', { ascending: false })
         .limit(100);
 
