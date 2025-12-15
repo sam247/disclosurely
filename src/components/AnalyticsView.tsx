@@ -153,12 +153,28 @@ const AnalyticsView: React.FC = () => {
 
       
 
-      // Decrypt categories for current period reports
-      const reportsWithCategories = await decryptCategoriesForReports(currentReports || [], organization.id);
+      // Decrypt categories for current period reports (optional - don't fail if decryption fails)
+      let reportsWithCategories = currentReports || [];
+      try {
+        reportsWithCategories = await decryptCategoriesForReports(currentReports || [], organization.id);
+      } catch (decryptError) {
+        console.warn('Category decryption failed, continuing without categories:', decryptError);
+        // Continue with reports without decrypted categories
+        reportsWithCategories = (currentReports || []).map(r => ({
+          ...r,
+          mainCategory: null,
+          subCategory: null
+        }));
+      }
       
       // Process data - pass selectedPeriod for monthly trends generation
       const processedData = processSimpleAnalytics(reportsWithCategories, selectedPeriod);
-      const previousData = previousReports ? processSimpleAnalytics(previousReports, selectedPeriod) : null;
+      
+      // Process previous period data (without decryption for now to speed things up)
+      const previousData = previousReports ? processSimpleAnalytics(
+        previousReports.map(r => ({ ...r, mainCategory: null, subCategory: null })),
+        selectedPeriod
+      ) : null;
       
       
       setAnalyticsData(processedData);
