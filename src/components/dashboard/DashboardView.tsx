@@ -1539,6 +1539,10 @@ Additional Details: ${decryptedContent.additionalDetails || 'None provided'}
         const calculatedContentHeight = viewportHeight - headerHeight - totalAlertsHeight - contentPadding;
         const rootHeight = viewportHeight - headerHeight;
         
+        // #region agent log
+        fetch('http://127.0.0.1:7243/ingest/07d80fb8-251f-44b3-a7af-ce7afb45a49c',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'DashboardView.tsx:1541',message:'Height calculation values',data:{viewportHeight,headerHeight,rootHeight,calculatedContentHeight,totalAlertsHeight,contentPadding,rootContainerComputedHeight:rootContainer.style.height,rootContainerInlineHeight:rootContainer.getAttribute('style')},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'A'})}).catch(()=>{});
+        // #endregion
+        
         // Constrain body to prevent page scroll (desktop only - mobile needs natural scrolling)
         if (!isMobile) {
 
@@ -1569,6 +1573,10 @@ Additional Details: ${decryptedContent.additionalDetails || 'None provided'}
           rootContainer.style.margin = '0';
           rootContainer.style.padding = '0';
           
+          // #region agent log
+          fetch('http://127.0.0.1:7243/ingest/07d80fb8-251f-44b3-a7af-ce7afb45a49c',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'DashboardView.tsx:1566',message:'After setting rootContainer height',data:{rootHeight,actualHeight:rootContainer.style.height,tableContainerHeight:tableContainer?.clientHeight,tableContainerComputedHeight:tableContainer ? window.getComputedStyle(tableContainer).height : null},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'B'})}).catch(()=>{});
+          // #endregion
+          
           // Set content wrapper to fill remaining space
           if (contentWrapper) {
             contentWrapper.style.overflow = 'hidden';
@@ -1594,6 +1602,10 @@ Additional Details: ${decryptedContent.additionalDetails || 'None provided'}
           contentContainer.style.height = '';
           contentContainer.style.overflow = '';
         }
+        
+        // #region agent log
+        fetch('http://127.0.0.1:7243/ingest/07d80fb8-251f-44b3-a7af-ce7afb45a49c',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'DashboardView.tsx:1600',message:'Final measurements',data:{tableContainerClientHeight:tableContainer?.clientHeight,tableContainerOffsetHeight:tableContainer?.offsetHeight,tableContainerScrollHeight:tableContainer?.scrollHeight,rootContainerClientHeight:rootContainer.clientHeight,contentContainerClientHeight:contentContainer.clientHeight},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'C'})}).catch(()=>{});
+        // #endregion
         
         // Measure actual heights to find extra space
         const measurements: any = {
