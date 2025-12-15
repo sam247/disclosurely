@@ -285,8 +285,9 @@ const AIAssistantView = () => {
 
   // Update empty state - keep empty state visible when case is selected but not analyzed yet
   useEffect(() => {
-    setIsEmptyState(messages.length === 0 && (!selectedCaseId || !hasAnalyzedCase));
-  }, [messages, selectedCaseId, hasAnalyzedCase]);
+    // Show empty state if no messages AND (no case selected OR case hasn't been analyzed) AND not showing PII choice
+    setIsEmptyState(messages.length === 0 && (!selectedCaseId || !hasAnalyzedCase) && !showPIIChoice);
+  }, [messages, selectedCaseId, hasAnalyzedCase, showPIIChoice]);
 
   const loadCases = async () => {
     if (!user || !organization?.id) return;
