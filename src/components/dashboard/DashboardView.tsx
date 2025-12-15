@@ -1485,21 +1485,6 @@ Additional Details: ${decryptedContent.additionalDetails || 'None provided'}
           document.body.style.width = '100%';
           document.body.style.top = '0';
           document.body.style.left = '0';
-
-                computedHeight: window.getComputedStyle(document.body).height,
-                computedPosition: window.getComputedStyle(document.body).position,
-                computedMinHeight: window.getComputedStyle(document.body).minHeight,
-                bodyScrollHeight: document.body.scrollHeight,
-                bodyClientHeight: document.body.clientHeight,
-                windowInnerHeight: window.innerHeight
-              },
-              timestamp: Date.now(),
-              sessionId: 'debug-session',
-              runId: 'scroll-debug',
-              hypothesisId: 'C'
-            })
-          }).catch(() => {});
-          // #endregion
         } else {
           // On mobile, allow natural body scrolling
           document.body.style.overflow = '';

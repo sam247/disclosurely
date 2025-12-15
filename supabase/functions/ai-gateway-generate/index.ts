@@ -5,7 +5,6 @@
 
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts';
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
-import { redactPII } from '../_shared/pii-detector.ts';
 
 // Restrict CORS for authenticated endpoints  
 const getAllowedOrigin = (req: Request): string => {
@@ -205,38 +204,55 @@ serve(async (req) => {
     }
 
     // ============================================================================
-    // 6. ENHANCED PII REDACTION (20+ patterns with validation)
+    // 6. PII REDACTION using OpenRedaction.com API
     // ============================================================================
     let redactionMap: Record<string, string> = {};
     let piiDetected = false;
     let detectionStats: Record<string, number> = {};
     
     if (policy.pii_protection?.enabled && !body.preserve_pii) {
-      console.log('[AI Gateway] PII redaction enabled - using enhanced detector');
+      console.log('[AI Gateway] PII redaction enabled - using OpenRedaction API');
       
-      // Use async redactPII with organization ID for feature flag check
+      // Import OpenRedaction API client
+      const { callOpenRedactAPI } = await import('../_shared/openredact-api.ts');
+      
+      // Call OpenRedaction API for each message
       const redactionPromises = body.messages.map(async (msg) => {
-        // Use enhanced PII detector with validation (now async for feature flag support)
-        const redactionResult = await redactPII(msg.content, {
-          organizationId: organizationId || undefined,
-        });
-        
-        if (redactionResult.piiDetected) {
-          piiDetected = true;
-          // Merge redaction maps (handle duplicates across messages)
-          Object.entries(redactionResult.redactionMap).forEach(([original, placeholder]) => {
-            redactionMap[original] = placeholder;
+        try {
+          const result = await callOpenRedactAPI({
+            text: msg.content,
+            enable_ai: true, // Use AI for maximum coverage
           });
           
-          // Merge detection stats
-          Object.entries(redactionResult.detectionStats).forEach(([type, count]) => {
-            detectionStats[type] = (detectionStats[type] || 0) + count;
-          });
-          
-          console.log(`[AI Gateway] Redacted ${Object.keys(redactionResult.redactionMap).length} PII items from message`);
-        }
+          if (result.detections && result.detections.length > 0) {
+            piiDetected = true;
+            
+            // Build redaction map from detections
+            const msgRedactionMap: Record<string, string> = {};
+            result.detections.forEach((det, idx) => {
+              const placeholder = `[${det.type}_${idx + 1}]`;
+              const originalValue = det.value || msg.content.substring(det.position?.start || 0, det.position?.end || 0);
+              msgRedactionMap[originalValue] = placeholder;
+              
+              // Track stats
+              const type = det.type.toUpperCase();
+              detectionStats[type] = (detectionStats[type] || 0) + 1;
+            });
+            
+            // Merge into global redaction map
+            Object.entries(msgRedactionMap).forEach(([original, placeholder]) => {
+              redactionMap[original] = placeholder;
+            });
+            
+            console.log(`[AI Gateway] Redacted ${result.detections.length} PII items from message`);
+          }
 
-        return { ...msg, content: redactionResult.redactedContent };
+          return { ...msg, content: result.redacted_text || msg.content };
+        } catch (error) {
+          console.error('[AI Gateway] PII detection exception:', error);
+          // Continue with original content if detection fails
+          return msg;
+        }
       });
       
       // Wait for all redactions to complete
