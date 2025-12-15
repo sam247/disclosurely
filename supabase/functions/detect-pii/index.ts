@@ -176,10 +176,23 @@ serve(async (req) => {
     console.log('[Detect PII] Processing text, length:', text.length);
     console.log('[Detect PII] Text preview (first 200 chars):', text.substring(0, 200));
     console.log('[Detect PII] Text preview (last 200 chars):', text.substring(Math.max(0, text.length - 200)));
-    console.log('[Detect PII] Full text being sent:', JSON.stringify(text));
+    
+    // Extract just the description if the text contains structured case data
+    // This helps the API focus on the actual content rather than labels
+    let textToAnalyze = text;
+    const descriptionMatch = text.match(/Description:\s*(.+?)(?:\n\n|\nLocation:|$)/s);
+    if (descriptionMatch && descriptionMatch[1]) {
+      console.log('[Detect PII] Extracted description from structured text');
+      textToAnalyze = descriptionMatch[1].trim();
+    } else {
+      console.log('[Detect PII] Using full text (no structured format detected)');
+    }
+    
+    console.log('[Detect PII] Text to analyze length:', textToAnalyze.length);
+    console.log('[Detect PII] Text to analyze preview:', textToAnalyze.substring(0, 300));
 
     // Call OpenRedaction API
-    const apiResult = await callOpenRedactAPI(text, enable_ai);
+    const apiResult = await callOpenRedactAPI(textToAnalyze, enable_ai);
     console.log('[Detect PII] API result received, detections:', apiResult.detections?.length || 0);
     console.log('[Detect PII] Full API result:', JSON.stringify(apiResult, null, 2));
 
@@ -187,14 +200,29 @@ serve(async (req) => {
     let redactedText = apiResult.redacted_text || text;
     
     // Transform to match client-side format
+    // Note: positions are relative to textToAnalyze, but we need to map them back to original text
     const detections = (apiResult.detections || []).map((det, idx) => {
       const placeholder = `[${det.type.toUpperCase()}_${idx + 1}]`;
+      // If we extracted description, we need to find the position in the original text
+      let start = det.position?.start || 0;
+      let end = det.position?.end || 0;
+      
+      if (textToAnalyze !== text) {
+        // Find the description in the original text to map positions
+        const descriptionMatch = text.match(/Description:\s*(.+?)(?:\n\n|\nLocation:|$)/s);
+        if (descriptionMatch && descriptionMatch.index !== undefined) {
+          const descriptionStart = descriptionMatch.index + descriptionMatch[0].indexOf(descriptionMatch[1]);
+          start = descriptionStart + (det.position?.start || 0);
+          end = descriptionStart + (det.position?.end || 0);
+        }
+      }
+      
       return {
-        original: det.value || text.substring(det.position?.start || 0, det.position?.end || 0),
+        original: det.value || text.substring(start, end),
         placeholder,
         type: det.type.toLowerCase(),
-        start: det.position?.start || 0,
-        end: det.position?.end || 0,
+        start,
+        end,
       };
     });
 
@@ -222,6 +250,14 @@ serve(async (req) => {
             det.placeholder + 
             redactedText.slice(det.end);
         });
+    } else if (apiResult.redacted_text && textToAnalyze !== text) {
+      // If we analyzed just the description, we need to reconstruct the full redacted text
+      const descriptionMatch = text.match(/Description:\s*(.+?)(?:\n\n|\nLocation:|$)/s);
+      if (descriptionMatch && descriptionMatch.index !== undefined) {
+        const beforeDescription = text.substring(0, descriptionMatch.index + descriptionMatch[0].indexOf(descriptionMatch[1]));
+        const afterDescription = text.substring(descriptionMatch.index + descriptionMatch[0].length);
+        redactedText = beforeDescription + apiResult.redacted_text + afterDescription;
+      }
     }
 
     return new Response(
