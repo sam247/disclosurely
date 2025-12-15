@@ -1529,6 +1529,8 @@ Additional Details: ${decryptedContent.additionalDetails || 'None provided'}
       const tableContainer = document.querySelector('[data-dashboard-table-active]') as HTMLElement;
       const rootContainer = document.querySelector('[data-dashboard-root]') as HTMLElement;
       const contentWrapper = document.querySelector('[data-dashboard-wrapper]') as HTMLElement;
+      const titleSection = contentContainer?.querySelector('div:first-of-type') as HTMLElement; // Title section
+      const tabsSection = contentContainer?.querySelector('[role="tablist"]')?.parentElement as HTMLElement; // Tabs/filters section
       
       if (contentContainer && rootContainer) {
         const subscriptionHeight = subscriptionAlert ? subscriptionAlert.clientHeight + 16 : 0; // +16 for mt-4
@@ -1600,11 +1602,33 @@ Additional Details: ${decryptedContent.additionalDetails || 'None provided'}
             contentWrapper.style.padding = '0';
           }
           
-          // Set max-height to constrain the content area - but don't constrain too much to allow table to grow
-          // The table container uses flex-1, so it will fill available space
-          contentContainer.style.maxHeight = `${calculatedContentHeight + 200}px`; // Add extra space for table
-          contentContainer.style.height = `${calculatedContentHeight + 200}px`; // Add extra space for table
+          // Don't constrain content container height - let flex handle it so table can grow
+          // Remove height constraint to allow table container (flex-1) to fill available space
+          contentContainer.style.maxHeight = '';
+          contentContainer.style.height = '';
           contentContainer.style.overflow = 'hidden';
+          
+          // Calculate available space for table and set minimum height
+          // Account for title section and tabs/filters section
+          const titleHeight = titleSection?.offsetHeight || 60;
+          const tabsHeight = tabsSection?.offsetHeight || 60;
+          const availableForTable = rootHeight - titleHeight - tabsHeight - 32; // 32px for padding/margins
+          
+          // Set minimum height on table container to ensure it gets enough space
+          if (tableContainer) {
+            const minTableHeight = Math.max(availableForTable, 600); // At least 600px or calculated available space
+            tableContainer.style.minHeight = `${minTableHeight}px`;
+            
+            // Debug: Log table height calculation
+            console.log('[Dashboard Height Debug] Table height calculation', {
+              rootHeight,
+              titleHeight,
+              tabsHeight,
+              availableForTable,
+              minTableHeight,
+              tableContainerActualHeight: tableContainer.clientHeight
+            });
+          }
         } else {
           // On mobile, allow natural flow
           rootContainer.style.height = '';
@@ -1753,7 +1777,7 @@ Additional Details: ${decryptedContent.additionalDetails || 'None provided'}
         )}
 
 
-        <div className="flex-1 flex flex-col overflow-hidden min-h-0 px-4 pt-4 pb-0" data-dashboard-content style={{ overflow: 'hidden', maxHeight: '100%' }}>
+        <div className="flex-1 flex flex-col overflow-hidden min-h-0 px-4 pt-4 pb-0" data-dashboard-content style={{ overflow: 'hidden' }}>
           {/* Title and Subtitle */}
           <div className="flex-shrink-0 mb-2">
             <h2 className="text-xl sm:text-2xl font-bold">{t('reportsOverview')}</h2>
