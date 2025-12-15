@@ -1511,18 +1511,33 @@ Additional Details: ${decryptedContent.additionalDetails || 'None provided'}
       const controls = root?.querySelector('.border.rounded-lg.bg-white.flex-shrink-0') as HTMLElement;
       
       if (root && tableContainer) {
+        const tableMarginTop = parseInt(window.getComputedStyle(tableContainer).marginTop) || 0;
+        const tableMarginBottom = parseInt(window.getComputedStyle(tableContainer).marginBottom) || 0;
+        const headerMarginBottom = parseInt(window.getComputedStyle(header || document.createElement('div')).marginBottom) || 0;
+        const controlsMarginBottom = parseInt(window.getComputedStyle(controls || document.createElement('div')).marginBottom) || 0;
+        const rootPaddingTop = parseInt(window.getComputedStyle(root).paddingTop) || 0;
+        const rootPaddingBottom = parseInt(window.getComputedStyle(root).paddingBottom) || 0;
+        
         const measurements = {
           viewportHeight: window.innerHeight,
           rootHeight: root.offsetHeight,
           rootClientHeight: root.clientHeight,
           rootComputedHeight: window.getComputedStyle(root).height,
+          rootPaddingTop,
+          rootPaddingBottom,
           tableContainerHeight: tableContainer.offsetHeight,
           tableContainerClientHeight: tableContainer.clientHeight,
           tableContainerComputedHeight: window.getComputedStyle(tableContainer).height,
+          tableMarginTop,
+          tableMarginBottom,
           headerHeight: header?.offsetHeight,
+          headerMarginBottom,
           alertHeight: alert?.offsetHeight,
           controlsHeight: controls?.offsetHeight,
-          availableSpace: root.clientHeight - (header?.offsetHeight || 0) - (alert?.offsetHeight || 0) - (controls?.offsetHeight || 0)
+          controlsMarginBottom,
+          availableSpace: root.clientHeight - (header?.offsetHeight || 0) - (alert?.offsetHeight || 0) - (controls?.offsetHeight || 0),
+          expectedTableHeight: root.clientHeight - (header?.offsetHeight || 0) - (alert?.offsetHeight || 0) - (controls?.offsetHeight || 0) - tableMarginTop,
+          difference: (root.clientHeight - (header?.offsetHeight || 0) - (alert?.offsetHeight || 0) - (controls?.offsetHeight || 0) - tableMarginTop) - tableContainer.clientHeight
         };
         console.log('[Dashboard Layout Debug]', measurements);
       }
@@ -1638,7 +1653,7 @@ Additional Details: ${decryptedContent.additionalDetails || 'None provided'}
 
       {/* Table - Directly in root like audit page */}
       {!showArchived ? (
-        <div className="border rounded-lg bg-white flex-1 flex flex-col overflow-hidden min-h-0 mx-2 sm:mx-0 mt-[15px]" data-dashboard-table-active>
+        <div className="border rounded-lg bg-white flex-1 flex flex-col overflow-hidden min-h-0 mx-2 sm:mx-0" style={{ marginTop: '15px' }} data-dashboard-table-active>
                 {/* Table Header */}
                 <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between p-2 sm:p-3 border-b bg-gray-50 gap-2 sm:gap-0 flex-shrink-0">
                   <div className="flex items-center space-x-2 sm:space-x-4">
@@ -2375,7 +2390,7 @@ Additional Details: ${decryptedContent.additionalDetails || 'None provided'}
                 )}
               </div>
       ) : (
-        <div className="border rounded-lg bg-white flex-1 flex flex-col overflow-hidden min-h-0 mx-2 sm:mx-0 mt-[15px]" data-dashboard-table-archived>
+        <div className="border rounded-lg bg-white flex-1 flex flex-col overflow-hidden min-h-0 mx-2 sm:mx-0" style={{ marginTop: '15px' }} data-dashboard-table-archived>
                 {/* Table Header */}
                 <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between p-2 sm:p-3 border-b bg-gray-50 gap-2 sm:gap-0 flex-shrink-0">
                   <div className="flex items-center space-x-2 sm:space-x-4">
