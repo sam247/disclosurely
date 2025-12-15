@@ -1653,7 +1653,7 @@ Additional Details: ${decryptedContent.additionalDetails || 'None provided'}
 
       {/* Table - Directly in root like audit page */}
       {!showArchived ? (
-        <div className="border rounded-lg bg-white flex-1 flex flex-col overflow-hidden min-h-0 mx-2 sm:mx-0" style={{ minHeight: 0, marginTop: '15px' }} data-dashboard-table-active>
+        <div className="border rounded-lg bg-white flex-1 flex flex-col overflow-hidden min-h-0 mx-2 sm:mx-0" style={{ marginTop: '15px' }} data-dashboard-table-active>
                 {/* Table Header */}
                 <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between p-2 sm:p-3 border-b bg-gray-50 gap-2 sm:gap-0 flex-shrink-0">
                   <div className="flex items-center space-x-2 sm:space-x-4">
@@ -1783,7 +1783,7 @@ Additional Details: ${decryptedContent.additionalDetails || 'None provided'}
                               <tr 
                                 key={report.id} 
                                 className={`border-b hover:bg-gray-50 ${highlightedReportIds.includes(report.id) ? 'bg-yellow-50 border-l-4 border-l-orange-400' : index % 2 === 0 ? 'bg-white' : 'bg-gray-50'}`}
-                                style={{ height: '28px' }}
+                                style={{ height: '42px' }}
                               >
                                 <td className="px-2 py-1 text-xs text-gray-900 border-r font-mono">
                                   <div className="flex items-center gap-2">
@@ -2390,7 +2390,7 @@ Additional Details: ${decryptedContent.additionalDetails || 'None provided'}
                 )}
               </div>
       ) : (
-        <div className="border rounded-lg bg-white flex-1 flex flex-col overflow-hidden min-h-0 mx-2 sm:mx-0" style={{ marginTop: '15px' }} data-dashboard-table-archived>
+        <div className="border rounded-lg bg-white flex-1 flex flex-col overflow-hidden min-h-0 mx-2 sm:mx-0" style={{ minHeight: 0, marginTop: '15px' }} data-dashboard-table-archived>
                 {/* Table Header */}
                 <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between p-2 sm:p-3 border-b bg-gray-50 gap-2 sm:gap-0 flex-shrink-0">
                   <div className="flex items-center space-x-2 sm:space-x-4">
@@ -2494,7 +2494,7 @@ Additional Details: ${decryptedContent.additionalDetails || 'None provided'}
                               <tr 
                                 key={report.id} 
                                 className={`border-b hover:bg-gray-50 ${index % 2 === 0 ? 'bg-white' : 'bg-gray-50'}`}
-                                style={{ height: '28px' }}
+                                style={{ height: '42px' }}
                               >
                                 <td className="px-2 py-1 text-xs text-gray-900 border-r font-mono">
                                   <div className="flex items-center gap-2">
