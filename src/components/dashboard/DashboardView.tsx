@@ -20,7 +20,6 @@ import ReportMessaging from '@/components/ReportMessaging';
 import ReportContentDisplay from '@/components/ReportContentDisplay';
 import ReportAttachments from '@/components/ReportAttachments';
 import LinkGenerator from '@/components/LinkGenerator';
-import PatternAlerts from '@/components/dashboard/PatternAlerts';
 import BulkActions from '@/components/dashboard/BulkActions';
 import SmartFilters, { createSmartFilters, SmartFilter } from '@/components/dashboard/SmartFilters';
 import { Input } from '@/components/ui/input';
@@ -241,7 +240,6 @@ const DashboardView = () => {
   const [deleteReportId, setDeleteReportId] = useState<string | null>(null);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [patterns, setPatterns] = useState<PatternDetectionResult | null>(null);
-  const [patternsDismissed, setPatternsDismissed] = useState(false);
   const [highlightedReportIds, setHighlightedReportIds] = useState<string[]>([]);
   const [selectedReportIds, setSelectedReportIds] = useState<string[]>([]);
   const [smartFilters, setSmartFilters] = useState<SmartFilter[]>([]);
@@ -361,7 +359,7 @@ const DashboardView = () => {
   // Pattern Detection: Run when reports change
   useEffect(() => {
     const runPatternDetection = async () => {
-      if (reports.length < 3 || patternsDismissed || !effectiveOrganizationId) return; // Need minimum data for patterns
+      if (reports.length < 3 || !effectiveOrganizationId) return; // Need minimum data for patterns
 
       // Decrypt report contents for name detection
       const decryptedContents = new Map<string, string>();
@@ -465,7 +463,7 @@ const DashboardView = () => {
     };
 
     runPatternDetection();
-  }, [reports, patternsDismissed]);
+  }, [reports]);
 
   // Initialize smart filters when reports change
   useEffect(() => {
@@ -1172,23 +1170,6 @@ Additional Details: ${decryptedContent.additionalDetails || 'None provided'}
     }
   };
 
-  // Pattern Alert Handlers
-  const handlePatternReportClick = (reportIds: string[]) => {
-    setHighlightedReportIds(reportIds);
-    // Scroll to reports table
-    setTimeout(() => {
-      const tableElement = document.querySelector('[role="table"]');
-      if (tableElement) {
-        tableElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
-      }
-    }, 100);
-  };
-
-  const handlePatternDismiss = () => {
-    setPatternsDismissed(true);
-    setPatterns(null);
-    setHighlightedReportIds([]); // Clear highlighted reports when dismissing pattern alert
-  };
 
   // Bulk Actions Handlers
   const handleBulkStatusUpdate = async (status: string) => {
@@ -1511,7 +1492,6 @@ Additional Details: ${decryptedContent.additionalDetails || 'None provided'}
     const updateContentHeight = () => {
 
       const subscriptionAlert = document.querySelector('[data-dashboard-alert-subscription]');
-      const patternAlert = document.querySelector('[data-dashboard-alert-patterns]');
       const contentContainer = document.querySelector('[data-dashboard-content]') as HTMLElement;
       const card = document.querySelector('[data-dashboard-card-active]') as HTMLElement;
       const tableContainer = document.querySelector('[data-dashboard-table-active]') as HTMLElement;
@@ -1520,8 +1500,7 @@ Additional Details: ${decryptedContent.additionalDetails || 'None provided'}
       
       if (contentContainer && rootContainer) {
         const subscriptionHeight = subscriptionAlert ? subscriptionAlert.clientHeight + 16 : 0; // +16 for mt-4
-        const patternHeight = patternAlert ? patternAlert.clientHeight + 16 : 0; // +16 for mt-4
-        const totalAlertsHeight = subscriptionHeight + patternHeight;
+        const totalAlertsHeight = subscriptionHeight;
         const viewportHeight = window.innerHeight;
         const headerHeight = 64; // 4rem = 64px
         const contentPadding = 16; // pt-4 = 16px
@@ -1709,16 +1688,6 @@ Additional Details: ${decryptedContent.additionalDetails || 'None provided'}
           </Alert>
         )}
 
-        {/* Pattern Detection Alerts */}
-        {patterns && patterns.totalPatterns > 0 && (
-          <div className="flex-shrink-0 mx-4 mt-4" data-dashboard-alert-patterns>
-            <PatternAlerts
-              patterns={patterns}
-              onReportClick={handlePatternReportClick}
-              onDismiss={handlePatternDismiss}
-            />
-          </div>
-        )}
 
         <div className="flex-1 flex flex-col overflow-hidden min-h-0 px-4 pt-4 pb-0" data-dashboard-content style={{ overflow: 'hidden', maxHeight: '100%' }}>
           {/* Title and Subtitle */}
