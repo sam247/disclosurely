@@ -180,7 +180,8 @@ serve(async (req) => {
     // Extract just the description if the text contains structured case data
     // This helps the API focus on the actual content rather than labels
     let textToAnalyze = text;
-    const descriptionMatch = text.match(/Description:\s*(.+?)(?:\n\n|\nLocation:|$)/s);
+    const descriptionPattern = /Description:\s*([\s\S]+?)(?:\n\n|\nLocation:|$)/;
+    const descriptionMatch = text.match(descriptionPattern);
     if (descriptionMatch && descriptionMatch[1]) {
       console.log('[Detect PII] Extracted description from structured text');
       textToAnalyze = descriptionMatch[1].trim();
@@ -209,7 +210,8 @@ serve(async (req) => {
       
       if (textToAnalyze !== text) {
         // Find the description in the original text to map positions
-        const descriptionMatch = text.match(/Description:\s*(.+?)(?:\n\n|\nLocation:|$)/s);
+        const descriptionPattern = /Description:\s*([\s\S]+?)(?:\n\n|\nLocation:|$)/;
+        const descriptionMatch = text.match(descriptionPattern);
         if (descriptionMatch && descriptionMatch.index !== undefined) {
           const descriptionStart = descriptionMatch.index + descriptionMatch[0].indexOf(descriptionMatch[1]);
           start = descriptionStart + (det.position?.start || 0);
@@ -252,7 +254,8 @@ serve(async (req) => {
         });
     } else if (apiResult.redacted_text && textToAnalyze !== text) {
       // If we analyzed just the description, we need to reconstruct the full redacted text
-      const descriptionMatch = text.match(/Description:\s*(.+?)(?:\n\n|\nLocation:|$)/s);
+      const descriptionPattern = /Description:\s*([\s\S]+?)(?:\n\n|\nLocation:|$)/;
+      const descriptionMatch = text.match(descriptionPattern);
       if (descriptionMatch && descriptionMatch.index !== undefined) {
         const beforeDescription = text.substring(0, descriptionMatch.index + descriptionMatch[0].indexOf(descriptionMatch[1]));
         const afterDescription = text.substring(descriptionMatch.index + descriptionMatch[0].length);
