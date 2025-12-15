@@ -84,34 +84,30 @@ const AnalyticsView: React.FC = () => {
   const [previousPeriodData, setPreviousPeriodData] = useState<SimpleAnalyticsData | null>(null);
 
   useEffect(() => {
-    
-    
-    
-    
     // Wait for organization to finish loading
     if (orgLoading) {
-      
+      console.log('[Analytics] Waiting for organization to load...');
       return;
     }
     
     // Only fetch data if we have an organization ID
     if (organization?.id) {
-      
+      console.log('[Analytics] Organization loaded, fetching analytics data for period:', selectedPeriod);
       fetchAnalyticsData();
     } else {
-      
+      console.warn('[Analytics] No organization ID available');
       setLoading(false);
     }
   }, [selectedPeriod, organization?.id, orgLoading]);
 
   const fetchAnalyticsData = async () => {
     if (!organization?.id) {
-      
+      console.warn('[Analytics] fetchAnalyticsData called without organization ID');
       setLoading(false);
       return;
     }
     
-    
+    console.log('[Analytics] Starting fetchAnalyticsData for organization:', organization.id, 'period:', selectedPeriod);
     setLoading(true);
     
     try {
@@ -806,54 +802,44 @@ const AnalyticsView: React.FC = () => {
   if (!analyticsData) return null;
 
   return (
-    <div 
-      className="flex-1 overflow-hidden flex flex-col min-h-0" 
-      style={{ height: 'calc(100vh - 4rem)', overflow: 'hidden', maxHeight: 'calc(100vh - 4rem)' }}
-    >
-      {/* Content - Standardized structure matching dashboard */}
-      <div 
-        className="flex-1 overflow-hidden flex flex-col min-h-0" 
-        style={{ overflow: 'hidden', maxHeight: '100%' }}
-      >
-        <div className="flex-1 flex flex-col overflow-hidden min-h-0 px-4 pt-4 pb-0" style={{ overflow: 'hidden', maxHeight: '100%' }}>
-          {/* Title and Subtitle */}
-          <div className="flex-shrink-0 mb-4">
-            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 mb-2">
-              <div>
-                <h1 className="text-xl sm:text-2xl font-bold">Analytics</h1>
-                <p className="text-xs sm:text-sm text-muted-foreground mt-0.5">
-                  Decision-ready insights for compliance teams
-                </p>
-              </div>
-              <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
-                <div className="flex items-center gap-2 flex-1 sm:flex-initial">
-                  <label className="text-xs sm:text-sm font-medium whitespace-nowrap">Period:</label>
-                  <select 
-                    value={selectedPeriod} 
-                    onChange={(e) => setSelectedPeriod(e.target.value as any)}
-                    className="px-2 py-1 sm:py-1.5 border rounded-md text-xs sm:text-sm bg-background flex-1 sm:flex-initial touch-manipulation"
-                  >
-                    <option value="7d">Last 7 days</option>
-                    <option value="30d">Last 30 days</option>
-                    <option value="90d">Last 90 days</option>
-                    <option value="1y">Last year</option>
-                  </select>
-                </div>
-                <Button
-                  onClick={handleExport}
-                  disabled={exporting}
-                  variant="outline"
-                  size="sm"
-                  className="gap-2 w-full sm:w-auto touch-manipulation text-xs sm:text-sm h-7 sm:h-8"
-                >
-                  <Download className="h-3 w-3 sm:h-4 sm:w-4" />
-                  {exporting ? 'Exporting...' : 'Export'}
-                </Button>
-              </div>
-            </div>
+    <div className="flex flex-col gap-0" style={{ height: 'calc(100vh - 109px)', overflow: 'hidden' }} data-analytics-root>
+      {/* Header */}
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 flex-shrink-0 px-2 sm:px-0 mb-2">
+        <div>
+          <h1 className="text-xl sm:text-2xl font-bold">Analytics</h1>
+          <p className="text-xs sm:text-sm text-muted-foreground mt-0.5">
+            Decision-ready insights for compliance teams
+          </p>
+        </div>
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
+          <div className="flex items-center gap-2 flex-1 sm:flex-initial">
+            <label className="text-xs sm:text-sm font-medium whitespace-nowrap">Period:</label>
+            <select 
+              value={selectedPeriod} 
+              onChange={(e) => setSelectedPeriod(e.target.value as any)}
+              className="px-2 py-1 sm:py-1.5 border rounded-md text-xs sm:text-sm bg-background flex-1 sm:flex-initial touch-manipulation"
+            >
+              <option value="7d">Last 7 days</option>
+              <option value="30d">Last 30 days</option>
+              <option value="90d">Last 90 days</option>
+              <option value="1y">Last year</option>
+            </select>
+          </div>
+          <Button
+            onClick={handleExport}
+            disabled={exporting}
+            variant="outline"
+            size="sm"
+            className="gap-2 w-full sm:w-auto touch-manipulation text-xs sm:text-sm h-7 sm:h-8"
+          >
+            <Download className="h-3 w-3 sm:h-4 sm:w-4" />
+            {exporting ? 'Exporting...' : 'Export'}
+          </Button>
+        </div>
+      </div>
 
-            {/* Compact Metric Cards - Small inline row */}
-            <div className="flex flex-wrap gap-2 mb-4">
+      {/* Compact Metric Cards - Small inline row */}
+      <div className="flex flex-wrap gap-2 mb-2 px-2 sm:px-0 flex-shrink-0">
               <div className="flex items-center gap-2 px-3 py-1.5 bg-muted/50 rounded-md border text-xs">
                 <FileText className="h-3 w-3 text-muted-foreground" />
                 <span className="font-semibold">{analyticsData.totalReports}</span>
@@ -875,10 +861,9 @@ const AnalyticsView: React.FC = () => {
                 <span className="text-muted-foreground">Resolved</span>
               </div>
             </div>
-          </div>
 
-          {/* Content Area - No scroll, fits on one screen */}
-          <div className="flex-1 min-h-0 overflow-hidden flex flex-col space-y-3 sm:space-y-4">
+      {/* Content Area - No scroll, fits on one screen */}
+      <div className="flex-1 min-h-0 overflow-hidden flex flex-col space-y-3 sm:space-y-4 px-2 sm:px-0" style={{ minHeight: 0 }}>
           {/* Main Chart - Full Width on Mobile */}
           <Card className="flex flex-col min-h-0">
             <CardHeader className="pb-2 sm:pb-3 flex-shrink-0">

@@ -123,6 +123,37 @@ const AuditLogView = () => {
     }
   }, [organization?.id]);
 
+  // Runtime fix to ensure pagination sits at bottom when records < 25
+  useEffect(() => {
+    const measureLayout = () => {
+      const tableContainer = document.querySelector('[data-audit-table]') as HTMLElement;
+      if (!tableContainer) return;
+
+      const desktopTableWrapper = tableContainer.querySelector('.hidden.md\\:block.flex-1') as HTMLElement;
+      const scrollableDiv = desktopTableWrapper?.querySelector('.flex-1.overflow-y-auto') as HTMLElement;
+      const pagination = tableContainer.querySelector('.flex.flex-row.items-center.justify-between') as HTMLElement;
+
+      if (scrollableDiv && desktopTableWrapper && pagination) {
+        const expectedHeight = desktopTableWrapper.clientHeight - pagination.offsetHeight;
+        const actualHeight = scrollableDiv.clientHeight;
+        if (Math.abs(expectedHeight - actualHeight) > 5) {
+          scrollableDiv.style.minHeight = `${expectedHeight}px`;
+          scrollableDiv.style.height = `${expectedHeight}px`;
+          scrollableDiv.style.flex = '1 1 0%';
+        }
+      }
+    };
+
+    const timeout = setTimeout(measureLayout, 100);
+    const timeout2 = setTimeout(measureLayout, 500);
+    window.addEventListener('resize', measureLayout);
+    return () => {
+      clearTimeout(timeout);
+      clearTimeout(timeout2);
+      window.removeEventListener('resize', measureLayout);
+    };
+  }, [logs, pageSize]);
+
 
   const fetchLogs = useCallback(async (resetPage = false) => {
     if (!organization?.id) return;
