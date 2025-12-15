@@ -1568,7 +1568,6 @@ Additional Details: ${decryptedContent.additionalDetails || 'None provided'}
           viewportHeight,
           headerHeight,
           subscriptionHeight: subscriptionAlert?.clientHeight || 0,
-          patternHeight: patternAlert?.clientHeight || 0,
           totalAlertsHeight,
           contentPadding,
           calculatedContentHeight,
