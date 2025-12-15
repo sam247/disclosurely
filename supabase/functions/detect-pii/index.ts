@@ -21,34 +21,58 @@ async function callOpenRedactAPI(text: string, enableAI: boolean = true) {
     headers['x-api-key'] = OPENREDACT_API_KEY;
   }
 
-  const response = await fetch(`${OPENREDACT_API_URL}/v1/ai-detect`, {
-    method: 'POST',
-    headers,
-    body: JSON.stringify({
-      text,
-      enable_ai: enableAI,
-    }),
-  });
-
-  if (!response.ok) {
-    const errorText = await response.text();
-    throw new Error(`OpenRedact API error (${response.status}): ${errorText}`);
-  }
-
-  const data = await response.json();
-  
-  // Map API response entities to detections format
-  const detections = (data.entities || []).map((entity: any) => ({
-    type: entity.type,
-    value: entity.value,
-    position: { start: entity.start, end: entity.end },
-    confidence: entity.confidence,
-  }));
-  
-  return {
-    redacted_text: data.redacted_text || data.text,
-    detections,
+  const apiUrl = `${OPENREDACT_API_URL}/v1/ai-detect`;
+  const requestBody = {
+    text,
+    enable_ai: enableAI,
   };
+
+  console.log('[Detect PII] Calling OpenRedaction API:', apiUrl);
+  console.log('[Detect PII] Request body length:', text.length, 'chars');
+  console.log('[Detect PII] Enable AI:', enableAI);
+
+  try {
+    const response = await fetch(apiUrl, {
+      method: 'POST',
+      headers,
+      body: JSON.stringify(requestBody),
+    });
+
+    console.log('[Detect PII] Response status:', response.status);
+    console.log('[Detect PII] Response headers:', Object.fromEntries(response.headers.entries()));
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error('[Detect PII] API error response:', errorText);
+      throw new Error(`OpenRedact API error (${response.status}): ${errorText}`);
+    }
+
+    const data = await response.json();
+    console.log('[Detect PII] API response keys:', Object.keys(data));
+    console.log('[Detect PII] Entities count:', data.entities?.length || 0);
+    console.log('[Detect PII] Has redacted_text:', !!data.redacted_text);
+    console.log('[Detect PII] AI used:', data.aiUsed);
+    
+    // Map API response entities to detections format
+    // API returns: { entities: [...], aiUsed: boolean, redacted_text?: string }
+    const detections = (data.entities || []).map((entity: any) => ({
+      type: entity.type,
+      value: entity.value,
+      position: { start: entity.start, end: entity.end },
+      confidence: entity.confidence,
+    }));
+    
+    return {
+      redacted_text: data.redacted_text || null, // API may not always return this
+      detections,
+      aiUsed: data.aiUsed || false,
+    };
+  } catch (error: any) {
+    console.error('[Detect PII] Full API call error:', error);
+    console.error('[Detect PII] Error message:', error.message);
+    console.error('[Detect PII] Error stack:', error.stack);
+    throw error;
+  }
 }
 
 // CORS handling - same pattern as ai-gateway-generate
@@ -112,17 +136,25 @@ serve(async (req) => {
 
   try {
     // Parse request
-    const { text, enable_ai = true } = await req.json();
+    console.log('[Detect PII] Request received');
+    const body = await req.json();
+    console.log('[Detect PII] Request body keys:', Object.keys(body));
+    
+    const { text, enable_ai = true } = body;
 
     if (!text || typeof text !== 'string') {
+      console.error('[Detect PII] Invalid text input:', typeof text, text?.substring(0, 50));
       return new Response(
         JSON.stringify({ error: 'Text is required' }),
         { status: 400, headers: corsHeaders }
       );
     }
 
+    console.log('[Detect PII] Processing text, length:', text.length);
+
     // Call OpenRedaction API
     const apiResult = await callOpenRedactAPI(text, enable_ai);
+    console.log('[Detect PII] API result received, detections:', apiResult.detections?.length || 0);
 
     // Use redacted_text from API if available, otherwise build from detections
     let redactedText = apiResult.redacted_text || text;
@@ -176,10 +208,16 @@ serve(async (req) => {
       { status: 200, headers: corsHeaders }
     );
   } catch (error: any) {
-    console.error('[Detect PII] Error:', error);
+    console.error('[Detect PII] Top-level error caught:');
+    console.error('[Detect PII] Error type:', error?.constructor?.name);
+    console.error('[Detect PII] Error message:', error?.message);
+    console.error('[Detect PII] Error stack:', error?.stack);
+    console.error('[Detect PII] Full error object:', JSON.stringify(error, Object.getOwnPropertyNames(error)));
+    
     return new Response(
       JSON.stringify({ 
-        error: error.message || 'Failed to detect PII',
+        error: error?.message || 'Failed to detect PII',
+        errorDetails: error?.stack || String(error),
         redactedText: '',
         detections: [],
         piiCount: 0,
