@@ -1710,8 +1710,8 @@ Additional Details: ${decryptedContent.additionalDetails || 'None provided'}
                   <>
                     {/* Desktop Table View */}
                     <div className="hidden md:block flex-1 overflow-hidden min-h-0 flex flex-col" data-dashboard-desktop-table-wrapper>
-                      {/* Scrollable table body - fits screen height, accounting for pagination toolbar (40px) */}
-                      <div className="flex-1 overflow-y-auto overflow-x-auto min-h-0" style={{ minHeight: 0, maxHeight: 'calc(100% - 40px)' }} data-dashboard-scrollable-div>
+                      {/* Scrollable table body - always fills available space, pagination fixed at bottom */}
+                      <div className="flex-1 overflow-y-auto overflow-x-auto min-h-0" style={{ minHeight: 0 }} data-dashboard-scrollable-div>
                         <table className="w-full">
                           {/* Fixed Header */}
                           <thead className="bg-gray-50 sticky top-0 z-10">
@@ -2447,8 +2447,8 @@ Additional Details: ${decryptedContent.additionalDetails || 'None provided'}
                   <>
                     {/* Desktop Table View */}
                     <div className="hidden md:block flex-1 overflow-hidden min-h-0 flex flex-col" data-dashboard-desktop-table-wrapper>
-                      {/* Scrollable table body - fits screen height, accounting for pagination toolbar (40px) */}
-                      <div className="flex-1 overflow-y-auto overflow-x-auto min-h-0" style={{ minHeight: 0, maxHeight: 'calc(100% - 40px)' }} data-dashboard-scrollable-div>
+                      {/* Scrollable table body - always fills available space, pagination fixed at bottom */}
+                      <div className="flex-1 overflow-y-auto overflow-x-auto min-h-0" style={{ minHeight: 0 }} data-dashboard-scrollable-div>
                         <table className="w-full">
                           {/* Fixed Header */}
                           <thead className="bg-gray-50 sticky top-0 z-10">
