@@ -176,6 +176,7 @@ serve(async (req) => {
     console.log('[Detect PII] Processing text, length:', text.length);
     console.log('[Detect PII] Text preview (first 200 chars):', text.substring(0, 200));
     console.log('[Detect PII] Text preview (last 200 chars):', text.substring(Math.max(0, text.length - 200)));
+    console.log('[Detect PII] Full text being sent:', JSON.stringify(text));
 
     // Call OpenRedaction API
     const apiResult = await callOpenRedactAPI(text, enable_ai);
