@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Shield, Info, Lock, AlertCircle } from 'lucide-react';
-import { detectPIISync, highlightPIIForDisplay, formatPIIType } from '@/utils/pii-detector-client';
+import { highlightPIIForDisplay, formatPIIType } from '@/utils/pii-detector-client';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { useOrganization } from '@/hooks/useOrganization';
@@ -33,45 +33,58 @@ export const PIIPreviewModal: React.FC<PIIPreviewModalProps> = ({
   } | null>(null);
   const [highlightedParts, setHighlightedParts] = useState<Array<{ text: string; isPII: boolean; type?: string; placeholder?: string }>>([]);
   
-  // Detect PII using client-side detection (same as anonymous report form)
+  // Detect PII using OpenRedaction API via Edge Function
   useEffect(() => {
-    if (!originalText) {
-      setRedactionResult({
-        redactedText: '',
-        detections: [],
-        piiCount: 0,
-        stats: {}
-      });
-      setHighlightedParts([{ text: '', isPII: false }]);
-      return;
-    }
+    const detectPII = async () => {
+      if (!originalText) {
+        setRedactionResult({
+          redactedText: '',
+          detections: [],
+          piiCount: 0,
+          stats: {}
+        });
+        setHighlightedParts([{ text: '', isPII: false }]);
+        return;
+      }
 
-    try {
-      // Use the same client-side detection that works in the anonymous report
-      const result = detectPIISync(originalText);
-      
-      setRedactionResult({
-        redactedText: result.redactedText || originalText,
-        detections: result.detections || [],
-        piiCount: result.piiCount || 0,
-        stats: result.stats || {}
-      });
-      
-      // Generate highlighted parts for display
-      const highlighted = highlightPIIForDisplay(
-        originalText, 
-        result.detections || []
-      );
-      setHighlightedParts(Array.isArray(highlighted) ? highlighted : [{ text: originalText, isPII: false }]);
-    } catch (error) {
-      console.error('Error detecting PII:', error);
-      setRedactionResult({
-        redactedText: originalText,
-        detections: [],
-        piiCount: 0,
-        stats: {}
-      });
-      setHighlightedParts([{ text: originalText, isPII: false }]);
+      try {
+        const { data, error } = await supabase.functions.invoke('detect-pii', {
+          body: { 
+            text: originalText || '',
+            enable_ai: true 
+          }
+        });
+
+        if (error) throw error;
+
+        const result = data;
+        setRedactionResult({
+          redactedText: result.redactedText || originalText || '',
+          detections: result.detections || [],
+          piiCount: result.piiCount || 0,
+          stats: result.stats || {}
+        });
+        
+        // Generate highlighted parts
+        const highlighted = highlightPIIForDisplay(
+          originalText || '', 
+          Array.isArray(result?.detections) ? result.detections : []
+        );
+        setHighlightedParts(Array.isArray(highlighted) ? highlighted : [{ text: originalText || '', isPII: false }]);
+      } catch (error) {
+        console.error('Error detecting PII:', error);
+        setRedactionResult({
+          redactedText: originalText || '',
+          detections: [],
+          piiCount: 0,
+          stats: {}
+        });
+        setHighlightedParts([{ text: originalText || '', isPII: false }]);
+      }
+    };
+
+    if (originalText) {
+      detectPII();
     }
   }, [originalText]);
 

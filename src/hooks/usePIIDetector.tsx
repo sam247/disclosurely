@@ -5,9 +5,7 @@
  */
 
 import { useState, useEffect, useCallback } from 'react';
-import { useFeatureFlag } from './useFeatureFlag';
-import { scanForPrivacyRisks } from '@/utils/privacyDetection';
-import { detectPII } from '@/utils/pii-detector-client';
+import { supabase } from '@/integrations/supabase/client';
 
 export interface PIIDetectionResult {
   hasPII: boolean;
@@ -54,9 +52,6 @@ export function usePIIDetector(
   const [detections, setDetections] = useState<PIIDetectionResult['detections']>([]);
   const [isDetecting, setIsDetecting] = useState(false);
 
-  // Check if OpenRedact feature flag is enabled
-  const { data: useOpenRedact = false } = useFeatureFlag('use_openredact', organizationId);
-
   const detectPIIInText = useCallback(async (textToScan: string) => {
     if (!textToScan || textToScan.trim().length === 0) {
       setDetections([]);
@@ -67,24 +62,27 @@ export function usePIIDetector(
     setIsDetecting(true);
 
     try {
-      let result: PIIDetectionResult['detections'] = [];
+      // Use OpenRedaction API via Edge Function
+      const { data, error } = await supabase.functions.invoke('detect-pii', {
+        body: {
+          text: textToScan,
+          enable_ai: true
+        }
+      });
 
-      // OpenRedact uses Node.js fs/path modules and cannot run in the browser
-      // For client-side, always use legacy implementation
-      // OpenRedact is only used in server-side edge functions
-      // The feature flag check is kept for future API endpoint implementation
-      if (false) { // Disabled: OpenRedact is Node.js only
-        // Future: Call API endpoint that uses OpenRedact server-side
-      } else {
-        // Use legacy detection
-        const privacyRisks = await scanForPrivacyRisks(textToScan, organizationId);
-        result = privacyRisks.map(risk => ({
-          type: risk.type,
-          text: risk.text,
-          position: risk.position,
-          severity: risk.severity,
-        }));
+      if (error) {
+        console.error('[usePIIDetector] API error:', error);
+        setDetections([]);
+        return;
       }
+
+      // Map API response to hook format
+      const result: PIIDetectionResult['detections'] = (data?.detections || []).map((det: any) => ({
+        type: det.type,
+        text: det.original || det.value || '',
+        position: { start: det.start || det.position?.start || 0, end: det.end || det.position?.end || 0 },
+        severity: det.severity || (det.type === 'SSN' || det.type === 'EMAIL' || det.type === 'PHONE' ? 'high' : 'medium'),
+      }));
 
       setDetections(result);
     } catch (error) {
@@ -93,7 +91,7 @@ export function usePIIDetector(
     } finally {
       setIsDetecting(false);
     }
-  }, [useOpenRedact, confidenceThreshold, enableContextAnalysis, organizationId]);
+  }, [organizationId]);
 
   // Debounced detection
   useEffect(() => {
