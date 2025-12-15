@@ -1151,7 +1151,6 @@ const AnalyticsView: React.FC = () => {
               </CardContent>
             </Card>
           </div>
-        </div>
       </div>
     </div>
   );
