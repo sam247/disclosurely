@@ -1535,7 +1535,10 @@ Additional Details: ${decryptedContent.additionalDetails || 'None provided'}
         const totalAlertsHeight = subscriptionHeight;
         const viewportHeight = window.innerHeight;
         const headerHeight = 109; // Match audit page: calc(100vh - 109px)
-        const contentPadding = 16; // pt-4 = 16px
+        // Reduced padding to give more space to table (was 16px, now 8px)
+        const contentPadding = 8; // pt-2 = 8px (reduced from pt-4 = 16px)
+        // Account for title (approx 60px) and tabs/filters (approx 60px) to give table more space
+        const titleAndTabsHeight = 120; // Approximate height of title + tabs/filters section
         const calculatedContentHeight = viewportHeight - headerHeight - totalAlertsHeight - contentPadding;
         const rootHeight = viewportHeight - headerHeight;
         
@@ -1751,14 +1754,14 @@ Additional Details: ${decryptedContent.additionalDetails || 'None provided'}
 
         <div className="flex-1 flex flex-col overflow-hidden min-h-0 px-4 pt-4 pb-0" data-dashboard-content style={{ overflow: 'hidden', maxHeight: '100%' }}>
           {/* Title and Subtitle */}
-          <div className="flex-shrink-0 mb-4">
+          <div className="flex-shrink-0 mb-2">
             <h2 className="text-xl sm:text-2xl font-bold">{t('reportsOverview')}</h2>
             <p className="text-muted-foreground break-words hyphens-auto">{t('manageAndReviewReports')}</p>
           </div>
 
           <Tabs defaultValue="active" className="flex-1 flex flex-col overflow-hidden min-h-0">
             {/* Tabs, Search, and Filter Row */}
-            <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center flex-shrink-0 mb-4">
+            <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center flex-shrink-0 mb-2">
             <TabsList className="w-full md:w-auto">
               <TabsTrigger value="active" className="flex-1 md:flex-none">{t('activeReports')} ({reports.length})</TabsTrigger>
               <TabsTrigger value="archived" className="flex-1 md:flex-none">{t('archived')} ({archivedReports.length})</TabsTrigger>
