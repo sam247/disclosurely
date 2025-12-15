@@ -14,7 +14,7 @@ import { useToast } from '@/hooks/use-toast';
 import { useTranslation } from 'react-i18next';
 import { log, LogContext } from '@/utils/logger';
 import { auditLogger } from '@/utils/auditLogger';
-import { FileText, Eye, Archive, Trash2, RotateCcw, MoreVertical, XCircle, ChevronUp, ChevronDown, CheckCircle, Search, Download, FileSpreadsheet, Bot, Zap, AlertCircle, Clock, Flame, User, Copy, Check, ChevronLeft, ChevronRight } from 'lucide-react';
+import { FileText, Eye, Archive, Trash2, RotateCcw, MoreVertical, XCircle, ChevronUp, ChevronDown, CheckCircle, Search, Download, FileSpreadsheet, Bot, Zap, AlertCircle, Clock, Flame, User, Copy, Check, ChevronLeft, ChevronRight, MoreHorizontal } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import ReportMessaging from '@/components/ReportMessaging';
 import ReportContentDisplay from '@/components/ReportContentDisplay';
@@ -1419,6 +1419,23 @@ Additional Details: ${decryptedContent.additionalDetails || 'None provided'}
     return sortDirection === 'asc' ? comparison : -comparison;
   });
 
+  // Sorting functions (matching audit page)
+  const handleSort = (field: 'created_at' | 'title' | 'tracking_id' | 'ai_risk_score' | 'status' | 'priority') => {
+    if (sortField === field) {
+      setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc');
+    } else {
+      setSortField(field as any);
+      setSortDirection('desc');
+    }
+  };
+
+  const getSortIcon = (field: string) => {
+    if (sortField !== field) return <MoreHorizontal className="h-3 w-3 text-gray-400" />;
+    return sortDirection === 'asc' ?
+      <ChevronUp className="h-3 w-3 text-blue-600" /> :
+      <ChevronDown className="h-3 w-3 text-blue-600" />;
+  };
+
   // Pagination calculations for active reports
   const totalReports = filteredReports.length;
   const totalPages = Math.ceil(totalReports / pageSize);
@@ -1432,6 +1449,21 @@ Additional Details: ${decryptedContent.additionalDetails || 'None provided'}
   const archivedStartRecord = (archivedCurrentPage - 1) * archivedPageSize + 1;
   const archivedEndRecord = Math.min(archivedCurrentPage * archivedPageSize, totalArchived);
   const paginatedArchivedReports = archivedReports.slice((archivedCurrentPage - 1) * archivedPageSize, archivedCurrentPage * archivedPageSize);
+  
+  // Sort archived reports (same as active)
+  const sortedArchivedReports = [...archivedReports].sort((a, b) => {
+    let aValue, bValue;
+    if (sortField === 'ai_risk_score') {
+      aValue = a.ai_risk_score ?? -1;
+      bValue = b.ai_risk_score ?? -1;
+    } else {
+      aValue = a[sortField];
+      bValue = b[sortField];
+    }
+    const comparison = aValue < bValue ? -1 : aValue > bValue ? 1 : 0;
+    return sortDirection === 'asc' ? comparison : -comparison;
+  });
+  const paginatedArchivedReportsSorted = sortedArchivedReports.slice((archivedCurrentPage - 1) * archivedPageSize, archivedCurrentPage * archivedPageSize);
 
   // Pagination handlers for active reports
   const handlePageChange = (page: number) => {
@@ -1732,333 +1764,406 @@ Additional Details: ${decryptedContent.additionalDetails || 'None provided'}
               </Button>
             </div>
           </div>
-            {/* LOCKED: Active Reports Tab - Card structure must use flex-1, overflow-hidden, min-h-0 */}
+            {/* LOCKED: Active Reports Tab - Replicated from audit page structure */}
             <TabsContent value="active" className="flex flex-col overflow-hidden min-h-0">
-              <Card className="md:border md:shadow-sm border-0 shadow-none flex flex-col flex-1 overflow-hidden min-h-0" data-dashboard-card-active>
-                <CardContent className="p-0 sm:p-4 flex-1 flex flex-col overflow-hidden min-h-0">
-              {filteredReports.length === 0 ? (
-                <div className="text-center py-8 text-muted-foreground px-6">
-                  {isOrgAdmin ? (
-                    t('noReportsFound')
-                  ) : (
-                    <div className="space-y-2">
-                      <div className="text-lg font-medium text-gray-700">No Reports Assigned</div>
-                      <div className="text-sm text-gray-500">
-                        Reports that are assigned to you by your administrator will appear here
-                      </div>
+              {/* Excel-Style Table - Matches audit page exactly */}
+              <div className="border rounded-lg bg-white flex-1 flex flex-col overflow-hidden min-h-0 mx-2 sm:mx-0" style={{ minHeight: 0, marginTop: '15px' }} data-dashboard-table-active>
+                {/* Table Header */}
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between p-2 sm:p-3 border-b bg-gray-50 gap-2 sm:gap-0 flex-shrink-0">
+                  <div className="flex items-center space-x-2 sm:space-x-4">
+                    <div>
+                      <h3 className="font-semibold text-xs sm:text-sm">Active Reports</h3>
+                      <p className="text-xs text-muted-foreground mt-0.5">
+                        Showing {startRecord}-{endRecord} of {totalReports} records
+                      </p>
                     </div>
-                  )}
+                  </div>
                 </div>
-              ) : (
-                <>
-                  {/* Desktop Table View - Matches audit page structure */}
-                  <div className="hidden md:block flex-1 overflow-hidden flex flex-col min-h-0" data-dashboard-table-active>
-                    {/* Scrollable table body */}
-                    <div className="flex-1 overflow-y-auto overflow-x-auto min-h-0" style={{ maxHeight: 'calc(100% - 40px)' }}>
-                      <Table className="min-w-full">
-                      <TableHeader>
-                        <TableRow>
-                          <TableHead className="px-2 py-1 text-xs">{t('trackingId')}</TableHead>
-                          <TableHead className="px-2 py-1 text-xs">{t('title')}</TableHead>
-                          <TableHead className="px-2 py-1 text-xs">{t('status')}</TableHead>
-                          <TableHead className="px-2 py-1 text-xs">{t('category')}</TableHead>
-                          <TableHead className="px-2 py-1 text-xs">{t('priority')}</TableHead>
-                          <TableHead className="px-2 py-1 text-xs">{t('ai.triage')}</TableHead>
-                          <TableHead className="px-2 py-1 text-xs">{t('assignedTo')}</TableHead>
-                          <TableHead className="px-2 py-1 text-xs">{t('date')}</TableHead>
-                          <TableHead className="text-right px-2 py-1 text-xs">{t('actions')}</TableHead>
-                        </TableRow>
-                      </TableHeader>
-                      <TableBody>
-                        {paginatedReports.map((report) => (
-                          <TableRow
-                            key={report.id}
-                            className={highlightedReportIds.includes(report.id) ? 'bg-yellow-50 border-l-4 border-l-orange-400' : ''}
-                            style={{ height: '15px' }}
-                          >
-                            <TableCell className="font-mono text-xs px-2 py-0">
-                              <div className="flex items-center gap-2">
-                                <span>{report.tracking_id}</span>
-                                <button
-                                  onClick={async () => {
-                                    try {
-                                      await navigator.clipboard.writeText(report.tracking_id);
-                                      setCopiedTrackingId(report.tracking_id);
-                                      setTimeout(() => setCopiedTrackingId(null), 1000);
-                                } catch (error) {
-                                  log.error(LogContext.FRONTEND, 'Failed to copy tracking ID', error as Error);
-                                }
-                                  }}
-                                  className="text-muted-foreground hover:text-foreground transition-colors"
-                                  title="Copy tracking ID"
-                                >
-                                  {copiedTrackingId === report.tracking_id ? (
-                                    <Check className="h-3 w-3 text-green-600" />
-                                  ) : (
-                                    <Copy className="h-3 w-3" />
-                                  )}
-                                </button>
-                              </div>
-                            </TableCell>
-                            <TableCell className="font-medium">{report.title}</TableCell>
-                            <TableCell>
-                              <Badge variant={report.status === 'new' ? 'default' : 'secondary'}>
-                                {report.status}
-                              </Badge>
-                            </TableCell>
-                            <TableCell>
-                              {decryptedCategories[report.id] ? (
-                                <div className="text-sm">
-                                  <div className="font-medium">{decryptedCategories[report.id].main}</div>
-                                  {decryptedCategories[report.id].sub && (
-                                    <div className="text-muted-foreground text-xs">{decryptedCategories[report.id].sub}</div>
-                                  )}
-                                </div>
-                              ) : (
-                                <span className="text-sm text-muted-foreground">-</span>
-                              )}
-                            </TableCell>
-
-                            {/* Manual Risk Level Column */}
-                            <TableCell>
-                              <RiskLevelSelector
-                                reportId={report.id}
-                                currentLevel={report.manual_risk_level}
-                                onUpdate={(level) => updateManualRiskLevel(report.id, level)}
-                                isUpdating={updatingRiskLevel === report.id}
-                              />
-                            </TableCell>
-
-                            {/* AI Triage Column */}
-                            <TableCell>
-                              {report.ai_risk_level ? (
-                                <div className="flex items-center gap-2">
-                                  <Popover>
-                                    <PopoverTrigger asChild>
-                                      <button
-                                        className={`inline-flex items-center gap-1 px-2 py-1 rounded-md text-xs font-semibold cursor-pointer transition-all hover:ring-2 hover:ring-offset-1 ${
-                                          getUrgencyLevel(report.ai_risk_level) === 'HIGH' ? 'bg-red-600 text-white hover:ring-red-400' :
-                                          getUrgencyLevel(report.ai_risk_level) === 'MEDIUM' ? 'bg-yellow-500 text-white hover:ring-yellow-400' :
-                                          'bg-green-500 text-white hover:ring-green-400'
-                                        }`}
-                                      >
-                                        <span>{getUrgencyLevel(report.ai_risk_level)}</span>
-                                        <Eye className="w-3 h-3 opacity-70" />
-                                      </button>
-                                    </PopoverTrigger>
-                                    <PopoverContent className="w-80">
-                                      {renderAITriageDetails(report)}
-                                    </PopoverContent>
-                                  </Popover>
-                                </div>
-                              ) : (
-                                <span className="text-xs text-muted-foreground">Pending...</span>
-                              )}
-                            </TableCell>
-
-                            <TableCell className="px-2 py-0">
-                              <Select
-                                value={report.assigned_to || 'unassigned'}
-                                onValueChange={(value) => assignReport(report.id, value)}
+                
+                {/* Excel-Style Table */}
+                {filteredReports.length === 0 ? (
+                  <div className="text-center py-8 sm:py-12 px-4">
+                    <FileText className="h-10 w-10 sm:h-12 sm:w-12 text-muted-foreground mx-auto mb-4" />
+                    <h3 className="text-base sm:text-lg font-medium mb-2">No Reports Found</h3>
+                    <p className="text-sm sm:text-base text-muted-foreground">
+                      {isOrgAdmin ? t('noReportsFound') : 'Reports assigned to you will appear here'}
+                    </p>
+                  </div>
+                ) : (
+                  <>
+                    {/* Desktop Table View */}
+                    <div className="hidden md:block flex-1 overflow-hidden min-h-0 flex flex-col">
+                      {/* Scrollable table body - fits screen height, accounting for pagination toolbar (40px) */}
+                      <div className="flex-1 overflow-y-auto overflow-x-auto min-h-0" style={{ maxHeight: 'calc(100% - 40px)' }}>
+                        <table className="w-full">
+                          {/* Fixed Header */}
+                          <thead className="bg-gray-50 sticky top-0 z-10">
+                            <tr className="border-b">
+                              <th 
+                                className="px-2 py-1 text-left text-xs font-semibold text-gray-700 border-r cursor-pointer hover:bg-gray-100"
+                                style={{ width: '140px' }}
+                                onClick={() => handleSort('tracking_id')}
                               >
-                                <SelectTrigger className="w-40 h-6 text-xs">
-                                  <SelectValue placeholder="Assign to..." />
-                                </SelectTrigger>
-                                <SelectContent>
-                                  <SelectItem value="unassigned">Unassigned</SelectItem>
-                                  {teamMembers.map((member) => (
-                                    <SelectItem key={member.id} value={member.id}>
-                                      {member.first_name && member.last_name 
-                                        ? `${member.first_name} ${member.last_name}`
-                                        : member.email
-                                      }
-                                    </SelectItem>
-                                  ))}
-                                </SelectContent>
-                              </Select>
-                            </TableCell>
-                            <TableCell className="text-xs text-muted-foreground px-2 py-0">
-                              {new Date(report.created_at).toLocaleDateString()}
-                            </TableCell>
-                            <TableCell className="text-right px-2 py-0">
-                               <div className="flex items-center justify-end gap-2">
-                                <Button 
-                                  variant="default" 
-                                  size="sm"
-                                  className="h-6 text-xs px-2"
-                                  onClick={() => handleViewReport(report)}
-                                >
-                                  {t('viewReport')}
-                                </Button>
-                                <DropdownMenu>
-                                  <DropdownMenuTrigger asChild>
-                                    <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
-                                      <MoreVertical className="h-4 w-4" />
+                                <div className="flex items-center justify-between">
+                                  {t('trackingId')}
+                                  {getSortIcon('tracking_id')}
+                                </div>
+                              </th>
+                              <th 
+                                className="px-2 py-1 text-left text-xs font-semibold text-gray-700 border-r cursor-pointer hover:bg-gray-100"
+                                onClick={() => handleSort('title')}
+                              >
+                                <div className="flex items-center justify-between">
+                                  {t('title')}
+                                  {getSortIcon('title')}
+                                </div>
+                              </th>
+                              <th 
+                                className="px-2 py-1 text-left text-xs font-semibold text-gray-700 border-r cursor-pointer hover:bg-gray-100"
+                                style={{ width: '100px' }}
+                                onClick={() => handleSort('status')}
+                              >
+                                <div className="flex items-center justify-between">
+                                  {t('status')}
+                                  {getSortIcon('status')}
+                                </div>
+                              </th>
+                              <th 
+                                className="px-2 py-1 text-left text-xs font-semibold text-gray-700 border-r cursor-pointer hover:bg-gray-100"
+                                style={{ width: '150px' }}
+                              >
+                                {t('category')}
+                              </th>
+                              <th 
+                                className="px-2 py-1 text-left text-xs font-semibold text-gray-700 border-r cursor-pointer hover:bg-gray-100"
+                                style={{ width: '90px' }}
+                                onClick={() => handleSort('priority')}
+                              >
+                                <div className="flex items-center justify-between">
+                                  {t('priority')}
+                                  {getSortIcon('priority')}
+                                </div>
+                              </th>
+                              <th 
+                                className="px-2 py-1 text-left text-xs font-semibold text-gray-700 border-r cursor-pointer hover:bg-gray-100"
+                                style={{ width: '100px' }}
+                                onClick={() => handleSort('ai_risk_score')}
+                              >
+                                <div className="flex items-center justify-between">
+                                  {t('ai.triage')}
+                                  {getSortIcon('ai_risk_score')}
+                                </div>
+                              </th>
+                              <th 
+                                className="px-2 py-1 text-left text-xs font-semibold text-gray-700 border-r cursor-pointer hover:bg-gray-100"
+                                style={{ width: '150px' }}
+                              >
+                                {t('assignedTo')}
+                              </th>
+                              <th 
+                                className="px-2 py-1 text-left text-xs font-semibold text-gray-700 border-r cursor-pointer hover:bg-gray-100"
+                                style={{ width: '100px' }}
+                                onClick={() => handleSort('created_at')}
+                              >
+                                <div className="flex items-center justify-between">
+                                  {t('date')}
+                                  {getSortIcon('created_at')}
+                                </div>
+                              </th>
+                              <th 
+                                className="px-2 py-1 text-center text-xs font-semibold text-gray-700"
+                                style={{ width: '120px' }}
+                              >
+                                {t('actions')}
+                              </th>
+                            </tr>
+                          </thead>
+                          
+                          {/* Table Body */}
+                          <tbody>
+                            {paginatedReports.map((report, index) => (
+                              <tr 
+                                key={report.id} 
+                                className={`border-b hover:bg-gray-50 ${highlightedReportIds.includes(report.id) ? 'bg-yellow-50 border-l-4 border-l-orange-400' : index % 2 === 0 ? 'bg-white' : 'bg-gray-50'}`}
+                                style={{ height: '22px' }}
+                              >
+                                <td className="px-2 py-0 text-xs text-gray-900 border-r font-mono">
+                                  <div className="flex items-center gap-2">
+                                    <span>{report.tracking_id}</span>
+                                    <button
+                                      onClick={async () => {
+                                        try {
+                                          await navigator.clipboard.writeText(report.tracking_id);
+                                          setCopiedTrackingId(report.tracking_id);
+                                          setTimeout(() => setCopiedTrackingId(null), 1000);
+                                        } catch (error) {
+                                          log.error(LogContext.FRONTEND, 'Failed to copy tracking ID', error as Error);
+                                        }
+                                      }}
+                                      className="text-muted-foreground hover:text-foreground transition-colors"
+                                      title="Copy tracking ID"
+                                    >
+                                      {copiedTrackingId === report.tracking_id ? (
+                                        <Check className="h-3 w-3 text-green-600" />
+                                      ) : (
+                                        <Copy className="h-3 w-3" />
+                                      )}
+                                    </button>
+                                  </div>
+                                </td>
+                                <td className="px-2 py-0 text-xs text-gray-900 border-r font-medium">
+                                  <div className="truncate" title={report.title}>
+                                    {report.title}
+                                  </div>
+                                </td>
+                                <td className="px-2 py-0 text-xs border-r">
+                                  <Badge variant={report.status === 'new' ? 'default' : 'secondary'} className="text-xs px-1 py-0">
+                                    {report.status}
+                                  </Badge>
+                                </td>
+                                <td className="px-2 py-0 text-xs border-r">
+                                  {decryptedCategories[report.id] ? (
+                                    <div>
+                                      <div className="font-medium">{decryptedCategories[report.id].main}</div>
+                                      {decryptedCategories[report.id].sub && (
+                                        <div className="text-muted-foreground text-[10px]">{decryptedCategories[report.id].sub}</div>
+                                      )}
+                                    </div>
+                                  ) : (
+                                    <span className="text-muted-foreground">-</span>
+                                  )}
+                                </td>
+                                <td className="px-2 py-0 text-xs border-r">
+                                  <RiskLevelSelector
+                                    reportId={report.id}
+                                    currentLevel={report.manual_risk_level}
+                                    onUpdate={(level) => updateManualRiskLevel(report.id, level)}
+                                    isUpdating={updatingRiskLevel === report.id}
+                                  />
+                                </td>
+                                <td className="px-2 py-0 text-xs border-r">
+                                  {report.ai_risk_level ? (
+                                    <Popover>
+                                      <PopoverTrigger asChild>
+                                        <button
+                                          className={`inline-flex items-center gap-1 px-2 py-1 rounded-md text-xs font-semibold cursor-pointer transition-all hover:ring-2 hover:ring-offset-1 ${
+                                            getUrgencyLevel(report.ai_risk_level) === 'HIGH' ? 'bg-red-600 text-white hover:ring-red-400' :
+                                            getUrgencyLevel(report.ai_risk_level) === 'MEDIUM' ? 'bg-yellow-500 text-white hover:ring-yellow-400' :
+                                            'bg-green-500 text-white hover:ring-green-400'
+                                          }`}
+                                        >
+                                          <span>{getUrgencyLevel(report.ai_risk_level)}</span>
+                                          <Eye className="w-3 h-3 opacity-70" />
+                                        </button>
+                                      </PopoverTrigger>
+                                      <PopoverContent className="w-80">
+                                        {renderAITriageDetails(report)}
+                                      </PopoverContent>
+                                    </Popover>
+                                  ) : (
+                                    <span className="text-muted-foreground">Pending...</span>
+                                  )}
+                                </td>
+                                <td className="px-2 py-0 text-xs border-r">
+                                  <Select
+                                    value={report.assigned_to || 'unassigned'}
+                                    onValueChange={(value) => assignReport(report.id, value)}
+                                  >
+                                    <SelectTrigger className="w-40 h-6 text-xs">
+                                      <SelectValue placeholder="Assign to..." />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                      <SelectItem value="unassigned">Unassigned</SelectItem>
+                                      {teamMembers.map((member) => (
+                                        <SelectItem key={member.id} value={member.id}>
+                                          {member.first_name && member.last_name 
+                                            ? `${member.first_name} ${member.last_name}`
+                                            : member.email
+                                          }
+                                        </SelectItem>
+                                      ))}
+                                    </SelectContent>
+                                  </Select>
+                                </td>
+                                <td className="px-2 py-0 text-xs text-gray-900 border-r">
+                                  {new Date(report.created_at).toLocaleDateString()}
+                                </td>
+                                <td className="px-2 py-0 text-center">
+                                  <div className="flex items-center justify-center gap-1">
+                                    <Button 
+                                      variant="default" 
+                                      size="sm"
+                                      className="h-6 text-xs px-2"
+                                      onClick={() => handleViewReport(report)}
+                                    >
+                                      {t('viewReport')}
                                     </Button>
-                                  </DropdownMenuTrigger>
-                                  <DropdownMenuContent align="end" className="w-48">
-                                    <DropdownMenuItem 
-                                      onClick={async () => {
-                                        setUpdatingStatusReportId(report.id);
-                                        try {
-                                          const { error } = await supabase
-                                            .from('reports')
-                                            .update({ 
-                                              status: 'reviewing',
-                                              updated_at: new Date().toISOString()
-                                            })
-                                            .eq('id', report.id);
-                                          
-                                          if (error) throw error;
-                                          
-                                          // Log audit event
-                                          if (effectiveOrganizationId) {
-                                            await log.info(LogContext.CASE_MANAGEMENT, 'Report status updated', {
-                                              reportId: report.id,
-                                              userId: user?.id,
-                                              userEmail: user?.email,
-                                              organizationId: effectiveOrganizationId
-                                            });
-                                          }
-                                          
-                                          toast({ title: 'Report marked as Reviewing' });
-                                          fetchData();
-                                        } catch (error) {
-                                          log.error(LogContext.CASE_MANAGEMENT, 'Error updating report status', error as Error, { reportId: report.id });
-                                          toast({ 
-                                            title: 'Error updating report status',
-                                            variant: 'destructive'
-                                          });
-                                        } finally {
-                                          setUpdatingStatusReportId(null);
-                                        }
-                                      }}
-                                      disabled={updatingStatusReportId === report.id}
-                                    >
-                                      <Eye className="h-4 w-4 mr-2" />
-                                      {updatingStatusReportId === report.id ? 'Updating...' : 'Mark as Reviewing'}
-                                    </DropdownMenuItem>
-                                    <DropdownMenuItem 
-                                      onClick={async () => {
-                                        setUpdatingStatusReportId(report.id);
-                                        try {
-                                          const { error } = await supabase
-                                            .from('reports')
-                                            .update({ 
-                                              status: 'investigating',
-                                              updated_at: new Date().toISOString()
-                                            })
-                                            .eq('id', report.id);
-                                          
-                                          if (error) throw error;
-                                          
-                                          // Log audit event
-                                          if (organizationId) {
-                                            await log.info(LogContext.CASE_MANAGEMENT, 'Report status updated', {
-                                              reportId: report.id,
-                                              userId: user?.id,
-                                              userEmail: user?.email,
-                                              organizationId: organizationId
-                                            });
-                                          }
-                                          
-                                          toast({ title: 'Report marked as Investigating' });
-                                          fetchData();
-                                        } catch (error) {
-                                          log.error(LogContext.CASE_MANAGEMENT, 'Error updating report status', error as Error, { reportId: report.id });
-                                          toast({ 
-                                            title: 'Error updating report status',
-                                            variant: 'destructive'
-                                          });
-                                        } finally {
-                                          setUpdatingStatusReportId(null);
-                                        }
-                                      }}
-                                      disabled={updatingStatusReportId === report.id}
-                                    >
-                                      <Search className="h-4 w-4 mr-2" />
-                                      {updatingStatusReportId === report.id ? 'Updating...' : 'Mark as Investigating'}
-                                    </DropdownMenuItem>
-                                    <DropdownMenuItem 
-                                      onClick={async () => {
-                                        setResolvingReportId(report.id);
-                                        try {
-                                          const { error } = await supabase
-                                            .from('reports')
-                                            .update({ 
-                                              status: 'resolved',
-                                              resolved_at: new Date().toISOString()
-                                            })
-                                            .eq('id', report.id);
-                                          
-                                          if (error) throw error;
-                                          
-                                          // Log audit event
-                                          if (organizationId) {
-                                            await log.info(LogContext.CASE_MANAGEMENT, 'Report resolved', {
-                                              reportId: report.id,
-                                              userId: user?.id,
-                                              userEmail: user?.email,
-                                              organizationId: organizationId
-                                            });
-                                          }
-                                          
-                                          toast({ title: 'Report marked as resolved' });
-                                          fetchData();
-                                        } catch (error) {
-                                          log.error(LogContext.CASE_MANAGEMENT, 'Error resolving report', error as Error, { reportId: report.id });
-                                          toast({ 
-                                            title: 'Error resolving report',
-                                            variant: 'destructive'
-                                          });
-                                        } finally {
-                                          setResolvingReportId(null);
-                                        }
-                                      }}
-                                      disabled={resolvingReportId === report.id}
-                                    >
-                                      <CheckCircle className="h-4 w-4 mr-2" />
-                                      {resolvingReportId === report.id ? 'Resolving...' : 'Mark as Resolved'}
-                                    </DropdownMenuItem>
-                                    <DropdownMenuItem 
-                                      onClick={() => exportReportToPDF(report)}
-                                      disabled={exportingReportId === report.id}
-                                    >
-                                      <Download className="h-4 w-4 mr-2" />
-                                      {exportingReportId === report.id ? 'Exporting PDF...' : 'Export PDF'}
-                                    </DropdownMenuItem>
-                                    <DropdownMenuItem 
-                                      onClick={() => handleArchiveReport(report.id)}
-                                      disabled={processingReportId === report.id}
-                                    >
-                                      <Archive className="h-4 w-4 mr-2" />
-                                      {processingReportId === report.id ? 'Archiving...' : 'Archive'}
-                                    </DropdownMenuItem>
-                                    <DropdownMenuSeparator />
-                                    <DropdownMenuItem 
-                                      className="text-destructive"
-                                      onClick={(e) => {
-                                        e.preventDefault();
-                                        setDeleteReportId(report.id);
-                                        setIsDeleteDialogOpen(true);
-                                      }}
-                                    >
-                                      <Trash2 className="h-4 w-4 mr-2" />
-                                      Delete
-                                    </DropdownMenuItem>
-                                  </DropdownMenuContent>
-                                </DropdownMenu>
-                              </div>
-                            </TableCell>
-                          </TableRow>
-                        ))}
-                      </TableBody>
-                    </Table>
-                    </div>
+                                    <DropdownMenu>
+                                      <DropdownMenuTrigger asChild>
+                                        <Button variant="ghost" size="sm" className="h-6 w-6 p-0">
+                                          <MoreVertical className="h-3 w-3" />
+                                        </Button>
+                                      </DropdownMenuTrigger>
+                                      <DropdownMenuContent align="end" className="w-48">
+                                        <DropdownMenuItem 
+                                          onClick={async () => {
+                                            setUpdatingStatusReportId(report.id);
+                                            try {
+                                              const { error } = await supabase
+                                                .from('reports')
+                                                .update({ 
+                                                  status: 'reviewing',
+                                                  updated_at: new Date().toISOString()
+                                                })
+                                                .eq('id', report.id);
+                                              
+                                              if (error) throw error;
+                                              
+                                              if (effectiveOrganizationId) {
+                                                await log.info(LogContext.CASE_MANAGEMENT, 'Report status updated', {
+                                                  reportId: report.id,
+                                                  userId: user?.id,
+                                                  userEmail: user?.email,
+                                                  organizationId: effectiveOrganizationId
+                                                });
+                                              }
+                                              
+                                              toast({ title: 'Report marked as Reviewing' });
+                                              fetchData();
+                                            } catch (error) {
+                                              log.error(LogContext.CASE_MANAGEMENT, 'Error updating report status', error as Error, { reportId: report.id });
+                                              toast({ 
+                                                title: 'Error updating report status',
+                                                variant: 'destructive'
+                                              });
+                                            } finally {
+                                              setUpdatingStatusReportId(null);
+                                            }
+                                          }}
+                                          disabled={updatingStatusReportId === report.id}
+                                        >
+                                          <Eye className="h-4 w-4 mr-2" />
+                                          {updatingStatusReportId === report.id ? 'Updating...' : 'Mark as Reviewing'}
+                                        </DropdownMenuItem>
+                                        <DropdownMenuItem 
+                                          onClick={async () => {
+                                            setUpdatingStatusReportId(report.id);
+                                            try {
+                                              const { error } = await supabase
+                                                .from('reports')
+                                                .update({ 
+                                                  status: 'investigating',
+                                                  updated_at: new Date().toISOString()
+                                                })
+                                                .eq('id', report.id);
+                                              
+                                              if (error) throw error;
+                                              
+                                              if (organizationId) {
+                                                await log.info(LogContext.CASE_MANAGEMENT, 'Report status updated', {
+                                                  reportId: report.id,
+                                                  userId: user?.id,
+                                                  userEmail: user?.email,
+                                                  organizationId: organizationId
+                                                });
+                                              }
+                                              
+                                              toast({ title: 'Report marked as Investigating' });
+                                              fetchData();
+                                            } catch (error) {
+                                              log.error(LogContext.CASE_MANAGEMENT, 'Error updating report status', error as Error, { reportId: report.id });
+                                              toast({ 
+                                                title: 'Error updating report status',
+                                                variant: 'destructive'
+                                              });
+                                            } finally {
+                                              setUpdatingStatusReportId(null);
+                                            }
+                                          }}
+                                          disabled={updatingStatusReportId === report.id}
+                                        >
+                                          <Search className="h-4 w-4 mr-2" />
+                                          {updatingStatusReportId === report.id ? 'Updating...' : 'Mark as Investigating'}
+                                        </DropdownMenuItem>
+                                        <DropdownMenuItem 
+                                          onClick={async () => {
+                                            setResolvingReportId(report.id);
+                                            try {
+                                              const { error } = await supabase
+                                                .from('reports')
+                                                .update({ 
+                                                  status: 'resolved',
+                                                  resolved_at: new Date().toISOString()
+                                                })
+                                                .eq('id', report.id);
+                                              
+                                              if (error) throw error;
+                                              
+                                              if (organizationId) {
+                                                await log.info(LogContext.CASE_MANAGEMENT, 'Report resolved', {
+                                                  reportId: report.id,
+                                                  userId: user?.id,
+                                                  userEmail: user?.email,
+                                                  organizationId: organizationId
+                                                });
+                                              }
+                                              
+                                              toast({ title: 'Report marked as resolved' });
+                                              fetchData();
+                                            } catch (error) {
+                                              log.error(LogContext.CASE_MANAGEMENT, 'Error resolving report', error as Error, { reportId: report.id });
+                                              toast({ 
+                                                title: 'Error resolving report',
+                                                variant: 'destructive'
+                                              });
+                                            } finally {
+                                              setResolvingReportId(null);
+                                            }
+                                          }}
+                                          disabled={resolvingReportId === report.id}
+                                        >
+                                          <CheckCircle className="h-4 w-4 mr-2" />
+                                          {resolvingReportId === report.id ? 'Resolving...' : 'Mark as Resolved'}
+                                        </DropdownMenuItem>
+                                        <DropdownMenuItem 
+                                          onClick={() => exportReportToPDF(report)}
+                                          disabled={exportingReportId === report.id}
+                                        >
+                                          <Download className="h-4 w-4 mr-2" />
+                                          {exportingReportId === report.id ? 'Exporting PDF...' : 'Export PDF'}
+                                        </DropdownMenuItem>
+                                        <DropdownMenuItem 
+                                          onClick={() => handleArchiveReport(report.id)}
+                                          disabled={processingReportId === report.id}
+                                        >
+                                          <Archive className="h-4 w-4 mr-2" />
+                                          {processingReportId === report.id ? 'Archiving...' : 'Archive'}
+                                        </DropdownMenuItem>
+                                        <DropdownMenuSeparator />
+                                        <DropdownMenuItem 
+                                          className="text-destructive"
+                                          onClick={(e) => {
+                                            e.preventDefault();
+                                            setDeleteReportId(report.id);
+                                            setIsDeleteDialogOpen(true);
+                                          }}
+                                        >
+                                          <Trash2 className="h-4 w-4 mr-2" />
+                                          Delete
+                                        </DropdownMenuItem>
+                                      </DropdownMenuContent>
+                                    </DropdownMenu>
+                                  </div>
+                                </td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      </div>
                     
-                    {/* Pagination Footer - Same as audit table */}
-                    {totalReports > 0 && (
-                      <div className="flex flex-row items-center justify-between px-3 py-2 border-t bg-gray-50 flex-shrink-0 h-10 z-20 bg-white">
+                      {/* Pagination Footer - Airtable/Spreadsheet style fixed at bottom - Always visible */}
+                      {totalReports > 0 && (
+                        <div className="flex flex-row items-center justify-between px-3 py-2 border-t bg-gray-50 flex-shrink-0 h-10 z-20 bg-white">
                         <div className="flex items-center space-x-3">
                           <div className="flex items-center space-x-2">
                             <Label className="text-xs whitespace-nowrap font-medium">Rows per page:</Label>
@@ -2127,11 +2232,11 @@ Additional Details: ${decryptedContent.additionalDetails || 'None provided'}
                           </Button>
                         </div>
                       </div>
-                    )}
-                  </div>
-                  
-                  {/* Mobile Card View - Allow natural scrolling on mobile */}
-                  <div className="md:hidden space-y-4 overflow-y-auto">
+                      )}
+                    </div>
+                    
+                    {/* Mobile Card View */}
+                    <div className="md:hidden space-y-2 p-2 overflow-y-auto flex-1 min-h-0">
                     {paginatedReports.map((report) => (
                       <Card key={report.id} className="overflow-hidden">
                         <CardContent className="p-5 md:p-4 space-y-4 md:space-y-3">
@@ -2380,132 +2485,195 @@ Additional Details: ${decryptedContent.additionalDetails || 'None provided'}
                         </CardContent>
                       </Card>
                     ))}
-                  </div>
-                </>
-              )}
-            </CardContent>
-          </Card>
-        </TabsContent>
+                    </div>
+                  </>
+                )}
+              </div>
+            </TabsContent>
 
-            {/* LOCKED: Archived Reports Tab - Must match active tab structure exactly */}
+            {/* LOCKED: Archived Reports Tab - Replicated from audit page structure */}
             <TabsContent value="archived" className="flex flex-col overflow-hidden min-h-0">
-              {/* LOCKED: Card uses flex-1 to fill remaining space - DO NOT CHANGE to fixed height */}
-              <Card className="md:border md:shadow-sm border-0 shadow-none flex flex-col flex-1 overflow-hidden min-h-0" data-dashboard-card-archived>
-                <CardContent className="p-0 sm:p-4 flex-1 flex flex-col overflow-hidden min-h-0">
-              {totalArchived === 0 ? (
-                <div className="text-center py-8 text-muted-foreground px-6">
-                  {isOrgAdmin ? (
-                    "No archived reports"
-                  ) : (
-                    <div className="space-y-2">
-                      <div className="text-lg font-medium text-gray-700">No Archived Reports Assigned</div>
-                      <div className="text-sm text-gray-500">
-                        Archived reports that are assigned to you by your administrator will appear here
-                      </div>
+              {/* Excel-Style Table - Matches audit page exactly */}
+              <div className="border rounded-lg bg-white flex-1 flex flex-col overflow-hidden min-h-0 mx-2 sm:mx-0" style={{ minHeight: 0, marginTop: '15px' }} data-dashboard-table-archived>
+                {/* Table Header */}
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between p-2 sm:p-3 border-b bg-gray-50 gap-2 sm:gap-0 flex-shrink-0">
+                  <div className="flex items-center space-x-2 sm:space-x-4">
+                    <div>
+                      <h3 className="font-semibold text-xs sm:text-sm">Archived Reports</h3>
+                      <p className="text-xs text-muted-foreground mt-0.5">
+                        Showing {archivedStartRecord}-{archivedEndRecord} of {totalArchived} records
+                      </p>
                     </div>
-                  )}
+                  </div>
                 </div>
-              ) : (
-                <>
-                  {/* Desktop Table View - Matches audit page structure */}
-                  <div className="hidden md:block flex-1 overflow-hidden flex flex-col min-h-0" data-dashboard-table-archived>
-                    {/* Scrollable table body */}
-                    <div className="flex-1 overflow-y-auto overflow-x-auto min-h-0" style={{ maxHeight: 'calc(100% - 40px)' }}>
-                      <Table className="min-w-full">
-                        <TableHeader>
-                          <TableRow>
-                            <TableHead className="px-2 py-1 text-xs">Tracking ID</TableHead>
-                            <TableHead className="px-2 py-1 text-xs">Title</TableHead>
-                            <TableHead className="px-2 py-1 text-xs">Status</TableHead>
-                            <TableHead className="px-2 py-1 text-xs">Category</TableHead>
-                            <TableHead className="px-2 py-1 text-xs">Archived Date</TableHead>
-                            <TableHead className="text-right px-2 py-1 text-xs">Actions</TableHead>
-                          </TableRow>
-                        </TableHeader>
-                      <TableBody>
-                        {/* LOCKED: Row height is 15px - matches active table - DO NOT CHANGE */}
-                        {paginatedArchivedReports.map((report) => (
-                            <TableRow key={report.id} style={{ height: '15px' }}>
-                              <TableCell className="font-mono text-xs px-2 py-0">
-                                <div className="flex items-center gap-2">
-                                  <span>{report.tracking_id}</span>
-                                  <button
-                                    onClick={async () => {
-                                      try {
-                                        await navigator.clipboard.writeText(report.tracking_id);
-                                        setCopiedTrackingId(report.tracking_id);
-                                        setTimeout(() => setCopiedTrackingId(null), 1000);
-                                  } catch (error) {
-                                    log.error(LogContext.FRONTEND, 'Failed to copy tracking ID', error as Error);
-                                  }
-                                    }}
-                                    className="text-muted-foreground hover:text-foreground transition-colors"
-                                    title="Copy tracking ID"
-                                  >
-                                    {copiedTrackingId === report.tracking_id ? (
-                                      <Check className="h-3 w-3 text-green-600" />
-                                    ) : (
-                                      <Copy className="h-3 w-3" />
-                                    )}
-                                  </button>
+                
+                {/* Excel-Style Table */}
+                {totalArchived === 0 ? (
+                  <div className="text-center py-8 sm:py-12 px-4">
+                    <Archive className="h-10 w-10 sm:h-12 sm:w-12 text-muted-foreground mx-auto mb-4" />
+                    <h3 className="text-base sm:text-lg font-medium mb-2">No Archived Reports</h3>
+                    <p className="text-sm sm:text-base text-muted-foreground">
+                      {isOrgAdmin ? "No archived reports" : "Archived reports assigned to you will appear here"}
+                    </p>
+                  </div>
+                ) : (
+                  <>
+                    {/* Desktop Table View */}
+                    <div className="hidden md:block flex-1 overflow-hidden min-h-0 flex flex-col">
+                      {/* Scrollable table body - fits screen height, accounting for pagination toolbar (40px) */}
+                      <div className="flex-1 overflow-y-auto overflow-x-auto min-h-0" style={{ maxHeight: 'calc(100% - 40px)' }}>
+                        <table className="w-full">
+                          {/* Fixed Header */}
+                          <thead className="bg-gray-50 sticky top-0 z-10">
+                            <tr className="border-b">
+                              <th 
+                                className="px-2 py-1 text-left text-xs font-semibold text-gray-700 border-r cursor-pointer hover:bg-gray-100"
+                                style={{ width: '140px' }}
+                                onClick={() => handleSort('tracking_id')}
+                              >
+                                <div className="flex items-center justify-between">
+                                  Tracking ID
+                                  {getSortIcon('tracking_id')}
                                 </div>
-                              </TableCell>
-                            <TableCell className="font-medium">{report.title}</TableCell>
-                            <TableCell>
-                              <Badge variant="secondary">{report.status}</Badge>
-                            </TableCell>
-                            <TableCell>
-                              {decryptedCategories[report.id] ? (
-                                <div className="text-sm">
-                                  <div className="font-medium">{decryptedCategories[report.id].main}</div>
-                                  {decryptedCategories[report.id].sub && (
-                                    <div className="text-muted-foreground text-xs">{decryptedCategories[report.id].sub}</div>
+                              </th>
+                              <th 
+                                className="px-2 py-1 text-left text-xs font-semibold text-gray-700 border-r cursor-pointer hover:bg-gray-100"
+                                onClick={() => handleSort('title')}
+                              >
+                                <div className="flex items-center justify-between">
+                                  Title
+                                  {getSortIcon('title')}
+                                </div>
+                              </th>
+                              <th 
+                                className="px-2 py-1 text-left text-xs font-semibold text-gray-700 border-r cursor-pointer hover:bg-gray-100"
+                                style={{ width: '100px' }}
+                                onClick={() => handleSort('status')}
+                              >
+                                <div className="flex items-center justify-between">
+                                  Status
+                                  {getSortIcon('status')}
+                                </div>
+                              </th>
+                              <th 
+                                className="px-2 py-1 text-left text-xs font-semibold text-gray-700 border-r cursor-pointer hover:bg-gray-100"
+                                style={{ width: '150px' }}
+                              >
+                                Category
+                              </th>
+                              <th 
+                                className="px-2 py-1 text-left text-xs font-semibold text-gray-700 border-r cursor-pointer hover:bg-gray-100"
+                                style={{ width: '120px' }}
+                                onClick={() => handleSort('created_at')}
+                              >
+                                <div className="flex items-center justify-between">
+                                  Archived Date
+                                  {getSortIcon('created_at')}
+                                </div>
+                              </th>
+                              <th 
+                                className="px-2 py-1 text-center text-xs font-semibold text-gray-700"
+                                style={{ width: '120px' }}
+                              >
+                                Actions
+                              </th>
+                            </tr>
+                          </thead>
+                          
+                          {/* Table Body */}
+                          <tbody>
+                            {paginatedArchivedReportsSorted.map((report, index) => (
+                              <tr 
+                                key={report.id} 
+                                className={`border-b hover:bg-gray-50 ${index % 2 === 0 ? 'bg-white' : 'bg-gray-50'}`}
+                                style={{ height: '22px' }}
+                              >
+                                <td className="px-2 py-0 text-xs text-gray-900 border-r font-mono">
+                                  <div className="flex items-center gap-2">
+                                    <span>{report.tracking_id}</span>
+                                    <button
+                                      onClick={async () => {
+                                        try {
+                                          await navigator.clipboard.writeText(report.tracking_id);
+                                          setCopiedTrackingId(report.tracking_id);
+                                          setTimeout(() => setCopiedTrackingId(null), 1000);
+                                        } catch (error) {
+                                          log.error(LogContext.FRONTEND, 'Failed to copy tracking ID', error as Error);
+                                        }
+                                      }}
+                                      className="text-muted-foreground hover:text-foreground transition-colors"
+                                      title="Copy tracking ID"
+                                    >
+                                      {copiedTrackingId === report.tracking_id ? (
+                                        <Check className="h-3 w-3 text-green-600" />
+                                      ) : (
+                                        <Copy className="h-3 w-3" />
+                                      )}
+                                    </button>
+                                  </div>
+                                </td>
+                                <td className="px-2 py-0 text-xs text-gray-900 border-r font-medium">
+                                  <div className="truncate" title={report.title}>
+                                    {report.title}
+                                  </div>
+                                </td>
+                                <td className="px-2 py-0 text-xs border-r">
+                                  <Badge variant="secondary" className="text-xs px-1 py-0">
+                                    {report.status}
+                                  </Badge>
+                                </td>
+                                <td className="px-2 py-0 text-xs border-r">
+                                  {decryptedCategories[report.id] ? (
+                                    <div>
+                                      <div className="font-medium">{decryptedCategories[report.id].main}</div>
+                                      {decryptedCategories[report.id].sub && (
+                                        <div className="text-muted-foreground text-[10px]">{decryptedCategories[report.id].sub}</div>
+                                      )}
+                                    </div>
+                                  ) : (
+                                    <span className="text-muted-foreground">-</span>
                                   )}
-                                </div>
-                              ) : (
-                                <span className="text-sm text-muted-foreground">-</span>
-                              )}
-                            </TableCell>
-                            <TableCell className="text-xs text-muted-foreground px-2 py-0">
-                              {new Date(report.archived_at || report.created_at).toLocaleDateString()}
-                            </TableCell>
-                            <TableCell className="text-right px-2 py-0">
-                               <div className="flex items-center justify-end gap-2">
-                                <Button 
-                                  variant="default" 
-                                  size="sm"
-                                  className="h-6 text-xs px-2"
-                                  onClick={() => handleViewReport(report)}
-                                >
-                                  {t('viewReport')}
-                                </Button>
-                                  <DropdownMenu>
-                                    <DropdownMenuTrigger asChild>
-                                      <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
-                                        <MoreVertical className="h-4 w-4" />
-                                      </Button>
-                                    </DropdownMenuTrigger>
-                                    <DropdownMenuContent align="end" className="w-40">
-                                      <DropdownMenuItem 
-                                        onClick={() => handleUnarchiveReport(report.id)}
-                                        disabled={processingReportId === report.id}
-                                      >
-                                        <RotateCcw className="h-4 w-4 mr-2" />
-                                        {processingReportId === report.id ? 'Unarchiving...' : 'Unarchive'}
-                                      </DropdownMenuItem>
-                                    </DropdownMenuContent>
-                                  </DropdownMenu>
-                                </div>
-                              </TableCell>
-                            </TableRow>
-                          ))}
-                        </TableBody>
-                      </Table>
-                    </div>
+                                </td>
+                                <td className="px-2 py-0 text-xs text-gray-900 border-r">
+                                  {new Date(report.archived_at || report.created_at).toLocaleDateString()}
+                                </td>
+                                <td className="px-2 py-0 text-center">
+                                  <div className="flex items-center justify-center gap-1">
+                                    <Button 
+                                      variant="default" 
+                                      size="sm"
+                                      className="h-6 text-xs px-2"
+                                      onClick={() => handleViewReport(report)}
+                                    >
+                                      {t('viewReport')}
+                                    </Button>
+                                    <DropdownMenu>
+                                      <DropdownMenuTrigger asChild>
+                                        <Button variant="ghost" size="sm" className="h-6 w-6 p-0">
+                                          <MoreVertical className="h-3 w-3" />
+                                        </Button>
+                                      </DropdownMenuTrigger>
+                                      <DropdownMenuContent align="end" className="w-40">
+                                        <DropdownMenuItem 
+                                          onClick={() => handleUnarchiveReport(report.id)}
+                                          disabled={processingReportId === report.id}
+                                        >
+                                          <RotateCcw className="h-4 w-4 mr-2" />
+                                          {processingReportId === report.id ? 'Unarchiving...' : 'Unarchive'}
+                                        </DropdownMenuItem>
+                                      </DropdownMenuContent>
+                                    </DropdownMenu>
+                                  </div>
+                                </td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      </div>
                     
-                    {/* Pagination Footer - Same as audit table */}
-                    {totalArchived > 0 && (
-                      <div className="flex flex-row items-center justify-between px-3 py-2 border-t bg-gray-50 flex-shrink-0 h-10 z-20 bg-white">
+                      {/* Pagination Footer - Airtable/Spreadsheet style fixed at bottom - Always visible */}
+                      {totalArchived > 0 && (
+                        <div className="flex flex-row items-center justify-between px-3 py-2 border-t bg-gray-50 flex-shrink-0 h-10 z-20 bg-white">
                         <div className="flex items-center space-x-3">
                           <div className="flex items-center space-x-2">
                             <Label className="text-xs whitespace-nowrap font-medium">Rows per page:</Label>
@@ -2574,12 +2742,12 @@ Additional Details: ${decryptedContent.additionalDetails || 'None provided'}
                           </Button>
                         </div>
                       </div>
-                    )}
-                  </div>
-
-                  {/* Mobile Card View - Allow natural scrolling on mobile */}
-                  <div className="md:hidden space-y-4 overflow-y-auto">
-                    {paginatedArchivedReports.map((report) => (
+                      )}
+                    </div>
+                    
+                    {/* Mobile Card View */}
+                    <div className="md:hidden space-y-2 p-2 overflow-y-auto flex-1 min-h-0">
+                    {paginatedArchivedReportsSorted.map((report) => (
                       <Card key={report.id} className="overflow-hidden">
                         <CardContent className="p-5 md:p-4 space-y-4 md:space-y-3">
                           <div className="flex items-start justify-between gap-2">
@@ -2697,11 +2865,10 @@ Additional Details: ${decryptedContent.additionalDetails || 'None provided'}
                         </CardContent>
                       </Card>
                     ))}
-                  </div>
-                </>
-              )}
-                </CardContent>
-              </Card>
+                    </div>
+                  </>
+                )}
+              </div>
             </TabsContent>
           </Tabs>
         </div>
