@@ -1,10 +1,9 @@
-import React, { useState, useEffect } from 'react';
-import { Home, Bot, Users, Palette, Lock, BarChart3, ScrollText, Link as LinkIcon, MessageSquare, Info, FileText, Zap, Settings, Shield, Workflow, Flag, Activity, ChevronRight, Search, Sparkles } from 'lucide-react';
+import React from 'react';
+import { Home, Bot, Users, Palette, Lock, BarChart3, ScrollText, Link as LinkIcon, MessageSquare, Info, FileText, Zap, Settings, Workflow, Search, Sparkles } from 'lucide-react';
 import { Separator } from '@/components/ui/separator';
 import { Badge } from '@/components/ui/badge';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { Sidebar, SidebarContent, SidebarFooter, SidebarGroup, SidebarGroupContent, SidebarHeader, SidebarMenu, SidebarMenuButton, SidebarMenuItem, SidebarMenuSub, SidebarMenuSubItem, SidebarMenuSubButton } from '@/components/ui/sidebar';
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
+import { Sidebar, SidebarContent, SidebarFooter, SidebarGroup, SidebarGroupContent, SidebarHeader, SidebarMenu, SidebarMenuButton, SidebarMenuItem } from '@/components/ui/sidebar';
 import { useSubscriptionLimits } from '@/hooks/useSubscriptionLimits';
 import { useUserRoles } from '@/hooks/useUserRoles';
 import { useAuth } from '@/hooks/useAuth';
@@ -92,27 +91,7 @@ const DashboardSidebar = ({
     path: '/dashboard/settings',
     locked: !isOrgAdmin,
     ownerOnly: false
-  }, {
-    title: t('sidebar.adminSection'),
-    icon: Shield,
-    path: '/dashboard/admin',
-    locked: false,
-    ownerOnly: true, // STRICT: Only visible to owner
-    hasSubMenu: true
   }];
-
-  const adminSubMenuItems = [
-    {
-      title: t('sidebar.featureFlags'),
-      icon: Flag,
-      path: '/dashboard/admin/features'
-    },
-    {
-      title: t('sidebar.systemHealth'),
-      icon: Activity,
-      path: '/dashboard/admin/health'
-    }
-  ];
 
   const handleNavigation = (item: typeof menuItems[0]) => {
     if (item.locked) {
@@ -122,14 +101,6 @@ const DashboardSidebar = ({
     }
   };
 
-  // Track admin menu open state
-  const isAdminOpen = location.pathname.startsWith('/dashboard/admin');
-  const [adminMenuOpen, setAdminMenuOpen] = useState(isAdminOpen);
-  
-  // Sync admin menu state with route
-  useEffect(() => {
-    setAdminMenuOpen(location.pathname.startsWith('/dashboard/admin'));
-  }, [location.pathname]);
 
   return (
     <Sidebar className="border-r">
@@ -152,66 +123,8 @@ const DashboardSidebar = ({
                 // AI Assistant combines both RAG search and deep-dive analysis
                 // Don't hide it even if locked - let the click handler show upgrade modal
                 
-                const isActive = location.pathname === item.path || (item.hasSubMenu && location.pathname.startsWith(item.path));
+                const isActive = location.pathname === item.path;
                 const Icon = item.icon;
-                const isAdminItem = item.path === '/dashboard/admin';
-                
-                // Handle Admin with sub-menu
-                if (isAdminItem && item.hasSubMenu) {
-                  return (
-                    <Collapsible key={item.path} open={adminMenuOpen} onOpenChange={setAdminMenuOpen}>
-                      <SidebarMenuItem>
-                        <SidebarMenuButton 
-                          onClick={() => {
-                            // Navigate to first admin sub-item (features) if not already on admin page
-                            if (!location.pathname.startsWith('/dashboard/admin')) {
-                              navigate('/dashboard/admin/features');
-                            } else {
-                              // Toggle menu if already on admin page
-                              setAdminMenuOpen(!adminMenuOpen);
-                            }
-                          }}
-                          className={cn(
-                            "w-full justify-start transition-colors px-4 cursor-pointer", 
-                            isActive && "bg-primary/10 text-primary font-medium"
-                          )}
-                        >
-                          <div className="flex items-center gap-3 w-full">
-                            <Icon className="flex-shrink-0 text-primary h-5 w-5" />
-                            <span className="flex-1">{item.title}</span>
-                            <button
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                setAdminMenuOpen(!adminMenuOpen);
-                              }}
-                              className="p-0.5 hover:bg-primary/10 rounded transition-colors flex-shrink-0"
-                              aria-label="Toggle admin menu"
-                            >
-                              <ChevronRight className={cn(
-                                "h-4 w-4 transition-transform",
-                                adminMenuOpen && "rotate-90"
-                              )} />
-                            </button>
-                          </div>
-                        </SidebarMenuButton>
-                        <CollapsibleContent>
-                          <SidebarMenuSub>
-                            {adminSubMenuItems.map((subItem) => {
-                              const SubIcon = subItem.icon;
-                              const isSubActive = location.pathname === subItem.path;
-                              return (
-                                <SidebarMenuSubItem key={subItem.path}>
-                                  <SidebarMenuSubButton
-                                    asChild
-                                    isActive={isSubActive}
-                                  >
-                                    <a
-                                      href={subItem.path}
-                                      onClick={(e) => {
-                                        e.preventDefault();
-                                        navigate(subItem.path);
-                                      }}
-                                      className="flex items-center gap-2"
                                     >
                                       <SubIcon className="h-4 w-4" />
                                       <span>{subItem.title}</span>
