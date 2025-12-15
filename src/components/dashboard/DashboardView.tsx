@@ -1536,8 +1536,8 @@ Additional Details: ${decryptedContent.additionalDetails || 'None provided'}
           controlsHeight: controls?.offsetHeight,
           controlsMarginBottom,
           availableSpace: root.clientHeight - (header?.offsetHeight || 0) - (alert?.offsetHeight || 0) - (controls?.offsetHeight || 0),
-          expectedTableHeight: root.clientHeight - (header?.offsetHeight || 0) - (alert?.offsetHeight || 0) - (controls?.offsetHeight || 0) - tableMarginTop,
-          difference: (root.clientHeight - (header?.offsetHeight || 0) - (alert?.offsetHeight || 0) - (controls?.offsetHeight || 0) - tableMarginTop) - tableContainer.clientHeight
+          expectedTableHeight: root.clientHeight - (header?.offsetHeight || 0) - (alert?.offsetHeight || 0) - (controls?.offsetHeight || 0) - tableMarginTop - headerMarginBottom,
+          difference: (root.clientHeight - (header?.offsetHeight || 0) - (alert?.offsetHeight || 0) - (controls?.offsetHeight || 0) - tableMarginTop - headerMarginBottom) - tableContainer.clientHeight
         };
         console.log('[Dashboard Layout Debug]', measurements);
       }
@@ -1692,7 +1692,7 @@ Additional Details: ${decryptedContent.additionalDetails || 'None provided'}
                     {/* Desktop Table View */}
                     <div className="hidden md:block flex-1 overflow-hidden min-h-0 flex flex-col">
                       {/* Scrollable table body - fits screen height, accounting for pagination toolbar (40px) */}
-                      <div className="flex-1 overflow-y-auto overflow-x-auto min-h-0" style={{ maxHeight: 'calc(100% - 40px)' }}>
+                      <div className="flex-1 overflow-y-auto overflow-x-auto min-h-0" style={{ minHeight: 0, maxHeight: 'calc(100% - 40px)' }}>
                         <table className="w-full">
                           {/* Fixed Header */}
                           <thead className="bg-gray-50 sticky top-0 z-10">
@@ -2429,7 +2429,7 @@ Additional Details: ${decryptedContent.additionalDetails || 'None provided'}
                     {/* Desktop Table View */}
                     <div className="hidden md:block flex-1 overflow-hidden min-h-0 flex flex-col">
                       {/* Scrollable table body - fits screen height, accounting for pagination toolbar (40px) */}
-                      <div className="flex-1 overflow-y-auto overflow-x-auto min-h-0" style={{ maxHeight: 'calc(100% - 40px)' }}>
+                      <div className="flex-1 overflow-y-auto overflow-x-auto min-h-0" style={{ minHeight: 0, maxHeight: 'calc(100% - 40px)' }}>
                         <table className="w-full">
                           {/* Fixed Header */}
                           <thead className="bg-gray-50 sticky top-0 z-10">
