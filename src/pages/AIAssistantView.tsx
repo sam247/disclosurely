@@ -17,7 +17,8 @@ import {
   ChevronDown,
   ChevronUp,
   AlertCircle,
-  Trash2
+  Trash2,
+  Info
 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
@@ -33,6 +34,7 @@ import { Separator } from '@/components/ui/separator';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { formatMarkdownToHtml } from '@/utils/markdownFormatter';
 import { sanitizeHtml } from '@/utils/sanitizer';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 
 interface ChatMessage {
   id: string;
@@ -1674,7 +1676,30 @@ Additional Details: ${decrypted.additionalDetails || 'None provided'}`;
               <div className="p-4 pb-2 bg-muted/30">
                 {/* Case Selection Section */}
                 <div>
-                  <h3 className="text-sm font-semibold mb-2 px-2">Cases</h3>
+                  <div className="flex items-center gap-1 mb-2 px-2">
+                    <h3 className="text-sm font-semibold">Cases</h3>
+                    <TooltipProvider delayDuration={200}>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <button
+                            type="button"
+                            className="inline-flex items-center justify-center rounded-full hover:bg-muted transition-colors p-0.5"
+                            aria-label="Cases information"
+                          >
+                            <Info className="h-3 w-3 text-muted-foreground" />
+                          </button>
+                        </TooltipTrigger>
+                        <TooltipContent 
+                          side="right" 
+                          align="start"
+                          sideOffset={8}
+                          className="max-w-xs p-3 bg-blue-50 border-blue-200 text-sm"
+                        >
+                          <p className="text-blue-900">Please select a case to optionally redact PII and analyse</p>
+                        </TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
+                  </div>
               {isLoadingCases ? (
                 <div className="flex items-center justify-center py-4">
                   <Loader2 className="h-4 w-4 animate-spin" />
@@ -1725,7 +1750,30 @@ Additional Details: ${decrypted.additionalDetails || 'None provided'}`;
               {/* Document Management Section - Fixed at bottom */}
               <div className="flex-shrink-0">
                 <div className="flex items-center justify-between mb-2 px-2">
-                  <h3 className="text-sm font-semibold">Documents</h3>
+                  <div className="flex items-center gap-1">
+                    <h3 className="text-sm font-semibold">Documents</h3>
+                    <TooltipProvider delayDuration={200}>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <button
+                            type="button"
+                            className="inline-flex items-center justify-center rounded-full hover:bg-muted transition-colors p-0.5"
+                            aria-label="Documents information"
+                          >
+                            <Info className="h-3 w-3 text-muted-foreground" />
+                          </button>
+                        </TooltipTrigger>
+                        <TooltipContent 
+                          side="right" 
+                          align="start"
+                          sideOffset={8}
+                          className="max-w-xs p-3 bg-blue-50 border-blue-200 text-sm"
+                        >
+                          <p className="text-blue-900">Please select a document to analyse against a case</p>
+                        </TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
+                  </div>
                   <input
                     ref={fileInputRef}
                     type="file"
@@ -1803,7 +1851,30 @@ Additional Details: ${decrypted.additionalDetails || 'None provided'}`;
 
               {/* Saved Analyses Section - Fixed at bottom, always visible */}
               <div className="flex-shrink-0" data-ai-assistant-saved-analyses>
-                <h3 className="text-sm font-semibold mb-2 px-2">Saved Analyses</h3>
+                <div className="flex items-center gap-1 mb-2 px-2">
+                  <h3 className="text-sm font-semibold">Saved Analyses</h3>
+                  <TooltipProvider delayDuration={200}>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <button
+                          type="button"
+                          className="inline-flex items-center justify-center rounded-full hover:bg-muted transition-colors p-0.5"
+                          aria-label="Saved Analyses information"
+                        >
+                          <Info className="h-3 w-3 text-muted-foreground" />
+                        </button>
+                      </TooltipTrigger>
+                      <TooltipContent 
+                        side="right" 
+                        align="start"
+                        sideOffset={8}
+                        className="max-w-xs p-3 bg-blue-50 border-blue-200 text-sm"
+                      >
+                        <p className="text-blue-900">Select a previous case to analyse</p>
+                      </TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
+                </div>
                 {isLoadingSavedAnalyses ? (
                   <div className="flex items-center justify-center py-4">
                     <Loader2 className="h-4 w-4 animate-spin" />
@@ -1854,7 +1925,10 @@ Additional Details: ${decrypted.additionalDetails || 'None provided'}`;
         {/* Toolbar - Full width */}
         <div className="h-14 border-b flex items-center justify-between px-4 md:px-6 flex-shrink-0 w-full bg-background">
           <div className="flex items-center gap-2">
-            <h1 className="text-lg font-semibold">AI Assistant</h1>
+            <div>
+              <h1 className="text-lg font-semibold">AI Assistant:</h1>
+              <p className="text-xs text-muted-foreground font-normal">Analyse cases with or without redaction against company documentation.</p>
+            </div>
             {selectedCaseData && (
               <Badge variant="secondary">
                 {selectedCaseData.tracking_id}
@@ -2185,6 +2259,10 @@ Additional Details: ${decrypted.additionalDetails || 'None provided'}`;
             setPendingAnalysisQuery('');
             setSelectedCaseId('');
             setSelectedCaseData(null);
+            setHasAnalyzedCase(false);
+            setShowPIIChoice(false);
+            setMessages([]);
+            setCurrentAnalysisData(null);
             setIsEmptyState(true);
           }}
         />
