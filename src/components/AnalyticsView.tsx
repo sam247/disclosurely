@@ -406,32 +406,43 @@ const AnalyticsView: React.FC = () => {
 
     let trends, labels, data;
     
-    switch (chartPeriod) {
-      case 'day':
-        trends = analyticsData.dailyTrends.slice(-30); // Last 30 days
-        labels = trends.map(t => {
-          const date = new Date(t.date);
-          return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
-        });
-        data = trends.map(t => t.count);
-        break;
-      case 'week':
-        trends = analyticsData.weeklyTrends;
-        labels = trends.map(t => {
-          const date = new Date(t.week);
-          return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
-        });
-        data = trends.map(t => t.count);
-        break;
-      case 'month':
-      default:
-        trends = analyticsData.monthlyTrends;
-        labels = trends.map(t => {
-          const [year, month] = t.month.split('-');
-          return new Date(parseInt(year), parseInt(month) - 1).toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
-        });
-        data = trends.map(t => t.count);
-        break;
+    // If period is "1y", show monthly trends (yearly view)
+    // Otherwise use chartPeriod selection
+    if (selectedPeriod === '1y') {
+      trends = analyticsData.monthlyTrends;
+      labels = trends.map(t => {
+        const [year, month] = t.month.split('-');
+        return new Date(parseInt(year), parseInt(month) - 1).toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
+      });
+      data = trends.map(t => t.count);
+    } else {
+      switch (chartPeriod) {
+        case 'day':
+          trends = analyticsData.dailyTrends.slice(-30); // Last 30 days
+          labels = trends.map(t => {
+            const date = new Date(t.date);
+            return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+          });
+          data = trends.map(t => t.count);
+          break;
+        case 'week':
+          trends = analyticsData.weeklyTrends;
+          labels = trends.map(t => {
+            const date = new Date(t.week);
+            return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+          });
+          data = trends.map(t => t.count);
+          break;
+        case 'month':
+        default:
+          trends = analyticsData.monthlyTrends;
+          labels = trends.map(t => {
+            const [year, month] = t.month.split('-');
+            return new Date(parseInt(year), parseInt(month) - 1).toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
+          });
+          data = trends.map(t => t.count);
+          break;
+      }
     }
 
     return {
@@ -678,8 +689,8 @@ const AnalyticsView: React.FC = () => {
             </div>
           </div>
 
-          {/* Scrollable Content Area */}
-          <div className="flex-1 min-h-0 overflow-y-auto overflow-x-hidden space-y-3 sm:space-y-4">
+          {/* Content Area - No scroll, fits on one screen */}
+          <div className="flex-1 min-h-0 overflow-hidden flex flex-col space-y-3 sm:space-y-4">
           {/* Main Chart - Full Width on Mobile */}
           <Card className="flex flex-col min-h-0">
             <CardHeader className="pb-2 sm:pb-3 flex-shrink-0">
@@ -687,38 +698,40 @@ const AnalyticsView: React.FC = () => {
                 <div>
                   <CardTitle className="text-sm sm:text-base">Reports Received</CardTitle>
                   <CardDescription className="text-[11px] sm:text-xs mt-0.5">
-                    {chartPeriod === 'day' ? 'Daily view' : chartPeriod === 'week' ? 'Weekly view' : 'Monthly view'}
+                    {selectedPeriod === '1y' ? 'Yearly view (monthly breakdown)' : chartPeriod === 'day' ? 'Daily view' : chartPeriod === 'week' ? 'Weekly view' : 'Monthly view'}
                   </CardDescription>
                 </div>
-                <div className="flex items-center gap-1.5 w-full sm:w-auto">
-                  <Button
-                    variant={chartPeriod === 'day' ? 'default' : 'outline'}
-                    size="sm"
-                    onClick={() => setChartPeriod('day')}
-                    className="text-[11px] sm:text-xs flex-1 sm:flex-initial touch-manipulation h-7 sm:h-8 px-2"
-                  >
-                    Days
-                  </Button>
-                  <Button
-                    variant={chartPeriod === 'week' ? 'default' : 'outline'}
-                    size="sm"
-                    onClick={() => setChartPeriod('week')}
-                    className="text-[11px] sm:text-xs flex-1 sm:flex-initial touch-manipulation h-7 sm:h-8 px-2"
-                  >
-                    Weeks
-                  </Button>
-                  <Button
-                    variant={chartPeriod === 'month' ? 'default' : 'outline'}
-                    size="sm"
-                    onClick={() => setChartPeriod('month')}
-                    className="text-[11px] sm:text-xs flex-1 sm:flex-initial touch-manipulation h-7 sm:h-8 px-2"
-                  >
-                    Months
-                  </Button>
-                </div>
+                {selectedPeriod !== '1y' && (
+                  <div className="flex items-center gap-1.5 w-full sm:w-auto">
+                    <Button
+                      variant={chartPeriod === 'day' ? 'default' : 'outline'}
+                      size="sm"
+                      onClick={() => setChartPeriod('day')}
+                      className="text-[11px] sm:text-xs flex-1 sm:flex-initial touch-manipulation h-7 sm:h-8 px-2"
+                    >
+                      Days
+                    </Button>
+                    <Button
+                      variant={chartPeriod === 'week' ? 'default' : 'outline'}
+                      size="sm"
+                      onClick={() => setChartPeriod('week')}
+                      className="text-[11px] sm:text-xs flex-1 sm:flex-initial touch-manipulation h-7 sm:h-8 px-2"
+                    >
+                      Weeks
+                    </Button>
+                    <Button
+                      variant={chartPeriod === 'month' ? 'default' : 'outline'}
+                      size="sm"
+                      onClick={() => setChartPeriod('month')}
+                      className="text-[11px] sm:text-xs flex-1 sm:flex-initial touch-manipulation h-7 sm:h-8 px-2"
+                    >
+                      Months
+                    </Button>
+                  </div>
+                )}
               </div>
             </CardHeader>
-            <CardContent className="pt-0 flex-1 min-h-0 flex flex-col" style={{ minHeight: '150px', height: '150px' }}>
+            <CardContent className="pt-0 flex-1 min-h-0 flex flex-col" style={{ minHeight: '100px', height: '100px' }}>
               {getChartData() ? (
                 <div className="flex-1 min-h-0 -mx-2 sm:mx-0 px-2 sm:px-0">
                 <Line 
@@ -733,12 +746,12 @@ const AnalyticsView: React.FC = () => {
                       tooltip: {
                         mode: 'index',
                         intersect: false,
-                        padding: 10,
+                        padding: 8,
                         titleFont: {
-                          size: 11
+                          size: 10
                         },
                         bodyFont: {
-                          size: 10
+                          size: 9
                         }
                       }
                     },
@@ -746,10 +759,10 @@ const AnalyticsView: React.FC = () => {
                       x: {
                         ticks: {
                           font: {
-                            size: 9
+                            size: 8
                           },
-                          maxRotation: 45,
-                          minRotation: 45
+                          maxRotation: 0,
+                          minRotation: 0
                         }
                       },
                       y: {
@@ -757,7 +770,7 @@ const AnalyticsView: React.FC = () => {
                         ticks: {
                           stepSize: 1,
                           font: {
-                            size: 9
+                            size: 8
                           }
                         }
                       }
@@ -773,15 +786,15 @@ const AnalyticsView: React.FC = () => {
             </CardContent>
           </Card>
 
-          {/* Charts Grid - Stack on Mobile, Side by Side on Desktop */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 sm:gap-4">
+          {/* Charts Grid - 3 Column Layout */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-3 sm:gap-4">
             {/* Category Distribution */}
             <Card className="flex flex-col min-h-0">
               <CardHeader className="pb-2 sm:pb-3 flex-shrink-0">
                 <CardTitle className="text-xs sm:text-sm">Category Distribution</CardTitle>
                 <CardDescription className="text-[11px] sm:text-xs mt-0.5">Breakdown by report type</CardDescription>
               </CardHeader>
-              <CardContent className="pt-0 flex-1 min-h-0 flex flex-col" style={{ minHeight: '150px', height: '150px' }}>
+              <CardContent className="pt-0 flex-1 min-h-0 flex flex-col" style={{ minHeight: '120px', height: '120px' }}>
                 {getCategoryChartData() ? (
                   <div className="flex-1 min-h-0 -mx-2 sm:mx-0 px-2 sm:px-0">
                   <Doughnut 
@@ -834,7 +847,7 @@ const AnalyticsView: React.FC = () => {
                 <CardTitle className="text-xs sm:text-sm">Status Breakdown</CardTitle>
                 <CardDescription className="text-[11px] sm:text-xs mt-0.5">Cases by status</CardDescription>
               </CardHeader>
-              <CardContent className="pt-0 flex-1 min-h-0 flex flex-col" style={{ minHeight: '150px', height: '150px' }}>
+              <CardContent className="pt-0 flex-1 min-h-0 flex flex-col" style={{ minHeight: '120px', height: '120px' }}>
                 {getStatusChartData() ? (
                   <div className="flex-1 min-h-0 -mx-2 sm:mx-0 px-2 sm:px-0">
                   <Bar 
@@ -884,90 +897,30 @@ const AnalyticsView: React.FC = () => {
               )}
               </CardContent>
             </Card>
-          </div>
 
-          {/* Bottom Row: Additional Metrics - Stack on Mobile */}
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4 flex-shrink-0">
-            {/* Priority Breakdown */}
-            <Card>
-              <CardHeader className="pb-2 sm:pb-3">
+            {/* Priority Breakdown - Third column */}
+            <Card className="flex flex-col min-h-0">
+              <CardHeader className="pb-2 sm:pb-3 flex-shrink-0">
                 <CardTitle className="text-xs sm:text-sm">Priority Breakdown</CardTitle>
               </CardHeader>
-              <CardContent className="pt-0 pb-3 sm:pb-4">
-                <div className="space-y-2">
+              <CardContent className="pt-0 flex-1 min-h-0">
+                <div className="space-y-1.5">
                 {analyticsData.priorityBreakdown
                   .sort((a, b) => b.priority - a.priority)
                   .map((item, index) => (
-                    <div key={index} className="flex items-center justify-between py-1">
-                      <div className="flex items-center gap-2 min-w-0 flex-1">
-                        <div className={`h-2.5 w-2.5 sm:h-3 sm:w-3 rounded-full flex-shrink-0 ${
+                    <div key={index} className="flex items-center justify-between py-0.5">
+                      <div className="flex items-center gap-1.5 min-w-0 flex-1">
+                        <div className={`h-2 w-2 rounded-full flex-shrink-0 ${
                           item.priority >= 4 ? 'bg-red-500' :
                           item.priority === 3 ? 'bg-orange-500' :
                           item.priority === 2 ? 'bg-yellow-500' :
                           'bg-green-500'
                         }`} />
-                        <span className="text-xs sm:text-sm truncate">Priority {item.priority}</span>
+                        <span className="text-[10px] sm:text-xs truncate">P{item.priority}</span>
                       </div>
-                      <span className="text-xs sm:text-sm font-medium ml-2 flex-shrink-0">{item.count}</span>
+                      <span className="text-[10px] sm:text-xs font-medium flex-shrink-0">{item.count}</span>
                     </div>
                   ))}
-              </div>
-              </CardContent>
-            </Card>
-
-            {/* Top Categories */}
-            <Card>
-              <CardHeader className="pb-2 sm:pb-3">
-                <CardTitle className="text-xs sm:text-sm">Top Categories</CardTitle>
-              </CardHeader>
-              <CardContent className="pt-0 pb-3 sm:pb-4">
-                <div className="space-y-2">
-                {analyticsData.categories
-                  .sort((a, b) => b.count - a.count)
-                  .slice(0, 5)
-                  .map((category, index) => (
-                    <div key={index} className="flex items-center justify-between gap-2 py-1">
-                      <span className="text-xs sm:text-sm truncate flex-1 min-w-0">{category.category}</span>
-                      <div className="flex items-center gap-2 flex-shrink-0">
-                        <span className="text-xs sm:text-sm font-medium">{category.count}</span>
-                        <div className="w-10 sm:w-16 bg-gray-200 rounded-full h-1.5 sm:h-2">
-                          <div 
-                            className="bg-primary h-1.5 sm:h-2 rounded-full" 
-                            style={{ width: `${(category.count / analyticsData.totalReports) * 100}%` }}
-                          ></div>
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-              </div>
-              </CardContent>
-            </Card>
-
-            {/* Performance Indicators */}
-            <Card>
-              <CardHeader className="pb-2 sm:pb-3">
-                <CardTitle className="text-xs sm:text-sm">Performance Indicators</CardTitle>
-              </CardHeader>
-              <CardContent className="pt-0 pb-3 sm:pb-4">
-                <div className="space-y-2">
-                <div className="flex items-center justify-between py-1">
-                  <span className="text-xs sm:text-sm">Escalation Rate</span>
-                  <Badge variant={analyticsData.escalationRate > 20 ? 'destructive' : 'secondary'} className="text-[10px] sm:text-xs">
-                    {analyticsData.escalationRate.toFixed(1)}%
-                  </Badge>
-                </div>
-                <div className="flex items-center justify-between py-1">
-                  <span className="text-xs sm:text-sm">Resolution Rate</span>
-                  <Badge variant={analyticsData.resolutionRate >= 70 ? 'default' : 'secondary'} className="text-[10px] sm:text-xs">
-                    {analyticsData.resolutionRate.toFixed(1)}%
-                  </Badge>
-                </div>
-                <div className="flex items-center justify-between py-1">
-                  <span className="text-xs sm:text-sm">Response Time</span>
-                  <Badge variant={analyticsData.avgResponseTime > 7 ? 'destructive' : 'default'} className="text-[10px] sm:text-xs">
-                    {analyticsData.avgResponseTime.toFixed(1)}d
-                  </Badge>
-                </div>
               </div>
               </CardContent>
             </Card>
