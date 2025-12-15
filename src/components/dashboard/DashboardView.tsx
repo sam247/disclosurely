@@ -1559,6 +1559,20 @@ Additional Details: ${decryptedContent.additionalDetails || 'None provided'}
           scrollableDivShouldBeHeight: desktopTableWrapper && pagination ? `${desktopTableWrapper.clientHeight - pagination.offsetHeight}px` : 'unknown'
         };
         console.log('[Dashboard Layout Debug]', measurements);
+        
+        // Force scrollable div to correct height if it's wrong - AGGRESSIVE FIX
+        if (scrollableDiv && desktopTableWrapper && pagination) {
+          const expectedHeight = desktopTableWrapper.clientHeight - pagination.offsetHeight;
+          const actualHeight = scrollableDiv.clientHeight;
+          if (Math.abs(expectedHeight - actualHeight) > 5) {
+            console.log(`[Dashboard Layout Debug] Forcing scrollable div height from ${actualHeight}px to ${expectedHeight}px`);
+            scrollableDiv.style.minHeight = `${expectedHeight}px`;
+            scrollableDiv.style.height = `${expectedHeight}px`;
+            scrollableDiv.style.flex = '1 1 0%';
+            scrollableDiv.style.overflowY = 'auto';
+            scrollableDiv.style.overflowX = 'auto';
+          }
+        }
       }
     };
     const timeout = setTimeout(measureLayout, 100);
