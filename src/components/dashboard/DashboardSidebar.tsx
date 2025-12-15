@@ -37,6 +37,32 @@ const DashboardSidebar = ({
   const { isAdmin } = useUserRoles();
   const isOwner = isAdmin;
 
+  // #region agent log
+  useEffect(() => {
+    fetch('http://127.0.0.1:7243/ingest/07d80fb8-251f-44b3-a7af-ce7afb45a49c', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        location: 'DashboardSidebar.tsx:role-check',
+        message: 'Sidebar role/limits state',
+        data: {
+          isAdmin,
+          isOwner,
+          isOrgAdmin,
+          isCaseHandler,
+          hasAIHelper: limits?.hasAIHelper,
+          subscribed: subscriptionData?.subscribed,
+          subscription_tier: subscriptionData?.subscription_tier
+        },
+        timestamp: Date.now(),
+        sessionId: 'debug-session',
+        runId: 'admin-visibility-debug',
+        hypothesisId: 'C'
+      })
+    }).catch(() => {});
+  }, [isAdmin, isOwner, isOrgAdmin, isCaseHandler, limits?.hasAIHelper, subscriptionData?.subscribed, subscriptionData?.subscription_tier]);
+  // #endregion
+
   const menuItems = [{
     title: t('dashboard'),
     icon: Home,

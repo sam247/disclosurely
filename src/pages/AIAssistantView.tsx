@@ -603,6 +603,27 @@ Remember: Compliance teams need confidence and clarity under pressure. Be the ad
     // Calculate PII stats only from case description (exclude document PII)
     let piiMetadata = undefined;
     if (data.metadata && data.metadata.pii_redacted) {
+      // #region agent log
+      fetch('http://127.0.0.1:7243/ingest/07d80fb8-251f-44b3-a7af-ce7afb45a49c', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          location: 'AIAssistantView.tsx:handleCaseAnalysis:pii-metadata',
+          message: 'PII metadata received from ai-gateway-generate',
+          data: {
+            preserve_pii: skipPIIRedaction,
+            hasMetadata: !!data.metadata,
+            pii_redacted: data.metadata?.pii_redacted,
+            redaction_map_keys: data.metadata?.redaction_map ? Object.keys(data.metadata.redaction_map).length : 0
+          },
+          timestamp: Date.now(),
+          sessionId: 'debug-session',
+          runId: 'pii-debug',
+          hypothesisId: 'A'
+        })
+      }).catch(() => {});
+      // #endregion
+
       // Detect PII in case description only (not documents)
       const { detectPII } = await import('@/utils/pii-detector-client');
       const caseOnlyPII = await detectPII(decryptedContent, organization?.id);
@@ -618,6 +639,26 @@ Remember: Compliance teams need confidence and clarity under pressure. Be the ad
       
       // Only show metadata if case has PII (ignore document PII in count)
       const casePIICount = Object.values(caseStats).reduce((sum, count) => sum + count, 0);
+      
+      // #region agent log
+      fetch('http://127.0.0.1:7243/ingest/07d80fb8-251f-44b3-a7af-ce7afb45a49c', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          location: 'AIAssistantView.tsx:handleCaseAnalysis:case-pii-detection',
+          message: 'Case-only PII detection results',
+          data: {
+            casePIICount,
+            caseStats
+          },
+          timestamp: Date.now(),
+          sessionId: 'debug-session',
+          runId: 'pii-debug',
+          hypothesisId: 'B'
+        })
+      }).catch(() => {});
+      // #endregion
+
       if (casePIICount > 0) {
         piiMetadata = {
           redacted: true,
@@ -2235,10 +2276,14 @@ Additional Details: ${decrypted.additionalDetails || 'None provided'}`;
                     <Loader2 className="h-4 w-4 animate-spin text-primary" />
                     <div className="flex flex-col">
                       <span className="text-sm font-medium text-foreground">
-                          {selectedCaseId ? (hasAnalyzedCase ? 'Thinking...' : 'Analyzing case...') : 'Searching your cases...'}
+                        Thinking…
                       </span>
                       <span className="text-xs text-muted-foreground mt-1">
-                        {selectedCaseId ? 'This may take a few moments' : 'Please wait'}
+                        {selectedCaseId
+                          ? (hasAnalyzedCase
+                            ? 'Crafting a response to your follow-up'
+                            : 'Analyzing the case with PII protection')
+                          : 'Searching across cases'}
                       </span>
                     </div>
                   </div>
