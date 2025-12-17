@@ -1640,7 +1640,7 @@ Additional Details: ${decryptedContent.additionalDetails || 'None provided'}
       )}
 
       {/* Controls Bar - Replaces filter bar */}
-      <div className="border rounded-lg bg-white flex-shrink-0 mx-2 sm:mx-0">
+      <div className="border rounded-lg bg-white flex-shrink-0 mx-2 sm:mx-0 mb-2">
         <div className="p-2 sm:p-3 space-y-2 sm:space-y-3">
           <div className="flex flex-col sm:flex-row gap-2 sm:gap-4 items-start sm:items-center">
             {/* Tabs */}
