@@ -71,6 +71,7 @@ interface SimpleAnalyticsData {
   monthlyTrends: Array<{ month: string; count: number; categories: string[] }>;
   yearlyTrends: Array<{ year: string; count: number; categories: string[] }>;
   statusBreakdown: Array<{ status: string; count: number }>;
+  casesByMember: Array<{ member: string; count: number }>;
 }
 
 const AnalyticsView: React.FC = () => {
@@ -119,10 +120,10 @@ const AnalyticsView: React.FC = () => {
       const previousPeriodStart = getPreviousPeriodStart(selectedPeriod);
       const previousPeriodEnd = currentPeriodStart;
 
-      // Query current period reports - include encrypted_content for category decryption
+      // Query current period reports - include encrypted_content for category decryption and assigned_to for member analytics
       let currentReportsQuery = supabase
         .from('reports')
-        .select('id, title, status, created_at, updated_at, report_type, priority, manual_risk_level, encrypted_content')
+        .select('id, title, status, created_at, updated_at, report_type, priority, manual_risk_level, encrypted_content, assigned_to')
         .eq('organization_id', organization.id)
         .is('deleted_at', null) // Only exclude deleted reports
         .gte('created_at', currentPeriodStart);
@@ -152,6 +153,25 @@ const AnalyticsView: React.FC = () => {
 
       
 
+      // Fetch profiles for member names
+      const assignedUserIds = [...new Set((currentReports || []).filter(r => r.assigned_to).map(r => r.assigned_to))];
+      let memberMap: Record<string, string> = {};
+      if (assignedUserIds.length > 0) {
+        const { data: profiles } = await supabase
+          .from('profiles')
+          .select('id, first_name, last_name, email')
+          .in('id', assignedUserIds);
+        
+        if (profiles) {
+          profiles.forEach(profile => {
+            const name = profile.first_name && profile.last_name 
+              ? `${profile.first_name} ${profile.last_name}`
+              : profile.email || 'Unknown';
+            memberMap[profile.id] = name;
+          });
+        }
+      }
+
       // Decrypt categories for current period reports (optional - don't fail if decryption fails)
       let reportsWithCategories = currentReports || [];
       try {
@@ -166,9 +186,9 @@ const AnalyticsView: React.FC = () => {
         }));
       }
       
-      // Process data - pass selectedPeriod for monthly trends generation
+      // Process data - pass selectedPeriod for monthly trends generation and memberMap
       console.log('Analytics: Processing', reportsWithCategories.length, 'reports');
-      const processedData = processSimpleAnalytics(reportsWithCategories, selectedPeriod);
+      const processedData = processSimpleAnalytics(reportsWithCategories, selectedPeriod, memberMap);
       console.log('Analytics: Processed data:', {
         totalReports: processedData.totalReports,
         mainCategories: processedData.mainCategories.length,
@@ -202,7 +222,8 @@ const AnalyticsView: React.FC = () => {
         weeklyTrends: [],
         monthlyTrends: [],
         yearlyTrends: [],
-        statusBreakdown: []
+        statusBreakdown: [],
+        casesByMember: []
       });
       toast({
         title: "Analytics Error",
@@ -404,7 +425,7 @@ const AnalyticsView: React.FC = () => {
       .sort((a, b) => a.year.localeCompare(b.year));
   };
 
-  const processSimpleAnalytics = (reports: any[], period: string = '90d'): SimpleAnalyticsData => {
+  const processSimpleAnalytics = (reports: any[], period: string = '90d', memberMap: Record<string, string> = {}): SimpleAnalyticsData => {
     const totalReports = reports.length;
     const activeReports = reports.filter(r => !['closed', 'resolved', 'archived'].includes(r.status)).length;
     
@@ -495,6 +516,24 @@ const AnalyticsView: React.FC = () => {
       count: count as number
     }));
 
+    // Cases by member
+    const memberCounts = reports.reduce((acc, r) => {
+      if (r.assigned_to) {
+        const memberName = memberMap[r.assigned_to] || 'Unknown';
+        acc[memberName] = (acc[memberName] || 0) + 1;
+      } else {
+        acc['Unassigned'] = (acc['Unassigned'] || 0) + 1;
+      }
+      return acc;
+    }, {} as Record<string, number>);
+
+    const casesByMember = Object.entries(memberCounts)
+      .map(([member, count]) => ({
+        member,
+        count: count as number
+      }))
+      .sort((a, b) => b.count - a.count);
+
     return {
       totalReports,
       activeReports,
@@ -509,7 +548,8 @@ const AnalyticsView: React.FC = () => {
       weeklyTrends,
       monthlyTrends,
       yearlyTrends,
-      statusBreakdown
+      statusBreakdown,
+      casesByMember
     };
   };
 
@@ -705,6 +745,25 @@ const AnalyticsView: React.FC = () => {
           label: 'Reports',
           data: sortedCategories.map(c => c.count),
           backgroundColor: colors.slice(0, sortedCategories.length),
+        },
+      ],
+    };
+  };
+
+  const getCasesByMemberChartData = () => {
+    if (!analyticsData || analyticsData.casesByMember.length === 0) return null;
+
+    const colors = [
+      '#36A2EB', '#FF6384', '#FFCE56', '#4BC0C0', '#9966FF', '#FF9900', '#C9CBCF'
+    ];
+
+    return {
+      labels: analyticsData.casesByMember.map(m => m.member),
+      datasets: [
+        {
+          label: 'Cases',
+          data: analyticsData.casesByMember.map(m => m.count),
+          backgroundColor: colors.slice(0, analyticsData.casesByMember.length),
         },
       ],
     };
@@ -978,24 +1037,18 @@ const AnalyticsView: React.FC = () => {
                 <CardTitle className="text-xs sm:text-sm">By Category</CardTitle>
                 <CardDescription className="text-[11px] sm:text-xs mt-0.5">Financial Misconduct, Workplace Behaviour, etc.</CardDescription>
               </CardHeader>
-              <CardContent className="pt-0 pb-4 flex-1 min-h-0 flex flex-col" style={{ minHeight: '100px', height: '100px' }}>
+              <CardContent className="pt-0 pb-4 flex-1 min-h-0 flex flex-col" style={{ minHeight: '80px', height: '80px' }}>
                 {getCategoryChartData() ? (
                   <div className="flex-1 min-h-0 -mx-2 sm:mx-0 px-2 sm:px-0">
-                  <Doughnut 
+                  <Bar 
                     data={getCategoryChartData()!} 
                     options={{
+                      indexAxis: 'y' as const,
                       responsive: true,
                       maintainAspectRatio: false,
                       plugins: {
                         legend: {
-                          position: 'bottom' as const,
-                          labels: {
-                            padding: 6,
-                            font: {
-                              size: 9
-                            },
-                            boxWidth: 10
-                          }
+                          display: false,
                         },
                         tooltip: {
                           padding: 10,
@@ -1004,12 +1057,23 @@ const AnalyticsView: React.FC = () => {
                           },
                           bodyFont: {
                             size: 10
-                          },
-                          callbacks: {
-                            label: function(context) {
-                              const total = analyticsData?.totalReports || 1;
-                              const percentage = ((context.parsed / total) * 100).toFixed(1);
-                              return `${context.label}: ${context.parsed} (${percentage}%)`;
+                          }
+                        }
+                      },
+                      scales: {
+                        x: {
+                          beginAtZero: true,
+                          ticks: {
+                            stepSize: 1,
+                            font: {
+                              size: 9
+                            }
+                          }
+                        },
+                        y: {
+                          ticks: {
+                            font: {
+                              size: 9
                             }
                           }
                         }
@@ -1031,24 +1095,18 @@ const AnalyticsView: React.FC = () => {
                 <CardTitle className="text-xs sm:text-sm">By Sub Category</CardTitle>
                 <CardDescription className="text-[11px] sm:text-xs mt-0.5">Fraud, Harassment, etc.</CardDescription>
               </CardHeader>
-              <CardContent className="pt-0 pb-4 flex-1 min-h-0 flex flex-col" style={{ minHeight: '100px', height: '100px' }}>
+              <CardContent className="pt-0 pb-4 flex-1 min-h-0 flex flex-col" style={{ minHeight: '80px', height: '80px' }}>
                 {getSubCategoryChartData() ? (
                   <div className="flex-1 min-h-0 -mx-2 sm:mx-0 px-2 sm:px-0">
-                  <Doughnut 
+                  <Bar 
                     data={getSubCategoryChartData()!} 
                     options={{
+                      indexAxis: 'y' as const,
                       responsive: true,
                       maintainAspectRatio: false,
                       plugins: {
                         legend: {
-                          position: 'bottom' as const,
-                          labels: {
-                            padding: 6,
-                            font: {
-                              size: 9
-                            },
-                            boxWidth: 10
-                          }
+                          display: false,
                         },
                         tooltip: {
                           padding: 10,
@@ -1057,12 +1115,23 @@ const AnalyticsView: React.FC = () => {
                           },
                           bodyFont: {
                             size: 10
-                          },
-                          callbacks: {
-                            label: function(context) {
-                              const total = analyticsData?.totalReports || 1;
-                              const percentage = ((context.parsed / total) * 100).toFixed(1);
-                              return `${context.label}: ${context.parsed} (${percentage}%)`;
+                          }
+                        }
+                      },
+                      scales: {
+                        x: {
+                          beginAtZero: true,
+                          ticks: {
+                            stepSize: 1,
+                            font: {
+                              size: 9
+                            }
+                          }
+                        },
+                        y: {
+                          ticks: {
+                            font: {
+                              size: 9
                             }
                           }
                         }
@@ -1084,7 +1153,7 @@ const AnalyticsView: React.FC = () => {
                 <CardTitle className="text-xs sm:text-sm">Status Breakdown</CardTitle>
                 <CardDescription className="text-[11px] sm:text-xs mt-0.5">Cases by status</CardDescription>
               </CardHeader>
-              <CardContent className="pt-0 pb-4 flex-1 min-h-0 flex flex-col" style={{ minHeight: '100px', height: '100px' }}>
+              <CardContent className="pt-0 pb-4 flex-1 min-h-0 flex flex-col" style={{ minHeight: '80px', height: '80px' }}>
                 {getStatusChartData() ? (
                   <div className="flex-1 min-h-0 -mx-2 sm:mx-0 px-2 sm:px-0">
                   <Bar 
@@ -1145,7 +1214,7 @@ const AnalyticsView: React.FC = () => {
                 <CardTitle className="text-xs sm:text-sm">Top Categories</CardTitle>
                 <CardDescription className="text-[11px] sm:text-xs mt-0.5">Reports by category (top 5)</CardDescription>
               </CardHeader>
-              <CardContent className="pt-0 pb-4 flex-1 min-h-0 flex flex-col" style={{ minHeight: '100px', height: '100px' }}>
+              <CardContent className="pt-0 pb-4 flex-1 min-h-0 flex flex-col" style={{ minHeight: '80px', height: '80px' }}>
                 {getHorizontalBarChartData() ? (
                   <div className="flex-1 min-h-0 -mx-2 sm:mx-0 px-2 sm:px-0">
                   <Bar 
@@ -1197,16 +1266,61 @@ const AnalyticsView: React.FC = () => {
               </CardContent>
             </Card>
 
-            {/* Placeholder for second box */}
+            {/* Cases by Member */}
             <Card className="flex flex-col min-h-0">
               <CardHeader className="pb-2 sm:pb-3 flex-shrink-0">
-                <CardTitle className="text-xs sm:text-sm">Coming Soon</CardTitle>
-                <CardDescription className="text-[11px] sm:text-xs mt-0.5">Additional analytics</CardDescription>
+                <CardTitle className="text-xs sm:text-sm">Cases by Member</CardTitle>
+                <CardDescription className="text-[11px] sm:text-xs mt-0.5">Assigned cases per team member</CardDescription>
               </CardHeader>
-              <CardContent className="pt-0 pb-4 flex-1 min-h-0 flex flex-col" style={{ minHeight: '100px', height: '100px' }}>
-                <div className="h-full flex items-center justify-center text-muted-foreground text-[11px] sm:text-xs">
-                  Chart coming soon
+              <CardContent className="pt-0 pb-4 flex-1 min-h-0 flex flex-col" style={{ minHeight: '80px', height: '80px' }}>
+                {getCasesByMemberChartData() ? (
+                  <div className="flex-1 min-h-0 -mx-2 sm:mx-0 px-2 sm:px-0">
+                  <Bar 
+                    data={getCasesByMemberChartData()!} 
+                    options={{
+                      indexAxis: 'y' as const,
+                      responsive: true,
+                      maintainAspectRatio: false,
+                      plugins: {
+                        legend: {
+                          display: false,
+                        },
+                        tooltip: {
+                          padding: 10,
+                          titleFont: {
+                            size: 11
+                          },
+                          bodyFont: {
+                            size: 10
+                          }
+                        }
+                      },
+                      scales: {
+                        x: {
+                          beginAtZero: true,
+                          ticks: {
+                            stepSize: 1,
+                            font: {
+                              size: 9
+                            }
+                          }
+                        },
+                        y: {
+                          ticks: {
+                            font: {
+                              size: 9
+                            }
+                          }
+                        }
+                      }
+                    }}
+                  />
                 </div>
+              ) : (
+                <div className="h-full flex items-center justify-center text-muted-foreground text-[11px] sm:text-xs">
+                  No assignment data available
+                </div>
+              )}
               </CardContent>
             </Card>
 
@@ -1216,7 +1330,7 @@ const AnalyticsView: React.FC = () => {
                 <CardTitle className="text-xs sm:text-sm">Coming Soon</CardTitle>
                 <CardDescription className="text-[11px] sm:text-xs mt-0.5">Additional analytics</CardDescription>
               </CardHeader>
-              <CardContent className="pt-0 pb-4 flex-1 min-h-0 flex flex-col" style={{ minHeight: '100px', height: '100px' }}>
+              <CardContent className="pt-0 pb-4 flex-1 min-h-0 flex flex-col" style={{ minHeight: '80px', height: '80px' }}>
                 <div className="h-full flex items-center justify-center text-muted-foreground text-[11px] sm:text-xs">
                   Chart coming soon
                 </div>
