@@ -593,8 +593,8 @@ const LinkGenerator = () => {
     : null;
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-      {/* Secure Report Link - Left Column */}
+    <>
+      {/* Secure Report Link - Full Width Card with Two Columns */}
       <Card>
         <CardHeader>
           <div>
@@ -608,7 +608,7 @@ const LinkGenerator = () => {
           <RadioGroup
             value={activeUrlType}
             onValueChange={(value) => setActiveUrlType(value as 'subdomain' | 'custom_domain')}
-            className="space-y-3"
+            className="grid grid-cols-1 md:grid-cols-2 gap-4"
           >
                   {/* Subdomain Option */}
                   <div className="flex items-start space-x-3 p-3 border rounded-lg bg-background">
@@ -842,8 +842,8 @@ const LinkGenerator = () => {
           </div>
         </CardContent>
       </Card>
-    </div>
-  );
-};
+
+      {/* Form Settings */}
+      <Card>
 
 export default LinkGenerator;
