@@ -179,13 +179,13 @@ const AnalyticsView: React.FC = () => {
       let impressionsByLink: Array<{ linkName: string; count: number }> = [];
       
       // Get all organization links
-      const { data: orgLinks } = await supabase
+      const { data: orgLinks, error: orgLinksError } = await supabase
         .from('organization_links')
         .select('id, name')
         .eq('organization_id', organization.id)
         .eq('is_active', true);
 
-      if (orgLinks && orgLinks.length > 0) {
+      if (!orgLinksError && orgLinks && orgLinks.length > 0) {
         const linkIds = orgLinks.map(link => link.id);
         
         // Count impressions for this period
@@ -269,7 +269,9 @@ const AnalyticsView: React.FC = () => {
         monthlyTrends: [],
         yearlyTrends: [],
         statusBreakdown: [],
-        casesByMember: []
+        casesByMember: [],
+        linkImpressions: 0,
+        impressionsByLink: []
       });
       toast({
         title: "Analytics Error",
@@ -822,7 +824,7 @@ const AnalyticsView: React.FC = () => {
   };
 
   const getImpressionsByLinkChartData = () => {
-    if (!analyticsData || analyticsData.impressionsByLink.length === 0) return null;
+    if (!analyticsData || !analyticsData.impressionsByLink || analyticsData.impressionsByLink.length === 0) return null;
 
     const colors = [
       '#36A2EB', '#FF6384', '#FFCE56', '#4BC0C0', '#9966FF', '#FF9900', '#C9CBCF'
