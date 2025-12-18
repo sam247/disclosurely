@@ -593,7 +593,8 @@ const LinkGenerator = () => {
     : null;
 
   return (
-    <>
+    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      {/* Secure Report Link - Left Column */}
       <Card>
         <CardHeader>
           <div>
@@ -739,7 +740,7 @@ const LinkGenerator = () => {
         </CardContent>
       </Card>
 
-      {/* Form Settings */}
+      {/* Form Settings - Right Column */}
       <Card>
         <CardHeader>
           <div className="flex items-center gap-2">
