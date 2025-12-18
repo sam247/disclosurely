@@ -354,21 +354,30 @@ const LinkGenerator = () => {
         throw new Error('Custom domain must be verified before it can be set as active.');
       }
 
-      const { data, error } = await supabase
+      // First try the update with select to verify
+      const { data, error, count } = await supabase
         .from('organizations')
         .update({ active_url_type })
         .eq('id', organizationId)
-        .select('active_url_type')
-        .single();
+        .select('active_url_type', { count: 'exact' });
 
       if (error) {
         console.error('Failed to update active_url_type:', error);
+        console.error('Organization ID:', organizationId);
+        console.error('Active URL Type:', active_url_type);
         throw error;
       }
 
+      // Check if any rows were updated
+      if (!data || data.length === 0) {
+        console.error('No rows updated. This may indicate an RLS policy issue.');
+        console.error('Organization ID:', organizationId);
+        throw new Error('Update failed: No rows were updated. You may not have permission to update this organization.');
+      }
+
       // Verify the update actually happened
-      if (data?.active_url_type !== active_url_type) {
-        console.error('Update did not persist. Expected:', active_url_type, 'Got:', data?.active_url_type);
+      if (data[0]?.active_url_type !== active_url_type) {
+        console.error('Update did not persist. Expected:', active_url_type, 'Got:', data[0]?.active_url_type);
         throw new Error('Update did not persist correctly');
       }
     },
