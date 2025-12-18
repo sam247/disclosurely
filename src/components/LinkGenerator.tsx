@@ -842,8 +842,8 @@ const LinkGenerator = () => {
           </div>
         </CardContent>
       </Card>
-
-      {/* Form Settings */}
-      <Card>
+    </>
+  );
+};
 
 export default LinkGenerator;
