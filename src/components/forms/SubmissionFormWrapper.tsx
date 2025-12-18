@@ -8,6 +8,18 @@ import { AlertTriangle } from 'lucide-react';
 import BrandedFormLayout from '../BrandedFormLayout';
 import ProgressiveSubmissionForm from './ProgressiveSubmissionForm';
 
+// Track link impression (non-blocking)
+const trackLinkImpression = async (linkId: string, linkToken: string) => {
+  try {
+    await supabase.functions.invoke('track-link-impression', {
+      body: { linkId, linkToken }
+    });
+  } catch (error) {
+    console.error('Error tracking link impression:', error);
+    throw error;
+  }
+};
+
 interface LinkData {
   id: string;
   name: string;
@@ -131,6 +143,11 @@ const SubmissionFormWrapper = () => {
         link_token: linkToken!,
         default_language: linkInfo.default_language,
         available_languages: availableLanguages as string[] | null
+      });
+
+      // Track link impression (non-blocking)
+      trackLinkImpression(linkInfo.id, linkToken!).catch(err => {
+        console.warn('Failed to track link impression:', err);
       });
 
       // Fetch subscription tier for the organization

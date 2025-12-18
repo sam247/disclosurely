@@ -9,6 +9,18 @@ import BrandedFormLayout from '../BrandedFormLayout';
 import ProgressiveSubmissionForm from './ProgressiveSubmissionForm';
 import { resumeDraft } from '@/services/draftService';
 
+// Track link impression (non-blocking)
+const trackLinkImpression = async (linkId: string, linkToken: string) => {
+  try {
+    await supabase.functions.invoke('track-link-impression', {
+      body: { linkId, linkToken }
+    });
+  } catch (error) {
+    console.error('Error tracking link impression:', error);
+    throw error;
+  }
+};
+
 interface LinkData {
   id: string;
   name: string;
@@ -265,6 +277,12 @@ const CleanSubmissionWrapper = () => {
       };
 
       setLinkData(formattedLinkData);
+      
+      // Track link impression (non-blocking)
+      trackLinkImpression(formattedLinkData.id, formattedLinkData.link_token).catch(err => {
+        console.warn('Failed to track link impression:', err);
+      });
+      
       setLoading(false);
     } catch (error) {
       console.error('Error fetching organization link data:', error);

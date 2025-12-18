@@ -72,6 +72,8 @@ interface SimpleAnalyticsData {
   yearlyTrends: Array<{ year: string; count: number; categories: string[] }>;
   statusBreakdown: Array<{ status: string; count: number }>;
   casesByMember: Array<{ member: string; count: number }>;
+  linkImpressions: number;
+  impressionsByLink: Array<{ linkName: string; count: number }>;
 }
 
 const AnalyticsView: React.FC = () => {
@@ -172,6 +174,47 @@ const AnalyticsView: React.FC = () => {
         }
       }
 
+      // Fetch link impressions for the period
+      let linkImpressions = 0;
+      let impressionsByLink: Array<{ linkName: string; count: number }> = [];
+      
+      // Get all organization links
+      const { data: orgLinks } = await supabase
+        .from('organization_links')
+        .select('id, name')
+        .eq('organization_id', organization.id)
+        .eq('is_active', true);
+
+      if (orgLinks && orgLinks.length > 0) {
+        const linkIds = orgLinks.map(link => link.id);
+        
+        // Count impressions for this period
+        const { data: impressions, error: impressionsError } = await supabase
+          .from('link_analytics')
+          .select('link_id, event_type')
+          .in('link_id', linkIds)
+          .eq('event_type', 'view')
+          .gte('created_at', currentPeriodStart);
+
+        if (!impressionsError && impressions) {
+          linkImpressions = impressions.length;
+          
+          // Group by link
+          const linkCounts: Record<string, number> = {};
+          impressions.forEach(imp => {
+            linkCounts[imp.link_id] = (linkCounts[imp.link_id] || 0) + 1;
+          });
+          
+          impressionsByLink = orgLinks
+            .map(link => ({
+              linkName: link.name,
+              count: linkCounts[link.id] || 0
+            }))
+            .filter(item => item.count > 0)
+            .sort((a, b) => b.count - a.count);
+        }
+      }
+
       // Decrypt categories for current period reports (optional - don't fail if decryption fails)
       let reportsWithCategories = currentReports || [];
       try {
@@ -186,9 +229,9 @@ const AnalyticsView: React.FC = () => {
         }));
       }
       
-      // Process data - pass selectedPeriod for monthly trends generation and memberMap
+      // Process data - pass selectedPeriod for monthly trends generation, memberMap, and impressions
       console.log('Analytics: Processing', reportsWithCategories.length, 'reports');
-      const processedData = processSimpleAnalytics(reportsWithCategories, selectedPeriod, memberMap);
+      const processedData = processSimpleAnalytics(reportsWithCategories, selectedPeriod, memberMap, linkImpressions, impressionsByLink);
       console.log('Analytics: Processed data:', {
         totalReports: processedData.totalReports,
         mainCategories: processedData.mainCategories.length,
@@ -199,7 +242,10 @@ const AnalyticsView: React.FC = () => {
       // Process previous period data (without decryption for now to speed things up)
       const previousData = previousReports ? processSimpleAnalytics(
         previousReports.map(r => ({ ...r, mainCategory: null, subCategory: null })),
-        selectedPeriod
+        selectedPeriod,
+        {},
+        0,
+        []
       ) : null;
       
       
@@ -425,7 +471,13 @@ const AnalyticsView: React.FC = () => {
       .sort((a, b) => a.year.localeCompare(b.year));
   };
 
-  const processSimpleAnalytics = (reports: any[], period: string = '90d', memberMap: Record<string, string> = {}): SimpleAnalyticsData => {
+  const processSimpleAnalytics = (
+    reports: any[], 
+    period: string = '90d', 
+    memberMap: Record<string, string> = {},
+    linkImpressions: number = 0,
+    impressionsByLink: Array<{ linkName: string; count: number }> = []
+  ): SimpleAnalyticsData => {
     const totalReports = reports.length;
     const activeReports = reports.filter(r => !['closed', 'resolved', 'archived'].includes(r.status)).length;
     
@@ -769,6 +821,25 @@ const AnalyticsView: React.FC = () => {
     };
   };
 
+  const getImpressionsByLinkChartData = () => {
+    if (!analyticsData || analyticsData.impressionsByLink.length === 0) return null;
+
+    const colors = [
+      '#36A2EB', '#FF6384', '#FFCE56', '#4BC0C0', '#9966FF', '#FF9900', '#C9CBCF'
+    ];
+
+    return {
+      labels: analyticsData.impressionsByLink.map(l => l.linkName),
+      datasets: [
+        {
+          label: 'Impressions',
+          data: analyticsData.impressionsByLink.map(l => l.count),
+          backgroundColor: colors.slice(0, analyticsData.impressionsByLink.length),
+        },
+      ],
+    };
+  };
+
   // Calculate trends for metrics
   const totalReportsTrend = useMemo(() => 
     calculateTrend(analyticsData?.totalReports || 0, previousPeriodData?.totalReports || null),
@@ -950,7 +1021,7 @@ const AnalyticsView: React.FC = () => {
                 )}
               </div>
             </CardHeader>
-            <CardContent className="pt-0 pb-4 flex-1 min-h-0 flex flex-col" style={{ minHeight: '240px', height: '240px' }}>
+            <CardContent className="pt-0 pb-4 flex-1 min-h-0 flex flex-col" style={{ minHeight: '160px', height: '160px' }}>
                 {getChartData() ? (
                 <div className="flex-1 min-h-0 -mx-2 sm:mx-0 px-2 sm:px-0">
                 <Line 
@@ -1005,13 +1076,13 @@ const AnalyticsView: React.FC = () => {
             </CardContent>
           </Card>
 
-          {/* Charts Grid - 3 Column Layout */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-3 sm:gap-4 mb-3 sm:mb-4">
+          {/* Charts Grid - 4 Column Layout for compact display */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-3 mb-2 sm:mb-3">
             {/* By Category (Main Categories) */}
             <Card className="flex flex-col min-h-0">
-              <CardHeader className="pb-2 sm:pb-3 flex-shrink-0">
+              <CardHeader className="pb-1.5 sm:pb-2 flex-shrink-0">
                 <CardTitle className="text-xs sm:text-sm">By Category</CardTitle>
-                <CardDescription className="text-[11px] sm:text-xs mt-0.5">Financial Misconduct, Workplace Behaviour, etc.</CardDescription>
+                <CardDescription className="text-[10px] sm:text-[11px] mt-0.5">Financial Misconduct, Workplace Behaviour, etc.</CardDescription>
               </CardHeader>
               <CardContent className="pt-0 pb-4 flex-1 min-h-0 flex flex-col" style={{ minHeight: '80px', height: '80px' }}>
                 {getCategoryChartData() ? (
@@ -1027,12 +1098,12 @@ const AnalyticsView: React.FC = () => {
                           display: false,
                         },
                         tooltip: {
-                          padding: 10,
+                          padding: 8,
                           titleFont: {
-                            size: 11
+                            size: 10
                           },
                           bodyFont: {
-                            size: 10
+                            size: 9
                           }
                         }
                       },
@@ -1042,14 +1113,14 @@ const AnalyticsView: React.FC = () => {
                           ticks: {
                             stepSize: 1,
                             font: {
-                              size: 9
+                              size: 8
                             }
                           }
                         },
                         y: {
                           ticks: {
                             font: {
-                              size: 9
+                              size: 8
                             }
                           }
                         }
@@ -1058,7 +1129,7 @@ const AnalyticsView: React.FC = () => {
                   />
                 </div>
               ) : (
-                <div className="h-full flex items-center justify-center text-muted-foreground text-[11px] sm:text-xs">
+                <div className="h-full flex items-center justify-center text-muted-foreground text-[10px] sm:text-[11px]">
                   No category data available
                 </div>
               )}
@@ -1067,9 +1138,9 @@ const AnalyticsView: React.FC = () => {
 
             {/* By Sub Category */}
             <Card className="flex flex-col min-h-0">
-              <CardHeader className="pb-2 sm:pb-3 flex-shrink-0">
+              <CardHeader className="pb-1.5 sm:pb-2 flex-shrink-0">
                 <CardTitle className="text-xs sm:text-sm">By Sub Category</CardTitle>
-                <CardDescription className="text-[11px] sm:text-xs mt-0.5">Fraud, Harassment, etc.</CardDescription>
+                <CardDescription className="text-[10px] sm:text-[11px] mt-0.5">Fraud, Harassment, etc.</CardDescription>
               </CardHeader>
               <CardContent className="pt-0 pb-4 flex-1 min-h-0 flex flex-col" style={{ minHeight: '80px', height: '80px' }}>
                 {getSubCategoryChartData() ? (
@@ -1085,12 +1156,12 @@ const AnalyticsView: React.FC = () => {
                           display: false,
                         },
                         tooltip: {
-                          padding: 10,
+                          padding: 8,
                           titleFont: {
-                            size: 11
+                            size: 10
                           },
                           bodyFont: {
-                            size: 10
+                            size: 9
                           }
                         }
                       },
@@ -1100,14 +1171,14 @@ const AnalyticsView: React.FC = () => {
                           ticks: {
                             stepSize: 1,
                             font: {
-                              size: 9
+                              size: 8
                             }
                           }
                         },
                         y: {
                           ticks: {
                             font: {
-                              size: 9
+                              size: 8
                             }
                           }
                         }
@@ -1116,7 +1187,7 @@ const AnalyticsView: React.FC = () => {
                   />
                 </div>
               ) : (
-                <div className="h-full flex items-center justify-center text-muted-foreground text-[11px] sm:text-xs">
+                <div className="h-full flex items-center justify-center text-muted-foreground text-[10px] sm:text-[11px]">
                   No subcategory data available
                 </div>
               )}
@@ -1125,9 +1196,9 @@ const AnalyticsView: React.FC = () => {
 
             {/* Status Breakdown */}
             <Card className="flex flex-col min-h-0">
-              <CardHeader className="pb-2 sm:pb-3 flex-shrink-0">
+              <CardHeader className="pb-1.5 sm:pb-2 flex-shrink-0">
                 <CardTitle className="text-xs sm:text-sm">Status Breakdown</CardTitle>
-                <CardDescription className="text-[11px] sm:text-xs mt-0.5">Cases by status</CardDescription>
+                <CardDescription className="text-[10px] sm:text-[11px] mt-0.5">Cases by status</CardDescription>
               </CardHeader>
               <CardContent className="pt-0 pb-4 flex-1 min-h-0 flex flex-col" style={{ minHeight: '80px', height: '80px' }}>
                 {getStatusChartData() ? (
@@ -1142,12 +1213,12 @@ const AnalyticsView: React.FC = () => {
                           display: false,
                         },
                         tooltip: {
-                          padding: 10,
+                          padding: 8,
                           titleFont: {
-                            size: 11
+                            size: 10
                           },
                           bodyFont: {
-                            size: 10
+                            size: 9
                           }
                         }
                       },
@@ -1155,7 +1226,7 @@ const AnalyticsView: React.FC = () => {
                         x: {
                           ticks: {
                             font: {
-                              size: 9
+                              size: 8
                             }
                           }
                         },
@@ -1164,7 +1235,7 @@ const AnalyticsView: React.FC = () => {
                           ticks: {
                             stepSize: 1,
                             font: {
-                              size: 9
+                              size: 8
                             }
                           }
                         }
@@ -1173,7 +1244,7 @@ const AnalyticsView: React.FC = () => {
                   />
                 </div>
               ) : (
-                <div className="h-full flex items-center justify-center text-muted-foreground text-[11px] sm:text-xs">
+                <div className="h-full flex items-center justify-center text-muted-foreground text-[10px] sm:text-[11px]">
                   No status data available
                 </div>
               )}
@@ -1182,15 +1253,15 @@ const AnalyticsView: React.FC = () => {
 
           </div>
 
-          {/* Second Row - 2 Column Layout (removed duplicate Top Categories) */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4">
+          {/* Second Row - 4 Column Layout (compact) */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-3">
             {/* Cases by Member */}
             <Card className="flex flex-col min-h-0">
-              <CardHeader className="pb-2 sm:pb-3 flex-shrink-0">
+              <CardHeader className="pb-1.5 sm:pb-2 flex-shrink-0">
                 <CardTitle className="text-xs sm:text-sm">Cases by Member</CardTitle>
-                <CardDescription className="text-[11px] sm:text-xs mt-0.5">Assigned cases per team member</CardDescription>
+                <CardDescription className="text-[10px] sm:text-[11px] mt-0.5">Assigned cases per team member</CardDescription>
               </CardHeader>
-              <CardContent className="pt-0 pb-4 flex-1 min-h-0 flex flex-col" style={{ minHeight: '80px', height: '80px' }}>
+              <CardContent className="pt-0 pb-3 flex-1 min-h-0 flex flex-col" style={{ minHeight: '60px', height: '60px' }}>
                 {getCasesByMemberChartData() ? (
                   <div className="flex-1 min-h-0 -mx-2 sm:mx-0 px-2 sm:px-0">
                   <Bar 
@@ -1204,12 +1275,12 @@ const AnalyticsView: React.FC = () => {
                           display: false,
                         },
                         tooltip: {
-                          padding: 10,
+                          padding: 8,
                           titleFont: {
-                            size: 11
+                            size: 10
                           },
                           bodyFont: {
-                            size: 10
+                            size: 9
                           }
                         }
                       },
@@ -1219,14 +1290,14 @@ const AnalyticsView: React.FC = () => {
                           ticks: {
                             stepSize: 1,
                             font: {
-                              size: 9
+                              size: 8
                             }
                           }
                         },
                         y: {
                           ticks: {
                             font: {
-                              size: 9
+                              size: 8
                             }
                           }
                         }
@@ -1235,21 +1306,142 @@ const AnalyticsView: React.FC = () => {
                   />
                 </div>
               ) : (
-                <div className="h-full flex items-center justify-center text-muted-foreground text-[11px] sm:text-xs">
+                <div className="h-full flex items-center justify-center text-muted-foreground text-[10px] sm:text-[11px]">
                   No assignment data available
                 </div>
               )}
               </CardContent>
             </Card>
 
-            {/* Placeholder for third box */}
+            {/* Link Impressions */}
             <Card className="flex flex-col min-h-0">
-              <CardHeader className="pb-2 sm:pb-3 flex-shrink-0">
-                <CardTitle className="text-xs sm:text-sm">Coming Soon</CardTitle>
-                <CardDescription className="text-[11px] sm:text-xs mt-0.5">Additional analytics</CardDescription>
+              <CardHeader className="pb-1.5 sm:pb-2 flex-shrink-0">
+                <CardTitle className="text-xs sm:text-sm">Link Impressions</CardTitle>
+                <CardDescription className="text-[10px] sm:text-[11px] mt-0.5">Secure link page views</CardDescription>
               </CardHeader>
-              <CardContent className="pt-0 pb-4 flex-1 min-h-0 flex flex-col" style={{ minHeight: '80px', height: '80px' }}>
-                <div className="h-full flex items-center justify-center text-muted-foreground text-[11px] sm:text-xs">
+              <CardContent className="pt-0 pb-3 flex-1 min-h-0 flex flex-col" style={{ minHeight: '60px', height: '60px' }}>
+                {getImpressionsByLinkChartData() ? (
+                  <div className="flex-1 min-h-0 -mx-2 sm:mx-0 px-2 sm:px-0">
+                  <Bar 
+                    data={getImpressionsByLinkChartData()!} 
+                    options={{
+                      indexAxis: 'y' as const,
+                      responsive: true,
+                      maintainAspectRatio: false,
+                      plugins: {
+                        legend: {
+                          display: false,
+                        },
+                        tooltip: {
+                          padding: 8,
+                          titleFont: {
+                            size: 10
+                          },
+                          bodyFont: {
+                            size: 9
+                          }
+                        }
+                      },
+                      scales: {
+                        x: {
+                          beginAtZero: true,
+                          ticks: {
+                            stepSize: 1,
+                            font: {
+                              size: 8
+                            }
+                          }
+                        },
+                        y: {
+                          ticks: {
+                            font: {
+                              size: 8
+                            }
+                          }
+                        }
+                      }
+                    }}
+                  />
+                </div>
+              ) : (
+                <div className="h-full flex items-center justify-center text-muted-foreground text-[10px] sm:text-[11px]">
+                  {analyticsData?.linkImpressions ? `${analyticsData.linkImpressions} total impressions` : 'No impressions yet'}
+                </div>
+              )}
+              </CardContent>
+            </Card>
+
+            {/* Placeholder boxes for additional metrics */}
+            <Card className="flex flex-col min-h-0">
+              <CardHeader className="pb-1.5 sm:pb-2 flex-shrink-0">
+                <CardTitle className="text-xs sm:text-sm">Coming Soon</CardTitle>
+                <CardDescription className="text-[10px] sm:text-[11px] mt-0.5">Additional analytics</CardDescription>
+              </CardHeader>
+              <CardContent className="pt-0 pb-3 flex-1 min-h-0 flex flex-col" style={{ minHeight: '60px', height: '60px' }}>
+                <div className="h-full flex items-center justify-center text-muted-foreground text-[10px] sm:text-[11px]">
+                  Chart coming soon
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card className="flex flex-col min-h-0">
+              <CardHeader className="pb-1.5 sm:pb-2 flex-shrink-0">
+                <CardTitle className="text-xs sm:text-sm">Coming Soon</CardTitle>
+                <CardDescription className="text-[10px] sm:text-[11px] mt-0.5">Additional analytics</CardDescription>
+              </CardHeader>
+              <CardContent className="pt-0 pb-3 flex-1 min-h-0 flex flex-col" style={{ minHeight: '60px', height: '60px' }}>
+                <div className="h-full flex items-center justify-center text-muted-foreground text-[10px] sm:text-[11px]">
+                  Chart coming soon
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* Third Row - 4 Column Layout (compact) */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-3">
+            <Card className="flex flex-col min-h-0">
+              <CardHeader className="pb-1.5 sm:pb-2 flex-shrink-0">
+                <CardTitle className="text-xs sm:text-sm">Coming Soon</CardTitle>
+                <CardDescription className="text-[10px] sm:text-[11px] mt-0.5">Additional analytics</CardDescription>
+              </CardHeader>
+              <CardContent className="pt-0 pb-3 flex-1 min-h-0 flex flex-col" style={{ minHeight: '60px', height: '60px' }}>
+                <div className="h-full flex items-center justify-center text-muted-foreground text-[10px] sm:text-[11px]">
+                  Chart coming soon
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card className="flex flex-col min-h-0">
+              <CardHeader className="pb-1.5 sm:pb-2 flex-shrink-0">
+                <CardTitle className="text-xs sm:text-sm">Coming Soon</CardTitle>
+                <CardDescription className="text-[10px] sm:text-[11px] mt-0.5">Additional analytics</CardDescription>
+              </CardHeader>
+              <CardContent className="pt-0 pb-3 flex-1 min-h-0 flex flex-col" style={{ minHeight: '60px', height: '60px' }}>
+                <div className="h-full flex items-center justify-center text-muted-foreground text-[10px] sm:text-[11px]">
+                  Chart coming soon
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card className="flex flex-col min-h-0">
+              <CardHeader className="pb-1.5 sm:pb-2 flex-shrink-0">
+                <CardTitle className="text-xs sm:text-sm">Coming Soon</CardTitle>
+                <CardDescription className="text-[10px] sm:text-[11px] mt-0.5">Additional analytics</CardDescription>
+              </CardHeader>
+              <CardContent className="pt-0 pb-3 flex-1 min-h-0 flex flex-col" style={{ minHeight: '60px', height: '60px' }}>
+                <div className="h-full flex items-center justify-center text-muted-foreground text-[10px] sm:text-[11px]">
+                  Chart coming soon
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card className="flex flex-col min-h-0">
+              <CardHeader className="pb-1.5 sm:pb-2 flex-shrink-0">
+                <CardTitle className="text-xs sm:text-sm">Coming Soon</CardTitle>
+                <CardDescription className="text-[10px] sm:text-[11px] mt-0.5">Additional analytics</CardDescription>
+              </CardHeader>
+              <CardContent className="pt-0 pb-3 flex-1 min-h-0 flex flex-col" style={{ minHeight: '60px', height: '60px' }}>
+                <div className="h-full flex items-center justify-center text-muted-foreground text-[10px] sm:text-[11px]">
                   Chart coming soon
                 </div>
               </CardContent>
