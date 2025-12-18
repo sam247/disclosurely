@@ -909,28 +909,6 @@ const AnalyticsView: React.FC = () => {
       </div>
 
       {/* Compact Metric Cards - Small inline row */}
-      <div className="flex flex-wrap gap-2 mb-2 px-2 sm:px-0 flex-shrink-0">
-              <div className="flex items-center gap-2 px-3 py-1.5 bg-muted/50 rounded-md border text-xs">
-                <FileText className="h-3 w-3 text-muted-foreground" />
-                <span className="font-semibold">{analyticsData.totalReports}</span>
-                <span className="text-muted-foreground">Total</span>
-              </div>
-              <div className="flex items-center gap-2 px-3 py-1.5 bg-muted/50 rounded-md border text-xs">
-                <Activity className="h-3 w-3 text-muted-foreground" />
-                <span className="font-semibold">{analyticsData.activeReports}</span>
-                <span className="text-muted-foreground">Active</span>
-              </div>
-              <div className="flex items-center gap-2 px-3 py-1.5 bg-muted/50 rounded-md border text-xs">
-                <Clock className="h-3 w-3 text-muted-foreground" />
-                <span className="font-semibold">{analyticsData.avgResponseTime.toFixed(1)}d</span>
-                <span className="text-muted-foreground">Response</span>
-              </div>
-              <div className="flex items-center gap-2 px-3 py-1.5 bg-muted/50 rounded-md border text-xs">
-                <Target className="h-3 w-3 text-muted-foreground" />
-                <span className="font-semibold">{analyticsData.resolutionRate.toFixed(1)}%</span>
-                <span className="text-muted-foreground">Resolved</span>
-              </div>
-            </div>
 
       {/* Content Area - No scroll, fits on one screen */}
       <div className="flex-1 min-h-0 overflow-hidden flex flex-col space-y-3 sm:space-y-4 px-2 sm:px-0" style={{ minHeight: 0, overflowY: 'hidden' }}>
@@ -1206,66 +1184,8 @@ const AnalyticsView: React.FC = () => {
 
           </div>
 
-          {/* Second Row - 3 Column Layout */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-3 sm:gap-4">
-            {/* Top Categories - Horizontal Bar Chart */}
-            <Card className="flex flex-col min-h-0">
-              <CardHeader className="pb-2 sm:pb-3 flex-shrink-0">
-                <CardTitle className="text-xs sm:text-sm">Top Categories</CardTitle>
-                <CardDescription className="text-[11px] sm:text-xs mt-0.5">Reports by category (top 5)</CardDescription>
-              </CardHeader>
-              <CardContent className="pt-0 pb-4 flex-1 min-h-0 flex flex-col" style={{ minHeight: '80px', height: '80px' }}>
-                {getHorizontalBarChartData() ? (
-                  <div className="flex-1 min-h-0 -mx-2 sm:mx-0 px-2 sm:px-0">
-                  <Bar 
-                    data={getHorizontalBarChartData()!} 
-                    options={{
-                      indexAxis: 'y' as const,
-                      responsive: true,
-                      maintainAspectRatio: false,
-                      plugins: {
-                        legend: {
-                          display: false,
-                        },
-                        tooltip: {
-                          padding: 10,
-                          titleFont: {
-                            size: 11
-                          },
-                          bodyFont: {
-                            size: 10
-                          }
-                        }
-                      },
-                      scales: {
-                        x: {
-                          beginAtZero: true,
-                          ticks: {
-                            stepSize: 1,
-                            font: {
-                              size: 9
-                            }
-                          }
-                        },
-                        y: {
-                          ticks: {
-                            font: {
-                              size: 9
-                            }
-                          }
-                        }
-                      }
-                    }}
-                  />
-                </div>
-              ) : (
-                <div className="h-full flex items-center justify-center text-muted-foreground text-[11px] sm:text-xs">
-                  No category data available
-                </div>
-              )}
-              </CardContent>
-            </Card>
-
+          {/* Second Row - 2 Column Layout (removed duplicate Top Categories) */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4">
             {/* Cases by Member */}
             <Card className="flex flex-col min-h-0">
               <CardHeader className="pb-2 sm:pb-3 flex-shrink-0">
