@@ -1317,54 +1317,6 @@ const AnalyticsView: React.FC = () => {
 
             </div>
           </div>
-                {getImpressionsByLinkChartData() ? (
-                  <div className="flex-1 min-h-0 -mx-2 sm:mx-0 px-2 sm:px-0">
-                  <Bar 
-                    data={getImpressionsByLinkChartData()!} 
-                    options={{
-                      indexAxis: 'y' as const,
-                      responsive: true,
-                      maintainAspectRatio: false,
-                      plugins: {
-                        legend: {
-                          display: false,
-                        },
-                        tooltip: {
-                          padding: 8,
-                          titleFont: {
-                            size: 10
-                          },
-                          bodyFont: {
-                            size: 9
-                          }
-                        }
-                      },
-                      scales: {
-                        x: {
-                          beginAtZero: true,
-                          ticks: {
-                            stepSize: 1,
-                            font: {
-                              size: 8
-                            }
-                          }
-                        },
-                        y: {
-                          ticks: {
-                            font: {
-                              size: 8
-                            }
-                          }
-                        }
-                      }
-                    }}
-                  />
-                </div>
-              ) : (
-                <div className="h-full flex items-center justify-center text-muted-foreground text-[10px] sm:text-[11px]">
-                  {analyticsData?.linkImpressions ? `${analyticsData.linkImpressions} total impressions` : 'No impressions yet'}
-                </div>
-              )}
       </div>
     </div>
   );
