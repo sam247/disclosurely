@@ -677,10 +677,34 @@ const AnalyticsView: React.FC = () => {
           data: analyticsData.statusBreakdown.map(s => s.count),
           backgroundColor: [
             '#4CAF50', // Resolved/Closed - Green
-            '#FFC107', // In Progress - Yellow  
+            '#FFC107', // In Progress - Yellow
             '#F44336', // New/Investigating - Red
             '#2196F3', // Other - Blue
           ],
+        },
+      ],
+    };
+  };
+
+  const getHorizontalBarChartData = () => {
+    if (!analyticsData || analyticsData.mainCategories.length === 0) return null;
+
+    // Sort categories by count (descending) and take top 5
+    const sortedCategories = [...analyticsData.mainCategories]
+      .sort((a, b) => b.count - a.count)
+      .slice(0, 5);
+
+    const colors = [
+      '#36A2EB', '#FF6384', '#FFCE56', '#4BC0C0', '#9966FF'
+    ];
+
+    return {
+      labels: sortedCategories.map(c => c.category),
+      datasets: [
+        {
+          label: 'Reports',
+          data: sortedCategories.map(c => c.count),
+          backgroundColor: colors.slice(0, sortedCategories.length),
         },
       ],
     };
@@ -891,7 +915,7 @@ const AnalyticsView: React.FC = () => {
                 )}
               </div>
             </CardHeader>
-            <CardContent className="pt-0 pb-4 flex-1 min-h-0 flex flex-col" style={{ minHeight: '100px', height: '100px' }}>
+            <CardContent className="pt-0 pb-4 flex-1 min-h-0 flex flex-col" style={{ minHeight: '80px', height: '80px' }}>
               {getChartData() ? (
                 <div className="flex-1 min-h-0 -mx-2 sm:mx-0 px-2 sm:px-0">
                 <Line 
@@ -954,7 +978,7 @@ const AnalyticsView: React.FC = () => {
                 <CardTitle className="text-xs sm:text-sm">By Category</CardTitle>
                 <CardDescription className="text-[11px] sm:text-xs mt-0.5">Financial Misconduct, Workplace Behaviour, etc.</CardDescription>
               </CardHeader>
-              <CardContent className="pt-0 pb-4 flex-1 min-h-0 flex flex-col" style={{ minHeight: '120px', height: '120px' }}>
+              <CardContent className="pt-0 pb-4 flex-1 min-h-0 flex flex-col" style={{ minHeight: '100px', height: '100px' }}>
                 {getCategoryChartData() ? (
                   <div className="flex-1 min-h-0 -mx-2 sm:mx-0 px-2 sm:px-0">
                   <Doughnut 
@@ -1007,7 +1031,7 @@ const AnalyticsView: React.FC = () => {
                 <CardTitle className="text-xs sm:text-sm">By Sub Category</CardTitle>
                 <CardDescription className="text-[11px] sm:text-xs mt-0.5">Fraud, Harassment, etc.</CardDescription>
               </CardHeader>
-              <CardContent className="pt-0 pb-4 flex-1 min-h-0 flex flex-col" style={{ minHeight: '120px', height: '120px' }}>
+              <CardContent className="pt-0 pb-4 flex-1 min-h-0 flex flex-col" style={{ minHeight: '100px', height: '100px' }}>
                 {getSubCategoryChartData() ? (
                   <div className="flex-1 min-h-0 -mx-2 sm:mx-0 px-2 sm:px-0">
                   <Doughnut 
@@ -1060,7 +1084,7 @@ const AnalyticsView: React.FC = () => {
                 <CardTitle className="text-xs sm:text-sm">Status Breakdown</CardTitle>
                 <CardDescription className="text-[11px] sm:text-xs mt-0.5">Cases by status</CardDescription>
               </CardHeader>
-              <CardContent className="pt-0 pb-4 flex-1 min-h-0 flex flex-col" style={{ minHeight: '120px', height: '120px' }}>
+              <CardContent className="pt-0 pb-4 flex-1 min-h-0 flex flex-col" style={{ minHeight: '100px', height: '100px' }}>
                 {getStatusChartData() ? (
                   <div className="flex-1 min-h-0 -mx-2 sm:mx-0 px-2 sm:px-0">
                   <Bar 
@@ -1111,6 +1135,93 @@ const AnalyticsView: React.FC = () => {
               </CardContent>
             </Card>
 
+          </div>
+
+          {/* Second Row - 3 Column Layout */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-3 sm:gap-4">
+            {/* Top Categories - Horizontal Bar Chart */}
+            <Card className="flex flex-col min-h-0">
+              <CardHeader className="pb-2 sm:pb-3 flex-shrink-0">
+                <CardTitle className="text-xs sm:text-sm">Top Categories</CardTitle>
+                <CardDescription className="text-[11px] sm:text-xs mt-0.5">Reports by category (top 5)</CardDescription>
+              </CardHeader>
+              <CardContent className="pt-0 pb-4 flex-1 min-h-0 flex flex-col" style={{ minHeight: '100px', height: '100px' }}>
+                {getHorizontalBarChartData() ? (
+                  <div className="flex-1 min-h-0 -mx-2 sm:mx-0 px-2 sm:px-0">
+                  <Bar 
+                    data={getHorizontalBarChartData()!} 
+                    options={{
+                      indexAxis: 'y' as const,
+                      responsive: true,
+                      maintainAspectRatio: false,
+                      plugins: {
+                        legend: {
+                          display: false,
+                        },
+                        tooltip: {
+                          padding: 10,
+                          titleFont: {
+                            size: 11
+                          },
+                          bodyFont: {
+                            size: 10
+                          }
+                        }
+                      },
+                      scales: {
+                        x: {
+                          beginAtZero: true,
+                          ticks: {
+                            stepSize: 1,
+                            font: {
+                              size: 9
+                            }
+                          }
+                        },
+                        y: {
+                          ticks: {
+                            font: {
+                              size: 9
+                            }
+                          }
+                        }
+                      }
+                    }}
+                  />
+                </div>
+              ) : (
+                <div className="h-full flex items-center justify-center text-muted-foreground text-[11px] sm:text-xs">
+                  No category data available
+                </div>
+              )}
+              </CardContent>
+            </Card>
+
+            {/* Placeholder for second box */}
+            <Card className="flex flex-col min-h-0">
+              <CardHeader className="pb-2 sm:pb-3 flex-shrink-0">
+                <CardTitle className="text-xs sm:text-sm">Coming Soon</CardTitle>
+                <CardDescription className="text-[11px] sm:text-xs mt-0.5">Additional analytics</CardDescription>
+              </CardHeader>
+              <CardContent className="pt-0 pb-4 flex-1 min-h-0 flex flex-col" style={{ minHeight: '100px', height: '100px' }}>
+                <div className="h-full flex items-center justify-center text-muted-foreground text-[11px] sm:text-xs">
+                  Chart coming soon
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Placeholder for third box */}
+            <Card className="flex flex-col min-h-0">
+              <CardHeader className="pb-2 sm:pb-3 flex-shrink-0">
+                <CardTitle className="text-xs sm:text-sm">Coming Soon</CardTitle>
+                <CardDescription className="text-[11px] sm:text-xs mt-0.5">Additional analytics</CardDescription>
+              </CardHeader>
+              <CardContent className="pt-0 pb-4 flex-1 min-h-0 flex flex-col" style={{ minHeight: '100px', height: '100px' }}>
+                <div className="h-full flex items-center justify-center text-muted-foreground text-[11px] sm:text-xs">
+                  Chart coming soon
+                </div>
+              </CardContent>
+            </Card>
           </div>
       </div>
     </div>
