@@ -1138,66 +1138,8 @@ const AnalyticsView: React.FC = () => {
               </CardContent>
             </Card>
 
-            {/* Bottom Section - Tri Layout (3 charts side-by-side) */}
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 sm:gap-3">
-              {/* By Sub Category */}
-              <Card className="flex flex-col min-h-0">
-                <CardHeader className="pb-1.5 sm:pb-2 flex-shrink-0">
-                  <CardTitle className="text-xs sm:text-sm">By Sub Category</CardTitle>
-                  <CardDescription className="text-[10px] sm:text-[11px] mt-0.5">Fraud, Harassment, etc.</CardDescription>
-                </CardHeader>
-                <CardContent className="pt-0 pb-3 flex-1 min-h-0 flex flex-col" style={{ minHeight: '120px', height: '120px' }}>
-                {getSubCategoryChartData() ? (
-                  <div className="flex-1 min-h-0 -mx-2 sm:mx-0 px-2 sm:px-0">
-                  <Bar 
-                    data={getSubCategoryChartData()!} 
-                    options={{
-                      indexAxis: 'y' as const,
-                      responsive: true,
-                      maintainAspectRatio: false,
-                      plugins: {
-                        legend: {
-                          display: false,
-                        },
-                        tooltip: {
-                          padding: 8,
-                          titleFont: {
-                            size: 10
-                          },
-                          bodyFont: {
-                            size: 9
-                          }
-                        }
-                      },
-                      scales: {
-                        x: {
-                          beginAtZero: true,
-                          ticks: {
-                            stepSize: 1,
-                            font: {
-                              size: 8
-                            }
-                          }
-                        },
-                        y: {
-                          ticks: {
-                            font: {
-                              size: 8
-                            }
-                          }
-                        }
-                      }
-                    }}
-                  />
-                </div>
-              ) : (
-                <div className="h-full flex items-center justify-center text-muted-foreground text-[10px] sm:text-[11px]">
-                  No subcategory data available
-                </div>
-              )}
-                </CardContent>
-              </Card>
-
+            {/* Bottom Section - 2 Charts Side-by-Side */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-3">
               {/* Status Breakdown */}
               <Card className="flex flex-col min-h-0">
                 <CardHeader className="pb-1.5 sm:pb-2 flex-shrink-0">
@@ -1308,6 +1250,64 @@ const AnalyticsView: React.FC = () => {
               ) : (
                 <div className="h-full flex items-center justify-center text-muted-foreground text-[10px] sm:text-[11px]">
                   No assignment data available
+                </div>
+              )}
+                </CardContent>
+              </Card>
+
+              {/* Link Impressions */}
+              <Card className="flex flex-col min-h-0">
+                <CardHeader className="pb-1.5 sm:pb-2 flex-shrink-0">
+                  <CardTitle className="text-xs sm:text-sm">Link Impressions</CardTitle>
+                  <CardDescription className="text-[10px] sm:text-[11px] mt-0.5">Secure link page views</CardDescription>
+                </CardHeader>
+                <CardContent className="pt-0 pb-3 flex-1 min-h-0 flex flex-col" style={{ minHeight: '120px', height: '120px' }}>
+                {getImpressionsByLinkChartData() ? (
+                  <div className="flex-1 min-h-0 -mx-2 sm:mx-0 px-2 sm:px-0">
+                  <Bar 
+                    data={getImpressionsByLinkChartData()!} 
+                    options={{
+                      indexAxis: 'y' as const,
+                      responsive: true,
+                      maintainAspectRatio: false,
+                      plugins: {
+                        legend: {
+                          display: false,
+                        },
+                        tooltip: {
+                          padding: 8,
+                          titleFont: {
+                            size: 10
+                          },
+                          bodyFont: {
+                            size: 9
+                          }
+                        }
+                      },
+                      scales: {
+                        x: {
+                          beginAtZero: true,
+                          ticks: {
+                            stepSize: 1,
+                            font: {
+                              size: 8
+                            }
+                          }
+                        },
+                        y: {
+                          ticks: {
+                            font: {
+                              size: 8
+                            }
+                          }
+                        }
+                      }
+                    }}
+                  />
+                </div>
+              ) : (
+                <div className="h-full flex items-center justify-center text-muted-foreground text-[10px] sm:text-[11px]">
+                  {analyticsData?.linkImpressions ? `${analyticsData.linkImpressions} total impressions` : 'No impressions yet'}
                 </div>
               )}
                 </CardContent>
