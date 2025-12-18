@@ -1080,15 +1080,13 @@ const AnalyticsView: React.FC = () => {
 
           {/* Right Column - Top Section and Tri Layout Bottom */}
           <div className="flex flex-col gap-3 sm:gap-4 min-h-0">
-            {/* Top Section - Single Chart */}
-            <Card className="flex flex-col min-h-0">
-            {/* By Category (Main Categories) */}
+            {/* Top Section - Single Chart (By Category) */}
             <Card className="flex flex-col min-h-0">
               <CardHeader className="pb-1.5 sm:pb-2 flex-shrink-0">
                 <CardTitle className="text-xs sm:text-sm">By Category</CardTitle>
                 <CardDescription className="text-[10px] sm:text-[11px] mt-0.5">Financial Misconduct, Workplace Behaviour, etc.</CardDescription>
               </CardHeader>
-              <CardContent className="pt-0 pb-4 flex-1 min-h-0 flex flex-col" style={{ minHeight: '80px', height: '80px' }}>
+              <CardContent className="pt-0 pb-3 flex-1 min-h-0 flex flex-col" style={{ minHeight: '120px', height: '120px' }}>
                 {getCategoryChartData() ? (
                   <div className="flex-1 min-h-0 -mx-2 sm:mx-0 px-2 sm:px-0">
                   <Bar 
