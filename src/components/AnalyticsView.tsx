@@ -950,7 +950,7 @@ const AnalyticsView: React.FC = () => {
                 )}
               </div>
             </CardHeader>
-            <CardContent className="pt-0 pb-4 flex-1 min-h-0 flex flex-col" style={{ minHeight: '180px', height: '180px' }}>
+            <CardContent className="pt-0 pb-4 flex-1 min-h-0 flex flex-col" style={{ minHeight: '240px', height: '240px' }}>
                 {getChartData() ? (
                 <div className="flex-1 min-h-0 -mx-2 sm:mx-0 px-2 sm:px-0">
                 <Line 
