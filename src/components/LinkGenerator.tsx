@@ -842,8 +842,7 @@ const LinkGenerator = () => {
           </div>
         </CardContent>
       </Card>
-
-    </>
+    </div>
   );
 };
 
