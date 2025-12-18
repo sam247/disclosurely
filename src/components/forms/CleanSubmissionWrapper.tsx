@@ -239,6 +239,13 @@ const CleanSubmissionWrapper = () => {
       }
 
       // Transform to expected format
+      // Log logo URLs for debugging
+      console.log('[CleanSubmissionWrapper] Organization logo URLs:', {
+        logo_url: linkInfo.organizations.logo_url,
+        custom_logo_url: linkInfo.organizations.custom_logo_url,
+        organization_name: linkInfo.organizations.name
+      });
+      
       const formattedLinkData: LinkData = {
         id: linkInfo.id,
         name: linkInfo.name,
