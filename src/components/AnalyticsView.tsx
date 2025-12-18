@@ -981,9 +981,9 @@ const AnalyticsView: React.FC = () => {
         </div>
       </div>
 
-      {/* Content Area - No scroll, fits on one screen */}
-      <div className="flex-1 min-h-0 overflow-hidden flex flex-col space-y-3 sm:space-y-4 px-2 sm:px-0" style={{ minHeight: 0, overflowY: 'hidden' }}>
-          {/* Main Chart - Full Width on Mobile */}
+      {/* Content Area - 2 Column Layout with Tri Layout on Right */}
+      <div className="flex-1 min-h-0 overflow-hidden grid grid-cols-1 lg:grid-cols-2 gap-3 sm:gap-4 px-2 sm:px-0" style={{ minHeight: 0, overflowY: 'hidden' }}>
+          {/* Left Column - Main Chart */}
           <Card className="flex flex-col min-h-0">
             <CardHeader className="pb-2 sm:pb-3 flex-shrink-0">
               <div className="flex flex-col gap-2">
@@ -1023,7 +1023,7 @@ const AnalyticsView: React.FC = () => {
                 )}
               </div>
             </CardHeader>
-            <CardContent className="pt-0 pb-4 flex-1 min-h-0 flex flex-col" style={{ minHeight: '160px', height: '160px' }}>
+            <CardContent className="pt-0 pb-4 flex-1 min-h-0 flex flex-col" style={{ minHeight: '300px', height: '300px' }}>
                 {getChartData() ? (
                 <div className="flex-1 min-h-0 -mx-2 sm:mx-0 px-2 sm:px-0">
                 <Line 
@@ -1078,8 +1078,10 @@ const AnalyticsView: React.FC = () => {
             </CardContent>
           </Card>
 
-          {/* Charts Grid - 4 Column Layout for compact display */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-3 mb-2 sm:mb-3">
+          {/* Right Column - Top Section and Tri Layout Bottom */}
+          <div className="flex flex-col gap-3 sm:gap-4 min-h-0">
+            {/* Top Section - Single Chart */}
+            <Card className="flex flex-col min-h-0">
             {/* By Category (Main Categories) */}
             <Card className="flex flex-col min-h-0">
               <CardHeader className="pb-1.5 sm:pb-2 flex-shrink-0">
@@ -1138,13 +1140,15 @@ const AnalyticsView: React.FC = () => {
               </CardContent>
             </Card>
 
-            {/* By Sub Category */}
-            <Card className="flex flex-col min-h-0">
-              <CardHeader className="pb-1.5 sm:pb-2 flex-shrink-0">
-                <CardTitle className="text-xs sm:text-sm">By Sub Category</CardTitle>
-                <CardDescription className="text-[10px] sm:text-[11px] mt-0.5">Fraud, Harassment, etc.</CardDescription>
-              </CardHeader>
-              <CardContent className="pt-0 pb-4 flex-1 min-h-0 flex flex-col" style={{ minHeight: '80px', height: '80px' }}>
+            {/* Bottom Section - Tri Layout (3 charts side-by-side) */}
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 sm:gap-3">
+              {/* By Sub Category */}
+              <Card className="flex flex-col min-h-0">
+                <CardHeader className="pb-1.5 sm:pb-2 flex-shrink-0">
+                  <CardTitle className="text-xs sm:text-sm">By Sub Category</CardTitle>
+                  <CardDescription className="text-[10px] sm:text-[11px] mt-0.5">Fraud, Harassment, etc.</CardDescription>
+                </CardHeader>
+                <CardContent className="pt-0 pb-3 flex-1 min-h-0 flex flex-col" style={{ minHeight: '120px', height: '120px' }}>
                 {getSubCategoryChartData() ? (
                   <div className="flex-1 min-h-0 -mx-2 sm:mx-0 px-2 sm:px-0">
                   <Bar 
@@ -1193,16 +1197,16 @@ const AnalyticsView: React.FC = () => {
                   No subcategory data available
                 </div>
               )}
-              </CardContent>
-            </Card>
+                </CardContent>
+              </Card>
 
-            {/* Status Breakdown */}
-            <Card className="flex flex-col min-h-0">
-              <CardHeader className="pb-1.5 sm:pb-2 flex-shrink-0">
-                <CardTitle className="text-xs sm:text-sm">Status Breakdown</CardTitle>
-                <CardDescription className="text-[10px] sm:text-[11px] mt-0.5">Cases by status</CardDescription>
-              </CardHeader>
-              <CardContent className="pt-0 pb-4 flex-1 min-h-0 flex flex-col" style={{ minHeight: '80px', height: '80px' }}>
+              {/* Status Breakdown */}
+              <Card className="flex flex-col min-h-0">
+                <CardHeader className="pb-1.5 sm:pb-2 flex-shrink-0">
+                  <CardTitle className="text-xs sm:text-sm">Status Breakdown</CardTitle>
+                  <CardDescription className="text-[10px] sm:text-[11px] mt-0.5">Cases by status</CardDescription>
+                </CardHeader>
+                <CardContent className="pt-0 pb-3 flex-1 min-h-0 flex flex-col" style={{ minHeight: '120px', height: '120px' }}>
                 {getStatusChartData() ? (
                   <div className="flex-1 min-h-0 -mx-2 sm:mx-0 px-2 sm:px-0">
                   <Bar 
@@ -1250,20 +1254,16 @@ const AnalyticsView: React.FC = () => {
                   No status data available
                 </div>
               )}
-              </CardContent>
-            </Card>
+                </CardContent>
+              </Card>
 
-          </div>
-
-          {/* Second Row - 4 Column Layout (compact) */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-3">
-            {/* Cases by Member */}
-            <Card className="flex flex-col min-h-0">
-              <CardHeader className="pb-1.5 sm:pb-2 flex-shrink-0">
-                <CardTitle className="text-xs sm:text-sm">Cases by Member</CardTitle>
-                <CardDescription className="text-[10px] sm:text-[11px] mt-0.5">Assigned cases per team member</CardDescription>
-              </CardHeader>
-              <CardContent className="pt-0 pb-3 flex-1 min-h-0 flex flex-col" style={{ minHeight: '60px', height: '60px' }}>
+              {/* Cases by Member */}
+              <Card className="flex flex-col min-h-0">
+                <CardHeader className="pb-1.5 sm:pb-2 flex-shrink-0">
+                  <CardTitle className="text-xs sm:text-sm">Cases by Member</CardTitle>
+                  <CardDescription className="text-[10px] sm:text-[11px] mt-0.5">Assigned cases per team member</CardDescription>
+                </CardHeader>
+                <CardContent className="pt-0 pb-3 flex-1 min-h-0 flex flex-col" style={{ minHeight: '120px', height: '120px' }}>
                 {getCasesByMemberChartData() ? (
                   <div className="flex-1 min-h-0 -mx-2 sm:mx-0 px-2 sm:px-0">
                   <Bar 
@@ -1312,16 +1312,16 @@ const AnalyticsView: React.FC = () => {
                   No assignment data available
                 </div>
               )}
-              </CardContent>
-            </Card>
+                </CardContent>
+              </Card>
 
-            {/* Link Impressions */}
-            <Card className="flex flex-col min-h-0">
-              <CardHeader className="pb-1.5 sm:pb-2 flex-shrink-0">
-                <CardTitle className="text-xs sm:text-sm">Link Impressions</CardTitle>
-                <CardDescription className="text-[10px] sm:text-[11px] mt-0.5">Secure link page views</CardDescription>
-              </CardHeader>
-              <CardContent className="pt-0 pb-3 flex-1 min-h-0 flex flex-col" style={{ minHeight: '60px', height: '60px' }}>
+              {/* Link Impressions */}
+              <Card className="flex flex-col min-h-0">
+                <CardHeader className="pb-1.5 sm:pb-2 flex-shrink-0">
+                  <CardTitle className="text-xs sm:text-sm">Link Impressions</CardTitle>
+                  <CardDescription className="text-[10px] sm:text-[11px] mt-0.5">Secure link page views</CardDescription>
+                </CardHeader>
+                <CardContent className="pt-0 pb-3 flex-1 min-h-0 flex flex-col" style={{ minHeight: '120px', height: '120px' }}>
                 {getImpressionsByLinkChartData() ? (
                   <div className="flex-1 min-h-0 -mx-2 sm:mx-0 px-2 sm:px-0">
                   <Bar 
@@ -1370,85 +1370,58 @@ const AnalyticsView: React.FC = () => {
                   {analyticsData?.linkImpressions ? `${analyticsData.linkImpressions} total impressions` : 'No impressions yet'}
                 </div>
               )}
-              </CardContent>
-            </Card>
-
-            {/* Placeholder boxes for additional metrics */}
-            <Card className="flex flex-col min-h-0">
-              <CardHeader className="pb-1.5 sm:pb-2 flex-shrink-0">
-                <CardTitle className="text-xs sm:text-sm">Coming Soon</CardTitle>
-                <CardDescription className="text-[10px] sm:text-[11px] mt-0.5">Additional analytics</CardDescription>
-              </CardHeader>
-              <CardContent className="pt-0 pb-3 flex-1 min-h-0 flex flex-col" style={{ minHeight: '60px', height: '60px' }}>
-                <div className="h-full flex items-center justify-center text-muted-foreground text-[10px] sm:text-[11px]">
-                  Chart coming soon
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card className="flex flex-col min-h-0">
-              <CardHeader className="pb-1.5 sm:pb-2 flex-shrink-0">
-                <CardTitle className="text-xs sm:text-sm">Coming Soon</CardTitle>
-                <CardDescription className="text-[10px] sm:text-[11px] mt-0.5">Additional analytics</CardDescription>
-              </CardHeader>
-              <CardContent className="pt-0 pb-3 flex-1 min-h-0 flex flex-col" style={{ minHeight: '60px', height: '60px' }}>
-                <div className="h-full flex items-center justify-center text-muted-foreground text-[10px] sm:text-[11px]">
-                  Chart coming soon
-                </div>
-              </CardContent>
-            </Card>
+                </CardContent>
+              </Card>
+            </div>
           </div>
-
-          {/* Third Row - 4 Column Layout (compact) */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-3">
-            <Card className="flex flex-col min-h-0">
-              <CardHeader className="pb-1.5 sm:pb-2 flex-shrink-0">
-                <CardTitle className="text-xs sm:text-sm">Coming Soon</CardTitle>
-                <CardDescription className="text-[10px] sm:text-[11px] mt-0.5">Additional analytics</CardDescription>
-              </CardHeader>
-              <CardContent className="pt-0 pb-3 flex-1 min-h-0 flex flex-col" style={{ minHeight: '60px', height: '60px' }}>
-                <div className="h-full flex items-center justify-center text-muted-foreground text-[10px] sm:text-[11px]">
-                  Chart coming soon
+                {getImpressionsByLinkChartData() ? (
+                  <div className="flex-1 min-h-0 -mx-2 sm:mx-0 px-2 sm:px-0">
+                  <Bar 
+                    data={getImpressionsByLinkChartData()!} 
+                    options={{
+                      indexAxis: 'y' as const,
+                      responsive: true,
+                      maintainAspectRatio: false,
+                      plugins: {
+                        legend: {
+                          display: false,
+                        },
+                        tooltip: {
+                          padding: 8,
+                          titleFont: {
+                            size: 10
+                          },
+                          bodyFont: {
+                            size: 9
+                          }
+                        }
+                      },
+                      scales: {
+                        x: {
+                          beginAtZero: true,
+                          ticks: {
+                            stepSize: 1,
+                            font: {
+                              size: 8
+                            }
+                          }
+                        },
+                        y: {
+                          ticks: {
+                            font: {
+                              size: 8
+                            }
+                          }
+                        }
+                      }
+                    }}
+                  />
                 </div>
-              </CardContent>
-            </Card>
-
-            <Card className="flex flex-col min-h-0">
-              <CardHeader className="pb-1.5 sm:pb-2 flex-shrink-0">
-                <CardTitle className="text-xs sm:text-sm">Coming Soon</CardTitle>
-                <CardDescription className="text-[10px] sm:text-[11px] mt-0.5">Additional analytics</CardDescription>
-              </CardHeader>
-              <CardContent className="pt-0 pb-3 flex-1 min-h-0 flex flex-col" style={{ minHeight: '60px', height: '60px' }}>
+              ) : (
                 <div className="h-full flex items-center justify-center text-muted-foreground text-[10px] sm:text-[11px]">
-                  Chart coming soon
+                  {analyticsData?.linkImpressions ? `${analyticsData.linkImpressions} total impressions` : 'No impressions yet'}
                 </div>
-              </CardContent>
-            </Card>
-
-            <Card className="flex flex-col min-h-0">
-              <CardHeader className="pb-1.5 sm:pb-2 flex-shrink-0">
-                <CardTitle className="text-xs sm:text-sm">Coming Soon</CardTitle>
-                <CardDescription className="text-[10px] sm:text-[11px] mt-0.5">Additional analytics</CardDescription>
-              </CardHeader>
-              <CardContent className="pt-0 pb-3 flex-1 min-h-0 flex flex-col" style={{ minHeight: '60px', height: '60px' }}>
-                <div className="h-full flex items-center justify-center text-muted-foreground text-[10px] sm:text-[11px]">
-                  Chart coming soon
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card className="flex flex-col min-h-0">
-              <CardHeader className="pb-1.5 sm:pb-2 flex-shrink-0">
-                <CardTitle className="text-xs sm:text-sm">Coming Soon</CardTitle>
-                <CardDescription className="text-[10px] sm:text-[11px] mt-0.5">Additional analytics</CardDescription>
-              </CardHeader>
-              <CardContent className="pt-0 pb-3 flex-1 min-h-0 flex flex-col" style={{ minHeight: '60px', height: '60px' }}>
-                <div className="h-full flex items-center justify-center text-muted-foreground text-[10px] sm:text-[11px]">
-                  Chart coming soon
-                </div>
-              </CardContent>
-            </Card>
-          </div>
+              )}
       </div>
     </div>
   );
