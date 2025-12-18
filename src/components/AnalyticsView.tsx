@@ -908,8 +908,6 @@ const AnalyticsView: React.FC = () => {
         </div>
       </div>
 
-      {/* Compact Metric Cards - Small inline row */}
-
       {/* Content Area - No scroll, fits on one screen */}
       <div className="flex-1 min-h-0 overflow-hidden flex flex-col space-y-3 sm:space-y-4 px-2 sm:px-0" style={{ minHeight: 0, overflowY: 'hidden' }}>
           {/* Main Chart - Full Width on Mobile */}
@@ -952,8 +950,8 @@ const AnalyticsView: React.FC = () => {
                 )}
               </div>
             </CardHeader>
-            <CardContent className="pt-0 pb-4 flex-1 min-h-0 flex flex-col" style={{ minHeight: '80px', height: '80px' }}>
-              {getChartData() ? (
+            <CardContent className="pt-0 pb-4 flex-1 min-h-0 flex flex-col" style={{ minHeight: '180px', height: '180px' }}>
+                {getChartData() ? (
                 <div className="flex-1 min-h-0 -mx-2 sm:mx-0 px-2 sm:px-0">
                 <Line 
                   data={getChartData()!} 
