@@ -1315,63 +1315,6 @@ const AnalyticsView: React.FC = () => {
                 </CardContent>
               </Card>
 
-              {/* Link Impressions */}
-              <Card className="flex flex-col min-h-0">
-                <CardHeader className="pb-1.5 sm:pb-2 flex-shrink-0">
-                  <CardTitle className="text-xs sm:text-sm">Link Impressions</CardTitle>
-                  <CardDescription className="text-[10px] sm:text-[11px] mt-0.5">Secure link page views</CardDescription>
-                </CardHeader>
-                <CardContent className="pt-0 pb-3 flex-1 min-h-0 flex flex-col" style={{ minHeight: '120px', height: '120px' }}>
-                {getImpressionsByLinkChartData() ? (
-                  <div className="flex-1 min-h-0 -mx-2 sm:mx-0 px-2 sm:px-0">
-                  <Bar 
-                    data={getImpressionsByLinkChartData()!} 
-                    options={{
-                      indexAxis: 'y' as const,
-                      responsive: true,
-                      maintainAspectRatio: false,
-                      plugins: {
-                        legend: {
-                          display: false,
-                        },
-                        tooltip: {
-                          padding: 8,
-                          titleFont: {
-                            size: 10
-                          },
-                          bodyFont: {
-                            size: 9
-                          }
-                        }
-                      },
-                      scales: {
-                        x: {
-                          beginAtZero: true,
-                          ticks: {
-                            stepSize: 1,
-                            font: {
-                              size: 8
-                            }
-                          }
-                        },
-                        y: {
-                          ticks: {
-                            font: {
-                              size: 8
-                            }
-                          }
-                        }
-                      }
-                    }}
-                  />
-                </div>
-              ) : (
-                <div className="h-full flex items-center justify-center text-muted-foreground text-[10px] sm:text-[11px]">
-                  {analyticsData?.linkImpressions ? `${analyticsData.linkImpressions} total impressions` : 'No impressions yet'}
-                </div>
-              )}
-                </CardContent>
-              </Card>
             </div>
           </div>
                 {getImpressionsByLinkChartData() ? (
