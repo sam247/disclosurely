@@ -13,11 +13,27 @@ CREATE POLICY "org_admins_can_manage" ON public.organizations
 FOR ALL 
 USING (
   public.user_is_in_organization(id) AND
-  (has_role(auth.uid(), 'admin') OR has_role(auth.uid(), 'org_admin'))
+  (
+    EXISTS (
+      SELECT 1 FROM public.user_roles ur
+      WHERE ur.user_id = auth.uid()
+        AND ur.organization_id = id
+        AND ur.role IN ('admin', 'org_admin')
+        AND ur.is_active = true
+    )
+  )
 )
 WITH CHECK (
   public.user_is_in_organization(id) AND
-  (has_role(auth.uid(), 'admin') OR has_role(auth.uid(), 'org_admin'))
+  (
+    EXISTS (
+      SELECT 1 FROM public.user_roles ur
+      WHERE ur.user_id = auth.uid()
+        AND ur.organization_id = id
+        AND ur.role IN ('admin', 'org_admin')
+        AND ur.is_active = true
+    )
+  )
 );
 
 -- Add comment

@@ -354,12 +354,23 @@ const LinkGenerator = () => {
         throw new Error('Custom domain must be verified before it can be set as active.');
       }
 
-      const { error } = await supabase
+      const { data, error } = await supabase
         .from('organizations')
         .update({ active_url_type })
-        .eq('id', organizationId);
+        .eq('id', organizationId)
+        .select('active_url_type')
+        .single();
 
-      if (error) throw error;
+      if (error) {
+        console.error('Failed to update active_url_type:', error);
+        throw error;
+      }
+
+      // Verify the update actually happened
+      if (data?.active_url_type !== active_url_type) {
+        console.error('Update did not persist. Expected:', active_url_type, 'Got:', data?.active_url_type);
+        throw new Error('Update did not persist correctly');
+      }
     },
     onSuccess: async () => {
       // Invalidate and refetch organization info
