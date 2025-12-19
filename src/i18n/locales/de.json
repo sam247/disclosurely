@@ -514,5 +514,9 @@
       "standard": "Standard-Fallbearbeiter",
       "any": "Beliebiger verfügbarer Bearbeiter"
     }
-  }
+  },
+  "noReportsFound": "Keine Berichte gefunden",
+  "noReports": "Keine Berichte",
+  "noAssignedCasesMessage": "Ihnen sind keine Fälle zugewiesen. Bitte fordern Sie einen Fall bei Ihrem Administrator an.",
+  "noArchivedReports": "Keine archivierten Berichte"
 }

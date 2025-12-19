@@ -210,7 +210,7 @@ const DashboardSidebar = ({
             >
               Privacy
             </button>
-            <span>•</span>
+            <span>ï¿½</span>
             <button 
               onClick={() => navigate('/terms')}
               className="hover:text-foreground transition-colors"

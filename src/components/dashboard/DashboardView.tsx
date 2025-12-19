@@ -1716,9 +1716,15 @@ Additional Details: ${decryptedContent.additionalDetails || 'None provided'}
                 {filteredReports.length === 0 ? (
                   <div className="text-center py-8 sm:py-12 px-4">
                     <FileText className="h-10 w-10 sm:h-12 sm:w-12 text-muted-foreground mx-auto mb-4" />
-                    <h3 className="text-base sm:text-lg font-medium mb-2">No Reports Found</h3>
+                    <h3 className="text-base sm:text-lg font-medium mb-2">
+                      {shouldRestrictCaseHandler ? t('noReports') : 'No Reports Found'}
+                    </h3>
                     <p className="text-sm sm:text-base text-muted-foreground">
-                      {isOrgAdmin ? t('noReportsFound') : 'Reports assigned to you will appear here'}
+                      {shouldRestrictCaseHandler 
+                        ? t('noAssignedCasesMessage')
+                        : isOrgAdmin 
+                          ? t('noReportsFound') 
+                          : 'Reports assigned to you will appear here'}
                     </p>
                 </div>
               ) : (
@@ -2453,9 +2459,15 @@ Additional Details: ${decryptedContent.additionalDetails || 'None provided'}
                 {totalArchived === 0 ? (
                   <div className="text-center py-8 sm:py-12 px-4">
                     <Archive className="h-10 w-10 sm:h-12 sm:w-12 text-muted-foreground mx-auto mb-4" />
-                    <h3 className="text-base sm:text-lg font-medium mb-2">No Archived Reports</h3>
+                    <h3 className="text-base sm:text-lg font-medium mb-2">
+                      {shouldRestrictCaseHandler ? t('noReports') : 'No Archived Reports'}
+                    </h3>
                     <p className="text-sm sm:text-base text-muted-foreground">
-                      {isOrgAdmin ? "No archived reports" : "Archived reports assigned to you will appear here"}
+                      {shouldRestrictCaseHandler 
+                        ? t('noAssignedCasesMessage')
+                        : isOrgAdmin 
+                          ? t('noArchivedReports') 
+                          : "Archived reports assigned to you will appear here"}
                     </p>
                 </div>
               ) : (
