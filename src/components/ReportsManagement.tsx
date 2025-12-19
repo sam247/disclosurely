@@ -11,6 +11,7 @@ import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
+import { useUserRoles } from '@/hooks/useUserRoles';
 import { 
   Eye, 
   UserCheck, 
@@ -65,6 +66,7 @@ const ReportsManagement = () => {
   const { user } = useAuth();
   const { toast } = useToast();
   const { t } = useTranslation();
+  const { isOrgAdmin, loading: rolesLoading } = useUserRoles();
   
   const [reports, setReports] = useState<Report[]>([]);
   const [selectedReport, setSelectedReport] = useState<Report | null>(null);
@@ -97,7 +99,7 @@ const ReportsManagement = () => {
 
       if (!profile?.organization_id) return;
 
-      const { data, error } = await supabase
+      let reportsQuery = supabase
         .from('reports')
         .select(`
           *,
@@ -110,6 +112,13 @@ const ReportsManagement = () => {
         .eq('organization_id', profile.organization_id)
         .filter('deleted_at', showDeleted ? 'not.is' : 'is', null)
         .order('created_at', { ascending: false });
+
+      // Filter by assigned_to for case handlers
+      if (isOrgAdmin === false && rolesLoading === false && user) {
+        reportsQuery = reportsQuery.eq('assigned_to', user.id);
+      }
+
+      const { data, error } = await reportsQuery;
 
       if (error) throw error;
       setReports(data || []);
