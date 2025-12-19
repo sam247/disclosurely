@@ -148,28 +148,10 @@ class Logger {
   }
 
   private async sendLog(logEntry: LogEntry): Promise<void> {
-    try {
-      // Send to our custom log endpoint (if it exists)
-      // Silently fail if endpoint doesn't exist to avoid console errors
-      const response = await fetch('/api/logs', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(logEntry)
-      });
-      // Only log error if it's not a 404/405 (endpoint doesn't exist)
-      if (!response.ok && response.status !== 404 && response.status !== 405) {
-        console.error('Failed to send log:', response.status, response.statusText);
-      }
-    } catch (error) {
-      // Silently fail - endpoint may not exist
-      // Only log actual network errors, not missing endpoints
-      if (error instanceof TypeError && error.message.includes('Failed to fetch')) {
-        // Network error - endpoint doesn't exist, ignore
-        return;
-      }
-    }
+    // Disabled: /api/logs endpoint doesn't exist
+    // This prevents 405 Method Not Allowed errors in console
+    // Logs are still written to console for debugging
+    return;
   }
 
   private log(level: LogLevel, context: LogContext, message: string, data?: any, error?: Error) {
