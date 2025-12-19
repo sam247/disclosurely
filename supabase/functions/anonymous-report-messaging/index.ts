@@ -1,12 +1,70 @@
 import "https://deno.land/x/xhr@0.1.0/mod.ts";
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.50.0";
-import { checkRateLimit, rateLimiters, rateLimitResponse } from '../_shared/rateLimit.ts'
+import { Ratelimit } from "https://esm.sh/@upstash/ratelimit@1.0.0"
+import { Redis } from "https://esm.sh/@upstash/redis@1.25.1"
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
+
+// Inline rate limiting (shared file not supported by Supabase MCP deployment)
+const redis = new Redis({
+  url: Deno.env.get('UPSTASH_REDIS_REST_URL')!,
+  token: Deno.env.get('UPSTASH_REDIS_REST_TOKEN')!,
+})
+
+const messagingRateLimiter = new Ratelimit({
+  redis,
+  limiter: Ratelimit.slidingWindow(20, "1 h"),
+  analytics: true,
+  prefix: "@upstash/ratelimit/message",
+})
+
+async function checkRateLimit(req: Request, identifier?: string) {
+  try {
+    const id = identifier || req.headers.get("x-forwarded-for") || req.headers.get("cf-connecting-ip") || "anonymous"
+    const result = await messagingRateLimiter.limit(id)
+    console.log(`[RateLimit] ${id}: ${result.success ? 'ALLOWED' : 'BLOCKED'} (${result.remaining}/${result.limit} remaining)`)
+    return {
+      success: result.success,
+      limit: result.limit,
+      remaining: result.remaining,
+      reset: result.reset,
+    }
+  } catch (error) {
+    console.error('[RateLimit] Error checking rate limit:', error)
+    // Fail open - allow request if rate limiting fails
+    return {
+      success: true,
+      limit: 0,
+      remaining: 0,
+      reset: Date.now() + 60000,
+    }
+  }
+}
+
+function rateLimitResponse(result: any, corsHeaders: Record<string, string>) {
+  return new Response(
+    JSON.stringify({ 
+      error: "Too many requests. Please try again later.",
+      reset: result.reset,
+      retryAfter: Math.ceil((result.reset - Date.now()) / 1000)
+    }),
+    { 
+      status: 429,
+      headers: {
+        ...corsHeaders,
+        'X-RateLimit-Limit': result.limit.toString(),
+        'X-RateLimit-Remaining': result.remaining.toString(),
+        'X-RateLimit-Reset': result.reset.toString(),
+        'Retry-After': Math.ceil((result.reset - Date.now()) / 1000).toString(),
+        'Content-Type': 'application/json',
+      }
+    }
+  )
+}
 
 // ⚠️ CRITICAL: Verify ENCRYPTION_SALT on module load (startup check)
 const ENCRYPTION_SALT_STARTUP = Deno.env.get('ENCRYPTION_SALT');
@@ -61,7 +119,7 @@ serve(async (req) => {
   }
 
   // 🔒 Rate limiting: 20 messages per hour per tracking ID (extracted later)
-  const rateLimit = await checkRateLimit(req, rateLimiters.messaging)
+  const rateLimit = await checkRateLimit(req)
   if (!rateLimit.success) {
     console.warn('⚠️ Rate limit exceeded for messaging')
     return rateLimitResponse(rateLimit, corsHeaders)

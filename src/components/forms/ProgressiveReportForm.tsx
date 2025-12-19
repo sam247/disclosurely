@@ -175,7 +175,7 @@ const ProgressiveReportForm = ({
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [currentStep, totalSteps, isSubmitting, validateStep]);
 
-  // Calculate progress percentage
+  // Calculate progress percentage (currentStep is 0-indexed, totalSteps is count)
   const progressPercent = ((currentStep + 1) / totalSteps) * 100;
 
   // Determine which step component to render
