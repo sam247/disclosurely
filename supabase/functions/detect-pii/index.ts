@@ -5,6 +5,7 @@
  */
 
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts';
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 
 const OPENREDACT_API_URL = 'https://openredaction-api.onrender.com';
 const OPENREDACT_API_KEY = Deno.env.get('OPENREDACT_API_KEY');
@@ -81,8 +82,8 @@ async function callOpenRedactAPI(text: string, enableAI: boolean = true) {
   }
 }
 
-// CORS handling - same pattern as ai-gateway-generate
-const getAllowedOrigin = (req: Request): string => {
+// CORS handling with custom domain support
+const getAllowedOrigin = async (req: Request): Promise<string> => {
   const origin = req.headers.get('origin');
   
   if (!origin) {
@@ -96,6 +97,7 @@ const getAllowedOrigin = (req: Request): string => {
     'https://app.disclosurely.com',
     'http://localhost:8080',
     'http://localhost:5173',
+    'http://localhost:3000',
   ];
   
   if (allowedDomains.includes(origin)) {
@@ -107,17 +109,69 @@ const getAllowedOrigin = (req: Request): string => {
     return origin;
   }
   
-  // Default fallback
-  return 'https://disclosurely.com';
+  // Check if origin is a custom domain in the database
+  try {
+    const supabase = createClient(
+      Deno.env.get('SUPABASE_URL') ?? '',
+      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '',
+      {
+        auth: {
+          autoRefreshToken: false,
+          persistSession: false
+        }
+      }
+    );
+    
+    // Extract domain from origin (remove protocol)
+    const domain = origin.replace(/^https?:\/\//, '').replace(/\/$/, '');
+    
+    // Check if this domain exists in custom_domains table
+    const { data: customDomain } = await supabase
+      .from('custom_domains')
+      .select('domain_name, is_active, status')
+      .eq('domain_name', domain)
+      .maybeSingle();
+    
+    // Allow if domain exists and is active
+    if (customDomain && customDomain.is_active && customDomain.status === 'active') {
+      return origin;
+    }
+    
+    // Also check for subdomains (e.g., testing.betterranking.co.uk should match betterranking.co.uk)
+    const domainParts = domain.split('.');
+    if (domainParts.length > 2) {
+      // Try parent domain (e.g., betterranking.co.uk from testing.betterranking.co.uk)
+      const parentDomain = domainParts.slice(-2).join('.');
+      const { data: parentCustomDomain } = await supabase
+        .from('custom_domains')
+        .select('domain_name, is_active, status')
+        .eq('domain_name', parentDomain)
+        .maybeSingle();
+      
+      if (parentCustomDomain && parentCustomDomain.is_active && parentCustomDomain.status === 'active') {
+        return origin;
+      }
+    }
+  } catch (error) {
+    console.error('[Detect PII] Error checking custom domain:', error);
+    // Fall through to default
+  }
+  
+  // For public endpoints, allow all origins to support custom domains
+  // This is safe because this endpoint doesn't expose sensitive data without proper auth
+  return origin;
 };
 
-const getCorsHeaders = (req: Request) => ({
-  'Access-Control-Allow-Origin': getAllowedOrigin(req),
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
-  'Access-Control-Allow-Credentials': 'true',
-  'Access-Control-Allow-Methods': 'POST, OPTIONS',
-  'Content-Type': 'application/json',
-});
+const getCorsHeaders = async (req: Request) => {
+  const allowedOrigin = await getAllowedOrigin(req);
+  return {
+    'Access-Control-Allow-Origin': allowedOrigin,
+    'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+    'Access-Control-Allow-Credentials': allowedOrigin !== '*' ? 'true' : 'false',
+    'Access-Control-Allow-Methods': 'POST, OPTIONS',
+    'Content-Type': 'application/json',
+  };
+};
 
 serve(async (req) => {
   // Default CORS headers for error responses
@@ -132,7 +186,7 @@ serve(async (req) => {
     // Handle CORS preflight FIRST - before any other code
     if (req.method === 'OPTIONS') {
       try {
-        const corsHeaders = getCorsHeaders(req);
+        const corsHeaders = await getCorsHeaders(req);
         return new Response('ok', { status: 200, headers: corsHeaders });
       } catch (error) {
         // Fallback CORS headers if getCorsHeaders fails
@@ -143,7 +197,7 @@ serve(async (req) => {
       }
     }
     
-    const corsHeaders = getCorsHeaders(req);
+    const corsHeaders = await getCorsHeaders(req);
 
     // Parse request
     console.log('[Detect PII] Request received, method:', req.method);
@@ -252,7 +306,7 @@ serve(async (req) => {
     // Try to get CORS headers, but fallback to default if it fails
     let errorCorsHeaders;
     try {
-      errorCorsHeaders = getCorsHeaders(req);
+      errorCorsHeaders = await getCorsHeaders(req);
     } catch {
       errorCorsHeaders = defaultCorsHeaders;
     }

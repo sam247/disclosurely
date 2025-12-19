@@ -1,7 +1,7 @@
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { FileText, Users, History, CheckCircle2 } from 'lucide-react';
+import { FileText, Users, History, CheckCircle2, AlertTriangle } from 'lucide-react';
 import { progressiveFormTranslations } from '@/i18n/progressiveFormTranslations';
 import { usePIIDetector } from '@/hooks/usePIIDetector';
 import { PIIWarningBox } from '@/components/forms/PIIWarningBox';
@@ -18,7 +18,7 @@ const Step9Additional = ({ witnesses, previousReports, onChange, language, organ
   const t = progressiveFormTranslations[language as keyof typeof progressiveFormTranslations] || progressiveFormTranslations.en;
   
   // Real-time PII detection for witnesses field
-  const { hasPII: hasWitnessesPII, detections: witnessesDetections, isDetecting: isDetectingWitnesses } = usePIIDetector(witnesses, {
+  const { hasPII: hasWitnessesPII, detections: witnessesDetections, isDetecting: isDetectingWitnesses, hasError: hasWitnessesError } = usePIIDetector(witnesses, {
     debounce: 500,
     organizationId,
     confidenceThreshold: 0.4,
@@ -66,10 +66,16 @@ const Step9Additional = ({ witnesses, previousReports, onChange, language, organ
           {witnesses.length > 5 && (
             <div className="space-y-2">
               <PIIWarningBox detections={witnessesDetections} isDetecting={isDetectingWitnesses} />
-              {!isDetectingWitnesses && !hasWitnessesPII && (
+              {!isDetectingWitnesses && !hasWitnessesPII && !hasWitnessesError && (
                 <div className="text-xs text-green-600 dark:text-green-400 flex items-center gap-2">
                   <CheckCircle2 className="h-3 w-3" />
                   ✅ No personal information detected
+                </div>
+              )}
+              {!isDetectingWitnesses && hasWitnessesError && (
+                <div className="text-xs text-amber-600 dark:text-amber-400 flex items-center gap-2">
+                  <AlertTriangle className="h-3 w-3" />
+                  ⚠️ Unable to check for personal information. Please review your content carefully.
                 </div>
               )}
             </div>

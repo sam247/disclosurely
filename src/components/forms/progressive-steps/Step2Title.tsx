@@ -1,6 +1,6 @@
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { FileText, HelpCircle, CheckCircle2 } from 'lucide-react';
+import { FileText, HelpCircle, CheckCircle2, AlertTriangle } from 'lucide-react';
 import { useEffect, useRef } from 'react';
 import {
   Tooltip,
@@ -25,7 +25,7 @@ const Step2Title = ({ value, onChange, isValid, language, organizationId }: Step
   const inputRef = useRef<HTMLInputElement>(null);
 
   // Real-time PII detection
-  const { hasPII, detections, isDetecting } = usePIIDetector(value, {
+  const { hasPII, detections, isDetecting, hasError } = usePIIDetector(value, {
     debounce: 500,
     organizationId,
     confidenceThreshold: 0.4,
@@ -89,10 +89,16 @@ const Step2Title = ({ value, onChange, isValid, language, organizationId }: Step
           {value.length > 10 && (
             <div className="space-y-2">
               <PIIWarningBox detections={detections} isDetecting={isDetecting} />
-              {!isDetecting && !hasPII && (
+              {!isDetecting && !hasPII && !hasError && (
                 <div className="text-xs text-green-600 dark:text-green-400 flex items-center gap-2">
                   <CheckCircle2 className="h-3 w-3" />
                   ✅ No personal information detected
+                </div>
+              )}
+              {!isDetecting && hasError && (
+                <div className="text-xs text-amber-600 dark:text-amber-400 flex items-center gap-2">
+                  <AlertTriangle className="h-3 w-3" />
+                  ⚠️ Unable to check for personal information. Please review your content carefully.
                 </div>
               )}
             </div>

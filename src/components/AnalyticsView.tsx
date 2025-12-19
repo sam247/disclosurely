@@ -1079,9 +1079,9 @@ const AnalyticsView: React.FC = () => {
           </Card>
 
           {/* Right Column - Top Section and Tri Layout Bottom */}
-          <div className="flex flex-col gap-3 sm:gap-4 min-h-0">
+          <div className="flex flex-col gap-3 sm:gap-4 min-h-0 flex-1">
             {/* Top Section - Single Chart (By Category) */}
-            <Card className="flex flex-col min-h-0">
+            <Card className="flex flex-col min-h-0 flex-shrink-0">
               <CardHeader className="pb-1.5 sm:pb-2 flex-shrink-0">
                 <CardTitle className="text-xs sm:text-sm">By Category</CardTitle>
                 <CardDescription className="text-[10px] sm:text-[11px] mt-0.5">Financial Misconduct, Workplace Behaviour, etc.</CardDescription>
@@ -1139,14 +1139,14 @@ const AnalyticsView: React.FC = () => {
             </Card>
 
             {/* Bottom Section - 2 Charts Side-by-Side */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-3 flex-1 min-h-0">
               {/* Status Breakdown */}
-              <Card className="flex flex-col min-h-0">
+              <Card className="flex flex-col min-h-0 flex-1">
                 <CardHeader className="pb-1.5 sm:pb-2 flex-shrink-0">
                   <CardTitle className="text-xs sm:text-sm">Status Breakdown</CardTitle>
                   <CardDescription className="text-[10px] sm:text-[11px] mt-0.5">Cases by status</CardDescription>
                 </CardHeader>
-                <CardContent className="pt-0 pb-3 flex-1 min-h-0 flex flex-col" style={{ minHeight: '300px', height: '300px' }}>
+                <CardContent className="pt-0 pb-3 flex-1 min-h-0 flex flex-col">
                 {getStatusChartData() ? (
                   <div className="flex-1 min-h-0 -mx-2 sm:mx-0 px-2 sm:px-0">
                   <Bar 
@@ -1198,12 +1198,12 @@ const AnalyticsView: React.FC = () => {
               </Card>
 
               {/* Cases by Member */}
-              <Card className="flex flex-col min-h-0">
+              <Card className="flex flex-col min-h-0 flex-1">
                 <CardHeader className="pb-1.5 sm:pb-2 flex-shrink-0">
                   <CardTitle className="text-xs sm:text-sm">Cases by Member</CardTitle>
                   <CardDescription className="text-[10px] sm:text-[11px] mt-0.5">Assigned cases per team member</CardDescription>
                 </CardHeader>
-                <CardContent className="pt-0 pb-3 flex-1 min-h-0 flex flex-col" style={{ minHeight: '300px', height: '300px' }}>
+                <CardContent className="pt-0 pb-3 flex-1 min-h-0 flex flex-col">
                 {getCasesByMemberChartData() ? (
                   <div className="flex-1 min-h-0 -mx-2 sm:mx-0 px-2 sm:px-0">
                   <Bar 

@@ -26,7 +26,7 @@ const Step3Description = ({ value, onChange, isValid, language, organizationId }
   const [isAnalyzing, setIsAnalyzing] = useState(false);
 
   // Real-time PII detection
-  const { hasPII, detections, isDetecting } = usePIIDetector(value, {
+  const { hasPII, detections, isDetecting, hasError, errorMessage } = usePIIDetector(value, {
     debounce: 500,
     organizationId,
     confidenceThreshold: 0.4, // Strict for anonymous reports
@@ -117,10 +117,17 @@ const Step3Description = ({ value, onChange, isValid, language, organizationId }
             <div className="space-y-2 w-full">
               <PIIWarningBox detections={detections} isDetecting={isDetecting} />
               
-              {!isDetecting && !hasPII && value.length > 50 && (
+              {!isDetecting && !hasPII && !hasError && value.length > 50 && (
                 <div className="text-xs text-green-600 dark:text-green-400 flex items-center gap-2">
                   <CheckCircle2 className="h-3 w-3" />
                   ✅ No personal information detected
+                </div>
+              )}
+              
+              {!isDetecting && hasError && value.length > 50 && (
+                <div className="text-xs text-amber-600 dark:text-amber-400 flex items-center gap-2">
+                  <AlertTriangle className="h-3 w-3" />
+                  ⚠️ Unable to check for personal information. Please review your content carefully.
                 </div>
               )}
             </div>

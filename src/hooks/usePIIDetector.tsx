@@ -16,6 +16,8 @@ export interface PIIDetectionResult {
     severity: 'high' | 'medium' | 'low';
   }>;
   isDetecting: boolean;
+  hasError: boolean;
+  errorMessage?: string;
 }
 
 export interface UsePIIDetectorOptions {
@@ -51,15 +53,21 @@ export function usePIIDetector(
 
   const [detections, setDetections] = useState<PIIDetectionResult['detections']>([]);
   const [isDetecting, setIsDetecting] = useState(false);
+  const [hasError, setHasError] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string | undefined>(undefined);
 
   const detectPIIInText = useCallback(async (textToScan: string) => {
     if (!textToScan || textToScan.trim().length === 0) {
       setDetections([]);
       setIsDetecting(false);
+      setHasError(false);
+      setErrorMessage(undefined);
       return;
     }
 
     setIsDetecting(true);
+    setHasError(false);
+    setErrorMessage(undefined);
 
     try {
       // Use OpenRedaction API via Edge Function
@@ -73,6 +81,8 @@ export function usePIIDetector(
       if (error) {
         console.error('[usePIIDetector] API error:', error);
         setDetections([]);
+        setHasError(true);
+        setErrorMessage(error.message || 'Unable to check for personal information');
         return;
       }
 
@@ -85,9 +95,13 @@ export function usePIIDetector(
       }));
 
       setDetections(result);
-    } catch (error) {
+      setHasError(false);
+      setErrorMessage(undefined);
+    } catch (error: any) {
       console.error('[usePIIDetector] Error detecting PII:', error);
       setDetections([]);
+      setHasError(true);
+      setErrorMessage(error?.message || 'Unable to check for personal information');
     } finally {
       setIsDetecting(false);
     }
@@ -106,6 +120,8 @@ export function usePIIDetector(
     hasPII: detections.length > 0,
     detections,
     isDetecting,
+    hasError,
+    errorMessage,
   };
 }
 
