@@ -1558,14 +1558,11 @@ Additional Details: ${decryptedContent.additionalDetails || 'None provided'}
           difference: (root.clientHeight - (header?.offsetHeight || 0) - (alert?.offsetHeight || 0) - (controls?.offsetHeight || 0) - tableMarginTop - headerMarginBottom) - tableContainer.clientHeight,
           scrollableDivShouldBeHeight: desktopTableWrapper && pagination ? `${desktopTableWrapper.clientHeight - pagination.offsetHeight}px` : 'unknown'
         };
-        console.log('[Dashboard Layout Debug]', measurements);
-        
         // Force scrollable div to correct height if it's wrong - AGGRESSIVE FIX
         if (scrollableDiv && desktopTableWrapper && pagination) {
           const expectedHeight = desktopTableWrapper.clientHeight - pagination.offsetHeight;
           const actualHeight = scrollableDiv.clientHeight;
           if (Math.abs(expectedHeight - actualHeight) > 5) {
-            console.log(`[Dashboard Layout Debug] Forcing scrollable div height from ${actualHeight}px to ${expectedHeight}px`);
             scrollableDiv.style.minHeight = `${expectedHeight}px`;
             scrollableDiv.style.height = `${expectedHeight}px`;
             scrollableDiv.style.flex = '1 1 0%';

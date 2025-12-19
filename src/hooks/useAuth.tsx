@@ -282,8 +282,6 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     // Set up auth state listener
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       (event, session) => {
-        console.log('[Auth] Event:', event, 'Session exists:', !!session);
-
         setSession(session);
         setUser(session?.user ?? null);
         setLoading(false);
@@ -291,26 +289,21 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
         // Only check subscription for token refresh events, not during initial sign in
         // This prevents authentication disruption if subscription service is down
         if (event === 'TOKEN_REFRESHED' && session?.user && session?.access_token) {
-          console.log('[Auth] Token refreshed, checking subscription');
           // Delay subscription check to ensure session is fully established
           setTimeout(() => {
             refreshSubscription(session);
           }, 1000);
         } else if (event === 'SIGNED_OUT') {
-          console.log('[Auth] Signed out event detected, isInitialLoad:', isInitialLoad);
-
           // Clear subscription data on actual logout
           setSubscriptionData({ subscribed: false });
 
           // If this is not the initial load and we had a user, it means the session was terminated
           // This could be due to concurrent login from another device or session expiry
           if (!isInitialLoad && user) {
-            console.log('[Auth] Session terminated (possible concurrent login or expiry)');
             // The session timeout hook or manual signout will handle the redirect
             // We don't show a toast here as it could be a normal logout
           }
         } else if (event === 'SIGNED_IN') {
-          console.log('[Auth] Signed in, checking subscription');
           // Check subscription after successful sign-in with a delay
           setTimeout(() => {
             refreshSubscription(session);
@@ -328,7 +321,6 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
 
     // Get initial session and check subscription once
     supabase.auth.getSession().then(({ data: { session } }) => {
-      console.log('[Auth] Initial session check, exists:', !!session);
       setSession(session);
       setUser(session?.user ?? null);
       setLoading(false);
