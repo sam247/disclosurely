@@ -1,6 +1,74 @@
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts'
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
-import { getAllowedOrigin, getCorsHeaders } from '../_shared/cors.ts'
+
+// Inline CORS utility (MCP deployment doesn't support shared files)
+async function getAllowedOrigin(req: Request, supabaseClient?: any): Promise<string> {
+  const origin = req.headers.get('origin');
+  
+  if (!origin) {
+    return 'https://disclosurely.com';
+  }
+  
+  const allowedDomains = [
+    'https://disclosurely.com',
+    'https://www.disclosurely.com',
+    'https://app.disclosurely.com',
+    'http://localhost:8080',
+    'http://localhost:5173',
+    'http://localhost:3000',
+  ];
+  
+  if (allowedDomains.includes(origin)) {
+    return origin;
+  }
+  
+  if (origin.includes('.lovable.app') || origin.includes('.lovableproject.com')) {
+    return origin;
+  }
+  
+  if (supabaseClient) {
+    try {
+      const domain = origin.replace(/^https?:\/\//, '').replace(/\/$/, '');
+      const { data: customDomain } = await supabaseClient
+        .from('custom_domains')
+        .select('domain_name, is_active, status')
+        .eq('domain_name', domain)
+        .maybeSingle();
+      
+      if (customDomain && customDomain.is_active && customDomain.status === 'active') {
+        return origin;
+      }
+      
+      const domainParts = domain.split('.');
+      if (domainParts.length > 2) {
+        const parentDomain = domainParts.slice(-2).join('.');
+        const { data: parentCustomDomain } = await supabaseClient
+          .from('custom_domains')
+          .select('domain_name, is_active, status')
+          .eq('domain_name', parentDomain)
+          .maybeSingle();
+        
+        if (parentCustomDomain && parentCustomDomain.is_active && parentCustomDomain.status === 'active') {
+          return origin;
+        }
+      }
+    } catch (error) {
+      console.error('[strip-all-metadata] Error checking custom domain:', error);
+    }
+  }
+  
+  return origin;
+}
+
+function getCorsHeaders(req: Request, allowedOrigin?: string) {
+  const origin = allowedOrigin || req.headers.get('origin') || '*';
+  return {
+    'Access-Control-Allow-Origin': origin,
+    'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+    'Access-Control-Allow-Credentials': origin !== '*',
+    'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
+  };
+}
 
 // Default CORS headers for error responses
 const defaultCorsHeaders = {
