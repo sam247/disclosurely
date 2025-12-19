@@ -82,96 +82,7 @@ async function callOpenRedactAPI(text: string, enableAI: boolean = true) {
   }
 }
 
-// CORS handling with custom domain support
-const getAllowedOrigin = async (req: Request): Promise<string> => {
-  const origin = req.headers.get('origin');
-  
-  if (!origin) {
-    return 'https://disclosurely.com';
-  }
-  
-  // Allow specific production domains
-  const allowedDomains = [
-    'https://disclosurely.com',
-    'https://www.disclosurely.com',
-    'https://app.disclosurely.com',
-    'http://localhost:8080',
-    'http://localhost:5173',
-    'http://localhost:3000',
-  ];
-  
-  if (allowedDomains.includes(origin)) {
-    return origin;
-  }
-  
-  // Allow Lovable preview domains (any subdomain)
-  if (origin.includes('.lovable.app') || origin.includes('.lovableproject.com')) {
-    return origin;
-  }
-  
-  // Check if origin is a custom domain in the database
-  try {
-    const supabase = createClient(
-      Deno.env.get('SUPABASE_URL') ?? '',
-      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '',
-      {
-        auth: {
-          autoRefreshToken: false,
-          persistSession: false
-        }
-      }
-    );
-    
-    // Extract domain from origin (remove protocol)
-    const domain = origin.replace(/^https?:\/\//, '').replace(/\/$/, '');
-    
-    // Check if this domain exists in custom_domains table
-    const { data: customDomain } = await supabase
-      .from('custom_domains')
-      .select('domain_name, is_active, status')
-      .eq('domain_name', domain)
-      .maybeSingle();
-    
-    // Allow if domain exists and is active
-    if (customDomain && customDomain.is_active && customDomain.status === 'active') {
-      return origin;
-    }
-    
-    // Also check for subdomains (e.g., testing.betterranking.co.uk should match betterranking.co.uk)
-    const domainParts = domain.split('.');
-    if (domainParts.length > 2) {
-      // Try parent domain (e.g., betterranking.co.uk from testing.betterranking.co.uk)
-      const parentDomain = domainParts.slice(-2).join('.');
-      const { data: parentCustomDomain } = await supabase
-        .from('custom_domains')
-        .select('domain_name, is_active, status')
-        .eq('domain_name', parentDomain)
-        .maybeSingle();
-      
-      if (parentCustomDomain && parentCustomDomain.is_active && parentCustomDomain.status === 'active') {
-        return origin;
-      }
-    }
-  } catch (error) {
-    console.error('[Detect PII] Error checking custom domain:', error);
-    // Fall through to default
-  }
-  
-  // For public endpoints, allow all origins to support custom domains
-  // This is safe because this endpoint doesn't expose sensitive data without proper auth
-  return origin;
-};
-
-const getCorsHeaders = async (req: Request) => {
-  const allowedOrigin = await getAllowedOrigin(req);
-  return {
-    'Access-Control-Allow-Origin': allowedOrigin,
-    'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
-    'Access-Control-Allow-Credentials': allowedOrigin !== '*' ? 'true' : 'false',
-    'Access-Control-Allow-Methods': 'POST, OPTIONS',
-    'Content-Type': 'application/json',
-  };
-};
+import { getAllowedOrigin, getCorsHeaders as getSharedCorsHeaders } from '../_shared/cors.ts';
 
 serve(async (req) => {
   // Default CORS headers for error responses
@@ -182,13 +93,31 @@ serve(async (req) => {
     'Content-Type': 'application/json',
   };
 
+  // Create Supabase client for CORS checks
+  const supabase = createClient(
+    Deno.env.get('SUPABASE_URL') ?? '',
+    Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '',
+    {
+      auth: {
+        autoRefreshToken: false,
+        persistSession: false
+      }
+    }
+  );
+
   try {
     // Handle CORS preflight FIRST - before any other code
     if (req.method === 'OPTIONS') {
       try {
-        const corsHeaders = await getCorsHeaders(req);
+        const origin = req.headers.get('origin');
+        console.log('[Detect PII] OPTIONS request from origin:', origin);
+        const allowedOrigin = await getAllowedOrigin(req, supabase);
+        console.log('[Detect PII] Allowed origin:', allowedOrigin);
+        const corsHeaders = getSharedCorsHeaders(req, allowedOrigin);
+        corsHeaders['Content-Type'] = 'application/json';
         return new Response('ok', { status: 200, headers: corsHeaders });
       } catch (error) {
+        console.error('[Detect PII] CORS preflight error:', error);
         // Fallback CORS headers if getCorsHeaders fails
         return new Response('ok', { 
           status: 200, 
@@ -197,7 +126,19 @@ serve(async (req) => {
       }
     }
     
-    const corsHeaders = await getCorsHeaders(req);
+    // Get proper CORS headers for the request
+    const origin = req.headers.get('origin');
+    console.log('[Detect PII] Request from origin:', origin);
+    let corsHeaders;
+    try {
+      const allowedOrigin = await getAllowedOrigin(req, supabase);
+      console.log('[Detect PII] Allowed origin:', allowedOrigin);
+      corsHeaders = getSharedCorsHeaders(req, allowedOrigin);
+      corsHeaders['Content-Type'] = 'application/json';
+    } catch (error) {
+      console.error('[Detect PII] CORS error:', error);
+      corsHeaders = defaultCorsHeaders;
+    }
 
     // Parse request
     console.log('[Detect PII] Request received, method:', req.method);
@@ -303,10 +244,12 @@ serve(async (req) => {
       console.error('[Detect PII] Could not stringify error:', stringifyError);
     }
     
-    // Try to get CORS headers, but fallback to default if it fails
+    // Try to get CORS headers for error response
     let errorCorsHeaders;
     try {
-      errorCorsHeaders = await getCorsHeaders(req);
+      const allowedOrigin = await getAllowedOrigin(req, supabase);
+      errorCorsHeaders = getSharedCorsHeaders(req, allowedOrigin);
+      errorCorsHeaders['Content-Type'] = 'application/json';
     } catch {
       errorCorsHeaders = defaultCorsHeaders;
     }
