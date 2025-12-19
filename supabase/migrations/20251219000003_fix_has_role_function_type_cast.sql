@@ -8,10 +8,12 @@ STABLE
 SECURITY DEFINER
 SET search_path = public
 AS $$
-  SELECT EXISTS (
+BEGIN
+  RETURN EXISTS (
     SELECT 1 FROM public.user_roles
     WHERE user_id = _user_id 
     AND role = _role::app_role 
     AND is_active = true
   );
+END;
 $$;
