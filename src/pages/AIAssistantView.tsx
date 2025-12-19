@@ -23,6 +23,7 @@ import {
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { useOrganization } from '@/hooks/useOrganization';
+import { useUserRoles } from '@/hooks/useUserRoles';
 import { useToast } from '@/hooks/use-toast';
 import { CaseCard } from '@/components/CaseCard';
 import { cn } from '@/lib/utils';
