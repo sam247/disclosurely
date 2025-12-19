@@ -48,6 +48,77 @@ const Step3Description = ({ value, onChange, isValid, language, organizationId }
     }
   }, [value]);
 
+  // Generate redacted text based on detection type
+  const getRedactedText = (text: string, type: string): string => {
+    const lowerType = type.toLowerCase();
+    
+    if (lowerType === 'email' || lowerType.includes('email')) {
+      const [name, domain] = text.split('@');
+      return `${name.slice(0, 1)}****@${domain || '[REDACTED]'}`;
+    }
+    
+    if (lowerType === 'phone' || lowerType.includes('phone')) {
+      return '***-***-' + text.slice(-4);
+    }
+    
+    if (lowerType === 'ipaddress' || lowerType.includes('ip')) {
+      return '***.***.***.***';
+    }
+    
+    if (lowerType.includes('name') || lowerType === 'person') {
+      return '[NAME REDACTED]';
+    }
+    
+    if (lowerType === 'ssn' || lowerType.includes('ssn')) {
+      return '***-**-****';
+    }
+    
+    // Default: show first char and last char with stars
+    if (text.length > 2) {
+      return text[0] + '****' + text[text.length - 1];
+    }
+    
+    return '[REDACTED]';
+  };
+
+  // Handle redaction of a single detection
+  const handleRedact = (detectionIndex: number) => {
+    if (!detections || detectionIndex >= detections.length) return;
+    
+    const detection = detections[detectionIndex];
+    if (!detection.position || !detection.text) return;
+    
+    const { start, end } = detection.position;
+    const redactedText = getRedactedText(detection.text, detection.type);
+    
+    // Replace the detected text with redacted version
+    const newValue = value.slice(0, start) + redactedText + value.slice(end);
+    onChange(newValue);
+  };
+
+  // Handle redaction of all detections
+  const handleRedactAll = () => {
+    if (!detections || detections.length === 0) return;
+    
+    // Sort detections by position (end to start) to avoid position shifts
+    const sortedDetections = [...detections]
+      .filter(d => d.position && d.text)
+      .sort((a, b) => (b.position?.end || 0) - (a.position?.end || 0));
+    
+    let newValue = value;
+    
+    // Replace from end to start to maintain correct positions
+    for (const detection of sortedDetections) {
+      if (detection.position && detection.text) {
+        const { start, end } = detection.position;
+        const redactedText = getRedactedText(detection.text, detection.type);
+        newValue = newValue.slice(0, start) + redactedText + newValue.slice(end);
+      }
+    }
+    
+    onChange(newValue);
+  };
+
   return (
     <TooltipProvider>
       <div className="space-y-4 py-2 flex flex-col">
@@ -115,7 +186,12 @@ const Step3Description = ({ value, onChange, isValid, language, organizationId }
           {/* Real-time PII detection feedback - in normal flow to push buttons down */}
           {value.length > 50 && (
             <div className="space-y-2 w-full">
-              <PIIWarningBox detections={detections} isDetecting={isDetecting} />
+              <PIIWarningBox 
+                detections={detections} 
+                isDetecting={isDetecting}
+                onRedact={handleRedact}
+                onRedactAll={handleRedactAll}
+              />
               
               {!isDetecting && !hasPII && !hasError && value.length > 50 && (
                 <div className="text-xs text-green-600 dark:text-green-400 flex items-center gap-2">

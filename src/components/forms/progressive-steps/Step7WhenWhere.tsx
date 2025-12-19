@@ -22,6 +22,74 @@ const Step7WhenWhere = ({ incidentDate, location, onChange, language, organizati
     organizationId,
     confidenceThreshold: 0.4,
   });
+
+  // Generate redacted text based on detection type
+  const getRedactedText = (text: string, type: string): string => {
+    const lowerType = type.toLowerCase();
+    
+    if (lowerType === 'email' || lowerType.includes('email')) {
+      const [name, domain] = text.split('@');
+      return `${name.slice(0, 1)}****@${domain || '[REDACTED]'}`;
+    }
+    
+    if (lowerType === 'phone' || lowerType.includes('phone')) {
+      return '***-***-' + text.slice(-4);
+    }
+    
+    if (lowerType === 'ipaddress' || lowerType.includes('ip')) {
+      return '***.***.***.***';
+    }
+    
+    if (lowerType.includes('name') || lowerType === 'person') {
+      return '[NAME REDACTED]';
+    }
+    
+    if (lowerType === 'ssn' || lowerType.includes('ssn')) {
+      return '***-**-****';
+    }
+    
+    if (text.length > 2) {
+      return text[0] + '****' + text[text.length - 1];
+    }
+    
+    return '[REDACTED]';
+  };
+
+  // Handle redaction of a single detection
+  const handleRedact = (detectionIndex: number) => {
+    if (!locationDetections || detectionIndex >= locationDetections.length) return;
+    
+    const detection = locationDetections[detectionIndex];
+    if (!detection.position || !detection.text) return;
+    
+    const { start, end } = detection.position;
+    const redactedText = getRedactedText(detection.text, detection.type);
+    
+    const newLocation = location.slice(0, start) + redactedText + location.slice(end);
+    onChange({ location: newLocation });
+  };
+
+  // Handle redaction of all detections
+  const handleRedactAll = () => {
+    if (!locationDetections || locationDetections.length === 0) return;
+    
+    const sortedDetections = [...locationDetections]
+      .filter(d => d.position && d.text)
+      .sort((a, b) => (b.position?.end || 0) - (a.position?.end || 0));
+    
+    let newLocation = location;
+    
+    for (const detection of sortedDetections) {
+      if (detection.position && detection.text) {
+        const { start, end } = detection.position;
+        const redactedText = getRedactedText(detection.text, detection.type);
+        newLocation = newLocation.slice(0, start) + redactedText + newLocation.slice(end);
+      }
+    }
+    
+    onChange({ location: newLocation });
+  };
+
   return (
     <div className="space-y-4 py-2 flex flex-col">
       <div className="flex items-center gap-2 sm:gap-3">
@@ -83,7 +151,12 @@ const Step7WhenWhere = ({ incidentDate, location, onChange, language, organizati
           {/* PII detection feedback for location */}
           {location.length > 5 && (
             <div className="space-y-2">
-              <PIIWarningBox detections={locationDetections} isDetecting={isDetectingLocation} />
+              <PIIWarningBox 
+                detections={locationDetections} 
+                isDetecting={isDetectingLocation}
+                onRedact={handleRedact}
+                onRedactAll={handleRedactAll}
+              />
               {!isDetectingLocation && !hasLocationPII && !hasLocationError && (
                 <div className="text-xs text-green-600 dark:text-green-400 flex items-center gap-2">
                   <CheckCircle2 className="h-3 w-3" />

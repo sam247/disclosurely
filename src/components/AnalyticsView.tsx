@@ -584,7 +584,7 @@ const AnalyticsView: React.FC = () => {
     const casesByMember = Object.entries(memberCounts)
       .map(([member, count]) => ({
         member,
-        count: count as number
+      count: count as number
       }))
       .sort((a, b) => b.count - a.count);
 
@@ -664,32 +664,32 @@ const AnalyticsView: React.FC = () => {
       });
       data = trends.map(t => t.count);
     } else {
-      switch (chartPeriod) {
-        case 'day':
-          trends = analyticsData.dailyTrends.slice(-30); // Last 30 days
-          labels = trends.map(t => {
-            const date = new Date(t.date);
-            return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
-          });
-          data = trends.map(t => t.count);
-          break;
-        case 'week':
-          trends = analyticsData.weeklyTrends;
-          labels = trends.map(t => {
-            const date = new Date(t.week);
-            return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
-          });
-          data = trends.map(t => t.count);
-          break;
-        case 'month':
-        default:
-          trends = analyticsData.monthlyTrends;
-          labels = trends.map(t => {
-            const [year, month] = t.month.split('-');
-            return new Date(parseInt(year), parseInt(month) - 1).toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
-          });
-          data = trends.map(t => t.count);
-          break;
+    switch (chartPeriod) {
+      case 'day':
+        trends = analyticsData.dailyTrends.slice(-30); // Last 30 days
+        labels = trends.map(t => {
+          const date = new Date(t.date);
+          return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+        });
+        data = trends.map(t => t.count);
+        break;
+      case 'week':
+        trends = analyticsData.weeklyTrends;
+        labels = trends.map(t => {
+          const date = new Date(t.week);
+          return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+        });
+        data = trends.map(t => t.count);
+        break;
+      case 'month':
+      default:
+        trends = analyticsData.monthlyTrends;
+        labels = trends.map(t => {
+          const [year, month] = t.month.split('-');
+          return new Date(parseInt(year), parseInt(month) - 1).toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
+        });
+        data = trends.map(t => t.count);
+        break;
       }
     }
 
@@ -771,7 +771,7 @@ const AnalyticsView: React.FC = () => {
           data: analyticsData.statusBreakdown.map(s => s.count),
           backgroundColor: [
             '#4CAF50', // Resolved/Closed - Green
-            '#FFC107', // In Progress - Yellow
+            '#FFC107', // In Progress - Yellow  
             '#F44336', // New/Investigating - Red
             '#2196F3', // Other - Blue
           ],
@@ -911,31 +911,31 @@ const AnalyticsView: React.FC = () => {
                 {!organization?.id ? 'No organization found. Please contact support.' : 'No data available for the selected period.'}
               </p>
               <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 mt-2">
-                <Button 
-                  onClick={fetchAnalyticsData} 
-                  variant="outline"
-                  size="sm"
-                  className="text-xs sm:text-sm"
-                >
-                  Retry
-                </Button>
-                {organization?.id && (
-                  <div className="flex items-center gap-2">
-                    <label className="text-xs sm:text-sm font-medium whitespace-nowrap">Period:</label>
-                    <select 
-                      value={selectedPeriod} 
-                      onChange={(e) => setSelectedPeriod(e.target.value as any)}
-                      className="px-2 py-1 sm:py-1.5 border rounded-md text-xs sm:text-sm bg-background"
-                    >
-                      <option value="7d">Last 7 days</option>
-                      <option value="30d">Last 30 days</option>
-                      <option value="90d">Last 90 days</option>
-                      <option value="1y">Last year</option>
-                    </select>
-                  </div>
-                )}
-              </div>
+              <Button 
+                onClick={fetchAnalyticsData} 
+                variant="outline"
+                size="sm"
+                className="text-xs sm:text-sm"
+              >
+                Retry
+              </Button>
+              {organization?.id && (
+                <div className="flex items-center gap-2">
+                  <label className="text-xs sm:text-sm font-medium whitespace-nowrap">Period:</label>
+                  <select 
+                    value={selectedPeriod} 
+                    onChange={(e) => setSelectedPeriod(e.target.value as any)}
+                    className="px-2 py-1 sm:py-1.5 border rounded-md text-xs sm:text-sm bg-background"
+                  >
+                    <option value="7d">Last 7 days</option>
+                    <option value="30d">Last 30 days</option>
+                    <option value="90d">Last 90 days</option>
+                    <option value="1y">Last year</option>
+                  </select>
+                </div>
+              )}
             </div>
+          </div>
           </div>
         </div>
       </div>
@@ -946,40 +946,40 @@ const AnalyticsView: React.FC = () => {
 
   return (
     <div className="flex flex-col gap-0" style={{ height: 'calc(100vh - 109px)', overflow: 'hidden' }} data-analytics-root>
-      {/* Header */}
+        {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 flex-shrink-0 px-2 sm:px-0 mb-2">
-        <div>
-          <h1 className="text-xl sm:text-2xl font-bold">Analytics</h1>
-          <p className="text-xs sm:text-sm text-muted-foreground mt-0.5">
-            Decision-ready insights for compliance teams
-          </p>
-        </div>
-        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
-          <div className="flex items-center gap-2 flex-1 sm:flex-initial">
-            <label className="text-xs sm:text-sm font-medium whitespace-nowrap">Period:</label>
-            <select 
-              value={selectedPeriod} 
-              onChange={(e) => setSelectedPeriod(e.target.value as any)}
-              className="px-2 py-1 sm:py-1.5 border rounded-md text-xs sm:text-sm bg-background flex-1 sm:flex-initial touch-manipulation"
-            >
-              <option value="7d">Last 7 days</option>
-              <option value="30d">Last 30 days</option>
-              <option value="90d">Last 90 days</option>
-              <option value="1y">Last year</option>
-            </select>
+          <div>
+            <h1 className="text-xl sm:text-2xl font-bold">Analytics</h1>
+            <p className="text-xs sm:text-sm text-muted-foreground mt-0.5">
+              Decision-ready insights for compliance teams
+            </p>
           </div>
-          <Button
-            onClick={handleExport}
-            disabled={exporting}
-            variant="outline"
-            size="sm"
-            className="gap-2 w-full sm:w-auto touch-manipulation text-xs sm:text-sm h-7 sm:h-8"
-          >
-            <Download className="h-3 w-3 sm:h-4 sm:w-4" />
-            {exporting ? 'Exporting...' : 'Export'}
-          </Button>
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
+            <div className="flex items-center gap-2 flex-1 sm:flex-initial">
+              <label className="text-xs sm:text-sm font-medium whitespace-nowrap">Period:</label>
+              <select 
+                value={selectedPeriod} 
+                onChange={(e) => setSelectedPeriod(e.target.value as any)}
+                className="px-2 py-1 sm:py-1.5 border rounded-md text-xs sm:text-sm bg-background flex-1 sm:flex-initial touch-manipulation"
+              >
+                <option value="7d">Last 7 days</option>
+                <option value="30d">Last 30 days</option>
+                <option value="90d">Last 90 days</option>
+                <option value="1y">Last year</option>
+              </select>
+            </div>
+            <Button
+              onClick={handleExport}
+              disabled={exporting}
+              variant="outline"
+              size="sm"
+              className="gap-2 w-full sm:w-auto touch-manipulation text-xs sm:text-sm h-7 sm:h-8"
+            >
+              <Download className="h-3 w-3 sm:h-4 sm:w-4" />
+              {exporting ? 'Exporting...' : 'Export'}
+            </Button>
+          </div>
         </div>
-      </div>
 
       {/* Content Area - 2 Column Layout with Tri Layout on Right */}
       <div className="flex-1 min-h-0 overflow-hidden grid grid-cols-1 lg:grid-cols-2 gap-3 sm:gap-4 px-2 sm:px-0" style={{ minHeight: 0, overflowY: 'hidden' }}>
@@ -994,37 +994,37 @@ const AnalyticsView: React.FC = () => {
                   </CardDescription>
                 </div>
                 {selectedPeriod !== '1y' && (
-                  <div className="flex items-center gap-1.5 w-full sm:w-auto">
-                    <Button
-                      variant={chartPeriod === 'day' ? 'default' : 'outline'}
-                      size="sm"
-                      onClick={() => setChartPeriod('day')}
-                      className="text-[11px] sm:text-xs flex-1 sm:flex-initial touch-manipulation h-7 sm:h-8 px-2"
-                    >
-                      Days
-                    </Button>
-                    <Button
-                      variant={chartPeriod === 'week' ? 'default' : 'outline'}
-                      size="sm"
-                      onClick={() => setChartPeriod('week')}
-                      className="text-[11px] sm:text-xs flex-1 sm:flex-initial touch-manipulation h-7 sm:h-8 px-2"
-                    >
-                      Weeks
-                    </Button>
-                    <Button
-                      variant={chartPeriod === 'month' ? 'default' : 'outline'}
-                      size="sm"
-                      onClick={() => setChartPeriod('month')}
-                      className="text-[11px] sm:text-xs flex-1 sm:flex-initial touch-manipulation h-7 sm:h-8 px-2"
-                    >
-                      Months
-                    </Button>
-                  </div>
+                <div className="flex items-center gap-1.5 w-full sm:w-auto">
+                  <Button
+                    variant={chartPeriod === 'day' ? 'default' : 'outline'}
+                    size="sm"
+                    onClick={() => setChartPeriod('day')}
+                    className="text-[11px] sm:text-xs flex-1 sm:flex-initial touch-manipulation h-7 sm:h-8 px-2"
+                  >
+                    Days
+                  </Button>
+                  <Button
+                    variant={chartPeriod === 'week' ? 'default' : 'outline'}
+                    size="sm"
+                    onClick={() => setChartPeriod('week')}
+                    className="text-[11px] sm:text-xs flex-1 sm:flex-initial touch-manipulation h-7 sm:h-8 px-2"
+                  >
+                    Weeks
+                  </Button>
+                  <Button
+                    variant={chartPeriod === 'month' ? 'default' : 'outline'}
+                    size="sm"
+                    onClick={() => setChartPeriod('month')}
+                    className="text-[11px] sm:text-xs flex-1 sm:flex-initial touch-manipulation h-7 sm:h-8 px-2"
+                  >
+                    Months
+                  </Button>
+                </div>
                 )}
               </div>
             </CardHeader>
             <CardContent className="pt-0 pb-4 flex-1 min-h-0 flex flex-col" style={{ minHeight: '300px', height: '300px' }}>
-                {getChartData() ? (
+              {getChartData() ? (
                 <div className="flex-1 min-h-0 -mx-2 sm:mx-0 px-2 sm:px-0">
                 <Line 
                   data={getChartData()!} 
@@ -1140,12 +1140,12 @@ const AnalyticsView: React.FC = () => {
 
             {/* Bottom Section - 2 Charts Side-by-Side */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-3 flex-1 min-h-0">
-              {/* Status Breakdown */}
+            {/* Status Breakdown */}
               <Card className="flex flex-col min-h-0 flex-1">
                 <CardHeader className="pb-1.5 sm:pb-2 flex-shrink-0">
-                  <CardTitle className="text-xs sm:text-sm">Status Breakdown</CardTitle>
+                <CardTitle className="text-xs sm:text-sm">Status Breakdown</CardTitle>
                   <CardDescription className="text-[10px] sm:text-[11px] mt-0.5">Cases by status</CardDescription>
-                </CardHeader>
+              </CardHeader>
                 <CardContent className="pt-0 pb-3 flex-1 min-h-0 flex flex-col">
                 {getStatusChartData() ? (
                   <div className="flex-1 min-h-0 -mx-2 sm:mx-0 px-2 sm:px-0">
@@ -1194,15 +1194,15 @@ const AnalyticsView: React.FC = () => {
                   No status data available
                 </div>
               )}
-                </CardContent>
-              </Card>
+              </CardContent>
+            </Card>
 
               {/* Cases by Member */}
               <Card className="flex flex-col min-h-0 flex-1">
                 <CardHeader className="pb-1.5 sm:pb-2 flex-shrink-0">
                   <CardTitle className="text-xs sm:text-sm">Cases by Member</CardTitle>
                   <CardDescription className="text-[10px] sm:text-[11px] mt-0.5">Assigned cases per team member</CardDescription>
-                </CardHeader>
+              </CardHeader>
                 <CardContent className="pt-0 pb-3 flex-1 min-h-0 flex flex-col">
                 {getCasesByMemberChartData() ? (
                   <div className="flex-1 min-h-0 -mx-2 sm:mx-0 px-2 sm:px-0">
@@ -1246,17 +1246,17 @@ const AnalyticsView: React.FC = () => {
                       }
                     }}
                   />
-                </div>
+                      </div>
               ) : (
                 <div className="h-full flex items-center justify-center text-muted-foreground text-[10px] sm:text-[11px]">
                   No assignment data available
-                </div>
+                    </div>
               )}
-                </CardContent>
-              </Card>
+              </CardContent>
+            </Card>
 
-            </div>
           </div>
+        </div>
       </div>
     </div>
   );

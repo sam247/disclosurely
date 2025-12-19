@@ -1753,7 +1753,7 @@ Additional Details: ${decrypted.additionalDetails || 'None provided'}`;
               <div className="flex-shrink-0">
                 <div className="flex items-center justify-between mb-2 px-2">
                   <div className="flex items-center gap-1">
-                    <h3 className="text-sm font-semibold">Documents</h3>
+                  <h3 className="text-sm font-semibold">Documents</h3>
                     <TooltipProvider delayDuration={200}>
                       <Tooltip>
                         <TooltipTrigger asChild>

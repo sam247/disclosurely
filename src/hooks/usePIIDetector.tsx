@@ -92,7 +92,7 @@ export function usePIIDetector(
         text: det.original || det.value || '',
         position: { start: det.start || det.position?.start || 0, end: det.end || det.position?.end || 0 },
         severity: det.severity || (det.type === 'SSN' || det.type === 'EMAIL' || det.type === 'PHONE' ? 'high' : 'medium'),
-      }));
+        }));
 
       setDetections(result);
       setHasError(false);

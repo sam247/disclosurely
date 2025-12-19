@@ -90,10 +90,10 @@ const UrlRedirectMiddleware = ({ children }: { children: React.ReactNode }) => {
               .maybeSingle();
 
             if (!orgError && org) {
-              organizationId = org.id;
-              activeUrlType = org.active_url_type || 'subdomain';
+            organizationId = org.id;
+            activeUrlType = org.active_url_type || 'subdomain';
               customDomain = customDomainData.domain_name; // Use domain from custom_domains table
-              orgDomain = org.domain;
+            orgDomain = org.domain;
               customDomainVerified = customDomainData.status === 'active';
             }
           }

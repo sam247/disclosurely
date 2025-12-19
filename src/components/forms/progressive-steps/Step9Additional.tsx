@@ -23,6 +23,74 @@ const Step9Additional = ({ witnesses, previousReports, onChange, language, organ
     organizationId,
     confidenceThreshold: 0.4,
   });
+
+  // Generate redacted text based on detection type
+  const getRedactedText = (text: string, type: string): string => {
+    const lowerType = type.toLowerCase();
+    
+    if (lowerType === 'email' || lowerType.includes('email')) {
+      const [name, domain] = text.split('@');
+      return `${name.slice(0, 1)}****@${domain || '[REDACTED]'}`;
+    }
+    
+    if (lowerType === 'phone' || lowerType.includes('phone')) {
+      return '***-***-' + text.slice(-4);
+    }
+    
+    if (lowerType === 'ipaddress' || lowerType.includes('ip')) {
+      return '***.***.***.***';
+    }
+    
+    if (lowerType.includes('name') || lowerType === 'person') {
+      return '[NAME REDACTED]';
+    }
+    
+    if (lowerType === 'ssn' || lowerType.includes('ssn')) {
+      return '***-**-****';
+    }
+    
+    if (text.length > 2) {
+      return text[0] + '****' + text[text.length - 1];
+    }
+    
+    return '[REDACTED]';
+  };
+
+  // Handle redaction of a single detection
+  const handleRedact = (detectionIndex: number) => {
+    if (!witnessesDetections || detectionIndex >= witnessesDetections.length) return;
+    
+    const detection = witnessesDetections[detectionIndex];
+    if (!detection.position || !detection.text) return;
+    
+    const { start, end } = detection.position;
+    const redactedText = getRedactedText(detection.text, detection.type);
+    
+    const newWitnesses = witnesses.slice(0, start) + redactedText + witnesses.slice(end);
+    onChange({ witnesses: newWitnesses });
+  };
+
+  // Handle redaction of all detections
+  const handleRedactAll = () => {
+    if (!witnessesDetections || witnessesDetections.length === 0) return;
+    
+    const sortedDetections = [...witnessesDetections]
+      .filter(d => d.position && d.text)
+      .sort((a, b) => (b.position?.end || 0) - (a.position?.end || 0));
+    
+    let newWitnesses = witnesses;
+    
+    for (const detection of sortedDetections) {
+      if (detection.position && detection.text) {
+        const { start, end } = detection.position;
+        const redactedText = getRedactedText(detection.text, detection.type);
+        newWitnesses = newWitnesses.slice(0, start) + redactedText + newWitnesses.slice(end);
+      }
+    }
+    
+    onChange({ witnesses: newWitnesses });
+  };
+
   return (
     <div className="space-y-4 py-2 flex flex-col">
       <div className="flex items-center gap-2 sm:gap-3">
@@ -65,7 +133,12 @@ const Step9Additional = ({ witnesses, previousReports, onChange, language, organ
           {/* PII detection feedback for witnesses */}
           {witnesses.length > 5 && (
             <div className="space-y-2">
-              <PIIWarningBox detections={witnessesDetections} isDetecting={isDetectingWitnesses} />
+              <PIIWarningBox 
+                detections={witnessesDetections} 
+                isDetecting={isDetectingWitnesses}
+                onRedact={handleRedact}
+                onRedactAll={handleRedactAll}
+              />
               {!isDetectingWitnesses && !hasWitnessesPII && !hasWitnessesError && (
                 <div className="text-xs text-green-600 dark:text-green-400 flex items-center gap-2">
                   <CheckCircle2 className="h-3 w-3" />

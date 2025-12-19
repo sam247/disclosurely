@@ -489,7 +489,7 @@ export async function redactPII(
 
   // Always use OpenRedaction.com API (regex + AI)
   try {
-    return await redactPIIWithOpenRedact(content, organizationId);
+      return await redactPIIWithOpenRedact(content, organizationId);
   } catch (error) {
     console.error('[PII Detector] OpenRedact API failed:', error);
     // Return original content if API fails (fail-safe)

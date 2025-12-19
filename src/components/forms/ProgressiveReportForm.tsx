@@ -2,7 +2,6 @@ import { useState, useCallback, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
-import { scanForPrivacyRisks } from '@/utils/privacyDetection';
 import { progressiveFormTranslations } from '@/i18n/progressiveFormTranslations';
 import { SaveDraftButton } from './draft-controls/SaveDraftButton';
 
@@ -10,7 +9,6 @@ import { SaveDraftButton } from './draft-controls/SaveDraftButton';
 import Step1Welcome from './progressive-steps/Step1Welcome';
 import Step2Title from './progressive-steps/Step2Title';
 import Step3Description from './progressive-steps/Step3Description';
-import Step4PrivacyCheck from './progressive-steps/Step4PrivacyCheck';
 import Step5Category from './progressive-steps/Step5Category';
 import Step6Urgency from './progressive-steps/Step6Urgency';
 import Step7WhenWhere from './progressive-steps/Step7WhenWhere';
@@ -65,40 +63,12 @@ const ProgressiveReportForm = ({
 }: ProgressiveReportFormProps) => {
   const [currentStep, setCurrentStep] = useState(0);
   const [direction, setDirection] = useState<'forward' | 'backward'>('forward');
-  const [privacyRisks, setPrivacyRisks] = useState<any[]>([]);
-  const [hasViewedPrivacy, setHasViewedPrivacy] = useState(false);
   // Use default_language from settings, fallback to 'en'
   const [language, setLanguage] = useState<string>(defaultLanguage || 'en');
   const [currentDraftCode, setCurrentDraftCode] = useState(initialDraftCode);
 
-  // Check for privacy risks whenever title/description changes
-  useEffect(() => {
-    const checkPrivacyRisks = async () => {
-    const combinedText = `${formData.title}\n\n${formData.description}`;
-      const risks = await scanForPrivacyRisks(combinedText, organizationId);
-    setPrivacyRisks(risks);
-    };
-    
-    checkPrivacyRisks();
-  }, [formData.title, formData.description, organizationId]);
-
-  // Determine total steps (privacy check is conditional)
-  const showPrivacyStep = privacyRisks.length > 0 && currentStep >= 3 && !hasViewedPrivacy;
-  const totalSteps = showPrivacyStep ? 11 : 10;
-
-  // Calculate display step number (accounting for conditional privacy step)
-  const getDisplayStepNumber = () => {
-    if (currentStep === 0) return 0; // Welcome
-
-    // If we're past the privacy step (currentStep >= 4) and privacy was never shown
-    if (currentStep >= 4 && !hasViewedPrivacy && privacyRisks.length === 0) {
-      return currentStep - 1; // Subtract 1 because we skipped privacy step
-    }
-
-    return currentStep;
-  };
-
-  const displayStep = getDisplayStepNumber();
+  // Total steps (Step 3 privacy check removed - inline redaction now available in each step)
+  const totalSteps = 9; // Welcome(0), Title(1), Description(2), Category(3), Urgency(4), When/Where(5), Evidence(6), Additional(7), Review(8)
 
   // Step validation logic
   const validateStep = useCallback((step: number): boolean => {
@@ -109,19 +79,17 @@ const ProgressiveReportForm = ({
         return formData.title.trim().length >= 5;
       case 2: // Description
         return formData.description.trim().length >= 20;
-      case 3: // Privacy check (conditional)
-        return true; // Always can proceed
-      case 4: // Category (adjusted if no privacy step)
+      case 3: // Category
         return !!(formData.mainCategory && formData.subCategory);
-      case 5: // Urgency
+      case 4: // Urgency
         return formData.priority > 0;
-      case 6: // When/Where
+      case 5: // When/Where
         return true; // Optional fields
-      case 7: // Evidence
+      case 6: // Evidence
         return true; // Optional
-      case 8: // Additional
+      case 7: // Additional
         return true; // Optional
-      case 9: // Review
+      case 8: // Review
         return true;
       default:
         return false;
@@ -147,18 +115,10 @@ const ProgressiveReportForm = ({
         goToStep(2);
       }
     } else if (currentStep === 2) {
-      // Description - check if we need privacy step
+      // Description to Category
       if (validateStep(2)) {
-        if (privacyRisks.length > 0 && !hasViewedPrivacy) {
-          goToStep(3); // Go to privacy check
-        } else {
-          goToStep(4); // Skip privacy, go to category
-        }
+        goToStep(3); // Go to category
       }
-    } else if (currentStep === 3) {
-      // Privacy check done
-      setHasViewedPrivacy(true);
-      goToStep(4); // Go to category
     } else if (currentStep < totalSteps - 1) {
       // All other steps
       if (validateStep(currentStep)) {
@@ -168,24 +128,12 @@ const ProgressiveReportForm = ({
   };
 
   const handleBack = () => {
-    if (currentStep === 4 && hasViewedPrivacy && privacyRisks.length > 0) {
-      // Coming back from category, go to privacy if it was shown
-      goToStep(3);
-    } else if (currentStep === 4 && !hasViewedPrivacy) {
-      // No privacy step was shown, go back to description
-      goToStep(2);
-    } else if (currentStep > 0) {
+    if (currentStep > 0) {
       goToStep(currentStep - 1);
     }
   };
 
 
-  const handleAutoRedact = (redactedTitle: string, redactedDescription: string) => {
-    updateFormData({
-      title: redactedTitle,
-      description: redactedDescription
-    });
-  };
 
   const handleSubmit = async () => {
     await onSubmit(formData);
@@ -232,14 +180,6 @@ const ProgressiveReportForm = ({
 
   // Determine which step component to render
   const renderStep = () => {
-    // Adjust step numbers if privacy step is shown/hidden
-    let adjustedStep = currentStep;
-
-    if (currentStep >= 4 && !hasViewedPrivacy && privacyRisks.length === 0) {
-      // No privacy step shown, shift everything down by 1
-      adjustedStep = currentStep;
-    }
-
     switch (currentStep) {
       case 0:
         return (
@@ -273,19 +213,6 @@ const ProgressiveReportForm = ({
           />
         );
       case 3:
-        // Privacy check (only if risks detected)
-        if (privacyRisks.length > 0) {
-          return (
-            <Step4PrivacyCheck
-              title={formData.title}
-              description={formData.description}
-              risks={privacyRisks}
-              onAutoRedact={handleAutoRedact}
-              language={language}
-            />
-          );
-        }
-        // Fallthrough to category if no privacy risks
         return (
           <Step5Category
             mainCategory={formData.mainCategory}
@@ -298,24 +225,13 @@ const ProgressiveReportForm = ({
         );
       case 4:
         return (
-          <Step5Category
-            mainCategory={formData.mainCategory}
-            subCategory={formData.subCategory}
-            customCategory={formData.customCategory}
-            onChange={updateFormData}
-            isValid={validateStep(currentStep)}
-            language={language}
-          />
-        );
-      case 5:
-        return (
           <Step6Urgency
             priority={formData.priority}
             onChange={(priority) => updateFormData({ priority })}
             language={language}
           />
         );
-      case 6:
+      case 5:
         return (
           <Step7WhenWhere
             incidentDate={formData.incidentDate}
@@ -325,7 +241,7 @@ const ProgressiveReportForm = ({
             organizationId={organizationId}
           />
         );
-      case 7:
+      case 6:
         return (
           <Step8Evidence
             attachedFiles={attachedFiles}
@@ -333,7 +249,7 @@ const ProgressiveReportForm = ({
             language={language}
           />
         );
-      case 8:
+      case 7:
         return (
           <Step9Additional
             witnesses={formData.witnesses}
@@ -343,8 +259,8 @@ const ProgressiveReportForm = ({
             organizationId={organizationId}
           />
         );
+      case 8:
       case 9:
-      case 10:
         return (
           <Step10Review
             formData={formData}
@@ -375,8 +291,8 @@ const ProgressiveReportForm = ({
             {currentStep === 0
               ? t.navigation.welcome
               : t.navigation.step
-                  .replace('{current}', displayStep.toString())
-                  .replace('{total}', '9')}
+                  .replace('{current}', (currentStep).toString())
+                  .replace('{total}', (totalSteps - 1).toString())}
           </span>
           <span className="text-xs sm:text-sm text-gray-500">{Math.round(progressPercent)}{t.navigation.percent}</span>
         </div>
@@ -386,12 +302,10 @@ const ProgressiveReportForm = ({
       {/* Step content with animation - Fully responsive, no fixed heights */}
       <div
         className={`transition-all duration-300 ease-in-out ${
-          currentStep === 9 || currentStep === 10 
+          currentStep === 9 || currentStep === 8
             ? 'min-h-[180px]' // Review step - min height only, allow scroll
             : currentStep === 0
             ? 'min-h-[198px] sm:min-h-[352px]' // Welcome step - min height to accommodate footer
-            : currentStep === 3
-            ? 'min-h-[400px] sm:min-h-[500px]' // Privacy step - needs more space for content
             : 'min-h-[198px]' // All other steps - fully responsive, no fixed height
         }`}
         key={currentStep}

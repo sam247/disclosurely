@@ -222,10 +222,10 @@ serve(async (req) => {
           const result = await callOpenRedactAPI({
             text: msg.content,
             enable_ai: true, // Use AI for maximum coverage
-          });
-          
+        });
+        
           if (result.detections && result.detections.length > 0) {
-            piiDetected = true;
+          piiDetected = true;
             
             // Build redaction map from detections
             const msgRedactionMap: Record<string, string> = {};
@@ -242,10 +242,10 @@ serve(async (req) => {
             // Merge into global redaction map
             Object.entries(msgRedactionMap).forEach(([original, placeholder]) => {
               redactionMap[original] = placeholder;
-            });
-            
+          });
+          
             console.log(`[AI Gateway] Redacted ${result.detections.length} PII items from message`);
-          }
+        }
 
           return { ...msg, content: result.redacted_text || msg.content };
         } catch (error) {
