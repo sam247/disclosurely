@@ -41,56 +41,65 @@ const DashboardSidebar = ({
     icon: Home,
     path: '/dashboard',
     locked: false,
-    ownerOnly: false
+    ownerOnly: false,
+    caseHandlerVisible: true // Case handlers can see dashboard
   }, {
     title: 'AI Assistant',
     icon: Sparkles,
     path: '/dashboard/ai-assistant',
     locked: !limits.hasAIHelper || !isOrgAdmin,
-    ownerOnly: false
+    ownerOnly: false,
+    caseHandlerVisible: true // Case handlers can see AI Assistant
   }, {
     title: t('analytics'),
     icon: BarChart3,
     path: '/dashboard/analytics',
     locked: !isOrgAdmin,
-    ownerOnly: false
+    ownerOnly: false,
+    caseHandlerVisible: false // Case handlers cannot see analytics
   }, {
     title: t('sidebar.workflows'),
     icon: Workflow,
     path: '/dashboard/workflows',
     locked: !isOrgAdmin,
     badge: 'NEW',
-    ownerOnly: false
+    ownerOnly: false,
+    caseHandlerVisible: false // Case handlers cannot see workflows
   }, {
     title: t('audit'),
     icon: ScrollText,
     path: '/dashboard/audit',
     locked: !isOrgAdmin,
-    ownerOnly: false
+    ownerOnly: false,
+    caseHandlerVisible: false // Case handlers cannot see audit
   }, {
     title: t('sidebar.secureLink'),
     icon: LinkIcon,
     path: '/dashboard/secure-link',
     locked: false,
-    ownerOnly: false
+    ownerOnly: false,
+    caseHandlerVisible: false // Case handlers cannot see secure links
   }, {
     title: t('team'),
     icon: Users,
     path: '/dashboard/team',
     locked: !isOrgAdmin,
-    ownerOnly: false
+    ownerOnly: false,
+    caseHandlerVisible: false // Case handlers cannot see team
   }, {
     title: t('sidebar.integrations'),
     icon: Zap,
     path: '/dashboard/integrations',
     locked: !isOrgAdmin,
-    ownerOnly: false
+    ownerOnly: false,
+    caseHandlerVisible: false // Case handlers cannot see integrations
   }, {
     title: t('sidebar.settings'),
     icon: Settings,
     path: '/dashboard/settings',
     locked: !isOrgAdmin,
-    ownerOnly: false
+    ownerOnly: false,
+    caseHandlerVisible: false // Case handlers cannot see settings
   }];
 
   const handleNavigation = (item: typeof menuItems[0]) => {
@@ -117,6 +126,11 @@ const DashboardSidebar = ({
               {menuItems.map(item => {
                 // STRICT OWNER CHECK: Hide owner-only items from non-owners
                 if (item.ownerOnly && !isOwner) {
+                  return null;
+                }
+                
+                // Hide restricted items from case handlers (only show Dashboard and AI Assistant)
+                if (isCaseHandler && !isOrgAdmin && !item.caseHandlerVisible) {
                   return null;
                 }
                 

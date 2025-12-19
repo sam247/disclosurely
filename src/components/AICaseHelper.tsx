@@ -12,6 +12,7 @@ import { sanitizeHtml } from '@/utils/sanitizer';
 import { formatMarkdownToHtml } from '@/utils/markdownFormatter';
 import { useAuth } from '@/hooks/useAuth';
 import { useOrganization } from '@/hooks/useOrganization';
+import { useUserRoles } from '@/hooks/useUserRoles';
 import { auditLogger } from '@/utils/auditLogger';
 import { PIIPreviewModal } from '@/components/PIIPreviewModal';
 import { decryptReport } from '@/utils/encryption';
@@ -82,6 +83,7 @@ const AICaseHelper: React.FC<AICaseHelperProps> = ({ reportId, reportContent }) 
   const { user } = useAuth();
   const { organization } = useOrganization();
   const { toast } = useToast();
+  const { isOrgAdmin, loading: rolesLoading } = useUserRoles();
 
   // Detect mobile screen size
   useEffect(() => {
@@ -143,15 +145,24 @@ const AICaseHelper: React.FC<AICaseHelperProps> = ({ reportId, reportContent }) 
   }, [isResizing]);
 
   const loadNewCases = async () => {
-    if (!user) return;
+    if (!user || !organization?.id) return;
     
     setIsLoadingCases(true);
     try {
-      const { data, error } = await supabase
+      let casesQuery = supabase
         .from('reports')
-        .select('id, tracking_id, title, status, created_at, priority')
+        .select('id, tracking_id, title, status, created_at, priority, assigned_to')
+        .eq('organization_id', organization.id)
         .neq('status', 'archived') // Load all cases except archived
+        .is('deleted_at', null)
         .order('created_at', { ascending: false });
+
+      // Filter by assigned_to for case handlers
+      if (isOrgAdmin === false && rolesLoading === false) {
+        casesQuery = casesQuery.eq('assigned_to', user.id);
+      }
+
+      const { data, error } = await casesQuery;
 
       if (error) throw error;
       setNewCases(data || []);
@@ -168,16 +179,23 @@ const AICaseHelper: React.FC<AICaseHelperProps> = ({ reportId, reportContent }) 
   };
 
   const loadSavedAnalyses = async () => {
-    if (!organization?.id) return;
+    if (!organization?.id || !user) return;
     
     setIsLoadingSaved(true);
     try {
-      const { data, error } = await supabase
+      let analysesQuery = supabase
         .from('ai_case_analyses')
         .select('id, case_title, tracking_id, analysis_content, created_at')
         .eq('organization_id', organization.id)
         .order('created_at', { ascending: false })
         .limit(10);
+
+      // Filter by created_by for case handlers (only show their own analyses)
+      if (isOrgAdmin === false && rolesLoading === false) {
+        analysesQuery = analysesQuery.eq('created_by', user.id);
+      }
+
+      const { data, error } = await analysesQuery;
 
       if (error) throw error;
       setSavedAnalyses(data || []);

@@ -6,6 +6,7 @@ import { useSessionTimeout } from './hooks/useSessionTimeout';
 import { useAuth } from './hooks/useAuth';
 import { useMultipleSessionDetection } from './hooks/useMultipleSessionDetection';
 import ProtectedRoute from './components/ProtectedRoute';
+import OwnerOnlyRoute from './components/dashboard/OwnerOnlyRoute';
 import ScrollToTop from './components/ScrollToTop';
 import UrlRedirectMiddleware from './components/UrlRedirectMiddleware';
 import ErrorBoundary from './components/forms/ErrorBoundary';
@@ -286,20 +287,22 @@ const AppContent = () => {
           path="/dashboard/settings"
           element={
             <ProtectedRoute>
-              <DashboardLayout>
-                <ErrorBoundary>
-                  <Suspense fallback={
-                    <div className="flex items-center justify-center p-8">
-                      <div className="text-center">
-                        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
-                        <p className="text-sm text-muted-foreground">Loading settings...</p>
+              <OwnerOnlyRoute>
+                <DashboardLayout>
+                  <ErrorBoundary>
+                    <Suspense fallback={
+                      <div className="flex items-center justify-center p-8">
+                        <div className="text-center">
+                          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
+                          <p className="text-sm text-muted-foreground">Loading settings...</p>
+                        </div>
                       </div>
-                    </div>
-                  }>
-                    <OrganizationSettings />
-                  </Suspense>
-                </ErrorBoundary>
-              </DashboardLayout>
+                    }>
+                      <OrganizationSettings />
+                    </Suspense>
+                  </ErrorBoundary>
+                </DashboardLayout>
+              </OwnerOnlyRoute>
             </ProtectedRoute>
           }
         />
@@ -307,9 +310,11 @@ const AppContent = () => {
           path="/dashboard/team"
           element={
             <ProtectedRoute>
-              <DashboardLayout>
-                <TeamView />
-              </DashboardLayout>
+              <OwnerOnlyRoute>
+                <DashboardLayout>
+                  <TeamView />
+                </DashboardLayout>
+              </OwnerOnlyRoute>
             </ProtectedRoute>
           }
         />
@@ -317,9 +322,11 @@ const AppContent = () => {
           path="/dashboard/branding"
           element={
             <ProtectedRoute>
-              <DashboardLayout>
-                <BrandingView />
-              </DashboardLayout>
+              <OwnerOnlyRoute>
+                <DashboardLayout>
+                  <BrandingView />
+                </DashboardLayout>
+              </OwnerOnlyRoute>
             </ProtectedRoute>
           }
         />
@@ -327,9 +334,11 @@ const AppContent = () => {
           path="/dashboard/secure-link"
           element={
             <ProtectedRoute>
-              <DashboardLayout>
-                <SecureLinkView />
-              </DashboardLayout>
+              <OwnerOnlyRoute>
+                <DashboardLayout>
+                  <SecureLinkView />
+                </DashboardLayout>
+              </OwnerOnlyRoute>
             </ProtectedRoute>
           }
         />
@@ -337,9 +346,11 @@ const AppContent = () => {
           path="/dashboard/integrations"
           element={
             <ProtectedRoute>
-              <DashboardLayout>
-                <IntegrationsView />
-              </DashboardLayout>
+              <OwnerOnlyRoute>
+                <DashboardLayout>
+                  <IntegrationsView />
+                </DashboardLayout>
+              </OwnerOnlyRoute>
             </ProtectedRoute>
           }
         />
@@ -347,9 +358,11 @@ const AppContent = () => {
           path="/dashboard/analytics"
           element={
             <ProtectedRoute>
-              <DashboardLayout>
-                <AnalyticsView />
-              </DashboardLayout>
+              <OwnerOnlyRoute>
+                <DashboardLayout>
+                  <AnalyticsView />
+                </DashboardLayout>
+              </OwnerOnlyRoute>
             </ProtectedRoute>
           }
         />
@@ -357,9 +370,11 @@ const AppContent = () => {
           path="/dashboard/audit"
           element={
             <ProtectedRoute>
-              <DashboardLayout>
-                <AuditLogView />
-              </DashboardLayout>
+              <OwnerOnlyRoute>
+                <DashboardLayout>
+                  <AuditLogView />
+                </DashboardLayout>
+              </OwnerOnlyRoute>
             </ProtectedRoute>
           }
         />
@@ -367,9 +382,11 @@ const AppContent = () => {
           path="/dashboard/workflows"
           element={
             <ProtectedRoute>
-              <DashboardLayout>
-                <WorkflowsView />
-              </DashboardLayout>
+              <OwnerOnlyRoute>
+                <DashboardLayout>
+                  <WorkflowsView />
+                </DashboardLayout>
+              </OwnerOnlyRoute>
             </ProtectedRoute>
           }
         />

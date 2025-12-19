@@ -248,6 +248,7 @@ const AIAssistantView = () => {
   const { user } = useAuth();
   const { organization } = useOrganization();
   const { toast } = useToast();
+  const { isOrgAdmin, loading: rolesLoading } = useUserRoles();
   const navigate = useNavigate();
 
   // Detect mobile screen size
@@ -294,14 +295,21 @@ const AIAssistantView = () => {
     
     setIsLoadingCases(true);
     try {
-      const { data, error } = await supabase
+      let casesQuery = supabase
         .from('reports')
-        .select('id, tracking_id, title, status, created_at, priority')
+        .select('id, tracking_id, title, status, created_at, priority, assigned_to')
         .eq('organization_id', organization.id)
         .neq('status', 'archived')
         .is('deleted_at', null) // Exclude deleted cases
         .order('created_at', { ascending: false })
         .limit(100);
+
+      // Filter by assigned_to for case handlers
+      if (isOrgAdmin === false && rolesLoading === false) {
+        casesQuery = casesQuery.eq('assigned_to', user.id);
+      }
+
+      const { data, error } = await casesQuery;
 
       if (error) throw error;
       setCases(Array.isArray(data) ? data : []);
@@ -731,12 +739,20 @@ Priority: ${selectedCaseData.priority}/5
     
     if (Array.isArray(cases) && cases.length > 0) {
       // Fetch full case data including report_type and tags for filtering
-      const { data: fullCasesData } = await supabase
+      let fullCasesQuery = supabase
         .from('reports')
-        .select('id, tracking_id, title, status, priority, report_type, tags')
+        .select('id, tracking_id, title, status, priority, report_type, tags, assigned_to')
         .eq('organization_id', organization.id)
         .neq('status', 'archived')
+        .is('deleted_at', null)
         .limit(100);
+
+      // Filter by assigned_to for case handlers
+      if (isOrgAdmin === false && rolesLoading === false && user) {
+        fullCasesQuery = fullCasesQuery.eq('assigned_to', user.id);
+      }
+
+      const { data: fullCasesData } = await fullCasesQuery;
       
       if (Array.isArray(fullCasesData) && fullCasesData.length > 0) {
         const harassmentCases = fullCasesData.filter(c => 
@@ -1386,16 +1402,23 @@ Additional Details: ${decrypted.additionalDetails || 'None provided'}`;
   };
 
   const loadSavedAnalyses = async () => {
-    if (!organization?.id) return;
+    if (!organization?.id || !user) return;
     
     setIsLoadingSavedAnalyses(true);
     try {
-      const { data, error } = await supabase
+      let analysesQuery = supabase
         .from('ai_case_analyses')
         .select('*')
         .eq('organization_id', organization.id)
         .order('created_at', { ascending: false })
         .limit(50);
+
+      // Filter by created_by for case handlers (only show their own analyses)
+      if (isOrgAdmin === false && rolesLoading === false) {
+        analysesQuery = analysesQuery.eq('created_by', user.id);
+      }
+
+      const { data, error } = await analysesQuery;
 
       if (error) throw error;
       setSavedAnalyses(Array.isArray(data) ? data : []);
