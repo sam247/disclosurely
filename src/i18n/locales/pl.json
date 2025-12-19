@@ -504,5 +504,9 @@
       "standard": "Standardowy obsługujący sprawy",
       "any": "Dowolny dostępny obsługujący"
     }
-  }
+  },
+  "noReportsFound": "Nie znaleziono raportów",
+  "noReports": "Brak raportów",
+  "noAssignedCasesMessage": "Nie masz przypisanych spraw. Proszę poproś administratora o przypisanie sprawy.",
+  "noArchivedReports": "Brak zarchiwizowanych raportów"
 }
