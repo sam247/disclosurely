@@ -83,7 +83,7 @@ Please provide your analysis in the following JSON format:
   "impact_score": [1-5],
   "impact_reasoning": "explanation for impact score",
   "risk_score": [1-25],
-  "risk_level": "Low/Medium/High/Critical",
+  "risk_level": "Low/Medium/High/Critical (will be automatically adjusted based on risk_score thresholds)",
   "priority_recommendation": "Immediate/High/Medium/Low",
   "whistleblower_priority_alignment": "explanation of how your assessment compares to the whistleblower's ${priorityLabel} rating and why",
   "immediate_actions": ["list of immediate actions required"],
@@ -146,6 +146,23 @@ Focus on compliance, legal, operational, and reputational risks. Be thorough but
         immediate_actions: ["Review case manually"],
         risk_factors: ["Analysis parsing error"]
       };
+    }
+
+    // Override risk_level based on stricter thresholds to make "High" more exclusive
+    // Risk score ranges (1-25):
+    // - Critical: 22-25 (severity 8.8-10/10)
+    // - High: 18-21 (severity 7.2-8.4/10) - More exclusive
+    // - Medium: 10-17 (severity 4-6.8/10) - Includes 6/10
+    // - Low: 1-9 (severity 0.4-3.6/10)
+    const riskScore = riskAssessment.risk_score || 0;
+    if (riskScore >= 22) {
+      riskAssessment.risk_level = "Critical";
+    } else if (riskScore >= 18) {
+      riskAssessment.risk_level = "High";
+    } else if (riskScore >= 10) {
+      riskAssessment.risk_level = "Medium";
+    } else {
+      riskAssessment.risk_level = "Low";
     }
 
     return new Response(JSON.stringify({ 
