@@ -1146,7 +1146,7 @@ const AnalyticsView: React.FC = () => {
                   <CardTitle className="text-xs sm:text-sm">Status Breakdown</CardTitle>
                   <CardDescription className="text-[10px] sm:text-[11px] mt-0.5">Cases by status</CardDescription>
                 </CardHeader>
-                <CardContent className="pt-0 pb-3 flex-1 min-h-0 flex flex-col" style={{ minHeight: '200px', height: '200px' }}>
+                <CardContent className="pt-0 pb-3 flex-1 min-h-0 flex flex-col" style={{ minHeight: '280px', height: '280px' }}>
                 {getStatusChartData() ? (
                   <div className="flex-1 min-h-0 -mx-2 sm:mx-0 px-2 sm:px-0">
                   <Bar 
@@ -1203,7 +1203,7 @@ const AnalyticsView: React.FC = () => {
                   <CardTitle className="text-xs sm:text-sm">Cases by Member</CardTitle>
                   <CardDescription className="text-[10px] sm:text-[11px] mt-0.5">Assigned cases per team member</CardDescription>
                 </CardHeader>
-                <CardContent className="pt-0 pb-3 flex-1 min-h-0 flex flex-col" style={{ minHeight: '200px', height: '200px' }}>
+                <CardContent className="pt-0 pb-3 flex-1 min-h-0 flex flex-col" style={{ minHeight: '280px', height: '280px' }}>
                 {getCasesByMemberChartData() ? (
                   <div className="flex-1 min-h-0 -mx-2 sm:mx-0 px-2 sm:px-0">
                   <Bar 
