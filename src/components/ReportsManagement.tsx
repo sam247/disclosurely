@@ -66,7 +66,12 @@ const ReportsManagement = () => {
   const { user } = useAuth();
   const { toast } = useToast();
   const { t } = useTranslation();
-  const { isOrgAdmin, loading: rolesLoading } = useUserRoles();
+  const { isOrgAdmin, loading: rolesLoading, roles, isAdmin } = useUserRoles();
+  
+  // Check if user is a case handler (has case_handler role)
+  // System admins bypass case handler restrictions
+  const hasCaseHandlerRole = roles.includes('case_handler');
+  const shouldRestrictCaseHandler = hasCaseHandlerRole && !isAdmin;
   
   const [reports, setReports] = useState<Report[]>([]);
   const [selectedReport, setSelectedReport] = useState<Report | null>(null);
@@ -113,8 +118,8 @@ const ReportsManagement = () => {
         .filter('deleted_at', showDeleted ? 'not.is' : 'is', null)
         .order('created_at', { ascending: false });
 
-      // Filter by assigned_to for case handlers
-      if (isOrgAdmin === false && rolesLoading === false && user) {
+      // Filter by assigned_to for case handlers (unless they're a system admin)
+      if (shouldRestrictCaseHandler && rolesLoading === false && user?.id) {
         reportsQuery = reportsQuery.eq('assigned_to', user.id);
       }
 

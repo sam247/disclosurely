@@ -249,7 +249,13 @@ const AIAssistantView = () => {
   const { user } = useAuth();
   const { organization } = useOrganization();
   const { toast } = useToast();
-  const { isOrgAdmin, loading: rolesLoading } = useUserRoles();
+  const { isOrgAdmin, loading: rolesLoading, roles, isAdmin } = useUserRoles();
+  
+  // Check if user is a case handler (has case_handler role)
+  // System admins bypass case handler restrictions
+  const hasCaseHandlerRole = roles.includes('case_handler');
+  const shouldRestrictCaseHandler = hasCaseHandlerRole && !isAdmin;
+  
   const navigate = useNavigate();
 
   // Detect mobile screen size
@@ -305,8 +311,8 @@ const AIAssistantView = () => {
         .order('created_at', { ascending: false })
         .limit(100);
 
-      // Filter by assigned_to for case handlers
-      if (isOrgAdmin === false && rolesLoading === false) {
+      // Filter by assigned_to for case handlers (unless they're a system admin)
+      if (shouldRestrictCaseHandler && rolesLoading === false && user?.id) {
         casesQuery = casesQuery.eq('assigned_to', user.id);
       }
 
@@ -748,8 +754,8 @@ Priority: ${selectedCaseData.priority}/5
         .is('deleted_at', null)
         .limit(100);
 
-      // Filter by assigned_to for case handlers
-      if (isOrgAdmin === false && rolesLoading === false && user) {
+      // Filter by assigned_to for case handlers (unless they're a system admin)
+      if (shouldRestrictCaseHandler && rolesLoading === false && user?.id) {
         fullCasesQuery = fullCasesQuery.eq('assigned_to', user.id);
       }
 
@@ -1414,8 +1420,8 @@ Additional Details: ${decrypted.additionalDetails || 'None provided'}`;
         .order('created_at', { ascending: false })
         .limit(50);
 
-      // Filter by created_by for case handlers (only show their own analyses)
-      if (isOrgAdmin === false && rolesLoading === false) {
+      // Filter by created_by for case handlers (only show their own analyses, unless they're a system admin)
+      if (shouldRestrictCaseHandler && rolesLoading === false && user?.id) {
         analysesQuery = analysesQuery.eq('created_by', user.id);
       }
 

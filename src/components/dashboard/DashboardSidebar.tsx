@@ -28,13 +28,17 @@ const DashboardSidebar = ({
   const location = useLocation();
   const { t } = useTranslation();
   const { limits } = useSubscriptionLimits();
-  const { isOrgAdmin, isCaseHandler } = useUserRoles();
+  const { isOrgAdmin, isCaseHandler, roles, isAdmin } = useUserRoles();
   const { user } = useAuth();
   
   // Admin/owner visibility now allows system admins or org admins
   // This check is mirrored in route guards and the admin panel itself
-  const { isAdmin } = useUserRoles();
   const isOwner = isAdmin || isOrgAdmin;
+  
+  // Check if user is a case handler (has case_handler role)
+  // System admins bypass case handler restrictions
+  const hasCaseHandlerRole = roles.includes('case_handler');
+  const shouldRestrictCaseHandler = hasCaseHandlerRole && !isAdmin;
 
   const menuItems = [{
     title: t('dashboard'),
@@ -130,7 +134,8 @@ const DashboardSidebar = ({
                 }
                 
                 // Hide restricted items from case handlers (only show Dashboard and AI Assistant)
-                if (isCaseHandler && !isOrgAdmin && !item.caseHandlerVisible) {
+                // Apply restrictions if user has case_handler role (unless they're a system admin)
+                if (shouldRestrictCaseHandler && !item.caseHandlerVisible) {
                   return null;
                 }
                 
@@ -205,7 +210,7 @@ const DashboardSidebar = ({
             >
               Privacy
             </button>
-            <span>â€¢</span>
+            <span>•</span>
             <button 
               onClick={() => navigate('/terms')}
               className="hover:text-foreground transition-colors"

@@ -208,7 +208,12 @@ const getHandlerRecommendation = (urgency: 'HIGH' | 'MEDIUM' | 'LOW'): string =>
 
 const DashboardView = () => {
   const { user, subscriptionData } = useAuth();
-  const { isOrgAdmin, loading: rolesLoading } = useUserRoles();
+  const { isOrgAdmin, loading: rolesLoading, roles, isAdmin } = useUserRoles();
+  
+  // Check if user is a case handler (has case_handler role)
+  // System admins bypass case handler restrictions
+  const hasCaseHandlerRole = roles.includes('case_handler');
+  const shouldRestrictCaseHandler = hasCaseHandlerRole && !isAdmin;
   const { customDomain, organizationId } = useCustomDomain();
   const { organization } = useOrganization();
   const { toast } = useToast();
@@ -509,10 +514,9 @@ const DashboardView = () => {
           .order('created_at', { ascending: false })
           .limit(20);
 
-        // Add filtering for team members
-        if (isOrgAdmin === false && rolesLoading === false) {
-          reportsQuery = reportsQuery.eq('assigned_to', user?.id);
-        } else {
+        // Add filtering for case handlers (unless they're a system admin)
+        if (shouldRestrictCaseHandler && rolesLoading === false && user?.id) {
+          reportsQuery = reportsQuery.eq('assigned_to', user.id);
         }
 
         const { data: reportsWithAI, error: reportsError } = await reportsQuery;
@@ -531,11 +535,11 @@ const DashboardView = () => {
           .order('created_at', { ascending: false })
           .limit(20);
 
-        // Add filtering for archived reports
-        if (isOrgAdmin === false && rolesLoading === false) {
+        // Add filtering for archived reports (case handlers)
+        if (shouldRestrictCaseHandler && rolesLoading === false && user?.id) {
           // Note: We can't modify the query after it's executed, so we'll filter the results
           if (archivedWithAI) {
-            archivedData = archivedWithAI.filter(report => report.assigned_to === user?.id);
+            archivedData = archivedWithAI.filter(report => report.assigned_to === user.id);
           }
         } else {
           archivedData = archivedWithAI;
@@ -553,9 +557,9 @@ const DashboardView = () => {
           .order('created_at', { ascending: false })
           .limit(20);
 
-        // Add filtering for team members in fallback query
-        if (isOrgAdmin === false && rolesLoading === false) {
-          reportsBasicQuery = reportsBasicQuery.eq('assigned_to', user?.id);
+        // Add filtering for case handlers in fallback query
+        if (shouldRestrictCaseHandler && rolesLoading === false && user?.id) {
+          reportsBasicQuery = reportsBasicQuery.eq('assigned_to', user.id);
         }
 
         const { data: reportsBasic, error: reportsBasicError } = await reportsBasicQuery;
@@ -574,9 +578,9 @@ const DashboardView = () => {
 
         if (archivedBasicError) throw archivedBasicError;
         
-        // Add filtering for archived reports in fallback
-        if (isOrgAdmin === false && rolesLoading === false) {
-          archivedData = archivedBasic?.filter(report => report.assigned_to === user?.id) || [];
+        // Add filtering for archived reports in fallback (case handlers)
+        if (shouldRestrictCaseHandler && rolesLoading === false && user?.id) {
+          archivedData = archivedBasic?.filter(report => report.assigned_to === user.id) || [];
         } else {
           archivedData = archivedBasic;
         }
