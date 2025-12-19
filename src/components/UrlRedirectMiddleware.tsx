@@ -71,20 +71,31 @@ const UrlRedirectMiddleware = ({ children }: { children: React.ReactNode }) => {
           }
         } else {
           // Check if we're on a custom domain
-          // Look up organization by custom_domain
-          const { data: org, error } = await supabase
-            .from('organizations')
-            .select('id, domain, active_url_type, custom_domain, custom_domain_verified')
-            .eq('custom_domain', currentHost)
+          // Use custom_domains table (more reliable than organizations.custom_domain)
+          const { data: customDomainData, error: customDomainError } = await supabase
+            .from('custom_domains')
+            .select('organization_id, domain_name, is_active, status')
+            .eq('domain_name', currentHost)
             .eq('is_active', true)
-            .single();
+            .eq('status', 'active')
+            .maybeSingle();
 
-          if (!error && org) {
-            organizationId = org.id;
-            activeUrlType = org.active_url_type || 'subdomain';
-            customDomain = org.custom_domain;
-            orgDomain = org.domain;
-            customDomainVerified = org.custom_domain_verified || false;
+          if (!customDomainError && customDomainData) {
+            // Now fetch the organization using the organization_id
+            const { data: org, error: orgError } = await supabase
+              .from('organizations')
+              .select('id, domain, active_url_type, custom_domain, custom_domain_verified')
+              .eq('id', customDomainData.organization_id)
+              .eq('is_active', true)
+              .maybeSingle();
+
+            if (!orgError && org) {
+              organizationId = org.id;
+              activeUrlType = org.active_url_type || 'subdomain';
+              customDomain = customDomainData.domain_name; // Use domain from custom_domains table
+              orgDomain = org.domain;
+              customDomainVerified = customDomainData.status === 'active';
+            }
           }
         }
 
