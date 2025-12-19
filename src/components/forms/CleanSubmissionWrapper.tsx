@@ -74,7 +74,7 @@ const CleanSubmissionWrapper = () => {
             .select('id')
             .eq('domain', slug)
             .eq('is_active', true)
-            .single()
+            .maybeSingle()
             .then(({ data, error }) => {
               if (!error && data) {
                 

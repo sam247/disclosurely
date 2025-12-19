@@ -1,9 +1,13 @@
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts'
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
+import { getAllowedOrigin, getCorsHeaders } from '../_shared/cors.ts'
 
-const corsHeaders = {
+// Default CORS headers for error responses
+const defaultCorsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+  'Access-Control-Allow-Methods': 'POST, OPTIONS',
+  'Content-Type': 'application/json',
 }
 
 const MAX_FILE_SIZE = 100 * 1024 * 1024 // 100MB
@@ -460,15 +464,33 @@ async function logMetadataStripping(
 }
 
 serve(async (req) => {
-  // Handle CORS preflight requests
-  if (req.method === 'OPTIONS') {
-    return new Response(null, { headers: corsHeaders })
-  }
-
+  // Create Supabase client for CORS checks
   const supabaseClient = createClient(
     Deno.env.get('SUPABASE_URL') ?? '',
     Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
-  )
+  );
+
+  // Handle CORS preflight requests FIRST
+  if (req.method === 'OPTIONS') {
+    try {
+      const allowedOrigin = await getAllowedOrigin(req, supabaseClient);
+      const corsHeaders = getCorsHeaders(req, allowedOrigin);
+      return new Response(null, { status: 200, headers: corsHeaders });
+    } catch (error) {
+      console.error('[strip-all-metadata] CORS error:', error);
+      return new Response(null, { status: 200, headers: defaultCorsHeaders });
+    }
+  }
+
+  // Get proper CORS headers for the request
+  let corsHeaders;
+  try {
+    const allowedOrigin = await getAllowedOrigin(req, supabaseClient);
+    corsHeaders = getCorsHeaders(req, allowedOrigin);
+  } catch (error) {
+    console.error('[strip-all-metadata] CORS error:', error);
+    corsHeaders = defaultCorsHeaders;
+  }
 
   try {
     // Get the file from the request

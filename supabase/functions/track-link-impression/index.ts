@@ -1,30 +1,52 @@
 import "https://deno.land/x/xhr@0.1.0/mod.ts";
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
-import { getCorsHeadersWithDomainCheck } from '../_shared/cors.ts';
+import { getAllowedOrigin, getCorsHeaders } from '../_shared/cors.ts';
 
-const corsHeaders = {
+// Default CORS headers for error responses
+const defaultCorsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+  'Access-Control-Allow-Methods': 'POST, OPTIONS',
+  'Content-Type': 'application/json',
 };
 
 serve(async (req) => {
-  // Handle CORS preflight requests
+  // Create Supabase client for CORS checks
+  const supabase = createClient(
+    Deno.env.get('SUPABASE_URL') ?? '',
+    Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '',
+    {
+      auth: {
+        autoRefreshToken: false,
+        persistSession: false
+      }
+    }
+  );
+
+  // Handle CORS preflight requests FIRST
   if (req.method === 'OPTIONS') {
-    return new Response(null, { headers: corsHeaders });
+    try {
+      const allowedOrigin = await getAllowedOrigin(req, supabase);
+      const corsHeaders = getCorsHeaders(req, allowedOrigin);
+      return new Response(null, { status: 200, headers: corsHeaders });
+    } catch (error) {
+      console.error('[track-link-impression] CORS error:', error);
+      return new Response(null, { status: 200, headers: defaultCorsHeaders });
+    }
+  }
+
+  // Get proper CORS headers
+  let corsHeaders;
+  try {
+    const allowedOrigin = await getAllowedOrigin(req, supabase);
+    corsHeaders = getCorsHeaders(req, allowedOrigin);
+  } catch (error) {
+    console.error('[track-link-impression] CORS error:', error);
+    corsHeaders = defaultCorsHeaders;
   }
 
   try {
-    const supabase = createClient(
-      Deno.env.get('SUPABASE_URL') ?? '',
-      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '',
-      {
-        auth: {
-          autoRefreshToken: false,
-          persistSession: false
-        }
-      }
-    );
 
     const { linkId, linkToken } = await req.json();
 
@@ -78,18 +100,26 @@ serve(async (req) => {
       JSON.stringify({ success: true, data }),
       {
         status: 200,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        headers: corsHeaders,
       }
     );
   } catch (error) {
     console.error('Link impression tracking error:', error);
+    // Try to get CORS headers for error response
+    let errorCorsHeaders;
+    try {
+      const allowedOrigin = await getAllowedOrigin(req, supabase);
+      errorCorsHeaders = getCorsHeaders(req, allowedOrigin);
+    } catch {
+      errorCorsHeaders = defaultCorsHeaders;
+    }
     return new Response(
       JSON.stringify({
         error: error.message || 'Failed to track link impression',
       }),
       {
         status: 500,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        headers: errorCorsHeaders,
       }
     );
   }
