@@ -47,7 +47,7 @@ const DashboardSidebar = ({
     title: 'AI Assistant',
     icon: Sparkles,
     path: '/dashboard/ai-assistant',
-    locked: !limits.hasAIHelper || !isOrgAdmin,
+    locked: !limits.hasAIHelper, // Allow case handlers to access AI Assistant
     ownerOnly: false,
     caseHandlerVisible: true // Case handlers can see AI Assistant
   }, {
