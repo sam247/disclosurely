@@ -291,8 +291,8 @@ const ProgressiveReportForm = ({
             {currentStep === 0
               ? t.navigation.welcome
               : t.navigation.step
-                  .replace('{current}', (currentStep).toString())
-                  .replace('{total}', (totalSteps - 1).toString())}
+                  .replace('{current}', (currentStep + 1).toString())
+                  .replace('{total}', totalSteps.toString())}
           </span>
           <span className="text-xs sm:text-sm text-gray-500">{Math.round(progressPercent)}{t.navigation.percent}</span>
         </div>
