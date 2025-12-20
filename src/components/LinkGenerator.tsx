@@ -63,8 +63,8 @@ const LinkGenerator = () => {
   const { data: customDomains = [], refetch: refetchDomains, isLoading: isLoadingDomains } = useQuery<CustomDomainRecord[]>({
     queryKey: ['custom-domains', user?.id],
     enabled: !!user,
-    refetchOnWindowFocus: true,
-    staleTime: 0, // Don't cache - always fetch fresh
+    refetchOnWindowFocus: false, // Don't refetch on window focus to reduce unnecessary requests
+    staleTime: 30000, // Cache for 30 seconds to improve performance
     queryFn: async () => {
       if (!user) {
         
