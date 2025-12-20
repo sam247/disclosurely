@@ -587,47 +587,71 @@ const DashboardView = () => {
       setReports(reportsData || []);
       setArchivedReports(archivedData || []);
 
-      // Decrypt categories for display (both active and archived)
-      if ((reportsData || archivedData) && profile?.organization_id) {
-        const categories: Record<string, { main: string; sub: string }> = {};
-        const allReports = [...(reportsData || []), ...(archivedData || [])];
-        for (const report of allReports) {
-          try {
-            if (report.encrypted_content) {
-              const decrypted = await decryptReport(report.encrypted_content, profile.organization_id);
-              if (decrypted && decrypted.category) {
-                const parts = decrypted.category.split(' - ');
-                categories[report.id] = {
-                  main: parts[0] || decrypted.category,
-                  sub: parts[1] || ''
-                };
-              }
-            }
-          } catch (error) {
-            log.error(LogContext.ENCRYPTION, 'Failed to decrypt category for report', error as Error, { reportId: report.id });
+      // Decrypt categories and fetch team members in parallel for better performance
+      const [categoriesResult, teamResult] = await Promise.allSettled([
+        // Decrypt categories for display (both active and archived) - parallelized
+        (async () => {
+          if (!(reportsData || archivedData) || !profile?.organization_id) {
+            return {};
           }
-        }
-        setDecryptedCategories(categories);
+          const categories: Record<string, { main: string; sub: string }> = {};
+          const allReports = [...(reportsData || []), ...(archivedData || [])];
+          
+          // Decrypt in parallel batches of 5 for better performance
+          const batchSize = 5;
+          for (let i = 0; i < allReports.length; i += batchSize) {
+            const batch = allReports.slice(i, i + batchSize);
+            await Promise.allSettled(
+              batch.map(async (report) => {
+                try {
+                  if (report.encrypted_content) {
+                    const decrypted = await decryptReport(report.encrypted_content, profile.organization_id);
+                    if (decrypted && decrypted.category) {
+                      const parts = decrypted.category.split(' - ');
+                      categories[report.id] = {
+                        main: parts[0] || decrypted.category,
+                        sub: parts[1] || ''
+                      };
+                    }
+                  }
+                } catch (error) {
+                  log.error(LogContext.ENCRYPTION, 'Failed to decrypt category for report', error as Error, { reportId: report.id });
+                }
+              })
+            );
+          }
+          return categories;
+        })(),
+        // Fetch team members for assignment
+        supabase
+          .from('profiles')
+          .select(`
+            id, 
+            email, 
+            first_name, 
+            last_name,
+            user_roles!inner(role, is_active)
+          `)
+          .eq('organization_id', profile.organization_id)
+          .eq('is_active', true)
+          .eq('user_roles.is_active', true)
+      ]);
+
+      // Process decryption results
+      if (categoriesResult.status === 'fulfilled') {
+        setDecryptedCategories(categoriesResult.value);
       }
 
-      // Fetch team members for assignment
-      const { data: teamData, error: teamError } = await supabase
-        .from('profiles')
-        .select(`
-          id, 
-          email, 
-          first_name, 
-          last_name,
-          user_roles!inner(role, is_active)
-        `)
-        .eq('organization_id', profile.organization_id)
-        .eq('is_active', true)
-        .eq('user_roles.is_active', true);
-
-      if (teamError) {
-        log.error(LogContext.DATABASE, 'Error fetching team members', teamError as Error);
+      // Process team members results
+      if (teamResult.status === 'fulfilled') {
+        const { data: teamData, error: teamError } = teamResult.value;
+        if (teamError) {
+          log.error(LogContext.DATABASE, 'Error fetching team members', teamError as Error);
+        } else {
+          setTeamMembers(teamData || []);
+        }
       } else {
-        setTeamMembers(teamData || []);
+        log.error(LogContext.DATABASE, 'Error in team members fetch', teamResult.reason as Error);
       }
     } catch (error) {
       log.error(LogContext.DATABASE, 'Error fetching dashboard data', error as Error);
