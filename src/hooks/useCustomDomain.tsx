@@ -18,8 +18,10 @@ export const useCustomDomain = (): CustomDomainInfo => {
     loading: true
   });
 
+  // Memoize the hostname to avoid unnecessary re-runs
+  const currentHost = useMemo(() => window.location.hostname, []);
+
   const checkCustomDomain = async () => {
-      const currentHost = window.location.hostname;
       
 
       // Skip if on localhost or default Lovable domains
@@ -135,7 +137,9 @@ export const useCustomDomain = (): CustomDomainInfo => {
 
   useEffect(() => {
     checkCustomDomain();
-  }, []);
+    // Only re-run if hostname actually changes (e.g., navigation)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [currentHost]);
 
   // Add a refresh function to allow manual refresh
   const refreshDomainInfo = () => {

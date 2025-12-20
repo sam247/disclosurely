@@ -288,20 +288,20 @@ const AppContent = () => {
           element={
             <ProtectedRoute>
               <OwnerOnlyRoute>
-                <DashboardLayout>
-                  <ErrorBoundary>
-                    <Suspense fallback={
-                      <div className="flex items-center justify-center p-8">
-                        <div className="text-center">
-                          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
-                          <p className="text-sm text-muted-foreground">Loading settings...</p>
-                        </div>
+              <DashboardLayout>
+                <ErrorBoundary>
+                  <Suspense fallback={
+                    <div className="flex items-center justify-center p-8">
+                      <div className="text-center">
+                        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
+                        <p className="text-sm text-muted-foreground">Loading settings...</p>
                       </div>
-                    }>
-                      <OrganizationSettings />
-                    </Suspense>
-                  </ErrorBoundary>
-                </DashboardLayout>
+                    </div>
+                  }>
+                    <OrganizationSettings />
+                  </Suspense>
+                </ErrorBoundary>
+              </DashboardLayout>
               </OwnerOnlyRoute>
             </ProtectedRoute>
           }
@@ -311,9 +311,9 @@ const AppContent = () => {
           element={
             <ProtectedRoute>
               <OwnerOnlyRoute>
-                <DashboardLayout>
-                  <TeamView />
-                </DashboardLayout>
+              <DashboardLayout>
+                <TeamView />
+              </DashboardLayout>
               </OwnerOnlyRoute>
             </ProtectedRoute>
           }
@@ -323,9 +323,9 @@ const AppContent = () => {
           element={
             <ProtectedRoute>
               <OwnerOnlyRoute>
-                <DashboardLayout>
-                  <BrandingView />
-                </DashboardLayout>
+              <DashboardLayout>
+                <BrandingView />
+              </DashboardLayout>
               </OwnerOnlyRoute>
             </ProtectedRoute>
           }
@@ -335,9 +335,9 @@ const AppContent = () => {
           element={
             <ProtectedRoute>
               <OwnerOnlyRoute>
-                <DashboardLayout>
-                  <SecureLinkView />
-                </DashboardLayout>
+              <DashboardLayout>
+                <SecureLinkView />
+              </DashboardLayout>
               </OwnerOnlyRoute>
             </ProtectedRoute>
           }
@@ -347,9 +347,9 @@ const AppContent = () => {
           element={
             <ProtectedRoute>
               <OwnerOnlyRoute>
-                <DashboardLayout>
-                  <IntegrationsView />
-                </DashboardLayout>
+              <DashboardLayout>
+                <IntegrationsView />
+              </DashboardLayout>
               </OwnerOnlyRoute>
             </ProtectedRoute>
           }
@@ -359,9 +359,9 @@ const AppContent = () => {
           element={
             <ProtectedRoute>
               <OwnerOnlyRoute>
-                <DashboardLayout>
-                  <AnalyticsView />
-                </DashboardLayout>
+              <DashboardLayout>
+                <AnalyticsView />
+              </DashboardLayout>
               </OwnerOnlyRoute>
             </ProtectedRoute>
           }
