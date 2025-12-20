@@ -495,8 +495,11 @@ const DashboardView = () => {
       // First, try to fetch with AI fields, fallback to basic fields if they don't exist
       let reportsData, archivedData;
       
+      // Build queries in parallel for better performance
+      const isCaseHandlerFilter = shouldRestrictCaseHandler && rolesLoading === false && user?.id;
+      
       try {
-        // Try with AI fields first
+        // Try with AI fields first - build both queries
         let reportsQuery = supabase
           .from('reports')
           .select('id, title, tracking_id, status, created_at, encrypted_content, encryption_key_hash, priority, report_type, submitted_by_email, tags, assigned_to, ai_risk_score, ai_risk_level, ai_likelihood_score, ai_impact_score, ai_risk_assessment, ai_assessed_at, manual_risk_level, incident_date, location, witnesses, previous_reports, additional_notes')
@@ -506,19 +509,7 @@ const DashboardView = () => {
           .order('created_at', { ascending: false })
           .limit(20);
 
-        // Add filtering for case handlers (unless they're a system admin)
-        if (shouldRestrictCaseHandler && rolesLoading === false && user?.id) {
-          reportsQuery = reportsQuery.eq('assigned_to', user.id);
-        }
-
-        const { data: reportsWithAI, error: reportsError } = await reportsQuery;
-
-        if (reportsError) {
-          throw reportsError;
-        }
-        reportsData = reportsWithAI;
-
-        const { data: archivedWithAI, error: archivedError } = await supabase
+        let archivedQuery = supabase
           .from('reports')
           .select('id, title, tracking_id, status, created_at, encrypted_content, encryption_key_hash, priority, report_type, submitted_by_email, tags, assigned_to, incident_date, location, witnesses, previous_reports, additional_notes')
           .eq('organization_id', profile.organization_id)
@@ -527,18 +518,30 @@ const DashboardView = () => {
           .order('created_at', { ascending: false })
           .limit(20);
 
-        // Add filtering for archived reports (case handlers)
-        if (shouldRestrictCaseHandler && rolesLoading === false && user?.id) {
-          // Note: We can't modify the query after it's executed, so we'll filter the results
-          if (archivedWithAI) {
-            archivedData = archivedWithAI.filter(report => report.assigned_to === user.id);
-          }
+        // Add filtering for case handlers
+        if (isCaseHandlerFilter) {
+          reportsQuery = reportsQuery.eq('assigned_to', user.id);
+        }
+
+        // Execute both queries in parallel
+        const [reportsResult, archivedResult] = await Promise.all([
+          reportsQuery,
+          archivedQuery
+        ]);
+
+        if (reportsResult.error) {
+          throw reportsResult.error;
+        }
+        reportsData = reportsResult.data;
+
+        // Filter archived reports for case handlers
+        if (isCaseHandlerFilter && archivedResult.data) {
+          archivedData = archivedResult.data.filter(report => report.assigned_to === user.id);
         } else {
-          archivedData = archivedWithAI;
+          archivedData = archivedResult.data;
         }
 
       } catch (aiError) {
-        
         // Fallback to basic query without AI fields
         let reportsBasicQuery = supabase
           .from('reports')
@@ -549,17 +552,7 @@ const DashboardView = () => {
           .order('created_at', { ascending: false })
           .limit(20);
 
-        // Add filtering for case handlers in fallback query
-        if (shouldRestrictCaseHandler && rolesLoading === false && user?.id) {
-          reportsBasicQuery = reportsBasicQuery.eq('assigned_to', user.id);
-        }
-
-        const { data: reportsBasic, error: reportsBasicError } = await reportsBasicQuery;
-
-        if (reportsBasicError) throw reportsBasicError;
-        reportsData = reportsBasic;
-
-        const { data: archivedBasic, error: archivedBasicError } = await supabase
+        let archivedBasicQuery = supabase
           .from('reports')
           .select('id, title, tracking_id, status, created_at, encrypted_content, encryption_key_hash, priority, report_type, submitted_by_email, tags, assigned_to, incident_date, location, witnesses, previous_reports, additional_notes')
           .eq('organization_id', profile.organization_id)
@@ -568,13 +561,26 @@ const DashboardView = () => {
           .order('created_at', { ascending: false })
           .limit(20);
 
-        if (archivedBasicError) throw archivedBasicError;
+        if (isCaseHandlerFilter) {
+          reportsBasicQuery = reportsBasicQuery.eq('assigned_to', user.id);
+        }
+
+        // Execute both fallback queries in parallel
+        const [reportsBasicResult, archivedBasicResult] = await Promise.all([
+          reportsBasicQuery,
+          archivedBasicQuery
+        ]);
+
+        if (reportsBasicResult.error) throw reportsBasicResult.error;
+        if (archivedBasicResult.error) throw archivedBasicResult.error;
         
-        // Add filtering for archived reports in fallback (case handlers)
-        if (shouldRestrictCaseHandler && rolesLoading === false && user?.id) {
-          archivedData = archivedBasic?.filter(report => report.assigned_to === user.id) || [];
+        reportsData = reportsBasicResult.data;
+        
+        // Filter archived reports for case handlers
+        if (isCaseHandlerFilter && archivedBasicResult.data) {
+          archivedData = archivedBasicResult.data.filter(report => report.assigned_to === user.id) || [];
         } else {
-          archivedData = archivedBasic;
+          archivedData = archivedBasicResult.data;
         }
       }
 
