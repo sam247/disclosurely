@@ -401,7 +401,6 @@ const DashboardView = () => {
         } catch (error) {
           // Silently skip reports that can't be decrypted (might be from different org or corrupted)
           // This is expected for some reports, so we don't log it as an error
-          console.debug('Skipping report for pattern detection (decryption failed):', report.id);
         }
       }
 
