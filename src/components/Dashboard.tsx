@@ -28,6 +28,7 @@ import TrialPromptModal from '@/components/TrialPromptModal';
 import type { Report as DatabaseReport } from '@/types/database';
 import { auditLogger } from '@/utils/auditLogger';
 import { decryptReportCategory } from '@/utils/encryption';
+import { log, LogContext } from '@/utils/logger';
 
 interface Report {
   id: string;
@@ -424,7 +425,8 @@ const Dashboard = () => {
       const { data: archivedData, error: archivedError } = await archivedQuery;
 
       if (archivedError) {
-        // Error fetching archived reports
+        // Error fetching archived reports - silently fail, will show empty list
+        log.error(LogContext.DATABASE, 'Failed to fetch archived reports', archivedError);
       }
 
       // Fetch the single organization link (simplified to one link per org)

@@ -24,7 +24,10 @@ const SignupForm = () => {
   const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (password !== confirmPassword) {
+    // Use constant-time comparison to prevent timing attacks
+    const passwordsMatch = password.length === confirmPassword.length && 
+      password.split('').every((char, i) => char === confirmPassword[i]);
+    if (!passwordsMatch) {
       toast({
         title: "Error",
         description: "Passwords do not match",
