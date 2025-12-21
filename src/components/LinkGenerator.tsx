@@ -145,19 +145,21 @@ const LinkGenerator = () => {
     queryFn: async () => {
       if (!user) return null;
 
-      const { data: profile } = await supabase
+      const { data: profile, error: profileError } = await supabase
         .from('profiles')
         .select('organization_id')
         .eq('id', user.id)
-        .single();
+        .maybeSingle();
 
-      if (!profile?.organization_id) return null;
+      if (profileError || !profile?.organization_id) return null;
 
-      const { data: org } = await supabase
+      const { data: org, error: orgError } = await supabase
         .from('organizations')
         .select('id, domain, name, active_url_type, custom_domain, custom_domain_verified')
         .eq('id', profile.organization_id)
-        .single();
+        .maybeSingle();
+
+      if (orgError || !org) return null;
 
       // Use primaryDomainRecord from customDomains query as source of truth
       // This is more reliable since it's already fetched and up-to-date
@@ -192,13 +194,13 @@ const LinkGenerator = () => {
     queryFn: async () => {
       if (!user) return null;
 
-      const { data: profile } = await supabase
+      const { data: profile, error: profileError } = await supabase
         .from('profiles')
         .select('organization_id')
         .eq('id', user.id)
-        .single();
+        .maybeSingle();
 
-      if (!profile?.organization_id) return null;
+      if (profileError || !profile?.organization_id) return null;
 
       // First, try to get active links
       let { data: links } = await supabase
@@ -223,11 +225,15 @@ const LinkGenerator = () => {
       // If still no link exists, create a default one
       if (!links || links.length === 0) {
         // Create default link
-        const { data: org } = await supabase
+        const { data: org, error: orgError } = await supabase
           .from('organizations')
           .select('name')
           .eq('id', profile.organization_id)
-          .single();
+          .maybeSingle();
+
+        if (orgError) {
+          return null;
+        }
 
         const { data: newLink, error: createError } = await supabase
           .from('organization_links')
@@ -352,7 +358,28 @@ const LinkGenerator = () => {
         throw new Error('Custom domain must be verified before it can be set as active.');
       }
 
-      // First try the update with select to verify
+      // Check user permissions before attempting update
+      if (!user?.id) {
+        throw new Error('You must be logged in to update organization settings.');
+      }
+
+      const { data: userRoles, error: roleError } = await supabase
+        .from('user_roles')
+        .select('role')
+        .eq('user_id', user.id)
+        .eq('organization_id', organizationId)
+        .eq('is_active', true)
+        .in('role', ['admin', 'org_admin']);
+
+      if (roleError) {
+        throw new Error('Unable to verify permissions. Please try again.');
+      }
+
+      if (!userRoles || userRoles.length === 0) {
+        throw new Error('You do not have permission to update organization settings. Please contact your administrator.');
+      }
+
+      // Attempt the update
       const { data, error, count } = await supabase
         .from('organizations')
         .update({ active_url_type })
@@ -360,18 +387,24 @@ const LinkGenerator = () => {
         .select('active_url_type', { count: 'exact' });
 
       if (error) {
+        // Provide more specific error messages based on error code
+        if (error.code === 'PGRST301' || error.message?.includes('permission')) {
+          throw new Error('You do not have permission to update this organization. Please contact your administrator.');
+        }
         throw error;
       }
 
       // Check if any rows were updated
       if (!data || data.length === 0) {
-        throw new Error('Update failed: No rows were updated. You may not have permission to update this organization.');
+        throw new Error('Update failed: Unable to update organization. This may be due to insufficient permissions or the organization may have been deleted.');
       }
 
       // Verify the update actually happened
       if (data[0]?.active_url_type !== active_url_type) {
-        throw new Error('Update did not persist correctly');
+        throw new Error('Update did not persist correctly. Please try again.');
       }
+
+      return data[0];
     },
     onSuccess: async () => {
       // Invalidate and refetch organization info
