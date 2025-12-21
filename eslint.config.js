@@ -28,6 +28,7 @@ export default tseslint.config(
       ],
       "@typescript-eslint/no-unused-vars": "off",
       "@typescript-eslint/no-explicit-any": "warn", // Allow any in API files and external lib integrations
+      "@typescript-eslint/no-unused-expressions": "off", // Disable to avoid compatibility issues with ESLint 9
       // Security rules that fail the build
       "security/detect-object-injection": "warn", // Many false positives with safe object property access
       "security/detect-eval-with-expression": "error",
