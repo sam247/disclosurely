@@ -45,7 +45,6 @@ export const useCustomDomains = () => {
 
       setDomains(data.domains || []);
     } catch (err) {
-      console.error('Error fetching domains:', err);
       setError(err instanceof Error ? err.message : 'Failed to fetch domains');
     } finally {
       setLoading(false);
@@ -67,7 +66,6 @@ export const useCustomDomains = () => {
       
 
       if (error) {
-        console.error('❌ Supabase error:', error);
         throw error;
       }
 
@@ -96,7 +94,6 @@ export const useCustomDomains = () => {
       
 
       if (error) {
-        console.error('❌ Supabase verify error:', error);
         throw error;
       }
 
@@ -134,7 +131,6 @@ export const useCustomDomains = () => {
       
       return data.domain;
     } catch (err) {
-      console.error('Error activating domain:', err);
       throw err;
     }
   };
@@ -192,7 +188,6 @@ export const useCustomDomains = () => {
       
       return data.domain;
     } catch (err) {
-      console.error('Error setting primary domain:', err);
       throw err;
     }
   };

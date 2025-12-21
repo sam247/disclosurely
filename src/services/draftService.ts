@@ -31,8 +31,6 @@ export async function saveDraft(request: SaveDraftRequest): Promise<SaveDraftRes
     });
 
     if (error) {
-      console.error('Error saving draft:', error);
-      
       // Provide more specific error messages
       let errorMessage = 'Failed to save draft';
       if (error.message) {
@@ -54,7 +52,6 @@ export async function saveDraft(request: SaveDraftRequest): Promise<SaveDraftRes
     }
 
     if (!data) {
-      console.error('No data returned from edge function');
       return {
         success: false,
         draftCode: '',
@@ -71,7 +68,6 @@ export async function saveDraft(request: SaveDraftRequest): Promise<SaveDraftRes
       return data;
     } else if (data.error) {
       // Edge function returned an error in the data
-      console.error('Edge function error in data:', data.error);
       return {
         success: false,
         draftCode: '',
@@ -79,7 +75,6 @@ export async function saveDraft(request: SaveDraftRequest): Promise<SaveDraftRes
         message: data.error || 'Failed to save draft',
       };
     } else {
-      console.error('Unexpected response structure:', data);
       return {
         success: false,
         draftCode: '',
@@ -123,7 +118,6 @@ export async function resumeDraft(request: ResumeDraftRequest): Promise<ResumeDr
     });
 
     if (error) {
-      console.error('Error resuming draft:', error);
       return {
         success: false,
         formData: {} as ProgressiveFormData,
@@ -136,7 +130,6 @@ export async function resumeDraft(request: ResumeDraftRequest): Promise<ResumeDr
 
     return data;
   } catch (error) {
-    console.error('Error resuming draft:', error);
     return {
       success: false,
       formData: {} as ProgressiveFormData,
@@ -173,7 +166,6 @@ export async function updateDraft(draftCode: string, request: SaveDraftRequest):
 
     return data;
   } catch (error) {
-    console.error('Error updating draft:', error);
     return {
       success: false,
       draftCode: '',
@@ -199,7 +191,6 @@ export async function deleteDraft(draftCode: string): Promise<boolean> {
 
     return data?.success || false;
   } catch (error) {
-    console.error('Error deleting draft:', error);
     return false;
   }
 }

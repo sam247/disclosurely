@@ -93,7 +93,6 @@ const CustomDomainSettings = () => {
         setExistingDomains(response.data.domains || []);
       }
     } catch (error) {
-      console.error('Failed to fetch existing domains:', error);
     }
   }, []);
 
@@ -248,11 +247,9 @@ const CustomDomainSettings = () => {
         }));
         
         if (validRecords.length === 0) {
-          console.error('No valid records after filtering. Raw result:', result);
           throw new Error('No valid DNS records returned from server');
         }
         
-        console.log('Setting valid records:', validRecords);
         setRecords(validRecords);
         
         // AI Logging
@@ -300,7 +297,6 @@ const CustomDomainSettings = () => {
         });
       }
     } catch (error: any) {
-      console.error('Error generating records:', error);
       
       // Extract error message from various error formats
       let errorMessage = "Failed to generate verification records";
@@ -456,7 +452,6 @@ const CustomDomainSettings = () => {
         });
       }
     } catch (error: any) {
-      console.error('Error verifying domain:', error);
       const errorMessage = error?.message || 'Failed to verify domain';
       setVerificationResult({
         success: false,
@@ -584,7 +579,6 @@ const CustomDomainSettings = () => {
         description: `${recordType} record copied to clipboard`,
       });
     } catch (error) {
-      console.error('Failed to copy:', error);
     }
   };
 

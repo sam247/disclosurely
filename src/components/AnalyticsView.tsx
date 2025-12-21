@@ -90,28 +90,23 @@ const AnalyticsView: React.FC = () => {
   useEffect(() => {
     // Wait for organization to finish loading
     if (orgLoading) {
-      console.log('[Analytics] Waiting for organization to load...');
       return;
     }
     
     // Only fetch data if we have an organization ID
     if (organization?.id) {
-      console.log('[Analytics] Organization loaded, fetching analytics data for period:', selectedPeriod);
       fetchAnalyticsData();
     } else {
-      console.warn('[Analytics] No organization ID available');
       setLoading(false);
     }
   }, [selectedPeriod, organization?.id, orgLoading]);
 
   const fetchAnalyticsData = async () => {
     if (!organization?.id) {
-      console.warn('[Analytics] fetchAnalyticsData called without organization ID');
       setLoading(false);
       return;
     }
     
-    console.log('[Analytics] Starting fetchAnalyticsData for organization:', organization.id, 'period:', selectedPeriod);
     setLoading(true);
     
     try {
@@ -138,11 +133,9 @@ const AnalyticsView: React.FC = () => {
       const { data: currentReports, error: currentError } = await currentReportsQuery;
 
       if (currentError) {
-        console.error('Reports query error:', currentError);
         throw currentError;
       }
 
-      console.log('Analytics: Fetched reports count:', currentReports?.length || 0, 'for period:', selectedPeriod, 'from:', currentPeriodStart);
 
       // Query previous period reports for comparison - include all reports
       const { data: previousReports } = await supabase
@@ -220,7 +213,6 @@ const AnalyticsView: React.FC = () => {
       try {
         reportsWithCategories = await decryptCategoriesForReports(currentReports || [], organization.id);
       } catch (decryptError) {
-        console.warn('Category decryption failed, continuing without categories:', decryptError);
         // Continue with reports without decrypted categories
         reportsWithCategories = (currentReports || []).map(r => ({
           ...r,
@@ -230,14 +222,7 @@ const AnalyticsView: React.FC = () => {
       }
       
       // Process data - pass selectedPeriod for monthly trends generation, memberMap, and impressions
-      console.log('Analytics: Processing', reportsWithCategories.length, 'reports');
       const processedData = processSimpleAnalytics(reportsWithCategories, selectedPeriod, memberMap, linkImpressions, impressionsByLink);
-      console.log('Analytics: Processed data:', {
-        totalReports: processedData.totalReports,
-        mainCategories: processedData.mainCategories.length,
-        subCategories: processedData.subCategories.length,
-        statusBreakdown: processedData.statusBreakdown.length
-      });
       
       // Process previous period data (without decryption for now to speed things up)
       const previousData = previousReports ? processSimpleAnalytics(
@@ -252,7 +237,6 @@ const AnalyticsView: React.FC = () => {
       setAnalyticsData(processedData);
       setPreviousPeriodData(previousData);
     } catch (error) {
-      console.error('Error fetching analytics:', error);
       // Set empty analytics data so the page still renders
       setAnalyticsData({
         totalReports: 0,
@@ -338,7 +322,6 @@ const AnalyticsView: React.FC = () => {
                 };
               }
             } catch (error) {
-              console.warn('Failed to decrypt category for report:', report.id, error);
             }
           }
           return {

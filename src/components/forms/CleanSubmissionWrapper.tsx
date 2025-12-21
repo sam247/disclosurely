@@ -61,29 +61,31 @@ const CleanSubmissionWrapper = () => {
 
   // Also check for subdomain if not found via custom domain hook
   useEffect(() => {
-    if (!domainLoading && !organizationId && !hookOrganizationId) {
-      const currentHost = window.location.hostname;
-      const subdomainMatch = currentHost.match(/^([^.]+)\.disclosurely\.com$/);
-      
-      if (subdomainMatch) {
-        const slug = subdomainMatch[1];
-        if (slug !== 'app' && slug !== 'www' && slug !== 'secure') {
-          // Look up organization by subdomain
-          supabase
-            .from('organizations')
-            .select('id')
-            .eq('domain', slug)
-            .eq('is_active', true)
-            .maybeSingle()
-            .then(({ data, error }) => {
-              if (!error && data) {
-                
-                setOrganizationId(data.id);
-              }
-            });
+    const checkSubdomain = async () => {
+      if (!domainLoading && !organizationId && !hookOrganizationId) {
+        const currentHost = window.location.hostname;
+        const subdomainMatch = currentHost.match(/^([^.]+)\.disclosurely\.com$/);
+        
+        if (subdomainMatch) {
+          const slug = subdomainMatch[1];
+          if (slug !== 'app' && slug !== 'www' && slug !== 'secure') {
+            // Look up organization by subdomain
+            const { data, error } = await supabase
+              .from('organizations')
+              .select('id')
+              .eq('domain', slug)
+              .eq('is_active', true)
+              .maybeSingle();
+            
+            if (!error && data) {
+              setOrganizationId(data.id);
+            }
+          }
         }
       }
-    }
+    };
+    
+    checkSubdomain();
   }, [domainLoading, organizationId, hookOrganizationId]);
 
   useEffect(() => {
@@ -251,13 +253,6 @@ const CleanSubmissionWrapper = () => {
       }
 
       // Transform to expected format
-      // Log logo URLs for debugging
-      console.log('[CleanSubmissionWrapper] Organization logo URLs:', {
-        logo_url: linkInfo.organizations.logo_url,
-        custom_logo_url: linkInfo.organizations.custom_logo_url,
-        organization_name: linkInfo.organizations.name
-      });
-      
       const formattedLinkData: LinkData = {
         id: linkInfo.id,
         name: linkInfo.name,
@@ -279,8 +274,8 @@ const CleanSubmissionWrapper = () => {
       setLinkData(formattedLinkData);
       
       // Track link impression (non-blocking)
-      trackLinkImpression(formattedLinkData.id, formattedLinkData.link_token).catch(err => {
-        console.warn('Failed to track link impression:', err);
+      trackLinkImpression(formattedLinkData.id, formattedLinkData.link_token).catch(() => {
+        // Silently fail - tracking is non-critical
       });
       
       setLoading(false);

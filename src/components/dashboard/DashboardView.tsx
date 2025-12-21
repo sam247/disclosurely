@@ -456,11 +456,11 @@ const DashboardView = () => {
                 });
               
               if (notifError) {
-                console.error('Error creating pattern alert notification:', notifError);
+                // Error already logged via log utility
               }
             }
           } catch (error) {
-            console.error('Error creating pattern alert notification:', error);
+            // Error already logged via log utility
           }
         }
       }
@@ -593,8 +593,8 @@ const DashboardView = () => {
           if (!(reportsData || archivedData) || !profile?.organization_id) {
             return {};
           }
-          const categories: Record<string, { main: string; sub: string }> = {};
-          const allReports = [...(reportsData || []), ...(archivedData || [])];
+        const categories: Record<string, { main: string; sub: string }> = {};
+        const allReports = [...(reportsData || []), ...(archivedData || [])];
           
           // Decrypt in parallel batches of 5 for better performance
           const batchSize = 5;
@@ -602,37 +602,37 @@ const DashboardView = () => {
             const batch = allReports.slice(i, i + batchSize);
             await Promise.allSettled(
               batch.map(async (report) => {
-                try {
-                  if (report.encrypted_content) {
-                    const decrypted = await decryptReport(report.encrypted_content, profile.organization_id);
-                    if (decrypted && decrypted.category) {
-                      const parts = decrypted.category.split(' - ');
-                      categories[report.id] = {
-                        main: parts[0] || decrypted.category,
-                        sub: parts[1] || ''
-                      };
-                    }
-                  }
-                } catch (error) {
-                  log.error(LogContext.ENCRYPTION, 'Failed to decrypt category for report', error as Error, { reportId: report.id });
-                }
+          try {
+            if (report.encrypted_content) {
+              const decrypted = await decryptReport(report.encrypted_content, profile.organization_id);
+              if (decrypted && decrypted.category) {
+                const parts = decrypted.category.split(' - ');
+                categories[report.id] = {
+                  main: parts[0] || decrypted.category,
+                  sub: parts[1] || ''
+                };
+              }
+            }
+          } catch (error) {
+            log.error(LogContext.ENCRYPTION, 'Failed to decrypt category for report', error as Error, { reportId: report.id });
+          }
               })
             );
-          }
+        }
           return categories;
         })(),
-        // Fetch team members for assignment
+      // Fetch team members for assignment
         supabase
-          .from('profiles')
-          .select(`
-            id, 
-            email, 
-            first_name, 
-            last_name,
-            user_roles!inner(role, is_active)
-          `)
-          .eq('organization_id', profile.organization_id)
-          .eq('is_active', true)
+        .from('profiles')
+        .select(`
+          id, 
+          email, 
+          first_name, 
+          last_name,
+          user_roles!inner(role, is_active)
+        `)
+        .eq('organization_id', profile.organization_id)
+        .eq('is_active', true)
           .eq('user_roles.is_active', true)
       ]);
 
@@ -644,10 +644,10 @@ const DashboardView = () => {
       // Process team members results
       if (teamResult.status === 'fulfilled') {
         const { data: teamData, error: teamError } = teamResult.value;
-        if (teamError) {
-          log.error(LogContext.DATABASE, 'Error fetching team members', teamError as Error);
-        } else {
-          setTeamMembers(teamData || []);
+      if (teamError) {
+        log.error(LogContext.DATABASE, 'Error fetching team members', teamError as Error);
+      } else {
+        setTeamMembers(teamData || []);
         }
       } else {
         log.error(LogContext.DATABASE, 'Error in team members fetch', teamResult.reason as Error);
@@ -1890,7 +1890,7 @@ Additional Details: ${decryptedContent.additionalDetails || 'None provided'}
                                 </div>
                               ) : (
                                     <span className="text-muted-foreground">-</span>
-                                  )}
+                              )}
                                 </td>
                                 <td className="px-2 py-1 text-xs border-r">
                                   <div className="flex items-center">
@@ -2326,7 +2326,6 @@ Additional Details: ${decryptedContent.additionalDetails || 'None provided'}
                                       toast({ title: 'Report marked as Reviewing' });
                                       fetchData();
                                     } catch (error) {
-                                      console.error('Error updating report status:', error);
                                       toast({ 
                                         title: 'Error updating report status',
                                         variant: 'destructive'
@@ -2363,7 +2362,6 @@ Additional Details: ${decryptedContent.additionalDetails || 'None provided'}
                                       toast({ title: 'Report marked as Investigating' });
                                       fetchData();
                                     } catch (error) {
-                                      console.error('Error updating report status:', error);
                                       toast({ 
                                         title: 'Error updating report status',
                                         variant: 'destructive'

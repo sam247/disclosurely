@@ -87,8 +87,7 @@ const validateFile = (file: File, reportId: string): { valid: boolean; error?: s
 
   // Check MIME type matches extension
   if (file.type && !ALLOWED_MIME_TYPES.includes(file.type)) {
-    // Warn but don't block - MIME types can be unreliable
-    console.warn(`MIME type ${file.type} doesn't match allowed types, but extension is valid`);
+    // MIME types can be unreliable, but extension is valid
   }
 
   return { valid: true };
@@ -195,7 +194,6 @@ export const uploadReportFile = async (
       });
 
     if (uploadError) {
-      console.error('File upload error:', uploadError);
       return { success: false, error: uploadError.message };
     }
 
@@ -229,7 +227,6 @@ export const uploadReportFile = async (
       });
 
     if (dbError) {
-      console.error('Database error:', dbError);
       // Clean up uploaded file if database insert fails
       await supabase.storage
         .from('report-attachments')
@@ -272,7 +269,6 @@ export const uploadReportFile = async (
       }
     } catch (auditError) {
       // Don't fail the upload if audit logging fails
-      console.error('Failed to log file upload audit:', auditError);
     }
 
     return { success: true, fileUrl: publicUrl };
@@ -327,7 +323,6 @@ export const downloadReportFile = async (
       .download(fileName);
 
     if (error) {
-      console.error('File download error:', error);
       return null;
     }
 
@@ -381,7 +376,6 @@ export const downloadReportFile = async (
 
     return data;
   } catch (error) {
-    console.error('Unexpected error during file download:', error);
     return null;
   }
 };

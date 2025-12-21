@@ -104,7 +104,6 @@ const UserManagement = () => {
 
       setTeamMembers(membersWithRoles);
     } catch (error) {
-      console.error('Error fetching team members:', error);
       toast({
         title: "Error",
         description: "Failed to fetch team members",
@@ -133,7 +132,6 @@ const UserManagement = () => {
       if (error) throw error;
       setInvitations(data || []);
     } catch (error) {
-      console.error('Error fetching invitations:', error);
       toast({
         title: "Error",
         description: "Failed to fetch invitations",
@@ -294,7 +292,6 @@ const UserManagement = () => {
       });
 
       if (emailError) {
-        console.error('Error sending invitation email:', emailError);
         toast({
           title: "Invitation created",
           description: "Invitation created but email failed to send. Please resend manually.",
@@ -388,7 +385,6 @@ const UserManagement = () => {
 
       await fetchInvitations();
     } catch (error) {
-      console.error('Error cancelling invitation:', error);
       toast({
         title: "Error",
         description: "Failed to cancel invitation",
@@ -547,7 +543,6 @@ const UserManagement = () => {
 
       await fetchTeamMembers();
     } catch (error) {
-      console.error('Error deactivating user:', error);
       toast({
         title: "Error",
         description: "Failed to deactivate user",

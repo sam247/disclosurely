@@ -182,12 +182,10 @@ const Dashboard = () => {
           .single();
         
         if (error) {
-          console.error('Error fetching profile:', error);
         } else if (data) {
           setFirstName(data.first_name || '');
         }
       } catch (error) {
-        console.error('Error fetching profile:', error);
       }
     };
 
@@ -400,7 +398,6 @@ const Dashboard = () => {
       
 
       if (reportsError) {
-        console.error('Error fetching reports:', reportsError);
       }
 
       // Fetch archived reports - filter by assignment for team members
@@ -461,7 +458,6 @@ const Dashboard = () => {
       setSubdomains(customDomainsData || []);
       setTeamMembers(teamData || []);
     } catch (error) {
-      console.error('Error fetching dashboard data:', error);
     } finally {
       setLoading(false);
     }
@@ -541,7 +537,6 @@ const Dashboard = () => {
         fetchData();
       }, 1000);
     } catch (error) {
-      console.error('Error unarchiving report:', error);
       toast({
         title: "Error",
         description: "Failed to unarchive report. Please try again.",
@@ -641,7 +636,6 @@ const Dashboard = () => {
         fetchData();
       }, 500);
     } catch (error) {
-      console.error('Error marking report as read:', error);
       toast({
         title: "Error",
         description: "Failed to mark report as read. Please try again.",
@@ -704,7 +698,6 @@ const Dashboard = () => {
         fetchData();
       }, 500);
     } catch (error) {
-      console.error('Error closing report:', error);
       toast({
         title: "Error",
         description: "Failed to close report. Please try again.",
@@ -825,7 +818,6 @@ const Dashboard = () => {
         fetchData();
       }, 500);
     } catch (error) {
-      console.error('Error restoring report:', error);
       toast({
         title: "Error",
         description: "Failed to restore report. Please try again.",
@@ -858,7 +850,6 @@ const Dashboard = () => {
       await signOut();
       navigate('/auth/login');
     } catch (error) {
-      console.error('Logout error:', error);
     }
   };
 

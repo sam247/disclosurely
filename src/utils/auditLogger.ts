@@ -209,17 +209,12 @@ class AuditLogger {
       
 
       if (error) {
-        console.error('Failed to log audit event:', error);
-        console.error('Error details:', error.message, error.code, error.details);
-        console.error('Error hint:', error.hint);
-        console.error('Full error object:', JSON.stringify(error, null, 2));
         return null;
       }
 
       
       return result as unknown as AuditLogEntry;
     } catch (error) {
-      console.error('Error logging audit event:', error);
       return null;
     }
   }
@@ -292,7 +287,6 @@ class AuditLogger {
           
           return { logs: [], total: 0, hasMore: false };
         }
-        console.error('Failed to fetch audit logs:', error);
         return { logs: [], total: 0, hasMore: false };
       }
 
@@ -302,7 +296,6 @@ class AuditLogger {
         hasMore: (offset + limit) < (count || 0)
       };
     } catch (error) {
-      console.error('Error fetching audit logs:', error);
       return { logs: [], total: 0, hasMore: false };
     }
   }
@@ -334,13 +327,11 @@ class AuditLogger {
       const { data, error } = await query;
 
       if (error) {
-        console.error('Failed to fetch entity audit logs:', error);
         return [];
       }
 
       return data as unknown as AuditLogEntry[];
     } catch (error) {
-      console.error('Error fetching entity audit logs:', error);
       return [];
     }
   }
@@ -363,7 +354,6 @@ class AuditLogger {
             invalidRecords: 0
           };
         }
-        console.error('Failed to verify audit chain:', error);
         return {
           isValid: false,
           totalRecords: 0,
@@ -387,7 +377,6 @@ class AuditLogger {
         invalidRecords: 0
       };
     } catch (error) {
-      console.error('Error verifying audit chain:', error);
       return {
         isValid: false,
         totalRecords: 0,
@@ -412,7 +401,6 @@ class AuditLogger {
         return JSON.stringify(logs, null, 2);
       }
     } catch (error) {
-      console.error('Error exporting audit logs:', error);
       return '';
     }
   }

@@ -122,7 +122,6 @@ const PIIInfoInline = ({ piiMetadata, originalContent }: { piiMetadata: { redact
 
       setReportingFalsePositive(null);
     } catch (error: any) {
-      console.error('Error reporting false positive:', error);
       toast({
         title: 'Error',
         description: 'Failed to report false positive. Please try again.',
@@ -341,7 +340,6 @@ const AIAssistantView = () => {
       setSelectedCaseData(data);
       setHasAnalyzedCase(false); // Reset when case changes
     } catch (error: any) {
-      console.error('Error loading case data:', error);
       toast({
         title: "Error",
         description: error.message || "Failed to load case data.",
@@ -398,7 +396,6 @@ const AIAssistantView = () => {
         return prevArray.filter(id => id !== doc.id);
       });
     } catch (error: any) {
-      console.error('Error deleting document:', error);
           toast({
         title: "Delete Failed",
         description: error.message || "Failed to delete document. Please try again.",
@@ -459,10 +456,8 @@ Note: Full case content could not be decrypted. Analysis will be based on availa
                   body: { filePath: doc.file_path }
                 });
 
-            console.log(`[PDF Extract] Response for ${doc.name}:`, { extractData, extractError });
 
             if (extractError) {
-              console.error(`[PDF Extract] Error extracting PDF ${doc.name}:`, extractError);
               toast({
                 title: "PDF Extraction Failed",
                 description: `Could not extract text from ${doc.name}. The AI will analyze without this document.`,
@@ -477,8 +472,6 @@ Note: Full case content could not be decrypted. Analysis will be based on availa
               // Use full extracted text (edge function already limits to 50k chars)
               // Only limit if it's still too large for AI context
               const extractedText = extractData.text;
-              console.log(`[PDF Extract] Successfully extracted ${extractedText.length} characters from ${doc.name}`);
-              console.log(`[PDF Extract] Preview (first 200 chars):`, extractedText.substring(0, 200));
               
               const maxLength = 100000; // Increased from 5000 to 100k chars
               const finalText = extractedText.length > maxLength 
@@ -502,7 +495,6 @@ Note: Full case content could not be decrypted. Analysis will be based on availa
               });
             }
           } catch (error: any) {
-                console.error(`Error extracting PDF ${doc.name}:`, error);
             toast({
               title: "PDF Extraction Error",
               description: `Failed to extract ${doc.name}: ${error.message || 'Unknown error'}`,
@@ -529,10 +521,6 @@ Note: Full case content could not be decrypted. Analysis will be based on availa
       documentContext = '\n\n=== COMPANY DOCUMENTS ===\n\n' + companyDocuments.map(doc => 
         `DOCUMENT: ${doc.name}\n${doc.content}`
       ).join('\n\n---\n\n');
-      console.log(`[Case Analysis] Including ${companyDocuments.length} documents in analysis`);
-      console.log(`[Case Analysis] Document context length: ${documentContext.length} characters`);
-    } else {
-      console.log(`[Case Analysis] No documents selected or extracted`);
     }
 
     // Build analysis prompt
@@ -548,8 +536,6 @@ Note: Full case content could not be decrypted. Analysis will be based on availa
 
 ${decryptedContent}${documentContext}`;
     
-    console.log(`[Case Analysis] Final prompt length: ${analysisPrompt.length} characters`);
-    console.log(`[Case Analysis] Prompt preview (first 500 chars):`, analysisPrompt.substring(0, 500));
 
     // Call ai-gateway-generate DIRECTLY from frontend
     const { data, error } = await supabase.functions.invoke('ai-gateway-generate', {
@@ -604,7 +590,6 @@ Remember: Compliance teams need confidence and clarity under pressure. Be the ad
     });
 
     if (error) {
-      console.error('AI Gateway error:', error);
       throw new Error(error.message || 'Failed to analyze case');
     }
     
@@ -710,10 +695,6 @@ Remember: Compliance teams need confidence and clarity under pressure. Be the ad
       documentContext = '\n\n=== COMPANY DOCUMENTS AVAILABLE ===\n\n' + companyDocuments.map(doc => 
         `DOCUMENT: ${doc.name}\n${doc.content}`
       ).join('\n\n---\n\n');
-      console.log(`[Follow-up] Including ${companyDocuments.length} documents in follow-up`);
-      console.log(`[Follow-up] Document context length: ${documentContext.length} characters`);
-    } else {
-      console.log(`[Follow-up] No documents available for follow-up`);
     }
 
     // Decrypt case content for context
@@ -817,7 +798,6 @@ Provide SHORT, conversational responses (2-3 paragraphs max). Just natural conve
           });
 
           if (error) {
-            console.error('AI Gateway error:', error);
             throw new Error(error.message || 'Failed to generate response');
           }
           
@@ -910,7 +890,6 @@ When listing cases, always include the tracking ID (DIS-XXXX format) so users ca
     });
 
           if (error) {
-      console.error('AI Gateway error:', error);
       throw new Error(error.message || 'Failed to search cases');
           }
           
@@ -979,16 +958,13 @@ When listing cases, always include the tracking ID (DIS-XXXX format) so users ca
 
       if (selectedCaseId && hasAnalyzedCase) {
         // Follow-up conversation
-        console.log('💬 Follow-up conversation');
         setIsLoading(false);
         responseContent = await handleFollowUp(query);
       } else if (selectedCaseId) {
         // Initial case analysis - run with explicit PII preference
-        console.log('📊 Case analysis - running', { selectedCaseId, hasAnalyzedCase, skipPIIRedaction, hasSelectedCaseData: !!selectedCaseData });
         
         // Ensure case data is loaded
         if (!selectedCaseData) {
-          console.log('📦 Loading case data...');
           await loadCaseData(selectedCaseId);
         }
         
@@ -1014,7 +990,6 @@ When listing cases, always include the tracking ID (DIS-XXXX format) so users ca
         return; // Exit early, message already added
       } else {
         // Cross-case search
-        console.log('🔍 Cross-case search');
         setIsLoading(false);
         const result = await handleCrossCaseSearch(query);
         responseContent = result.content;
@@ -1047,8 +1022,6 @@ When listing cases, always include the tracking ID (DIS-XXXX format) so users ca
         });
       }
     } catch (error: any) {
-      console.error('Query error:', error);
-      
       const errorMessage: ChatMessage = {
         id: `error-${Date.now()}`,
         role: 'assistant',
@@ -1102,16 +1075,13 @@ When listing cases, always include the tracking ID (DIS-XXXX format) so users ca
 
       if (selectedCaseId && hasAnalyzedCase) {
         // Follow-up conversation
-        console.log('💬 Follow-up conversation');
         setIsLoading(false);
         responseContent = await handleFollowUp(query);
       } else if (selectedCaseId) {
         // Initial case analysis - run with user's PII preference
-        console.log('📊 Case analysis - running', { selectedCaseId, hasAnalyzedCase, preservePII, hasSelectedCaseData: !!selectedCaseData });
         
         // Ensure case data is loaded
         if (!selectedCaseData) {
-          console.log('📦 Loading case data...');
           await loadCaseData(selectedCaseId);
         }
         
@@ -1137,7 +1107,6 @@ When listing cases, always include the tracking ID (DIS-XXXX format) so users ca
         return; // Exit early, message already added
       } else {
         // Cross-case search
-        console.log('🔍 Cross-case search');
         setIsLoading(false);
         const result = await handleCrossCaseSearch(query);
         responseContent = result.content;
@@ -1303,7 +1272,6 @@ When listing cases, always include the tracking ID (DIS-XXXX format) so users ca
         }
       }
     } catch (error: any) {
-      console.error('Error uploading files:', error);
       toast({
         title: "Upload Failed",
         description: error.message || "Failed to upload documents. Please try again.",
@@ -1331,7 +1299,6 @@ When listing cases, always include the tracking ID (DIS-XXXX format) so users ca
       await loadCaseData(selectedCaseId);
     }
 
-    console.log('🔍 loadPreviewContent: Starting', { selectedCaseId });
     setIsLoadingPreview(true);
     try {
       const { data: caseData, error: caseError } = await supabase
@@ -1341,16 +1308,13 @@ When listing cases, always include the tracking ID (DIS-XXXX format) so users ca
         .single();
 
       if (caseError) {
-        console.error('❌ loadPreviewContent: Database error', caseError);
         throw caseError;
       }
 
       if (!caseData) {
-        console.error('❌ loadPreviewContent: No case data returned');
         throw new Error('Case not found');
       }
 
-      console.log('✅ loadPreviewContent: Case data loaded', { caseId: caseData.id, title: caseData.title });
 
       let decryptedContent = '';
       if (caseData.encrypted_content && caseData.organization_id) {
@@ -1389,12 +1353,9 @@ Additional Details: ${decrypted.additionalDetails || 'None provided'}`;
         }
       }
 
-      console.log('✅ loadPreviewContent: Setting preview content and opening modal');
       setPreviewContent(fullContent);
       setShowPIIPreview(true);
-      console.log('✅ loadPreviewContent: Modal should now be open');
     } catch (error: any) {
-      console.error('❌ loadPreviewContent: Error', error);
       toast({
         title: "Preview Failed",
         description: error.message || "Failed to load case content for preview.",
@@ -1479,7 +1440,6 @@ Additional Details: ${decrypted.additionalDetails || 'None provided'}`;
         description: `Loaded saved analysis for ${analysis.tracking_id}`
       });
     } catch (error: any) {
-      console.error('Error loading saved analysis:', error);
       toast({
         title: "Error",
         description: error.message || "Failed to load saved analysis.",
@@ -1547,7 +1507,6 @@ Additional Details: ${decrypted.additionalDetails || 'None provided'}`;
         description: "Analysis has been saved successfully."
       });
     } catch (error) {
-      console.error('Error saving analysis:', error);
       toast({
         title: "Save Failed",
         description: "Failed to save analysis. Please try again.",
@@ -2070,7 +2029,6 @@ Additional Details: ${decrypted.additionalDetails || 'None provided'}`;
                               const query = inputQuery || "Analyze this case";
                               await handleQueryWithPIIPreference(query, true, true);
                             } catch (error: any) {
-                              console.error('Error in Analyze Without Redaction:', error);
                               toast({
                                 title: "Analysis Failed",
                                 description: error.message || "Failed to start analysis. Please try again.",
@@ -2275,7 +2233,6 @@ Additional Details: ${decrypted.additionalDetails || 'None provided'}`;
                 setHasAnalyzedCase(true);
                 setPendingAnalysisQuery('');
               } catch (error: any) {
-                console.error('Error in analysis:', error);
                 toast({
                   title: "Analysis Failed",
                   description: error.message || "Failed to analyze case.",

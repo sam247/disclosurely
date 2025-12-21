@@ -67,14 +67,6 @@ const Pricing = () => {
       });
 
       if (error) {
-        console.error('[Pricing] Edge function error:', error);
-        console.error('[Pricing] Error details:', {
-          message: error.message,
-          context: error.context,
-          status: error.status,
-          name: error.name
-        });
-        
         // Try to extract error message from various sources
         let errorMsg = error?.message || 'Unknown error';
         
@@ -82,7 +74,6 @@ const Pricing = () => {
         if (error?.context instanceof Response) {
           try {
             const responseText = await error.context.text();
-            console.error('[Pricing] Error response body:', responseText);
             try {
               const responseJson = JSON.parse(responseText);
               if (responseJson.error) {
@@ -120,8 +111,6 @@ const Pricing = () => {
         throw new Error(errorMsg);
       }
 
-      console.log('[Pricing] Checkout response:', data);
-
       // Check if response contains an error
       if (data?.error) {
         throw new Error(data.error);
@@ -134,7 +123,6 @@ const Pricing = () => {
         throw new Error('No checkout URL returned from server');
       }
     } catch (error: any) {
-      console.error('[Pricing] Error creating checkout session:', error);
       // Extract error message from various possible formats
       let errorMessage = 'Failed to start subscription process. Please try again.';
       

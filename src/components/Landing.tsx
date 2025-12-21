@@ -62,8 +62,6 @@ const Landing = () => {
   const handleSubscribe = async (tier: 'tier1' | 'tier2') => {
     setLoading(tier);
     try {
-      console.log('[Landing] Starting subscription for tier:', tier);
-      
       // Check if user is logged in (optional - checkout works without auth)
       const { data: { session } } = await supabase.auth.getSession();
       
@@ -88,14 +86,6 @@ const Landing = () => {
       });
 
       if (error) {
-        console.error('[Landing] Edge function error:', error);
-        console.error('[Landing] Error details:', {
-          message: error.message,
-          context: error.context,
-          status: error.status,
-          name: error.name
-        });
-        
         // Try to extract error message from various sources
         let errorMsg = error?.message || 'Unknown error';
         
@@ -103,7 +93,6 @@ const Landing = () => {
         if (error?.context instanceof Response) {
           try {
             const responseText = await error.context.text();
-            console.error('[Landing] Error response body:', responseText);
             try {
               const responseJson = JSON.parse(responseText);
               if (responseJson.error) {
@@ -141,8 +130,6 @@ const Landing = () => {
         throw new Error(errorMsg);
       }
 
-      console.log('[Landing] Checkout response:', data);
-
       // Check if response contains an error
       if (data?.error) {
         throw new Error(data.error);
@@ -155,7 +142,6 @@ const Landing = () => {
         throw new Error('No checkout URL returned from server');
       }
     } catch (error: any) {
-      console.error('[Landing] Error creating checkout session:', error);
       // Extract error message from various possible formats
       let errorMessage = 'Failed to start subscription process. Please try again.';
       

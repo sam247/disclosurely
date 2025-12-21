@@ -93,7 +93,6 @@ const CompanyStatusPage = () => {
       }
 
       if (!linkInfo) {
-        console.error('Organization link not found for token:', linkToken);
         setLoadingBranding(false);
         return;
       }
@@ -107,7 +106,6 @@ const CompanyStatusPage = () => {
         brand_color: linkInfo.organizations.brand_color
       });
     } catch (error) {
-      console.error('Error fetching organization branding:', error);
     } finally {
       setLoadingBranding(false);
     }
@@ -139,7 +137,6 @@ const CompanyStatusPage = () => {
         .maybeSingle();
 
       if (linkError || !linkInfo) {
-        console.error('Link validation error:', linkError);
         toast.error("Invalid access link");
         return;
       }
@@ -158,7 +155,6 @@ const CompanyStatusPage = () => {
         .maybeSingle();
 
       if (reportError) {
-        console.error("Report lookup error:", reportError);
         toast.error("Error looking up report. Please try again.");
         return;
       }
@@ -196,7 +192,6 @@ const CompanyStatusPage = () => {
       toast.success("Report found successfully!");
 
     } catch (error) {
-      console.error("Error looking up report:", error);
       toast.error("Failed to look up report. Please try again.");
     } finally {
       setIsLoading(false);
@@ -270,7 +265,6 @@ const CompanyStatusPage = () => {
       toast.success("Message sent successfully!");
 
     } catch (error) {
-      console.error("Error sending message:", error);
       toast.error("Failed to send message. Please try again.");
     } finally {
       setIsSubmittingMessage(false);

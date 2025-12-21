@@ -26,7 +26,6 @@ const OrganizationOnboarding = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!user) {
-      console.error('No user found');
       return;
     }
 
@@ -49,7 +48,6 @@ const OrganizationOnboarding = () => {
         .single();
 
       if (orgError) {
-        console.error('Organization creation error:', orgError);
         throw orgError;
       }
 
@@ -81,11 +79,6 @@ const OrganizationOnboarding = () => {
 
       navigate('/dashboard');
     } catch (error: any) {
-      console.error('Full error object:', error);
-      console.error('Error code:', error.code);
-      console.error('Error details:', error.details);
-      console.error('Error hint:', error.hint);
-      console.error('Error message:', error.message);
       
       toast({
         title: "Error creating organization",

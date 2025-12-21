@@ -14,7 +14,7 @@
 **Impact:** Customers won't know when trials end, payments fail, or subscriptions cancel. High churn risk.
 
 **Fix:** Implement email notifications using `send-notification-emails` edge function or Resend API.
-
+ 
 ---
 
 ### 2. **Support Widget Missing**

@@ -81,7 +81,6 @@ const LinkGenerator = () => {
       });
 
       if (response.error) {
-        console.error('🔍 LinkGenerator: list-domains edge function error:', response.error);
         return [];
       }
 
@@ -245,7 +244,6 @@ const LinkGenerator = () => {
           .single();
 
         if (createError) {
-          console.error('Error creating default link:', createError);
           return null;
         }
 
@@ -362,22 +360,16 @@ const LinkGenerator = () => {
         .select('active_url_type', { count: 'exact' });
 
       if (error) {
-        console.error('Failed to update active_url_type:', error);
-        console.error('Organization ID:', organizationId);
-        console.error('Active URL Type:', active_url_type);
         throw error;
       }
 
       // Check if any rows were updated
       if (!data || data.length === 0) {
-        console.error('No rows updated. This may indicate an RLS policy issue.');
-        console.error('Organization ID:', organizationId);
         throw new Error('Update failed: No rows were updated. You may not have permission to update this organization.');
       }
 
       // Verify the update actually happened
       if (data[0]?.active_url_type !== active_url_type) {
-        console.error('Update did not persist. Expected:', active_url_type, 'Got:', data[0]?.active_url_type);
         throw new Error('Update did not persist correctly');
       }
     },
@@ -401,7 +393,9 @@ const LinkGenerator = () => {
             newType: activeUrlType,
             customDomain: organizationInfo.custom_domain
           }
-        }).catch(console.error);
+        }).catch(() => {
+          // Error handled silently
+        });
       }
 
       toast({
@@ -503,7 +497,6 @@ const LinkGenerator = () => {
           });
 
           if (response.error) {
-            console.error('Domain check error:', response.error);
             const primaryDomainData = customDomains?.find(d => d.domain_name === primaryDomain && d.is_active && d.status === 'active');
             if (!isCancelled) {
               setBrandedLinkStatus(primaryDomainData ? 'accessible' : 'inaccessible');
@@ -525,14 +518,15 @@ const LinkGenerator = () => {
                   organizationId: result.organizationId,
                   summary: `Branded link accessibility checked for ${primaryDomain}`,
                   metadata: { domain: primaryDomain, accessible: true }
-                }).catch(console.error);
+                }).catch(() => {
+          // Error handled silently
+        });
               }
             } else {
               setBrandedLinkStatus('inaccessible');
             }
           }
         } catch (error) {
-          console.error('Domain accessibility check failed:', error);
           const primaryDomainData = customDomains?.find(d => d.domain_name === primaryDomain && d.is_active && d.status === 'active');
           if (!isCancelled) {
             setBrandedLinkStatus(primaryDomainData ? 'accessible' : 'checking');

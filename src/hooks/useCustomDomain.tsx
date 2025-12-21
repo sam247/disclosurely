@@ -80,7 +80,7 @@ export const useCustomDomain = (): CustomDomainInfo => {
             
           }
         } catch (error) {
-          console.error('❌ useCustomDomain: Error checking subdomain:', error);
+          // Error handled silently - domain check failures are expected
         }
       }
 
@@ -99,7 +99,6 @@ export const useCustomDomain = (): CustomDomainInfo => {
         
 
         if (error) {
-          console.error('❌ useCustomDomain: Database error:', error);
           setDomainInfo({
             customDomain: null,
             organizationId: null,
@@ -122,7 +121,7 @@ export const useCustomDomain = (): CustomDomainInfo => {
           
         }
       } catch (error) {
-        console.error('❌ useCustomDomain: Error checking custom domain:', error);
+        // Error handled silently - domain check failures are expected
       }
 
       // Default case
