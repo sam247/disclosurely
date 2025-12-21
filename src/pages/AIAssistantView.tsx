@@ -36,6 +36,8 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { formatMarkdownToHtml } from '@/utils/markdownFormatter';
 import { sanitizeHtml } from '@/utils/sanitizer';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { Sheet, SheetContent } from '@/components/ui/sheet';
+import { Menu } from 'lucide-react';
 
 interface ChatMessage {
   id: string;
@@ -240,6 +242,7 @@ const AIAssistantView = () => {
   const [savedAnalyses, setSavedAnalyses] = useState<any[]>([]);
   const [isLoadingSavedAnalyses, setIsLoadingSavedAnalyses] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
+  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -1654,8 +1657,8 @@ Additional Details: ${decrypted.additionalDetails || 'None provided'}`;
       }}
       data-ai-assistant-root
     >
-      {/* Left Sidebar */}
-      <div className="w-[260px] border-r bg-muted/30 flex flex-col overflow-hidden flex-shrink-0" data-ai-assistant-sidebar>
+      {/* Left Sidebar - Hidden on mobile, shown via drawer */}
+      <div className="hidden md:flex w-[260px] border-r bg-muted/30 flex-col overflow-hidden flex-shrink-0" data-ai-assistant-sidebar>
         <div className="flex flex-col h-full bg-muted/30">
           {/* Scrollable Cases Section */}
           <div className="flex-1 min-h-0 overflow-hidden bg-muted/30">
@@ -1907,11 +1910,271 @@ Additional Details: ${decrypted.additionalDetails || 'None provided'}`;
         </div>
       </div>
 
+      {/* Mobile Drawer */}
+      <Sheet open={isDrawerOpen} onOpenChange={setIsDrawerOpen}>
+        <SheetContent side="left" className="w-[260px] p-0 bg-muted/30">
+          <div className="flex flex-col h-full bg-muted/30 overflow-hidden">
+            {/* Scrollable Cases Section */}
+            <div className="flex-1 min-h-0 overflow-hidden bg-muted/30">
+              <ScrollArea className="h-full">
+                <div className="p-4 pb-2 bg-muted/30">
+                  {/* Case Selection Section */}
+                  <div>
+                    <div className="flex items-center gap-1 mb-2 px-2">
+                      <h3 className="text-sm font-semibold">Cases</h3>
+                      <TooltipProvider delayDuration={200}>
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <button
+                              type="button"
+                              className="inline-flex items-center justify-center rounded-full hover:bg-muted transition-colors p-0.5"
+                              aria-label="Cases information"
+                            >
+                              <Info className="h-3 w-3 text-muted-foreground" />
+                            </button>
+                          </TooltipTrigger>
+                          <TooltipContent 
+                            side="right" 
+                            align="start"
+                            sideOffset={8}
+                            className="max-w-xs p-3 bg-blue-50 border-blue-200 text-sm"
+                          >
+                            <p className="text-blue-900">Please select a case to optionally redact PII and analyse</p>
+                          </TooltipContent>
+                        </Tooltip>
+                      </TooltipProvider>
+                    </div>
+                    {isLoadingCases ? (
+                      <div className="flex items-center justify-center py-4">
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                      </div>
+                    ) : (
+                      <div className="space-y-1">
+                        {Array.isArray(cases) && cases.length > 0 ? (
+                          cases.map((caseItem) => (
+                            <button
+                              key={caseItem.id}
+                              onClick={() => {
+                                setSelectedCaseId(caseItem.id);
+                                setHasAnalyzedCase(false);
+                                setShowPIIChoice(true);
+                                loadCaseData(caseItem.id);
+                                setInputQuery("Analyze this case");
+                                setIsEmptyState(false);
+                                setIsDrawerOpen(false);
+                              }}
+                              className={cn(
+                                "w-full text-left px-3 py-2 rounded-md text-sm transition-colors",
+                                selectedCaseId === caseItem.id
+                                  ? "bg-primary text-primary-foreground"
+                                  : "hover:bg-muted"
+                              )}
+                            >
+                              <div className="font-medium truncate">{caseItem.tracking_id}</div>
+                              <div className={cn(
+                                "text-xs truncate",
+                                selectedCaseId === caseItem.id ? "text-primary-foreground/80" : "text-muted-foreground"
+                              )}>
+                                {caseItem.title}
+                              </div>
+                            </button>
+                          ))
+                        ) : (
+                          <p className="text-xs text-muted-foreground px-2">No cases available</p>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </ScrollArea>
+            </div>
+
+            {/* Fixed Bottom Sections - Documents and Saved Analyses */}
+            <div className="flex-shrink-0 border-t bg-muted/30">
+              <div className="p-4 space-y-4">
+                {/* Document Management Section */}
+                <div className="flex-shrink-0">
+                  <div className="flex items-center justify-between mb-2 px-2">
+                    <div className="flex items-center gap-1">
+                      <h3 className="text-sm font-semibold">Documents</h3>
+                      <TooltipProvider delayDuration={200}>
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <button
+                              type="button"
+                              className="inline-flex items-center justify-center rounded-full hover:bg-muted transition-colors p-0.5"
+                              aria-label="Documents information"
+                            >
+                              <Info className="h-3 w-3 text-muted-foreground" />
+                            </button>
+                          </TooltipTrigger>
+                          <TooltipContent 
+                            side="right" 
+                            align="start"
+                            sideOffset={8}
+                            className="max-w-xs p-3 bg-blue-50 border-blue-200 text-sm"
+                          >
+                            <p className="text-blue-900">Please select a document to analyse against a case</p>
+                          </TooltipContent>
+                        </Tooltip>
+                      </TooltipProvider>
+                    </div>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="h-6 w-6 p-0"
+                      onClick={() => fileInputRef.current?.click()}
+                      disabled={isUploading}
+                      title="Upload document"
+                    >
+                      <Upload className="h-3 w-3" />
+                    </Button>
+                  </div>
+                  {isLoadingDocs ? (
+                    <div className="flex items-center justify-center py-4">
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                    </div>
+                  ) : (
+                    <div className="space-y-1 max-h-32 overflow-y-auto">
+                      {Array.isArray(documents) && documents.length > 0 ? (
+                        documents.map((doc) => {
+                          const isSelected = Array.isArray(selectedDocs) && selectedDocs.includes(doc.id);
+                          return (
+                            <div key={doc.id} className="flex items-center gap-1 group">
+                              <button
+                                onClick={() => {
+                                  setSelectedDocs(prev => {
+                                    const prevArray = Array.isArray(prev) ? prev : [];
+                                    return prevArray.includes(doc.id)
+                                      ? prevArray.filter(id => id !== doc.id)
+                                      : [...prevArray, doc.id];
+                                  });
+                                }}
+                                className={cn(
+                                  "flex-1 text-left px-3 py-2 rounded-md text-xs transition-colors truncate",
+                                  isSelected
+                                    ? "bg-primary text-primary-foreground"
+                                    : "hover:bg-muted"
+                                )}
+                                title={doc.name}
+                              >
+                                <FileText className="h-3 w-3 inline mr-1" />
+                                <span className="truncate">{doc.name}</span>
+                                {isSelected && <span className="ml-1">✓</span>}
+                              </button>
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                className="h-6 w-6 p-0 opacity-0 group-hover:opacity-100 transition-opacity"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  deleteDocument(doc);
+                                }}
+                                title="Delete document"
+                              >
+                                <Trash2 className="h-3 w-3 text-destructive" />
+                              </Button>
+                            </div>
+                          );
+                        })
+                      ) : (
+                        <p className="text-xs text-muted-foreground px-2">No documents</p>
+                      )}
+                    </div>
+                  )}
+                </div>
+
+                <Separator />
+
+                {/* Saved Analyses Section */}
+                <div className="flex-shrink-0">
+                  <div className="flex items-center gap-1 mb-2 px-2">
+                    <h3 className="text-sm font-semibold">Saved Analyses</h3>
+                    <TooltipProvider delayDuration={200}>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <button
+                            type="button"
+                            className="inline-flex items-center justify-center rounded-full hover:bg-muted transition-colors p-0.5"
+                            aria-label="Saved Analyses information"
+                          >
+                            <Info className="h-3 w-3 text-muted-foreground" />
+                          </button>
+                        </TooltipTrigger>
+                        <TooltipContent 
+                          side="right" 
+                          align="start"
+                          sideOffset={8}
+                          className="max-w-xs p-3 bg-blue-50 border-blue-200 text-sm"
+                        >
+                          <p className="text-blue-900">Select a previous case to analyse</p>
+                        </TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
+                  </div>
+                  {isLoadingSavedAnalyses ? (
+                    <div className="flex items-center justify-center py-4">
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                    </div>
+                  ) : (
+                    <div className="space-y-1 max-h-32 overflow-y-auto">
+                      {savedAnalyses.length > 0 ? (
+                        savedAnalyses.map((analysis) => (
+                          <div key={analysis.id} className="flex items-center gap-1 group">
+                            <button
+                              onClick={() => {
+                                loadSavedAnalysis(analysis.id);
+                                setIsDrawerOpen(false);
+                              }}
+                              className="flex-1 text-left px-3 py-2 rounded-md text-xs transition-colors hover:bg-muted truncate"
+                              title={`${analysis.tracking_id} - ${analysis.case_title}`}
+                            >
+                              <div className="font-medium truncate">{analysis.tracking_id}</div>
+                              <div className="text-muted-foreground truncate">{analysis.case_title}</div>
+                              <div className="text-muted-foreground text-[10px]">
+                                {new Date(analysis.created_at).toLocaleDateString()}
+                              </div>
+                            </button>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              className="h-6 w-6 p-0 opacity-0 group-hover:opacity-100 transition-opacity"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                deleteSavedAnalysis(analysis.id);
+                              }}
+                              title="Delete saved analysis"
+                            >
+                              <Trash2 className="h-3 w-3 text-destructive" />
+                            </Button>
+                          </div>
+                        ))
+                      ) : (
+                        <p className="text-xs text-muted-foreground px-2">No saved analyses</p>
+                      )}
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+          </div>
+        </SheetContent>
+      </Sheet>
+
       {/* Main Content Area */}
-      <div className="flex-1 flex flex-col overflow-hidden bg-background" data-ai-assistant-right-panel>
+      <div className="w-full md:flex-1 flex flex-col overflow-hidden bg-background" data-ai-assistant-right-panel>
         {/* Toolbar - Full width */}
         <div className="h-14 border-b flex items-center justify-between px-4 md:px-6 flex-shrink-0 w-full bg-background">
           <div className="flex items-center gap-2">
+            {/* Mobile hamburger menu */}
+            <Button 
+              variant="ghost" 
+              size="sm" 
+              className="h-9 w-9 p-0 md:hidden"
+              onClick={() => setIsDrawerOpen(true)}
+            >
+              <Menu className="h-5 w-5" />
+            </Button>
             <div>
               <h1 className="text-lg font-semibold">AI Assistant:</h1>
               <p className="text-xs text-muted-foreground font-normal">Analyse cases with or without redaction against company documentation.</p>

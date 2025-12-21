@@ -1663,8 +1663,8 @@ Additional Details: ${decryptedContent.additionalDetails || 'None provided'}
 
       {/* Controls Bar - Replaces filter bar - matches table width exactly */}
       <div className="border rounded-lg bg-white flex-shrink-0 mx-2 sm:mx-0 mb-2">
-        <div className="p-2 sm:p-3 space-y-2 sm:space-y-3">
-          <div className="flex flex-col sm:flex-row gap-2 sm:gap-4 items-start sm:items-center">
+        <div className="p-3 sm:p-3 space-y-3 sm:space-y-3">
+          <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 items-stretch sm:items-center">
             {/* Tabs */}
             <Tabs value={showArchived ? "archived" : "active"} onValueChange={(value) => setShowArchived(value === "archived")} className="w-full sm:w-auto">
               <TabsList className="w-full sm:w-auto">
@@ -1674,15 +1674,15 @@ Additional Details: ${decryptedContent.additionalDetails || 'None provided'}
             </Tabs>
             
             {/* Search, Status, Export */}
-            <div className="flex flex-col sm:flex-row gap-2 sm:gap-4 flex-1 w-full sm:w-auto">
+            <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 flex-1 w-full sm:w-auto">
               <Input
                 placeholder={t('searchReports')}
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="flex-1 w-full sm:w-auto"
+                className="flex-1 w-full sm:w-auto min-h-[44px] md:min-h-0"
               />
               <Select value={statusFilter} onValueChange={setStatusFilter}>
-                <SelectTrigger className="w-full sm:w-48">
+                <SelectTrigger className="w-full sm:w-48 min-h-[44px] md:min-h-0">
                   <SelectValue placeholder={t('filterByStatus')} />
                 </SelectTrigger>
                 <SelectContent>
@@ -1696,7 +1696,7 @@ Additional Details: ${decryptedContent.additionalDetails || 'None provided'}
               <Button
                 variant="outline"
                 onClick={exportReportsToCSV}
-                className="w-full sm:w-auto"
+                className="w-full sm:w-auto min-h-[44px] md:min-h-0"
               >
                 <FileSpreadsheet className="h-4 w-4 mr-2" />
                 Export CSV
@@ -1710,8 +1710,8 @@ Additional Details: ${decryptedContent.additionalDetails || 'None provided'}
       {!showArchived ? (
         <div className="border rounded-lg bg-white flex-1 flex flex-col overflow-hidden min-h-0 mx-2 sm:mx-0" style={{ marginTop: '15px' }} data-dashboard-table-active>
                 {/* Table Header */}
-                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between p-2 sm:p-3 border-b bg-gray-50 gap-2 sm:gap-0 flex-shrink-0">
-                  <div className="flex items-center space-x-2 sm:space-x-4">
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between p-3 sm:p-3 border-b bg-gray-50 gap-3 sm:gap-0 flex-shrink-0">
+                  <div className="flex flex-col sm:flex-row items-start sm:items-center space-y-1 sm:space-y-0 sm:space-x-2 sm:space-x-4">
                     <div>
                       <h3 className="font-semibold text-xs sm:text-sm">Active Reports</h3>
                       <p className="text-xs text-muted-foreground mt-0.5">
@@ -1725,9 +1725,9 @@ Additional Details: ${decryptedContent.additionalDetails || 'None provided'}
                       onClick={fetchData}
                       disabled={loading}
                       size="sm"
-                      className="h-8 text-xs"
+                      className="h-9 sm:h-8 text-xs min-h-[44px] sm:min-h-0"
                     >
-                      <RefreshCw className={`h-3 w-3 mr-1 ${loading ? 'animate-spin' : ''}`} />
+                      <RefreshCw className={`h-4 w-4 sm:h-3 sm:w-3 mr-1 ${loading ? 'animate-spin' : ''}`} />
                       Refresh
                     </Button>
                   </div>
@@ -2124,12 +2124,12 @@ Additional Details: ${decryptedContent.additionalDetails || 'None provided'}
                     
                       {/* Pagination Footer - Airtable/Spreadsheet style fixed at bottom - Always visible */}
                     {totalReports > 0 && (
-                        <div className="flex flex-row items-center justify-between px-3 py-2 border-t bg-gray-50 flex-shrink-0 h-10 z-20 bg-white" data-dashboard-pagination>
-                        <div className="flex items-center space-x-3">
+                        <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between px-3 py-3 sm:py-2 border-t bg-gray-50 flex-shrink-0 min-h-[auto] sm:h-10 z-20 bg-white gap-3 sm:gap-0" data-dashboard-pagination>
+                        <div className="flex flex-col sm:flex-row items-start sm:items-center space-y-2 sm:space-y-0 sm:space-x-3">
                           <div className="flex items-center space-x-2">
                             <Label className="text-xs whitespace-nowrap font-medium">Rows per page:</Label>
                             <Select value={pageSize.toString()} onValueChange={(value) => handlePageSizeChange(Number(value))}>
-                              <SelectTrigger className="h-7 text-xs w-16 border-gray-300">
+                              <SelectTrigger className="h-9 sm:h-7 text-xs w-20 sm:w-16 border-gray-300 min-h-[44px] sm:min-h-0">
                                 <SelectValue />
                               </SelectTrigger>
                               <SelectContent>
@@ -2150,19 +2150,19 @@ Additional Details: ${decryptedContent.additionalDetails || 'None provided'}
                           </div>
                         </div>
                         
-                        <div className="flex items-center space-x-1">
+                        <div className="flex items-center justify-center sm:justify-end space-x-1">
                           <Button
                             variant="outline"
                             size="sm"
                             onClick={() => handlePageChange(currentPage - 1)}
                             disabled={currentPage === 1 || loading}
-                            className="h-7 w-7 text-xs p-0 border-gray-300"
+                            className="h-9 w-9 sm:h-7 sm:w-7 text-xs p-0 border-gray-300 min-h-[44px] sm:min-h-0"
                           >
-                            <ChevronLeft className="h-3.5 w-3.5" />
+                            <ChevronLeft className="h-4 w-4 sm:h-3.5 sm:w-3.5" />
                           </Button>
                           
-                          {/* Page Numbers */}
-                          <div className="flex items-center space-x-0.5">
+                          {/* Page Numbers - Hidden on mobile */}
+                          <div className="hidden sm:flex items-center space-x-0.5">
                             {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
                               const pageNum = Math.max(1, Math.min(totalPages - 4, currentPage - 2)) + i;
                               if (pageNum > totalPages) return null;
@@ -2187,9 +2187,9 @@ Additional Details: ${decryptedContent.additionalDetails || 'None provided'}
                             size="sm"
                             onClick={() => handlePageChange(currentPage + 1)}
                             disabled={currentPage === totalPages || loading}
-                            className="h-7 w-7 text-xs p-0 border-gray-300"
+                            className="h-9 w-9 sm:h-7 sm:w-7 text-xs p-0 border-gray-300 min-h-[44px] sm:min-h-0"
                           >
-                            <ChevronRight className="h-3.5 w-3.5" />
+                            <ChevronRight className="h-4 w-4 sm:h-3.5 sm:w-3.5" />
                           </Button>
                         </div>
                       </div>
@@ -2197,7 +2197,7 @@ Additional Details: ${decryptedContent.additionalDetails || 'None provided'}
                   </div>
                   
                     {/* Mobile Card View */}
-                    <div className="md:hidden space-y-2 p-2 overflow-y-auto flex-1 min-h-0">
+                    <div className="md:hidden space-y-3 p-4 overflow-y-auto flex-1 min-h-0">
                     {paginatedReports.map((report) => (
                       <Card key={report.id} className="overflow-hidden">
                         <CardContent className="p-5 md:p-4 space-y-4 md:space-y-3">
@@ -2719,7 +2719,7 @@ Additional Details: ${decryptedContent.additionalDetails || 'None provided'}
                   </div>
 
                     {/* Mobile Card View */}
-                    <div className="md:hidden space-y-2 p-2 overflow-y-auto flex-1 min-h-0">
+                    <div className="md:hidden space-y-3 p-4 overflow-y-auto flex-1 min-h-0">
                     {paginatedArchivedReportsSorted.map((report) => (
                       <Card key={report.id} className="overflow-hidden">
                         <CardContent className="p-5 md:p-4 space-y-4 md:space-y-3">

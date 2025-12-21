@@ -944,7 +944,7 @@ const AnalyticsView: React.FC = () => {
               <select 
                 value={selectedPeriod} 
                 onChange={(e) => setSelectedPeriod(e.target.value as any)}
-                className="px-2 py-1 sm:py-1.5 border rounded-md text-xs sm:text-sm bg-background flex-1 sm:flex-initial touch-manipulation"
+                className="px-2 py-1 sm:py-1.5 border rounded-md text-xs sm:text-sm bg-background flex-1 sm:flex-initial touch-manipulation min-h-[44px] md:min-h-0"
               >
                 <option value="7d">Last 7 days</option>
                 <option value="30d">Last 30 days</option>
@@ -957,7 +957,7 @@ const AnalyticsView: React.FC = () => {
               disabled={exporting}
               variant="outline"
               size="sm"
-              className="gap-2 w-full sm:w-auto touch-manipulation text-xs sm:text-sm h-7 sm:h-8"
+              className="gap-2 w-full sm:w-auto touch-manipulation text-xs sm:text-sm min-h-[44px] md:h-7 md:min-h-0 sm:h-8"
             >
               <Download className="h-3 w-3 sm:h-4 sm:w-4" />
               {exporting ? 'Exporting...' : 'Export'}
@@ -966,7 +966,7 @@ const AnalyticsView: React.FC = () => {
         </div>
 
       {/* Content Area - 2 Column Layout with Tri Layout on Right */}
-      <div className="flex-1 min-h-0 overflow-hidden grid grid-cols-1 lg:grid-cols-2 gap-3 sm:gap-4 px-2 sm:px-0" style={{ minHeight: 0, overflowY: 'hidden' }}>
+      <div className="flex-1 min-h-0 overflow-hidden grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-3 px-2 sm:px-0" style={{ minHeight: 0, overflowY: 'hidden' }}>
           {/* Left Column - Main Chart */}
           <Card className="flex flex-col min-h-0">
             <CardHeader className="pb-2 sm:pb-3 flex-shrink-0">
@@ -1007,7 +1007,7 @@ const AnalyticsView: React.FC = () => {
                 )}
               </div>
             </CardHeader>
-            <CardContent className="pt-0 pb-4 flex-1 min-h-0 flex flex-col" style={{ minHeight: '300px', height: '300px' }}>
+            <CardContent className="pt-0 pb-4 flex-1 min-h-0 flex flex-col min-h-[400px] md:min-h-[300px]">
               {getChartData() ? (
                 <div className="flex-1 min-h-0 -mx-2 sm:mx-0 px-2 sm:px-0">
                 <Line 
@@ -1024,10 +1024,10 @@ const AnalyticsView: React.FC = () => {
                         intersect: false,
                         padding: 8,
                         titleFont: {
-                          size: 10
+                          size: window.innerWidth < 768 ? 12 : 10
                         },
                         bodyFont: {
-                          size: 9
+                          size: window.innerWidth < 768 ? 11 : 9
                         }
                       }
                     },
@@ -1035,7 +1035,7 @@ const AnalyticsView: React.FC = () => {
                       x: {
                         ticks: {
                           font: {
-                            size: 8
+                            size: window.innerWidth < 768 ? 11 : 8
                           },
                           maxRotation: 0,
                           minRotation: 0
@@ -1046,7 +1046,7 @@ const AnalyticsView: React.FC = () => {
                         ticks: {
                           stepSize: 1,
                           font: {
-                            size: 8
+                            size: window.innerWidth < 768 ? 11 : 8
                           }
                         }
                       }
@@ -1070,7 +1070,7 @@ const AnalyticsView: React.FC = () => {
                 <CardTitle className="text-xs sm:text-sm">By Category</CardTitle>
                 <CardDescription className="text-[10px] sm:text-[11px] mt-0.5">Financial Misconduct, Workplace Behaviour, etc.</CardDescription>
               </CardHeader>
-              <CardContent className="pt-0 pb-3 flex-1 min-h-0 flex flex-col" style={{ minHeight: '120px', height: '120px' }}>
+              <CardContent className="pt-0 pb-3 flex-1 min-h-0 flex flex-col min-h-[200px] md:min-h-[120px]">
                 {getCategoryChartData() ? (
                   <div className="flex-1 min-h-0 -mx-2 sm:mx-0 px-2 sm:px-0">
                   <Bar 
@@ -1086,10 +1086,10 @@ const AnalyticsView: React.FC = () => {
                         tooltip: {
                           padding: 8,
                           titleFont: {
-                            size: 10
+                            size: window.innerWidth < 768 ? 12 : 10
                           },
                           bodyFont: {
-                            size: 9
+                            size: window.innerWidth < 768 ? 11 : 9
                           }
                         }
                       },
@@ -1099,14 +1099,14 @@ const AnalyticsView: React.FC = () => {
                           ticks: {
                             stepSize: 1,
                             font: {
-                              size: 8
+                              size: window.innerWidth < 768 ? 11 : 8
                             }
                           }
                         },
                         y: {
                           ticks: {
                             font: {
-                              size: 8
+                              size: window.innerWidth < 768 ? 11 : 8
                             }
                           }
                         }
@@ -1145,10 +1145,10 @@ const AnalyticsView: React.FC = () => {
                         tooltip: {
                           padding: 8,
                           titleFont: {
-                            size: 10
+                            size: window.innerWidth < 768 ? 12 : 10
                           },
                           bodyFont: {
-                            size: 9
+                            size: window.innerWidth < 768 ? 11 : 9
                           }
                         }
                       },
@@ -1156,7 +1156,7 @@ const AnalyticsView: React.FC = () => {
                         x: {
                           ticks: {
                             font: {
-                              size: 8
+                              size: window.innerWidth < 768 ? 11 : 8
                             }
                           }
                         },
@@ -1165,7 +1165,7 @@ const AnalyticsView: React.FC = () => {
                           ticks: {
                             stepSize: 1,
                             font: {
-                              size: 8
+                              size: window.innerWidth < 768 ? 11 : 8
                             }
                           }
                         }
@@ -1203,10 +1203,10 @@ const AnalyticsView: React.FC = () => {
                         tooltip: {
                           padding: 8,
                           titleFont: {
-                            size: 10
+                            size: window.innerWidth < 768 ? 12 : 10
                           },
                           bodyFont: {
-                            size: 9
+                            size: window.innerWidth < 768 ? 11 : 9
                           }
                         }
                       },
@@ -1216,14 +1216,14 @@ const AnalyticsView: React.FC = () => {
                           ticks: {
                             stepSize: 1,
                             font: {
-                              size: 8
+                              size: window.innerWidth < 768 ? 11 : 8
                             }
                           }
                         },
                         y: {
                           ticks: {
                             font: {
-                              size: 8
+                              size: window.innerWidth < 768 ? 11 : 8
                             }
                           }
                         }
