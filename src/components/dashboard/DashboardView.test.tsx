@@ -93,8 +93,9 @@ describe('DashboardView', () => {
     await waitFor(() => {
       const hasTable = screen.queryByRole('table');
       const hasFilterButton = screen.queryByRole('button', { name: /filter/i });
-      const hasReportsHeading = screen.queryByRole('heading', { name: /reports/i });
-      const hasDashboardContent = hasTable || hasFilterButton || hasReportsHeading;
+      // Use getAllByRole to handle multiple headings with "reports" text
+      const reportsHeadings = screen.queryAllByRole('heading', { name: /reports/i });
+      const hasDashboardContent = hasTable || hasFilterButton || reportsHeadings.length > 0;
       expect(hasDashboardContent).toBeTruthy();
     }, { timeout: 5000 });
   });

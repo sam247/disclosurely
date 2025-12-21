@@ -15,6 +15,69 @@ process.env.VITE_CONTENTFUL_SPACE_ID = 'test-space-id';
 process.env.VITE_CONTENTFUL_DELIVERY_TOKEN = 'test-delivery-token';
 process.env.VITE_GOOGLE_MAPS_API_KEY = 'test-maps-key';
 
+// Mock Supabase client BEFORE logger mock (logger imports Supabase)
+vi.mock('@/integrations/supabase/client', () => {
+  const createQueryBuilder = () => {
+    const defaultResult = Promise.resolve({ data: null, error: null });
+    const builder: any = {
+      select: vi.fn().mockReturnThis(),
+      insert: vi.fn().mockReturnThis(),
+      update: vi.fn().mockReturnThis(),
+      delete: vi.fn().mockReturnThis(),
+      upsert: vi.fn().mockResolvedValue({ data: null, error: null }),
+      eq: vi.fn().mockReturnThis(),
+      neq: vi.fn().mockReturnThis(),
+      gt: vi.fn().mockReturnThis(),
+      gte: vi.fn().mockReturnThis(),
+      lt: vi.fn().mockReturnThis(),
+      lte: vi.fn().mockReturnThis(),
+      like: vi.fn().mockReturnThis(),
+      ilike: vi.fn().mockReturnThis(),
+      is: vi.fn().mockReturnThis(),
+      in: vi.fn().mockReturnThis(),
+      contains: vi.fn().mockReturnThis(),
+      order: vi.fn().mockReturnThis(),
+      limit: vi.fn().mockReturnThis(),
+      range: vi.fn().mockReturnThis(),
+      single: vi.fn().mockResolvedValue({ data: null, error: null }),
+      maybeSingle: vi.fn().mockResolvedValue({ data: null, error: null }),
+    };
+    builder.then = defaultResult.then.bind(defaultResult);
+    builder.catch = defaultResult.catch.bind(defaultResult);
+    builder.finally = defaultResult.finally.bind(defaultResult);
+    return builder;
+  };
+
+  return {
+    supabase: {
+      auth: {
+        getSession: vi.fn().mockResolvedValue({ data: { session: null }, error: null }),
+        getUser: vi.fn().mockResolvedValue({ data: { user: null }, error: null }),
+        signInWithPassword: vi.fn().mockResolvedValue({ data: { user: null, session: null }, error: null }),
+        signUp: vi.fn().mockResolvedValue({ data: { user: null, session: null }, error: null }),
+        signOut: vi.fn().mockResolvedValue({ error: null }),
+        onAuthStateChange: vi.fn().mockReturnValue({ data: { subscription: { unsubscribe: vi.fn() } } }),
+      },
+      from: vi.fn(() => createQueryBuilder()),
+      rpc: vi.fn().mockResolvedValue({ data: null, error: null }),
+      functions: {
+        invoke: vi.fn().mockResolvedValue({ data: null, error: null }),
+      },
+      storage: {
+        from: vi.fn().mockReturnValue({
+          upload: vi.fn().mockResolvedValue({ data: null, error: null }),
+          download: vi.fn().mockResolvedValue({ data: null, error: null }),
+          remove: vi.fn().mockResolvedValue({ data: null, error: null }),
+          list: vi.fn().mockResolvedValue({ data: null, error: null }),
+        }),
+      },
+    },
+  };
+});
+// #region agent log
+fetch('http://127.0.0.1:7242/ingest/b23f41c9-5db1-4b59-8836-82f1a959095c',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'setup.ts:66',message:'Supabase mock setup complete',data:{},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'F'})}).catch(()=>{});
+// #endregion
+
 // Mock window.matchMedia
 Object.defineProperty(window, 'matchMedia', {
   writable: true,
@@ -62,6 +125,9 @@ if (!HTMLElement.prototype.scrollIntoView) {
 }
 
 // Mock logger to prevent fetch errors in tests
+// #region agent log
+fetch('http://127.0.0.1:7242/ingest/b23f41c9-5db1-4b59-8836-82f1a959095c',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'setup.ts:65',message:'Setting up logger mock',data:{},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'A'})}).catch(()=>{});
+// #endregion
 vi.mock('@/utils/logger', () => ({
   LogContext: {
     FRONTEND: 'frontend',
@@ -100,9 +166,15 @@ vi.mock('@/utils/logger', () => ({
     edgeFunctionError: vi.fn(),
     databaseQuery: vi.fn(),
     databaseError: vi.fn(),
+    customDomainError: vi.fn(),
+    customDomainInfo: vi.fn(),
     triggerAIAnalysis: vi.fn(),
     checkSystemHealth: vi.fn(),
     criticalWithAI: vi.fn(),
+    getErrorPatterns: vi.fn(() => []),
+    exportLogs: vi.fn(() => Promise.resolve([])),
+    setUserContext: vi.fn(),
+    setRequestId: vi.fn(),
   },
 }));
 
