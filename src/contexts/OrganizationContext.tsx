@@ -79,7 +79,7 @@ export const OrganizationProvider = ({ children }: OrganizationProviderProps) =>
         brand_color: linkData.organizations.brand_color
       });
     } catch (err: any) {
-      console.error('Error fetching organization by link token:', err);
+      log.error(LogContext.FRONTEND, 'Error fetching organization by link token', err instanceof Error ? err : new Error(String(err)), { linkToken });
       setError(err.message || 'Failed to load organization data');
     } finally {
       setLoading(false);
@@ -125,7 +125,7 @@ export const OrganizationProvider = ({ children }: OrganizationProviderProps) =>
       }
 
       if (orgError || !orgData || orgData.length === 0) {
-        console.error('Organization lookup error after retries:', orgError);
+        log.error(LogContext.FRONTEND, 'Organization lookup error after retries', orgError instanceof Error ? orgError : new Error(String(orgError)), { trackingId, retries: 3 });
         throw new Error('Organization not found for this report');
       }
 
@@ -140,7 +140,7 @@ export const OrganizationProvider = ({ children }: OrganizationProviderProps) =>
         brand_color: org.brand_color
       });
     } catch (err: any) {
-      console.error('Error fetching organization by tracking ID:', err);
+      log.error(LogContext.FRONTEND, 'Error fetching organization by tracking ID', err instanceof Error ? err : new Error(String(err)), { trackingId });
       setError(err.message || 'Failed to load organization data');
     } finally {
       setLoading(false);

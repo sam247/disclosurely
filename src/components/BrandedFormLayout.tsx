@@ -67,13 +67,13 @@ const BrandedFormLayout = ({
                      decoding="async"
                      onClick={() => window.location.href = getMainSecurePageUrl()}
                      onError={(e) => {
-                       console.error('Logo failed to load:', logoUrl, e);
+                       // Logo failed to load
                        const target = e.target as HTMLImageElement;
                        target.style.display = 'none';
                        target.nextElementSibling?.classList.remove('hidden');
                      }}
                      onLoad={() => {
-                       console.log('Logo loaded successfully:', logoUrl);
+                       // Logo loaded successfully
                      }}
                    />
                  ) : (

@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useLocation } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
+import { log, LogContext } from '@/utils/logger';
 
 /**
  * Middleware component that handles 301 redirects between subdomain and custom domain URLs
@@ -131,7 +132,7 @@ const UrlRedirectMiddleware = ({ children }: { children: React.ReactNode }) => {
           }
         }
       } catch (error) {
-        console.error('Error checking URL redirect:', error);
+        log.warn(LogContext.FRONTEND, 'Error checking URL redirect', { error: error instanceof Error ? error.message : String(error), pathname: location.pathname });
         // Don't block rendering on error
       }
     };

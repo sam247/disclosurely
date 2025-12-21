@@ -10,6 +10,7 @@ import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { Building2, Palette, FileText } from 'lucide-react';
+import { log, LogContext } from '@/utils/logger';
 
 const OrganizationOnboarding = () => {
   const [formData, setFormData] = useState({
@@ -66,7 +67,7 @@ const OrganizationOnboarding = () => {
         });
 
       if (profileError) {
-        console.error('Profile update error:', profileError);
+        log.error(LogContext.AUTH, 'Profile update error during organization onboarding', profileError instanceof Error ? profileError : new Error(String(profileError)), { userId: user?.id });
         throw profileError;
       }
 

@@ -53,7 +53,6 @@ const Contact = () => {
         alert(t("contact.form.error") || "There was an error sending your message. Please try again or email us directly.");
       }
     } catch (error) {
-      console.error("Contact form error:", error);
       alert(t("contact.form.error") || "There was an error sending your message. Please email us at team@disclosurely.com");
     } finally {
       setLoading(false);

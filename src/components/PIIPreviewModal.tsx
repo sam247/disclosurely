@@ -6,6 +6,7 @@ import { highlightPIIForDisplay, formatPIIType } from '@/utils/pii-detector-clie
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { useOrganization } from '@/hooks/useOrganization';
+import { log, LogContext } from '@/utils/logger';
 
 interface PIIPreviewModalProps {
   originalText: string;
@@ -76,7 +77,7 @@ export const PIIPreviewModal: React.FC<PIIPreviewModalProps> = ({
         );
         setHighlightedParts(Array.isArray(highlighted) ? highlighted : [{ text: originalText || '', isPII: false }]);
       } catch (error) {
-        console.error('Error detecting PII:', error);
+        log.error(LogContext.AI_ANALYSIS, 'Error detecting PII in PIIPreviewModal', error instanceof Error ? error : new Error(String(error)));
         setRedactionResult({
           redactedText: originalText || '',
           detections: [],
@@ -131,7 +132,7 @@ export const PIIPreviewModal: React.FC<PIIPreviewModalProps> = ({
 
       setReportingFalsePositive(null);
     } catch (error: any) {
-      console.error('Error reporting false positive:', error);
+      log.error(LogContext.AI_ANALYSIS, 'Error reporting false positive', error instanceof Error ? error : new Error(String(error)));
       toast({
         title: 'Error',
         description: 'Failed to report false positive. Please try again.',

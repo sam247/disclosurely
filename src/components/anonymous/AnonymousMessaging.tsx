@@ -11,6 +11,7 @@ import { MessageSquare, Clock, Send } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { auditLogger } from '@/utils/auditLogger';
 import StatusTimeline from '@/components/StatusTimeline';
+import { log, LogContext } from '@/utils/logger';
 
 interface OrgBranding { name?: string; brand_color?: string; logo_url?: string; custom_logo_url?: string; }
 interface ReportInfo { id: string; tracking_id: string; title: string; status: string; created_at: string; organization_id: string; }
@@ -61,7 +62,7 @@ const AnonymousMessaging = () => {
         .maybeSingle();
 
       if (linkError) {
-        console.error('Organization link error:', linkError);
+        log.error(LogContext.FRONTEND, 'Organization link error in AnonymousMessaging', linkError instanceof Error ? linkError : new Error(String(linkError)));
         return;
       }
 
@@ -79,7 +80,7 @@ const AnonymousMessaging = () => {
         brand_color: linkInfo.organizations.brand_color
       });
     } catch (error) {
-      console.error('Error fetching organization branding from domain:', error);
+      log.error(LogContext.FRONTEND, 'Error fetching organization branding from domain', error instanceof Error ? error : new Error(String(error)));
     }
   };
 

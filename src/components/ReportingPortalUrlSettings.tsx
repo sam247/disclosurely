@@ -9,6 +9,9 @@ import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { auditLogger } from '@/utils/auditLogger';
+import * as Sentry from '@sentry/react';
+import { log } from '@/utils/logger';
+import { LogContext } from '@/utils/logger';
 
 interface Organization {
   id: string;
@@ -59,7 +62,14 @@ const ReportingPortalUrlSettings = () => {
 
       setOrganization(orgData as Organization);
     } catch (error) {
-      console.error('Error fetching organization:', error);
+      // Log to Sentry for critical CNAME/custom domain errors
+      if (error instanceof Error) {
+        Sentry.captureException(error, {
+          tags: { component: 'ReportingPortalUrlSettings', action: 'fetchOrganization' },
+          extra: { userId: user?.id }
+        });
+        log.error(LogContext.SYSTEM, 'Error fetching organization for URL settings', error, { userId: user?.id });
+      }
       toast({
         title: "Error",
         description: "Failed to load organization settings",
@@ -112,7 +122,12 @@ const ReportingPortalUrlSettings = () => {
             newType: activeUrlType,
             customDomain: organization.custom_domain
           }
-        }).catch(console.error);
+        }).catch((err) => {
+          // Non-critical audit log failure - use logger instead of Sentry
+          if (err instanceof Error) {
+            log.warn(LogContext.AUDIT, 'Failed to log URL type change audit', { error: err.message });
+          }
+        });
       }
 
       // Refresh organization data
@@ -123,7 +138,24 @@ const ReportingPortalUrlSettings = () => {
         description: "Reporting portal URL settings updated. The old URL will automatically redirect to the new one.",
       });
     } catch (error) {
-      console.error('Error updating URL type:', error);
+      // Critical CNAME/custom domain operation - log to Sentry
+      if (error instanceof Error) {
+        Sentry.captureException(error, {
+          tags: { component: 'ReportingPortalUrlSettings', action: 'updateUrlType' },
+          extra: { 
+            userId: user?.id,
+            organizationId: organization?.id,
+            activeUrlType,
+            previousType: organization?.active_url_type
+          }
+        });
+        log.error(LogContext.SYSTEM, 'Error updating URL type', error, {
+          userId: user?.id,
+          organizationId: organization?.id,
+          activeUrlType,
+          previousType: organization?.active_url_type
+        });
+      }
       toast({
         title: "Error",
         description: "Failed to update URL settings",
@@ -144,7 +176,10 @@ const ReportingPortalUrlSettings = () => {
         description: "URL copied to clipboard",
       });
     } catch (error) {
-      console.error('Failed to copy:', error);
+      // Non-critical clipboard error - use logger instead of Sentry
+      if (error instanceof Error) {
+        log.warn(LogContext.FRONTEND, 'Failed to copy URL to clipboard', { url });
+      }
       toast({
         title: "Error",
         description: "Failed to copy URL",

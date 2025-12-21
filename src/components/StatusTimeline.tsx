@@ -4,6 +4,7 @@ import { Badge } from '@/components/ui/badge';
 import { Clock, CheckCircle, AlertCircle, Search, FileText, Lock } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
 import { supabase } from '@/integrations/supabase/client';
+import { log, LogContext } from '@/utils/logger';
 
 interface StatusChange {
   id: string;
@@ -83,7 +84,7 @@ const StatusTimeline: React.FC<StatusTimelineProps> = ({ reportId, currentStatus
         });
 
         if (error) {
-          console.error('Error fetching status changes:', error);
+          log.warn(LogContext.FRONTEND, 'Error fetching status changes', { error: error instanceof Error ? error.message : String(error), reportId });
           // Fallback to mock timeline
           const mockTimeline = generateMockTimeline(currentStatus);
           setStatusChanges(mockTimeline);
@@ -95,7 +96,7 @@ const StatusTimeline: React.FC<StatusTimelineProps> = ({ reportId, currentStatus
           setStatusChanges(mockTimeline);
         }
       } catch (error) {
-        console.error('Error fetching status changes:', error);
+        log.warn(LogContext.FRONTEND, 'Error fetching status changes (catch)', { error: error instanceof Error ? error.message : String(error), reportId });
         // Fallback to mock timeline
         const mockTimeline = generateMockTimeline(currentStatus);
         setStatusChanges(mockTimeline);

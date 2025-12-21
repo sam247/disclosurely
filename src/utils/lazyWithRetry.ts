@@ -24,10 +24,7 @@ export function lazyWithRetry<T extends ComponentType<any>>(
               error?.name === 'ChunkLoadError';
 
             if (isModuleError && attempt < retries) {
-              console.warn(
-                `Module load failed (attempt ${attempt}/${retries}). This may be due to a deployment update. Retrying...`,
-                error
-              );
+              // Module load failed, retrying (may be due to deployment update)
               
               // For module errors, try fetching the HTML first to get fresh chunk references
               if (attempt === 1) {
@@ -53,11 +50,9 @@ export function lazyWithRetry<T extends ComponentType<any>>(
               }
             } else if (isModuleError) {
               // After all retries, this is likely a stale deployment - let error boundary handle it
-              console.error('Module load failed after retries. Likely stale deployment - error boundary will handle reload.');
               reject(error);
             } else {
               // If it's not a module error, reject immediately
-              console.error('Module load failed (non-module error):', error);
               reject(error);
             }
           });

@@ -87,7 +87,7 @@ const CompanyStatusPage = () => {
         .maybeSingle();
 
       if (linkError) {
-        console.error('Organization link error:', linkError);
+        // Organization link error
         setLoadingBranding(false);
         return;
       }
@@ -106,6 +106,7 @@ const CompanyStatusPage = () => {
         brand_color: linkInfo.organizations.brand_color
       });
     } catch (error) {
+      // Ignore errors when setting branding
     } finally {
       setLoadingBranding(false);
     }
@@ -183,7 +184,7 @@ const CompanyStatusPage = () => {
         .order("created_at", { ascending: true });
 
       if (messagesError) {
-        console.error("Messages fetch error:", messagesError);
+        // Messages fetch error
       } else {
         
         setMessages(messagesData || []);
@@ -225,7 +226,6 @@ const CompanyStatusPage = () => {
         });
 
       if (error) {
-        console.error("Message send error:", error);
         throw error;
       }
 

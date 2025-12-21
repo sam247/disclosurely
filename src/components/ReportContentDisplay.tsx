@@ -12,6 +12,7 @@ import { useToast } from '@/hooks/use-toast';
 import { useTranslation } from 'react-i18next';
 import CompactReportAttachments from './CompactReportAttachments';
 import TranslateButton from './TranslateButton';
+import { log, LogContext } from '@/utils/logger';
 
 interface ReportContentDisplayProps {
   encryptedContent: string;
@@ -80,12 +81,12 @@ const ReportContentDisplay = ({
         .single();
 
       if (profileError) {
-        console.error('Error fetching user profile:', profileError);
+        log.error(LogContext.AUTH, 'Error fetching user profile in ReportContentDisplay', profileError instanceof Error ? profileError : new Error(String(profileError)), { userId: user?.id });
         throw new Error('Failed to fetch user profile: ' + profileError.message);
       }
 
       if (!profile?.organization_id) {
-        console.error('No organization found for user');
+        log.error(LogContext.AUTH, 'No organization found for user in ReportContentDisplay', new Error('User has no organization'), { userId: user?.id });
         throw new Error('User is not associated with any organization');
       }
 
@@ -106,7 +107,7 @@ const ReportContentDisplay = ({
       });
       
     } catch (error) {
-      console.error('Decryption process failed:', error);
+      log.error(LogContext.FRONTEND, 'Decryption process failed in ReportContentDisplay', error instanceof Error ? error : new Error(String(error)), { trackingId });
       const errorMessage = error instanceof Error ? error.message : 'Unknown decryption error';
       setDecryptionError(errorMessage);
       

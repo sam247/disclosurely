@@ -4,6 +4,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { AlertCircle, FileText, Users, Link, Clock } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
+import { log, LogContext } from '@/utils/logger';
 
 interface DashboardStats {
   totalReports: number;
@@ -97,7 +98,7 @@ const DashboardStats = () => {
         averageResponseTimeHours: avgResponseTime
       });
     } catch (error) {
-      console.error('Error fetching dashboard stats:', error);
+      log.error(LogContext.FRONTEND, 'Error fetching dashboard stats', error instanceof Error ? error : new Error(String(error)), { userId: user?.id });
     } finally {
       setLoading(false);
     }

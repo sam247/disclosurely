@@ -7,6 +7,7 @@ import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 import { Cookie, Settings, X } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { log, LogContext } from '@/utils/logger';
 
 interface CookiePreferences {
   necessary: boolean;
@@ -41,7 +42,7 @@ const CookieConsentBanner = () => {
           return;
         }
       } catch (error) {
-        console.error('Error parsing local consent:', error);
+        log.warn(LogContext.FRONTEND, 'Error parsing local consent', { error: error instanceof Error ? error.message : String(error) });
       }
     }
 

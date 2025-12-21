@@ -5,6 +5,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Check, Crown, Zap } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import { log, LogContext } from '@/utils/logger';
 
 interface SubscriptionPromptModalProps {
   open: boolean;
@@ -43,7 +44,7 @@ const SubscriptionPromptModal = ({ open, onOpenChange }: SubscriptionPromptModal
         window.location.href = data.url;
       }
     } catch (error) {
-      console.error('Error creating checkout session:', error);
+      log.error(LogContext.FRONTEND, 'Error creating checkout session in SubscriptionPromptModal', error instanceof Error ? error : new Error(String(error)), { plan });
       toast({
         title: "Error",
         description: "Failed to start subscription process. Please try again.",

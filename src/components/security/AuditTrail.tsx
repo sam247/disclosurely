@@ -11,6 +11,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { useUserRoles } from '@/hooks/useUserRoles';
 import { Shield, Activity, Search, Download, AlertTriangle, CheckCircle, XCircle } from 'lucide-react';
 import { format } from 'date-fns';
+import { log, LogContext } from '@/utils/logger';
 
 interface AuditEvent {
   id: string;
@@ -77,7 +78,7 @@ const AuditTrail = () => {
       const { data, error } = await query;
 
       if (error) {
-        console.error('Error fetching audit events:', error);
+        log.error(LogContext.AUDIT, 'Error fetching audit events', error instanceof Error ? error : new Error(String(error)));
         // If table doesn't exist yet, show empty state
         if (error.code === 'PGRST116' || error.message?.includes('does not exist')) {
           setAuditEvents([]);
@@ -105,7 +106,7 @@ const AuditTrail = () => {
       
       setAuditEvents(typedData);
     } catch (error: any) {
-      console.error('Error fetching audit events:', error);
+      log.error(LogContext.AUDIT, 'Error fetching audit events', error instanceof Error ? error : new Error(String(error)));
       toast({
         title: "Error",
         description: "Failed to fetch audit events",
@@ -150,7 +151,7 @@ const AuditTrail = () => {
         description: "Audit log has been exported successfully",
       });
     } catch (error) {
-      console.error('Export error:', error);
+      log.warn(LogContext.AUDIT, 'Error exporting audit log', { error: error instanceof Error ? error.message : String(error) });
       toast({
         title: "Export Failed",
         description: "Failed to export audit log",

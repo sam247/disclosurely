@@ -4,6 +4,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { TrendingUp, FileText, Clock, BarChart3 } from 'lucide-react';
+import { log, LogContext } from '@/utils/logger';
 
 interface ReportStats {
   totalReports: number;
@@ -128,7 +129,7 @@ const ReportsStatistics = () => {
       });
 
     } catch (error) {
-      console.error('Error fetching report statistics:', error);
+      log.error(LogContext.FRONTEND, 'Error fetching report statistics', error instanceof Error ? error : new Error(String(error)), { userId: user?.id });
     } finally {
       setLoading(false);
     }

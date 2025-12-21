@@ -13,6 +13,7 @@ import { useToast } from '@/hooks/use-toast';
 import BrandedFormLayout from '../BrandedFormLayout';
 import { useSecureForm } from '@/hooks/useSecureForm';
 import { validateTrackingId } from '@/utils/inputValidation';
+import { log, LogContext } from '@/utils/logger';
 
 interface OrganizationBranding {
   name: string;
@@ -83,7 +84,7 @@ const SecureReportStatusLookup = () => {
         .maybeSingle();
 
       if (linkError) {
-        console.error('Organization link error:', linkError);
+        log.error(LogContext.FRONTEND, 'Organization link error in SecureReportStatusLookup', linkError instanceof Error ? linkError : new Error(String(linkError)));
         setLoadingBranding(false);
         return;
       }
@@ -103,7 +104,7 @@ const SecureReportStatusLookup = () => {
         brand_color: linkInfo.organizations.brand_color
       });
     } catch (error) {
-      console.error('Error fetching organization branding from domain:', error);
+      log.error(LogContext.FRONTEND, 'Error fetching organization branding from domain', error instanceof Error ? error : new Error(String(error)));
     } finally {
       setLoadingBranding(false);
     }
@@ -131,12 +132,12 @@ const SecureReportStatusLookup = () => {
     );
 
     if (orgError) {
-      console.error('RPC error during status lookup:', orgError);
+      log.error(LogContext.DATABASE, 'RPC error during status lookup', orgError instanceof Error ? orgError : new Error(String(orgError)), { trackingId });
       throw new Error('Unable to check status right now. Please try again.');
     }
 
     if (!orgRows || orgRows.length === 0) {
-      console.error('Report not found via RPC');
+      log.warn(LogContext.FRONTEND, 'Report not found via RPC', { trackingId });
       throw new Error('Report not found. Please check your tracking ID and try again.');
     }
 

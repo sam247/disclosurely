@@ -8,6 +8,7 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } f
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { Cookie, Settings } from 'lucide-react';
+import { log, LogContext } from '@/utils/logger';
 
 interface CookieConsentProps {
   organizationId: string;
@@ -52,7 +53,7 @@ const CookieConsent = ({ organizationId }: CookieConsentProps) => {
         setShowBanner(true);
       }
     } catch (error) {
-      console.error('Error checking existing consent:', error);
+      log.warn(LogContext.FRONTEND, 'Error checking existing consent', { error: error instanceof Error ? error.message : String(error), organizationId });
       setShowBanner(true);
     }
   };

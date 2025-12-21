@@ -7,6 +7,7 @@ import { AlertCircle, TrendingUp, Calendar, Target, RefreshCw, ChevronDown, Chev
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
+import { log, LogContext } from '@/utils/logger';
 
 interface PatternAnalysis {
   common_themes: Array<{
@@ -65,7 +66,7 @@ const PatternDetection = () => {
           sessionStorage.removeItem('ai-analysis-timestamp');
         }
       } catch (error) {
-        console.error('Failed to load saved analysis:', error);
+        log.warn(LogContext.AI_ANALYSIS, 'Failed to load saved analysis from sessionStorage', { error: error instanceof Error ? error.message : String(error) });
         sessionStorage.removeItem('ai-analysis');
         sessionStorage.removeItem('ai-analysis-timestamp');
       }
@@ -135,7 +136,7 @@ const PatternDetection = () => {
       });
 
     } catch (error) {
-      console.error('Error analyzing patterns:', error);
+      log.error(LogContext.AI_ANALYSIS, 'Error analyzing patterns', error instanceof Error ? error : new Error(String(error)), { userId: user?.id });
       toast({
         title: "Error",
         description: "Failed to analyze patterns. Please try again.",

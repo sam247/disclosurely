@@ -93,6 +93,7 @@ const CustomDomainSettings = () => {
         setExistingDomains(response.data.domains || []);
       }
     } catch (error) {
+      // Ignore errors when fetching existing domains
     }
   }, []);
 
@@ -274,7 +275,9 @@ const CustomDomainSettings = () => {
                 recordCount: validRecords.length,
                 recordTypes: validRecords.map(r => r.type)
               }
-            }).catch(console.error);
+            }).catch(() => {
+              // Error logging audit event
+            });
           }
         }
         
@@ -418,7 +421,9 @@ const CustomDomainSettings = () => {
                 domain: domain.trim(),
                 verificationSuccess: true
               }
-            }).catch(console.error);
+            }).catch(() => {
+              // Error logging audit event
+            });
           }
         }
         
@@ -527,7 +532,9 @@ const CustomDomainSettings = () => {
                 domain: domainToDelete,
                 deletionSuccess: true
               }
-            }).catch(console.error);
+            }).catch(() => {
+              // Error logging audit event
+            });
           }
         }
 
@@ -557,7 +564,6 @@ const CustomDomainSettings = () => {
         });
       }
     } catch (error) {
-      console.error('Error deleting domain:', error);
       toast({
         title: "Error",
         description: `Failed to delete ${domainToDelete}`,
@@ -579,6 +585,7 @@ const CustomDomainSettings = () => {
         description: `${recordType} record copied to clipboard`,
       });
     } catch (error) {
+      // Ignore copy errors
     }
   };
 

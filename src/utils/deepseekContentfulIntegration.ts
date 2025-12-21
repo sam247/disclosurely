@@ -99,7 +99,7 @@ Format the response as JSON with this exact structure:
     
 
   } catch (error) {
-    console.error("❌ Error:", error);
+    // Error in content generation
   }
 }
 
@@ -121,7 +121,6 @@ export function useDeepSeekContentGeneration() {
       
       return blogData;
     } catch (error) {
-      console.error('Error generating content:', error);
       throw error;
     }
   };

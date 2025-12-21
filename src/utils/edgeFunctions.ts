@@ -16,13 +16,13 @@ export async function checkFeatureFlag(
     });
 
     if (error) {
-      console.error('[checkFeatureFlag] Error:', error);
+      // Error checking feature flag
       return false; // Default to disabled on error
     }
 
     return data?.enabled === true;
   } catch (error) {
-    console.error('[checkFeatureFlag] Unexpected error:', error);
+    // Unexpected error checking feature flag
     return false; // Default to disabled on error
   }
 }
@@ -43,13 +43,13 @@ export async function checkAccountLocked(
     });
 
     if (error) {
-      console.error('[checkAccountLocked] Error:', error);
+      // Error checking account locked status
       return false; // Default to not locked on error (allow login to proceed)
     }
 
     return data?.locked === true;
   } catch (error) {
-    console.error('[checkAccountLocked] Unexpected error:', error);
+    // Unexpected error checking account locked status
     return false; // Default to not locked on error (allow login to proceed)
   }
 }

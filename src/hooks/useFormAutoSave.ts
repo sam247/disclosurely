@@ -33,7 +33,7 @@ export const useFormAutoSave = ({
         }));
         
       } catch (error) {
-        console.error('Failed to auto-save form data:', error);
+        // Failed to auto-save form data
       }
     }, debounceMs);
   }, [debounceMs]);
@@ -63,7 +63,7 @@ export const useFormAutoSave = ({
         }
       }
     } catch (error) {
-      console.error('Failed to load saved form data:', error);
+      // Failed to load saved form data
     }
     return null;
   }, [key]);
@@ -74,7 +74,7 @@ export const useFormAutoSave = ({
       localStorage.removeItem(key);
       
     } catch (error) {
-      console.error('Failed to clear saved form data:', error);
+      // Failed to clear saved form data
     }
   }, [key]);
 

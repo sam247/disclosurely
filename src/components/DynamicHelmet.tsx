@@ -99,7 +99,7 @@ const DynamicHelmet: React.FC<DynamicHelmetProps> = ({
       urlObj.hash = '';
       return urlObj.toString();
     } catch (error) {
-      console.error('Error normalizing canonical URL:', error);
+      // Error normalizing canonical URL
       return url;
     }
   };
@@ -189,7 +189,7 @@ const DynamicHelmet: React.FC<DynamicHelmetProps> = ({
   useEffect(() => {
     const fetchSEOData = async () => {
       if (!contentfulClient) {
-        console.warn('Contentful client not initialized - VITE_CONTENTFUL_DELIVERY_TOKEN missing. Using fallback SEO data.');
+        // Contentful client not initialized - VITE_CONTENTFUL_DELIVERY_TOKEN missing. Using fallback SEO data.
         setLoading(false);
         return;
       }
@@ -305,7 +305,7 @@ const DynamicHelmet: React.FC<DynamicHelmetProps> = ({
           timestamp: Date.now(),
         });
       } catch (error) {
-        console.error('❌ DynamicHelmet: Error fetching SEO data from Contentful:', error);
+        // Error fetching SEO data from Contentful
       } finally {
         setLoading(false);
       }

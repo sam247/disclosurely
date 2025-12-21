@@ -83,8 +83,6 @@ export async function saveDraft(request: SaveDraftRequest): Promise<SaveDraftRes
       };
     }
   } catch (error) {
-    console.error('Error saving draft:', error);
-    
     let errorMessage = 'Failed to save draft';
     if (error instanceof Error) {
       if (error.message.includes('fetch')) {
@@ -155,7 +153,6 @@ export async function updateDraft(draftCode: string, request: SaveDraftRequest):
     });
 
     if (error) {
-      console.error('Error updating draft:', error);
       return {
         success: false,
         draftCode: '',
@@ -185,7 +182,7 @@ export async function deleteDraft(draftCode: string): Promise<boolean> {
     });
 
     if (error) {
-      console.error('Error deleting draft:', error);
+      // Error deleting draft
       return false;
     }
 

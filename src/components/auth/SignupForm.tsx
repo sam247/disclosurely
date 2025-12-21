@@ -6,6 +6,8 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import { log, LogContext } from '@/utils/logger';
+import * as Sentry from '@sentry/react';
 
 const SignupForm = () => {
   const [email, setEmail] = useState('');
@@ -96,7 +98,14 @@ const SignupForm = () => {
         .single();
 
       if (orgError) {
-        console.error('Organization creation error:', orgError);
+        // Critical auth operation - log to Sentry
+        if (orgError instanceof Error) {
+          Sentry.captureException(orgError, {
+            tags: { component: 'SignupForm', action: 'createOrganization' },
+            extra: { email }
+          });
+        }
+        log.error(LogContext.AUTH, 'Organization creation error during signup', orgError instanceof Error ? orgError : new Error(String(orgError)), { email });
         toast({
           title: "Error",
           description: `Failed to create organization: ${orgError.message}`,
@@ -120,7 +129,14 @@ const SignupForm = () => {
         });
 
       if (profileError) {
-        console.error('Profile creation error:', profileError);
+        // Critical auth operation - log to Sentry
+        if (profileError instanceof Error) {
+          Sentry.captureException(profileError, {
+            tags: { component: 'SignupForm', action: 'createProfile' },
+            extra: { email }
+          });
+        }
+        log.error(LogContext.AUTH, 'Profile creation error during signup', profileError instanceof Error ? profileError : new Error(String(profileError)), { email });
         toast({
           title: "Error",
           description: `Account created but failed to set up organization: ${profileError.message}`,
@@ -136,7 +152,14 @@ const SignupForm = () => {
       });
       window.location.href = 'https://app.disclosurely.com/auth/login';
     } catch (error: any) {
-      console.error('Signup error:', error);
+      // Critical auth operation - log to Sentry
+      if (error instanceof Error) {
+        Sentry.captureException(error, {
+          tags: { component: 'SignupForm', action: 'signup' },
+          extra: { email }
+        });
+      }
+      log.error(LogContext.AUTH, 'Signup error', error instanceof Error ? error : new Error(String(error)), { email });
       toast({
         title: "Error",
         description: error.message || "An unexpected error occurred",

@@ -150,7 +150,7 @@ const AnalyticsView: React.FC = () => {
 
       // Fetch profiles for member names
       const assignedUserIds = [...new Set((currentReports || []).filter(r => r.assigned_to).map(r => r.assigned_to))];
-      let memberMap: Record<string, string> = {};
+      const memberMap: Record<string, string> = {};
       if (assignedUserIds.length > 0) {
         const { data: profiles } = await supabase
           .from('profiles')
@@ -322,6 +322,7 @@ const AnalyticsView: React.FC = () => {
                 };
               }
             } catch (error) {
+              // Ignore decryption errors, use fallback
             }
           }
           return {

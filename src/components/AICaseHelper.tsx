@@ -172,7 +172,6 @@ const AICaseHelper: React.FC<AICaseHelperProps> = ({ reportId, reportContent }) 
       if (error) throw error;
       setNewCases(data || []);
     } catch (error) {
-      console.error('Error loading cases:', error);
       toast({
         title: "Error",
         description: "Failed to load cases.",
@@ -205,7 +204,7 @@ const AICaseHelper: React.FC<AICaseHelperProps> = ({ reportId, reportContent }) 
       if (error) throw error;
       setSavedAnalyses(data || []);
     } catch (error) {
-      console.error('Error loading saved analyses:', error);
+      // Error loading saved analyses
     } finally {
       setIsLoadingSaved(false);
     }
@@ -233,7 +232,6 @@ const AICaseHelper: React.FC<AICaseHelperProps> = ({ reportId, reportContent }) 
       // Reload the list
       loadSavedAnalyses();
     } catch (error) {
-      console.error('Error deleting saved analysis:', error);
       toast({
         title: "Delete Failed",
         description: "Failed to delete analysis. Please try again.",
@@ -255,7 +253,6 @@ const AICaseHelper: React.FC<AICaseHelperProps> = ({ reportId, reportContent }) 
       if (error) throw error;
       setDocuments(data || []);
     } catch (error) {
-      console.error('Error loading documents:', error);
       toast({
         title: "Error",
         description: "Failed to load documents.",
@@ -307,7 +304,6 @@ const AICaseHelper: React.FC<AICaseHelperProps> = ({ reportId, reportContent }) 
 
       loadDocuments();
     } catch (error) {
-      console.error('Error uploading files:', error);
       toast({
         title: "Upload Failed",
         description: "Failed to upload documents. Please try again.",
@@ -345,7 +341,6 @@ const AICaseHelper: React.FC<AICaseHelperProps> = ({ reportId, reportContent }) 
       loadDocuments();
       setSelectedDocs(prev => prev.filter(id => id !== doc.id));
     } catch (error) {
-      console.error('Error deleting document:', error);
       toast({
         title: "Delete Failed",
         description: "Failed to delete document. Please try again.",
@@ -406,7 +401,7 @@ Case Details:
 - Additional Details: ${decrypted.additionalDetails || 'None provided'}
           `.trim();
         } catch (decryptError) {
-          console.error('Error decrypting case content:', decryptError);
+          // Error decrypting case content
           decryptedContent = '[Case content is encrypted and could not be decrypted for analysis]';
         }
       }
@@ -424,7 +419,6 @@ Case Details:
             });
 
             if (extractError) {
-              console.error(`[PDF Extract] Error for ${doc.name}:`, extractError);
               throw extractError;
             }
 
@@ -443,7 +437,7 @@ Case Details:
               description: `Extracted ${extractedText.length.toLocaleString()} characters`
             });
           } catch (error) {
-            console.error(`[PDF Extract] Failed for ${doc.name}:`, error);
+            // PDF extract failed, using fallback
             companyDocuments.push({
               name: doc.name,
               content: `[PDF Document: ${doc.name} - Text extraction failed]`
@@ -532,7 +526,6 @@ Case Details:
         description: "AI analysis has been generated for this case."
       });
     } catch (error) {
-      console.error('Error analyzing case:', error);
       toast({
         title: "Analysis Failed",
         description: "Failed to generate AI analysis. Please try again.",
@@ -586,7 +579,6 @@ Case Details:
         description: "You can view it in the 'Saved Analyses' dropdown."
       });
     } catch (error) {
-      console.error('Error saving analysis:', error);
       toast({
         title: "Save Failed",
         description: "Failed to save analysis. Please try again.",
@@ -630,7 +622,7 @@ Evidence: ${decrypted.evidence || 'No evidence provided'}
 
 Additional Details: ${decrypted.additionalDetails || 'None provided'}`;
         } catch (decryptError) {
-          console.error('Error decrypting case content:', decryptError);
+          // Error decrypting case content
           decryptedContent = '[Case content is encrypted and could not be decrypted]';
         }
       } else {
@@ -653,7 +645,6 @@ Additional Details: ${decrypted.additionalDetails || 'None provided'}`;
       setShowPIIPreview(true);
       setHasViewedPreview(true); // Mark preview as viewed for this case
     } catch (error) {
-      console.error('Error loading preview:', error);
       toast({
         title: "Preview Failed",
         description: "Failed to load case content for preview.",
@@ -733,13 +724,11 @@ Guidelines:
       });
 
       if (error) {
-        console.error('[Chat] Edge Function error:', error);
         throw error;
       }
 
       // Parse AI Gateway response
       if (!data || !data.choices || !data.choices[0]?.message?.content) {
-        console.error('[Chat] Invalid response format:', data);
         throw new Error('No response from AI');
       }
 
@@ -748,7 +737,7 @@ Guidelines:
       
       // Log PII redaction if any
       if (data.metadata?.pii_redacted) {
-        
+        // PII was redacted from the response
       }
 
       // Add AI response to chat
@@ -759,7 +748,6 @@ Guidelines:
       }]);
 
     } catch (error) {
-      console.error('[Chat] Error sending chat message:', error);
       toast({
         title: "Chat Error",
         description: error instanceof Error ? error.message : "Failed to get AI response. Please try again.",

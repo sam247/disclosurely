@@ -5,6 +5,7 @@ import { saveDraft, updateDraft } from '@/services/draftService';
 import { ProgressiveFormData } from '@/components/forms/ProgressiveReportForm';
 import { SaveDraftModal } from './SaveDraftModal';
 import { useToast } from '@/hooks/use-toast';
+import { log, LogContext } from '@/utils/logger';
 
 interface SaveDraftButtonProps {
   formData: ProgressiveFormData;
@@ -55,7 +56,7 @@ export const SaveDraftButton = ({
         setShowModal(true);
         onDraftSaved(response.draftCode);
       } else {
-        console.error('Draft save failed:', response);
+        log.error(LogContext.SUBMISSION, 'Draft save failed', new Error(response.message || 'Unknown error'), { organizationId, currentStep });
         toast({
           title: "Failed to save draft",
           description: response.message || "An error occurred while saving your draft. Please try again.",
@@ -64,7 +65,7 @@ export const SaveDraftButton = ({
       }
     } catch (error) {
       setIsSaving(false);
-      console.error('Error saving draft:', error);
+      log.error(LogContext.SUBMISSION, 'Error saving draft', error instanceof Error ? error : new Error(String(error)), { organizationId, currentStep });
       toast({
         title: "Failed to save draft",
         description: error instanceof Error ? error.message : "An unexpected error occurred. Please try again.",

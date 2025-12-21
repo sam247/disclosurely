@@ -8,6 +8,7 @@ import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { Copy, Check, Gift, Users, TrendingUp } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
+import { log, LogContext } from '@/utils/logger';
 
 const ReferralProgram = () => {
   const { user } = useAuth();
@@ -43,7 +44,7 @@ const ReferralProgram = () => {
         setReferralCode(code);
       }
     } catch (error) {
-      console.error('Error fetching referral link:', error);
+      log.error(LogContext.FRONTEND, 'Error fetching referral link', error instanceof Error ? error : new Error(String(error)), { userId: user?.id });
       toast({
         title: 'Error',
         description: 'Failed to load referral information. Please try again later.',

@@ -6,6 +6,7 @@ import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { Bell } from 'lucide-react';
+import { log, LogContext } from '@/utils/logger';
 
 interface Notification {
   id: string;
@@ -75,7 +76,7 @@ const NotificationSystem = () => {
       setNotifications(data || []);
       setUnreadCount(data?.filter(n => !n.is_read).length || 0);
     } catch (error) {
-      console.error('Error fetching notifications:', error);
+      log.error(LogContext.FRONTEND, 'Error fetching notifications', error instanceof Error ? error : new Error(String(error)), { userId: user?.id });
     }
   };
 
@@ -93,7 +94,7 @@ const NotificationSystem = () => {
       );
       setUnreadCount(prev => Math.max(0, prev - 1));
     } catch (error) {
-      console.error('Error marking notification as read:', error);
+      log.error(LogContext.FRONTEND, 'Error marking notification as read', error instanceof Error ? error : new Error(String(error)), { notificationId, userId: user?.id });
     }
   };
 
@@ -115,7 +116,7 @@ const NotificationSystem = () => {
       );
       setUnreadCount(0);
     } catch (error) {
-      console.error('Error marking all notifications as read:', error);
+      log.error(LogContext.FRONTEND, 'Error marking all notifications as read', error instanceof Error ? error : new Error(String(error)), { userId: user?.id });
     } finally {
       setIsLoading(false);
     }

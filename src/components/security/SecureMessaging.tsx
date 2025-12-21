@@ -18,6 +18,7 @@ import { useOrganization } from '@/hooks/useOrganization';
 import { useFeatureFlag } from '@/hooks/useFeatureFlag';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { AlertTriangle } from 'lucide-react';
+import { log, LogContext } from '@/utils/logger';
 
 interface Report {
   id: string;
@@ -111,7 +112,7 @@ const SecureMessaging = ({ report, onClose }: SecureMessagingProps) => {
       }
 
       if (error) {
-        console.error('Error fetching messages:', error);
+        log.error(LogContext.MESSAGING, 'Error fetching secure messages', error instanceof Error ? error : new Error(String(error)));
         if (isMountedRef.current) {
         toast({
           title: "Error",
@@ -127,7 +128,7 @@ const SecureMessaging = ({ report, onClose }: SecureMessagingProps) => {
       setMessages(result?.messages || []);
       }
     } catch (error) {
-      console.error('Error fetching messages:', error);
+      log.error(LogContext.MESSAGING, 'Error fetching messages', error instanceof Error ? error : new Error(String(error)));
     } finally {
       if (isMountedRef.current) {
       setIsLoading(false);
@@ -221,7 +222,7 @@ const SecureMessaging = ({ report, onClose }: SecureMessagingProps) => {
     });
 
     if (error) {
-      console.error('Error sending message:', error);
+      log.error(LogContext.MESSAGING, 'Error sending secure message', error instanceof Error ? error : new Error(String(error)));
       throw new Error('Failed to send message');
     }
 

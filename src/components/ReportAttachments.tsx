@@ -6,6 +6,7 @@ import { Download, File, Eye, Paperclip } from 'lucide-react';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 import { downloadReportFile, getAttachmentDisplayName } from '@/utils/fileUpload';
+import { log, LogContext } from '@/utils/logger';
 
 interface ReportAttachment {
   id: string;
@@ -39,14 +40,14 @@ const ReportAttachments: React.FC<ReportAttachmentsProps> = ({ reportId }) => {
         .order('created_at', { ascending: false });
 
       if (error) {
-        console.error('Error fetching attachments:', error);
+        log.error(LogContext.FRONTEND, 'Error fetching attachments', error instanceof Error ? error : new Error(String(error)), { reportId });
         toast.error('Failed to load attachments');
         return;
       }
 
       setAttachments(data || []);
     } catch (error) {
-      console.error('Unexpected error fetching attachments:', error);
+      log.error(LogContext.FRONTEND, 'Unexpected error fetching attachments', error instanceof Error ? error : new Error(String(error)), { reportId });
       toast.error('Failed to load attachments');
     } finally {
       setLoading(false);
@@ -77,7 +78,7 @@ const ReportAttachments: React.FC<ReportAttachmentsProps> = ({ reportId }) => {
 
       toast.success('File downloaded successfully');
     } catch (error) {
-      console.error('Download error:', error);
+      log.error(LogContext.FRONTEND, 'Download error in ReportAttachments', error instanceof Error ? error : new Error(String(error)), { attachmentId: file.id });
       toast.error('Failed to download file');
     } finally {
       setDownloading(null);

@@ -64,7 +64,7 @@ export const useLatestBlogPosts = (limit: number = 3) => {
 
         setPosts(fetchedPosts);
       } catch (err) {
-        console.error('Error fetching latest blog posts:', err);
+        // Error fetching latest blog posts
         setError('Failed to fetch blog posts');
       } finally {
         setLoading(false);

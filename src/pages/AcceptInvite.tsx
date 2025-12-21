@@ -84,7 +84,6 @@ const AcceptInvite = () => {
       setInvitation(data);
     } catch (error) {
       log.error(LogContext.AUTH, 'Error validating invitation', error as Error, { token });
-      console.error('Error validating invitation:', error);
       toast({
         title: "Error",
         description: "Failed to validate invitation",
@@ -163,7 +162,6 @@ const AcceptInvite = () => {
       });
 
       if (emailError) {
-        console.error('Failed to send OTP email:', emailError);
         toast({
           title: 'Email not sent',
           description: 'We could not send the verification code. Please try again in a moment.',
@@ -185,7 +183,6 @@ const AcceptInvite = () => {
       });
 
     } catch (error) {
-      console.error('Error accepting invitation:', error);
       toast({
         title: "Error",
         description: "An unexpected error occurred",
@@ -288,7 +285,6 @@ const AcceptInvite = () => {
 
       if (acceptError) {
         log.error(LogContext.AUTH, 'Failed to accept team invitation after all attempts', acceptError, { userId, token });
-        console.error('Error accepting invitation:', acceptError);
         toast({
           title: "Warning",
           description: "Account verified but failed to link to organization. Please contact support.",
@@ -308,7 +304,6 @@ const AcceptInvite = () => {
 
       if (signInError) {
         log.error(LogContext.AUTH, 'Failed to sign in after invitation acceptance', signInError, { userId, email: invitation.email });
-        console.error('Error signing in after invitation acceptance:', signInError);
         toast({
           title: "Success!",
           description: `Welcome to ${invitation.organization.name}! Please sign in to continue.`,
@@ -333,7 +328,6 @@ const AcceptInvite = () => {
       }, 1500);
 
     } catch (error) {
-      console.error('Error verifying OTP:', error);
       toast({
         title: "Error",
         description: "An unexpected error occurred",

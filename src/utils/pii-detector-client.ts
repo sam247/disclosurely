@@ -306,7 +306,7 @@ async function isOpenRedactEnabled(organizationId?: string): Promise<boolean> {
     const { checkFeatureFlag } = await import('@/utils/edgeFunctions');
     return await checkFeatureFlag('use_openredact', organizationId);
   } catch (error) {
-    console.error('[PII Detector Client] Error checking OpenRedact feature flag:', error);
+    // Error checking OpenRedact feature flag
     return false;
   }
 }
@@ -321,7 +321,6 @@ async function detectPIIWithOpenRedact(
   // OpenRedact uses Node.js fs/path modules and cannot run in the browser
   // For client-side, always use legacy implementation
   // OpenRedact is only used in server-side edge functions
-  console.log('[PII Detector Client] OpenRedact not available in browser - using legacy implementation');
   return detectPIISync(text);
 }
 
@@ -342,7 +341,7 @@ export async function detectPII(
       return await detectPIIWithOpenRedact(text, organizationId);
     } catch (error) {
       // Fall through to legacy implementation on error
-      console.warn('[PII Detector Client] OpenRedact failed, using legacy implementation');
+      // OpenRedact failed, using legacy implementation
     }
   }
 

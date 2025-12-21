@@ -182,10 +182,12 @@ const Dashboard = () => {
           .single();
         
         if (error) {
+          // Ignore errors when fetching first name
         } else if (data) {
           setFirstName(data.first_name || '');
         }
       } catch (error) {
+        // Ignore errors when fetching user profile
       }
     };
 
@@ -292,7 +294,7 @@ const Dashboard = () => {
             }
           }, 2000);
         } catch (error) {
-          console.error('Error checking subscription:', error);
+          // Error checking subscription, will retry
           if (attempt < 5) {
             setTimeout(() => checkSubscription(attempt + 1), 3000);
           } else {
@@ -386,22 +388,23 @@ const Dashboard = () => {
       const shouldFilter = !isOrgAdmin || rolesLoading || isOrgAdmin === undefined;
       
       if (shouldFilter) {
-        
+        // Filter reports to only show those assigned to the user
         reportsQuery = reportsQuery.eq('assigned_to', user.id);
       } else {
-        
+        // Org admin can see all reports, no filtering needed
       }
 
       const { data: reportsData, error: reportsError } = await reportsQuery;
 
-      
+      // Process reports data
       
 
       if (reportsError) {
+        // Ignore reports error, will show empty state
       }
 
       // Fetch archived reports - filter by assignment for team members
-      let archivedQuery = supabase
+      const archivedQuery = supabase
         .from('reports')
         .select('id, title, tracking_id, status, created_at, encrypted_content, encryption_key_hash, priority, report_type, submitted_by_email, assigned_to, incident_date, location, witnesses, previous_reports, additional_notes')
         .eq('organization_id', profile.organization_id)
@@ -416,16 +419,16 @@ const Dashboard = () => {
       const shouldFilterArchived = !isOrgAdmin || rolesLoading || isOrgAdmin === undefined;
       
       if (shouldFilterArchived) {
-        
+        // Filter archived reports to only show those assigned to the user
         archivedQuery = archivedQuery.eq('assigned_to', user.id);
       } else {
-        
+        // Org admin can see all archived reports, no filtering needed
       }
 
       const { data: archivedData, error: archivedError } = await archivedQuery;
 
       if (archivedError) {
-        console.error('Error fetching archived reports:', archivedError);
+        // Error fetching archived reports
       }
 
       // Fetch the single organization link (simplified to one link per org)
@@ -458,6 +461,7 @@ const Dashboard = () => {
       setSubdomains(customDomainsData || []);
       setTeamMembers(teamData || []);
     } catch (error) {
+      // Ignore errors when fetching dashboard data
     } finally {
       setLoading(false);
     }
@@ -497,7 +501,6 @@ const Dashboard = () => {
         fetchData();
       }, 1000);
     } catch (error) {
-      console.error('Error archiving report:', error);
       toast({
         title: "Error",
         description: "Failed to archive report. Please try again.",
@@ -574,7 +577,6 @@ const Dashboard = () => {
         fetchData();
       }, 500);
     } catch (error) {
-      console.error('Error deleting report:', error);
       toast({
         title: "Error",
         description: "Failed to delete report. Please try again.",
@@ -760,7 +762,6 @@ const Dashboard = () => {
         fetchData();
       }, 500);
     } catch (error) {
-      console.error('Error reopening report:', error);
       toast({
         title: "Error",
         description: "Failed to reopen report. Please try again.",
@@ -855,7 +856,7 @@ const Dashboard = () => {
 
   // Filter and sort reports
   const filteredReports = (reportsList: Report[]) => {
-    let filtered = reportsList.filter(report => {
+    const filtered = reportsList.filter(report => {
       const matchesSearch = searchTerm === '' || 
         report.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
         report.tracking_id.toLowerCase().includes(searchTerm.toLowerCase());

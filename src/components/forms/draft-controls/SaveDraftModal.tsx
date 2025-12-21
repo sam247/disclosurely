@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Copy, Check, AlertTriangle } from 'lucide-react';
+import { log, LogContext } from '@/utils/logger';
 
 interface SaveDraftModalProps {
   draftCode: string;
@@ -21,7 +22,7 @@ export const SaveDraftModal = ({ draftCode, onClose, brandColor = '#2563eb' }: S
   };
 
   if (!draftCode) {
-    console.error('SaveDraftModal: draftCode is empty or undefined');
+    log.error(LogContext.SUBMISSION, 'SaveDraftModal: draftCode is empty or undefined', new Error('Draft code missing'));
     return (
       <Dialog open={true} onOpenChange={onClose}>
         <DialogContent className="max-w-xs w-full mx-4">

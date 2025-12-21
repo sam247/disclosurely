@@ -120,7 +120,7 @@ const ReportStatus = () => {
         });
       }
     } catch (error) {
-      console.error('Error fetching organization branding:', error);
+      // Error fetching organization branding
     } finally {
       setBrandingLoading(false);
     }
@@ -150,7 +150,6 @@ const ReportStatus = () => {
         .single();
 
       if (reportError || !reportData) {
-        console.error("Report lookup error:", reportError);
         toast.error("Report not found. Please check your tracking ID.");
         return;
       }
@@ -173,7 +172,7 @@ const ReportStatus = () => {
         .order("created_at", { ascending: true });
 
       if (messagesError) {
-        console.error("Messages fetch error:", messagesError);
+        // Messages fetch error
       } else {
         
         setMessages(messagesData || []);
@@ -182,7 +181,6 @@ const ReportStatus = () => {
       toast.success("Report found successfully!");
 
     } catch (error) {
-      console.error("Error looking up report:", error);
       toast.error("Failed to look up report. Please try again.");
     } finally {
       setIsLoading(false);
@@ -216,7 +214,6 @@ const ReportStatus = () => {
         });
 
       if (error) {
-        console.error("Message send error:", error);
         throw error;
       }
 
@@ -256,7 +253,6 @@ const ReportStatus = () => {
       toast.success("Message sent successfully!");
 
     } catch (error) {
-      console.error("Error sending message:", error);
       toast.error("Failed to send message. Please try again.");
     } finally {
       setIsSubmittingMessage(false);

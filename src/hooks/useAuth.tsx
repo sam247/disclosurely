@@ -104,16 +104,15 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
         .maybeSingle();
 
       if (profileError) {
-        console.error('[useAuth] Profile query error:', profileError);
         throw profileError;
       }
 
       if (!profile?.organization_id) {
-        console.log('[useAuth] No organization found, using edge function');
+        // No organization found, using edge function
         throw new Error('No organization');
       }
 
-      console.log('[useAuth] Organization found:', profile.organization_id);
+      // Organization found
 
       // Query 2: Get subscription by organization_id
       const { data: subData, error: subError } = await supabase
@@ -123,16 +122,15 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
         .maybeSingle();
 
       if (subError) {
-        console.error('[useAuth] Subscriber query error:', subError);
         throw subError;
       }
 
       if (!subData) {
-        console.log('[useAuth] No subscriber record found, using edge function to fetch from Stripe');
+        // No subscriber record found, using edge function to fetch from Stripe
         throw new Error('No subscriber record');
       }
 
-      console.log('[useAuth] Subscriber data found:', subData);
+      // Subscriber data found
 
       // Process subscription data
       const now = new Date();
@@ -190,16 +188,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
         isExpired,
       };
 
-      // Debug log to help diagnose
-      console.log('[useAuth] Mapped subscription data:', {
-        subscribed: mappedData.subscribed,
-        subscription_status: mappedData.subscription_status,
-        subscription_end: mappedData.subscription_end,
-        isExpired: mappedData.isExpired,
-        isInGracePeriod: mappedData.isInGracePeriod,
-        isExpiredByDate,
-        subscriptionStatus
-      });
+      // Mapped subscription data
 
       setSubscriptionData(mappedData);
       // Store with TTL (5 minutes) for performance optimization
@@ -213,7 +202,6 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
       return;
     } catch (error) {
       // Expected fallback - use edge function instead
-      console.log('[useAuth] Using edge function fallback:', error instanceof Error ? error.message : 'unknown');
       // Keep loading state true as we're about to call edge function
     }
 
@@ -222,7 +210,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
       if (!subscriptionLoading) {
         setSubscriptionLoading(true);
       }
-      console.log('[useAuth] Calling check-subscription edge function');
+      // Calling check-subscription edge function
 
       const { data, error } = await supabase.functions.invoke('check-subscription', {
         headers: {
@@ -231,7 +219,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
       });
 
       if (error) {
-        console.error('[useAuth] Edge function error:', error);
+        // Edge function error, using default
         // Don't return empty - set a reasonable default
         const defaultData = { subscribed: false };
         setSubscriptionData(defaultData);
@@ -239,7 +227,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
         return;
       }
 
-      console.log('[useAuth] Edge function response:', data);
+      // Edge function response received
       
       const nowDate = new Date();
       const subscriptionEnd = data?.subscription_end ? new Date(data.subscription_end) : null;
@@ -357,7 +345,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
           });
         } catch (error) {
           // Don't block logout if session deactivation fails
-          console.error('Error deactivating session on logout:', error);
+          // Error deactivating session on logout
         }
       }
       // Clear session tracking from sessionStorage

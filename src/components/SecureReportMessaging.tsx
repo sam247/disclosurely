@@ -140,7 +140,6 @@ const SecureReportMessaging = () => {
         .single();
 
       if (reportError || !reportData) {
-        console.error('Report not found:', reportError);
         toast({
           title: "Report Not Found",
           description: "The tracking ID you provided could not be found.",
@@ -182,13 +181,12 @@ const SecureReportMessaging = () => {
       });
 
       if (messagesError) {
-        console.error('Messages fetch error:', messagesError);
+        // Messages fetch error
       } else {
         
         setMessages(messagesResult?.messages || []);
       }
     } catch (error) {
-      console.error('Error fetching report and messages:', error);
       toast({
         title: "Error",
         description: "Failed to load report information.",
@@ -210,7 +208,7 @@ const SecureReportMessaging = () => {
         .rpc('get_organization_by_tracking_id', { p_tracking_id: trackingId });
 
       if (orgError || !orgData || orgData.length === 0) {
-        console.error('Organization branding lookup error:', orgError);
+        // Organization branding lookup error
         return;
       }
 
@@ -225,7 +223,7 @@ const SecureReportMessaging = () => {
         brand_color: org.brand_color
       });
     } catch (error) {
-      console.error('Error fetching organization branding:', error);
+      // Error fetching organization branding
     }
   };
 
@@ -261,7 +259,6 @@ const SecureReportMessaging = () => {
       });
 
       if (error) {
-        console.error('Message send error:', error);
         // Remove optimistic message on error
         setMessages(prev => prev.filter(msg => msg.id !== tempId));
         setNewMessage(messageText); // Restore the message
@@ -300,7 +297,6 @@ const SecureReportMessaging = () => {
         description: "Your message has been sent securely.",
       });
     } catch (error) {
-      console.error('Error sending message:', error);
       toast({
         title: "Error",
         description: "Failed to send message. Please try again.",

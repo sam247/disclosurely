@@ -10,6 +10,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { useUserRoles } from '@/hooks/useUserRoles';
 import { Shield, AlertTriangle, CheckCircle, XCircle, Clock, Users, Database, Activity } from 'lucide-react';
 import { format } from 'date-fns';
+import { log, LogContext } from '@/utils/logger';
 
 interface SecurityAlert {
   id: string;
@@ -60,7 +61,7 @@ const SecurityMonitoring = () => {
         .limit(50);
 
       if (alertsError) {
-        console.error('Error fetching security alerts:', alertsError);
+        log.error(LogContext.SECURITY, 'Error fetching security alerts', alertsError instanceof Error ? alertsError : new Error(String(alertsError)));
         // If table doesn't exist yet, show empty state
         if (alertsError.code === 'PGRST116' || alertsError.message?.includes('does not exist')) {
           setAlerts([]);
@@ -92,7 +93,7 @@ const SecurityMonitoring = () => {
         .gte('created_at', new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString());
 
       if (auditError) {
-        console.error('Error fetching audit data:', auditError);
+        log.error(LogContext.SECURITY, 'Error fetching audit data', auditError instanceof Error ? auditError : new Error(String(auditError)));
         // Continue with empty metrics if audit_logs doesn't exist
         return {
           totalEvents: 0,
@@ -118,7 +119,7 @@ const SecurityMonitoring = () => {
           activeAlerts
         });
     } catch (error: any) {
-      console.error('Error fetching security data:', error);
+      log.error(LogContext.SECURITY, 'Error fetching security monitoring data', error instanceof Error ? error : new Error(String(error)));
       toast({
         title: "Error",
         description: "Failed to fetch security monitoring data",

@@ -92,7 +92,7 @@ export const useMultipleSessionDetection = () => {
       return false; // No other sessions
     } catch (error) {
       if (signal?.aborted) return false;
-      console.error('Error checking for other sessions:', error);
+      // Error checking for other sessions
       return false;
     }
   }, [user, session, getSessionId, dismissedAt, showModal]);
@@ -124,7 +124,7 @@ export const useMultipleSessionDetection = () => {
       // This prevents false positives on page refresh
       setHasTrackedSession(true);
     } catch (error) {
-      console.error('Error tracking session:', error);
+      // Error tracking session, don't block login
       // Don't block login if session tracking fails
     }
   }, [user, session, hasTrackedSession, getSessionId]);
@@ -146,7 +146,7 @@ export const useMultipleSessionDetection = () => {
           },
         });
       } catch (error) {
-        console.error('Error updating session activity:', error);
+        // Error updating session activity
       }
     };
 
@@ -243,7 +243,7 @@ export const useMultipleSessionDetection = () => {
       setShowModal(false);
       setOtherSession(null);
     } catch (error) {
-      console.error('Error deactivating other sessions:', error);
+      // Error deactivating other sessions
     } finally {
       setIsProcessing(false);
     }
@@ -273,7 +273,7 @@ export const useMultipleSessionDetection = () => {
       // Then sign out
       await signOut();
     } catch (error) {
-      console.error('Error logging out everywhere:', error);
+      // Error logging out everywhere, still signing out
       // Still sign out even if API call fails
       await signOut();
     } finally {

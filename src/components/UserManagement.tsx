@@ -26,6 +26,7 @@ import {
 
 import { useUserRoles, UserRole } from '@/hooks/useUserRoles';
 import { useSubscriptionLimits } from '@/hooks/useSubscriptionLimits';
+import { log, LogContext } from '@/utils/logger';
 
 interface TeamMember {
   id: string;
@@ -274,7 +275,7 @@ const UserManagement = () => {
         .single();
 
       if (error) {
-        console.error('Error creating invitation:', error);
+        log.error(LogContext.AUTH, 'Error creating invitation', error instanceof Error ? error : new Error(String(error)), { email: inviteEmail });
         if (error.code === '23505') {
           toast({
             title: "Invitation Already Exists",
@@ -331,8 +332,7 @@ const UserManagement = () => {
       setIsInviteDialogOpen(false);
       await fetchInvitations();
     } catch (error: any) {
-      console.error('Error sending invitation:', error);
-      
+      log.error(LogContext.AUTH, 'Error sending invitation', error instanceof Error ? error : new Error(String(error)), { email: inviteEmail });
       toast({
         title: "Error",
         description: "Failed to send invitation. Please try again.",
@@ -471,7 +471,7 @@ const UserManagement = () => {
 
       await fetchTeamMembers();
     } catch (error) {
-      console.error('Error updating user role:', error);
+      log.error(LogContext.AUTH, 'Error updating user role', error instanceof Error ? error : new Error(String(error)), { userId: member.id, newRole });
       toast({
         title: "Error",
         description: "Failed to update user role",

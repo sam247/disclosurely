@@ -9,6 +9,7 @@ import { CheckCircle, Copy, AlertTriangle, ArrowLeft } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import BrandedFormLayout from './BrandedFormLayout';
 import { supabase } from '@/integrations/supabase/client';
+import { log, LogContext } from '@/utils/logger';
 
 const ReportSuccess = () => {
   const [searchParams] = useSearchParams();
@@ -43,14 +44,14 @@ const ReportSuccess = () => {
         setDomainBranding(org);
       }
     } catch (error) {
-      console.error('Error fetching organization branding from domain:', error);
+      log.error(LogContext.FRONTEND, 'Error fetching organization branding from domain in ReportSuccess', error instanceof Error ? error : new Error(String(error)));
     }
   };
 
   useEffect(() => {
     if (trackingId) {
       fetchOrganizationByTrackingId(trackingId).catch((err) => {
-        console.error('Error fetching organization:', err);
+        log.error(LogContext.FRONTEND, 'Error fetching organization in ReportSuccess', err instanceof Error ? err : new Error(String(err)), { trackingId });
         // Don't throw - let the component render with error state
       });
       // Only fetch linkToken from the report if not provided in URL
@@ -106,7 +107,7 @@ const ReportSuccess = () => {
         }
       }
     } catch (error) {
-      console.error('Error fetching link token:', error);
+      log.error(LogContext.FRONTEND, 'Error fetching link token in ReportSuccess', error instanceof Error ? error : new Error(String(error)));
     }
   };
 

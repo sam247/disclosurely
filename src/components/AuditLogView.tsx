@@ -35,6 +35,7 @@ import {
   MoreHorizontal,
   Info
 } from 'lucide-react';
+import { log, LogContext } from '@/utils/logger';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { auditLogger, AuditLogEntry, AuditLogFilters, AuditChainVerification } from '@/utils/auditLogger';
 
@@ -185,7 +186,7 @@ const AuditLogView = () => {
       }
       
     } catch (error) {
-      console.error('Error fetching audit logs:', error);
+      log.error(LogContext.AUDIT, 'Error fetching audit logs', error instanceof Error ? error : new Error(String(error)));
       toast({
         title: 'Error',
         description: 'Failed to fetch audit logs',
@@ -203,7 +204,7 @@ const AuditLogView = () => {
       const verification = await auditLogger.verifyChain(organization.id);
       setChainVerification(verification);
     } catch (error) {
-      console.error('Error verifying audit chain:', error);
+      log.error(LogContext.AUDIT, 'Error verifying audit chain', error instanceof Error ? error : new Error(String(error)));
     }
   };
 
@@ -296,7 +297,7 @@ const AuditLogView = () => {
         description: `Audit logs exported as ${format.toUpperCase()}`
       });
     } catch (error) {
-      console.error('Error exporting audit logs:', error);
+      log.warn(LogContext.AUDIT, 'Error exporting audit logs', { error: error instanceof Error ? error.message : String(error) });
       toast({
         title: 'Export Failed',
         description: 'Failed to export audit logs',

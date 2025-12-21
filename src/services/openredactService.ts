@@ -74,14 +74,13 @@ export class OpenRedactService {
       // NOTE: OpenRedact uses Node.js fs/path modules and cannot run in the browser
       // This service is for server-side use only (edge functions)
       // For browser/client-side, use API endpoints that call server-side OpenRedact
-      console.warn('[OpenRedact] Service is for server-side use only. Use API endpoints from client-side.');
       
       // Load learning store
       await this.loadLearningStore();
 
       this.isInitialized = true;
     } catch (error) {
-      console.error('[OpenRedact] Initialization error:', error);
+      // Initialization error
       throw error;
     }
   }
@@ -111,7 +110,7 @@ export class OpenRedactService {
       const result = this.detector.detect(text);
       return this.mapOpenRedactResult(result);
     } catch (error) {
-      console.error('[OpenRedact] Detection error:', error);
+      // Detection error
       throw error;
     }
   }
@@ -177,7 +176,7 @@ export class OpenRedactService {
         patterns: [],
       };
     } catch (error) {
-      console.error('[OpenRedact] Error loading learning store:', error);
+      // Error loading learning store
       this.learningStore = {
         falsePositives: [],
         falseNegatives: [],
@@ -196,9 +195,9 @@ export class OpenRedactService {
 
     try {
       // TODO: Save to Supabase storage
-      console.log('[OpenRedact] Learning store updated (not yet persisted)');
+      // Learning store updated (not yet persisted)
     } catch (error) {
-      console.error('[OpenRedact] Error saving learning store:', error);
+      // Error saving learning store
     }
   }
 

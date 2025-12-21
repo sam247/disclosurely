@@ -3,6 +3,7 @@ import { Button } from '@/components/ui/button';
 import { Lock, ArrowRight } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useState } from 'react';
+import { log, LogContext } from '@/utils/logger';
 
 interface SubscribePromptProps {
   feature: string;
@@ -39,7 +40,7 @@ const SubscribePrompt = ({ feature, description }: SubscribePromptProps) => {
         window.open(data.url, '_blank');
       }
     } catch (error) {
-      console.error('Error creating checkout session:', error);
+      log.error(LogContext.FRONTEND, 'Error creating checkout session in SubscribePrompt', error instanceof Error ? error : new Error(String(error)));
     } finally {
       setIsLoading(false);
     }

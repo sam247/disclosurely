@@ -4,6 +4,7 @@ import { Download, File, Eye } from 'lucide-react';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 import { downloadReportFile, getAttachmentDisplayName } from '@/utils/fileUpload';
+import { log, LogContext } from '@/utils/logger';
 
 interface ReportAttachment {
   id: string;
@@ -37,13 +38,13 @@ const CompactReportAttachments: React.FC<CompactReportAttachmentsProps> = ({ rep
         .order('created_at', { ascending: false });
 
       if (error) {
-        console.error('Error fetching attachments:', error);
+        log.error(LogContext.FRONTEND, 'Error fetching attachments in CompactReportAttachments', error instanceof Error ? error : new Error(String(error)), { reportId });
         return;
       }
 
       setAttachments(data || []);
     } catch (error) {
-      console.error('Unexpected error fetching attachments:', error);
+      log.error(LogContext.FRONTEND, 'Unexpected error fetching attachments in CompactReportAttachments', error instanceof Error ? error : new Error(String(error)), { reportId });
     } finally {
       setLoading(false);
     }
@@ -73,7 +74,7 @@ const CompactReportAttachments: React.FC<CompactReportAttachmentsProps> = ({ rep
 
       toast.success('File downloaded successfully');
     } catch (error) {
-      console.error('Download error:', error);
+      log.error(LogContext.FRONTEND, 'Download error in CompactReportAttachments', error instanceof Error ? error : new Error(String(error)), { attachmentId: file.id });
       toast.error('Failed to download file');
     } finally {
       setDownloading(null);

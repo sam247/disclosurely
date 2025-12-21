@@ -117,7 +117,7 @@ const Blog = () => {
         // Fetch categories separately to avoid blocking posts
         fetchCategories();
       } catch (error) {
-        console.error('Error fetching blog data:', error);
+        // Error fetching blog data, will try to fetch posts separately
         // Ensure we still show posts even if categories fail
         if (!slug) {
           await fetchPosts();
@@ -131,7 +131,7 @@ const Blog = () => {
 
   const fetchCategories = async () => {
     if (!client) {
-      console.warn('Contentful client not initialized - VITE_CONTENTFUL_DELIVERY_TOKEN missing');
+      // Contentful client not initialized
       setCategories([]);
       return;
     }
@@ -142,7 +142,7 @@ const Blog = () => {
       });
       setCategories(response.items as any);
     } catch (error) {
-      console.error('Error fetching categories:', error);
+      // Error fetching categories, using empty array
       // Set empty categories array instead of failing
       setCategories([]);
     }
@@ -150,7 +150,7 @@ const Blog = () => {
 
   const fetchPosts = async () => {
     if (!client) {
-      console.warn('Contentful client not initialized - VITE_CONTENTFUL_DELIVERY_TOKEN missing');
+      // Contentful client not initialized
       setPosts([]);
       return;
     }
@@ -204,20 +204,14 @@ const Blog = () => {
       
       setPosts(filteredPosts);
     } catch (error) {
-      console.error('Error fetching blog posts from Contentful:', error);
-      console.error('Error details:', {
-        message: error.message,
-        name: error.name,
-        code: error.code,
-        stack: error.stack
-      });
+      // Error fetching blog posts from Contentful
       setPosts([]);
     }
   };
 
   const fetchSinglePost = async (postSlug: string) => {
     if (!client) {
-      console.warn('Contentful client not initialized - VITE_CONTENTFUL_DELIVERY_TOKEN missing');
+      // Contentful client not initialized
       setCurrentPost(null);
       return;
     }
@@ -267,7 +261,7 @@ const Blog = () => {
         setCurrentPost(null);
       }
     } catch (error) {
-      console.error('Error fetching single blog post from Contentful:', error);
+      // Error fetching single blog post
       setCurrentPost(null);
     }
   };
@@ -313,7 +307,7 @@ const Blog = () => {
       
       return <div dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(htmlString) }} />;
     } catch (error) {
-      console.error('Error rendering rich text:', error);
+      // Error rendering rich text, falling back to plain text extraction
       // Fallback to plain text extraction
       const extractText = (node: any): string => {
         if (typeof node === 'string') return node;
@@ -702,7 +696,7 @@ const ShareButtons = ({ post }: { post: BlogPostDisplay }) => {
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
     } catch (err) {
-      console.error('Failed to copy: ', err);
+      // Failed to copy to clipboard
     }
   };
 
@@ -761,7 +755,7 @@ const RelatedArticles = ({ currentPost }: { currentPost: BlogPostDisplay }) => {
   useEffect(() => {
     const fetchRelatedPosts = async () => {
       if (!client) {
-        console.warn('Contentful client not initialized - VITE_CONTENTFUL_DELIVERY_TOKEN missing');
+        // Contentful client not initialized
         setLoading(false);
         return;
       }
@@ -786,7 +780,7 @@ const RelatedArticles = ({ currentPost }: { currentPost: BlogPostDisplay }) => {
         
         setRelatedPosts(posts);
       } catch (error) {
-        console.error('Error fetching related posts:', error);
+        // Error fetching related posts
       } finally {
         setLoading(false);
       }

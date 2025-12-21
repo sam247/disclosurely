@@ -73,7 +73,6 @@ export class DeepSeekContentGenerator {
 
       return this.parseGeneratedContent(generatedContent, topic);
     } catch (error) {
-      console.error('Error generating blog post:', error);
       throw error;
     }
   }

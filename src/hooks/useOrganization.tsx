@@ -55,7 +55,7 @@ export const useOrganization = () => {
         .single();
 
       if (profileError) {
-        console.error('Error fetching profile:', profileError);
+        // Error fetching profile
         setNeedsOnboarding(true);
         return;
       }
@@ -72,7 +72,7 @@ export const useOrganization = () => {
           .single();
 
         if (orgError) {
-          console.error('Error fetching organization:', orgError);
+          // Error fetching organization
         } else {
           
           setOrganization(orgData);
@@ -81,7 +81,7 @@ export const useOrganization = () => {
         setNeedsOnboarding(true);
       }
     } catch (error) {
-      console.error('Error in fetchUserProfile:', error);
+      // Error in fetchUserProfile
       setNeedsOnboarding(true);
     } finally {
       setLoading(false);

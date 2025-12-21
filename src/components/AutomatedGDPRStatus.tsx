@@ -7,6 +7,7 @@ import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { RefreshCw, CheckCircle, Clock, AlertCircle } from 'lucide-react';
+import { log, LogContext } from '@/utils/logger';
 
 const AutomatedGDPRStatus = () => {
   const [processing, setProcessing] = useState(false);
@@ -35,7 +36,7 @@ const AutomatedGDPRStatus = () => {
         description: "All pending GDPR requests are being processed automatically.",
       });
     } catch (error: any) {
-      console.error('Error triggering GDPR processing:', error);
+      log.error(LogContext.DATABASE, 'Error triggering GDPR processing', error instanceof Error ? error : new Error(String(error)), { userId: user?.id });
       toast({
         title: "Processing Error",
         description: error.message || "Failed to trigger GDPR processing.",
@@ -65,7 +66,7 @@ const AutomatedGDPRStatus = () => {
         description: "Eligible erasure requests are being auto-approved.",
       });
     } catch (error: any) {
-      console.error('Error triggering auto-approval:', error);
+      log.error(LogContext.DATABASE, 'Error triggering auto-approval', error instanceof Error ? error : new Error(String(error)), { userId: user?.id });
       toast({
         title: "Auto-Approval Error",
         description: error.message || "Failed to trigger auto-approval.",

@@ -7,6 +7,7 @@ import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { CreditCard, Calendar, Shield, Zap } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
+import { log, LogContext } from '@/utils/logger';
 
 const SubscriptionManagement = () => {
   const [isLoading, setIsLoading] = useState(false);
@@ -27,7 +28,7 @@ const SubscriptionManagement = () => {
       });
       
       if (invokeError) {
-        console.error('Error accessing customer portal:', invokeError);
+        log.error(LogContext.FRONTEND, 'Error accessing customer portal', invokeError instanceof Error ? invokeError : new Error(String(invokeError)));
         setError(invokeError.message || 'Failed to open customer portal. Please try again.');
         throw invokeError;
       }
@@ -40,7 +41,7 @@ const SubscriptionManagement = () => {
         setError('No portal URL returned. Please contact support.');
       }
     } catch (error: any) {
-      console.error('Error accessing customer portal:', error);
+      log.error(LogContext.FRONTEND, 'Error accessing customer portal (catch)', error instanceof Error ? error : new Error(String(error)));
       setError(error?.message || 'Failed to open customer portal. Please try again.');
     } finally {
       setIsLoading(false);
@@ -67,7 +68,7 @@ const SubscriptionManagement = () => {
         window.location.href = data.url;
       }
     } catch (error) {
-      console.error('Error creating checkout session:', error);
+      log.error(LogContext.FRONTEND, 'Error creating checkout session', error instanceof Error ? error : new Error(String(error)));
     } finally {
       setIsLoading(false);
     }

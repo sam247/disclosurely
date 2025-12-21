@@ -8,6 +8,7 @@ import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { MessageSquare, Send, Lock, Clock, User, Shield } from 'lucide-react';
+import { log, LogContext } from '@/utils/logger';
 
 interface Message {
   id: string;
@@ -57,7 +58,7 @@ const SecureMessaging = () => {
       });
 
       if (error) {
-        console.error('Error loading report:', error);
+        log.error(LogContext.MESSAGING, 'Error loading report in SecureMessaging', error instanceof Error ? error : new Error(String(error)), { trackingId });
         toast({
           title: "Error",
           description: error.message || "Failed to load report",
@@ -83,7 +84,7 @@ const SecureMessaging = () => {
         description: "Report and messages loaded successfully",
       });
     } catch (error) {
-      console.error('Error loading report:', error);
+      log.error(LogContext.MESSAGING, 'Error loading report in SecureMessaging (catch)', error instanceof Error ? error : new Error(String(error)), { trackingId });
       toast({
         title: "Error",
         description: "Failed to load report",
@@ -109,7 +110,7 @@ const SecureMessaging = () => {
       });
 
       if (error) {
-        console.error('Error sending message:', error);
+        log.error(LogContext.MESSAGING, 'Error sending message in SecureMessaging', error instanceof Error ? error : new Error(String(error)), { trackingId });
         toast({
           title: "Error",
           description: error.message || "Failed to send message",
@@ -137,7 +138,7 @@ const SecureMessaging = () => {
         description: "Your message has been sent securely",
       });
     } catch (error) {
-      console.error('Error sending message:', error);
+      log.error(LogContext.MESSAGING, 'Error sending message in SecureMessaging (catch)', error instanceof Error ? error : new Error(String(error)), { trackingId });
       toast({
         title: "Error",
         description: "Failed to send message",

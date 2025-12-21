@@ -3,6 +3,8 @@ import React, { Component, ReactNode } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { AlertTriangle, RefreshCw } from 'lucide-react';
+import { log, LogContext } from '@/utils/logger';
+import * as Sentry from '@sentry/react';
 
 interface Props {
   children: ReactNode;
@@ -28,7 +30,13 @@ class ErrorBoundary extends Component<Props, State> {
   public componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
     // Log error for debugging
     const errorMessage = error?.message || 'Unknown error';
-    console.error('ErrorBoundary caught an error:', error, errorInfo);
+    
+    // Critical error - log to Sentry
+    Sentry.captureException(error, {
+      tags: { component: 'ErrorBoundary' },
+      extra: { errorInfo }
+    });
+    log.critical(LogContext.FRONTEND, 'ErrorBoundary caught an error', error, { errorInfo });
     
     // Check if it's a module loading error (stale chunks after deployment)
     const isModuleError = 
@@ -39,7 +47,7 @@ class ErrorBoundary extends Component<Props, State> {
       error?.name === 'ChunkLoadError';
 
     if (isModuleError) {
-      console.warn('Module loading error detected. This may be due to a deployment update. Auto-reloading with cache clear...');
+      log.warn(LogContext.FRONTEND, 'Module loading error detected - may be due to deployment update', { errorMessage });
       
       // Auto-reload with cache clear after a short delay to show the error message
       setTimeout(() => {

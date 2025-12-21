@@ -273,7 +273,7 @@ export const uploadReportFile = async (
 
     return { success: true, fileUrl: publicUrl };
   } catch (error) {
-    console.error('Unexpected error during file upload:', error);
+    // Unexpected error during file upload
     return { success: false, error: 'An unexpected error occurred during file upload.' };
   }
 };
@@ -371,7 +371,7 @@ export const downloadReportFile = async (
       }
     } catch (auditError) {
       // Don't fail the download if audit logging fails
-      console.error('Failed to log file download audit:', auditError);
+      // Failed to log file download audit
     }
 
     return data;

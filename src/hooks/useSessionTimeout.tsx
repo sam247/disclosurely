@@ -51,7 +51,7 @@ export const useSessionTimeout = () => {
         absoluteCountdownIntervalRef.current = undefined;
       }
     } catch (error) {
-      console.error('Error clearing timers:', error);
+      // Error clearing timers
     }
   }, []);
 
@@ -86,7 +86,7 @@ export const useSessionTimeout = () => {
       
       
     } catch (error) {
-      console.error('Error resetting idle timer:', error);
+      // Error resetting idle timer
     }
   }, [user, session, showIdleWarning, showAbsoluteWarning, clearAllTimers]);
 
@@ -100,7 +100,7 @@ export const useSessionTimeout = () => {
       setShowAbsoluteWarning(true);
       
     } catch (error) {
-      console.error('Error showing absolute timeout warning:', error);
+      // Error showing absolute timeout warning
     }
   }, []);
 
@@ -134,7 +134,7 @@ export const useSessionTimeout = () => {
       
       
     } catch (error) {
-      console.error('Error extending session:', error);
+      // Error extending session
     }
   }, [toast, clearAllTimers]);
 
@@ -147,7 +147,7 @@ export const useSessionTimeout = () => {
       signOut();
       
     } catch (error) {
-      console.error('Error signing out from warning:', error);
+      // Error signing out from warning
     }
   }, [signOut, clearAllTimers]);
 
@@ -184,7 +184,7 @@ export const useSessionTimeout = () => {
       
       
     } catch (error) {
-      console.error('Error setting up absolute timeout:', error);
+      // Error setting up absolute timeout
     }
   }, [user, session, signOut, toast, showAbsoluteTimeoutWarning, showAbsoluteWarning]);
 

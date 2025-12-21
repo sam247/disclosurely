@@ -7,6 +7,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { AlertTriangle } from 'lucide-react';
 import BrandedFormLayout from '../BrandedFormLayout';
 import ProgressiveSubmissionForm from './ProgressiveSubmissionForm';
+import { log, LogContext } from '@/utils/logger';
 
 // Track link impression (non-blocking)
 const trackLinkImpression = async (linkId: string, linkToken: string) => {
@@ -15,7 +16,7 @@ const trackLinkImpression = async (linkId: string, linkToken: string) => {
       body: { linkId, linkToken }
     });
   } catch (error) {
-    console.error('Error tracking link impression:', error);
+    log.warn(LogContext.FRONTEND, 'Error tracking link impression', { error: error instanceof Error ? error.message : String(error) });
     throw error;
   }
 };
@@ -147,7 +148,7 @@ const SubmissionFormWrapper = () => {
 
       // Track link impression (non-blocking)
       trackLinkImpression(linkInfo.id, linkToken!).catch(err => {
-        console.warn('Failed to track link impression:', err);
+        log.warn(LogContext.FRONTEND, 'Failed to track link impression', { error: err instanceof Error ? err.message : String(err) });
       });
 
       // Fetch subscription tier for the organization

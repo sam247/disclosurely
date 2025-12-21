@@ -167,7 +167,7 @@ const FileUpload: React.FC<FileUploadProps> = ({
                   { description: 'Your identity is protected' }
                 );
               } else {
-                
+                // No metadata found, file is safe
               }
             } catch (fetchError) {
               if (progressInterval) clearInterval(progressInterval);
@@ -175,7 +175,6 @@ const FileUpload: React.FC<FileUploadProps> = ({
             }
           } catch (error) {
             // NEVER return original file if stripping fails
-            console.error('Failed to strip metadata from file:', file.name, error);
             toast.error(
               `❌ Could not process ${file.name}`,
               { description: error instanceof Error ? error.message : 'Metadata stripping failed. File not uploaded.' }
@@ -190,7 +189,6 @@ const FileUpload: React.FC<FileUploadProps> = ({
         setFiles(updatedFiles);
         onFilesChange(updatedFiles);
       } catch (error) {
-        console.error('Error processing files:', error);
         toast.error('Failed to process files. Please try again.');
       } finally {
         setIsProcessing(false);

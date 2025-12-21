@@ -8,7 +8,7 @@ type VercelResponse = {
   status: (code: number) => VercelResponse;
   setHeader: (name: string, value: string) => void;
   send: (body: string) => void;
-  json: (body: any) => void;
+  json: (body: unknown) => void;
 };
 
 /**

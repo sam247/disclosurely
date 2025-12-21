@@ -81,7 +81,7 @@ export const updateFeatureFlag = async (
   });
 
   if (error) {
-    console.error('RPC error details:', error);
+    // RPC error details
     throw new Error(error.message || error.error?.message || 'Failed to update feature flag');
   }
 

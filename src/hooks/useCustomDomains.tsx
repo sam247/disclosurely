@@ -75,7 +75,6 @@ export const useCustomDomains = () => {
       
       return data;
     } catch (err) {
-      console.error('❌ Error adding domain:', err);
       throw err;
     }
   };
@@ -103,7 +102,6 @@ export const useCustomDomains = () => {
       
       return data;
     } catch (err) {
-      console.error('❌ Error verifying domain:', err);
       throw err;
     }
   };
@@ -151,7 +149,6 @@ export const useCustomDomains = () => {
       // Refresh domains list
       await fetchDomains();
     } catch (err) {
-      console.error('Error deleting domain:', err);
       throw err;
     }
   };

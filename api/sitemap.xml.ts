@@ -12,7 +12,7 @@ type VercelResponse = {
   status: (code: number) => VercelResponse;
   setHeader: (name: string, value: string) => void;
   send: (body: string) => void;
-  json: (body: any) => void;
+  json: (body: unknown) => void;
 };
 
 // Contentful configuration
@@ -55,6 +55,7 @@ async function scanDocsDirectory(dir: string, baseDir: string = dir): Promise<st
   const paths: string[] = [];
 
   try {
+    // eslint-disable-next-line security/detect-non-literal-fs-filename
     const entries = await readdir(dir, { withFileTypes: true });
 
     for (const entry of entries) {
@@ -83,7 +84,7 @@ async function scanDocsDirectory(dir: string, baseDir: string = dir): Promise<st
       }
     }
   } catch (error) {
-    console.error('Error scanning docs directory:', error);
+    // Error scanning docs directory
   }
 
   return paths;
@@ -163,11 +164,11 @@ async function fetchBlogPosts(): Promise<UrlEntry[]> {
     const response = await client.getEntries({
       content_type: '9oYANGj5uBRT6UHsl5LxO', // Blog Post content type ID
       'fields.status': 'published',
-      order: ['-fields.publishDate'] as any, // Contentful expects array for order
+      order: ['-fields.publishDate'] as string[], // Contentful expects array for order
       limit: 1000, // Get all blog posts
     });
 
-    response.items.forEach((item: any) => {
+    response.items.forEach((item: { fields: { slug?: string; publishDate?: string }; sys: { updatedAt?: string } }) => {
       const slug = item.fields.slug;
       const publishDate = item.fields.publishDate 
         ? new Date(item.fields.publishDate).toISOString().split('T')[0]
@@ -188,7 +189,7 @@ async function fetchBlogPosts(): Promise<UrlEntry[]> {
 
     return entries;
   } catch (error) {
-    console.error('Error fetching blog posts for sitemap:', error);
+    // Error fetching blog posts for sitemap
     return [];
   }
 }
@@ -210,7 +211,7 @@ async function generateDocsEntries(): Promise<UrlEntry[]> {
     const docsDir = join(process.cwd(), 'docs', 'docs');
     const docsPaths = await scanDocsDirectory(docsDir);
 
-    console.log(`Found ${docsPaths.length} docs pages`);
+    // Found ${docsPaths.length} docs pages
 
     // Include all discovered docs pages
     docsPaths.forEach(path => {
@@ -222,7 +223,7 @@ async function generateDocsEntries(): Promise<UrlEntry[]> {
       });
     });
   } catch (error) {
-    console.error('Error generating docs entries:', error);
+    // Error generating docs entries
     // If scanning fails, continue without docs entries
   }
 
@@ -265,7 +266,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     // Combine all entries - UNIFIED sitemap for consolidated SEO authority
     const allEntries = [...staticEntries, ...blogEntries, ...docsEntries];
 
-    console.log(`Total sitemap entries: ${allEntries.length} (static: ${staticEntries.length}, blog: ${blogEntries.length}, docs: ${docsEntries.length})`);
+    // Total sitemap entries: ${allEntries.length} (static: ${staticEntries.length}, blog: ${blogEntries.length}, docs: ${docsEntries.length})
 
     // Generate XML
     const sitemap = generateSitemapXML(allEntries);
@@ -276,7 +277,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
     return res.status(200).send(sitemap);
   } catch (error) {
-    console.error('Error generating sitemap:', error);
+    // Error generating sitemap
     return res.status(500).json({ error: 'Failed to generate sitemap' });
   }
 }

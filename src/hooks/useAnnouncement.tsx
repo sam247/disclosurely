@@ -27,7 +27,7 @@ export const useAnnouncement = () => {
   useEffect(() => {
     const fetchAnnouncement = async () => {
       if (!client) {
-        console.warn('Contentful client not initialized - VITE_CONTENTFUL_DELIVERY_TOKEN missing');
+        // Contentful client not initialized
         setLoading(false);
         return;
       }
@@ -64,7 +64,6 @@ export const useAnnouncement = () => {
           
         }
       } catch (err) {
-        console.error('Error fetching announcement:', err);
         setError('Failed to fetch announcement');
       } finally {
         setLoading(false);

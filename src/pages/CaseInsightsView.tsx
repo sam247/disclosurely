@@ -93,7 +93,6 @@ const CaseInsightsView = () => {
 
       setMessages(prev => [...prev, aiMessage]);
     } catch (error: any) {
-      console.error('Error querying cases:', error);
       toast({
         title: "Query Failed",
         description: error.message || "Failed to process query. Please try again.",

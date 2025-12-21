@@ -231,7 +231,7 @@ test.describe('Complete User Journeys', () => {
 
         // This is a soft check - log if not accessible but don't fail
         if (!isAccessible) {
-          console.log('Form element without clear label found (not failing test)');
+          // Form element without clear label found (not failing test)
         }
       }
     });

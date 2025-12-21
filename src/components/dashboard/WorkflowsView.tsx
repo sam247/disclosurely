@@ -151,7 +151,6 @@ const WorkflowsView = () => {
       if (logsError) throw logsError;
       setWorkflowLogs(logsData || []);
     } catch (error) {
-      console.error('Error fetching workflow data:', error);
       toast({
         title: "Error",
         description: "Failed to load workflow data",
@@ -176,7 +175,7 @@ const WorkflowsView = () => {
       if (error) throw error;
       setTeamMembers(data || []);
     } catch (error) {
-      console.error('Error fetching team members:', error);
+      // Error fetching team members
     }
   };
 
@@ -262,7 +261,6 @@ const WorkflowsView = () => {
       setShowCreateRuleDialog(false);
       fetchData();
     } catch (error: any) {
-      console.error('Error saving rule:', error);
       toast({
         title: "Error",
         description: error.message || "Failed to save assignment rule",
@@ -289,7 +287,6 @@ const WorkflowsView = () => {
       });
       fetchData();
     } catch (error: any) {
-      console.error('Error deleting rule:', error);
       toast({
         title: "Error",
         description: error.message || "Failed to delete assignment rule",
@@ -384,7 +381,6 @@ const WorkflowsView = () => {
       setShowCreatePolicyDialog(false);
       fetchData();
     } catch (error: any) {
-      console.error('Error saving policy:', error);
       toast({
         title: "Error",
         description: error.message || "Failed to save SLA policy",
@@ -411,7 +407,6 @@ const WorkflowsView = () => {
       });
       fetchData();
     } catch (error: any) {
-      console.error('Error deleting policy:', error);
       toast({
         title: "Error",
         description: error.message || "Failed to delete SLA policy",

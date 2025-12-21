@@ -6,6 +6,7 @@ import { useSecureForm } from '@/hooks/useSecureForm';
 import { validateReportTitle, validateReportDescription } from '@/utils/inputValidation';
 import { uploadReportFile } from '@/utils/fileUpload';
 import ProgressiveReportForm, { ProgressiveFormData } from './ProgressiveReportForm';
+import { log, LogContext } from '@/utils/logger';
 
 interface LinkData {
   id: string;
@@ -186,7 +187,7 @@ const ProgressiveSubmissionForm = ({
             try {
               await uploadReportFile(file, reportId, linkData.organization_id);
             } catch (fileError) {
-              console.error('File upload error:', fileError);
+              log.error(LogContext.SUBMISSION, 'File upload error during submission', fileError instanceof Error ? fileError : new Error(String(fileError)), { reportId, fileName: file.name });
               // Don't fail the whole submission if file upload fails
             }
           }
@@ -208,7 +209,7 @@ const ProgressiveSubmissionForm = ({
         });
 
       } catch (error: any) {
-        console.error('Submission error:', error);
+        log.error(LogContext.SUBMISSION, 'Submission error', error instanceof Error ? error : new Error(String(error)), { organizationId: linkData.organization_id });
         toast({
           title: "Submission Failed",
           description: error.message || "Failed to submit report. Please try again.",

@@ -90,7 +90,7 @@ export const useSecureForm = (options: UseSecureFormOptions = {}) => {
       clientRateLimit.reset(rateLimitKey);
       return result;
     } catch (error) {
-      console.error('❌ Secure form submission error:', error);
+      // Secure form submission error
       toast({
         title: "Submission failed",
         description: "An error occurred. Please try again.",

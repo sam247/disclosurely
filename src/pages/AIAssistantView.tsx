@@ -320,7 +320,7 @@ const AIAssistantView = () => {
       if (error) throw error;
       setCases(Array.isArray(data) ? data : []);
     } catch (error) {
-      console.error('Error loading cases:', error);
+      // Error loading cases
     } finally {
       setIsLoadingCases(false);
     }
@@ -362,7 +362,7 @@ const AIAssistantView = () => {
       if (error) throw error;
       setDocuments(Array.isArray(data) ? data : []);
     } catch (error) {
-      console.error('Error loading documents:', error);
+      // Error loading documents
     } finally {
       setIsLoadingDocs(false);
     }
@@ -426,7 +426,7 @@ Case Details:
 - Additional Details: ${decrypted.additionalDetails || 'None provided'}
             `.trim();
           } catch (decryptError: any) {
-            console.error('Error decrypting case content:', decryptError);
+            // Error decrypting case content
             decryptedContent = `
 Case Details:
 - Title: ${selectedCaseData.title || 'Not specified'}
@@ -488,7 +488,7 @@ Note: Full case content could not be decrypted. Analysis will be based on availa
                 description: `Successfully extracted ${extractedText.length.toLocaleString()} characters from ${doc.name}`,
               });
             } else {
-              console.warn(`[PDF Extract] No text extracted from PDF ${doc.name}. Response:`, extractData);
+              // No text extracted from PDF
               companyDocuments.push({
                 name: doc.name,
                 content: `[PDF Document: ${doc.name} - No text could be extracted. This may be an image-based PDF. Response: ${JSON.stringify(extractData)}]`
@@ -683,7 +683,7 @@ Remember: Compliance teams need confidence and clarity under pressure. Be the ad
               });
             }
           } catch (error) {
-            console.error(`Error extracting PDF ${doc.name} for follow-up:`, error);
+            // Error extracting PDF for follow-up
           }
         }
       }
@@ -712,7 +712,7 @@ Status: ${selectedCaseData.status}
 Priority: ${selectedCaseData.priority}/5
         `.trim();
       } catch (decryptError: any) {
-        console.error('Error decrypting case for follow-up:', decryptError);
+        // Error decrypting case for follow-up
         caseContext = `Case: ${selectedCaseData.tracking_id} - ${selectedCaseData.title} (Status: ${selectedCaseData.status}, Priority: ${selectedCaseData.priority}/5)`;
       }
     } else if (selectedCaseData) {
@@ -1146,8 +1146,6 @@ When listing cases, always include the tracking ID (DIS-XXXX format) so users ca
           });
       }
     } catch (error: any) {
-      console.error('Error processing query:', error);
-      
       const errorMessage: ChatMessage = {
         id: `error-${Date.now()}`,
         role: 'assistant',
@@ -1287,7 +1285,6 @@ When listing cases, always include the tracking ID (DIS-XXXX format) so users ca
 
   const loadPreviewContent = async () => {
     if (!selectedCaseId) {
-      console.error('❌ loadPreviewContent: No selectedCaseId');
       return;
     }
 
@@ -1334,7 +1331,7 @@ Evidence: ${decrypted.evidence || 'No evidence provided'}
 
 Additional Details: ${decrypted.additionalDetails || 'None provided'}`;
         } catch (decryptError) {
-          console.error('⚠️ loadPreviewContent: Error decrypting case content:', decryptError);
+          // Error decrypting case content
           decryptedContent = '[Case content is encrypted and could not be decrypted]';
         }
       } else {
@@ -1391,7 +1388,7 @@ Additional Details: ${decrypted.additionalDetails || 'None provided'}`;
       if (error) throw error;
       setSavedAnalyses(Array.isArray(data) ? data : []);
     } catch (error) {
-      console.error('Error loading saved analyses:', error);
+      // Error loading saved analyses
     } finally {
       setIsLoadingSavedAnalyses(false);
     }
@@ -1464,7 +1461,6 @@ Additional Details: ${decrypted.additionalDetails || 'None provided'}`;
         description: "Saved analysis deleted successfully."
       });
     } catch (error: any) {
-      console.error('Error deleting saved analysis:', error);
       toast({
         title: "Delete Failed",
         description: error.message || "Failed to delete saved analysis.",
@@ -1994,7 +1990,6 @@ Additional Details: ${decrypted.additionalDetails || 'None provided'}`;
                               const query = inputQuery || "Analyze this case";
                               await handleQueryWithPIIPreference(query, false, true);
                             } catch (error: any) {
-                              console.error('Error in Analyze with PII Protection:', error);
                               toast({
                                 title: "Analysis Failed",
                                 description: error.message || "Failed to start analysis. Please try again.",
@@ -2059,7 +2054,6 @@ Additional Details: ${decrypted.additionalDetails || 'None provided'}`;
                           try {
                             loadPreviewContent();
                           } catch (error: any) {
-                            console.error('Error loading preview:', error);
                             toast({
                               title: "Preview Failed",
                               description: error.message || "Failed to load preview. Please try again.",

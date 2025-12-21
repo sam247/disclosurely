@@ -77,15 +77,14 @@ const ReportDetails = () => {
               .eq('id', reportId);
             
             if (updateError) {
-              console.error('Error updating report status:', updateError);
+              // Error updating report status
             }
           } catch (updateError) {
-            console.error('Error updating report status:', updateError);
+            // Error updating report status
           }
         }
       }
     } catch (error: any) {
-      console.error('Error fetching report:', error);
       toast({
         title: 'Error',
         description: 'Failed to load report details',

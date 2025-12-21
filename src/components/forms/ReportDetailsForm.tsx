@@ -13,6 +13,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from '@/components/ui/tooltip';
+import { log, LogContext } from '@/utils/logger';
 
 const MAIN_CATEGORIES = {
   "Financial Misconduct": [
@@ -129,7 +130,7 @@ const ReportDetailsForm = ({ formData, updateFormData, validationErrors = {} }: 
       
 
       if (error) {
-        console.error('❌ AI category suggestion error:', error);
+        log.error(LogContext.AI_ANALYSIS, 'AI category suggestion error', error instanceof Error ? error : new Error(String(error)));
         return;
       }
 
@@ -147,7 +148,7 @@ const ReportDetailsForm = ({ formData, updateFormData, validationErrors = {} }: 
         setAiSuggested(true);
       }
     } catch (error) {
-      console.error('❌ Failed to get AI category suggestion:', error);
+      log.error(LogContext.AI_ANALYSIS, 'Failed to get AI category suggestion', error instanceof Error ? error : new Error(String(error)));
     } finally {
       setIsLoadingSuggestion(false);
     }

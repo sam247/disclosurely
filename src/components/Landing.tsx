@@ -16,6 +16,7 @@ import DynamicHelmet from "@/components/DynamicHelmet";
 import TypingAnimation from "@/components/TypingAnimation";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { log, LogContext } from '@/utils/logger';
 import anonymousReportingIcon from "@/assets/icons/anonymous_reporting.png";
 import secureMessagingIcon from "@/assets/icons/secure_messaging.png";
 import caseManagementIcon from "@/assets/icons/case_management.png";
@@ -78,7 +79,7 @@ const Landing = () => {
         headers.Authorization = `Bearer ${session.access_token}`;
       }
 
-      console.log('[Landing] Invoking create-checkout with:', { tier, interval: billingInterval, hasAuth: !!session });
+      log.info(LogContext.FRONTEND, '[Landing] Invoking create-checkout', { tier, interval: billingInterval, hasAuth: !!session });
 
       const { data, error } = await supabase.functions.invoke('create-checkout', {
         headers,
@@ -105,7 +106,7 @@ const Landing = () => {
               }
             }
           } catch (e) {
-            console.error('[Landing] Could not read error response body:', e);
+            log.warn(LogContext.FRONTEND, '[Landing] Could not read error response body', { error: e instanceof Error ? e.message : String(e) });
           }
         }
         
@@ -136,7 +137,7 @@ const Landing = () => {
       }
 
       if (data?.url) {
-        console.log('[Landing] Redirecting to checkout URL:', data.url);
+        log.info(LogContext.FRONTEND, '[Landing] Redirecting to checkout URL', { hasUrl: !!data.url });
         window.location.href = data.url;
       } else {
         throw new Error('No checkout URL returned from server');

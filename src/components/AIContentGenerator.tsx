@@ -10,6 +10,7 @@ import { Badge } from '@/components/ui/badge';
 import { Loader2, Sparkles, FileText, Clock, Tag } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { DeepSeekContentGenerator, createContentfulBlogPost } from '@/utils/deepseekContentGenerator';
+import { log, LogContext } from '@/utils/logger';
 
 interface Author {
   id: string;
@@ -77,7 +78,7 @@ export function AIContentGenerator() {
         description: "AI has created your blog post. Review and create the entry.",
       });
     } catch (error) {
-      console.error('Error generating content:', error);
+      log.error(LogContext.AI_ANALYSIS, 'Error generating AI content', error instanceof Error ? error : new Error(String(error)), { topic, category });
       toast({
         title: "Generation Failed",
         description: "Failed to generate content. Please try again.",
@@ -111,7 +112,7 @@ export function AIContentGenerator() {
       setSelectedCategory('');
       setGeneratedPost(null);
     } catch (error) {
-      console.error('Error creating entry:', error);
+      log.error(LogContext.AI_ANALYSIS, 'Error creating Contentful entry', error instanceof Error ? error : new Error(String(error)));
       toast({
         title: "Creation Failed",
         description: "Failed to create blog post entry. Please try again.",

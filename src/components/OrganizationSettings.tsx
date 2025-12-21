@@ -8,6 +8,7 @@ import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Upload, Palette, ExternalLink } from 'lucide-react';
 import { Alert, AlertDescription } from '@/components/ui/alert';
+import { log, LogContext } from '@/utils/logger';
 
 interface Organization {
   id: string;
@@ -64,7 +65,7 @@ const OrganizationSettings = () => {
 
       setOrganization(orgData);
     } catch (error) {
-      console.error('Error fetching organization:', error);
+      log.error(LogContext.FRONTEND, 'Error fetching organization in OrganizationSettings', error instanceof Error ? error : new Error(String(error)), { userId: user?.id });
       toast({
         title: "Error",
         description: "Failed to load organization settings",
@@ -91,7 +92,7 @@ const OrganizationSettings = () => {
         description: "Brand color updated successfully",
       });
     } catch (error) {
-      console.error('Error updating brand color:', error);
+      log.error(LogContext.FRONTEND, 'Error updating brand color', error instanceof Error ? error : new Error(String(error)), { userId: user?.id });
       toast({
         title: "Error",
         description: "Failed to update brand color",
@@ -188,7 +189,7 @@ const OrganizationSettings = () => {
       await fetchOrganization();
       setLogoFile(null);
     } catch (error) {
-      console.error('Error saving organization:', error);
+      log.error(LogContext.FRONTEND, 'Error saving organization', error instanceof Error ? error : new Error(String(error)), { userId: user?.id });
       toast({
         title: "Error",
         description: "Failed to save organization settings",

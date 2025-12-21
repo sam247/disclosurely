@@ -62,7 +62,7 @@ export const useContentManagement = () => {
       if (error) throw error;
       setPageContents(data || []);
     } catch (error) {
-      console.error('Error fetching page content:', error);
+      // Error fetching page content
       toast({
         title: "Error",
         description: "Failed to fetch page content",
@@ -88,7 +88,7 @@ export const useContentManagement = () => {
       if (error) throw error;
       setBlogPosts(data || []);
     } catch (error) {
-      console.error('Error fetching blog posts:', error);
+      // Error fetching blog posts
       toast({
         title: "Error",
         description: "Failed to fetch blog posts",
@@ -129,7 +129,7 @@ export const useContentManagement = () => {
       await fetchPageContent();
       return true;
     } catch (error) {
-      console.error('Error updating content:', error);
+      // Error updating content
       toast({
         title: "Error",
         description: "Failed to update content",
@@ -178,7 +178,7 @@ export const useContentManagement = () => {
       await fetchPageContent();
       return true;
     } catch (error) {
-      console.error('Error upserting content:', error);
+      // Error upserting content
       toast({
         title: "Error",
         description: "Failed to update content",
@@ -227,7 +227,7 @@ export const useContentManagement = () => {
       await fetchBlogPosts();
       return true;
     } catch (error) {
-      console.error('Error creating blog post:', error);
+      // Error creating blog post
       toast({
         title: "Error",
         description: "Failed to create blog post",
@@ -264,7 +264,7 @@ export const useContentManagement = () => {
       await fetchBlogPosts();
       return true;
     } catch (error) {
-      console.error('Error updating blog post:', error);
+      // Error updating blog post
       toast({
         title: "Error",
         description: "Failed to update blog post",
@@ -301,7 +301,7 @@ export const useContentManagement = () => {
       await fetchBlogPosts();
       return true;
     } catch (error) {
-      console.error('Error deleting blog post:', error);
+      // Error deleting blog post
       toast({
         title: "Error",
         description: "Failed to delete blog post",

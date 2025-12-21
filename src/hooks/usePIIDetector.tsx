@@ -79,7 +79,6 @@ export function usePIIDetector(
       });
 
       if (error) {
-        console.error('[usePIIDetector] API error:', error);
         setDetections([]);
         setHasError(true);
         setErrorMessage(error.message || 'Unable to check for personal information');
@@ -98,7 +97,6 @@ export function usePIIDetector(
       setHasError(false);
       setErrorMessage(undefined);
     } catch (error: any) {
-      console.error('[usePIIDetector] Error detecting PII:', error);
       setDetections([]);
       setHasError(true);
       setErrorMessage(error?.message || 'Unable to check for personal information');

@@ -8,6 +8,8 @@ import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { Building2 } from 'lucide-react';
+import { log, LogContext } from '@/utils/logger';
+import * as Sentry from '@sentry/react';
 
 interface SimpleOrganizationSetupProps {
   onComplete: () => void;
@@ -42,7 +44,14 @@ const SimpleOrganizationSetup = ({ onComplete }: SimpleOrganizationSetupProps) =
         .single();
 
       if (orgError) {
-        console.error('Organization creation error:', orgError);
+        // Critical setup operation - log to Sentry
+        if (orgError instanceof Error) {
+          Sentry.captureException(orgError, {
+            tags: { component: 'SimpleOrganizationSetup', action: 'createOrganization' },
+            extra: { userId: user?.id }
+          });
+        }
+        log.error(LogContext.AUTH, 'Organization creation error', orgError instanceof Error ? orgError : new Error(String(orgError)), { userId: user?.id });
         throw orgError;
       }
 
@@ -60,7 +69,14 @@ const SimpleOrganizationSetup = ({ onComplete }: SimpleOrganizationSetupProps) =
         });
 
       if (profileError) {
-        console.error('Profile update error:', profileError);
+        // Critical setup operation - log to Sentry
+        if (profileError instanceof Error) {
+          Sentry.captureException(profileError, {
+            tags: { component: 'SimpleOrganizationSetup', action: 'updateProfile' },
+            extra: { userId: user?.id }
+          });
+        }
+        log.error(LogContext.AUTH, 'Profile update error during organization setup', profileError instanceof Error ? profileError : new Error(String(profileError)), { userId: user?.id });
         throw profileError;
       }
 
@@ -73,7 +89,7 @@ const SimpleOrganizationSetup = ({ onComplete }: SimpleOrganizationSetupProps) =
 
       onComplete();
     } catch (error: any) {
-      console.error('Setup error:', error);
+      log.error(LogContext.AUTH, 'Organization setup error', error instanceof Error ? error : new Error(String(error)), { userId: user?.id });
       toast({
         title: "Setup failed",
         description: error.message || "Failed to create organization. Please try again.",

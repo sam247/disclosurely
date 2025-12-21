@@ -14,6 +14,7 @@ import { supabase } from '@/integrations/supabase/client';
 import NotificationSystem from '@/components/NotificationSystem';
 import { useTranslation } from 'react-i18next';
 import { AnnouncementBar } from '@/components/AnnouncementBar';
+import { log, LogContext } from '@/utils/logger';
 
 interface DashboardLayoutProps {
   children: ReactNode;
@@ -45,7 +46,7 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
           .single();
 
         if (error) {
-          console.error('Error checking organization:', error);
+          log.error(LogContext.AUTH, 'Error checking organization in DashboardLayout', error instanceof Error ? error : new Error(String(error)), { userId: user?.id });
           setHasOrganization(false);
         } else {
           const hasOrg = !!data?.organization_id;
@@ -58,7 +59,7 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
           }
         }
       } catch (error) {
-        console.error('Error checking organization:', error);
+        log.error(LogContext.AUTH, 'Error checking organization in DashboardLayout (catch)', error instanceof Error ? error : new Error(String(error)), { userId: user?.id });
         setHasOrganization(false);
       }
     };
@@ -78,12 +79,12 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
           .single();
 
         if (error) {
-          console.error('Error fetching profile:', error);
+          log.error(LogContext.AUTH, 'Error fetching profile in DashboardLayout', error instanceof Error ? error : new Error(String(error)), { userId: user?.id });
         } else if (data) {
           setFirstName(data.first_name || '');
         }
       } catch (error) {
-        console.error('Error fetching profile:', error);
+        log.error(LogContext.AUTH, 'Error fetching profile in DashboardLayout (catch)', error instanceof Error ? error : new Error(String(error)), { userId: user?.id });
       }
     };
 

@@ -8,6 +8,7 @@ import { AlertTriangle, Loader2 } from 'lucide-react';
 import BrandedFormLayout from '../BrandedFormLayout';
 import ProgressiveSubmissionForm from './ProgressiveSubmissionForm';
 import { resumeDraft } from '@/services/draftService';
+import { log, LogContext } from '@/utils/logger';
 
 // Track link impression (non-blocking)
 const trackLinkImpression = async (linkId: string, linkToken: string) => {
@@ -16,7 +17,7 @@ const trackLinkImpression = async (linkId: string, linkToken: string) => {
       body: { linkId, linkToken }
     });
   } catch (error) {
-    console.error('Error tracking link impression:', error);
+    log.warn(LogContext.FRONTEND, 'Error tracking link impression', { error: error instanceof Error ? error.message : String(error) });
     throw error;
   }
 };
@@ -136,7 +137,7 @@ const CleanSubmissionWrapper = () => {
         .maybeSingle();
 
       if (orgError || !orgData) {
-        console.error('Organization not found:', orgError);
+        log.error(LogContext.FRONTEND, 'Organization not found in CleanSubmissionWrapper', orgError instanceof Error ? orgError : new Error(String(orgError)), { organizationId });
         setLoading(false);
         return;
       }
@@ -210,7 +211,7 @@ const CleanSubmissionWrapper = () => {
         .single();
 
       if (linkError || !linkInfo) {
-        console.error('Link not found or error:', linkError);
+        log.error(LogContext.FRONTEND, 'Organization link not found', linkError instanceof Error ? linkError : new Error(String(linkError)), { organizationId });
         toast({
           title: "Reporting portal not configured",
           description: "This organization hasn't set up their reporting portal yet.",
@@ -247,7 +248,7 @@ const CleanSubmissionWrapper = () => {
         try {
           availableLanguages = JSON.parse(availableLanguages);
         } catch (e) {
-          console.error('Error parsing available_languages:', e);
+          log.warn(LogContext.FRONTEND, 'Error parsing available_languages', { error: e instanceof Error ? e.message : String(e) });
           availableLanguages = null;
         }
       }
@@ -280,7 +281,7 @@ const CleanSubmissionWrapper = () => {
       
       setLoading(false);
     } catch (error) {
-      console.error('Error fetching organization link data:', error);
+      log.error(LogContext.FRONTEND, 'Error fetching organization link data', error instanceof Error ? error : new Error(String(error)), { organizationId });
       toast({
         title: "Error",
         description: "Failed to load the reporting portal. Please try again.",
@@ -308,7 +309,7 @@ const CleanSubmissionWrapper = () => {
     if (response.success) {
       setDraftData(response);
     } else {
-      console.error('Failed to load draft:', response);
+      log.warn(LogContext.SUBMISSION, 'Failed to load draft', { draftCode: normalizedCode, message: response.message });
       toast({
         title: "Draft not found",
         description: response.message || "Unable to load draft. It may have expired.",

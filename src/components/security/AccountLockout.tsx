@@ -6,6 +6,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { Shield, Lock, AlertTriangle, Clock } from 'lucide-react';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { log, LogContext } from '@/utils/logger';
 
 const AccountLockout = () => {
   const { user } = useAuth();
@@ -60,7 +61,7 @@ const AccountLockout = () => {
         lockoutDuration: settings?.lockout_duration_minutes || 15
       });
     } catch (error) {
-      console.error('Error fetching lockout status:', error);
+      log.error(LogContext.SECURITY, 'Error fetching account lockout status', error instanceof Error ? error : new Error(String(error)));
     } finally {
       setLoading(false);
     }
@@ -81,7 +82,7 @@ const AccountLockout = () => {
         setRecentAttempts(data);
       }
     } catch (error) {
-      console.error('Error fetching login attempts:', error);
+      log.error(LogContext.SECURITY, 'Error fetching login attempts', error instanceof Error ? error : new Error(String(error)));
     }
   };
 

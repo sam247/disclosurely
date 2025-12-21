@@ -19,6 +19,7 @@ import {
 import { useAllFeatureFlags, updateFeatureFlag } from '@/hooks/useFeatureFlag';
 import { useToast } from '@/hooks/use-toast';
 import { useQueryClient } from '@tanstack/react-query';
+import { log, LogContext } from '@/utils/logger';
 
 const featureIcons: Record<string, React.ReactNode> = {
   ai_gateway: <Shield className="h-5 w-5" />,
@@ -37,7 +38,7 @@ export const FeatureFlagManager: React.FC = () => {
     setUpdating(featureName);
     try {
       const result = await updateFeatureFlag(featureName, { is_enabled: enabled });
-      console.log('Update result:', result);
+      log.info(LogContext.SYSTEM, `Feature flag updated: ${featureName} = ${enabled}`, { featureName, enabled });
       
       // Invalidate cache
       await queryClient.invalidateQueries({ queryKey: ['feature-flags'] });
@@ -48,7 +49,7 @@ export const FeatureFlagManager: React.FC = () => {
         description: `${featureName} has been ${enabled ? 'enabled' : 'disabled'}`,
       });
     } catch (error: any) {
-      console.error('Error updating feature flag:', error);
+      log.error(LogContext.SYSTEM, 'Error updating feature flag', error instanceof Error ? error : new Error(String(error)), { featureName, enabled });
       const errorMessage = error?.message || error?.error?.message || 'Failed to update feature flag';
       toast({
         title: 'Error',
@@ -77,7 +78,7 @@ export const FeatureFlagManager: React.FC = () => {
         description: `${featureName} now rolled out to ${percentage}% of organizations`,
       });
     } catch (error: any) {
-      console.error('Error updating rollout:', error);
+      log.error(LogContext.SYSTEM, 'Error updating feature flag rollout', error instanceof Error ? error : new Error(String(error)), { featureName, rolloutPercentage });
       toast({
         title: 'Error',
         description: error.message || 'Failed to update rollout percentage. Please check RLS policies.',

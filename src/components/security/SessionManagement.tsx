@@ -8,6 +8,8 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { useSessionTimeout } from '@/hooks/useSessionTimeout';
 import { Clock, LogOut, Shield, Timer } from 'lucide-react';
+import { log, LogContext } from '@/utils/logger';
+import * as Sentry from '@sentry/react';
 
 const SessionManagement = () => {
   const { user, signOut } = useAuth();
@@ -71,7 +73,14 @@ const SessionManagement = () => {
         description: "You have been logged out from all devices",
       });
     } catch (error: any) {
-      console.error('Error terminating sessions:', error);
+      // Critical security operation - log to Sentry
+      if (error instanceof Error) {
+        Sentry.captureException(error, {
+          tags: { component: 'SessionManagement', action: 'terminateAllSessions' },
+          extra: { userId: user?.id }
+        });
+        log.error(LogContext.SECURITY, 'Error terminating all sessions', error, { userId: user?.id });
+      }
       toast({
         title: "Error",
         description: "Failed to terminate all sessions",

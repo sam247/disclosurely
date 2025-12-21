@@ -7,7 +7,7 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY as string, {
 });
 
 // Utility: read raw body for Stripe validation
-async function buffer(readable: any) {
+async function buffer(readable: NodeJS.ReadableStream) {
   const chunks: Buffer[] = [];
   for await (const chunk of readable) {
     chunks.push(typeof chunk === 'string' ? Buffer.from(chunk) : chunk);
@@ -21,7 +21,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   const sig = req.headers['stripe-signature'] as string;
   const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
   if (!webhookSecret) {
-    console.error('Missing STRIPE_WEBHOOK_SECRET');
+    // Missing STRIPE_WEBHOOK_SECRET
     return res.status(500).send('Server misconfigured');
   }
 
@@ -29,8 +29,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   const buf = await buffer(req);
   try {
     event = stripe.webhooks.constructEvent(buf, sig, webhookSecret);
-  } catch (err: any) {
-    console.error('❌ Stripe signature verification failed:', err.message);
+  } catch (err: unknown) {
+    // Stripe signature verification failed
     return res.status(400).send(`Webhook Error: ${err.message}`);
   }
 
@@ -91,7 +91,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
     return res.status(200).json({ received: true });
   } catch (err) {
-    console.error('Webhook handler error:', err);
+    // Webhook handler error
     return res.status(500).send('Webhook handler error');
   }
 }

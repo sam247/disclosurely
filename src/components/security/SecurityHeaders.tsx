@@ -9,6 +9,7 @@ import { Badge } from '@/components/ui/badge';
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
 import { Shield, Lock, Globe, AlertTriangle, CheckCircle, Settings } from 'lucide-react';
+import { log, LogContext } from '@/utils/logger';
 
 interface SecurityHeaderConfig {
   csp: {
@@ -98,7 +99,7 @@ const SecurityHeaders = () => {
       // Retest headers after save
       testSecurityHeaders();
     } catch (error) {
-      console.error('Error saving configuration:', error);
+      log.error(LogContext.SECURITY, 'Error saving security headers configuration', error instanceof Error ? error : new Error(String(error)));
       toast({
         title: "Save Failed",
         description: "Failed to save security headers configuration",
@@ -125,7 +126,7 @@ const SecurityHeaders = () => {
       
       setTestResults(results);
     } catch (error) {
-      console.error('Error testing headers:', error);
+      log.warn(LogContext.SECURITY, 'Error testing security headers', { error: error instanceof Error ? error.message : String(error) });
       toast({
         title: "Test Failed",
         description: "Failed to test security headers",

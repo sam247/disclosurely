@@ -8,6 +8,7 @@ import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { User, Lock, Mail } from 'lucide-react';
+import { log, LogContext } from '@/utils/logger';
 
 const ProfileSettings = () => {
   const { user } = useAuth();
@@ -47,7 +48,7 @@ const ProfileSettings = () => {
         }));
       }
     } catch (error: any) {
-      console.error('Error fetching profile:', error);
+      log.error(LogContext.AUTH, 'Error fetching profile in ProfileSettings', error instanceof Error ? error : new Error(String(error)), { userId: user?.id });
     }
   };
 
@@ -73,7 +74,7 @@ const ProfileSettings = () => {
         description: "Your profile has been updated successfully.",
       });
     } catch (error: any) {
-      console.error('Error updating profile:', error);
+      log.error(LogContext.AUTH, 'Error updating profile', error instanceof Error ? error : new Error(String(error)), { userId: user?.id });
       toast({
         title: "Error",
         description: error.message || "Failed to update profile. Please try again.",
@@ -100,7 +101,7 @@ const ProfileSettings = () => {
         description: "Please check both your old and new email addresses for confirmation links.",
       });
     } catch (error: any) {
-      console.error('Error updating email:', error);
+      log.error(LogContext.AUTH, 'Error updating email', error instanceof Error ? error : new Error(String(error)), { userId: user?.id });
       toast({
         title: "Error",
         description: error.message || "Failed to update email. Please try again.",

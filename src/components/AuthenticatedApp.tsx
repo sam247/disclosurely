@@ -6,6 +6,7 @@ import { supabase } from '@/integrations/supabase/client';
 import Dashboard from './Dashboard';
 import SimpleOrganizationSetup from './SimpleOrganizationSetup';
 import { useToast } from '@/hooks/use-toast';
+import { log, LogContext } from '@/utils/logger';
 
 const AuthenticatedApp = () => {
   const { user } = useAuth();
@@ -32,7 +33,7 @@ const AuthenticatedApp = () => {
         .maybeSingle();
 
       if (profileError) {
-        console.error('Error checking profile:', profileError);
+        log.error(LogContext.AUTH, 'Error checking profile in AuthenticatedApp', profileError instanceof Error ? profileError : new Error(String(profileError)), { userId: user.id });
         toast({
           title: "Error checking profile",
           description: "Please try refreshing the page",
@@ -56,7 +57,7 @@ const AuthenticatedApp = () => {
           });
 
         if (createError) {
-          console.error('Error creating profile:', createError);
+          log.error(LogContext.AUTH, 'Error creating profile in AuthenticatedApp', createError instanceof Error ? createError : new Error(String(createError)), { userId: user.id });
           toast({
             title: "Error creating profile",
             description: createError.message,
@@ -84,7 +85,7 @@ const AuthenticatedApp = () => {
         .maybeSingle();
 
       if (orgError) {
-        console.error('Error checking organization:', orgError);
+        log.error(LogContext.AUTH, 'Error checking organization in AuthenticatedApp', orgError instanceof Error ? orgError : new Error(String(orgError)), { userId: user.id });
         setProfileStatus('needs_setup');
         return;
       }
@@ -104,7 +105,7 @@ const AuthenticatedApp = () => {
       
       setProfileStatus('complete');
     } catch (error) {
-      console.error('Error in checkUserProfile:', error);
+      log.error(LogContext.AUTH, 'Error in checkUserProfile', error instanceof Error ? error : new Error(String(error)), { userId: user?.id });
       setProfileStatus('needs_setup');
     }
   };

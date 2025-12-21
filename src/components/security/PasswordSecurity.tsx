@@ -10,6 +10,8 @@ import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { Key, Shield, CheckCircle, AlertCircle } from 'lucide-react';
+import { log, LogContext } from '@/utils/logger';
+import * as Sentry from '@sentry/react';
 
 interface PasswordStrength {
   score: number;
@@ -108,7 +110,14 @@ const PasswordSecurity = () => {
         description: "Your password has been successfully changed",
       });
     } catch (error: any) {
-      console.error('Error changing password:', error);
+      // Critical security operation - log to Sentry
+      if (error instanceof Error) {
+        Sentry.captureException(error, {
+          tags: { component: 'PasswordSecurity', action: 'changePassword' },
+          extra: { userId: user?.id }
+        });
+        log.error(LogContext.SECURITY, 'Error changing password', error, { userId: user?.id });
+      }
       toast({
         title: "Error",
         description: error.message || "Failed to change password",

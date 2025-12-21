@@ -71,7 +71,7 @@ export const ResumeDraft = () => {
         .maybeSingle();
 
       if (linkError) {
-        console.error('Organization link error:', linkError);
+        // Organization link error
         setLoadingBranding(false);
         return;
       }
@@ -91,7 +91,7 @@ export const ResumeDraft = () => {
         brand_color: linkInfo.organizations.brand_color
       });
     } catch (error) {
-      console.error('Error fetching organization branding from domain:', error);
+      // Error fetching organization branding from domain
     } finally {
       setLoadingBranding(false);
     }
@@ -133,7 +133,7 @@ export const ResumeDraft = () => {
         brand_color: orgData.brand_color
       });
     } catch (error) {
-      console.error('Error fetching organization branding from draft:', error);
+      // Error fetching organization branding from draft
     } finally {
       setLoadingBranding(false);
     }
@@ -155,7 +155,6 @@ export const ResumeDraft = () => {
       // Navigate to form with draft data using normalized code
       navigate(`/report?draft=${normalizedCode}`);
     } else {
-      console.error('Failed to resume draft:', response);
       setError(response.message || 'Failed to load draft');
     }
   };

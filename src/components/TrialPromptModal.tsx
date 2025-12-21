@@ -5,6 +5,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Check, Star, Zap } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import { log, LogContext } from '@/utils/logger';
 
 interface TrialPromptModalProps {
   open: boolean;
@@ -42,7 +43,7 @@ const TrialPromptModal = ({ open, onOpenChange }: TrialPromptModalProps) => {
       });
 
       if (error) {
-        console.error('Checkout error:', error);
+        log.error(LogContext.FRONTEND, 'Checkout error in TrialPromptModal', error instanceof Error ? error : new Error(String(error)), { plan });
         toast({
           title: "Error",
           description: "Failed to start trial. Please try again.",
@@ -55,7 +56,7 @@ const TrialPromptModal = ({ open, onOpenChange }: TrialPromptModalProps) => {
         window.location.href = data.url;
       }
     } catch (error) {
-      console.error('Trial start error:', error);
+      log.error(LogContext.FRONTEND, 'Trial start error', error instanceof Error ? error : new Error(String(error)), { plan });
       toast({
         title: "Error", 
         description: "Failed to start trial. Please try again.",

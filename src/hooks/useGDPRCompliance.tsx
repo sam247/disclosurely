@@ -30,7 +30,7 @@ export const useGDPRCompliance = () => {
       if (error) throw error;
       setRetentionPolicies(data || []);
     } catch (error) {
-      console.error('Error fetching retention policies:', error);
+      // Error fetching retention policies
     }
   };
 
@@ -49,7 +49,7 @@ export const useGDPRCompliance = () => {
       // Type assertion to ensure proper typing
       setExportRequests((data || []) as DataExportRequest[]);
     } catch (error) {
-      console.error('Error fetching export requests:', error);
+      // Error fetching export requests
     }
   };
 
@@ -68,7 +68,7 @@ export const useGDPRCompliance = () => {
       // Type assertion to ensure proper typing
       setErasureRequests((data || []) as DataErasureRequest[]);
     } catch (error) {
-      console.error('Error fetching erasure requests:', error);
+      // Error fetching erasure requests
     }
   };
 

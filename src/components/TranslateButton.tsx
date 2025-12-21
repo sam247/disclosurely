@@ -4,6 +4,7 @@ import { Languages } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { useTranslation } from 'react-i18next';
+import { log, LogContext } from '@/utils/logger';
 
 interface TranslateButtonProps {
   text: string;
@@ -53,7 +54,7 @@ const TranslateButton = ({
         });
       }
     } catch (error) {
-      console.error('Translation error:', error);
+      log.error(LogContext.FRONTEND, 'Translation error', error instanceof Error ? error : new Error(String(error)));
       toast({
         title: "Translation Failed",
         description: error instanceof Error ? error.message : 'Failed to translate text',

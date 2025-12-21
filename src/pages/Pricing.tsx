@@ -34,7 +34,7 @@ const Pricing = () => {
   const handleSubscribe = async (tier: 'tier1' | 'tier2') => {
     setLoading(tier);
     try {
-      console.log('[Pricing] Starting subscription for tier:', tier);
+      // Starting subscription
       
       // Check if user is logged in (optional - checkout works without auth)
       const { data: { session } } = await supabase.auth.getSession();
@@ -59,7 +59,7 @@ const Pricing = () => {
         headers.Authorization = `Bearer ${session.access_token}`;
       }
 
-      console.log('[Pricing] Invoking create-checkout with:', { tier, interval: billingInterval, hasAuth: !!session });
+      // Invoking create-checkout
 
       const { data, error } = await supabase.functions.invoke('create-checkout', {
         headers,
@@ -86,7 +86,7 @@ const Pricing = () => {
               }
             }
           } catch (e) {
-            console.error('[Pricing] Could not read error response body:', e);
+            // Could not read error response body
           }
         }
         
@@ -117,7 +117,6 @@ const Pricing = () => {
       }
 
       if (data?.url) {
-        console.log('[Pricing] Redirecting to checkout URL:', data.url);
         window.location.href = data.url;
       } else {
         throw new Error('No checkout URL returned from server');

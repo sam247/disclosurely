@@ -128,7 +128,6 @@ const ReportsManagement = () => {
       if (error) throw error;
       setReports(data || []);
     } catch (error) {
-      console.error('Error fetching reports:', error);
       toast({
         title: "Error",
         description: "Failed to fetch reports",
@@ -158,7 +157,7 @@ const ReportsManagement = () => {
       if (error) throw error;
       setTeamMembers(data || []);
     } catch (error) {
-      console.error('Error fetching team members:', error);
+      // Error fetching team members
     }
   };
 
@@ -180,7 +179,7 @@ const ReportsManagement = () => {
       if (error) throw error;
       setReportNotes(data || []);
     } catch (error) {
-      console.error('Error fetching report notes:', error);
+      // Error fetching report notes
     }
   };
 
@@ -237,7 +236,6 @@ const ReportsManagement = () => {
         description: "Report status updated successfully",
       });
     } catch (error) {
-      console.error('Error updating report status:', error);
       toast({
         title: "Error",
         description: "Failed to update report status",
@@ -291,7 +289,6 @@ const ReportsManagement = () => {
         description: "Report marked as read",
       });
     } catch (error) {
-      console.error('Error marking report as read:', error);
       toast({
         title: "Error",
         description: "Failed to mark report as read",
@@ -345,7 +342,6 @@ const ReportsManagement = () => {
         description: "Report closed successfully",
       });
     } catch (error) {
-      console.error('Error closing report:', error);
       toast({
         title: "Error",
         description: "Failed to close report",
@@ -404,7 +400,6 @@ const ReportsManagement = () => {
         description: "Report archived successfully",
       });
     } catch (error) {
-      console.error('Error archiving report:', error);
       toast({
         title: "Error",
         description: "Failed to archive report",
@@ -460,7 +455,6 @@ const ReportsManagement = () => {
         description: "Report deleted successfully",
       });
     } catch (error) {
-      console.error('Error deleting report:', error);
       toast({
         title: "Error",
         description: "Failed to delete report",
@@ -520,7 +514,6 @@ const ReportsManagement = () => {
         description: "Report restored successfully",
       });
     } catch (error) {
-      console.error('Error restoring report:', error);
       toast({
         title: "Error",
         description: "Failed to restore report",
@@ -574,7 +567,6 @@ const ReportsManagement = () => {
         description: "Tags updated successfully",
       });
     } catch (error) {
-      console.error('Error updating tags:', error);
       toast({
         title: "Error",
         description: "Failed to update tags",
@@ -630,7 +622,6 @@ const ReportsManagement = () => {
         description: "Report assigned successfully",
       });
     } catch (error) {
-      console.error('Error assigning report:', error);
       toast({
         title: "Error",
         description: "Failed to assign report",
@@ -685,7 +676,6 @@ const ReportsManagement = () => {
         description: "Note added successfully",
       });
     } catch (error) {
-      console.error('Error adding note:', error);
       toast({
         title: "Error",
         description: "Failed to add note",

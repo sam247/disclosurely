@@ -83,7 +83,7 @@ export const useUsageStats = () => {
         reportsThisMonth: reportsThisMonth || 0
       });
     } catch (error) {
-      console.error('Error fetching usage stats:', error);
+      // Error fetching usage stats
     } finally {
       setLoading(false);
     }

@@ -9,6 +9,8 @@ import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { Shield, Smartphone, Key, Check, X } from 'lucide-react';
+import { log, LogContext } from '@/utils/logger';
+import * as Sentry from '@sentry/react';
 
 const MFASetup = () => {
   const { user } = useAuth();
@@ -35,7 +37,7 @@ const MFASetup = () => {
       const hasActiveFactor = data?.totp?.some(factor => factor.status === 'verified');
       setMfaEnabled(!!hasActiveFactor);
     } catch (error) {
-      console.error('Error checking MFA status:', error);
+      log.error(LogContext.SECURITY, 'Error checking MFA status', error instanceof Error ? error : new Error(String(error)));
     }
   };
 
@@ -61,7 +63,14 @@ const MFASetup = () => {
         description: "Scan the QR code with your authenticator app",
       });
     } catch (error: any) {
-      console.error('Error starting MFA enrollment:', error);
+      // Critical security operation - log to Sentry
+      if (error instanceof Error) {
+        Sentry.captureException(error, {
+          tags: { component: 'MFASetup', action: 'startEnrollment' },
+          extra: { userId: user?.id }
+        });
+        log.error(LogContext.SECURITY, 'Error starting MFA enrollment', error, { userId: user?.id });
+      }
       toast({
         title: "Setup Error",
         description: error.message || "Failed to start MFA setup",
@@ -102,7 +111,14 @@ const MFASetup = () => {
         description: "Two-factor authentication has been successfully enabled",
       });
     } catch (error: any) {
-      console.error('Error verifying MFA:', error);
+      // Critical security operation - log to Sentry
+      if (error instanceof Error) {
+        Sentry.captureException(error, {
+          tags: { component: 'MFASetup', action: 'verifyMFA' },
+          extra: { userId: user?.id }
+        });
+        log.error(LogContext.SECURITY, 'Error verifying MFA', error, { userId: user?.id });
+      }
       toast({
         title: "Verification Failed",
         description: error.message || "Invalid verification code",
@@ -135,7 +151,14 @@ const MFASetup = () => {
         description: "Two-factor authentication has been disabled",
       });
     } catch (error: any) {
-      console.error('Error disabling MFA:', error);
+      // Critical security operation - log to Sentry
+      if (error instanceof Error) {
+        Sentry.captureException(error, {
+          tags: { component: 'MFASetup', action: 'disableMFA' },
+          extra: { userId: user?.id }
+        });
+        log.error(LogContext.SECURITY, 'Error disabling MFA', error, { userId: user?.id });
+      }
       toast({
         title: "Error",
         description: error.message || "Failed to disable MFA",

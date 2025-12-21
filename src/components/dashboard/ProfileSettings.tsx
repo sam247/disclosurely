@@ -8,6 +8,7 @@ import { useTranslation } from 'react-i18next';
 import { useState, useEffect } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
+import { log, LogContext } from '@/utils/logger';
 
 const ProfileSettings = () => {
   const { user } = useAuth();
@@ -56,7 +57,7 @@ const ProfileSettings = () => {
         }));
       }
     } catch (error: any) {
-      console.error('Error fetching profile:', error);
+      log.error(LogContext.AUTH, 'Error fetching profile in ProfileSettings', error instanceof Error ? error : new Error(String(error)), { userId: user?.id });
       // Fallback to user_metadata on error
       setFormData(prev => ({
         ...prev,

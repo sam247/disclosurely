@@ -169,7 +169,7 @@ async function isOpenRedactEnabled(organizationId?: string): Promise<boolean> {
     const { checkFeatureFlag } = await import('@/utils/edgeFunctions');
     return await checkFeatureFlag('use_openredact', organizationId);
   } catch (error) {
-    console.error('[Privacy Detection] Error checking OpenRedact feature flag:', error);
+    // Error checking OpenRedact feature flag
     return false;
   }
 }
@@ -184,10 +184,10 @@ async function scanForPrivacyRisksWithOpenRedact(text: string, organizationId?: 
     // Instead, we'll call an API endpoint that uses OpenRedact server-side
     // For now, fall back to legacy implementation on client-side
     // TODO: Create a client-side API endpoint that uses OpenRedact server-side
-    console.log('[Privacy Detection] OpenRedact not available in browser - using legacy implementation');
+    // OpenRedact not available in browser - using legacy implementation
     return [];
   } catch (error) {
-    console.error('[Privacy Detection] OpenRedact error, falling back to legacy:', error);
+    // OpenRedact error, falling back to legacy
     throw error;
   }
 }
