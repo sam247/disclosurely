@@ -251,7 +251,7 @@ serve(async (req) => {
     });
   } catch (error: any) {
     let errorMessage = "An unexpected error occurred";
-    let statusCode = 500;
+    const statusCode = 500;
     
     if (error instanceof Error) {
       errorMessage = error.message;

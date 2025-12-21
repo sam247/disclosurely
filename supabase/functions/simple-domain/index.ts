@@ -776,7 +776,7 @@ async function handleVerifyDomain(request: VerifyRequest, req?: Request): Promis
     }
 
     if (domainRecord) {
-      let organizationIdForDomain = domainRecord.organization_id || organizationId;
+      const organizationIdForDomain = domainRecord.organization_id || organizationId;
       const existingOrg = domainRecord.organization_id;
 
       // If we couldn't resolve the organization, we still proceed but won't try to set primary

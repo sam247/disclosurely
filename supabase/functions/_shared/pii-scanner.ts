@@ -233,7 +233,7 @@ async function scanForPIIWithNPM(
     // Find all [REDACTED] placeholders and map them back to original positions
     const redactedPattern = /\[REDACTED\]/g;
     let match;
-    let offset = 0;
+    const offset = 0;
     
     // Simple approach: detect redactions and create generic detections
     // The npm package handles detection internally, we just report that PII was found

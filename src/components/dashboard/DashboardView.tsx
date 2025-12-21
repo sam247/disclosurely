@@ -508,7 +508,7 @@ const DashboardView = () => {
           .order('created_at', { ascending: false })
           .limit(20);
 
-        let archivedQuery = supabase
+        const archivedQuery = supabase
           .from('reports')
           .select('id, title, tracking_id, status, created_at, encrypted_content, encryption_key_hash, priority, report_type, submitted_by_email, tags, assigned_to, incident_date, location, witnesses, previous_reports, additional_notes')
           .eq('organization_id', profile.organization_id)
@@ -551,7 +551,7 @@ const DashboardView = () => {
           .order('created_at', { ascending: false })
           .limit(20);
 
-        let archivedBasicQuery = supabase
+        const archivedBasicQuery = supabase
           .from('reports')
           .select('id, title, tracking_id, status, created_at, encrypted_content, encryption_key_hash, priority, report_type, submitted_by_email, tags, assigned_to, incident_date, location, witnesses, previous_reports, additional_notes')
           .eq('organization_id', profile.organization_id)

@@ -206,9 +206,9 @@ serve(async (req) => {
     // ============================================================================
     // 6. PII REDACTION using OpenRedaction.com API
     // ============================================================================
-    let redactionMap: Record<string, string> = {};
+    const redactionMap: Record<string, string> = {};
     let piiDetected = false;
-    let detectionStats: Record<string, number> = {};
+    const detectionStats: Record<string, number> = {};
     
     if (policy.pii_protection?.enabled && !body.preserve_pii) {
       console.log('[AI Gateway] PII redaction enabled - using OpenRedaction API');

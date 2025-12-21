@@ -440,7 +440,7 @@ async function redactPIIWithNPM(
     // The npm package uses [REDACTED] as placeholder, we'll map those
     const redactedPattern = /\[REDACTED\]/g;
     let matchCount = 0;
-    let lastIndex = 0;
+    const lastIndex = 0;
     
     // Simple approach: count redactions and create generic map
     // The npm package handles the actual redaction, we just track that PII was detected

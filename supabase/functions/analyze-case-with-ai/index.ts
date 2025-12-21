@@ -138,7 +138,7 @@ Remember: Compliance teams need confidence and clarity under pressure. Be the ad
     ];
 
     let analysis;
-    let metadata = {
+    const metadata = {
       timestamp: new Date().toISOString(),
       documentsAnalyzed: companyDocuments?.length || 0,
       routedVia: useAIGateway ? 'ai_gateway' : 'direct_deepseek',
