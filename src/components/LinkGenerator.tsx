@@ -131,7 +131,7 @@ const LinkGenerator = () => {
   // Debug logging
   useEffect(() => {
     if (customDomains.length > 0) {
-      
+      // Custom domains available - component will handle display
       
       
       

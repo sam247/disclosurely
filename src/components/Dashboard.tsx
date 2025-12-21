@@ -404,7 +404,7 @@ const Dashboard = () => {
       }
 
       // Fetch archived reports - filter by assignment for team members
-      const archivedQuery = supabase
+      let archivedQuery = supabase
         .from('reports')
         .select('id, title, tracking_id, status, created_at, encrypted_content, encryption_key_hash, priority, report_type, submitted_by_email, assigned_to, incident_date, location, witnesses, previous_reports, additional_notes')
         .eq('organization_id', profile.organization_id)
@@ -413,16 +413,12 @@ const Dashboard = () => {
         .limit(20);
 
       // If user is not org admin, only show reports assigned to them
-      
-      
       // Fallback: if roles are still loading or isOrgAdmin is undefined, assume team member
       const shouldFilterArchived = !isOrgAdmin || rolesLoading || isOrgAdmin === undefined;
       
       if (shouldFilterArchived) {
         // Filter archived reports to only show those assigned to the user
         archivedQuery = archivedQuery.eq('assigned_to', user.id);
-      } else {
-        // Org admin can see all archived reports, no filtering needed
       }
 
       const { data: archivedData, error: archivedError } = await archivedQuery;
@@ -851,6 +847,7 @@ const Dashboard = () => {
       await signOut();
       navigate('/auth/login');
     } catch (error) {
+      // Error handled silently - user will be redirected to login
     }
   };
 

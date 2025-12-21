@@ -61,7 +61,7 @@ const ReportStatus = () => {
   useEffect(() => {
     // Extract the link token from URL if present
     const path = window.location.pathname;
-    const match = path.match(/\/secure\/tool\/submit\/([^\/]+)\/status/);
+    const match = path.match(/\/secure\/tool\/submit\/([^/]+)\/status/);
     if (match) {
       setLinkToken(match[1]);
       fetchOrganizationBranding(match[1]);

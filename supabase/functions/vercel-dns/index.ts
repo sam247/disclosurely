@@ -268,7 +268,7 @@ async function handleAutomatedDNS(supabaseClient: any, organizationId: string, v
 
   try {
     // Step 1: Check if domain already exists in project
-    console.log(`Checking if domain ${domain.domain_name} exists in Vercel project...`)
+    await logToAI('info', `Checking if domain ${domain.domain_name} exists in Vercel project...`)
     let vercelDomain
     let domainConfig
     
@@ -280,18 +280,15 @@ async function handleAutomatedDNS(supabaseClient: any, organizationId: string, v
       const existingDomain = projectDomains.find(d => d.name === domain.domain_name)
       
       if (existingDomain) {
-        await logToAI('info', 'Domain already exists in Vercel project', { domainName: domain.domain_name, domainId: existingDomain.id })
-        console.log(`Domain already exists in Vercel project:`, existingDomain)
+        await logToAI('info', 'Domain already exists in Vercel project', { domainName: domain.domain_name, domainId: existingDomain.id, existingDomain })
         vercelDomain = existingDomain
       } else {
         // Domain doesn't exist, try to add it to project
-        await logToAI('info', 'Adding domain to Vercel project', { domainName: domain.domain_name })
-        console.log(`Adding domain ${domain.domain_name} to Vercel project...`)
+        await logToAI('info', `Adding domain ${domain.domain_name} to Vercel project...`)
         
         try {
           vercelDomain = await vercelDNS.addDomainToProject(domain.domain_name)
           await logToAI('info', 'Domain successfully added to Vercel project', { domainName: domain.domain_name, vercelDomain })
-          console.log(`Domain added to Vercel project:`, vercelDomain)
         } catch (addError: any) {
           // Check if it's a domain ownership error
           if (addError.message?.includes('Not authorized to use') || addError.message?.includes('forbidden')) {
