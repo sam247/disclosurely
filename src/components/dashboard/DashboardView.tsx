@@ -1708,10 +1708,10 @@ Additional Details: ${decryptedContent.additionalDetails || 'None provided'}
 
       {/* Table - Directly in root like audit page */}
       {!showArchived ? (
-        <div className="border rounded-lg bg-white flex-1 flex flex-col overflow-hidden min-h-0 mx-2 sm:mx-0" style={{ marginTop: '15px' }} data-dashboard-table-active>
+        <div className="border rounded-lg bg-white flex-1 flex flex-col overflow-hidden min-h-0 mx-2 sm:mx-0 relative" style={{ marginTop: '15px' }} data-dashboard-table-active>
                 {/* Table Header */}
                 <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between p-3 sm:p-3 border-b bg-gray-50 gap-3 sm:gap-0 flex-shrink-0">
-                  <div className="flex flex-col sm:flex-row items-start sm:items-center space-y-1 sm:space-y-0 sm:space-x-2 sm:space-x-4">
+                  <div className="flex flex-col sm:flex-row items-start sm:items-center space-y-1 sm:space-y-0 sm:space-x-2 sm:space-x-4 flex-1">
                     <div>
                       <h3 className="font-semibold text-xs sm:text-sm">Active Reports</h3>
                       <p className="text-xs text-muted-foreground mt-0.5">
@@ -1719,15 +1719,26 @@ Additional Details: ${decryptedContent.additionalDetails || 'None provided'}
                       </p>
                     </div>
                   </div>
-                  <div className="flex items-center space-x-2">
+                  <div className="flex items-center space-x-2 md:hidden absolute top-3 right-3">
+                    <Button 
+                      variant="ghost" 
+                      onClick={fetchData}
+                      disabled={loading}
+                      size="sm"
+                      className="h-8 w-8 p-0"
+                    >
+                      <RefreshCw className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
+                    </Button>
+                  </div>
+                  <div className="hidden md:flex items-center space-x-2">
                     <Button 
                       variant="outline" 
                       onClick={fetchData}
                       disabled={loading}
                       size="sm"
-                      className="h-9 sm:h-8 text-xs min-h-[44px] sm:min-h-0"
+                      className="h-8 text-xs"
                     >
-                      <RefreshCw className={`h-4 w-4 sm:h-3 sm:w-3 mr-1 ${loading ? 'animate-spin' : ''}`} />
+                      <RefreshCw className={`h-3 w-3 mr-1 ${loading ? 'animate-spin' : ''}`} />
                       Refresh
                     </Button>
                   </div>
@@ -2201,102 +2212,70 @@ Additional Details: ${decryptedContent.additionalDetails || 'None provided'}
                       {paginatedReports.map((report) => (
                         <div
                           key={report.id}
-                          className="border rounded-lg p-2 space-y-1.5 bg-white hover:bg-gray-50 transition-colors"
+                          className="border rounded-lg p-3 bg-white hover:bg-gray-50 transition-colors"
                         >
-                          <div className="flex items-start justify-between gap-2">
-                          <div className="flex-1 min-w-0">
-                            <div className="flex items-center gap-1.5 mb-0.5">
-                              <h4 className="text-xs font-medium truncate">{report.title}</h4>
+                          {/* Title and Status Badge */}
+                          <div className="flex items-start justify-between gap-2 mb-2">
+                            <h4 className="text-sm font-semibold flex-1 min-w-0 leading-tight">{report.title}</h4>
+                            <Badge variant={report.status === 'new' ? 'default' : 'secondary'} className="text-[10px] px-1.5 py-0.5 flex-shrink-0">
+                              {report.status}
+                            </Badge>
+                          </div>
+                          
+                          {/* Category and Date Row */}
+                          <div className="flex items-center justify-between gap-2 mb-2 text-xs">
+                            <div className="flex items-center gap-1.5 flex-1 min-w-0">
+                              <span className="text-muted-foreground">Category:</span>
+                              <span className="font-medium truncate">
+                                {decryptedCategories[report.id]?.main || '-'}
+                              </span>
                             </div>
-                            <p className="text-[10px] text-muted-foreground font-mono mb-1">
-                              {report.tracking_id}
-                            </p>
-                          </div>
-                          <Badge variant={report.status === 'new' ? 'default' : 'secondary'} className="text-[10px] px-1 py-0 flex-shrink-0">
-                            {report.status}
-                          </Badge>
-                        </div>
-                        
-                        <div className="grid grid-cols-2 gap-1.5 text-[10px]">
-                          <div>
-                            <span className="text-muted-foreground">Category:</span>
-                            <p className="font-medium truncate">
-                              {decryptedCategories[report.id]?.main || '-'}
-                            </p>
-                          </div>
-                          <div>
-                            <span className="text-muted-foreground">Date:</span>
-                            <p className="font-medium truncate">
-                              {new Date(report.created_at).toLocaleDateString()}
-                            </p>
-                          </div>
-                          <div>
-                            <span className="text-muted-foreground">Risk:</span>
-                            <div className="flex items-center gap-1 mt-0.5">
-                              {report.manual_risk_level && (
-                                <span className="text-xs font-medium">
-                                  {['Critical', 'High', 'Medium', 'Low', 'Info'][report.manual_risk_level - 1]} ({report.manual_risk_level}/5)
-                                </span>
-                              )}
+                            <div className="flex items-center gap-1.5 flex-shrink-0">
+                              <span className="text-muted-foreground">Date:</span>
+                              <span className="font-medium">
+                                {new Date(report.created_at).toLocaleDateString()}
+                              </span>
                             </div>
                           </div>
-                          <div>
-                            <span className="text-muted-foreground">AI Triage:</span>
-                            <div className="flex items-center gap-1 mt-0.5">
-                              {report.ai_risk_level ? (
-                                <span className={`text-[10px] px-1 py-0.5 rounded font-medium ${
+                          
+                          {/* Risk Pills Row */}
+                          <div className="flex items-center gap-2 mb-2 flex-wrap">
+                            {report.manual_risk_level && (
+                              <Badge variant="outline" className="text-[10px] px-1.5 py-0.5">
+                                {['Critical', 'High', 'Medium', 'Low', 'Info'][report.manual_risk_level - 1]} ({report.manual_risk_level}/5)
+                              </Badge>
+                            )}
+                            {report.ai_risk_level && (
+                              <Badge 
+                                className={`text-[10px] px-1.5 py-0.5 ${
                                   (() => {
                                     const urgency = getUrgencyLevel(report.ai_risk_level);
-                                    return urgency === 'HIGH' ? 'bg-red-100 text-red-800' :
-                                           urgency === 'MEDIUM' ? 'bg-yellow-100 text-yellow-800' :
-                                           'bg-green-100 text-green-800';
+                                    return urgency === 'HIGH' ? 'bg-red-100 text-red-800 border-red-200' :
+                                           urgency === 'MEDIUM' ? 'bg-yellow-100 text-yellow-800 border-yellow-200' :
+                                           'bg-green-100 text-green-800 border-green-200';
                                   })()
-                                }`}>
-                                  {getUrgencyLevel(report.ai_risk_level)}
-                                </span>
-                              ) : (
-                                <span className="text-muted-foreground">-</span>
-                              )}
-                            </div>
+                                }`}
+                              >
+                                AI: {getUrgencyLevel(report.ai_risk_level)}
+                              </Badge>
+                            )}
                           </div>
-                        </div>
-                        
-                        <div className="flex items-center justify-between pt-0.5">
-                          <div className="flex items-center gap-1.5 text-[10px] text-muted-foreground">
-                            <Select
-                              value={report.assigned_to || 'unassigned'}
-                              onValueChange={(value) => assignReport(report.id, value)}
-                            >
-                              <SelectTrigger className="h-5 text-[10px] w-24 border-gray-300">
-                                <SelectValue placeholder="Assign..." />
-                              </SelectTrigger>
-                              <SelectContent>
-                                <SelectItem value="unassigned">Unassigned</SelectItem>
-                                {teamMembers.map((member) => (
-                                  <SelectItem key={member.id} value={member.id}>
-                                    {member.first_name && member.last_name 
-                                      ? `${member.first_name} ${member.last_name}`
-                                      : member.email
-                                    }
-                                  </SelectItem>
-                                ))}
-                              </SelectContent>
-                            </Select>
-                          </div>
-                          <div className="flex items-center gap-1">
+                          
+                          {/* View Button and Actions */}
+                          <div className="flex items-center justify-between pt-2 border-t">
                             <Button
-                              variant="ghost"
+                              variant="default"
                               size="sm"
                               onClick={() => handleViewReport(report)}
-                              className="h-5 text-[10px] px-2"
+                              className="h-8 text-xs px-3 flex-1"
                             >
-                              <Eye className="h-2.5 w-2.5 mr-0.5" />
+                              <Eye className="h-3 w-3 mr-1.5" />
                               View
                             </Button>
                             <DropdownMenu>
                               <DropdownMenuTrigger asChild>
-                                <Button variant="ghost" size="sm" className="h-5 w-5 p-0">
-                                  <MoreVertical className="h-2.5 w-2.5" />
+                                <Button variant="outline" size="sm" className="h-8 w-8 p-0 ml-2">
+                                  <MoreVertical className="h-4 w-4" />
                                 </Button>
                               </DropdownMenuTrigger>
                               <DropdownMenuContent align="end" className="w-48">
@@ -2439,7 +2418,6 @@ Additional Details: ${decryptedContent.additionalDetails || 'None provided'}
                             </DropdownMenu>
                           </div>
                         </div>
-                      </div>
                       ))}
                     </div>
                   </>
