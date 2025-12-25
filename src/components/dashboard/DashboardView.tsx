@@ -1663,13 +1663,13 @@ Additional Details: ${decryptedContent.additionalDetails || 'None provided'}
 
       {/* Controls Bar - Replaces filter bar - matches table width exactly */}
       <div className="border rounded-lg bg-white flex-shrink-0 mx-2 sm:mx-0 mb-2">
-        <div className="p-3 sm:p-3 space-y-3 sm:space-y-3">
+        <div className="p-3 sm:p-3 space-y-3">
           <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 items-stretch sm:items-center">
             {/* Tabs */}
             <Tabs value={showArchived ? "archived" : "active"} onValueChange={(value) => setShowArchived(value === "archived")} className="w-full sm:w-auto">
               <TabsList className="w-full sm:w-auto">
-                <TabsTrigger value="active" className="flex-1 sm:flex-none">{t('activeReports')} ({reports.length})</TabsTrigger>
-                <TabsTrigger value="archived" className="flex-1 sm:flex-none">{t('archived')} ({archivedReports.length})</TabsTrigger>
+                <TabsTrigger value="active" className="flex-1 sm:flex-none min-h-[44px] sm:min-h-0">{t('activeReports')} ({reports.length})</TabsTrigger>
+                <TabsTrigger value="archived" className="flex-1 sm:flex-none min-h-[44px] sm:min-h-0">{t('archived')} ({archivedReports.length})</TabsTrigger>
             </TabsList>
             </Tabs>
             
@@ -1679,10 +1679,10 @@ Additional Details: ${decryptedContent.additionalDetails || 'None provided'}
                 placeholder={t('searchReports')}
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="flex-1 w-full sm:w-auto min-h-[44px] md:min-h-0"
+                className="flex-1 w-full sm:w-auto h-11 sm:h-10 px-4"
               />
               <Select value={statusFilter} onValueChange={setStatusFilter}>
-                <SelectTrigger className="w-full sm:w-48 min-h-[44px] md:min-h-0">
+                <SelectTrigger className="w-full sm:w-48 h-11 sm:h-10">
                   <SelectValue placeholder={t('filterByStatus')} />
                 </SelectTrigger>
                 <SelectContent>
@@ -1696,7 +1696,7 @@ Additional Details: ${decryptedContent.additionalDetails || 'None provided'}
               <Button
                 variant="outline"
                 onClick={exportReportsToCSV}
-                className="w-full sm:w-auto min-h-[44px] md:min-h-0"
+                className="w-full sm:w-auto h-11 sm:h-10"
               >
                 <FileSpreadsheet className="h-4 w-4 mr-2" />
                 Export CSV
@@ -2129,7 +2129,7 @@ Additional Details: ${decryptedContent.additionalDetails || 'None provided'}
                           <div className="flex items-center space-x-2">
                             <Label className="text-xs whitespace-nowrap font-medium">Rows per page:</Label>
                             <Select value={pageSize.toString()} onValueChange={(value) => handlePageSizeChange(Number(value))}>
-                              <SelectTrigger className="h-9 sm:h-7 text-xs w-20 sm:w-16 border-gray-300 min-h-[44px] sm:min-h-0">
+                              <SelectTrigger className="h-11 sm:h-7 text-xs w-20 sm:w-16 border-gray-300">
                                 <SelectValue />
                               </SelectTrigger>
                               <SelectContent>
@@ -2141,7 +2141,7 @@ Additional Details: ${decryptedContent.additionalDetails || 'None provided'}
                             </Select>
                           </div>
                           
-                          <div className="text-xs text-gray-600 font-medium">
+                          <div className="text-xs text-gray-600 font-medium hidden sm:block">
                             Page {currentPage} of {totalPages}
                           </div>
                           
@@ -2150,13 +2150,13 @@ Additional Details: ${decryptedContent.additionalDetails || 'None provided'}
                           </div>
                         </div>
                         
-                        <div className="flex items-center justify-center sm:justify-end space-x-1">
+                        <div className="flex items-center justify-center sm:justify-end space-x-2 gap-2 sm:gap-0">
                           <Button
                             variant="outline"
                             size="sm"
                             onClick={() => handlePageChange(currentPage - 1)}
                             disabled={currentPage === 1 || loading}
-                            className="h-9 w-9 sm:h-7 sm:w-7 text-xs p-0 border-gray-300 min-h-[44px] sm:min-h-0"
+                            className="h-11 w-11 sm:h-7 sm:w-7 text-xs p-0 border-gray-300 flex-1 sm:flex-initial"
                           >
                             <ChevronLeft className="h-4 w-4 sm:h-3.5 sm:w-3.5" />
                           </Button>
@@ -2187,7 +2187,7 @@ Additional Details: ${decryptedContent.additionalDetails || 'None provided'}
                             size="sm"
                             onClick={() => handlePageChange(currentPage + 1)}
                             disabled={currentPage === totalPages || loading}
-                            className="h-9 w-9 sm:h-7 sm:w-7 text-xs p-0 border-gray-300 min-h-[44px] sm:min-h-0"
+                            className="h-11 w-11 sm:h-7 sm:w-7 text-xs p-0 border-gray-300 flex-1 sm:flex-initial"
                           >
                             <ChevronRight className="h-4 w-4 sm:h-3.5 sm:w-3.5" />
                           </Button>
@@ -2196,81 +2196,78 @@ Additional Details: ${decryptedContent.additionalDetails || 'None provided'}
                     )}
                   </div>
                   
-                    {/* Mobile Card View */}
-                    <div className="md:hidden space-y-3 p-4 overflow-y-auto flex-1 min-h-0">
+                    {/* Mobile Card View - Compact Audit Log Style */}
+                    <div className="md:hidden space-y-2 p-2 overflow-y-auto flex-1 min-h-0">
                     {paginatedReports.map((report) => (
-                      <Card key={report.id} className="overflow-hidden">
-                        <CardContent className="p-5 md:p-4 space-y-4 md:space-y-3">
-                          <div className="flex items-start justify-between gap-2">
-                            <div className="flex-1 min-w-0">
-                              <div className="flex items-center gap-2 mb-1">
-                                <span className="font-mono text-sm md:text-xs text-muted-foreground">{report.tracking_id}</span>
-                                <button
-                                  onClick={async () => {
-                                    try {
-                                      await navigator.clipboard.writeText(report.tracking_id);
-                                      setCopiedTrackingId(report.tracking_id);
-                                      setTimeout(() => setCopiedTrackingId(null), 1000);
-                                } catch (error) {
-                                  log.error(LogContext.FRONTEND, 'Failed to copy tracking ID', error as Error);
-                                }
-                                  }}
-                                  className="text-muted-foreground hover:text-foreground transition-colors"
-                                  title="Copy tracking ID"
-                                >
-                                  {copiedTrackingId === report.tracking_id ? (
-                                    <Check className="h-3 w-3 text-green-600" />
-                                  ) : (
-                                    <Copy className="h-3 w-3" />
-                                  )}
-                                </button>
-                              </div>
-                              <h3 className="font-semibold text-base md:text-sm break-words">{report.title}</h3>
+                      <div
+                        key={report.id}
+                        className="border rounded-lg p-2 space-y-1.5 bg-white hover:bg-gray-50 transition-colors"
+                      >
+                        <div className="flex items-start justify-between gap-2">
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center gap-1.5 mb-0.5">
+                              <h4 className="text-xs font-medium truncate">{report.title}</h4>
                             </div>
-                            <Badge variant={report.status === 'new' ? 'default' : 'secondary'} className="shrink-0">
-                              {report.status}
-                            </Badge>
+                            <p className="text-[10px] text-muted-foreground font-mono mb-1">
+                              {report.tracking_id}
+                            </p>
                           </div>
-                          
-                          {decryptedCategories[report.id] ? (
-                            <div className="text-base md:text-sm">
-                              <div className="font-medium">{decryptedCategories[report.id].main}</div>
-                              {decryptedCategories[report.id].sub && (
-                                <div className="text-muted-foreground text-sm md:text-xs">{decryptedCategories[report.id].sub}</div>
+                          <Badge variant={report.status === 'new' ? 'default' : 'secondary'} className="text-[10px] px-1 py-0 flex-shrink-0">
+                            {report.status}
+                          </Badge>
+                        </div>
+                        
+                        <div className="grid grid-cols-2 gap-1.5 text-[10px]">
+                          <div>
+                            <span className="text-muted-foreground">Category:</span>
+                            <p className="font-medium truncate">
+                              {decryptedCategories[report.id]?.main || '-'}
+                            </p>
+                          </div>
+                          <div>
+                            <span className="text-muted-foreground">Date:</span>
+                            <p className="font-medium truncate">
+                              {new Date(report.created_at).toLocaleDateString()}
+                            </p>
+                          </div>
+                          <div>
+                            <span className="text-muted-foreground">Risk:</span>
+                            <div className="flex items-center gap-1 mt-0.5">
+                              {report.manual_risk_level && (
+                                <span className="text-xs font-medium">
+                                  {['Critical', 'High', 'Medium', 'Low', 'Info'][report.manual_risk_level - 1]} ({report.manual_risk_level}/5)
+                                </span>
                               )}
                             </div>
-                          ) : (
-                            <span className="text-base md:text-sm text-muted-foreground">-</span>
-                          )}
-                          
-                          <div className="flex flex-wrap items-center gap-2">
-                            <RiskLevelSelector
-                              reportId={report.id}
-                              currentLevel={report.manual_risk_level}
-                              onUpdate={(level) => updateManualRiskLevel(report.id, level)}
-                              isUpdating={updatingRiskLevel === report.id}
-                            />
-                            {report.ai_risk_level && (
-                              <div className={`flex items-center gap-1 px-2 py-1 rounded-md text-xs font-medium ${
-                                (() => {
-                                  const urgency = getUrgencyLevel(report.ai_risk_level);
-                                  return urgency === 'HIGH' ? 'bg-red-100 text-red-800' :
-                                         urgency === 'MEDIUM' ? 'bg-yellow-100 text-yellow-800' :
-                                         'bg-green-100 text-green-800';
-                                })()
-                              }`}>
-                                <span>{t('ai.triage')}: {getUrgencyLevel(report.ai_risk_level)}</span>
-                              </div>
-                            )}
                           </div>
-                          
-                          <div className="flex items-center justify-between text-sm md:text-xs text-muted-foreground">
-                            <span>{new Date(report.created_at).toLocaleDateString()}</span>
+                          <div>
+                            <span className="text-muted-foreground">AI Triage:</span>
+                            <div className="flex items-center gap-1 mt-0.5">
+                              {report.ai_risk_level ? (
+                                <span className={`text-[10px] px-1 py-0.5 rounded font-medium ${
+                                  (() => {
+                                    const urgency = getUrgencyLevel(report.ai_risk_level);
+                                    return urgency === 'HIGH' ? 'bg-red-100 text-red-800' :
+                                           urgency === 'MEDIUM' ? 'bg-yellow-100 text-yellow-800' :
+                                           'bg-green-100 text-green-800';
+                                  })()
+                                }`}>
+                                  {getUrgencyLevel(report.ai_risk_level)}
+                                </span>
+                              ) : (
+                                <span className="text-muted-foreground">-</span>
+                              )}
+                            </div>
+                          </div>
+                        </div>
+                        
+                        <div className="flex items-center justify-between pt-0.5">
+                          <div className="flex items-center gap-1.5 text-[10px] text-muted-foreground">
                             <Select
                               value={report.assigned_to || 'unassigned'}
                               onValueChange={(value) => assignReport(report.id, value)}
                             >
-                              <SelectTrigger className="h-7 text-xs w-32">
+                              <SelectTrigger className="h-5 text-[10px] w-24 border-gray-300">
                                 <SelectValue placeholder="Assign..." />
                               </SelectTrigger>
                               <SelectContent>
@@ -2286,20 +2283,20 @@ Additional Details: ${decryptedContent.additionalDetails || 'None provided'}
                               </SelectContent>
                             </Select>
                           </div>
-                          
-                          <div className="flex gap-2 pt-2 border-t">
-                            <Button 
-                              variant="default" 
+                          <div className="flex items-center gap-1">
+                            <Button
+                              variant="ghost"
                               size="sm"
                               onClick={() => handleViewReport(report)}
-                              className="flex-1"
+                              className="h-5 text-[10px] px-2"
                             >
-                              {t('viewReport')}
+                              <Eye className="h-2.5 w-2.5 mr-0.5" />
+                              View
                             </Button>
                             <DropdownMenu>
                               <DropdownMenuTrigger asChild>
-                                <Button variant="outline" size="sm">
-                                  <MoreVertical className="h-4 w-4" />
+                                <Button variant="ghost" size="sm" className="h-5 w-5 p-0">
+                                  <MoreVertical className="h-2.5 w-2.5" />
                                 </Button>
                               </DropdownMenuTrigger>
                               <DropdownMenuContent align="end" className="w-48">
@@ -2441,10 +2438,9 @@ Additional Details: ${decryptedContent.additionalDetails || 'None provided'}
                               </DropdownMenuContent>
                             </DropdownMenu>
                           </div>
-                        </CardContent>
-                      </Card>
-                    ))}
-                  </div>
+                        </div>
+                      ))}
+                    </div>
                 </>
               )}
               </div>
@@ -2814,13 +2810,13 @@ Additional Details: ${decryptedContent.additionalDetails || 'None provided'}
                               variant="default" 
                               size="sm"
                               onClick={() => handleViewReport(report)}
-                              className="flex-1"
+                              className="flex-1 min-h-[44px] sm:min-h-0"
                             >
                               {t('viewReport')}
                             </Button>
                             <DropdownMenu>
                               <DropdownMenuTrigger asChild>
-                                <Button variant="outline" size="sm">
+                                <Button variant="outline" size="sm" className="min-h-[44px] w-11 sm:min-h-0 sm:w-auto">
                                   <MoreVertical className="h-4 w-4" />
                                 </Button>
                               </DropdownMenuTrigger>

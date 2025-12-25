@@ -931,20 +931,20 @@ const AnalyticsView: React.FC = () => {
   return (
     <div className="flex flex-col gap-0" style={{ height: 'calc(100vh - 109px)', overflow: 'hidden' }} data-analytics-root>
         {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 flex-shrink-0 px-2 sm:px-0 mb-2">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-2 flex-shrink-0 px-2 sm:px-0 mb-2">
           <div>
             <h1 className="text-xl sm:text-2xl font-bold">Analytics</h1>
             <p className="text-xs sm:text-sm text-muted-foreground mt-0.5">
               Decision-ready insights for compliance teams
             </p>
           </div>
-          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 sm:gap-2">
             <div className="flex items-center gap-2 flex-1 sm:flex-initial">
               <label className="text-xs sm:text-sm font-medium whitespace-nowrap">Period:</label>
               <select 
                 value={selectedPeriod} 
                 onChange={(e) => setSelectedPeriod(e.target.value as any)}
-                className="px-2 py-1 sm:py-1.5 border rounded-md text-xs sm:text-sm bg-background flex-1 sm:flex-initial touch-manipulation min-h-[44px] md:min-h-0"
+                className="px-3 py-2 sm:py-1.5 border rounded-md text-xs sm:text-sm bg-background flex-1 sm:flex-initial touch-manipulation min-h-[44px] md:min-h-0"
               >
                 <option value="7d">Last 7 days</option>
                 <option value="30d">Last 30 days</option>
@@ -978,12 +978,12 @@ const AnalyticsView: React.FC = () => {
                   </CardDescription>
                 </div>
                 {selectedPeriod !== '1y' && (
-                <div className="flex items-center gap-1.5 w-full sm:w-auto">
+                <div className="flex items-center gap-2 w-full sm:w-auto">
                   <Button
                     variant={chartPeriod === 'day' ? 'default' : 'outline'}
                     size="sm"
                     onClick={() => setChartPeriod('day')}
-                    className="text-[11px] sm:text-xs flex-1 sm:flex-initial touch-manipulation h-7 sm:h-8 px-2"
+                    className="text-[11px] sm:text-xs flex-1 sm:flex-initial touch-manipulation h-9 sm:h-8 px-3 sm:px-2"
                   >
                     Days
                   </Button>
@@ -991,7 +991,7 @@ const AnalyticsView: React.FC = () => {
                     variant={chartPeriod === 'week' ? 'default' : 'outline'}
                     size="sm"
                     onClick={() => setChartPeriod('week')}
-                    className="text-[11px] sm:text-xs flex-1 sm:flex-initial touch-manipulation h-7 sm:h-8 px-2"
+                    className="text-[11px] sm:text-xs flex-1 sm:flex-initial touch-manipulation h-9 sm:h-8 px-3 sm:px-2"
                   >
                     Weeks
                   </Button>
@@ -999,7 +999,7 @@ const AnalyticsView: React.FC = () => {
                     variant={chartPeriod === 'month' ? 'default' : 'outline'}
                     size="sm"
                     onClick={() => setChartPeriod('month')}
-                    className="text-[11px] sm:text-xs flex-1 sm:flex-initial touch-manipulation h-7 sm:h-8 px-2"
+                    className="text-[11px] sm:text-xs flex-1 sm:flex-initial touch-manipulation h-9 sm:h-8 px-3 sm:px-2"
                   >
                     Months
                   </Button>

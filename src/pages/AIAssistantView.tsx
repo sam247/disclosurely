@@ -1658,7 +1658,7 @@ Additional Details: ${decrypted.additionalDetails || 'None provided'}`;
       data-ai-assistant-root
     >
       {/* Left Sidebar - Hidden on mobile, shown via drawer */}
-      <div className="hidden md:flex w-[260px] border-r bg-muted/30 flex-col overflow-hidden flex-shrink-0" data-ai-assistant-sidebar>
+      <div className="!hidden md:flex w-[260px] border-r bg-muted/30 flex-col overflow-hidden flex-shrink-0" data-ai-assistant-sidebar>
         <div className="flex flex-col h-full bg-muted/30">
           {/* Scrollable Cases Section */}
           <div className="flex-1 min-h-0 overflow-hidden bg-muted/30">
@@ -2164,50 +2164,52 @@ Additional Details: ${decrypted.additionalDetails || 'None provided'}`;
       {/* Main Content Area */}
       <div className="w-full md:flex-1 flex flex-col overflow-hidden bg-background" data-ai-assistant-right-panel>
         {/* Toolbar - Full width */}
-        <div className="h-14 border-b flex items-center justify-between px-4 md:px-6 flex-shrink-0 w-full bg-background">
-          <div className="flex items-center gap-2">
+        <div className="border-b flex flex-col sm:flex-row sm:items-center sm:justify-between px-4 md:px-6 flex-shrink-0 w-full bg-background py-2 sm:py-0 sm:h-14">
+          <div className="flex items-center gap-2 sm:gap-4 mb-2 sm:mb-0">
             {/* Mobile hamburger menu */}
             <Button 
               variant="ghost" 
               size="sm" 
-              className="h-9 w-9 p-0 md:hidden"
+              className="h-10 w-10 sm:h-9 sm:w-9 p-0 md:hidden touch-manipulation z-10"
               onClick={() => setIsDrawerOpen(true)}
             >
               <Menu className="h-5 w-5" />
             </Button>
-            <div>
-              <h1 className="text-lg font-semibold">AI Assistant:</h1>
-              <p className="text-xs text-muted-foreground font-normal">Analyse cases with or without redaction against company documentation.</p>
+            <div className="flex-1 min-w-0">
+              <h1 className="text-base sm:text-lg font-semibold">AI Assistant:</h1>
+              <p className="text-[11px] sm:text-xs text-muted-foreground font-normal">Analyse cases with or without redaction against company documentation.</p>
             </div>
             {selectedCaseData && (
-              <Badge variant="secondary">
+              <Badge variant="secondary" className="hidden sm:inline-flex">
                 {selectedCaseData.tracking_id}
               </Badge>
             )}
-        </div>
-        <div className="flex items-center gap-2">
-              {currentAnalysisData && (
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={saveAnalysis}
-                  disabled={isSaving}
-                >
-                  <Save className="h-4 w-4 mr-2" />
-                  Save Analysis
-                </Button>
-          )}
-          <Button
-            variant="outline"
-              size="sm"
-            onClick={handleClearChat}
-            disabled={isLoading}
-          >
-            <X className="h-4 w-4 mr-2" />
-              Clear
-          </Button>
-        </div>
           </div>
+          <div className="flex items-center gap-2 flex-shrink-0">
+            {currentAnalysisData && (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={saveAnalysis}
+                disabled={isSaving}
+                className="flex-1 sm:flex-initial min-h-[44px] sm:min-h-0"
+              >
+                <Save className="h-4 w-4 mr-2" />
+                Save Analysis
+              </Button>
+            )}
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleClearChat}
+              disabled={isLoading}
+              className="flex-1 sm:flex-initial min-h-[44px] sm:min-h-0"
+            >
+              <X className="h-4 w-4 mr-2" />
+              Clear
+            </Button>
+          </div>
+        </div>
 
         {/* Chat Messages Area - Scrollable */}
         <div className="flex-1 overflow-y-auto p-4 md:p-6 min-h-0 bg-background" data-ai-assistant-messages>
@@ -2451,7 +2453,7 @@ Additional Details: ${decrypted.additionalDetails || 'None provided'}`;
                 )}
               </Button>
             </div>
-            <p className="text-xs text-muted-foreground text-center mt-3">
+            <p className="text-[10px] text-muted-foreground text-center mt-2">
               Powered by AI • Your queries are logged for audit purposes
             </p>
           </div>
