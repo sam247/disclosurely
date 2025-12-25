@@ -1708,7 +1708,7 @@ Additional Details: ${decryptedContent.additionalDetails || 'None provided'}
 
       {/* Table - Directly in root like audit page */}
       {!showArchived ? (
-        <div className="border rounded-lg bg-white flex-1 flex flex-col overflow-hidden min-h-0 mx-2 sm:mx-0 relative" style={{ marginTop: '15px' }} data-dashboard-table-active>
+        <div className="border rounded-lg bg-white flex flex-col overflow-hidden mx-2 sm:mx-0 relative md:flex-1 md:min-h-0" style={{ marginTop: '15px', maxHeight: 'calc(100vh - 250px)' }} data-dashboard-table-active>
                 {/* Table Header */}
                 <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between p-3 sm:p-3 border-b bg-gray-50 gap-3 sm:gap-0 flex-shrink-0">
                   <div className="flex flex-col sm:flex-row items-start sm:items-center space-y-1 sm:space-y-0 sm:space-x-2 sm:space-x-4 flex-1">
@@ -2135,12 +2135,13 @@ Additional Details: ${decryptedContent.additionalDetails || 'None provided'}
                     
                       {/* Pagination Footer - Airtable/Spreadsheet style fixed at bottom - Always visible */}
                     {totalReports > 0 && (
-                        <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between px-3 py-3 sm:py-2 border-t bg-gray-50 flex-shrink-0 min-h-[auto] sm:h-10 z-20 bg-white gap-3 sm:gap-0" data-dashboard-pagination>
-                        <div className="flex flex-col sm:flex-row items-start sm:items-center space-y-2 sm:space-y-0 sm:space-x-3">
+                        <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between px-3 py-2 sm:py-2 border-t bg-gray-50 flex-shrink-0 min-h-[auto] sm:h-10 z-20 bg-white gap-2 sm:gap-0" data-dashboard-pagination>
+                        <div className="flex flex-col sm:flex-row items-start sm:items-center space-y-1 sm:space-y-0 sm:space-x-3">
                           <div className="flex items-center space-x-2">
-                            <Label className="text-xs whitespace-nowrap font-medium">Rows per page:</Label>
+                            <Label className="text-xs whitespace-nowrap font-medium hidden sm:inline">Rows per page:</Label>
+                            <Label className="text-xs whitespace-nowrap font-medium sm:hidden">Rows:</Label>
                             <Select value={pageSize.toString()} onValueChange={(value) => handlePageSizeChange(Number(value))}>
-                              <SelectTrigger className="h-11 sm:h-7 text-xs w-20 sm:w-16 border-gray-300">
+                              <SelectTrigger className="h-8 sm:h-7 text-xs w-16 sm:w-16 border-gray-300">
                                 <SelectValue />
                               </SelectTrigger>
                               <SelectContent>
@@ -2161,19 +2162,20 @@ Additional Details: ${decryptedContent.additionalDetails || 'None provided'}
                           </div>
                         </div>
                         
-                        <div className="flex items-center justify-center sm:justify-end space-x-2 gap-2 sm:gap-0">
+                        {/* Pagination arrows - Hidden on mobile, shown on desktop */}
+                        <div className="hidden sm:flex items-center justify-end space-x-0.5">
                           <Button
                             variant="outline"
                             size="sm"
                             onClick={() => handlePageChange(currentPage - 1)}
                             disabled={currentPage === 1 || loading}
-                            className="h-11 w-11 sm:h-7 sm:w-7 text-xs p-0 border-gray-300 flex-1 sm:flex-initial"
+                            className="h-7 w-7 text-xs p-0 border-gray-300"
                           >
-                            <ChevronLeft className="h-4 w-4 sm:h-3.5 sm:w-3.5" />
+                            <ChevronLeft className="h-3.5 w-3.5" />
                           </Button>
                           
-                          {/* Page Numbers - Hidden on mobile */}
-                          <div className="hidden sm:flex items-center space-x-0.5">
+                          {/* Page Numbers */}
+                          <div className="flex items-center space-x-0.5">
                             {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
                               const pageNum = Math.max(1, Math.min(totalPages - 4, currentPage - 2)) + i;
                               if (pageNum > totalPages) return null;
@@ -2198,9 +2200,9 @@ Additional Details: ${decryptedContent.additionalDetails || 'None provided'}
                             size="sm"
                             onClick={() => handlePageChange(currentPage + 1)}
                             disabled={currentPage === totalPages || loading}
-                            className="h-11 w-11 sm:h-7 sm:w-7 text-xs p-0 border-gray-300 flex-1 sm:flex-initial"
+                            className="h-7 w-7 text-xs p-0 border-gray-300"
                           >
-                            <ChevronRight className="h-4 w-4 sm:h-3.5 sm:w-3.5" />
+                            <ChevronRight className="h-3.5 w-3.5" />
                           </Button>
                         </div>
                       </div>
@@ -2208,7 +2210,7 @@ Additional Details: ${decryptedContent.additionalDetails || 'None provided'}
                   </div>
                   
                     {/* Mobile Card View - Compact Audit Log Style */}
-                    <div className="md:hidden space-y-2 p-2 overflow-y-auto flex-1 min-h-0">
+                    <div className="md:hidden space-y-2 p-2 overflow-y-auto" style={{ maxHeight: 'calc(100vh - 400px)' }}>
                       {paginatedReports.map((report) => (
                         <div
                           key={report.id}
