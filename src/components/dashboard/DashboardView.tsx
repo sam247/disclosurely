@@ -1708,9 +1708,9 @@ Additional Details: ${decryptedContent.additionalDetails || 'None provided'}
 
       {/* Table - Directly in root like audit page */}
       {!showArchived ? (
-        <div className="border rounded-lg bg-white flex flex-col overflow-hidden mx-2 sm:mx-0 relative md:flex-1 md:min-h-0" style={{ marginTop: '15px', maxHeight: 'calc(100vh - 380px)', height: 'calc(100vh - 380px)' }} data-dashboard-table-active>
+        <div className="border rounded-lg bg-white flex flex-col overflow-hidden mx-2 sm:mx-0 relative md:flex-1 md:min-h-0" style={{ marginTop: '15px', maxHeight: 'calc(100vh - 250px)' }} data-dashboard-table-active>
                 {/* Table Header */}
-                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between p-2 sm:p-3 border-b bg-gray-50 gap-2 sm:gap-0 flex-shrink-0">
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between p-3 sm:p-3 border-b bg-gray-50 gap-3 sm:gap-0 flex-shrink-0">
                   <div className="flex flex-col sm:flex-row items-start sm:items-center space-y-1 sm:space-y-0 sm:space-x-2 sm:space-x-4 flex-1">
                     <div>
                       <h3 className="font-semibold text-xs sm:text-sm">Active Reports</h3>
@@ -2135,7 +2135,7 @@ Additional Details: ${decryptedContent.additionalDetails || 'None provided'}
                     
                       {/* Pagination Footer - Airtable/Spreadsheet style fixed at bottom - Always visible */}
                     {totalReports > 0 && (
-                        <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between px-3 py-1.5 sm:py-2 border-t bg-gray-50 flex-shrink-0 min-h-[auto] sm:h-10 z-20 bg-white gap-2 sm:gap-0" data-dashboard-pagination>
+                        <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between px-3 py-2 sm:py-2 border-t bg-gray-50 flex-shrink-0 min-h-[auto] sm:h-10 z-20 bg-white gap-2 sm:gap-0" data-dashboard-pagination>
                         <div className="flex flex-col sm:flex-row items-start sm:items-center space-y-1 sm:space-y-0 sm:space-x-3">
                           <div className="flex items-center space-x-2">
                             <Label className="text-xs whitespace-nowrap font-medium hidden sm:inline">Rows per page:</Label>
@@ -2210,7 +2210,7 @@ Additional Details: ${decryptedContent.additionalDetails || 'None provided'}
                   </div>
                   
                     {/* Mobile Card View - Compact Audit Log Style */}
-                    <div className="md:hidden space-y-2 p-2 overflow-y-auto flex-1 min-h-0">
+                    <div className="md:hidden space-y-2 p-2 overflow-y-auto" style={{ maxHeight: 'calc(100vh - 400px)' }}>
                       {paginatedReports.map((report) => (
                         <div
                           key={report.id}
