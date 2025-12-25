@@ -1923,11 +1923,11 @@ Additional Details: ${decrypted.additionalDetails || 'None provided'}`;
                     <div className="flex items-center gap-1 mb-2 px-2">
                       <h3 className="text-sm font-semibold">Cases</h3>
                       <TooltipProvider delayDuration={200}>
-                        <Tooltip>
+                        <Tooltip disableHoverableContent>
                           <TooltipTrigger asChild>
                             <button
                               type="button"
-                              className="inline-flex items-center justify-center rounded-full hover:bg-muted transition-colors p-0.5"
+                              className="inline-flex items-center justify-center rounded-full hover:bg-muted transition-colors p-0.5 hidden sm:inline-flex"
                               aria-label="Cases information"
                             >
                               <Info className="h-3 w-3 text-muted-foreground" />
@@ -1937,7 +1937,7 @@ Additional Details: ${decrypted.additionalDetails || 'None provided'}`;
                             side="right" 
                             align="start"
                             sideOffset={8}
-                            className="max-w-xs p-3 bg-blue-50 border-blue-200 text-sm"
+                            className="max-w-xs p-3 bg-blue-50 border-blue-200 text-sm hidden sm:block"
                           >
                             <p className="text-blue-900">Please select a case to optionally redact PII and analyse</p>
                           </TooltipContent>
@@ -2235,16 +2235,16 @@ Additional Details: ${decrypted.additionalDetails || 'None provided'}`;
               </div>
                 
                 <Card className="border-blue-200 bg-blue-50/50">
-                  <CardContent className="p-6">
-                    <div className="flex flex-col items-center text-center space-y-4">
+                  <CardContent className="p-4 sm:p-6">
+                    <div className="flex flex-col items-center text-center space-y-3 sm:space-y-4">
               <div className="flex items-center gap-2">
-                        <Shield className="h-6 w-6 text-blue-600" />
-                        <h3 className="text-lg font-semibold">Privacy Protection</h3>
+                        <Shield className="h-5 w-5 sm:h-6 sm:w-6 text-blue-600" />
+                        <h3 className="text-base sm:text-lg font-semibold">Privacy Protection</h3>
                       </div>
-                      <p className="text-sm text-muted-foreground max-w-md">
+                      <p className="text-xs sm:text-sm text-muted-foreground max-w-md">
                         Choose how to handle personal information in this analysis:
                       </p>
-                      <div className="flex gap-3 w-full max-w-md">
+                      <div className="flex flex-col sm:flex-row gap-2 sm:gap-3 w-full max-w-md">
                 <Button
                           onClick={async (e) => {
                             e.preventDefault();
@@ -2263,7 +2263,7 @@ Additional Details: ${decrypted.additionalDetails || 'None provided'}`;
                               setShowPIIChoice(true); // Re-show choice on error
                             }
                           }}
-                          className="flex-1 bg-green-600 hover:bg-green-700"
+                          className="flex-1 bg-green-600 hover:bg-green-700 min-h-[44px] sm:min-h-0 text-sm sm:text-base"
                           size="default"
                           disabled={isLoading || isLoadingPreview}
                         >
@@ -2275,7 +2275,8 @@ Additional Details: ${decrypted.additionalDetails || 'None provided'}`;
                           ) : (
                             <>
                               <Shield className="h-4 w-4 mr-2" />
-                              Analyze with PII Protection
+                              <span className="hidden sm:inline">Analyze with PII Protection</span>
+                              <span className="sm:hidden">With PII Protection</span>
                             </>
                           )}
                         </Button>
@@ -2298,7 +2299,7 @@ Additional Details: ${decrypted.additionalDetails || 'None provided'}`;
                             }
                           }}
                   variant="outline"
-                          className="flex-1"
+                          className="flex-1 min-h-[44px] sm:min-h-0 text-sm sm:text-base"
                           size="default"
                           disabled={isLoading || isLoadingPreview}
                 >
@@ -2308,7 +2309,10 @@ Additional Details: ${decrypted.additionalDetails || 'None provided'}`;
                               Analyzing...
                             </>
                           ) : (
-                            'Analyze Without Redaction'
+                            <>
+                              <span className="hidden sm:inline">Analyze Without Redaction</span>
+                              <span className="sm:hidden">Without Redaction</span>
+                            </>
                           )}
                 </Button>
               </div>
@@ -2328,7 +2332,7 @@ Additional Details: ${decrypted.additionalDetails || 'None provided'}`;
                         }}
                         variant="outline"
                         size="default"
-                        className="w-full max-w-md"
+                        className="w-full max-w-md min-h-[44px] sm:min-h-0 text-sm sm:text-base"
                         disabled={isLoading || isLoadingPreview}
                       >
                         {isLoadingPreview ? (

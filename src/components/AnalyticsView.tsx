@@ -968,7 +968,7 @@ const AnalyticsView: React.FC = () => {
       {/* Content Area - 2 Column Layout with Tri Layout on Right */}
       <div className="flex-1 min-h-0 overflow-y-auto grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-3 px-2 sm:px-0" style={{ minHeight: 0 }}>
           {/* Left Column - Main Chart */}
-          <Card className="flex flex-col min-h-0">
+          <Card className="flex flex-col min-h-0 mb-4 md:mb-0">
             <CardHeader className="pb-2 sm:pb-3 flex-shrink-0">
               <div className="flex flex-col gap-2">
                 <div>
@@ -1007,7 +1007,7 @@ const AnalyticsView: React.FC = () => {
                 )}
               </div>
             </CardHeader>
-            <CardContent className="pt-0 pb-4 flex-1 min-h-0 flex flex-col min-h-[300px] md:min-h-[300px]">
+            <CardContent className="pt-0 pb-4 flex-1 min-h-0 flex flex-col min-h-[250px] md:min-h-[300px]">
               {getChartData() ? (
                 <div className="flex-1 min-h-0 -mx-2 sm:mx-0 px-2 sm:px-0">
                 <Line 
