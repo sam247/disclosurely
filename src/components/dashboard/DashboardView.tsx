@@ -2198,12 +2198,12 @@ Additional Details: ${decryptedContent.additionalDetails || 'None provided'}
                   
                     {/* Mobile Card View - Compact Audit Log Style */}
                     <div className="md:hidden space-y-2 p-2 overflow-y-auto flex-1 min-h-0">
-                    {paginatedReports.map((report) => (
-                      <div
-                        key={report.id}
-                        className="border rounded-lg p-2 space-y-1.5 bg-white hover:bg-gray-50 transition-colors"
-                      >
-                        <div className="flex items-start justify-between gap-2">
+                      {paginatedReports.map((report) => (
+                        <div
+                          key={report.id}
+                          className="border rounded-lg p-2 space-y-1.5 bg-white hover:bg-gray-50 transition-colors"
+                        >
+                          <div className="flex items-start justify-between gap-2">
                           <div className="flex-1 min-w-0">
                             <div className="flex items-center gap-1.5 mb-0.5">
                               <h4 className="text-xs font-medium truncate">{report.title}</h4>
@@ -2439,10 +2439,11 @@ Additional Details: ${decryptedContent.additionalDetails || 'None provided'}
                             </DropdownMenu>
                           </div>
                         </div>
+                      </div>
                       ))}
                     </div>
-                </>
-              )}
+                  </>
+                )}
               </div>
       ) : (
         <div className="border rounded-lg bg-white flex-1 flex flex-col overflow-hidden min-h-0 mx-2 sm:mx-0" style={{ minHeight: 0, marginTop: '15px' }} data-dashboard-table-archived>
