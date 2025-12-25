@@ -1708,7 +1708,7 @@ Additional Details: ${decryptedContent.additionalDetails || 'None provided'}
 
       {/* Table - Directly in root like audit page */}
       {!showArchived ? (
-        <div className="border rounded-lg bg-white flex flex-col overflow-hidden mx-2 sm:mx-0 relative md:flex-1 md:min-h-0" style={{ marginTop: '15px', maxHeight: 'calc(100vh - 320px)' }} data-dashboard-table-active>
+        <div className="border rounded-lg bg-white flex flex-col overflow-hidden mx-2 sm:mx-0 relative flex-1 min-h-0" style={{ marginTop: '15px' }} data-dashboard-table-active>
                 {/* Table Header */}
                 <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between p-3 sm:p-3 border-b bg-gray-50 gap-3 sm:gap-0 flex-shrink-0">
                   <div className="flex flex-col sm:flex-row items-start sm:items-center space-y-1 sm:space-y-0 sm:space-x-2 sm:space-x-4 flex-1">
@@ -2210,7 +2210,7 @@ Additional Details: ${decryptedContent.additionalDetails || 'None provided'}
                   </div>
                   
                     {/* Mobile Card View - Compact Audit Log Style */}
-                    <div className="md:hidden space-y-2 p-2 overflow-y-auto" style={{ maxHeight: 'calc(100vh - 470px)' }}>
+                    <div className="md:hidden space-y-2 p-2 overflow-y-auto flex-1 min-h-0">
                       {paginatedReports.map((report) => (
                         <div
                           key={report.id}
